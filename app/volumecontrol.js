@@ -11,6 +11,7 @@ var device = '';
 var mixer = '';
 var maxvolume = '';
 var volumecurve = '';
+var volumesteps = '';
 
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
@@ -27,7 +28,7 @@ function CoreVolumeController(commandRouter) {
 	mixer = '"'+mixerdev+'"';
 	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
 	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
-
+	volumesteps = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumesteps');
 
 	var amixer = function (args, cb) {
 
@@ -136,6 +137,7 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	mixer = '"'+data.mixer+'"';
 	maxvolume = data.maxvolume;
 	volumecurve = data.volumecurve;
+	volumesteps = data.volumesteps;
 }
 
 
@@ -143,7 +145,6 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::SetAlsaVolume' + VolumeInteger);
-
 	switch (VolumeInteger) {
 		case 'mute':
 			//Mute or Unmute, depending on state
@@ -185,7 +186,11 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			//Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
 			self.setMuted(false, function (err) {
 				self.getVolume(function (err, vol) {
-					self.setVolume(vol + 1, function (err) {
+					VolumeInteger = Number(vol)+Number(volumesteps);
+					if (VolumeInteger > maxvolume){
+						VolumeInteger = maxvolume;
+					}
+					self.setVolume(VolumeInteger, function (err) {
 						Volume.vol = VolumeInteger
 						Volume.mute = false;
 						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
@@ -197,8 +202,12 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			break;
 		case '-':
 			//Decrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
-			this.getVolume(function (err, vol) {
-				self.setVolume(vol - 1, function (err) {
+			self.getVolume(function (err, vol) {
+				VolumeInteger = Number(vol)-Number(volumesteps);
+				if (VolumeInteger > maxvolume){
+					VolumeInteger = maxvolume;
+				}
+				self.setVolume(VolumeInteger, function (err) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
 					Volume.vol = VolumeInteger
 					Volume.mute = false;
