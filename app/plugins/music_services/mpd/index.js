@@ -846,7 +846,7 @@ ControllerMpd.prototype.saveVolumeOptions = function (data) {
 ControllerMpd.prototype.restartMpd = function (callback) {
 	var self = this;
 
-	exec('/bin/systemctl restart mpd.service ',
+	exec('sudo /bin/systemctl restart mpd.service ',
 		function (error, stdout, stderr) {
 			callback(error);
 		});
