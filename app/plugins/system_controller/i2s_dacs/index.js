@@ -301,7 +301,7 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 
 	this.config.set("i2s_enabled", false);
 
-	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1';
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on';
 
 	fs.writeFile('/boot/config.txt', bootstring, function (err) {
 		if (err) {
