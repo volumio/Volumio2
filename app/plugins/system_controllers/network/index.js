@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 var iwlist = require('./lib/iwlist.js');
 var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
@@ -350,6 +351,8 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var defer = libQ.defer();
 	var response = [];
 	var oll;
+	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
+	var wirelessspeed = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 
 	var ethip = ''
 	var wlanip = ''
@@ -362,7 +365,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: " ", online: oll}
+				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll}
 				response.push(ethstatus);
 			}
 		}
@@ -372,7 +375,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				wlanip = status.ipv4_address
-				var wlanstatus = {type: "Wireless", ip: wlanip, status: "connected", speed: "", online: oll}
+				var wlanstatus = {type: "Wireless", ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				response.push(wlanstatus);
 				//console.log(wlanstatus);
 
