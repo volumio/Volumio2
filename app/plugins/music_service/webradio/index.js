@@ -374,6 +374,9 @@ ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
         {
             return self.mpdPlugin.sendMpdCommand('load "'+track.uri+'"',[]);
         })
+        .fail(function (e) {
+            return self.mpdPlugin.sendMpdCommand('add "'+track.uri+'"',[]);
+        })
         .then(function()
         {
             self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
