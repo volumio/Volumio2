@@ -285,7 +285,7 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
 
-	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL +  'dtoverlay='+data;
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL +  'dtoverlay='+data;
 
 	fs.writeFile('/boot/config.txt', bootstring, function (err) {
 		if (err) {
