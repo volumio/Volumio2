@@ -8,15 +8,10 @@ function CoreCommandRouter (server) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 
-	// Start the state machine
-	self.stateMachine = new (require('./statemachine.js'))(self);
-
 	// Start the client interfaces
 	self.arrayInterfaces = [];
 	self.arrayInterfaces.push(new (require('./interfaces/websocket/index.js'))(server, self));
 	self.arrayInterfaces.push(new (require('./interfaces/mpdemulation/index.js'))(server, self));
-
-
 
 	self.pushConsoleMessage('Loading controllers...');
 	self.loadControllers();
@@ -24,7 +19,8 @@ function CoreCommandRouter (server) {
 	self.pushConsoleMessage('Loading plugins...');
 	self.loadPlugins();
 
-
+	// Start the state machine
+	self.stateMachine = new (require('./statemachine.js'))(self);
 
 	// Start the music library
 	self.musicLibrary = new (require('./musiclibrary.js'))(self);
@@ -48,8 +44,17 @@ CoreCommandRouter.prototype.loadControllers=function()
 		var controllerInstance=new (require(__dirname+'/controllers/'+controllerName+'/index.js'))(self);
 		self['controllers'][controllerName]=controllerInstance;
 
+		//Calling Methods needed on Volumio Start for controllers
 		if(controllerInstance.onVolumioStart !=undefined)
 			controllerInstance.onVolumioStart();
+
+		setTimeout(function () {
+		//Calling Methods needed to initiate Controllers
+			if(controllerInstance.onStart !=undefined)
+			return controllerInstance.onStart();
+		}, 1500)
+
+
 	}
 }
 
@@ -78,8 +83,17 @@ CoreCommandRouter.prototype.loadPlugins=function()
 			var pluginInstance=new (require(__dirname+'/plugins/'+category+'/'+pluginName+'/index.js'))(self);
 			self['plugins'][category][pluginName]=pluginInstance;
 
+
+			//Calling Methods needed on Volumio Start for plugins
 			if(pluginInstance.onVolumioStart !=undefined)
 				pluginInstance.onVolumioStart();
+
+			//Calling Methods needed to initiate Plugins
+			setTimeout(function () {
+				if(pluginInstance.onStart !=undefined)
+					pluginInstance.onStart();
+			}, 1500)
+
 		}
 	}
 

@@ -3,32 +3,21 @@ var libNet = require('net');
 var libFast = require('fast.js');
 var libLevel = require('level');
 var fs=require('fs-extra');
+var exec = require('child_process').exec;
+
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
-function ControllerSpop(commandRouter) {
-	// This fixed variable will let us refer to 'this' object at deeper scopes
+
+
+ControllerSpop.prototype.onStart = function() {
 	var self = this;
 
-
-	//getting configuration
-	var config=fs.readJsonSync(__dirname+'/config.json');
-	var nHost=config['nHost'].value;
-	var nPort=config['nPort'].value;
-
-	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
-
 	// Each core gets its own set of Spop sockets connected
+	var nHost='localhost';
+	var nPort=6602;
 	self.connSpopCommand = libNet.createConnection(nPort, nHost); // Socket to send commands and receive track listings
 	self.connSpopStatus = libNet.createConnection(nPort, nHost); // Socket to listen for status changes
-
-	// Init some command socket variables
-	self.bSpopCommandGotFirstMessage = false;
-	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
-	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
-	self.arrayResponseStack = [];
-	self.sResponseBuffer = '';
 
 	// Start a listener for receiving errors
 	self.connSpopCommand.on('error', function(err) {
@@ -90,20 +79,107 @@ function ControllerSpop(commandRouter) {
 				var sStatus = self.sStatusBuffer;
 
 				self.logStart('Spop announces state update')
-				.then(function() {
-					return self.parseState.call(self, sStatus);
-				})
-				.then(libFast.bind(self.pushState, self))
-				.fail(libFast.bind(self.pushError, self))
-				.done(function() {
-					return self.logDone(timeStart);
-				});
+					.then(function() {
+						return self.parseState.call(self, sStatus);
+					})
+					.then(libFast.bind(self.pushState, self))
+					.fail(libFast.bind(self.pushError, self))
+					.done(function() {
+						return self.logDone(timeStart);
+					});
 			}
 
 			// Reset the status buffer
 			self.sStatusBuffer = '';
 		}
 	});
+
+
+}
+
+//Plugin methods
+ControllerSpop.prototype.onVolumioStart = function() {
+	var self = this;
+	exec("spopd -c /etc/spopd.conf", function (error, stdout, stderr) {
+		if (error !== null) {
+			self.commandRouter.pushConsoleMessage('The following error occurred while starting SPOPD: ' + error);
+		}
+		else {
+			self.commandRouter.pushConsoleMessage('SpopD Daemon Started');
+		}
+	});
+}
+
+
+
+
+
+ ControllerSpop.prototype.onStop = function() {
+ var self = this;
+ exec("killall spopd", function (error, stdout, stderr) {
+
+ });
+ }
+
+ ControllerSpop.prototype.onRestart = function() {
+ var self = this;
+ //
+ }
+
+ ControllerSpop.prototype.onInstall = function()
+ {
+ var self = this;
+ //Perform your installation tasks here
+ }
+
+ ControllerSpop.prototype.onUninstall = function()
+ {
+ var self = this;
+ //Perform your installation tasks here
+ }
+
+ ControllerSpop.prototype.getUIConfig = function()
+ {
+ var self = this;
+ //Perform your installation tasks here
+ }
+
+ ControllerSpop.prototype.setUIConfig = function(data)
+ {
+ var self = this;
+ //Perform your installation tasks here
+ }
+
+ ControllerSpop.prototype.getConf = function(varName)
+ {
+ var self = this;
+ //Perform your installation tasks here
+ }
+
+ ControllerSpop.prototype.setConf = function(varName, varValue)
+ {
+ var self = this;
+ //Perform your installation tasks here
+ }
+
+
+
+function ControllerSpop(commandRouter) {
+	// This fixed variable will let us refer to 'this' object at deeper scopes
+	var self = this;
+
+	//getting configuration
+	var config=fs.readJsonSync(__dirname+'/config.json');
+
+	// Save a reference to the parent commandRouter
+	self.commandRouter = commandRouter;
+
+	// Init some command socket variables
+	self.bSpopCommandGotFirstMessage = false;
+	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
+	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
+	self.arrayResponseStack = [];
+	self.sResponseBuffer = '';
 
 	self.tracklist = [];
 
@@ -440,51 +516,4 @@ ControllerSpop.prototype.logStart = function(sCommand) {
 };
 
 
-
-//Plugin methods
-ControllerSpop.prototype.onVolumioStart = function() {
-	//Perform startup tasks here
-}
-
-ControllerSpop.prototype.onStart = function() {
-	//Perform startup tasks here
-}
-
-ControllerSpop.prototype.onStop = function() {
-	//Perform startup tasks here
-}
-
-ControllerSpop.prototype.onRestart = function() {
-	//Perform startup tasks here
-}
-
-ControllerSpop.prototype.onInstall = function()
-{
-	//Perform your installation tasks here
-}
-
-ControllerSpop.prototype.onUninstall = function()
-{
-	//Perform your installation tasks here
-}
-
-ControllerSpop.prototype.getUIConfig = function()
-{
-	//Perform your installation tasks here
-}
-
-ControllerSpop.prototype.setUIConfig = function(data)
-{
-	//Perform your installation tasks here
-}
-
-ControllerSpop.prototype.getConf = function(varName)
-{
-	//Perform your installation tasks here
-}
-
-ControllerSpop.prototype.setConf = function(varName, varValue)
-{
-	//Perform your installation tasks here
-}
 
