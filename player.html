@@ -1,0 +1,82 @@
+<html>
+	<head>
+		<title>Volumino Test Client</title>
+
+	</head>
+
+	<body>
+		<h2>MPD Commands</h2>
+		<button id='button-mpdprev'>Previous Track</button>
+		<button id='button-mpdplay'>Play</button>
+		<button id='button-mpdstop'>Stop</button>
+		<button id='button-mpdnext'>Next Track</button>
+
+		<h2>Spop Commands</h2>
+		<button id='button-spopprev'>Previous Track</button>
+		<button id='button-spopplay'>Play</button>
+		<button id='button-spopstop'>Stop</button>
+		<button id='button-spopnext'>Next Track</button>
+
+		<h2>Console</h2>
+		<button id='button-clearconsole'>Clear</button>
+		<ul id='console'></ul>
+
+		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script>
+			var socket = io();
+
+			document.getElementById('button-mpdplay').onclick = function() {
+				socket.emit('command', 'mpd/play');
+			}
+
+			document.getElementById('button-mpdstop').onclick = function() {
+				socket.emit('command', 'mpd/stop');
+			}
+
+			document.getElementById('button-mpdnext').onclick = function() {
+				socket.emit('command', 'mpd/next');
+			}
+
+			document.getElementById('button-mpdprev').onclick = function() {
+				socket.emit('command', 'mpd/previous');
+			}
+
+			document.getElementById('button-spopplay').onclick = function() {
+				socket.emit('command', 'spop/play');
+			}
+
+			document.getElementById('button-spopstop').onclick = function() {
+				socket.emit('command', 'spop/stop');
+			}
+
+			document.getElementById('button-spopnext').onclick = function() {
+				socket.emit('command', 'spop/next');
+			}
+
+			document.getElementById('button-spopprev').onclick = function() {
+				socket.emit('command', 'spop/previous');
+			}
+
+			document.getElementById('button-clearconsole').onclick = function() {
+				var nodeConsole = document.getElementById('console');
+
+				while (nodeConsole.firstChild) {
+					nodeConsole.removeChild(nodeConsole.firstChild);
+				}
+
+			}
+
+			socket.on('consoleMessage', function(message){
+				var nodeListItem = document.createElement("LI");
+				var nodeText = document.createTextNode(message);
+
+				nodeListItem.appendChild(nodeText);
+				document.getElementById('console').appendChild(nodeListItem);
+
+			});
+
+		</script>
+
+	</body>
+
+</html>

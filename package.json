@@ -1,0 +1,16 @@
+{
+  "name": "volumino",
+  "version": "0.0.1",
+  "description": "ERROR: No README data found!",
+  "dependencies": {
+    "express": "^4.10.2",
+    "socket.io": "^1.2.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js",
+  "devDependencies": {},
+  "author": "ning-yu",
+  "license": "GPL"
+}
