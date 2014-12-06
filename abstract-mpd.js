@@ -28,7 +28,8 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        var command = data.substring(0, data.indexof(' '));
+        //var sSlashindex = data.indexof(' ');
+        var command = data.substring(0, data.indexOf(' '));
         
         // handle message
         switch(data) {
