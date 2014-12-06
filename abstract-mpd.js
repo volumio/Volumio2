@@ -28,8 +28,14 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        //var sSlashindex = data.indexof(' ');
-        var command = data.substring(0, data.indexOf(' '));
+        var sSlashindex = 0;
+        var command = '';
+        sSlashindex = data.indexOf(' ');
+        command = data.substring(0, sSlashindex);
+        
+        if(command == 'play') {
+            sys.puts("play joepie");
+        }
         
         // handle message
         switch(data) {
