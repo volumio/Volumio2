@@ -28,7 +28,7 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        if(data.equals(string.splice(0,"play".length))) {
+        if(data.equals(String.splice(0,"play".length))) {
             sys.puts("play");
         }
         
