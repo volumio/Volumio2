@@ -1,4 +1,4 @@
-var net = require(‘net’);
+var net = require('net');
 
 net.createServer(function(socket)) {
     
