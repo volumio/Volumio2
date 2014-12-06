@@ -17,6 +17,7 @@ var svr = net.createServer(function(sock) {
             }
             return;
         }
+        sys.puts(data);
         switch(data) {
             case 'play\n' :
                 sock.write('OK');
