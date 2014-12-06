@@ -28,7 +28,9 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        sys.puts(data.startsWith("play"));
+        if(data.equals(string.splice(0,"play".length))) {
+            sys.puts("play");
+        }
         
         // handle message
         switch(data) {
