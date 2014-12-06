@@ -28,9 +28,7 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        if(data.startsWith("play" == true)) {
-            sys.puts("true");
-        }
+        sys.puts(data.startsWith("play"));
         
         // handle message
         switch(data) {
@@ -71,10 +69,8 @@ var svrport = 6601;
 svr.listen(svrport, svraddr);
 sys.puts('Server Created at ' + svraddr + ':' + svrport + '\n');
 
-String.prototype.startsWith = function(prefix) {
-    return this.indexOf(prefix) === 0;
+if (typeof String.prototype.startsWith != 'function') {
+  String.prototype.startsWith = function (str){
+    return this.slice(0, str.length) == str;
+  };
 }
-
-String.prototype.endsWith = function(suffix) {
-    return this.match(suffix+"$") == suffix;
-};
