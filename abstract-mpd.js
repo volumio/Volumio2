@@ -9,7 +9,7 @@ var clients = [];
 var svr = net.createServer(function(sock) {
     // New client connected
     sys.puts('Connected: ' + sock.remoteAddress + ':' + sock.remotePort); 
-    sock.write('OK MPD "version\n");
+    sock.write('OK MPD "version\n');
     // Add to connected client-list
     clients.push(sock);
  
