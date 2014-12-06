@@ -31,7 +31,7 @@ var svr = net.createServer(function(sock) {
         message = data;
         // handle message
         switch(data) {
-            case strStartsWith(message, "play") :
+            case data.startsWith('play') :
                 sock.write('OK\n');
                 break;
             case 'stop\n':
@@ -68,7 +68,10 @@ var svrport = 6601;
 svr.listen(svrport, svraddr);
 sys.puts('Server Created at ' + svraddr + ':' + svrport + '\n');
 
-// implementation of a String.startsWith("") function
-function strStartsWith(str, prefix) {
-    return str.indexOf(prefix) === 0;
+String.prototype.startsWith = function(prefix) {
+    return this.indexOf(prefix) === 0;
 }
+
+String.prototype.endsWith = function(suffix) {
+    return this.match(suffix+"$") == suffix;
+};
