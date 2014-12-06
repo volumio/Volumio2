@@ -29,7 +29,9 @@ var svr = net.createServer(function(sock) {
         sys.puts(data);
         
         var string = data.toString();
-        if(string == 'play'){}
+        if(string == 'play'){
+            sys.puts( "ola");
+        }
         
         // handle message
         switch(data) {
