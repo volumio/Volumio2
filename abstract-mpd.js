@@ -29,7 +29,7 @@ var svr = net.createServer(function(sock) {
         sys.puts(data);
         // handle message
         switch(data) {
-            case 'play\n\n' :
+            case data.strStartsWith(data, "play") :
                 sock.write('OK\n');
                 break;
             case 'stop\n':
@@ -52,7 +52,7 @@ var svr = net.createServer(function(sock) {
         sys.puts('Disconnected: ' + sock.remoteAddress + ':' + sock.remotePort + '\n');
         var idx = sockets.indexOf(sock);
         if (idx != -1) {
-            delete sockets[idx];
+            delete clients[idx];
         }
     });
 });
@@ -65,3 +65,8 @@ var svrport = 6601;
 // start listening 
 svr.listen(svrport, svraddr);
 sys.puts('Server Created at ' + svraddr + ':' + svrport + '\n');
+
+// implementation of a String.startsWith("") function
+function strStartsWith(str, prefix) {
+    return str.indexOf(prefix) === 0;
+}
