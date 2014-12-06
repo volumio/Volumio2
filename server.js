@@ -3,7 +3,7 @@ var libHttp = require('http').Server(libExpress);
 var libSocketIO = require('socket.io')(libHttp);
 var libNet = require('net');
 var connMpdInterface = libNet.createConnection(6500, 'localhost');
-var connSpopInterface = libNet.createConnection(6502, 'localhost');
+//var connSpopInterface = libNet.createConnection(6502, 'localhost');
 
 // When an http get request occurs
 libExpress.get('/', function(req, res) {
@@ -41,7 +41,7 @@ libSocketIO.on('connection', function(websocket) {
 			connMpdInterface.write(sCommand);
 
 		} else if (sInterface == 'spop') {
-			connSpopInterface.write(sCommand);
+			//connSpopInterface.write(sCommand);
 
 		}
 
@@ -50,11 +50,12 @@ libSocketIO.on('connection', function(websocket) {
 });
 
 // When Spop interface gives a message
+/*
 connSpopInterface.on('data', function(response) {
 	// Broadcast to client console
 	libSocketIO.emit('consoleMessage', 'Spop Interface: ' + response.toString());
 
-});
+});*/
 
 // When MPD interface gives a message
 connMpdInterface.on('data', function(response) {
