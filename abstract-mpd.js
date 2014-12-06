@@ -27,11 +27,14 @@ var svr = net.createServer(function(sock) {
         }
         
         sys.puts(data);
-        var message = '';
-        message = data;
+        
+        if(data.startsWith("play" == true)) {
+            sys.puts("true");
+        }
+        
         // handle message
         switch(data) {
-            case data.startsWith('play') :
+            case 'play' :
                 sock.write('OK\n');
                 break;
             case 'stop\n':
