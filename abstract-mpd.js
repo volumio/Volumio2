@@ -9,7 +9,8 @@ var clients = [];
 var svr = net.createServer(function(sock) {
     // New client connected
     sys.puts('Connected: ' + sock.remoteAddress + ':' + sock.remotePort); 
-    sock.write('OK MPD "version\n');
+    sock.write('OK MPD version\n');
+    
     // Add to connected client-list
     clients.push(sock);
  
@@ -29,19 +30,19 @@ var svr = net.createServer(function(sock) {
         // handle message
         switch(data) {
             case 'play\n' :
-                sock.write('OK');
+                sock.write('OK\n');
                 break;
             case 'stop\n':
-                sock.write('OK');
+                sock.write('OK\n');
                 break;
             case 'next\n':
-                sock.write('OK');
+                sock.write('OK\n');
                 break;
             case 'previous\n':
-                sock.write('OK');
+                sock.write('OK\n');
                 break;
             default:
-                sock.write('ACK');
+                sock.write('ACK\n');
                 break;
         }
     });
