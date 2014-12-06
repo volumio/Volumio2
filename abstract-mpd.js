@@ -20,14 +20,19 @@ var svr = net.createServer(function(sock) {
         switch(data) {
             case "play" :
                 sock.write('OK');
+                break;
             case 'stop':
                 sock.write('OK');
+                break;
             case 'next':
                 sock.write('OK');
+                break;
             case 'previous':
                 sock.write('OK');
+                break;
             default:
                 sock.write('ACK');
+                break;
         }
     });
  
