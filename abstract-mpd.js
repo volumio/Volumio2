@@ -39,7 +39,7 @@ var svr = net.createServer(function(sock) {
     });
 });
  
-var svraddr = '127.0.0.1';
+var svraddr = '0.0.0.0';
 var svrport = 8080;
  
 svr.listen(svrport, svraddr);
