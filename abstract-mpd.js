@@ -17,14 +17,17 @@ var svr = net.createServer(function(sock) {
             }
             return;
         }
-        sys.puts('message received: ' + data);
-        var len = sockets.length;
-        for (var i = 0; i < len; i ++) { // broad cast
-            if (sockets[i] != sock) {
-                if (sockets[i]) {
-                    sockets[i].write(sock.remoteAddress + ':' + sock.remotePort + ':' + data);
-                }
-            }
+        switch(data) {
+            case 'play' :
+                sock.write('OK');
+            case 'stop':
+                sock.write('OK');
+            case 'next':
+                sock.write('OK');
+            case 'previous':
+                sock.write('OK');
+            default:
+                sock.write('ACK');
         }
     });
  
