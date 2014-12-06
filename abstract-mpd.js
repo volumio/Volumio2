@@ -28,7 +28,7 @@ var svr = net.createServer(function(sock) {
     });
  
     sock.on('end', function() { // client disconnects
-        sys.puts('Disconnected: ' + data + data.remoteAddress + ':' + data.remotePort + '\n');
+        sys.puts('Disconnected: ' + data + sock.remoteAddress + ':' + sock.remotePort + '\n');
         var idx = sockets.indexOf(sock);
         if (idx != -1) {
             delete sockets[idx];
