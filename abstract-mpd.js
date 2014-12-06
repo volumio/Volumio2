@@ -28,7 +28,7 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        if(data.equals(String.splice(0,"play".length))) {
+        if(data.localeCompare("play") == 1) {
             sys.puts("play");
         }
         
