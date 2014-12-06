@@ -18,16 +18,16 @@ var svr = net.createServer(function(sock) {
             return;
         }
         switch(data) {
-            case "play" :
+            case 'play\n' :
                 sock.write('OK');
                 break;
-            case 'stop':
+            case 'stop\n':
                 sock.write('OK');
                 break;
-            case 'next':
+            case 'next\n':
                 sock.write('OK');
                 break;
-            case 'previous':
+            case 'previous\n':
                 sock.write('OK');
                 break;
             default:
