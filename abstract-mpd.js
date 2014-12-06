@@ -28,9 +28,7 @@ var svr = net.createServer(function(sock) {
         
         sys.puts(data);
         
-        if(data.localeCompare("play") == 1) {
-            sys.puts("play");
-        }
+        var command = data.substring(0, data.indexof(' '));
         
         // handle message
         switch(data) {
