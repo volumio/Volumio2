@@ -26,16 +26,12 @@ var svr = net.createServer(function(sock) {
             return;
         }
         
+        // print message
         sys.puts(data);
-        
-        var string = data.toString();
-        if(string == 'play\n'){
-            sys.puts( "ola");
-        }
         
         // handle message
         switch(data) {
-            case 'play' :
+            case 'play\n' :
                 sock.write('OK\n');
                 break;
             case 'stop\n':
