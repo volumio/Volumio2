@@ -1,45 +1,30 @@
-// Load the TCP Library
-net = require('net');
- 
-// Keep track of the chat clients
-var clients = [];
- 
-// Start a TCP Server
-net.createServer(function (socket) {
- 
-  // Identify this client
-  socket.name = socket.remoteAddress + ":" + socket.remotePort 
- 
-  // Put this new client in the list
-  clients.push(socket);
- 
-  // Send a nice welcome message and announce
-  socket.write("Welcome " + socket.name + "\n");
-  broadcast(socket.name + " joined the chat\n", socket);
- 
-  // Handle incoming messages from clients.
-  socket.on('data', function (data) {
-    broadcast(socket.name + "> " + data, socket);
-  });
- 
-  // Remove the client from the list when it leaves
-  socket.on('end', function () {
-    clients.splice(clients.indexOf(socket), 1);
-    broadcast(socket.name + " left the chat.\n");
-  });
-  
-  // Send a message to all clients
-  function broadcast(message, sender) {
-    clients.forEach(function (client) {
-      // Don't want to send it to sender
-      if (client === sender) return;
-      client.write(message);
+var net = require('net');
+
+var HOST = 'localhost';
+var PORT = 6601;
+
+// Create a server instance, and chain the listen function to it
+// The function passed to net.createServer() becomes the event handler for the 'connection' event
+// The sock object the callback function receives UNIQUE for each connection
+net.createServer(function(sock) {
+    
+    // We have a connection - a socket object is assigned to the connection automatically
+    console.log('CONNECTED: ' + sock.remoteAddress +':'+ sock.remotePort);
+    
+    // Add a 'data' event handler to this instance of socket
+    sock.on('data', function(data) {
+        
+        console.log('DATA ' + sock.remoteAddress + ': ' + data);
+        // Write the data back to the socket, the client will receive it as data from the server
+        sock.write('You said "' + data + '"');
+        
     });
-    // Log it to the server output too
-    process.stdout.write(message)
-  }
- 
-}).listen(5000);
- 
-// Put a friendly message on the terminal of the server.
-console.log("Chat server running at port 5000\n");
+    
+    // Add a 'close' event handler to this instance of socket
+    sock.on('close', function(data) {
+        console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
+    });
+    
+}).listen(PORT, HOST);
+
+console.log('Server listening on ' + HOST +':'+ PORT);
