@@ -17,6 +17,7 @@ var svr = net.createServer(function(sock) {
             }
             return;
         }
+        sys.puts('message received: ' + data);
         var len = sockets.length;
         for (var i = 0; i < len; i ++) { // broad cast
             if (sockets[i] != sock) {
