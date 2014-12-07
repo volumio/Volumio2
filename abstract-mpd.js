@@ -96,6 +96,7 @@ protocolServer.listen(mpdPort, mpdHost, function() {
     mpdHost + ":" + mpdPort);
 });
 
+// method to forward commands that dont need a response
 function sendSingleCommandToCore(command) {
     // Foward the command to the Core (no editing needed)
     // Right now forwards it to MPD (localhost:6600)
