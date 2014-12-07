@@ -35,10 +35,20 @@ var protocolServer = net.createServer(function(socket) {
         var message = data.toString();
     
         // read command
-        if(message.startsWith('play')) {
+        if(message.startsWith('next')) {
+            // next command
+            sys.puts("next command received");
+            sendSingleCommandToCore("next");
+            socket.write("OK\n");
+        } else if(message.startsWith('play')) {
             // play command
             sys.puts("play command received");
             sendSingleCommandToCore("play");
+            socket.write("OK\n");
+        } else if(message.startsWith("previous")) {
+            // previous command
+            sys.puts("previous command received");
+            sendSingleCommandToCore("previous");
             socket.write("OK\n");
         } else if(message.startsWith("stop")) {
             // stop command
@@ -63,8 +73,10 @@ var protocolServer = net.createServer(function(socket) {
     }
 });
 
+// on error
 protocolServer.on('error', function(err) {
     if (err.code === 'EADDRINUSE') {
+        // address is in use
       sys.puts("Failed to bind MPD protocol to port " + mpdPort +
         ": Address in use.");
     } else {
@@ -72,6 +84,7 @@ protocolServer.on('error', function(err) {
     }
 });
 
+// start the server
 protocolServer.listen(mpdPort, mpdHost, function() {
     sys.puts("Abstract MPD layer listening at: " +
     mpdHost + ":" + mpdPort);
