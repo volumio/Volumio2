@@ -14,7 +14,7 @@ var svr = net.createServer(function(sock) {
     // Add to connected client-list
     clients.push(sock);
  
-    sock.on('data', function(data) {  // client writes message
+    sock.on('message', function(data) {  // client writes message
         // if message is 'exit', remove client from list
         if (data == 'exit\n') {
             sys.puts('exit command received: ' + sock.remoteAddress + ':' + sock.remotePort + '\n');
