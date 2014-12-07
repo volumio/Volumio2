@@ -8,18 +8,21 @@ var mpdHost = '0.0.0.0';
 // keep track of connected clients (for broadcasts)
 var clients = [];
 
+// MPD connection
+var connMpdCommand = libNet.createConnection(6600, 'localhost'); // Socket to send commands and receive track listings
+
 // create server
 var protocolServer = net.createServer(function(socket) {
     socket.setEncoding('utf8');
     
     // add client to list
-    socket.on('connected', function(socket) {
+    socket.on('connection', function(socket) {
         sys.puts("New client connected: " + socket.remoteAddress +':'+ socket.remotePort);
         clients.push(socket);
     });
     
     // MPD welcome command
-    socket.write("OK MPD -version-\n");
+    socket.write("OK MPD 19.0.0\n"); // TODO not hardcoded?
     
     // handle errors in handleError function
     socket.on('error', handleError);
@@ -40,7 +43,7 @@ var protocolServer = net.createServer(function(socket) {
         } else if(message.startsWith("stop")) {
             // stop command
             sys.puts("stop command received");
-            // TODO send stop to core
+            sendSingleCommandToCore("stop");
             socket.write("OK\n");
         } else {
             sys.puts("command not recognized: " + message);
@@ -80,6 +83,8 @@ function  handleMessage(data){
 
 function sendSingleCommandToCore(command) {
     // Foward the command to the Core (no editing needed)
+    // Right now forwards it to MPD (localhost:6600)
+    connMpdCommand.write(command + '\n');
 }
     
 String.prototype.startsWith = function (str){
