@@ -1,6 +1,5 @@
 var net = require('net');
 var sys = require('sys');
-var MpdProtocol = require('./abstract-mpd-protocol');
 
 var mpdPort = 6601;
 var mpdHost = '0.0.0.0';
