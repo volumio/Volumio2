@@ -56,6 +56,7 @@ var protocolServer = net.createServer(function(socket) {
             sendSingleCommandToCore("stop");
             socket.write("OK\n");
         } else {
+            // no known command
             sys.puts("command not recognized: " + message);
             socket.write("ACK\n");
         }    
