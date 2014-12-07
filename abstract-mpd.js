@@ -1,69 +1,68 @@
-// connection variables
-var sys = require('sys');
 var net = require('net');
+var sys = require('sys');
+var MpdProtocol = require('./abstract-mpd-protocol');
 
-// keep a list of connected clients
+var mpdPort = 6601;
+var mpdHost = '0.0.0.0';
+
 var clients = [];
 
-// connection
-var svr = net.createServer(function(sock) {
-    // New client connected
-    sys.puts('Connected: ' + sock.remoteAddress + ':' + sock.remotePort); 
-    sock.write('OK MPD version\n');
+var protocolServer = net.createServer(function(socket) {
+    socket.setEncoding('utf8');
+    clients.push(socket);
+    socket.write("OK MPD -version-\n");
     
-    // Add to connected client-list
-    clients.push(sock);
- 
-    sock.on('data', function(data) {  // client writes message
-        // if message is 'exit', remove client from list
-        if (data == 'exit\n') {
-            sys.puts('exit command received: ' + sock.remoteAddress + ':' + sock.remotePort + '\n');
-            sock.destroy();
-            var idx = sockets.indexOf(sock);
-            if (idx != -1) {
-                delete clients[idx];
-            }
-            return;
-        }
-        
-        // print message
-        sys.puts(data);
-        
-        // handle message
-        switch(data) {
-            case 'play\n' :
-                sock.write('OK\n');
-                break;
-            case 'stop\n':
-                sock.write('OK\n');
-                break;
-            case 'next\n':
-                sock.write('OK\n');
-                break;
-            case 'previous\n':
-                sock.write('OK\n');
-                break;
-            default:
-                sock.write('ACK\n');
-                break;
-        }
+    socket.on('error', handleError);
+
+    function handleError(err) {
+      log.error("socket error:", err.stack);
+      socket.destroy();
+      cleanup();
+    }
+
+    function handleError(err) {
+        log.error("socket error:", err.stack);
+        socket.destroy();
+        cleanup();
+    }
+
+    function cleanup() {
+        protocol.close();
+    }    
+
+
+    socket.on('data', function(message) {
+        sys.puts("received: " + message);
+        var data = message.toString();
+
+        if(data.startsWith('play')) {
+            sys.puts("play command received");
+            socket.write("OK\n");
+        } else if(data.startsWith("stop")) {
+            sys.puts("stop command received");
+            socket.write("OK\n");
+        } else {
+            sys.puts("command not recognized: " + data);
+            socket.write("ACK\n");
+        }        
     });
- 
-    sock.on('end', function() { // client disconnects
-        // remove client form list
-        sys.puts('Disconnected: ' + sock.remoteAddress + ':' + sock.remotePort + '\n');
-        var idx = sockets.indexOf(sock);
-        if (idx != -1) {
-            delete clients[idx];
-        }
-    });
+
 });
 
-// server address/port (0.0.0.0 for outside connections) 
-var svraddr = '0.0.0.0';
-// MPD listen port
-var svrport = 6601;
- 
-// start listening 
-svr.listen(svrport, svraddr);
-sys.puts('Server Created at ' + svraddr + ':' + svrport + '\n');
+protocolServer.on('error', function(err) {
+    if (err.code === 'EADDRINUSE') {
+      sys.puts("Failed to bind MPD protocol to port " + mpdPort +
+        ": Address in use.");
+    } else {
+      throw err;
+    }
+});
+
+protocolServer.listen(mpdPort, mpdHost, function() {
+    sys.puts("Abstract MPD layer listening at: " +
+    mpdHost + ":" + mpdPort);
+});
+    
+String.prototype.startsWith = function (str){
+    return this.slice(0, str.length) == str;
+};
