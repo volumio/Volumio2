@@ -25,7 +25,28 @@ var protocolServer = net.createServer(function(socket) {
     socket.on('error', handleError);
     
     // on incoming message
-    socket.on('data', handleMessage);
+    socket.on('data', function(data) {
+        // log data (only for debugging)
+        sys.puts("received: " + data);
+        // cast message to string
+        var message = data.toString();
+    
+        // read command
+        if(message.startsWith('play')) {
+            // play command
+            sys.puts("play command received");
+            sendSingleCommandToCore("play");
+            socket.write("OK\n");
+        } else if(message.startsWith("stop")) {
+            // stop command
+            sys.puts("stop command received");
+            // TODO send stop to core
+            socket.write("OK\n");
+        } else {
+            sys.puts("command not recognized: " + message);
+            socket.write("ACK\n");
+        }    
+    });
 
     function handleError(err) {
       log.error("socket error:", err.stack);
@@ -54,26 +75,7 @@ protocolServer.listen(mpdPort, mpdHost, function() {
 });
 
 function  handleMessage(data){
-    // log data (only for debugging)
-    sys.puts("received: " + data);
-    // cast message to string
-    var message = data.toString();
-
-    // read command
-    if(message.startsWith('play')) {
-        // play command
-        sys.puts("play command received");
-        sendSingleCommandToCore("play");
-        socket.write("OK\n");
-    } else if(message.startsWith("stop")) {
-        // stop command
-        sys.puts("stop command received");
-        // TODO send stop to core
-        socket.write("OK\n");
-    } else {
-        sys.puts("command not recognized: " + message);
-        socket.write("ACK\n");
-    }        
+        
 }
 
 function sendSingleCommandToCore(command) {
