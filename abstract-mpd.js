@@ -40,6 +40,11 @@ var protocolServer = net.createServer(function(socket) {
             sys.puts("next command received");
             sendSingleCommandToCore("next");
             socket.write("OK\n");
+        } else if(message.startsWith('pause')) {
+            // pause command
+            sys.puts("pause command received");
+            sendSingleCommandToCore("pause");
+            socket.write("OK\n");
         } else if(message.startsWith('play')) {
             // play command
             sys.puts("play command received");
@@ -90,10 +95,6 @@ protocolServer.listen(mpdPort, mpdHost, function() {
     sys.puts("Abstract MPD layer listening at: " +
     mpdHost + ":" + mpdPort);
 });
-
-function  handleMessage(data){
-        
-}
 
 function sendSingleCommandToCore(command) {
     // Foward the command to the Core (no editing needed)
