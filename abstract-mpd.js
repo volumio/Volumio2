@@ -9,7 +9,7 @@ var mpdHost = '0.0.0.0';
 var clients = [];
 
 // MPD connection
-var connMpdCommand = libNet.createConnection(6600, 'localhost'); // Socket to send commands and receive track listings
+var connMpdCommand = net.createConnection(6600, 'localhost'); // Socket to send commands and receive track listings
 
 // create server
 var protocolServer = net.createServer(function(socket) {
