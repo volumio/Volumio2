@@ -68,13 +68,7 @@ var protocolServer = net.createServer(function(socket) {
     });
 
     function handleError(err) {
-      log.error("socket error:", err.stack);
-      socket.destroy();
-      cleanup();
-    }
-
-    function handleError(err) {
-        log.error("socket error:", err.stack);
+        sys.puts("socket error:", err.stack);
         socket.destroy();
     }
 });
