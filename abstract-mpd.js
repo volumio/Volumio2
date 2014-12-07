@@ -22,7 +22,7 @@ var protocolServer = net.createServer(function(socket) {
     });
     
     // MPD welcome command
-    socket.write("OK MPD 19.0.0\n"); // TODO not hardcoded?
+    socket.write("OK MPD 0.19.0\n"); // TODO not hardcoded?
     
     // handle errors in handleError function
     socket.on('error', handleError);
