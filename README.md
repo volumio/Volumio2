@@ -22,7 +22,8 @@ All dependecies are in the package JSON, from the working directory just run
        npm install
 
 You can run all the servers in one single step just running with nodejs
-        nodejs bin/www 
+
+       nodejs bin/www 
 
 ## Developing
 
