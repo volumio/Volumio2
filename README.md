@@ -1,12 +1,16 @@
 
 
-# VolumioTwo
+# WebUI-NODE
 
 
 
 ## Usage
 
+All dependecies are in the package JSON, just run
 
+npm install
+
+You can run all the servers in one single step just running /bin/www with nodejs
 
 ## Developing
 
