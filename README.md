@@ -29,7 +29,7 @@ You can run all the servers in one single step just running with nodejs
 
 * ToDos, Tasks and Bugs [here](https://github.com/volumio/WebUI-NODE#boards) (you need to associate your github account with [ZenHub])(https://www.zenhub.io/) 
 * [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics 
-* [Wiki](http://volumio.org/forum/discussion-t2098-10.html) (Internal, Will be made public once released)
+* [Wiki](https://github.com/volumio/WebUI-NODE/wiki) (Internal, Will be made public once released)
 
 
 ### Tools
