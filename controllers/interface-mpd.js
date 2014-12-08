@@ -6,7 +6,7 @@ var mpdHost = null;
 // keep track of connected clients (for broadcasts)
 var clients = [];
 // MPD connection
-var connMpdCommand = null;
+var volumioCore = null;
 
 // create server
 var protocolServer = net.createServer(function(socket) {
@@ -79,7 +79,8 @@ protocolServer.on('error', function(err) {
 function sendSingleCommandToCore(command) {
 	// Foward the command to the Core (no editing needed)
 	// Right now forwards it to MPD (localhost:6600)
-	connMpdCommand.write(command + '\n');
+//	connMpdCommand.write(command + '\n');
+	volumioCore.executeCmd('mpd',command,'');//.sendCommand(command + '\n');
 }
 
 String.prototype.startsWith = function (str){
@@ -87,8 +88,8 @@ String.prototype.startsWith = function (str){
 };
 
 // method to initialize the mpd interface to listen on setMpdIntercaePort, setMpdInterfaceHost and the connection to the "real" MPD setConnMpdCommand
-function initProtocolServer(setMpdIntercaePort, setMpdInterfaceHost, setConnMpdCommand){
-	connMpdCommand = setConnMpdCommand;
+function initProtocolServer(setMpdIntercaePort, setMpdInterfaceHost, setVolumioCore){
+	volumioCore = setVolumioCore;
 	mpdPort = setMpdIntercaePort;
 	mpdHost = setMpdInterfaceHost;
 	protocolServer.listen(mpdPort, mpdHost, function() {

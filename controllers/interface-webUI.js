@@ -1,6 +1,6 @@
 // init the controller for the Volumio WebUI
 // the module exports the initializaztion function who takes the socketIo already initialized and the mpd command interface
-module.exports = function(libSocketIO,connMpdInterface){
+module.exports = function(libSocketIO,volumioCore){
 	//Socket IO config
 	libSocketIO.on('connection', function(websocket) {
 		// Broadcast to client console
@@ -25,7 +25,9 @@ module.exports = function(libSocketIO,connMpdInterface){
 			sInterface = sCommandString.substring(0, nSlashLocation);
 			sCommand = sCommandString.substring(nSlashLocation + 1, sCommandString.length);
 			if (sInterface == 'mpd') {
-				connMpdInterface.write(sCommand);
+//				connMpdInterface.write(sCommand);
+				volumioCore.executeCmd('mpd',sCommand,'');;//sendCommand(sCommand);
+				libSocketIO.emit('consoleMessage', 'MPD Interface: ' + sCommand);
 	
 			} else if (sInterface == 'spop') {
 				//connSpopInterface.write(sCommand);
@@ -36,9 +38,9 @@ module.exports = function(libSocketIO,connMpdInterface){
 	
 	});
 	
-	connMpdInterface.on('data', function(response) {
-		// Broadcast to client console
-		libSocketIO.emit('consoleMessage', 'MPD Interface: ' + response.toString());
-	
-	});
+//	connMpdInterface.on('data', function(response) {
+//		// Broadcast to client console
+//		libSocketIO.emit('consoleMessage', 'MPD Interface: ' + response.toString());
+//	
+//	});
 };
