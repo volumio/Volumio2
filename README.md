@@ -8,18 +8,21 @@
 
 First thing is to get node:
 
-       sudo apt-get install nodejs
- 
- Then, npm:
- 
-       sudo apt-get install npm
+       sudo apt-get install curl
+       sudo curl -sL https://deb.nodesource.com/setup | bash -
+       sudo apt-get install -y nodejs
+
+Clone the repo
+
+       git clone https://github.com/volumio/WebUI-NODE.git 
 
 All dependecies are in the package JSON, from the working directory just run
 
+        cd WebUI-NODE
         npm install
 
-You can run all the servers in one single step just runningwith nodejs
-        /bin/www 
+You can run all the servers in one single step just running with nodejs
+        nodejs bin/www 
 
 ## Developing
 
