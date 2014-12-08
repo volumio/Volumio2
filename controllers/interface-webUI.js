@@ -1,5 +1,5 @@
 // init the controller for the Volumio WebUI
-// the module exports the initializaztion function who takes the socketIo already initialized and the mpd command interface
+// the module exports the initialization function who takes the socketIo already initialized and the VolumioCore
 module.exports = function(libSocketIO,volumioCore){
 	//Socket IO config
 	libSocketIO.on('connection', function(websocket) {
@@ -38,9 +38,4 @@ module.exports = function(libSocketIO,volumioCore){
 	
 	});
 	
-//	connMpdInterface.on('data', function(response) {
-//		// Broadcast to client console
-//		libSocketIO.emit('consoleMessage', 'MPD Interface: ' + response.toString());
-//	
-//	});
 };

@@ -1,3 +1,6 @@
+// This module work as interface for all the third parties client wich want to talk with an MPD server.
+// This module get all the MPD client request but they will be handled from Volumio Core Module
+
 var net = require('net');
 var sys = require('sys');
 // server settings
@@ -5,7 +8,7 @@ var mpdPort = null;
 var mpdHost = null;
 // keep track of connected clients (for broadcasts)
 var clients = [];
-// MPD connection
+// Volumio Core Modules. All the incoming request will be parsed and then paased to the core module
 var volumioCore = null;
 
 // create server

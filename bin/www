@@ -1,21 +1,26 @@
 #!/usr/bin/env node
+// author: HoochDeveloper
+
+// this will works as our main, all the services and configuration should be set here
 // creating connection to the MPD daemon
 var net = require('net');
 var mpdPort = 6600;
 var mpdHost = 'localhost';
 var connMpdCommand = net.createConnection(mpdPort,mpdHost); // Socket to send commands and receive track listings
-
+// initialize our mpd daemon controller. This module implements all calls to the mpd daemon.
 var mpdDirectController = require('../controllers/mpd-daemon-controller');
 mpdDirectController.init(connMpdCommand);
-
+// initialize the volumio core. All the webUI and all third party interfaces will pass through the core module. In this way
+// when we add our own DB we can have the CORE to serve the various interfaces indipendent from the audio type  
 var volumioCore = require('../controllers/core-volumio-services');
+// here we tell wich implementations the core will use to talk with MPD
 volumioCore.setMpdDaemonController(mpdDirectController);
+// other setter will be added and implemented to talk with spop etc.
 
-// initializing MPD controller
-var mdpControllerPort = 6500;
-var mpdControllerHost = 'localhost';
-//var mpdController = require('../controllers/interface-mpd')(mdpControllerPort,mpdControllerHost,connMpdCommand);
-var mpdController = require('../controllers/interface-mpd')(mdpControllerPort,mpdControllerHost,volumioCore);
+// initializing MPD interfce. This will listen for all MPD third parties clients
+var mdpInterfacePort = 6500;
+var mpdInterfaceHost = 'localhost';
+var mpdThirdPatiesInteface = require('../controllers/interface-mpd')(mdpInterfacePort,mpdInterfaceHost,volumioCore);
 // initializing the main server module
 var main = require('../server');
 var app = main.app;
@@ -23,9 +28,7 @@ app.set('port', 3000);
 var server = app.listen(app.get('port'), function() {
 	  console.log('Express server listening on port ' + server.address().port);
 });
-// attaching socket io to our module
+// initialize socketIO to talk with webUI
 var socketIo = require('socket.io')(server);
-// creating a connection to the MPD controller
-var connMpdInterface = net.createConnection(mdpControllerPort, mpdControllerHost);
-// and passing it to our client controller
+// attaching socket io to our webUI interface and passing the volumioCore to handle all the request
 var clientMpdController = require('../controllers/interface-webUI')(socketIo,volumioCore);

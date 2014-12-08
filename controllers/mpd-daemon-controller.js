@@ -1,3 +1,4 @@
+// author: HoochDeveloper
 // MPD daemon controller sketch
 // this 
 // accepts the socket connection to the mpd daemon to be initialized
