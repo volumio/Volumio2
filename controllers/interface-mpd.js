@@ -3,6 +3,7 @@
 
 var net = require('net');
 var sys = require('sys');
+var os = require('os');
 // server settings
 var mpdPort = null;
 var mpdHost = null;
@@ -120,44 +121,55 @@ var protocolServer = net.createServer(function(socket) {
 	// MPD welcome command
 	socket.write("OK MPD 0.19.0\n"); // TODO not hardcoded?
 	// handle errors in handleError function
-	socket.on('error', handleError);
-	// on incoming message
+	socket.on('error', handleError);// on incoming message
+	
+	var buffer = ""; //Buffer since we may not receive whole lines
+	var lineIndex = 0;  //Store the index of "\n" (<- end of line sign)
 	socket.on('data', function(data) {
-	// log data (only for debugging)
-		sys.puts("received: " + data);
-		// cast message to string
-		var message = data.toString();
-		// read command
-		if(message.startsWith('next')) {
-		// next command
-			sys.puts("next command received");
-			sendSingleCommandToCore("next");
-			socket.write("OK\n");
-		} else if(message.startsWith('pause')) {
-		// pause command
-			sys.puts("pause command received");
-			sendSingleCommandToCore("pause");
-			socket.write("OK\n");
-		} else if(message.startsWith('play')) {
-		// play command
-			sys.puts("play command received");
-			sendSingleCommandToCore("play");
-			socket.write("OK\n");
-		} else if(message.startsWith("previous")) {
-		// previous command
-			sys.puts("previous command received");
-			sendSingleCommandToCore("previous");
-			socket.write("OK\n");
-		} else if(message.startsWith("stop")) {
-		// stop command
-			sys.puts("stop command received");
-			sendSingleCommandToCore("stop");
-			socket.write("OK\n");
-		} else {
-		// no known command
-			sys.puts("command not recognized: " + message);
-			socket.write("ACK\n");
+		buffer += data.toString(); // add new incoming data to our buffer
+		lineIndex = buffer.indexOf('\n'); // check if we have a complete line
+		
+		if(lineIndex == -1) {
+		    return; // our buffer has received no full line yet
 		}
+		
+		// while we still have a complete line in our buffer (os.EOL == end of line (\r\n))
+		while(results = buffer.split(os.EOL)) {
+		    // get 1 line from our buffer to process
+		    var message = results[0];
+		    // Print message (for debugging purposes)
+		    sys.puts("Received: "+message);
+		    
+		    // some vars to help extract command/parameters from line
+		    var nSpaceLocation = 0;
+		    var sCommand = '';
+		    var sParam = '';
+		    
+		    // check if there is a space
+		    nSpaceLocation = message.indexOf(' ');
+		    if(nSpaceLocation == -1) {
+		        // no space, only 1 command
+		        sCommand = message.substring(os.EOL);
+		    } else {
+		        // a space, before space command, rest parameter
+		        sCommand = message.substring(0,nSpaceLocation);
+		        sParam = message.substring(nSpaceLocation+1, message.length);
+		    }
+		    sys.puts("Command: " + sCommand + "\nParam: "+sParam);
+		    
+		    switch(sCommand) {
+		            case command.PLAY:
+		                sys.puts("case play");
+		                break;
+		            case command.NEXT:
+		                sys.puts("case next");
+		                break;
+		            default:
+		                sys.puts("default");
+		    }
+		    buffer = buffer.substring(lineIndex+1); // Cuts off the processed line
+		    break;
+		}	
 	});
 	function handleError(err) {
 		sys.puts("socket error:", err.stack);
