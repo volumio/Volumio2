@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+var mpdController = require('../controllers/interface-mpd');
+var mpdServer = mpdController.server; 
+mpdServer.listen(6500, function () {
+	console.log('Mpd interface listening on localhost:6500...');
+});
+var app = require('../server');
+var socketIo = require('../controllers/index-controller');

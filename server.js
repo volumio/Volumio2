@@ -1,72 +1,64 @@
-var libExpress = require('express')();
-var libHttp = require('http').Server(libExpress);
-var libSocketIO = require('socket.io')(libHttp);
-var libNet = require('net');
-var connMpdInterface = libNet.createConnection(6500, 'localhost');
-//var connSpopInterface = libNet.createConnection(6502, 'localhost');
+var express = require('express');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
-// When an http get request occurs
-libExpress.get('/', function(req, res) {
-	// Send the requestor a copy of 'player.html'
-	res.sendFile('player.html', { root: __dirname });
+var routes = require('./routes/index');
 
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', routes);
+
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
-// When a client connects via websocket
-libSocketIO.on('connection', function(websocket) {
-	// Broadcast to client console
-	libSocketIO.emit('consoleMessage', 'Volumino: A client connected');
+// error handlers
 
-	// When a client disconnects via websocket
-	websocket.on('disconnect', function() {
-		// Broadcast to client console
-		libSocketIO.emit('consoleMessage', 'Volumino: A client disconnected');
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
+    });
+}
 
-	});
-
-	var nSlashLocation = 0;
-	var sCommand = '';
-	var sInterface = '';
-	// When a command is sent over websocket
-	websocket.on('command', function(sCommandString) {
-		// Broadcast to client console
-		libSocketIO.emit('consoleMessage', 'Client: ' + sCommandString);
-
-		// Route command to appropriate interface
-		nSlashLocation = sCommandString.indexOf('/');
-		sInterface = sCommandString.substring(0, nSlashLocation);
-		sCommand = sCommandString.substring(nSlashLocation + 1, sCommandString.length);
-
-		if (sInterface == 'mpd') {
-			connMpdInterface.write(sCommand);
-
-		} else if (sInterface == 'spop') {
-			//connSpopInterface.write(sCommand);
-
-		}
-
-	});
-
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
 });
 
-// When Spop interface gives a message
-/*
-connSpopInterface.on('data', function(response) {
-	// Broadcast to client console
-	libSocketIO.emit('consoleMessage', 'Spop Interface: ' + response.toString());
+app.set('port', process.env.PORT || 3000);
 
-});*/
-
-// When MPD interface gives a message
-connMpdInterface.on('data', function(response) {
-	// Broadcast to client console
-	libSocketIO.emit('consoleMessage', 'MPD Interface: ' + response.toString());
-
+var server = app.listen(app.get('port'), function() {
+  console.log('Express server listening on port ' + server.address().port);
 });
 
-// Set http server to listen for requests
-libHttp.listen(3001, function() {
-	console.log('Volumino server listening on localhost:3001...');
-
-});
-
+module.exports.server = server;
