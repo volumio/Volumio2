@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var mpdController = require('../controllers/interface-mpd');
-var mpdServer = mpdController.server; 
+var mpdServer = mpdController.protocolServer; 
 mpdServer.listen(6500, function () {
 	console.log('Mpd interface listening on localhost:6500...');
 });

@@ -1,65 +1,90 @@
-var libNet = require('net');
-var server = libNet.createServer(onConnect);
-
-var mpd = require('mpd');
-var cmd = mpd.cmd;
-var q = require('q');
-
-// When a core connects to this interface
-function onConnect (connCore) {
-	
-	var client = mpd.connect({
-		port: 6600,
-		host: 'localhost',
+var net = require('net');
+var sys = require('sys');
+// server settings
+var mpdPort = 6601;
+var mpdHost = '0.0.0.0';
+// keep track of connected clients (for broadcasts)
+var clients = [];
+// MPD connection
+var connMpdCommand = net.createConnection(6600, 'localhost'); // Socket to send commands and receive track listings
+// create server
+var protocolServer = net.createServer(function(socket) {
+	socket.setEncoding('utf8');
+	// add client to list
+	socket.on('connection', function(socket) {
+		sys.puts("New client connected: " + socket.remoteAddress +':'+ socket.remotePort);
+		clients.push(socket);
 	});
-	
-	client.on('ready', function() {
-		  console.log("ready");
-		});
-	client.on('system', function(name) {
-	  console.log("update", name);
+	// MPD welcome command
+	socket.write("OK MPD 0.19.0\n"); // TODO not hardcoded?
+	// handle errors in handleError function
+	socket.on('error', handleError);
+	// on incoming message
+	socket.on('data', function(data) {
+	// log data (only for debugging)
+	sys.puts("received: " + data);
+	// cast message to string
+	var message = data.toString();
+	// read command
+	if(message.startsWith('next')) {
+	// next command
+		sys.puts("next command received");
+		sendSingleCommandToCore("next");
+		socket.write("OK\n");
+	} else if(message.startsWith('pause')) {
+	// pause command
+		sys.puts("pause command received");
+		sendSingleCommandToCore("pause");
+		socket.write("OK\n");
+	} else if(message.startsWith('play')) {
+	// play command
+		sys.puts("play command received");
+		sendSingleCommandToCore("play");
+		socket.write("OK\n");
+	} else if(message.startsWith("previous")) {
+	// previous command
+		sys.puts("previous command received");
+		sendSingleCommandToCore("previous");
+		socket.write("OK\n");
+	} else if(message.startsWith("stop")) {
+	// stop command
+		sys.puts("stop command received");
+		sendSingleCommandToCore("stop");
+		socket.write("OK\n");
+	} else {
+	// no known command
+		sys.puts("command not recognized: " + message);
+		socket.write("ACK\n");
+	}
 	});
-	client.on('system-player', function() {
-		console.log();
-		client.sendCommand(cmd("status", []), function(err, msg) {
-	    if (err) throw err;
-	    console.log(msg);
-	  });
-	});
-	
-	// When Core sends a command
-	connCore.on('data', function (command) {
-		// Pass the command to MPD command socket
-		var comando = command.toString();
-		
-		switch(comando) {
-        case 'status':
-        	client.sendCommand(cmd("status", []), function(err, msg) {
-    		    if (err) throw err;
-    		    console.log(msg);
-        	});
-            break;
-        case 'next':
-        	client.sendCommand(cmd("random", [value]), function(err, msg) {
-    		    if (err) throw err;
-    		    console.log(msg);
-//    		    connCore.send('OK\n');
-        	});
-//            sock.write('OK\n');
-            break;
-        case 'previous\n':
-//            sock.write('OK\n');
-            break;
-        default:
-//            sock.write('ACK\n');
-            break;
+	function handleError(err) {
+		sys.puts("socket error:", err.stack);
+		socket.destroy();
 		}
-		return 'OK';
-		
-		
-		
-
-	});
+});
+// on error
+protocolServer.on('error', function(err) {
+	if (err.code === 'EADDRINUSE') {
+		// address is in use
+		sys.puts("Failed to bind MPD protocol to port " + mpdPort +
+		": Address in use.");
+	} else {
+		throw err;
+	}
+});
+// start the server
+protocolServer.listen(mpdPort, mpdHost, function() {
+	sys.puts("Abstract MPD layer listening at: " +
+	mpdHost + ":" + mpdPort);
+});
+// method to forward commands that dont need a response
+function sendSingleCommandToCore(command) {
+	// Foward the command to the Core (no editing needed)
+	// Right now forwards it to MPD (localhost:6600)
+	connMpdCommand.write(command + '\n');
+	}
+	String.prototype.startsWith = function (str){
+	return this.slice(0, str.length) == str;
 };
 
-module.exports.server = server;
+module.exports.protocolServer = protocolServer;

@@ -32,10 +32,7 @@ libSocketIO.on('connection', function(websocket) {
 		sCommand = sCommandString.substring(nSlashLocation + 1, sCommandString.length);
 
 		if (sInterface == 'mpd') {
-//			connMpdInterface.emit('data','status');
-			connMpdInterface.write('status');
-			
-//			connMpdAbs.write(sCommand);
+			connMpdInterface.write(sCommand);
 
 		} else if (sInterface == 'spop') {
 			//connSpopInterface.write(sCommand);
