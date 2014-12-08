@@ -1,12 +1,13 @@
 var net = require('net');
 var sys = require('sys');
 // server settings
-var mpdPort = 6601;
-var mpdHost = '0.0.0.0';
+var mpdPort = null;
+var mpdHost = null;
 // keep track of connected clients (for broadcasts)
 var clients = [];
 // MPD connection
-var connMpdCommand = net.createConnection(6600, 'localhost'); // Socket to send commands and receive track listings
+var connMpdCommand = null;
+
 // create server
 var protocolServer = net.createServer(function(socket) {
 	socket.setEncoding('utf8');
@@ -22,45 +23,45 @@ var protocolServer = net.createServer(function(socket) {
 	// on incoming message
 	socket.on('data', function(data) {
 	// log data (only for debugging)
-	sys.puts("received: " + data);
-	// cast message to string
-	var message = data.toString();
-	// read command
-	if(message.startsWith('next')) {
-	// next command
-		sys.puts("next command received");
-		sendSingleCommandToCore("next");
-		socket.write("OK\n");
-	} else if(message.startsWith('pause')) {
-	// pause command
-		sys.puts("pause command received");
-		sendSingleCommandToCore("pause");
-		socket.write("OK\n");
-	} else if(message.startsWith('play')) {
-	// play command
-		sys.puts("play command received");
-		sendSingleCommandToCore("play");
-		socket.write("OK\n");
-	} else if(message.startsWith("previous")) {
-	// previous command
-		sys.puts("previous command received");
-		sendSingleCommandToCore("previous");
-		socket.write("OK\n");
-	} else if(message.startsWith("stop")) {
-	// stop command
-		sys.puts("stop command received");
-		sendSingleCommandToCore("stop");
-		socket.write("OK\n");
-	} else {
-	// no known command
-		sys.puts("command not recognized: " + message);
-		socket.write("ACK\n");
-	}
+		sys.puts("received: " + data);
+		// cast message to string
+		var message = data.toString();
+		// read command
+		if(message.startsWith('next')) {
+		// next command
+			sys.puts("next command received");
+			sendSingleCommandToCore("next");
+			socket.write("OK\n");
+		} else if(message.startsWith('pause')) {
+		// pause command
+			sys.puts("pause command received");
+			sendSingleCommandToCore("pause");
+			socket.write("OK\n");
+		} else if(message.startsWith('play')) {
+		// play command
+			sys.puts("play command received");
+			sendSingleCommandToCore("play");
+			socket.write("OK\n");
+		} else if(message.startsWith("previous")) {
+		// previous command
+			sys.puts("previous command received");
+			sendSingleCommandToCore("previous");
+			socket.write("OK\n");
+		} else if(message.startsWith("stop")) {
+		// stop command
+			sys.puts("stop command received");
+			sendSingleCommandToCore("stop");
+			socket.write("OK\n");
+		} else {
+		// no known command
+			sys.puts("command not recognized: " + message);
+			socket.write("ACK\n");
+		}
 	});
 	function handleError(err) {
 		sys.puts("socket error:", err.stack);
 		socket.destroy();
-		}
+	}
 });
 // on error
 protocolServer.on('error', function(err) {
@@ -73,18 +74,27 @@ protocolServer.on('error', function(err) {
 	}
 });
 // start the server
-protocolServer.listen(mpdPort, mpdHost, function() {
-	sys.puts("Abstract MPD layer listening at: " +
-	mpdHost + ":" + mpdPort);
-});
+
 // method to forward commands that dont need a response
 function sendSingleCommandToCore(command) {
 	// Foward the command to the Core (no editing needed)
 	// Right now forwards it to MPD (localhost:6600)
 	connMpdCommand.write(command + '\n');
-	}
-	String.prototype.startsWith = function (str){
+}
+
+String.prototype.startsWith = function (str){
 	return this.slice(0, str.length) == str;
 };
 
-module.exports.protocolServer = protocolServer;
+// method to initialize the mpd interface to listen on setMpdIntercaePort, setMpdInterfaceHost and the connection to the "real" MPD setConnMpdCommand
+function initProtocolServer(setMpdIntercaePort, setMpdInterfaceHost, setConnMpdCommand){
+	connMpdCommand = setConnMpdCommand;
+	mpdPort = setMpdIntercaePort;
+	mpdHost = setMpdInterfaceHost;
+	protocolServer.listen(mpdPort, mpdHost, function() {
+		sys.puts("Abstract MPD layer listening at: " +
+		mpdHost + ":" + mpdPort);
+	});
+}
+
+module.exports = initProtocolServer;

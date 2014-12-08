@@ -1,8 +1,23 @@
 #!/usr/bin/env node
-var mpdController = require('../controllers/interface-mpd');
-var mpdServer = mpdController.protocolServer; 
-mpdServer.listen(6500, function () {
-	console.log('Mpd interface listening on localhost:6500...');
+// creating connection to the MPD daemon
+var net = require('net');
+var mpdPort = 6600;
+var mpdHost = 'localhost';
+var connMpdCommand = net.createConnection(mpdPort,mpdHost); // Socket to send commands and receive track listings
+// initializing MPD controller
+var mdpControllerPort = 6500;
+var mpdControllerHost = 'localhost';
+var mpdController = require('../controllers/interface-mpd')(mdpControllerPort,mpdControllerHost,connMpdCommand);
+// initializing the main server module
+var main = require('../server');
+var app = main.app;
+app.set('port', 3000);
+var server = app.listen(app.get('port'), function() {
+	  console.log('Express server listening on port ' + server.address().port);
 });
-var app = require('../server');
-var socketIo = require('../controllers/index-controller');
+// attaching socket io to our module
+var socketIo = require('socket.io')(server);
+// creating a connection to the MPD controller
+var connMpdInterface = net.createConnection(mdpControllerPort, mpdControllerHost);
+// and passing it to our client controller
+var clientMpdController = require('../controllers/webUI-controller')(socketIo,connMpdInterface);
