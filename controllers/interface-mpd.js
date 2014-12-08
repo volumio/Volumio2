@@ -31,7 +31,7 @@ function onConnect (connCore) {
 	connCore.on('data', function (command) {
 		// Pass the command to MPD command socket
 		var comando = command.toString();
-		console.log('Command ' + comando + ' Value : ' + valore)
+		
 		switch(comando) {
         case 'status':
         	client.sendCommand(cmd("status", []), function(err, msg) {
