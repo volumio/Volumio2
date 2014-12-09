@@ -15,13 +15,9 @@ function initMpdDaemonController(mpdPort,mpdHost){
 }
 // function for send command to MPD daemon
 function sendSingleCommand2MPD(command,commandCallback) {
-	// Foward the command to the Core (no editing needed)
-	// Right now forwards it to MPD (localhost:6600)
-//	console.log('MPD Daemon Controller - Executing command ' + command);
-//	connMpdCommand.write(command + '\n');
-	var result = 'Empty';
+	// now the npm mpd module is used. the command callBack is passed from the caller, so it can handle the response in a proper way
+	// TODO evaluate of this approach is needed
 	client.sendCommand(cmd(command, []), commandCallback);
-	return result;
 }
 
 // all methods must be implemented here
