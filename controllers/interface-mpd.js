@@ -157,12 +157,70 @@ var protocolServer = net.createServer(function(socket) {
 		    sys.puts("Command: " + sCommand + "\nParam: "+sParam);
 		    
 		    switch(sCommand) {
+		            case command.ADD :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.CROSSFADE :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.DELETE :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.NEXT :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.PAUSE:
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
 		            case command.PLAY:
-		                sys.puts("case play");
+		                sendSingleCommandToCore(sCommand, sParam);
+                        	socket.write("OK");
 		                break;
-		            case command.NEXT:
-		                sys.puts("case next");
+		            case command.PREVIOUS:
+		                sendSingleCommandToCore(sCommand, sParam);
+                		socket.write("OK");
 		                break;
+	                    case command.RANDOM :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.REPEAT :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.SEEK:
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.SETVOL:
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.SHUFFLE :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.SINGLE :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.STOP :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.UPDATE :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
+	                    case command.VOLUME :
+	                        sendSingleCommandToCore(sCommand, sParam);
+	                        socket.write("OK");
+	                        break;
 		            default:
 		                sys.puts("default");
 		    }
