@@ -3,7 +3,6 @@
 
 var net = require('net');
 var sys = require('sys');
-var os = require('os');
 // server settings
 var mpdPort = null;
 var mpdHost = null;
@@ -134,7 +133,7 @@ var protocolServer = net.createServer(function(socket) {
 		}
 		
 		// while we still have a complete line in our buffer (os.EOL == end of line (\r\n))
-		while(results = buffer.split(os.EOL)) {
+		while(results = buffer.split(/\r?\n/)) {
 		    // get 1 line from our buffer to process
 		    var message = results[0];
 		    // Print message (for debugging purposes)
@@ -149,7 +148,7 @@ var protocolServer = net.createServer(function(socket) {
 		    nSpaceLocation = message.indexOf(' ');
 		    if(nSpaceLocation == -1) {
 		        // no space, only 1 command
-		        sCommand = message.substring(os.EOL);
+		        sCommand = message.substring(/\r?\n/);
 		    } else {
 		        // a space, before space command, rest parameter
 		        sCommand = message.substring(0,nSpaceLocation);
