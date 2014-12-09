@@ -26,8 +26,18 @@ module.exports = function(libSocketIO,volumioCore){
 			sCommand = sCommandString.substring(nSlashLocation + 1, sCommandString.length);
 			if (sInterface == 'mpd') {
 //				connMpdInterface.write(sCommand);
-				volumioCore.executeCmd('mpd',sCommand,'');;//sendCommand(sCommand);
-				libSocketIO.emit('consoleMessage', 'MPD Interface: ' + sCommand);
+				volumioCore.executeCmd(sCommand,'',function(err, msg) {
+				    if (err){ 
+				    	console.log(err);
+				    	libSocketIO.emit('consoleMessage', 'Volumio WebUI - An error as occurred while exectuing: ' + sCommand);
+			    	}else{
+					    console.log('Volumio WebUI - MPD Daemon CallBack, printing command output');
+					    console.log(msg);
+					    libSocketIO.emit('consoleMessage', 'Volumio WebUI - Success exectuing: ' + sCommand);
+			    	}
+				});
+				
+				
 	
 			} else if (sInterface == 'spop') {
 				//connSpopInterface.write(sCommand);

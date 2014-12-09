@@ -250,7 +250,15 @@ function sendSingleCommandToCore(command) {
 	// Foward the command to the Core (no editing needed)
 	// Right now forwards it to MPD (localhost:6600)
 //	connMpdCommand.write(command + '\n');
-	volumioCore.executeCmd('mpd',command,'');//.sendCommand(command + '\n');
+	volumioCore.executeCmd(command,'', function(err,msg){
+		if(err){
+			// TODO report error to the client
+			console.log('An error has occurred');
+		}else{
+			// TODO report success to the client, somenthing like socket.write("OK");
+			console.log(command + ' has been executed');
+		}
+	});
 }
 
 String.prototype.startsWith = function (str){
