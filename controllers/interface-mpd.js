@@ -174,7 +174,7 @@ var protocolServer = net.createServer(function(socket) {
 		sys.puts("socket error:", err.stack);
 		socket.destroy();
 	}
-});
+}).listen(6500, "0.0.0.0");
 // on error
 protocolServer.on('error', function(err) {
 	if (err.code === 'EADDRINUSE') {

@@ -19,7 +19,7 @@ volumioCore.setMpdDaemonController(mpdDirectController);
 
 // initializing MPD interfce. This will listen for all MPD third parties clients
 var mdpInterfacePort = 6500;
-var mpdInterfaceHost = 'localhost';
+var mpdInterfaceHost = '0.0.0.0';
 var mpdThirdPatiesInteface = require('../controllers/interface-mpd')(mdpInterfacePort,mpdInterfaceHost,volumioCore);
 // initializing the main server module
 var main = require('../server');
