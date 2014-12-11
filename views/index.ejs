@@ -1,10 +1,21 @@
-<!DOCTYPE html>
+<!DOCTYPE html>/
 <html>
   <head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+   
+    
+    <!-- Bootstrap -->
+    <link href="./stylesheets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    
+   
+    
+    
   </head>
   <body>
+  	
+  		
+  	
+  
 		<h2>MPD Commands</h2>
 		<button id='button-mpdprev'>Previous Track</button>
 		<button id='button-mpdplay'>Play</button>
@@ -21,8 +32,44 @@
 		<button id='button-clearconsole'>Clear</button>
 		<ul id='console'></ul>
 
-		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
+		
+		
+		
+		<div ng-app="myApp">
+		  <div>
+		    {{ 'World' | greet }}
+		  </div>
+		</div>
+
+		
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
+		<script src="./scripts/assets/angular.min.js"></script>
 		<script src="./scripts/volumio/index-socketio-controller.js"></script>
+		<script src="./scripts/assets/bootstrap.min.js"></script>
+		
+		<script src="./scripts/assets/ui-bootstrap-custom-0.12.0.min.js"></script>
+		<script src="./scripts/assets/ui-bootstrap-custom-tpls-0.12.0.min.js"></script>
+		
+		<script>
+			
+
+			// declare a module
+			var myAppModule = angular.module('myApp', []);
+			
+			// configure the module.
+			// in this example we will create a greeting filter
+			myAppModule.filter('greet', function() {
+			 return function(name) {
+			    return 'Hello, ' + name + '!';
+			  };
+			});
+
+			
+		</script>
+		
+		
 
 	</body>
 </html>
