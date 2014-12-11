@@ -1,4 +1,4 @@
-<!DOCTYPE html>/
+<!DOCTYPE html>
 <html>
   <head>
     <title><%= title %></title>
@@ -35,15 +35,11 @@
 		
 		
 		
-		<div ng-app="myApp">
-		  <div>
-		    {{ 'World' | greet }}
-		  </div>
-		</div>
+		
 
 		
 		
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="./scripts/assets/jquery.1.11.1.min.js"></script>
   		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
 		<script src="./scripts/assets/angular.min.js"></script>
 		<script src="./scripts/volumio/index-socketio-controller.js"></script>
@@ -52,22 +48,7 @@
 		<script src="./scripts/assets/ui-bootstrap-custom-0.12.0.min.js"></script>
 		<script src="./scripts/assets/ui-bootstrap-custom-tpls-0.12.0.min.js"></script>
 		
-		<script>
-			
-
-			// declare a module
-			var myAppModule = angular.module('myApp', []);
-			
-			// configure the module.
-			// in this example we will create a greeting filter
-			myAppModule.filter('greet', function() {
-			 return function(name) {
-			    return 'Hello, ' + name + '!';
-			  };
-			});
-
-			
-		</script>
+		
 		
 		
 
