@@ -140,13 +140,13 @@ var status = { // DUMMY FOR NOW!
 }
 
 var playlistId = { // DUMMY FOR NOW!
-    "file"          : 'USB/Deep House - Mixes/Bakermat Mixtape for Simon&Me.mp3',
+    "file"          : 'USB/Music/Example1.mp3',
     "Last-Modified" : '2013-07-02T17:51:12Z',
     "Date"          : 2013,
     "Time"          : 3261,
     "Pos"           : 0,
     "Id"            : 9,
-    "file"          : 'USB/Deep House - Mixes/Bakermat@AOA2013.mp3',
+    "file"          : 'USB/Music/Example2.mp3',
     "Last-Modified" : '2014-08-19T09:03:52Z',
     "Time"          : 2961,
     "Pos"           : 1,
