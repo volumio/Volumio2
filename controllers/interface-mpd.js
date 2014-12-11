@@ -109,6 +109,50 @@ var command = { // List of all MPD commands
     VOLUME          : 'volume'    
 };
 
+var stats = { // DUMMY FOR NOW!
+    "uptime"        : 91938,
+    "playtime"      : 100,
+    "artists"       : 4,
+    "albums"        : 3,
+    "songs"         : 416,
+    "db_playtime"   : 169329,
+    "db_update"     : 1417789242
+}
+
+var status = { // DUMMY FOR NOW!
+    "volume"        : 85,
+    "repeat"        : 0,
+    "random"        : 0,
+    "single"        : 0,
+    "consume"       : 0,
+    "playlist"      : 4,
+    "playlistlength": 8,
+    "mixrampdb"     : 0.000000,
+    "state"         : 'pause',
+    "song"          : 2,
+    "songid"        : 3,
+    "time"          : '16:0',
+    "elapsed"       : 16.242,
+    "bitrate"       : 320,
+    "audio"         : '44100:24:2',
+    "nextsong"      : 3,
+    "nextsongid"    : 4
+}
+
+var playlistId = { // DUMMY FOR NOW!
+    "file"          : 'USB/Deep House - Mixes/Bakermat Mixtape for Simon&Me.mp3',
+    "Last-Modified" : '2013-07-02T17:51:12Z',
+    "Date"          : 2013,
+    "Time"          : 3261,
+    "Pos"           : 0,
+    "Id"            : 9,
+    "file"          : 'USB/Deep House - Mixes/Bakermat@AOA2013.mp3',
+    "Last-Modified" : '2014-08-19T09:03:52Z',
+    "Time"          : 2961,
+    "Pos"           : 1,
+    "Id"            : 10
+}
+
 // create server
 var protocolServer = net.createServer(function(socket) {
 	socket.setEncoding('utf8');
@@ -159,70 +203,86 @@ var protocolServer = net.createServer(function(socket) {
 		    switch(sCommand) {
 		            case command.ADD :
 	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
+	                        socket.write("OK\n");
 	                        break;
+	                    case command.COMMANDS :
+	                            socket.write(printCommandList(socket));
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.CROSSFADE :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.DELETE :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.NEXT :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
-	                    case command.PAUSE:
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
-		            case command.PLAY:
-		                sendSingleCommandToCore(sCommand, sParam);
-                        	socket.write("OK");
-		                break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
+	                    case command.PAUSE :
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
+		            case command.PLAY :
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
+	                    case command.PLAYLISTID :
+	                            socket.write(printPlaylistId());
+	                            socket.write("OK\n");
+	                            break;
 		            case command.PREVIOUS:
-		                sendSingleCommandToCore(sCommand, sParam);
-                		socket.write("OK");
-		                break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.RANDOM :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.REPEAT :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.SEEK:
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.SETVOL:
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.SHUFFLE :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.SINGLE :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
+	                    case command.STATS :
+	                            socket.write(printStats());
+	                            socket.write("OK\n");
+	                            break;
+	                    case command.STATUS :
+	                            socket.write(printStatus());
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.STOP :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.UPDATE :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 	                    case command.VOLUME :
-	                        sendSingleCommandToCore(sCommand, sParam);
-	                        socket.write("OK");
-	                        break;
+	                            sendSingleCommandToCore(sCommand, sParam);
+	                            socket.write("OK\n");
+	                            break;
 		            default:
-		                sys.puts("default");
+                            sys.puts("default");
 		    }
 		    buffer = buffer.substring(lineIndex+1); // Cuts off the processed line
 		    break;
@@ -259,6 +319,50 @@ function sendSingleCommandToCore(command) {
 			console.log(command + ' has been executed');
 		}
 	});
+}
+
+// method to print a list of available commands (command.COMMANDS)
+function printCommandList() {
+    var output = "";
+    // for the length of command (nr of commands)
+    for(var index in command) {
+        // print command: 'command' [newline]
+        output += "command: " + command[index] + "\n";
+    }
+    return output;
+}
+
+// method to print the stats (command.STATS)
+function printStats() {
+    var output = "";
+    // for the length of stats (nr of attributes)
+    for(var index in stats) {
+        // print "stat: value"
+        output += index + ": " + stats[index] + "\n";
+    }
+    return output;
+}
+
+// method to print the status (command.STATuS)
+function printStatus() {
+    var output = "";
+    // for the length of statuss (nr of attributes)
+    for(var index in status) {
+        // print "stat: value"
+        output += index + ": " + status[index] + "\n";
+    }
+    return output;
+}
+
+// method to print the playlist info (command.PLAYLISTID)
+function printPlaylistId() {
+    var output = "";
+    // for the length of statuss (nr of attributes)
+    for(var index in playlistId) {
+        // print "stat: value"
+        output += index + ": " + playlistId[index] + "\n";
+    }
+    return output;
 }
 
 String.prototype.startsWith = function (str){
