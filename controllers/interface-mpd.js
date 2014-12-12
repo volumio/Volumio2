@@ -10,8 +10,10 @@ var mpdHost = null;
 var clients = [];
 // Volumio Core Modules. All the incoming request will be parsed and then paased to the core module
 var volumioCore = null;
+// Protocol, holds all status's
+var protocol = require('./interface-mpd-protocol');
 
-var command = { // List of all MPD commands
+const command = { // List of all MPD commands
     ADD             : 'add',
     ADDID           : 'addid',
     ADDTAGID        : 'addtagid',
@@ -109,50 +111,6 @@ var command = { // List of all MPD commands
     VOLUME          : 'volume'    
 };
 
-var stats = { // DUMMY FOR NOW!
-    "uptime"        : 91938,
-    "playtime"      : 100,
-    "artists"       : 4,
-    "albums"        : 3,
-    "songs"         : 416,
-    "db_playtime"   : 169329,
-    "db_update"     : 1417789242
-}
-
-var status = { // DUMMY FOR NOW!
-    "volume"        : 85,
-    "repeat"        : 0,
-    "random"        : 0,
-    "single"        : 0,
-    "consume"       : 0,
-    "playlist"      : 4,
-    "playlistlength": 8,
-    "mixrampdb"     : 0.000000,
-    "state"         : 'pause',
-    "song"          : 2,
-    "songid"        : 3,
-    "time"          : '16:0',
-    "elapsed"       : 16.242,
-    "bitrate"       : 320,
-    "audio"         : '44100:24:2',
-    "nextsong"      : 3,
-    "nextsongid"    : 4
-}
-
-var playlistId = { // DUMMY FOR NOW!
-    "file"          : 'USB/Music/Example1.mp3',
-    "Last-Modified" : '2013-07-02T17:51:12Z',
-    "Date"          : 2013,
-    "Time"          : 3261,
-    "Pos"           : 0,
-    "Id"            : 9,
-    "file"          : 'USB/Music/Example2.mp3',
-    "Last-Modified" : '2014-08-19T09:03:52Z',
-    "Time"          : 2961,
-    "Pos"           : 1,
-    "Id"            : 10
-}
-
 // create server
 var protocolServer = net.createServer(function(socket) {
 	socket.setEncoding('utf8');
@@ -230,7 +188,7 @@ var protocolServer = net.createServer(function(socket) {
 	                            socket.write("OK\n");
 	                            break;
 	                    case command.PLAYLISTID :
-	                            socket.write(printPlaylistId());
+	                            socket.write(printArray(protocol.getPlaylistId()));
 	                            socket.write("OK\n");
 	                            break;
 		            case command.PREVIOUS:
@@ -262,11 +220,11 @@ var protocolServer = net.createServer(function(socket) {
 	                            socket.write("OK\n");
 	                            break;
 	                    case command.STATS :
-	                            socket.write(printStats());
+	                            socket.write(printArray(protocol.getStats()));
 	                            socket.write("OK\n");
 	                            break;
 	                    case command.STATUS :
-	                            socket.write(printStatus());
+	                            socket.write(printArray(protocol.getStatus()));
 	                            socket.write("OK\n");
 	                            break;
 	                    case command.STOP :
@@ -321,46 +279,13 @@ function sendSingleCommandToCore(command) {
 	});
 }
 
-// method to print a list of available commands (command.COMMANDS)
-function printCommandList() {
-    var output = "";
-    // for the length of command (nr of commands)
-    for(var index in command) {
-        // print command: 'command' [newline]
-        output += "command: " + command[index] + "\n";
-    }
-    return output;
-}
-
-// method to print the stats (command.STATS)
-function printStats() {
-    var output = "";
-    // for the length of stats (nr of attributes)
-    for(var index in stats) {
-        // print "stat: value"
-        output += index + ": " + stats[index] + "\n";
-    }
-    return output;
-}
-
-// method to print the status (command.STATuS)
-function printStatus() {
+// method to print any array that uses (key: value) layout
+function printArray(array) {
     var output = "";
     // for the length of statuss (nr of attributes)
-    for(var index in status) {
+    for(var index in array) {
         // print "stat: value"
-        output += index + ": " + status[index] + "\n";
-    }
-    return output;
-}
-
-// method to print the playlist info (command.PLAYLISTID)
-function printPlaylistId() {
-    var output = "";
-    // for the length of statuss (nr of attributes)
-    for(var index in playlistId) {
-        // print "stat: value"
-        output += index + ": " + playlistId[index] + "\n";
+        output += index + ": " + array[index] + "\n";
     }
     return output;
 }
