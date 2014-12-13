@@ -164,7 +164,7 @@ var protocolServer = net.createServer(function(socket) {
 	                        socket.write("OK\n");
 	                        break;
 	                    case command.COMMANDS :
-	                            socket.write(printCommandList(socket));
+	                            socket.write(printCommandList());
 	                            socket.write("OK\n");
 	                            break;
 	                    case command.CROSSFADE :
@@ -262,6 +262,17 @@ protocolServer.on('error', function(err) {
 	}
 });
 // start the server
+
+// method to print a list of available commands (command.COMMANDS)
+function printCommandList() {
+    var output = "";
+    // for the length of command (nr of commands)
+    for(var index in command) {
+        // print command: 'command' [newline]
+        output += "command: " + command[index] + "\n";
+    }
+    return output;
+}
 
 // method to forward commands that dont need a response
 function sendSingleCommandToCore(command) {
