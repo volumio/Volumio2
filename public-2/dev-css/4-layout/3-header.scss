@@ -1,0 +1,41 @@
+@import "_settings";
+
+*
+{
+  box-sizing: border-box;
+}
+
+body,
+html
+{
+  height:  100%;
+  width:  100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ol,
+ul,
+li,
+p,
+table
+{
+  padding: 0;
+  margin:  0;
+}
+
+img,
+table
+{
+  border:  none;
+}
+
+body
+{
+  font-family: $volumio-ui-text-body;
+  line-height:  $volumio-ui-line-height-body;
+}
