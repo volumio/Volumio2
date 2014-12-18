@@ -6,12 +6,7 @@
 }
 
 body,
-html
-{
-  height:  100%;
-  width:  100%;
-}
-
+html,
 h1,
 h2,
 h3,
@@ -34,8 +29,20 @@ table
   border:  none;
 }
 
+
+body,
+html
+{
+  height:  100%;
+  overflow-x:  hidden;
+  width:  100%;
+}
+
 body
 {
+  background:  $volumio-ui-body-background;
+  color:  $volumio-ui-body-color;
   font-family: $volumio-ui-text-body;
   line-height:  $volumio-ui-line-height-body;
+  padding-top: $volumio-ui-sticky-header-height;
 }

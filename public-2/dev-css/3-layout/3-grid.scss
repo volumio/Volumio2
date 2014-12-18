@@ -1,0 +1,60 @@
+@import "_settings";
+
+@mixin grid-columns($classname-prefix, $columns, $property: width) {
+  @for $i from 1 through $columns
+  {
+    .#{$classname-prefix}-#{$i}
+    {
+      @content;
+      #{$property}: percentage($i/$columns);
+    }
+  }
+}
+
+.grid-row
+{
+  &:before,
+  &:after
+  {
+    content: " ";
+    display: table;
+  }
+
+  &:after
+  {
+    clear: both;
+  }
+}
+
+.grid
+{
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.grid-col
+{
+  display: block;
+  float: left;
+  padding: 0 $volumio-ui-grid-gutter;
+  position: relative;
+}
+
+// smart watch grid columns, it's smartwatch first, so this doesn't need a media query.
+@include grid-columns(grid-col-smartwatch, $grid-cols-smartwatch);
+
+// mobile grid columns
+@include respond-from(mobile)
+{
+  @include grid-columns(grid-col-mobile, $grid-cols-mobile);
+}
+
+@include respond-from(tablet)
+{
+  @include grid-columns(grid-col-tablet, $grid-cols-tablet);
+}
+
+@include respond-from(desktop)
+{
+    @include grid-columns(grid-col-desktop, $grid-cols-desktop);
+}

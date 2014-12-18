@@ -1,0 +1,32 @@
+@import "_settings";
+
+@if $development == true
+{
+  body:after
+  {
+    background: #000;
+    display: block;
+    padding: 3px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 100000;
+
+    @include respond-to(smartwatch)
+    {
+      content: "smartwatch";
+    }
+    @include respond-to(mobile)
+    {
+      content: "mobile";
+    }
+    @include respond-to(tablet)
+    {
+      content: "tablet";
+    }
+    @include respond-to(desktop)
+    {
+      content: "desktop";
+    }
+  }
+}
