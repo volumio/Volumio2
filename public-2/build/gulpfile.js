@@ -15,7 +15,7 @@ var
 
 	// gulp
 	gulp = require("gulp"),
-	strip = require('gulp-strip-comments'),
+	strip = require("gulp-strip-comments"),
 	gutil = require("gulp-util"),
 	concat = require("gulp-concat"),
 	bust = require("gulp-buster"),
@@ -35,7 +35,7 @@ var
 
 	mainPath = "/WebUI-NODE/public-2",
 
-// declarations, with trailing slash
+	// declarations, with trailing slash
 	paths = {
 		clientCode:              mainPath,
 		css:                     mainPath + "/css",
@@ -80,7 +80,7 @@ var getFolders = function(dir)
 		.filter(function (file) {
 			return fs.statSync(path.join(dir, file)).isDirectory();
 		});
-}
+};
 
 
 /**** CSS file automation ****/
@@ -174,7 +174,6 @@ gulp.task("compile-css-production", ["clean-css"], function(){
  */
 gulp.task("compile-cssgroup-production", ["clean-css", "compile-css-production"], function ()
 {
-
 	var folders = getFolders(paths.cssGroup),
 		tasks = folders.map(function (folder) {
 			return gulp.src(path.join(paths.cssGroup, folder, "/**/*.css"))
@@ -214,9 +213,9 @@ gulp.task("watch-sass-rebuild-incremental", function () {
 		.on("change", function (evt)
 		{
 			console.log("[watcher] Incremental rebuild - File " + evt.path + " was " + evt.type + ", compiling...");
-		})
+		});
 });
-gulp.task("watch-sass-rebuild-total", function () {
+gulp.task("watch-sass-rebuild-total", ["compile-css-production"], function () {
 
 	var directories = [
 		paths.cssDevelopment + "/**/_*.scss"
@@ -226,7 +225,7 @@ gulp.task("watch-sass-rebuild-total", function () {
 		.on("change", function (evt)
 		{
 			console.log("[watcher] Total rebuilding - File " + evt.path + " was " + evt.type + ", compiling...");
-		})
+		});
 });
 
 /**** JavaScript file autimation ****/
@@ -270,7 +269,7 @@ gulp.task("compile-jsgroup-production", ["compile-js-production"], function ()
 					// log the errors to gulp-utils.
 					gutil.log(err);
 					process.exit(1);
-				})
+				});
 		});
 
 	return merge(tasks);

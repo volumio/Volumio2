@@ -1,0 +1,129 @@
+$outputWithMediaQueries: true !default;
+
+@mixin breakpoint($size, $respondOnlyToSize: false)
+{
+  @include grid-size($size);
+
+  @if
+    $size == smartwatch or
+    $size == mobile or
+    $size == mobile-landscape or
+    $size == tablet or
+    $size == tablet-portrait or
+    $size == tablet-landscape or
+    $size == desktop
+  {
+    @if $outputWithMediaQueries == true
+    {
+      @if $size == smartwatch and $respondOnlyToSize == true
+      {
+        @media only screen and (max-width: 280px)
+        {
+          @content;
+        }
+      }
+      @else if $size == mobile and $respondOnlyToSize == true
+      {
+        @media only screen and (min-width: 281px) and (max-width: 667px)
+        {
+          @content;
+        }
+      }
+      @else if $size == mobile-landscape and $respondOnlyToSize == true
+      {
+        @media only screen and (min-width: 480px) and (max-width: 667px)
+        {
+          @content;
+        }
+      }
+      @else if $size == tablet
+      {
+        @if $respondOnlyToSize == true
+        {
+          @media only screen and (min-width: 668px)
+          {
+            @content;
+          }
+        }
+        @else
+        {
+          @media only screen and (min-width: 668px) and (max-width: 1023px)
+          {
+            @content;
+          }
+        }
+      }
+      @else if $size == tablet-portrait
+      {
+        @if $respondOnlyToSize == true
+        {
+          @media only screen and (min-width: 668px) and (orientation: portrait)
+          {
+            @content;
+          }
+        }
+        @else
+        {
+          @media only screen and (min-width: 668px) and (max-width: 1023px) and (orientation: portrait)
+          {
+            @content;
+          }
+        }
+      }
+      @else if $size == tablet-landscape
+      {
+        @if $respondOnlyToSize == true
+        {
+          @media only screen and (min-width: 668px) and (orientation: landscape)
+          {
+            @content;
+          }
+        }
+        @else
+        {
+          @media only screen and (min-width: 668px) and (max-width: 1023px) and (orientation: landscape)
+          {
+            @content;
+          }
+        }
+      }
+      @else if $size == desktop and $respondOnlyToSize == true
+      {
+        @media only screen and (min-width: 1024px)
+        {
+          @content;
+        }
+      }
+      @else
+      {
+        @warn "There is no mediaquery defined for size `#{$size}`.";
+      }
+    }
+    @else if $respondOnlyToSize == true
+    {
+      @content;
+    }
+  }
+  @else
+  {
+    @warn "There is no mediaquery defined for size `#{$size}`.";
+  }
+
+  @include grid-size(smartwatch);
+}
+
+@mixin respond-from($size)
+{
+  @include breakpoint($size, true)
+  {
+    @content;
+  };
+}
+
+@mixin respond-to($size)
+{
+  @include breakpoint($size, true)
+  {
+    @content;
+  };
+}

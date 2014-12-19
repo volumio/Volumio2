@@ -1,0 +1,8 @@
+@mixin render-by-gpu
+{
+  /*
+  * Renders the element by the GPU, forcing it to another layer so when say; a fixed element will not be rendered by the browser every time the user is scrolling.
+  * Don't over use !!! Prefer using it only on 'sticky-elements'
+  */
+  @include transform(translatez(0));
+}
