@@ -223,8 +223,10 @@ var protocolServer = net.createServer(function(socket) {
 	                            socket.write("OK\n");
 	                            break;
 	                    case command.PLAYLISTID :
-	                            socket.write(printArray(protocol.getPlaylistId()));
-	                            socket.write("OK\n");
+	                            // Temporary Disabled and HardCoded
+	                    		//socket.write(printArray(protocol.getPlaylistId()));
+	                            //socket.write("OK\n");
+	                    		socket.write("ACK [50@0] {playlistid} No such song\n");
 	                            break;
 		            case command.PREVIOUS:
 	                            sendSingleCommandToCore(sCommand, sParam);
