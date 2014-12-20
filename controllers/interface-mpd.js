@@ -167,6 +167,9 @@ var protocolServer = net.createServer(function(socket) {
 	                            socket.write(printCommandList());
 	                            socket.write("OK\n");
 	                            break;
+	                    case command.NOTCOMMANDS :
+	                            socket.write("OK\n");
+	                            break;        
 	                    case command.CROSSFADE :
 	                            sendSingleCommandToCore(sCommand, sParam);
 	                            socket.write("OK\n");
