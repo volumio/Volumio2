@@ -112,6 +112,23 @@ const command = { // List of all MPD commands
     VOLUME          : 'volume'    
 };
 
+const tagtypes = { // List of all MPD tagtypes
+		ARTIST                     : 'Artist',
+		ARTISTSORT                 : 'ArtistSort',
+		ALBUM                      : 'Album',
+		ALBUMARTIST                : 'AlbumArtist',
+		ALBUMTITLE                 : 'AlbumTitle',
+		TITLE                      : 'Title',
+		TRACK                      : 'Track',
+		NAME                       : 'Name',
+		GENRE                      : 'Genre',
+		DATE                       : 'Date',
+		PERFORMER                  : 'Performer',
+		DISC                       : 'Disc',
+		MUSICBRAINZ_ARTIS          : 'MUSICBRAINZ_ARTISTID',
+		MUSICBRAINZ_ALBUMARTISTID  : 'MUSICBRAINZ_ALBUMARTISTID',
+		MUSICBRAINZ_TRACKID        : 'MUSICBRAINZ_TRACKID',
+};
 // create server
 var protocolServer = net.createServer(function(socket) {
 	socket.setEncoding('utf8');
@@ -170,7 +187,11 @@ var protocolServer = net.createServer(function(socket) {
 	                            break;
 	                    case command.NOTCOMMANDS :
 	                            socket.write("OK\n");
-	                            break;        
+	                            break;  
+	                    case command.TAGTYPES :
+                            	socket.write(printTagTypes());
+                            	socket.write("OK\n");
+                            	break;        
 	                    case command.CROSSFADE :
 	                            sendSingleCommandToCore(sCommand, sParam);
 	                            socket.write("OK\n");
@@ -274,6 +295,15 @@ function printCommandList() {
     for(var index in command) {
         // print command: 'command' [newline]
         output += "command: " + command[index] + "\n";
+    }
+    return output;
+}
+
+function printTagTypes() {
+    var output = "";
+    for(var index in tagtypes) {
+        // print tagtype: 'tagtype' [newline]
+        output += "tagtype: " + tagtypes[index] + "\n";
     }
     return output;
 }
