@@ -191,7 +191,14 @@ var protocolServer = net.createServer(function(socket) {
 	                    case command.TAGTYPES :
                             	socket.write(printTagTypes());
                             	socket.write("OK\n");
-                            	break;        
+                            	break;
+	                    case command.OUTPUTS :
+	                    // Hardcoded, but MUST be tied to system later	
+	                    	socket.write("outputid: 0\n");
+	                    	socket.write("outputname: Default\n");
+	                    	socket.write("outputenabled: 1\n");	                 
+                        	socket.write("OK\n");
+                        	break;    	
 	                    case command.CROSSFADE :
 	                            sendSingleCommandToCore(sCommand, sParam);
 	                            socket.write("OK\n");
