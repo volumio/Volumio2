@@ -129,6 +129,8 @@ const tagtypes = { // List of all MPD tagtypes
 		MUSICBRAINZ_ALBUMARTISTID  : 'MUSICBRAINZ_ALBUMARTISTID',
 		MUSICBRAINZ_TRACKID        : 'MUSICBRAINZ_TRACKID',
 };
+
+
 // create server
 var protocolServer = net.createServer(function(socket) {
 	socket.setEncoding('utf8');
@@ -228,7 +230,21 @@ var protocolServer = net.createServer(function(socket) {
 	                            //socket.write("OK\n");
 	                    		socket.write("ACK [50@0] {playlistid} No such song\n");
 	                            break;
-		            case command.PREVIOUS:
+	                    case command.URLHANDLERS:
+	                    	socket.write("handler: http://\n");
+	                    	socket.write("handler: mms://\n");
+	                    	socket.write("handler: mmsh://\n");
+	                    	socket.write("handler: mmst://\n");
+	                    	socket.write("handler: mmsu://\n");
+	                    	socket.write("handler: gopher://\n");
+	                    	socket.write("handler: rtp://\n");
+	                    	socket.write("handler: rtsp://\n");
+	                    	socket.write("handler: rtmp://\n");
+	                    	socket.write("handler: rtmpt://\n");
+	                    	socket.write("handler: rtmps://\n");
+	                    	socket.write("OK\n");
+                            break;        
+	                    case command.PREVIOUS:
 	                            sendSingleCommandToCore(sCommand, sParam);
 	                            socket.write("OK\n");
 	                            break;
