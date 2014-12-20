@@ -23,6 +23,7 @@ const command = { // List of all MPD commands
     CLEARTAGID      : 'cleartagid',
     CLOSE           : 'close',
     COMMANDS        : 'commands',
+    NOTCOMMANDS     : 'notcommands',
     CONFIG          : 'config',
     CONSTUME        : 'consume',
     COUNT           : 'count',
