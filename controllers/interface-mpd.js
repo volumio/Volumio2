@@ -54,7 +54,7 @@ const command = { // List of all MPD commands
     MOVE            : 'move',
     MOVEID          : 'moveid',
     NEXT            : 'next',
-    NOTCOMMANDs     : 'notcommands',
+    NOIDLE          : 'noidle',
     OUTPUTS         : 'outputs',
     PASSWORD        : 'password',
     PAUSE           : 'pause',
@@ -198,7 +198,10 @@ var protocolServer = net.createServer(function(socket) {
 	                    	socket.write("outputname: Default\n");
 	                    	socket.write("outputenabled: 1\n");	                 
                         	socket.write("OK\n");
-                        	break;    	
+                        	break;    
+	                    case command.NOIDLE :
+                            socket.write("OK\n");
+                            break;	
 	                    case command.CROSSFADE :
 	                            sendSingleCommandToCore(sCommand, sParam);
 	                            socket.write("OK\n");
