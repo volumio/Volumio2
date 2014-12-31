@@ -1,13 +1,20 @@
 var socket = io();
 
 document.getElementById('button-mpdplay').onclick = function() {
-	socket.emit('command', 'mpd/currentsong');
+	socket.emit('command', 'mpd/play');
 }
 
 document.getElementById('button-mpdstop').onclick = function() {
-	socket.emit('command', 'mpd/status');
+	socket.emit('command', 'mpd/stop');
 }
 
+document.getElementById('button-mpdcurrentsong').onclick = function() {
+	socket.emit('command', 'mpd/currentsong');
+}
+
+document.getElementById('button-mpdstatus').onclick = function() {
+	socket.emit('command', 'mpd/status');
+}
 document.getElementById('button-mpdnext').onclick = function() {
 	socket.emit('command', 'mpd/next');
 }
