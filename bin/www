@@ -8,12 +8,12 @@ var mpdPort = 6600;
 var mpdHost = 'localhost';
 var connMpdCommand = net.createConnection(mpdPort,mpdHost); // Socket to send commands and receive track listings
 // initialize our mpd daemon controller. This module implements all calls to the mpd daemon.
-var mpdDirectController = require('../controllers/mpd-daemon-controller');
+var mpdDirectController = require('../controllers/controller-mpd');
 mpdDirectController.init(mpdPort,mpdHost);
 
 // initialize the volumio core. All the webUI and all third party interfaces will pass through the core module. In this way
 // when we add our own DB we can have the CORE to serve the various interfaces indipendent from the audio type  
-var volumioCore = require('../controllers/core-volumio-services');
+var volumioCore = require('../controllers/core-commandrouter');
 // here we tell wich implementations the core will use to talk with MPD
 volumioCore.setMpdDaemonController(mpdDirectController);
 // other setter will be added and implemented to talk with spop etc.
