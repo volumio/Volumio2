@@ -2,21 +2,20 @@
 <html>
   <head>
     <title><%= title %></title>
-   
-    
+
     <!-- Bootstrap -->
-    <link href="./stylesheets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    
-   
-    
-    
+    <!-- <link href="./stylesheets/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+
   </head>
   <body>
-  	
-  		
-  	
-  
-		<h2>MPD Commands</h2>
+		<h3>Volumio Commands</h3>
+		<button id='button-volumioplay'>Play</button>
+		<button id='button-volumiopause'>Pause</button>
+		<button id='button-volumiostop'>Stop</button>
+		<button id='button-volumioprev'>Previous Track</button>
+		<button id='button-volumionext'>Next Track</button>
+
+		<h3>MPD Commands</h3>
 		<button id='button-mpdprev'>Previous Track</button>
 		<button id='button-mpdplay'>Play</button>
 		<button id='button-mpdstop'>Stop</button>
@@ -24,35 +23,31 @@
 		<button id='button-mpdcurrentsong'>Current Song</button>
 		<button id='button-mpdstatus'>Status</button>
 
-		<h2>Spop Commands</h2>
+		<h3>Spop Commands</h3>
 		<button id='button-spopprev'>Previous Track</button>
 		<button id='button-spopplay'>Play</button>
 		<button id='button-spopstop'>Stop</button>
 		<button id='button-spopnext'>Next Track</button>
 
-		<h2>Console</h2>
+		<h3>Console</h3>
 		<button id='button-clearconsole'>Clear</button>
-		<ul id='console'></ul>
+		<div id='div-console' style='border: 1px solid black; height: 300px; overflow-y: scroll;'>
+			<ul id='console'></ul>
+		</div>
 
+		<h3>Play Queue</h3>
+		<ol id='playqueue'></ul>
 		
-		
-		
-		
-
-		
-		
-		<script src="./scripts/assets/jquery.1.11.1.min.js"></script>
+		<!-- <script src="./scripts/assets/jquery.1.11.1.min.js"></script> -->
   		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
-		<script src="./scripts/assets/angular.min.js"></script>
-		<script src="./scripts/volumio/index-socketio-controller.js"></script>
-		<script src="./scripts/assets/bootstrap.min.js"></script>
-		
-		<script src="./scripts/assets/ui-bootstrap-custom-0.12.0.min.js"></script>
-		<script src="./scripts/assets/ui-bootstrap-custom-tpls-0.12.0.min.js"></script>
-		
-		
-		
-		
+		<!-- <script src="./scripts/assets/angular.min.js"></script> -->
 
+		<script src="./scripts/volumio/index-socketio-controller.js"></script>
+
+		<!-- <script src="./scripts/assets/bootstrap.min.js"></script>		
+		<script src="./scripts/assets/ui-bootstrap-custom-0.12.0.min.js"></script>
+		<script src="./scripts/assets/ui-bootstrap-custom-tpls-0.12.0.min.js"></script> -->
+		
 	</body>
+
 </html>

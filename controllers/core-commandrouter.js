@@ -1,23 +1,56 @@
-// author: HoochDeveloper
+// Define the CoreCommandRouter class
+module.exports = CoreCommandRouter;
+function CoreCommandRouter (arrayInterfaces, CorePlayQueue) {
 
-// this module will handle all the interfaces request, here will be set all the implementations to talk with the services.
+	// Start event listeners for each client interface
+	for (i = 0; i < arrayInterfaces.length; i++) {
+		arrayInterfaces[i].on('clientCommand', handleClientCommand);
 
-// Daemon Controller Implementation for MPD
-var mpdDaemonController = null;
-// Daemon Controller Implementation for SPOP
-var spopDaemonControlle = null;
+	}
 
-// Updated method signature, now this one require the command, some paramaters and the callBack in order to handle the from the caller the asynchronous result
-// of the execution
-function executeCommand(command,parametes,callBack){ 
-	console.log('Volumio Core - Executing MPD command ' + command);
-	mpdDaemonController.sendCommand(command,callBack);
+	// Define the command routing table for client commands
+	function handleClientCommand (clientCommand) {
+
+		// Play command
+		if (clientCommand.command === 'volumioPlay') {
+			CorePlayQueue.play(clientCommand.promise);
+
+		// Pause command
+		} else if (clientCommand.command === 'volumioPause') {
+			CorePlayQueue.pause(clientCommand.promise);
+
+		// Stop command
+		} else if (clientCommand.command === 'volumioStop') {
+			CorePlayQueue.stop(clientCommand.promise);
+
+		// Next track command
+		} else if (clientCommand.command === 'volumioNext') {
+			CorePlayQueue.next(clientCommand.promise);
+
+		// Previous track command
+		} else if (clientCommand.command === 'volumioPrevious') {
+			CorePlayQueue.previous(clientCommand.promise);
+
+		// Get state command
+		} else if (clientCommand.command === 'volumioGetState') {
+			CorePlayQueue.getState(clientCommand.promise);
+
+		// Get queue command
+		} else if (clientCommand.command === 'volumioGetQueue') {
+			CorePlayQueue.getQueue(clientCommand.promise);
+
+		// Otherwise the command was not recognized
+		} else {
+			clientCommand.promise.reject("command not recognized");
+
+		}
+
+	}
+
+	// Define the command routing table for broadcasted updates from core services
+	function handleBroadcastUpdate () {
+
+	}
+
 }
 
-// setter for the MPD Daemon Controller Implementation
-function setMpdDaemonController(setMpdDaemonController){
-	mpdDaemonController = setMpdDaemonController;
-}
-
-module.exports.setMpdDaemonController = setMpdDaemonController;
-module.exports.executeCmd = executeCommand;

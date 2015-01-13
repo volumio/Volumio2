@@ -1,138 +1,166 @@
-var libNet = require('net');
-var server = libNet.createServer(onConnect);
+var libEvents = require('events');
+var libUtil = require('util');
+var libQ = require('q');
 
-function onConnect (connClient) {
-	// Announce the current status
-	connClient.write(JSON.stringify(stateCurrent) + '\n');
+// Define the CorePlayQueue class
+module.exports = CorePlayQueue;
+function CorePlayQueue () {
 
-	// When the client sends a command
-	connClient.on('data', function (input) {
-		var nNewlineLocation = input.toString().indexOf('\r\n');
-		var sCommand = input.toString().substring(0, nNewlineLocation);
+	// Initialize the player state
+	this.stateCurrent = {status: "stop", position: 0, seek: 0, track: {}};
 
-		// There are 3x possible playback states and 5x client commands which change that playback state, handle each transition case separately
-		// First, if the 'close' command is sent, skip the other cases
-		if (sCommand === "close") {
-			connClient.end();
+	// Init temporary play queue for testing purposes ---------------
+	this.arrayQueue = [
+		{track_interface: 'mpd', track_uri: 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC'},
+		{track_interface: 'spop', track_uri: 'spotify:track:6r509c4WvHaH1OctmcLzNv'}
 
-		// Current status is stopped
-		} else if (stateCurrent.status === 'stop') {
-			// Play command sent
-			if (sCommand === 'play') {
-				stateCurrent.status = 'play';
-				stateCurrent.track = arrayQueue[stateCurrent.position];
-				stateCurrent.seek = 0;
+	];
 
-			// Next command sent
-			} else if (sCommand === 'next') {
-				if (stateCurrent.position < arrayQueue.length - 1) {
-					stateCurrent.position++;
-					stateCurrent.track = arrayQueue[stateCurrent.position];
+	this.stateCurrent.position = 0;
+	this.stateCurrent.status = 'stop';
+	this.stateCurrent.seek = 0;
 
-				}
+	if (this.arrayQueue.length > 0) {
+		this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
 
-			// Previous command sent
-			} else if (sCommand === 'previous') {
-				if (stateCurrent.position > 0) {
-					stateCurrent.position--;
-					stateCurrent.track = arrayQueue[stateCurrent.position];
+	}
+	// --------------------------------------------------------------
 
-				}
-
-			}
-
-		// Current status is playing
-		} else if (stateCurrent.status === 'play') {
-			// Stop command sent
-			if(sCommand === 'stop') {
-				stateCurrent.status = 'stop';
-				stateCurrent.seek = 0;
-
-			// Next command sent
-			} else if (sCommand === 'next') {
-				if (stateCurrent.position < arrayQueue.length - 1) {
-					stateCurrent.position++;
-					stateCurrent.track = arrayQueue[stateCurrent.position];
-					stateCurrent.seek = 0;
-
-				}
-
-			// Previous command sent
-			} else if (sCommand === 'previous') {
-				if (stateCurrent.position > 0) {
-					stateCurrent.position--;
-					stateCurrent.track = arrayQueue[stateCurrent.position];
-					stateCurrent.seek = 0;
-
-				}
-
-			// Pause command sent
-			} else if (sCommand === 'pause') {
-				stateCurrent.status = 'pause';
-				// <- update seek pos here
-
-			}
-
-		// Current status is paused
-		} else if (stateCurrent.status === 'pause') {
-			// Play command sent
-			if (sCommand === 'play') {
-				stateCurrent.status = 'play';
-
-			// Stop command sent
-			} else if(sCommand === 'stop') {
-				stateCurrent.status = 'stop';
-				stateCurrent.seek = 0;
-
-			// Next command sent
-			} else if (sCommand === 'next') {
-				if (stateCurrent.position < arrayQueue.length - 1) {
-					stateCurrent.position++;
-					stateCurrent.track = arrayQueue[stateCurrent.position];
-
-				}
-
-				stateCurrent.status = 'play';
-				stateCurrent.seek = 0;
-
-			// Previous command sent
-			} else if (sCommand === 'previous') {
-				if (stateCurrent.position > 0) {
-					stateCurrent.position--;
-					stateCurrent.track = arrayQueue[stateCurrent.position];
-
-				}
-
-				stateCurrent.status = 'play';
-				stateCurrent.seek = 0;
-
-			}
-
-		}
-
-		connClient.write(JSON.stringify(stateCurrent) + '\n');
-
-	});
+	// Inherit some default objects from the EventEmitter class
+	libEvents.EventEmitter.call(this);
 
 }
 
-// Server listens for commands on port 3002
-server.listen(3002);
+// Let InterfaceWebUI inherit the methods of the EventEmitter class, such as 'emit'
+libUtil.inherits(CorePlayQueue, libEvents.EventEmitter);
 
-// Initialize the player state
-var stateCurrent = {status: "stop", position: 0, seek: 0, track: {}}; // Current state of the player
-var arrayQueue = [
-	{track_interface: 'mpd', track_uri: 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC'},
-	{track_interface: 'spop', track_uri: 'spotify:track:6r509c4WvHaH1OctmcLzNv'}
+// Public function to command the playback state machine
+// There are 3x possible playback states and 5x client commands which change that playback state, handle each transition case separately
 
-];
+CorePlayQueue.prototype.play = function (promise) {
+	if (this.stateCurrent.status === 'stop') {
+		this.stateCurrent.status = 'play';
+		this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+		this.stateCurrent.seek = 0;
 
-stateCurrent.position = 0;
-stateCurrent.status = 'stop';
-stateCurrent.seek = 0;
+	} else if (stateCurrent.status === 'pause') {
+		this.stateCurrent.status = 'play';
 
-if (arrayQueue.length > 0) {
-	stateCurrent.track = arrayQueue[stateCurrent.position];
+	}
+
+	promise.resolve({type: 'playerState', data: this.stateCurrent});
+
+}
+
+CorePlayQueue.prototype.next = function (promise) {
+	if (this.stateCurrent.status === 'stop') {
+		if (this.stateCurrent.position < this.arrayQueue.length - 1) {
+			this.stateCurrent.position++;
+			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+
+		}
+
+	} else if (this.stateCurrent.status === 'play') {
+		if (this.stateCurrent.position < this.arrayQueue.length - 1) {
+			this.stateCurrent.position++;
+			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+			this.stateCurrent.seek = 0;
+
+		}
+
+	} else if (this.stateCurrent.status === 'pause') {
+		if (this.stateCurrent.position < this.arrayQueue.length - 1) {
+			this.stateCurrent.position++;
+			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+
+		}
+
+		this.stateCurrent.status = 'play';
+		this.stateCurrent.seek = 0;
+
+	}
+
+	promise.resolve({type: 'playerState', data: this.stateCurrent});
+
+}
+
+CorePlayQueue.prototype.previous = function (promise) {
+	if (this.stateCurrent.status === 'stop') {
+		if (this.stateCurrent.position > 0) {
+			this.stateCurrent.position--;
+			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+
+		}
+
+	} else if (this.stateCurrent.status === 'play') {
+		if (this.stateCurrent.position > 0) {
+			this.stateCurrent.position--;
+			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+			this.stateCurrent.seek = 0;
+
+		}
+
+	} else if (this.stateCurrent.status === 'pause') {
+		if (this.stateCurrent.position > 0) {
+			this.stateCurrent.position--;
+			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+
+		}
+
+		this.stateCurrent.status = 'play';
+		this.stateCurrent.seek = 0;
+
+	}
+
+	promise.resolve({type: 'playerState', data: this.stateCurrent});
+
+}
+
+CorePlayQueue.prototype.stop = function (promise) {
+	if (this.stateCurrent.status === 'play') {
+		this.stateCurrent.status = 'stop';
+		this.stateCurrent.seek = 0;
+
+	} else if (this.stateCurrent.status === 'pause') {
+		this.stateCurrent.status = 'stop';
+		this.stateCurrent.seek = 0;
+
+	}
+
+	promise.resolve({type: 'playerState', data: this.stateCurrent});
+
+}
+
+CorePlayQueue.prototype.pause = function (promise) {
+	if (this.stateCurrent.status === 'play') {
+			this.stateCurrent.status = 'pause';
+			// <- update seek pos here
+
+	}
+
+	promise.resolve({type: 'playerState', data: this.stateCurrent});
+
+}
+
+// Get the current state of the player
+CorePlayQueue.prototype.getState = function (promise) {
+	promise.resolve({type: 'playerState', data: this.stateCurrent});
+
+}
+
+// Get the current contents of the play queue
+CorePlayQueue.prototype.getQueue = function (promise) {
+	promise.resolve({type: 'playerQueue', data: this.arrayQueue});
+
+}
+
+// Modify the current state of the player (ie from a status update from a music service controller)
+CorePlayQueue.prototype.modState = function (sField, sValue, promise) {
+
+}
+
+// Modify the contents of the queue (ie from client request)
+CorePlayQueue.prototype.modQueue = function (sCommand, sParameters, promise) {
 
 }
 

@@ -1,42 +1,67 @@
 var socket = io();
+var nPlayQueuePosition = 0;
+
+// Get the state upon load
+socket.emit('command', 'volumioGetState');
+socket.emit('command', 'volumioGetQueue');
+
+document.getElementById('button-volumioplay').onclick = function() {
+	socket.emit('command', 'volumioPlay');
+}
+
+document.getElementById('button-volumiopause').onclick = function() {
+	socket.emit('command', 'volumioPause');
+}
+
+document.getElementById('button-volumiostop').onclick = function() {
+	socket.emit('command', 'volumioStop');
+}
+
+document.getElementById('button-volumioprev').onclick = function() {
+	socket.emit('command', 'volumioPrevious');
+}
+
+document.getElementById('button-volumionext').onclick = function() {
+	socket.emit('command', 'volumioNext');
+}
 
 document.getElementById('button-mpdplay').onclick = function() {
-	socket.emit('command', 'mpd/play');
+	socket.emit('command', 'mpdPlay');
 }
 
 document.getElementById('button-mpdstop').onclick = function() {
-	socket.emit('command', 'mpd/stop');
+	socket.emit('command', 'mpdStop');
 }
 
 document.getElementById('button-mpdcurrentsong').onclick = function() {
-	socket.emit('command', 'mpd/currentsong');
+	socket.emit('command', 'mpdCurrentSong');
 }
 
 document.getElementById('button-mpdstatus').onclick = function() {
-	socket.emit('command', 'mpd/status');
+	socket.emit('command', 'mpdStatus');
 }
 document.getElementById('button-mpdnext').onclick = function() {
-	socket.emit('command', 'mpd/next');
+	socket.emit('command', 'mpdNext');
 }
 
 document.getElementById('button-mpdprev').onclick = function() {
-	socket.emit('command', 'mpd/previous');
+	socket.emit('command', 'mpdPrevious');
 }
 
 document.getElementById('button-spopplay').onclick = function() {
-	socket.emit('command', 'spop/play');
+	socket.emit('command', 'spopPlay');
 }
 
 document.getElementById('button-spopstop').onclick = function() {
-	socket.emit('command', 'spop/stop');
+	socket.emit('command', 'spopStop');
 }
 
 document.getElementById('button-spopnext').onclick = function() {
-	socket.emit('command', 'spop/next');
+	socket.emit('command', 'spopNext');
 }
 
 document.getElementById('button-spopprev').onclick = function() {
-	socket.emit('command', 'spop/previous');
+	socket.emit('command', 'spopPrevious');
 }
 
 document.getElementById('button-clearconsole').onclick = function() {
@@ -48,11 +73,34 @@ document.getElementById('button-clearconsole').onclick = function() {
 
 }
 
-socket.on('consoleMessage', function(message){
-	var nodeListItem = document.createElement("LI");
+socket.on('consoleMessage', function(message) {
+	var nodeListItem = document.createElement('LI');
 	var nodeText = document.createTextNode(message);
 
 	nodeListItem.appendChild(nodeText);
 	document.getElementById('console').appendChild(nodeListItem);
+
+	var divConsole = document.getElementById('div-console');
+	divConsole.scrollTop = divConsole.scrollHeight;
+
+});
+
+socket.on('updateQueue', function (arrayQueue) {
+	var nodePlayQueue = document.getElementById('playqueue');
+
+	while (nodePlayQueue.firstChild) {
+		nodePlayQueue.removeChild(nodePlayQueue.firstChild);
+	}
+
+	var nodeListItem = null;
+	var nodeText = null;
+	for (i = 0; i < arrayQueue.length; i++) {
+		nodeListItem = document.createElement('LI');
+		nodeText = document.createTextNode(JSON.stringify(arrayQueue[i]));
+
+		nodeListItem.appendChild(nodeText);
+		document.getElementById('playqueue').appendChild(nodeListItem);
+
+	}
 
 });
