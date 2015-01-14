@@ -66,7 +66,7 @@ function InterfaceWebUI (server) {
 
 }
 
-// Let InterfaceWebUI inherit the methods of the EventEmitter class, such as 'emit'
+// Let this class inherit the methods of the EventEmitter class, such as 'emit'
 libUtil.inherits(InterfaceWebUI, libEvents.EventEmitter);
 
 // Receive broadcasted updates from CoreCommandRouter and broadcast to all connected clients

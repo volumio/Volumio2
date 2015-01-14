@@ -1,6 +1,9 @@
 // Define the CoreCommandRouter class
+// This class constructor links a bunch of external handler functions to external listeners.
+// Since this class does not have properties or methods, you can potentially destroy the object
+// right after you instantiate it without any loss of functionality.
 module.exports = CoreCommandRouter;
-function CoreCommandRouter (arrayInterfaces, CorePlayQueue) {
+function CoreCommandRouter (arrayInterfaces, CorePlayQueue, ControllerMpd) {
 
 	// Start event listeners for each client interface
 	for (i = 0; i < arrayInterfaces.length; i++) {
@@ -39,9 +42,17 @@ function CoreCommandRouter (arrayInterfaces, CorePlayQueue) {
 		} else if (clientCommand.command === 'volumioGetQueue') {
 			CorePlayQueue.getQueue(clientCommand.promise);
 
+		// MPD Play command
+		} else if (clientCommand.command === 'mpdPlay') {
+			ControllerMpd.Play(clientCommand.promise);
+
+		// MPD Stop command
+		} else if (clientCommand.command === 'mpdStop') {
+			ControllerMpd.Stop(clientCommand.promise);
+
 		// Otherwise the command was not recognized
 		} else {
-			clientCommand.promise.reject("command not recognized");
+			clientCommand.promise.reject("No handler associated with command " + "\"" + clientCommand.command + "\"");
 
 		}
 

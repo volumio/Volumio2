@@ -4,10 +4,9 @@
 // this will works as our main, all the services and configuration should be set here
 
 // creating connection to the MPD daemon
-var mpdPort = 6600;
-var mpdHost = 'localhost';
-var mpdDirectController = require('../controllers/controller-mpd');
-mpdDirectController.init(mpdPort,mpdHost);
+var nMpdPort = 6600;
+var nMpdHost = 'localhost';
+var ControllerMpd = new (require('../controllers/controller-mpd'))(nMpdPort, nMpdHost);
 
 /*
 // initializing MPD interfce. This will listen for all MPD third parties clients
@@ -24,11 +23,11 @@ var server = app.listen(app.get('port'), function() {
 	  console.log('Express server listening on port ' + server.address().port);
 });
 
-var InterfaceWebUI = new (require('../controllers/interface-webUI.js'))(server);
-var arrayInterfaces = [InterfaceWebUI];
+var InterfaceWebUi = new (require('../controllers/interface-webUI.js'))(server);
+var arrayInterfaces = [InterfaceWebUi];
 
 var CorePlayQueue = new (require('../controllers/core-playqueue'))();
 
-var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(arrayInterfaces, CorePlayQueue);
+var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(arrayInterfaces, CorePlayQueue, ControllerMpd);
 
 

@@ -31,7 +31,7 @@ function CorePlayQueue () {
 
 }
 
-// Let InterfaceWebUI inherit the methods of the EventEmitter class, such as 'emit'
+// Let this class inherit the methods of the EventEmitter class, such as 'emit'
 libUtil.inherits(CorePlayQueue, libEvents.EventEmitter);
 
 // Public function to command the playback state machine
@@ -48,6 +48,7 @@ CorePlayQueue.prototype.play = function (promise) {
 
 	}
 
+	// Temporary - Push this promise to the daemon controller to resolve instead
 	promise.resolve({type: 'playerState', data: this.stateCurrent});
 
 }
@@ -80,6 +81,7 @@ CorePlayQueue.prototype.next = function (promise) {
 
 	}
 
+	// Temporary - Push this promise to the daemon controller to resolve instead
 	promise.resolve({type: 'playerState', data: this.stateCurrent});
 
 }
@@ -112,6 +114,7 @@ CorePlayQueue.prototype.previous = function (promise) {
 
 	}
 
+	// Temporary - Push this promise to the daemon controller to resolve instead
 	promise.resolve({type: 'playerState', data: this.stateCurrent});
 
 }
@@ -127,6 +130,7 @@ CorePlayQueue.prototype.stop = function (promise) {
 
 	}
 
+	// Temporary - Push this promise to the daemon controller to resolve instead
 	promise.resolve({type: 'playerState', data: this.stateCurrent});
 
 }
@@ -138,6 +142,7 @@ CorePlayQueue.prototype.pause = function (promise) {
 
 	}
 
+	// Temporary - Push this promise to the daemon controller to resolve instead
 	promise.resolve({type: 'playerState', data: this.stateCurrent});
 
 }

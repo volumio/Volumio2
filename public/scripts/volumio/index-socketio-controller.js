@@ -2,66 +2,66 @@ var socket = io();
 var nPlayQueuePosition = 0;
 
 // Get the state upon load
-socket.emit('command', 'volumioGetState');
-socket.emit('command', 'volumioGetQueue');
+socket.emit('command', 'volumioGetState', '');
+socket.emit('command', 'volumioGetQueue', '');
 
 document.getElementById('button-volumioplay').onclick = function() {
-	socket.emit('command', 'volumioPlay');
+	socket.emit('command', 'volumioPlay', '');
 }
 
 document.getElementById('button-volumiopause').onclick = function() {
-	socket.emit('command', 'volumioPause');
+	socket.emit('command', 'volumioPause', '');
 }
 
 document.getElementById('button-volumiostop').onclick = function() {
-	socket.emit('command', 'volumioStop');
+	socket.emit('command', 'volumioStop', '');
 }
 
 document.getElementById('button-volumioprev').onclick = function() {
-	socket.emit('command', 'volumioPrevious');
+	socket.emit('command', 'volumioPrevious', '');
 }
 
 document.getElementById('button-volumionext').onclick = function() {
-	socket.emit('command', 'volumioNext');
+	socket.emit('command', 'volumioNext', '');
 }
 
 document.getElementById('button-mpdplay').onclick = function() {
-	socket.emit('command', 'mpdPlay');
+	socket.emit('command', 'mpdPlay', '');
 }
 
 document.getElementById('button-mpdstop').onclick = function() {
-	socket.emit('command', 'mpdStop');
+	socket.emit('command', 'mpdStop', '');
 }
 
 document.getElementById('button-mpdcurrentsong').onclick = function() {
-	socket.emit('command', 'mpdCurrentSong');
+	socket.emit('command', 'mpdCurrentSong', '');
 }
 
 document.getElementById('button-mpdstatus').onclick = function() {
-	socket.emit('command', 'mpdStatus');
+	socket.emit('command', 'mpdStatus', '');
 }
 document.getElementById('button-mpdnext').onclick = function() {
-	socket.emit('command', 'mpdNext');
+	socket.emit('command', 'mpdNext', '');
 }
 
 document.getElementById('button-mpdprev').onclick = function() {
-	socket.emit('command', 'mpdPrevious');
+	socket.emit('command', 'mpdPrevious', '');
 }
 
 document.getElementById('button-spopplay').onclick = function() {
-	socket.emit('command', 'spopPlay');
+	socket.emit('command', 'spopPlay', '');
 }
 
 document.getElementById('button-spopstop').onclick = function() {
-	socket.emit('command', 'spopStop');
+	socket.emit('command', 'spopStop', '');
 }
 
 document.getElementById('button-spopnext').onclick = function() {
-	socket.emit('command', 'spopNext');
+	socket.emit('command', 'spopNext', '');
 }
 
 document.getElementById('button-spopprev').onclick = function() {
-	socket.emit('command', 'spopPrevious');
+	socket.emit('command', 'spopPrevious', '');
 }
 
 document.getElementById('button-clearconsole').onclick = function() {
