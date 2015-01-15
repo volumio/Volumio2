@@ -2,66 +2,66 @@ var socket = io();
 var nPlayQueuePosition = 0;
 
 // Get the state upon load
-socket.emit('command', 'volumioGetState', '');
-socket.emit('command', 'volumioGetQueue', '');
+socket.emit('clientEvent', 'volumioGetState', '');
+socket.emit('clientEvent', 'volumioGetQueue', '');
 
 document.getElementById('button-volumioplay').onclick = function() {
-	socket.emit('command', 'volumioPlay', '');
+	socket.emit('clientEvent', 'volumioPlay', '');
 }
 
 document.getElementById('button-volumiopause').onclick = function() {
-	socket.emit('command', 'volumioPause', '');
+	socket.emit('clientEvent', 'volumioPause', '');
 }
 
 document.getElementById('button-volumiostop').onclick = function() {
-	socket.emit('command', 'volumioStop', '');
+	socket.emit('clientEvent', 'volumioStop', '');
 }
 
 document.getElementById('button-volumioprev').onclick = function() {
-	socket.emit('command', 'volumioPrevious', '');
+	socket.emit('clientEvent', 'volumioPrevious', '');
 }
 
 document.getElementById('button-volumionext').onclick = function() {
-	socket.emit('command', 'volumioNext', '');
+	socket.emit('clientEvent', 'volumioNext', '');
 }
 
 document.getElementById('button-mpdplay').onclick = function() {
-	socket.emit('command', 'mpdPlay', '');
+	socket.emit('clientEvent', 'mpdPlay', '');
 }
 
 document.getElementById('button-mpdstop').onclick = function() {
-	socket.emit('command', 'mpdStop', '');
+	socket.emit('clientEvent', 'mpdStop', '');
 }
 
 document.getElementById('button-mpdcurrentsong').onclick = function() {
-	socket.emit('command', 'mpdCurrentSong', '');
+	socket.emit('clientEvent', 'mpdCurrentSong', '');
 }
 
 document.getElementById('button-mpdstatus').onclick = function() {
-	socket.emit('command', 'mpdStatus', '');
+	socket.emit('clientEvent', 'mpdStatus', '');
 }
 document.getElementById('button-mpdnext').onclick = function() {
-	socket.emit('command', 'mpdNext', '');
+	socket.emit('clientEvent', 'mpdNext', '');
 }
 
 document.getElementById('button-mpdprev').onclick = function() {
-	socket.emit('command', 'mpdPrevious', '');
+	socket.emit('clientEvent', 'mpdPrevious', '');
 }
 
 document.getElementById('button-spopplay').onclick = function() {
-	socket.emit('command', 'spopPlay', '');
+	socket.emit('clientEvent', 'spopPlay', '');
 }
 
 document.getElementById('button-spopstop').onclick = function() {
-	socket.emit('command', 'spopStop', '');
+	socket.emit('clientEvent', 'spopStop', '');
 }
 
 document.getElementById('button-spopnext').onclick = function() {
-	socket.emit('command', 'spopNext', '');
+	socket.emit('clientEvent', 'spopNext', '');
 }
 
 document.getElementById('button-spopprev').onclick = function() {
-	socket.emit('command', 'spopPrevious', '');
+	socket.emit('clientEvent', 'spopPrevious', '');
 }
 
 document.getElementById('button-clearconsole').onclick = function() {
@@ -85,7 +85,7 @@ socket.on('consoleMessage', function(message) {
 
 });
 
-socket.on('updateQueue', function (arrayQueue) {
+socket.on('playerQueue', function (arrayQueue) {
 	var nodePlayQueue = document.getElementById('playqueue');
 
 	while (nodePlayQueue.firstChild) {

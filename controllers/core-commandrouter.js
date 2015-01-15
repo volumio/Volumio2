@@ -7,59 +7,83 @@ function CoreCommandRouter (arrayInterfaces, CorePlayQueue, ControllerMpd) {
 
 	// Start event listeners for each client interface
 	for (i = 0; i < arrayInterfaces.length; i++) {
-		arrayInterfaces[i].on('clientCommand', handleClientCommand);
+		arrayInterfaces[i].on('clientEvent', handleClientEvent);
 
 	}
 
+	// Start event listener for each service controller
+	ControllerMpd.on('daemonEvent', handleDaemonEvent);
+
 	// Define the command routing table for client commands
-	function handleClientCommand (clientCommand) {
+	function handleClientEvent (clientEvent) {
 
 		// Play command
-		if (clientCommand.command === 'volumioPlay') {
-			CorePlayQueue.play(clientCommand.promise);
+		if (clientEvent.type === 'volumioPlay') {
+			CorePlayQueue.play(clientEvent.promise);
 
 		// Pause command
-		} else if (clientCommand.command === 'volumioPause') {
-			CorePlayQueue.pause(clientCommand.promise);
+		} else if (clientEvent.type === 'volumioPause') {
+			CorePlayQueue.pause(clientEvent.promise);
 
 		// Stop command
-		} else if (clientCommand.command === 'volumioStop') {
-			CorePlayQueue.stop(clientCommand.promise);
+		} else if (clientEvent.type === 'volumioStop') {
+			CorePlayQueue.stop(clientEvent.promise);
 
 		// Next track command
-		} else if (clientCommand.command === 'volumioNext') {
-			CorePlayQueue.next(clientCommand.promise);
+		} else if (clientEvent.type === 'volumioNext') {
+			CorePlayQueue.next(clientEvent.promise);
 
 		// Previous track command
-		} else if (clientCommand.command === 'volumioPrevious') {
-			CorePlayQueue.previous(clientCommand.promise);
+		} else if (clientEvent.type === 'volumioPrevious') {
+			CorePlayQueue.previous(clientEvent.promise);
 
 		// Get state command
-		} else if (clientCommand.command === 'volumioGetState') {
-			CorePlayQueue.getState(clientCommand.promise);
+		} else if (clientEvent.type === 'volumioGetState') {
+			CorePlayQueue.getState(clientEvent.promise);
 
 		// Get queue command
-		} else if (clientCommand.command === 'volumioGetQueue') {
-			CorePlayQueue.getQueue(clientCommand.promise);
+		} else if (clientEvent.type === 'volumioGetQueue') {
+			CorePlayQueue.getQueue(clientEvent.promise);
 
 		// MPD Play command
-		} else if (clientCommand.command === 'mpdPlay') {
-			ControllerMpd.Play(clientCommand.promise);
+		} else if (clientEvent.type === 'mpdPlay') {
+			ControllerMpd.play(clientEvent.promise);
 
 		// MPD Stop command
-		} else if (clientCommand.command === 'mpdStop') {
-			ControllerMpd.Stop(clientCommand.promise);
+		} else if (clientEvent.type === 'mpdStop') {
+			ControllerMpd.stop(clientEvent.promise);
 
-		// Otherwise the command was not recognized
+		// Otherwise the event was not recognized
 		} else {
-			clientCommand.promise.reject("No handler associated with command " + "\"" + clientCommand.command + "\"");
+			if ('promise' in clientEvent) {
+				clientEvent.promise.reject("No handler associated with event " + "\"" + clientEvent.type + "\"");
+
+			}
 
 		}
 
 	}
 
-	// Define the command routing table for broadcasted updates from core services
-	function handleBroadcastUpdate () {
+	// Define the command routing table for broadcasted updates from daemons
+	function handleDaemonEvent (daemonEvent) {
+
+		// MPD state updated
+		if (daemonEvent.type === 'mpdState') {
+			for (i = 0; i < arrayInterfaces.length; i++) {
+
+				// Temporary - print the new state on client consoles
+				arrayInterfaces[i].consoleMessage('MPD State: ' + JSON.stringify(daemonEvent.data));
+
+			}
+
+		// Otherwise the event was not recognized
+		} else {
+			if ('promise' in daemonEvent) {
+				daemonEvent.promise.reject("No handler associated with event " + "\"" + clientEvent.type + "\"");
+
+			}
+
+		}
 
 	}
 

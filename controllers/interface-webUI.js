@@ -22,37 +22,26 @@ function InterfaceWebUI (server) {
 		connWebSocket.emit('consoleMessage', 'Websocket connected');
 
 		// When a client command is received over websocket
-		connWebSocket.on('command', function(sCommand, sParameters) {
+		connWebSocket.on('clientEvent', function(sCommand, sParameters) {
 
-			// Print an acknowledgement of the command to client console
+			// Print an acknowledgement of the command to client console for debugging purposes
 			connWebSocket.emit('consoleMessage', 'Command: ' + sCommand + ' ' + sParameters);
 
 			// Construct a promise to be fulfilled by the eventual command handler (this can potentially be done by the client itself)
 			var promisedResponse = libQ.defer();
 
 			// Emit the command for the coreCommandRouter to hear
-			this_.emit('clientCommand', {command: sCommand, parameters: sParameters, promise: promisedResponse});
+			this_.emit('clientEvent', {type: sCommand, data: sParameters, promise: promisedResponse});
 
 			// Listen for and handle the command response (this can also potentially be done on the client side)
 			promisedResponse.promise
 			.then (function (response) {
 
-				// Print reponse to client console
+				// Print reponse to client console for debugging purposes
 				connWebSocket.emit('consoleMessage','Response: ' + JSON.stringify(response));
 
-				// If a play queue is provided as a response
-				if (response.type === 'playerQueue') {
-
-					// Push the play queue to the requestor
-					connWebSocket.emit('updateQueue', response.data);
-
-				// If a player state is provided as a response
-				} else if (response.type === 'playerState') {
-
-					// Push the state to the requestor
-					connWebSocket.emit('updateState', response.data);
-
-				}
+				// Push the response to the client
+				connWebSocket.emit(response.type, response.data);
 
 			})
 			.catch (function (error) {
@@ -69,21 +58,26 @@ function InterfaceWebUI (server) {
 // Let this class inherit the methods of the EventEmitter class, such as 'emit'
 libUtil.inherits(InterfaceWebUI, libEvents.EventEmitter);
 
-// Receive broadcasted updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.broadcastUpdate = function (update) {
+// Receive console messages from CoreCommandRouter and broadcast to all connected clients
+InterfaceWebUI.prototype.consoleMessage = function (message) {
 
-	// If an updated play queue has been announced
-	if (update.type === 'playerQueue') {
+	// Push the message all clients
+	this.libSocketIO.emit('consoleMessage', message);
 
-		// Push the updated play queue to all clients
-		this.libSocketIO.emit('updateQueue', update.data);
+}
 
-	// If an updated player state has been announced
-	} else if (update.type === 'playerState') {
+// Receive player queue updates from CoreCommandRouter and broadcast to all connected clients
+InterfaceWebUI.prototype.playerQueue = function (queue) {
 
-		// Push the updated state to all clients
-		this.libSocketIO.emit('updateState', update.data);
+	// Push the updated queue to all clients
+	this.libSocketIO.emit('playerQueue', queue);
 
-	}
+}
+
+// Receive player state updates from CoreCommandRouter and broadcast to all connected clients
+InterfaceWebUI.prototype.playerState = function (state) {
+
+	// Push the updated queue to all clients
+	this.libSocketIO.emit('playerState', state);
 
 }

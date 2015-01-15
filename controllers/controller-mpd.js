@@ -12,8 +12,27 @@ function ControllerMpd (nPort, nHost) {
 	this.client = libMpd.connect({port: nPort,	host: nHost});
 	this.cmd = libMpd.cmd;
 
+	var this_ = this;
+
 	// Inherit some default objects from the EventEmitter class
 	libEvents.EventEmitter.call(this);
+
+	// Create a listener for playback status updates
+	this.client.on('system-player', function () {
+
+		// Get the updated state
+		this.sendCommand(libMpd.cmd("status", []), function (err, msg) {
+			if (err) throw err;
+
+			// Emit the updated state for the command router to hear
+			this_.emit('daemonEvent',
+				{type: 'mpdState', data: libMpd.parseKeyValueMessage(msg), promise: null}
+
+			);
+
+		});
+
+	});
 
 }
 
@@ -24,17 +43,25 @@ libUtil.inherits(ControllerMpd, libEvents.EventEmitter);
 ControllerMpd.prototype.sendSingleCommand2Mpd = function (command, commandCallback) {
 	// now the npm mpd module is used. the command callBack is passed from the caller, so it can handle the response in a proper way
 	// TODO evaluate of this approach is needed
-	this.client.sendCommand(cmd(command, []), commandCallback);
+	this.client.sendCommand(this.cmd(command, []), commandCallback);
 
 }
 
-ControllerMpd.prototype.Play = function (promise) {
+ControllerMpd.prototype.play = function (promise) {
 	this.client.sendCommand(this.cmd('play', []), promise.resolve({type: null, data: null}));
 
 }
 
-ControllerMpd.prototype.Stop = function (promise) {
+ControllerMpd.prototype.stop = function (promise) {
 	this.client.sendCommand(this.cmd('stop', []), promise.resolve({type: null, data: null}));
 
 }
 
+ControllerMpd.prototype.clearaddplay = function (promise, tracks) {
+	this.client.sendCommands([
+		this.cmd('clear', []),
+		this.cmd('add', tracks),
+		this.cmd('play', []),
+	], promise.resolve({type: null, data: null}));
+
+}
