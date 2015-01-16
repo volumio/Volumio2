@@ -79,7 +79,7 @@ function CoreCommandRouter (arrayInterfaces, CorePlayQueue, ControllerMpd) {
 		// Otherwise the event was not recognized
 		} else {
 			if ('promise' in daemonEvent) {
-				daemonEvent.promise.reject("No handler associated with event " + "\"" + clientEvent.type + "\"");
+				daemonEvent.promise.reject("No handler associated with event " + "\"" + daemonEvent.type + "\"");
 
 			}
 

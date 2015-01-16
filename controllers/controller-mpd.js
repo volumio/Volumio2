@@ -57,7 +57,7 @@ ControllerMpd.prototype.stop = function (promise) {
 
 }
 
-ControllerMpd.prototype.clearaddplay = function (promise, tracks) {
+ControllerMpd.prototype.clearAddPlay = function (tracks, promise) {
 	this.client.sendCommands([
 		this.cmd('clear', []),
 		this.cmd('add', tracks),

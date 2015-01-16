@@ -18,34 +18,25 @@ function InterfaceWebUI (server) {
 	// When a websocket connection is made
 	this.libSocketIO.on('connection', function(connWebSocket) {
 
-		// Print connection message to client console
-		connWebSocket.emit('consoleMessage', 'Websocket connected');
+		// When a client event is received over websocket
+		connWebSocket.on('clientEvent', function(sType, sData) {
 
-		// When a client command is received over websocket
-		connWebSocket.on('clientEvent', function(sCommand, sParameters) {
-
-			// Print an acknowledgement of the command to client console for debugging purposes
-			connWebSocket.emit('consoleMessage', 'Command: ' + sCommand + ' ' + sParameters);
-
-			// Construct a promise to be fulfilled by the eventual command handler (this can potentially be done by the client itself)
+			// Construct a promise for response to be fulfilled by the event handler (this can potentially be done by the client itself)
 			var promisedResponse = libQ.defer();
 
-			// Emit the command for the coreCommandRouter to hear
-			this_.emit('clientEvent', {type: sCommand, data: sParameters, promise: promisedResponse});
+			// Emit the event for the coreCommandRouter to hear
+			this_.emit('clientEvent', {type: sType, data: sData, promise: promisedResponse});
 
-			// Listen for and handle the command response (this can also potentially be done on the client side)
+			// Listen for and handle the event response (this can also potentially be done on the client side)
 			promisedResponse.promise
 			.then (function (response) {
-
-				// Print reponse to client console for debugging purposes
-				connWebSocket.emit('consoleMessage','Response: ' + JSON.stringify(response));
 
 				// Push the response to the client
 				connWebSocket.emit(response.type, response.data);
 
 			})
-			.catch (function (error) {
-				connWebSocket.emit('consoleMessage','Error: ' + error);
+			.catch (function (sError) {
+				connWebSocket.emit('errorResponse' + sError);
 
 			});
 

@@ -11,20 +11,16 @@ function CorePlayQueue () {
 
 	// Init temporary play queue for testing purposes ---------------
 	this.arrayQueue = [
-		{track_interface: 'mpd', track_uri: 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC'},
-		{track_interface: 'spop', track_uri: 'spotify:track:6r509c4WvHaH1OctmcLzNv'}
+		{service: 'mpd', uri: 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC'},
+		{service: 'spop', uri: 'spotify:track:6r509c4WvHaH1OctmcLzNv'}
 
 	];
-
-	this.stateCurrent.position = 0;
-	this.stateCurrent.status = 'stop';
-	this.stateCurrent.seek = 0;
+	// --------------------------------------------------------------
 
 	if (this.arrayQueue.length > 0) {
 		this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
 
 	}
-	// --------------------------------------------------------------
 
 	// Inherit some default objects from the EventEmitter class
 	libEvents.EventEmitter.call(this);
