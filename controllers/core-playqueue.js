@@ -38,14 +38,16 @@ CorePlayQueue.prototype.play = function (promise) {
 		this.stateCurrent.status = 'play';
 		this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
 		this.stateCurrent.seek = 0;
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
-	} else if (stateCurrent.status === 'pause') {
+	} else if (this.stateCurrent.status === 'pause') {
 		this.stateCurrent.status = 'play';
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 	}
 
 	// Temporary - Push this promise to the daemon controller to resolve instead
-	promise.resolve({type: 'playerState', data: this.stateCurrent});
+	promise.resolve();
 
 }
 
@@ -54,6 +56,7 @@ CorePlayQueue.prototype.next = function (promise) {
 		if (this.stateCurrent.position < this.arrayQueue.length - 1) {
 			this.stateCurrent.position++;
 			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+			this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 		}
 
@@ -62,6 +65,7 @@ CorePlayQueue.prototype.next = function (promise) {
 			this.stateCurrent.position++;
 			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
 			this.stateCurrent.seek = 0;
+			this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 		}
 
@@ -74,11 +78,12 @@ CorePlayQueue.prototype.next = function (promise) {
 
 		this.stateCurrent.status = 'play';
 		this.stateCurrent.seek = 0;
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 	}
 
 	// Temporary - Push this promise to the daemon controller to resolve instead
-	promise.resolve({type: 'playerState', data: this.stateCurrent});
+	promise.resolve();
 
 }
 
@@ -87,6 +92,7 @@ CorePlayQueue.prototype.previous = function (promise) {
 		if (this.stateCurrent.position > 0) {
 			this.stateCurrent.position--;
 			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
+			this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 		}
 
@@ -95,6 +101,7 @@ CorePlayQueue.prototype.previous = function (promise) {
 			this.stateCurrent.position--;
 			this.stateCurrent.track = this.arrayQueue[this.stateCurrent.position];
 			this.stateCurrent.seek = 0;
+			this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 		}
 
@@ -107,11 +114,12 @@ CorePlayQueue.prototype.previous = function (promise) {
 
 		this.stateCurrent.status = 'play';
 		this.stateCurrent.seek = 0;
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 	}
 
 	// Temporary - Push this promise to the daemon controller to resolve instead
-	promise.resolve({type: 'playerState', data: this.stateCurrent});
+	promise.resolve();
 
 }
 
@@ -119,27 +127,30 @@ CorePlayQueue.prototype.stop = function (promise) {
 	if (this.stateCurrent.status === 'play') {
 		this.stateCurrent.status = 'stop';
 		this.stateCurrent.seek = 0;
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 	} else if (this.stateCurrent.status === 'pause') {
 		this.stateCurrent.status = 'stop';
 		this.stateCurrent.seek = 0;
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 	}
 
 	// Temporary - Push this promise to the daemon controller to resolve instead
-	promise.resolve({type: 'playerState', data: this.stateCurrent});
+	promise.resolve();
 
 }
 
 CorePlayQueue.prototype.pause = function (promise) {
 	if (this.stateCurrent.status === 'play') {
-			this.stateCurrent.status = 'pause';
-			// <- update seek pos here
+		this.stateCurrent.status = 'pause';
+		// <- update seek pos here
+		this.emit('coreEvent', {type: 'playerState', data: this.stateCurrent});
 
 	}
 
 	// Temporary - Push this promise to the daemon controller to resolve instead
-	promise.resolve({type: 'playerState', data: this.stateCurrent});
+	promise.resolve();
 
 }
 

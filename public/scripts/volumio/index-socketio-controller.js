@@ -7,7 +7,7 @@ document.getElementById('button-volumiopause').onclick = function() {emitClientE
 document.getElementById('button-volumiostop').onclick = function() {emitClientEvent('volumioStop', '');}
 document.getElementById('button-volumioprev').onclick = function() {emitClientEvent('volumioPrevious', '');}
 document.getElementById('button-volumionext').onclick = function() {emitClientEvent('volumioNext', '');}
-document.getElementById('button-mpdplay').onclick = function() {emitClientEvent('mdpPlay', '');}
+document.getElementById('button-mpdplay').onclick = function() {emitClientEvent('mpdPlay', '');}
 document.getElementById('button-mpdstop').onclick = function() {emitClientEvent('mpdStop', '');}
 document.getElementById('button-mpdcurrentsong').onclick = function() {emitClientEvent('mpdCurrentSong', '');}
 document.getElementById('button-mpdstatus').onclick = function() {emitClientEvent('mpdStatus', '');}
@@ -88,7 +88,7 @@ function clearPlayQueue () {
 }
 
 function emitClientEvent (sType, sData) {
-	socket.emit('clientEvent', sType, sData);
+	socket.emit('clientEvent', {type: sType, data: sData});
 	printConsoleMessage('clientEvent: ' + sType + ' ' + sData);
 
 }
@@ -107,7 +107,7 @@ socket.on('playerState', function (playerState) {
 
 });
 
-socket.on('errorResponse', function (sError) {
+socket.on('responseError', function (sError) {
 	printConsoleMessage('Error: ' + sError);
 
 });

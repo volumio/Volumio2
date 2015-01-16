@@ -25,10 +25,7 @@ function ControllerMpd (nPort, nHost) {
 			if (err) throw err;
 
 			// Emit the updated state for the command router to hear
-			this_.emit('daemonEvent',
-				{type: 'mpdState', data: libMpd.parseKeyValueMessage(msg), promise: null}
-
-			);
+			this_.emit('daemonEvent', {type: 'mpdState', data: libMpd.parseKeyValueMessage(msg)});
 
 		});
 
@@ -48,12 +45,12 @@ ControllerMpd.prototype.sendSingleCommand2Mpd = function (command, commandCallba
 }
 
 ControllerMpd.prototype.play = function (promise) {
-	this.client.sendCommand(this.cmd('play', []), promise.resolve({type: null, data: null}));
+	this.client.sendCommand(this.cmd('play', []), promise.resolve());
 
 }
 
 ControllerMpd.prototype.stop = function (promise) {
-	this.client.sendCommand(this.cmd('stop', []), promise.resolve({type: null, data: null}));
+	this.client.sendCommand(this.cmd('stop', []), promise.resolve());
 
 }
 
@@ -62,6 +59,6 @@ ControllerMpd.prototype.clearAddPlay = function (tracks, promise) {
 		this.cmd('clear', []),
 		this.cmd('add', tracks),
 		this.cmd('play', []),
-	], promise.resolve({type: null, data: null}));
+	], promise.resolve());
 
 }

@@ -19,24 +19,35 @@ function InterfaceWebUI (server) {
 	this.libSocketIO.on('connection', function(connWebSocket) {
 
 		// When a client event is received over websocket
-		connWebSocket.on('clientEvent', function(sType, sData) {
+		connWebSocket.on('clientEvent', function(clientEvent) {
 
 			// Construct a promise for response to be fulfilled by the event handler (this can potentially be done by the client itself)
 			var promisedResponse = libQ.defer();
 
 			// Emit the event for the coreCommandRouter to hear
-			this_.emit('clientEvent', {type: sType, data: sData, promise: promisedResponse});
+			this_.emit('clientEvent', clientEvent, promisedResponse);
 
 			// Listen for and handle the event response (this can also potentially be done on the client side)
 			promisedResponse.promise
 			.then (function (response) {
 
-				// Push the response to the client
-				connWebSocket.emit(response.type, response.data);
+				// If the response contains any data
+				if ('type' in response) {
+
+					// Push the response to the client
+					connWebSocket.emit(response.type, response.data);
+
+				}
 
 			})
-			.catch (function (sError) {
-				connWebSocket.emit('errorResponse' + sError);
+			.catch (function (error) {
+				// If the response contains any data
+				if ('type' in error) {
+
+					// Push the response to the client
+					connWebSocket.emit(error.type, error.data);
+
+				}
 
 			});
 
