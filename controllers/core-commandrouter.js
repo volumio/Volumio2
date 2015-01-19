@@ -3,63 +3,70 @@
 // Since this class does not have properties or methods, you can potentially destroy the object
 // right after you instantiate it without any loss of functionality.
 module.exports = CoreCommandRouter;
-function CoreCommandRouter (arrayInterfaces, CorePlayQueue, ControllerMpd) {
+function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 
 	// Start event listeners for each client interface
 	for (i = 0; i < arrayInterfaces.length; i++) {
-		arrayInterfaces[i].on('clientEvent', handleClientEvent);
+		arrayInterfaces[i].on('interfaceEvent', handleInterfaceEvent);
 
 	}
 
 	// Start event listener for each service controller
-	ControllerMpd.on('daemonEvent', handleDaemonEvent);
+	ControllerMpd.on('controllerEvent', handleControllerEvent);
 
 	// Start event listener for each core service
-	CorePlayQueue.on('coreEvent', handleCoreEvent);
+	CoreStateMachine.on('coreEvent', handleCoreEvent);
+
+
+	// Command routing tables -----------------------------------------------------------
 
 	// Define the command routing table for client commands
-	function handleClientEvent (clientEvent, promisedResponse) {
+	function handleInterfaceEvent (interfaceEvent, promisedResponse) {
 
 		// Play command
-		if (clientEvent.type === 'volumioPlay') {
-			CorePlayQueue.play(promisedResponse);
+		if (interfaceEvent.type === 'volumioPlay') {
+			CoreStateMachine.play(promisedResponse);
 
 		// Pause command
-		} else if (clientEvent.type === 'volumioPause') {
-			CorePlayQueue.pause(promisedResponse);
+		} else if (interfaceEvent.type === 'volumioPause') {
+			CoreStateMachine.pause(promisedResponse);
 
 		// Stop command
-		} else if (clientEvent.type === 'volumioStop') {
-			CorePlayQueue.stop(promisedResponse);
+		} else if (interfaceEvent.type === 'volumioStop') {
+			CoreStateMachine.stop(promisedResponse);
 
 		// Next track command
-		} else if (clientEvent.type === 'volumioNext') {
-			CorePlayQueue.next(promisedResponse);
+		} else if (interfaceEvent.type === 'volumioNext') {
+			CoreStateMachine.next(promisedResponse);
 
 		// Previous track command
-		} else if (clientEvent.type === 'volumioPrevious') {
-			CorePlayQueue.previous(promisedResponse);
+		} else if (interfaceEvent.type === 'volumioPrevious') {
+			CoreStateMachine.previous(promisedResponse);
 
 		// Get state command
-		} else if (clientEvent.type === 'volumioGetState') {
-			CorePlayQueue.getState(promisedResponse);
+		} else if (interfaceEvent.type === 'volumioGetState') {
+			CoreStateMachine.getState(promisedResponse);
 
 		// Get queue command
-		} else if (clientEvent.type === 'volumioGetQueue') {
-			CorePlayQueue.getQueue(promisedResponse);
+		} else if (interfaceEvent.type === 'volumioGetQueue') {
+			CoreStateMachine.getQueue(promisedResponse);
 
 		// MPD Play command
-		} else if (clientEvent.type === 'mpdPlay') {
+		} else if (interfaceEvent.type === 'mpdPlay') {
 			ControllerMpd.play(promisedResponse);
 
 		// MPD Stop command
-		} else if (clientEvent.type === 'mpdStop') {
+		} else if (interfaceEvent.type === 'mpdStop') {
 			ControllerMpd.stop(promisedResponse);
+
+		// MPD Test command
+		} else if (interfaceEvent.type === 'mpdTest') {
+			ControllerMpd.clearAddPlay(['B6+k7b7XGU+uZrpNI3ayYw=='], promisedResponse);
 
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {
-				promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + '\"' + JSON.stringify(clientEvent.type) + '\"'});
+				promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + JSON.stringify(interfaceEvent.type)});
 
 			}
 
@@ -68,21 +75,21 @@ function CoreCommandRouter (arrayInterfaces, CorePlayQueue, ControllerMpd) {
 	}
 
 	// Define the command routing table for broadcasted updates from daemons
-	function handleDaemonEvent (daemonEvent, promisedResponse) {
+	function handleControllerEvent (controllerEvent, promisedResponse) {
 
 		// MPD state updated
-		if (daemonEvent.type === 'mpdState') {
+		if (controllerEvent.type === 'mpdStateUpdate') {
 			for (i = 0; i < arrayInterfaces.length; i++) {
 
 				// Temporary - print the new state on client consoles
-				arrayInterfaces[i].consoleMessage('MPD State: ' + JSON.stringify(daemonEvent.data));
+				arrayInterfaces[i].printConsoleMessage('mpdStateUpdate: ' + JSON.stringify(controllerEvent.data));
 
 			}
 
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {
-				daemonEvent.promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + '\"' + JSON.stringify(daemonEvent.type) + '\"'});
+				controllerEvent.promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + JSON.stringify(controllerEvent.type)});
 
 			}
 
@@ -94,18 +101,18 @@ function CoreCommandRouter (arrayInterfaces, CorePlayQueue, ControllerMpd) {
 	function handleCoreEvent (coreEvent, promisedResponse) {
 
 		// Volumio player state updated
-		if (coreEvent.type === 'playerState') {
+		if (coreEvent.type === 'playerStateUpdate') {
 			for (i = 0; i < arrayInterfaces.length; i++) {
 
 				// Announce new player state to each client interface
-				arrayInterfaces[i].playerState(coreEvent.data);
+				arrayInterfaces[i].playerStateUpdate(coreEvent.data);
 
 			}
 
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {
-				coreEvent.promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + '\"' + JSON.stringify(coreEvent.type) + '\"'});
+				coreEvent.promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + JSON.stringify(coreEvent.type)});
 
 			}
 

@@ -25,7 +25,7 @@ function InterfaceWebUI (server) {
 			var promisedResponse = libQ.defer();
 
 			// Emit the event for the coreCommandRouter to hear
-			this_.emit('clientEvent', clientEvent, promisedResponse);
+			this_.emit('interfaceEvent', {type: clientEvent.type, data: clientEvent.data}, promisedResponse);
 
 			// Listen for and handle the event response (this can also potentially be done on the client side)
 			promisedResponse.promise
@@ -35,7 +35,7 @@ function InterfaceWebUI (server) {
 				if ('type' in response) {
 
 					// Push the response to the client
-					connWebSocket.emit(response.type, response.data);
+					connWebSocket.emit('interfaceEvent', {type: response.type, data: response.data});
 
 				}
 
@@ -45,7 +45,7 @@ function InterfaceWebUI (server) {
 				if ('type' in error) {
 
 					// Push the response to the client
-					connWebSocket.emit(error.type, error.data);
+					connWebSocket.emit('interfaceEvent', {type: error.type, data: error.data});
 
 				}
 
@@ -61,25 +61,25 @@ function InterfaceWebUI (server) {
 libUtil.inherits(InterfaceWebUI, libEvents.EventEmitter);
 
 // Receive console messages from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.consoleMessage = function (message) {
+InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 
 	// Push the message all clients
-	this.libSocketIO.emit('consoleMessage', message);
+	this.libSocketIO.emit('interfaceEvent', {type: 'consoleMessage', data: message});
 
 }
 
 // Receive player queue updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.playerQueue = function (queue) {
+InterfaceWebUI.prototype.playerQueueUpdate = function (queue) {
 
 	// Push the updated queue to all clients
-	this.libSocketIO.emit('playerQueue', queue);
+	this.libSocketIO.emit('interfaceEvent', {type: 'playerQueueUpdate', data: queue});
 
 }
 
 // Receive player state updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.playerState = function (state) {
+InterfaceWebUI.prototype.playerStateUpdate = function (state) {
 
 	// Push the updated queue to all clients
-	this.libSocketIO.emit('playerState', state);
+	this.libSocketIO.emit('interfaceEvent', {type: 'playerStateUpdate', data: state});
 
 }

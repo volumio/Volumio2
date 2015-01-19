@@ -4,7 +4,6 @@
 var libMpd = require('mpd');
 var libEvents = require('events');
 var libUtil = require('util');
-var libQ = require('q');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -13,6 +12,10 @@ function ControllerMpd (nPort, nHost) {
 	this.cmd = libMpd.cmd;
 
 	var this_ = this;
+
+	// Make a temporary track library for testing purposes
+	this.library = new Object();
+	this.library['B6+k7b7XGU+uZrpNI3ayYw=='] = {uri: 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC', metadata: {title: 'KUSC Radio'}};
 
 	// Inherit some default objects from the EventEmitter class
 	libEvents.EventEmitter.call(this);
@@ -25,7 +28,7 @@ function ControllerMpd (nPort, nHost) {
 			if (err) throw err;
 
 			// Emit the updated state for the command router to hear
-			this_.emit('daemonEvent', {type: 'mpdState', data: libMpd.parseKeyValueMessage(msg)});
+			this_.emit('controllerEvent', {type: 'mpdStateUpdate', data: libMpd.parseKeyValueMessage(msg)});
 
 		});
 
@@ -36,29 +39,30 @@ function ControllerMpd (nPort, nHost) {
 // Let this class inherit the methods of the EventEmitter class, such as 'emit'
 libUtil.inherits(ControllerMpd, libEvents.EventEmitter);
 
-// function for send command to MPD daemon
-ControllerMpd.prototype.sendSingleCommand2Mpd = function (command, commandCallback) {
-	// now the npm mpd module is used. the command callBack is passed from the caller, so it can handle the response in a proper way
-	// TODO evaluate of this approach is needed
-	this.client.sendCommand(this.cmd(command, []), commandCallback);
+// MPD play command
+ControllerMpd.prototype.play = function (promisedResponse) {
+	this.client.sendCommand(this.cmd('play', []), promisedResponse.resolve());
 
 }
 
-ControllerMpd.prototype.play = function (promise) {
-	this.client.sendCommand(this.cmd('play', []), promise.resolve());
+// MPD stop command
+ControllerMpd.prototype.stop = function (promisedResponse) {
+	this.client.sendCommand(this.cmd('stop', []), promisedResponse.resolve());
 
 }
 
-ControllerMpd.prototype.stop = function (promise) {
-	this.client.sendCommand(this.cmd('stop', []), promise.resolve());
+// MPD clear queue, add array of tracks, and play
+ControllerMpd.prototype.clearAddPlay = function (arrayTrackIds, promisedResponse) {
+	var arrayTrackUris = [];
+	for (i = 0; i < arrayTrackIds.length; i++) {
+		arrayTrackUris[i] = this.library[arrayTrackIds[i]].uri;
 
-}
+	}
 
-ControllerMpd.prototype.clearAddPlay = function (tracks, promise) {
 	this.client.sendCommands([
 		this.cmd('clear', []),
-		this.cmd('add', tracks),
+		this.cmd('add', arrayTrackUris),
 		this.cmd('play', []),
-	], promise.resolve());
+	], promisedResponse.resolve());
 
 }

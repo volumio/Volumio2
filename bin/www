@@ -26,8 +26,8 @@ var server = app.listen(app.get('port'), function() {
 var InterfaceWebUi = new (require('../controllers/interface-webUI.js'))(server);
 var arrayInterfaces = [InterfaceWebUi];
 
-var CorePlayQueue = new (require('../controllers/core-playqueue'))();
+var CoreStateMachine = new (require('../controllers/core-statemachine'))();
 
-var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(arrayInterfaces, CorePlayQueue, ControllerMpd);
+var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(arrayInterfaces, CoreStateMachine, ControllerMpd);
 
 

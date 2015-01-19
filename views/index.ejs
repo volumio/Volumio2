@@ -9,30 +9,34 @@
   </head>
   <body>
 		<h3>Volumio Commands</h3>
+		<button id='button-volumioprev' class='control-websocket' disabled>Prev</button>
 		<button id='button-volumioplay' class='control-websocket' disabled>Play</button>
 		<button id='button-volumiopause' class='control-websocket' disabled>Pause</button>
+		<button id='button-volumionext' class='control-websocket' disabled>Next</button>
 		<button id='button-volumiostop' class='control-websocket' disabled>Stop</button>
-		<button id='button-volumioprev' class='control-websocket' disabled>Previous Track</button>
-		<button id='button-volumionext' class='control-websocket' disabled>Next Track</button>
+		<button id='button-volumiostatus' class='control-websocket' disabled>Status</button>
 
 		<h3>MPD Commands</h3>
-		<button id='button-mpdprev' class='control-websocket' disabled>Previous Track</button>
+		<button id='button-mpdprev' class='control-websocket' disabled>Prev</button>
 		<button id='button-mpdplay' class='control-websocket' disabled>Play</button>
+		<button id='button-mpdpause' class='control-websocket' disabled>Pause</button>
+		<button id='button-mpdnext' class='control-websocket' disabled>Next</button>
 		<button id='button-mpdstop' class='control-websocket' disabled>Stop</button>
-		<button id='button-mpdnext' class='control-websocket' disabled>Next Track</button>
 		<button id='button-mpdcurrentsong' class='control-websocket' disabled>Current Song</button>
 		<button id='button-mpdstatus' class='control-websocket' disabled>Status</button>
+		<button id='button-mpdtest' class='control-websocket' disabled>ClearAddPlay Test</button>
 
 		<h3>Spop Commands</h3>
-		<button id='button-spopprev' class='control-websocket' disabled>Previous Track</button>
+		<button id='button-spopprev' class='control-websocket' disabled>Prev</button>
 		<button id='button-spopplay' class='control-websocket' disabled>Play</button>
+		<button id='button-spoppause' class='control-websocket' disabled>Pause</button>
+		<button id='button-spopnext' class='control-websocket' disabled>Next</button>
 		<button id='button-spopstop' class='control-websocket' disabled>Stop</button>
-		<button id='button-spopnext' class='control-websocket' disabled>Next Track</button>
 
 		<h3>Console</h3>
 		<button id='button-clearconsole'>Clear</button>
 		<div id='div-console' style='border: 1px solid black; height: 300px; overflow-y: scroll;'>
-			<ul id='console'></ul>
+			<ul id='console' style='font-family: monospace;'></ul>
 		</div>
 
 		<h3>Play Queue</h3>

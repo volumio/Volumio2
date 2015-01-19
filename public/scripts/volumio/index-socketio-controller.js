@@ -7,14 +7,18 @@ document.getElementById('button-volumiopause').onclick = function() {emitClientE
 document.getElementById('button-volumiostop').onclick = function() {emitClientEvent('volumioStop', '');}
 document.getElementById('button-volumioprev').onclick = function() {emitClientEvent('volumioPrevious', '');}
 document.getElementById('button-volumionext').onclick = function() {emitClientEvent('volumioNext', '');}
+document.getElementById('button-volumiostatus').onclick = function() {emitClientEvent('volumioGetState', '');}
 document.getElementById('button-mpdplay').onclick = function() {emitClientEvent('mpdPlay', '');}
 document.getElementById('button-mpdstop').onclick = function() {emitClientEvent('mpdStop', '');}
+document.getElementById('button-mpdpause').onclick = function() {emitClientEvent('mpdPause', '');}
 document.getElementById('button-mpdcurrentsong').onclick = function() {emitClientEvent('mpdCurrentSong', '');}
 document.getElementById('button-mpdstatus').onclick = function() {emitClientEvent('mpdStatus', '');}
 document.getElementById('button-mpdnext').onclick = function() {emitClientEvent('mpdNext', '');}
 document.getElementById('button-mpdprev').onclick = function() {emitClientEvent('mpdPrevious', '');}
+document.getElementById('button-mpdtest').onclick = function() {emitClientEvent('mpdTest', '');}
 document.getElementById('button-spopplay').onclick = function() {emitClientEvent('spopPlay', '');}
 document.getElementById('button-spopstop').onclick = function() {emitClientEvent('spopStop', '');}
+document.getElementById('button-spoppause').onclick = function() {emitClientEvent('spopPause', '');}
 document.getElementById('button-spopnext').onclick = function() {emitClientEvent('spopNext', '');}
 document.getElementById('button-spopprev').onclick = function() {emitClientEvent('spopPrevious', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
@@ -89,28 +93,13 @@ function clearPlayQueue () {
 
 function emitClientEvent (sType, sData) {
 	socket.emit('clientEvent', {type: sType, data: sData});
-	printConsoleMessage('clientEvent: ' + sType + ' ' + sData);
+	printConsoleMessage(sType + ': ' + sData);
 
 }
 
 // Create listeners for websocket events--------------------------------
-socket.on('consoleMessage', printConsoleMessage);
 
-socket.on('playerQueue', function (arrayPlayerQueue) {
-	updatePlayerQueue(arrayPlayerQueue);
-	printConsoleMessage('playerQueue: ' + JSON.stringify(arrayPlayerQueue));
-
-});
-
-socket.on('playerState', function (playerState) {
-	printConsoleMessage('playerState: ' + JSON.stringify(playerState));
-
-});
-
-socket.on('responseError', function (sError) {
-	printConsoleMessage('Error: ' + sError);
-
-});
+socket.on('interfaceEvent', handleInterfaceEvent);
 
 socket.on('connect', function () {
 	printConsoleMessage('Websocket connected.');
@@ -128,4 +117,23 @@ socket.on('disconnect', function () {
 	clearPlayQueue();
 
 });
+
+// Handle incoming interface events
+function handleInterfaceEvent (interfaceEvent) {
+	if (interfaceEvent.type === 'consoleMessage') {
+		printConsoleMessage(interfaceEvent.data);
+
+	} else if (interfaceEvent.type === 'playerQueueUpdate') {
+		updatePlayerQueue(interfaceEvent.data);
+		printConsoleMessage('playerQueueUpdate: ' + JSON.stringify(interfaceEvent.data));
+
+	} else if (interfaceEvent.type === 'playerStateUpdate') {
+		printConsoleMessage('playerStateUpdate: ' + JSON.stringify(interfaceEvent.data));
+
+	} else if (interfaceEvent.type === 'responseError') {
+		printConsoleMessage('responseError: ' + interfaceEvent.data);
+
+	}
+
+}
 
