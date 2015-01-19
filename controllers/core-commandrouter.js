@@ -109,6 +109,10 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 
 			}
 
+		// MPD clear-add-play
+		} else if (coreEvent.type === 'mpdClearAddPlay') {
+			ControllerMpd.clearAddPlay(coreEvent.data, promisedResponse);
+
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {

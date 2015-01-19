@@ -10,7 +10,7 @@ function InterfaceWebUI (server) {
 	this.libSocketIO = require('socket.io')(server);
 
 	// Establish a static variable for 'this', so can still refer to it at deeper scopes (any better way to do this?)
-	var this_ = this;
+	var thisInterfaceWebUI = this;
 
 	// Inherit some default objects from the EventEmitter class
 	libEvents.EventEmitter.call(this);
@@ -25,7 +25,7 @@ function InterfaceWebUI (server) {
 			var promisedResponse = libQ.defer();
 
 			// Emit the event for the coreCommandRouter to hear
-			this_.emit('interfaceEvent', {type: clientEvent.type, data: clientEvent.data}, promisedResponse);
+			thisInterfaceWebUI.emit('interfaceEvent', {type: clientEvent.type, data: clientEvent.data}, promisedResponse);
 
 			// Listen for and handle the event response (this can also potentially be done on the client side)
 			promisedResponse.promise

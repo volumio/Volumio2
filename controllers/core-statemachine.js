@@ -25,30 +25,35 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 		this.stateCurrent.status = 'play';
 		this.stateCurrent.seek = 0;
 
-		//this.emit('coreEvent', {type: 'mpdClearAddPlay', data: arrayTrackIds});
-		this.emit('coreEvent', {type: 'playerStateUpdate', data: this.stateCurrent});
+		var trackBlock = this.CorePlayQueue.getTrackBlock(this.stateCurrent.position);
+		if (trackBlock.service = 'mpd') {
+			this.emit('coreEvent', {type: 'mpdClearAddPlay', data: trackBlock.trackids}, promisedResponse);
+
+		}
+
+		//this.emit('coreEvent', {type: 'playerStateUpdate', data: this.stateCurrent});
 
 	} else if (this.stateCurrent.status === 'pause') {
 		this.stateCurrent.status = 'play';
 		this.emit('coreEvent', {type: 'playerStateUpdate', data: this.stateCurrent});
 
-	}
+		// TODO - Push this promise to the daemon controller to resolve instead
+		promisedResponse.resolve();
 
-	// TODO - Push this promise to the daemon controller to resolve instead
-	promisedResponse.resolve();
+	}
 
 }
 
 CoreStateMachine.prototype.next = function (promisedResponse) {
 	if (this.stateCurrent.status === 'stop') {
-		if (this.stateCurrent.position < this.CorePlayQueue.arrayQueue.length - 1) {
+		if (this.stateCurrent.position < this.CorePlayQueue.getQueue().length - 1) {
 			this.stateCurrent.position++;
 			this.emit('coreEvent', {type: 'playerStateUpdate', data: this.stateCurrent});
 
 		}
 
 	} else if (this.stateCurrent.status === 'play') {
-		if (this.stateCurrent.position < this.CorePlayQueue.arrayQueue.length - 1) {
+		if (this.stateCurrent.position < this.CorePlayQueue.getQueue().length - 1) {
 			this.stateCurrent.position++;
 			this.stateCurrent.seek = 0;
 			this.emit('coreEvent', {type: 'playerStateUpdate', data: this.stateCurrent});
@@ -56,7 +61,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 		}
 
 	} else if (this.stateCurrent.status === 'pause') {
-		if (this.stateCurrent.position < this.CorePlayQueue.arrayQueue.length - 1) {
+		if (this.stateCurrent.position < this.CorePlayQueue.getQueue().length - 1) {
 			this.stateCurrent.position++;
 
 		}
@@ -144,17 +149,17 @@ CoreStateMachine.prototype.getState = function (promisedResponse) {
 
 // Get the current contents of the play queue
 CoreStateMachine.prototype.getQueue = function (promisedResponse) {
-	this.CorePlayQueue.getQueue(promisedResponse);
-
-}
-
-// Modify the current state of the player (ie from a status update from a music service controller)
-CoreStateMachine.prototype.modState = function (sField, sValue, promisedResponse) {
+	promisedResponse.resolve({type: 'playerQueueUpdate', data: this.CorePlayQueue.getQueue()});
 
 }
 
 // Modify the contents of the queue (ie from client request)
 CoreStateMachine.prototype.modQueue = function (sCommand, sParameters, promisedResponse) {
+
+}
+
+// Update the current state of the player (ie from a status update from a music service controller)
+CoreStateMachine.prototype.updateStateFromMpd = function (stateMpd) {
 
 }
 

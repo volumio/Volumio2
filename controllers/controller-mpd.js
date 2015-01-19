@@ -11,11 +11,12 @@ function ControllerMpd (nPort, nHost) {
 	this.client = libMpd.connect({port: nPort,	host: nHost});
 	this.cmd = libMpd.cmd;
 
-	var this_ = this;
+	var thisControllerMpd = this;
 
 	// Make a temporary track library for testing purposes
 	this.library = new Object();
 	this.library['B6+k7b7XGU+uZrpNI3ayYw=='] = {uri: 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC', metadata: {title: 'KUSC Radio'}};
+	this.library['Ae7R2pn6CEyVG7GNuGGtbQ=='] = {uri: 'http://uk4.internet-radio.com:15938/', metadata: {title: 'Go Ham Radio'}};
 
 	// Inherit some default objects from the EventEmitter class
 	libEvents.EventEmitter.call(this);
@@ -28,7 +29,7 @@ function ControllerMpd (nPort, nHost) {
 			if (err) throw err;
 
 			// Emit the updated state for the command router to hear
-			this_.emit('controllerEvent', {type: 'mpdStateUpdate', data: libMpd.parseKeyValueMessage(msg)});
+			thisControllerMpd.emit('controllerEvent', {type: 'mpdStateUpdate', data: libMpd.parseKeyValueMessage(msg)});
 
 		});
 
@@ -53,16 +54,24 @@ ControllerMpd.prototype.stop = function (promisedResponse) {
 
 // MPD clear queue, add array of tracks, and play
 ControllerMpd.prototype.clearAddPlay = function (arrayTrackIds, promisedResponse) {
-	var arrayTrackUris = [];
-	for (i = 0; i < arrayTrackIds.length; i++) {
-		arrayTrackUris[i] = this.library[arrayTrackIds[i]].uri;
+	var thisControllerMpd = this;
+	var arrayTrackUris = arrayTrackIds.map(function (curTrackId) {
+		return thisControllerMpd.library[curTrackId].uri;
 
-	}
+	});
 
-	this.client.sendCommands([
-		this.cmd('clear', []),
-		this.cmd('add', arrayTrackUris),
-		this.cmd('play', []),
-	], promisedResponse.resolve());
+	var arrayCommands = [];
+	var thisControllerMpd = this;
+	arrayCommands.push(thisControllerMpd.cmd('clear', []));
+	arrayCommands = arrayCommands.concat(
+		arrayTrackUris.map(function (curTrackUri) {
+			return thisControllerMpd.cmd('add', [curTrackUri]);
+
+		})
+
+	);
+	arrayCommands.push(thisControllerMpd.cmd('play', []));
+
+	this.client.sendCommands(arrayCommands, promisedResponse.resolve());
 
 }
