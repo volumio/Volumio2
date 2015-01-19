@@ -31,6 +31,7 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 
 		}
 
+		// TODO - drive a player status change from mpdStateUpdate
 		//this.emit('coreEvent', {type: 'playerStateUpdate', data: this.stateCurrent});
 
 	} else if (this.stateCurrent.status === 'pause') {

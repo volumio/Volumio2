@@ -49,5 +49,5 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 		});
 
 	return {service: sTargetService, trackids: arrayTrackIds};
-	
+
 }
