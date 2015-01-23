@@ -102,15 +102,13 @@ function clearPlayQueue () {
 
 }
 
-function emitClientEvent (sType, sData) {
-	socket.emit('clientEvent', {type: sType, data: sData});
-	printConsoleMessage(sType + ': ' + sData);
+function emitClientEvent (sCommand, sParameters) {
+	socket.emit(sCommand, sParameters);
+	printConsoleMessage(sCommand + ': ' + sParameters);
 
 }
 
 // Create listeners for websocket events--------------------------------
-
-socket.on('interfaceEvent', handleInterfaceEvent);
 
 socket.on('connect', function () {
 	printConsoleMessage('Websocket connected.');
@@ -130,6 +128,13 @@ socket.on('disconnect', function () {
 
 });
 
+socket.on('volumioStateUpdate', function (state) {
+	updatePlayerState(state);
+	printConsoleMessage('volumioStateUpdate: ' + JSON.stringify(state));
+
+});
+
+/*
 // Handle incoming interface events
 function handleInterfaceEvent (interfaceEvent) {
 	if (interfaceEvent.type === 'consoleMessage') {
@@ -149,4 +154,4 @@ function handleInterfaceEvent (interfaceEvent) {
 	}
 
 }
-
+*/

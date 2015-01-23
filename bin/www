@@ -3,11 +3,6 @@
 
 // this will works as our main, all the services and configuration should be set here
 
-// creating connection to the MPD daemon
-var nMpdPort = 6600;
-var nMpdHost = 'localhost';
-var ControllerMpd = new (require('../controllers/controller-mpd'))(nMpdPort, nMpdHost);
-
 /*
 // initializing MPD interfce. This will listen for all MPD third parties clients
 var mdpInterfacePort = 6500;
@@ -23,11 +18,6 @@ var server = app.listen(app.get('port'), function() {
 	  console.log('Express server listening on port ' + server.address().port);
 });
 
-var InterfaceWebUi = new (require('../controllers/interface-webUI.js'))(server);
-var arrayInterfaces = [InterfaceWebUi];
-
-var CoreStateMachine = new (require('../controllers/core-statemachine'))();
-
-var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(arrayInterfaces, CoreStateMachine, ControllerMpd);
+var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(server);
 
 

@@ -1,13 +1,8 @@
-// author: HoochDeveloper
-// MPD daemon controller sketch
-// this accepts the socket connection to the mpd daemon to be initialized
 var libMpd = require('mpd');
-var libEvents = require('events');
-var libUtil = require('util');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
-function ControllerMpd (nPort, nHost) {
+function ControllerMpd (nPort, nHost, CoreCommandRouter) {
 	this.client = libMpd.connect({port: nPort,	host: nHost});
 	this.cmd = libMpd.cmd;
 
@@ -17,9 +12,6 @@ function ControllerMpd (nPort, nHost) {
 	this.library = new Object();
 	this.library['aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND'] = {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}};
 	this.library['aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv'] = {service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}};
-
-	// Inherit some default objects from the EventEmitter class
-	libEvents.EventEmitter.call(this);
 
 	// Create a listener for playback status updates from the MPD daemon
 	this.client.on('system-player', function () {
@@ -37,9 +29,6 @@ function ControllerMpd (nPort, nHost) {
 	});
 
 }
-
-// Let this class inherit the methods of the EventEmitter class, such as 'emit'
-libUtil.inherits(ControllerMpd, libEvents.EventEmitter);
 
 // MPD play command
 ControllerMpd.prototype.play = function (promisedResponse) {

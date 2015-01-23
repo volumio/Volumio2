@@ -1,32 +1,38 @@
+var libQ = require('q');
+
 // Define the CoreCommandRouter class
-// This class constructor links a bunch of external handler functions to external listeners.
-// Since this class does not have properties or methods, you can potentially destroy the object
-// right after you instantiate it without any loss of functionality.
 module.exports = CoreCommandRouter;
-function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
+function CoreCommandRouter (server) {
 
-	// Start event listeners for each client interface
-	for (i = 0; i < arrayInterfaces.length; i++) {
-		arrayInterfaces[i].on('interfaceEvent', handleInterfaceEvent);
+	// Start the state machine
+	this.CoreStateMachine = new (require('../controllers/core-statemachine'))(this);
 
-	}
+	// Start the client interfaces
+	this.arrayInterfaces = [];
+	this.arrayInterfaces.push(new (require('../controllers/interface-webUI.js'))(server, this));
 
-	// Start event listener for each service controller
-	ControllerMpd.on('controllerEvent', handleControllerEvent);
+	// Move these variables out at some point
+	var nMpdPort = 6600;
+	var nMpdHost = 'localhost';
 
-	// Start event listener for each core service
-	CoreStateMachine.on('coreEvent', handleCoreEvent);
+	// Start the MPD controller
+	this.ControllerMpd = new (require('../controllers/controller-mpd'))(nMpdPort, nMpdHost, this);
 
+}
 
-	// Command routing tables -----------------------------------------------------------
+// Play command
+CoreCommandRouter.prototype.volumioPlay = function () {
+	var thisCoreStateMachine = this.CoreStateMachine;
+	return libQ.fcall(thisCoreStateMachine.CoreStateMachine.play.bind(thisCoreStateMachine));
 
-	// Define the command routing table for client commands
-	function handleInterfaceEvent (interfaceEvent, promisedResponse) {
+}
+// Get Volumio status command
+CoreCommandRouter.prototype.volumioGetState = function () {
+	var thisCoreStateMachine = this.CoreStateMachine;
+	return libQ.fcall(thisCoreStateMachine.getState.bind(thisCoreStateMachine));
 
-		// Play command
-		if (interfaceEvent.type === 'volumioPlay') {
-			CoreStateMachine.play(promisedResponse);
-
+}
+/*
 		// Pause command
 		} else if (interfaceEvent.type === 'volumioPause') {
 			CoreStateMachine.pause(promisedResponse);
@@ -69,7 +75,7 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 		}
 
 	}
-
+*/
 	// Define the command routing table for broadcasted updates from daemons
 	function handleControllerEvent (controllerEvent, promisedResponse) {
 
@@ -137,5 +143,4 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 
 	}
 
-}
 

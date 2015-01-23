@@ -1,22 +1,12 @@
-var libEvents = require('events');
-var libUtil = require('util');
 var libQ = require('q');
 
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
-function CoreStateMachine () {
-
-	// Init player properties
+function CoreStateMachine (CoreCommandRouter) {
 	this.CorePlayQueue = new (require('./core-playqueue.js'));
 	this.resetVolumioState();
 
-	// Inherit some default objects from the EventEmitter class
-	libEvents.EventEmitter.call(this);
-
 }
-
-// Let this class inherit the methods of the EventEmitter class, such as 'emit'
-libUtil.inherits(CoreStateMachine, libEvents.EventEmitter);
 
 // Public functions to command the playback state machine
 // There are 3x possible playback states and 5x client commands which change that playback state, handle each transition case separately
@@ -156,10 +146,9 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 }
 
 // Get the current state of the player
-CoreStateMachine.prototype.getState = function (promisedResponse) {
+CoreStateMachine.prototype.getState = function () {
 	// <- TODO - update seek pos here
-
-	promisedResponse.resolve({type: 'volumioStateUpdate', data: {status: this.currentStatus, position: this.currentPosition, seek: this.currentSeek}});
+	return {type: 'volumioStateUpdate', data: {status: this.currentStatus, position: this.currentPosition, seek: this.currentSeek}};
 
 }
 
