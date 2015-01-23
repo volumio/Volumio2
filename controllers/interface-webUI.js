@@ -39,16 +39,6 @@ function InterfaceWebUI (server) {
 
 				}
 
-			})
-			.catch (function (error) {
-				// If the response contains any data
-				if ('type' in error) {
-
-					// Push the response to the client
-					connWebSocket.emit('interfaceEvent', {type: error.type, data: error.data});
-
-				}
-
 			});
 
 		});
@@ -69,17 +59,17 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 }
 
 // Receive player queue updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.playerQueueUpdate = function (queue) {
+InterfaceWebUI.prototype.volumioQueueUpdate = function (queue) {
 
 	// Push the updated queue to all clients
-	this.libSocketIO.emit('interfaceEvent', {type: 'playerQueueUpdate', data: queue});
+	this.libSocketIO.emit('interfaceEvent', {type: 'volumioQueueUpdate', data: queue});
 
 }
 
 // Receive player state updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.playerStateUpdate = function (state) {
+InterfaceWebUI.prototype.volumioStateUpdate = function (state) {
 
 	// Push the updated queue to all clients
-	this.libSocketIO.emit('interfaceEvent', {type: 'playerStateUpdate', data: state});
+	this.libSocketIO.emit('interfaceEvent', {type: 'volumioStateUpdate', data: state});
 
 }

@@ -4,14 +4,9 @@ function CorePlayQueue () {
 
 	// Init temporary play queue for testing purposes
 	this.arrayQueue = [
-
-		{service: 'mpd', trackid: 'Ae7R2pn6CEyVG7GNuGGtbQ==', metadata: {title: 'Go Ham Radio'}}
-
-		// trackid is md5-base64 of 'http://2363.live.streamtheworld.com:80/KUSCMP128_SC'
-		, {service: 'mpd', trackid: 'B6+k7b7XGU+uZrpNI3ayYw==', metadata: {title: 'KUSC Radio'}}
-
-		// trackid is md5-base64 of 'spotify:track:6r509c4WvHaH1OctmcLzNv'
-		, {service: 'spop', trackid: 'krsU08D9KlvC00UFwzdAHw==', metadata: {title: 'Gates of Gold 1)Arrival: a View From Sea'}}
+		{service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}}
+		, {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}}
+		, {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo2cjUwOWM0V3ZIYUgxT2N0bWNMek52', metadata: {title: 'Gates of Gold 1)Arrival: a View From Sea'}}
 
 	];
 

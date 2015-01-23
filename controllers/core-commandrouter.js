@@ -59,14 +59,10 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 		} else if (interfaceEvent.type === 'mpdStop') {
 			ControllerMpd.stop(promisedResponse);
 
-		// MPD Test command
-		} else if (interfaceEvent.type === 'mpdTest') {
-			ControllerMpd.clearAddPlay(['B6+k7b7XGU+uZrpNI3ayYw=='], promisedResponse);
-
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {
-				promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + JSON.stringify(interfaceEvent.type)});
+				promisedResponse.resolve({type: 'responseError', data: 'No handler associated with interface event ' + JSON.stringify(interfaceEvent.type)});
 
 			}
 
@@ -79,17 +75,19 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 
 		// MPD state updated
 		if (controllerEvent.type === 'mpdStateUpdate') {
-			for (i = 0; i < arrayInterfaces.length; i++) {
+			CoreStateMachine.updateStateFromMpd(controllerEvent.data);
 
-				// Temporary - print the new state on client consoles
-				arrayInterfaces[i].printConsoleMessage('mpdStateUpdate: ' + JSON.stringify(controllerEvent.data));
+		// Error was broadcast
+		} else if (controllerEvent.type === 'error') {
+			for (i = 0; i < arrayInterfaces.length; i++) {
+				arrayInterfaces[i].printConsoleMessage('error: ' + JSON.stringify(controllerEvent.data));
 
 			}
 
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {
-				controllerEvent.promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + JSON.stringify(controllerEvent.type)});
+				controllerEvent.promisedResponse.resolve({type: 'responseError', data: 'No handler associated with controller event ' + JSON.stringify(controllerEvent.type)});
 
 			}
 
@@ -101,11 +99,11 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 	function handleCoreEvent (coreEvent, promisedResponse) {
 
 		// Volumio player state updated
-		if (coreEvent.type === 'playerStateUpdate') {
+		if (coreEvent.type === 'volumioStateUpdate') {
 			for (i = 0; i < arrayInterfaces.length; i++) {
 
 				// Announce new player state to each client interface
-				arrayInterfaces[i].playerStateUpdate(coreEvent.data);
+				arrayInterfaces[i].volumioStateUpdate(coreEvent.data);
 
 			}
 
@@ -113,10 +111,25 @@ function CoreCommandRouter (arrayInterfaces, CoreStateMachine, ControllerMpd) {
 		} else if (coreEvent.type === 'mpdClearAddPlay') {
 			ControllerMpd.clearAddPlay(coreEvent.data, promisedResponse);
 
+		// MPD get updated state
+		} else if (coreEvent.type === 'mpdGetState') {
+			ControllerMpd.getState(promisedResponse);
+
+		// MPD get updated state
+		} else if (coreEvent.type === 'mpdGetQueue') {
+			ControllerMpd.getQueue(promisedResponse);
+
+		// Error was broadcast
+		} else if (coreEvent.type === 'error') {
+			for (i = 0; i < arrayInterfaces.length; i++) {
+				arrayInterfaces[i].printConsoleMessage('error: ' + JSON.stringify(coreEvent.data));
+
+			}
+
 		// Otherwise the event was not recognized
 		} else {
 			if (typeof promisedResponse !== 'undefined') {
-				coreEvent.promisedResponse.reject({type: 'responseError', data: 'No handler associated with event ' + JSON.stringify(coreEvent.type)});
+				coreEvent.promisedResponse.resolve({type: 'responseError', data: 'No handler associated with core event ' + JSON.stringify(coreEvent.type)});
 
 			}
 
