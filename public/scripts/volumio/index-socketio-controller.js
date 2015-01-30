@@ -102,9 +102,9 @@ function clearPlayQueue () {
 
 }
 
-function emitClientEvent (sCommand, sParameters) {
-	socket.emit(sCommand, sParameters);
-	printConsoleMessage(sCommand + ': ' + sParameters);
+function emitClientEvent (sEvent, sData) {
+	socket.emit(sEvent, sData);
+	printConsoleMessage(sEvent + ': ' + sData);
 
 }
 
@@ -128,30 +128,19 @@ socket.on('disconnect', function () {
 
 });
 
-socket.on('volumioStateUpdate', function (state) {
+socket.on('volumioPushState', function (state) {
 	updatePlayerState(state);
-	printConsoleMessage('volumioStateUpdate: ' + JSON.stringify(state));
+	printConsoleMessage('volumioPushState: ' + JSON.stringify(state));
 
 });
 
-/*
-// Handle incoming interface events
-function handleInterfaceEvent (interfaceEvent) {
-	if (interfaceEvent.type === 'consoleMessage') {
-		printConsoleMessage(interfaceEvent.data);
+socket.on('volumioPushQueue', function (arrayQueue) {
+	updatePlayerQueue(arrayQueue);
+	printConsoleMessage('volumioPushQueue: ' + JSON.stringify(arrayQueue));
 
-	} else if (interfaceEvent.type === 'volumioQueueUpdate') {
-		updatePlayerQueue(interfaceEvent.data);
-		printConsoleMessage('volumioQueueUpdate: ' + JSON.stringify(interfaceEvent.data));
+});
 
-	} else if (interfaceEvent.type === 'volumioStateUpdate') {
-		updatePlayerState(interfaceEvent.data);
-		printConsoleMessage('volumioStateUpdate: ' + JSON.stringify(interfaceEvent.data));
+socket.on('printConsoleMessage', function (sMessage) {
+	printConsoleMessage(sMessage);
 
-	} else if (interfaceEvent.type === 'responseError') {
-		printConsoleMessage('responseError: ' + interfaceEvent.data);
-
-	}
-
-}
-*/
+});

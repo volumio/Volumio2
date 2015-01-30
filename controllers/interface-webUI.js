@@ -1,6 +1,10 @@
+var libQ = require('q');
+
 // Define the InterfaceWebUI class
 module.exports = InterfaceWebUI;
-function InterfaceWebUI (server, CoreCommandRouter) {
+function InterfaceWebUI (server, commandRouter) {
+
+	_this = this;
 
 	// Init SocketIO listener, unique to each instance of InterfaceWebUI
 	this.libSocketIO = require('socket.io')(server);
@@ -8,46 +12,82 @@ function InterfaceWebUI (server, CoreCommandRouter) {
 	// When a websocket connection is made
 	this.libSocketIO.on('connection', function(connWebSocket) {
 
-		// When a client event is received over websocket
-		connWebSocket.on('volumioGetState', function(sParameters) {
-			CoreCommandRouter.volumioGetState().then(handleResult, handleError);
+		// Listen for the various types of client events -----------------------------
+		connWebSocket.on('volumioGetState', function() {
+			logStart('volumioGetState')
+				.then(commandRouter.volumioGetState.bind(commandRouter))
+				.then(_this.volumioPushState.bind(_this))
+				.catch(console.log)
+				.done(logDone);
 
 		});
 
-		// Listen for and pass the result to the client
-		function handleResult(result) {
-			connWebSocket.emit(result.type, result.data);
+		connWebSocket.on('volumioGetQueue', function() {
+			logStart('volumioGetQueue')
+				.then(commandRouter.volumioGetQueue.bind(commandRouter))
+				.then(_this.volumioPushQueue.bind(_this))
+				.catch(console.log)
+				.done(logDone);
 
-		};
+		});
 
-		// Listen for and pass the error to the client (and let them handle it)
-		function handleError(error) {
-			connWebSocket.emit(error.type, error.data);
+		connWebSocket.on('volumioPlay', function() {
+			logStart('volumioPlay')
+				.then(commandRouter.volumioPlay.bind(commandRouter))
+				.catch(console.log)
+				.done(logDone);
 
-		};
+		});
 
 	});
 
 }
 
-// Receive console messages from CoreCommandRouter and broadcast to all connected clients
+// Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function (message) {
+
+	console.log('InterfaceWebUI::printConsoleMessage');
 	// Push the message all clients
-	this.libSocketIO.emit('consoleMessage', message);
+	this.libSocketIO.emit('printConsoleMessage', message);
+
+	// Return a resolved empty promise to represent completion
+	return libQ();
 
 }
 
-// Receive player queue updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.volumioQueueUpdate = function (queue) {
+// Receive player queue updates from commandRouter and broadcast to all connected clients
+InterfaceWebUI.prototype.volumioPushQueue = function (queue) {
+
+	console.log('InterfaceWebUI::volumioPushQueue');
+	var _this = this;
+
 	// Push the updated queue to all clients
-	this.libSocketIO.emit('volumioQueueUpdate', queue);
+	return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushQueue', queue);
 
 }
 
-// Receive player state updates from CoreCommandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.volumioStateUpdate = function (state) {
-	// Push the updated queue to all clients
-	this.libSocketIO.emit('volumioStateUpdate', state);
+// Receive player state updates from commandRouter and broadcast to all connected clients
+InterfaceWebUI.prototype.volumioPushState = function (state) {
+
+	console.log('InterfaceWebUI::volumioPushState');
+	var _this = this;
+
+	// Push the updated state to all clients
+	return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushState', state);
 
 }
 
+function logDone () {
+
+	console.log('------------------------------ End Chain');
+	return libQ();
+
+}
+
+function logStart (sCommand) {
+
+	console.log('\n---------------------------- Start Chain');
+	console.log(sCommand);
+	return libQ();
+
+}

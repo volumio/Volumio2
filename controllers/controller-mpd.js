@@ -1,118 +1,156 @@
 var libMpd = require('mpd');
+var libQ = require('q');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
-function ControllerMpd (nPort, nHost, CoreCommandRouter) {
-	this.client = libMpd.connect({port: nPort,	host: nHost});
-	this.cmd = libMpd.cmd;
+function ControllerMpd (nPort, nHost, commandRouter) {
 
-	var thisControllerMpd = this;
+	// This fixed variable will let us refer to 'this' object at deeper scopes
+	var _this = this;
+
+	// Save a reference to the parent commandRouter
+	this.commandRouter = commandRouter;
+
+	// Connect to MPD
+	this.clientMpd = libMpd.connect({port: nPort, host: nHost});
+
+	// Make a promise for when the MPD connection is ready to receive events
+	this.mpdReady = libQ.ninvoke(_this.clientMpd, 'on', 'ready');
+
+	// When playback status changes
+	this.clientMpd.on('system-player', function () {
+
+		_this.sendMpdCommand('status', []) // Get the updated state
+			.then(_this.pushState) // then handle the updated state
+			.catch(_this.pushError); // ... or pass the error
+
+	})
 
 	// Make a temporary track library for testing purposes
 	this.library = new Object();
 	this.library['aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND'] = {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}};
 	this.library['aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv'] = {service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}};
 
-	// Create a listener for playback status updates from the MPD daemon
-	this.client.on('system-player', function () {
+}
 
-		// Get the updated state
-		this.sendCommand(libMpd.cmd("status", []), function (err, msg) {
-			if (err) throw err;
+// Public Methods ---------------------------------------------------------------------------------------
+// These are 'this' aware, and return a promise
 
-			// Emit the updated state for the command router to hear
-			// TODO - standardize the format of the emitted state
-			thisControllerMpd.emit('controllerEvent', {type: 'mpdStateUpdate', data: libMpd.parseKeyValueMessage(msg)});
+// Define a general method for sending an MPD command, and return a promise for its execution
+ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
+
+	var _this = this;
+
+	return this.mpdReady
+		.then(function () {
+			return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
 
 		});
 
-	});
+}
+
+// Define a method to get the MPD state
+ControllerMpd.prototype.getState = function () {
+
+	return this.sendMpdCommand('status', []);
 
 }
 
-// MPD play command
-ControllerMpd.prototype.play = function (promisedResponse) {
-	this.client.sendCommand(this.cmd('play', []), promisedResponse.resolve());
+// Define a method to clear, add, and play an array of tracks
+ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
-}
-
-// MPD stop command
-ControllerMpd.prototype.stop = function (promisedResponse) {
-	this.client.sendCommand(this.cmd('stop', []), promisedResponse.resolve());
-
-}
-
-// MPD clear queue, add array of tracks, and play
-ControllerMpd.prototype.clearAddPlay = function (arrayTrackIds, promisedResponse) {
-	var thisControllerMpd = this;
+	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
 	var arrayTrackUris = arrayTrackIds.map(function (curTrackId) {
+
 		return convertTrackIdToUri(curTrackId);
 
 	});
 
-console.log(JSON.stringify(arrayTrackUris));
 	// Clear the queue, add the first track, and start playback
-	this.client.sendCommand(thisControllerMpd.cmd('clear', []));
-	this.client.sendCommand(thisControllerMpd.cmd('add', [arrayTrackUris.shift()]));
-	this.client.sendCommand(thisControllerMpd.cmd('play', []));
+	var promisedActions = this.sendMpdCommand('clear', [])
+		.then(this.sendMpdCommand('add', [arrayTrackUris.shift()]))
+		.then(this.sendMpdCommand('play', []));
 
 	// If there are more tracks in the array, add those also
 	if (arrayTrackUris.length > 0) {
-		arrayTrackUris.map(function (curTrackUri) {
-			thisControllerMpd.client.sendCommand(thisControllerMpd.cmd('add', [curTrackUri]));
+		promisedActions = arrayTrackUris.reduce(function (previousPromise, curTrackUri) {
+			return previousPromise
+				.then(_this.sendMpdCommand('add', [curTrackUri]));
 
-		});
+		}, promisedActions);
 
 	}
 
-}
-
-// MPD get state
-ControllerMpd.prototype.getState = function (promisedResponse) {
-	var thisControllerMpd = this;
-
-	// Get the updated state
-	thisControllerMpd.client.sendCommand(libMpd.cmd("status", []), function (err, msg) {
-		if (err) throw err;
-
-		// Resolve the promise with the updated state
-		// TODO - standardize the format of the returned state
-		promisedResponse.resolve({type: 'mpdStateUpdate', data: libMpd.parseKeyValueMessage(msg)});
-
-	});
+	return promisedActions;
 
 }
 
 // MPD get queue, returns array of strings, each representing the URI of a track
-ControllerMpd.prototype.getQueue = function (promisedResponse) {
-	var thisControllerMpd = this;
+ControllerMpd.prototype.getQueue = function () {
 
-	// Get the updated queue
-	thisControllerMpd.client.sendCommand(libMpd.cmd("playlist", []), function (err, msg) {
-		if (err) throw err;
-
-		// Resolve the promise with the updated queue
-		var objMpdQueue = libMpd.parseKeyValueMessage(msg);
-		var arrayMpdQueue = Object.keys(objMpdQueue).map(function (currentKey) {
-			return objMpdQueue[currentKey];
+	return this.sendCommand('playlist', [])
+		.then(function (sPlaylist) {
+			return libQ.fcall(parsePlaylist);
 
 		});
 
-		promisedResponse.resolve({type: 'mpdQueueUpdate', data: arrayMpdQueue});
+}
 
-	});
+// Internal methods ---------------------------------------------------------------------------
+// These are 'this' aware, and may or may not return a promise
+
+// Announce updated MPD state
+ControllerMpd.prototype.pushState = function (sState) {
+
+	console.log(sState);
+
+	// Return a resolved empty promise to represent completion
+	return libQ();
 
 }
 
+// Pass the error if we don't want to handle it
+ControllerMpd.prototype.pushError = function (sReason) {
+
+	console.log(sReason);
+
+	// Return a resolved empty promise to represent completion
+	return libQ();
+
+}
+
+// Internal helper functions --------------------------------------------------------------------------
+// These are static, and not 'this' aware
+
+// Parse MPD's text playlist into a Volumio recognizable playlist object
+function parsePlaylist (sPlaylist) {
+
+	// Convert text playlist to object
+	var objMpdQueue = libMpd.parseKeyValueMessage(playlist);
+
+	// objMpdQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
+	// We want to convert to a straight array of trackIds
+	var arrayMpdQueue = Object.keys(objMpdQueue)
+		.map(function (currentKey) {
+			return convertUriToTrackId(objMpdQueue[currentKey]);
+
+		});
+
+}
+
+// Helper function to convert trackId to URI
 function convertTrackIdToUri (input) {
+
 	// Convert base64->utf8
 	return (new Buffer(input, 'base64')).toString('utf8');
 
 }
 
+// Helper function to convert URI to trackId
 function convertUriToTrackId (input) {
+
 	// Convert utf8->base64
 	return (new Buffer(input, 'utf8')).toString('base64');
 

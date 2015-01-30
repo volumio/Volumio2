@@ -18,6 +18,6 @@ var server = app.listen(app.get('port'), function() {
 	  console.log('Express server listening on port ' + server.address().port);
 });
 
-var CoreCommandRouter = new (require('../controllers/core-commandrouter'))(server);
+var commandRouter = new (require('../controllers/core-commandrouter'))(server);
 
 

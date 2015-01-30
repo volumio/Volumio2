@@ -1,3 +1,5 @@
+var libQ = require('q');
+
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
 function CorePlayQueue () {
@@ -13,16 +15,16 @@ function CorePlayQueue () {
 }
 
 CorePlayQueue.prototype.getQueue = function () {
-	return this.arrayQueue;
 
-}
-
-CorePlayQueue.prototype.modQueue = function () {
+	console.log('CorePlayQueue::getQueue');
+	return libQ(this.arrayQueue);
 
 }
 
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
+
+	console.log('CorePlayQueue::getTrackBlock');
 	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
 
@@ -43,6 +45,6 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 		});
 
-	return {service: sTargetService, trackids: arrayTrackIds};
+	return libQ({service: sTargetService, trackids: arrayTrackIds, startindex: nStartIndex});
 
 }
