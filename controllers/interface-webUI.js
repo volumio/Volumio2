@@ -16,7 +16,7 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioGetState', function() {
 			_thisConnWebSocket = this;
 
-			logStart('volumioGetState')
+			logStart('Client requests Volumio state')
 				.then(commandRouter.volumioGetState.bind(commandRouter))
 				.then(function (state) {
 					return _this.volumioPushState.call(_this, state, _thisConnWebSocket);
@@ -30,7 +30,7 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioGetQueue', function() {
 			_thisConnWebSocket = this;
 
-			logStart('volumioGetQueue')
+			logStart('Client requests Volumio queue')
 				.then(commandRouter.volumioGetQueue.bind(commandRouter))
 				.then(function (queue) {
 					return _this.volumioPushQueue.call(_this, queue, _thisConnWebSocket);
@@ -44,7 +44,7 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioPlay', function() {
 			_thisConnWebSocket = this;
 
-			logStart('volumioPlay')
+			logStart('Client requests Volumio play')
 				.then(commandRouter.volumioPlay.bind(commandRouter))
 				.catch(console.log)
 				.done(logDone);
@@ -103,15 +103,14 @@ InterfaceWebUI.prototype.volumioPushState = function (state, connWebSocket) {
 
 function logDone () {
 
-	console.log('------------------------------ End Chain');
+	console.log('------------------------------');
 	return libQ();
 
 }
 
 function logStart (sCommand) {
 
-	console.log('\n---------------------------- Start Chain');
-	console.log(sCommand);
+	console.log('\n---------------------------- ' + sCommand);
 	return libQ();
 
 }

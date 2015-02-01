@@ -14,6 +14,10 @@ function CorePlayQueue () {
 
 }
 
+// Public Methods ---------------------------------------------------------------------------------------
+// These are 'this' aware, and return a promise
+
+// Get a promise for contents of play queue
 CorePlayQueue.prototype.getQueue = function () {
 
 	console.log('CorePlayQueue::getQueue');

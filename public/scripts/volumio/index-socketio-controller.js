@@ -1,5 +1,7 @@
 var socket = io();
-var nPlayQueuePosition = 0;
+var playerState = {};
+var timeLastStateUpdate = 0;
+var timerPlayback = null;
 
 // Define button actions --------------------------------------------
 document.getElementById('button-volumioplay').onclick = function() {emitClientEvent('volumioPlay', '');}
@@ -51,15 +53,31 @@ function printConsoleMessage (message) {
 
 }
 
-function updatePlayerState (playerState) {
-	clearPlayerState();
+function updatePlayerStateDisplay () {
+	clearPlayerStateDisplay();
 
 	var nodeText = document.createTextNode(JSON.stringify(playerState));
 	document.getElementById('playerstate').appendChild(nodeText);
 
 }
 
-function clearPlayerState() {
+function startPlaybackTimer (nStartTime) {
+	window.clearInterval(timerPlayback);
+
+	timerPlayback = window.setInterval(function () {
+		playerState.seek = nStartTime + Date.now() - timeLastStateUpdate;
+		updatePlayerStateDisplay();
+
+	}, 500);
+
+}
+
+function stopPlaybackTimer () {
+	window.clearInterval(timerPlayback);
+
+}
+
+function clearPlayerStateDisplay() {
 	var nodePlayerState = document.getElementById('playerstate');
 
 	if (nodePlayerState.firstChild) {
@@ -124,12 +142,21 @@ socket.on('disconnect', function () {
 	printConsoleMessage('Websocket disconnected.');
 	disableControls();
 	clearPlayQueue();
-	clearPlayerState();
+	clearPlayerStateDisplay();
+	stopPlaybackTimer();
 
 });
 
 socket.on('volumioPushState', function (state) {
-	updatePlayerState(state);
+	playerState = state;
+	timeLastStateUpdate = Date.now();
+	updatePlayerStateDisplay();
+
+	if (state.status === 'play') {
+		startPlaybackTimer(state.seek);
+
+	}
+
 	printConsoleMessage('volumioPushState: ' + JSON.stringify(state));
 
 });

@@ -20,9 +20,11 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 	// When playback status changes
 	this.clientMpd.on('system-player', function () {
 
-		_this.sendMpdCommand('status', []) // Get the updated state
-			.then(_this.pushState) // then handle the updated state
-			.catch(_this.pushError); // ... or pass the error
+		logStart('MPD announces state update')
+			.then(_this.getState.bind(_this)) // Get the updated state
+			.then(_this.pushState.bind(_this)) // then handle the updated state
+			.catch(_this.pushError.bind(_this)) // ... or pass the error
+			.done(logDone);
 
 	})
 
@@ -36,29 +38,34 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
 
-// Define a general method for sending an MPD command, and return a promise for its execution
-ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
+// Define a method to get the MPD state
+ControllerMpd.prototype.getState = function () {
 
-	var _this = this;
-
-	return this.mpdReady
-		.then(function () {
-			return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
+	console.log('ControllerMpd::getState');
+	return this.sendMpdCommand('status', [])
+		.then(function (sState) {
+			return libQ(parseState).fcall(sState);
 
 		});
 
 }
 
-// Define a method to get the MPD state
-ControllerMpd.prototype.getState = function () {
+// MPD get queue, returns array of strings, each representing the URI of a track
+ControllerMpd.prototype.getQueue = function () {
 
-	return this.sendMpdCommand('status', []);
+	console.log('ControllerMpd::getQueue');
+	return this.sendCommand('playlist', [])
+		.then(function (sPlaylist) {
+			return libQ(parsePlaylist).fcall(sPlaylist);
+
+		});
 
 }
 
 // Define a method to clear, add, and play an array of tracks
 ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
+	console.log('ControllerMpd::clearAddPlayTracks');
 	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
@@ -87,37 +94,41 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 }
 
-// MPD get queue, returns array of strings, each representing the URI of a track
-ControllerMpd.prototype.getQueue = function () {
-
-	return this.sendCommand('playlist', [])
-		.then(function (sPlaylist) {
-			return libQ.fcall(parsePlaylist);
-
-		});
-
-}
-
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
 // Announce updated MPD state
-ControllerMpd.prototype.pushState = function (sState) {
+ControllerMpd.prototype.pushState = function (state) {
 
-	console.log(sState);
+	console.log('ControllerMpd::pushState');
 
 	// Return a resolved empty promise to represent completion
-	return libQ();
+	return this.commandRouter.mpdPushState(state);
 
 }
 
 // Pass the error if we don't want to handle it
 ControllerMpd.prototype.pushError = function (sReason) {
 
+	console.log('ControllerMpd::pushError');
 	console.log(sReason);
 
 	// Return a resolved empty promise to represent completion
 	return libQ();
+
+}
+
+// Define a general method for sending an MPD command, and return a promise for its execution
+ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
+
+	console.log('ControllerMpd::sendMpdCommand');
+	var _this = this;
+
+	return this.mpdReady
+		.then(function () {
+			return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
+
+		});
 
 }
 
@@ -128,15 +139,54 @@ ControllerMpd.prototype.pushError = function (sReason) {
 function parsePlaylist (sPlaylist) {
 
 	// Convert text playlist to object
-	var objMpdQueue = libMpd.parseKeyValueMessage(playlist);
+	var objQueue = libMpd.parseKeyValueMessage(sPlaylist);
 
-	// objMpdQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
+	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
-	var arrayMpdQueue = Object.keys(objMpdQueue)
+	return Object.keys(objQueue)
 		.map(function (currentKey) {
-			return convertUriToTrackId(objMpdQueue[currentKey]);
+			return convertUriToTrackId(objQueue[currentKey]);
 
 		});
+
+}
+
+// Parse MPD's text status into a Volumio recognizable status object
+function parseState (sState) {
+
+	var objState = libMpd.parseKeyValueMessage(sState);
+
+	// Pull time data out of status message
+	var nDuration = 0;
+	if ('time' in objState) {
+		var arrayTimeData = objState.time.split(':');
+		nDuration = Number(arrayTimeData[1]);
+
+	}
+
+	var nSeek = 0;
+	if ('elapsed' in objState) {
+		nSeek = Number(objState.elapsed) * 1000;
+
+	}
+
+	// Pull the queue position
+	var nPosition = 0;
+	if ('song' in objState) {
+		nPosition = Number(objState.song);
+
+	}
+
+	return {
+		status: objState.state,
+		repeat: Number(objState.repeat),
+		random: Number(objState.random),
+		single: Number(objState.single),
+		position: nPosition,
+		seek: nSeek,
+		duration: nDuration
+
+	};
 
 }
 
@@ -153,5 +203,19 @@ function convertUriToTrackId (input) {
 
 	// Convert utf8->base64
 	return (new Buffer(input, 'utf8')).toString('base64');
+
+}
+
+function logDone () {
+
+	console.log('------------------------------');
+	return libQ();
+
+}
+
+function logStart (sCommand) {
+
+	console.log('\n---------------------------- ' + sCommand);
+	return libQ();
 
 }

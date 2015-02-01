@@ -87,3 +87,12 @@ CoreCommandRouter.prototype.mpdGetQueue = function () {
 	return this.controllerMpd.getQueue();
 
 }
+
+// Methods usually called by the service controllers --------------------------------------------------------------
+
+CoreCommandRouter.prototype.mpdPushState = function (state) {
+
+	console.log('CoreCommandRouter::mpdPushState');
+	return this.stateMachine.syncStateFromMpd(state);
+
+}

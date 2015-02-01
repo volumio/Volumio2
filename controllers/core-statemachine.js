@@ -17,11 +17,10 @@ function CoreStateMachine (commandRouter) {
 CoreStateMachine.prototype.getState = function () {
 
 	console.log('CoreStateMachine::getState');
-	var _this = this;
 
 	// <- TODO - update seek pos here
 
-	return libQ({status: _this.currentStatus, position: _this.currentPosition, seek: _this.currentSeek});
+	return libQ({status: this.currentStatus, position: this.currentPosition, seek: this.currentSeek, duration: this.currentDuration});
 
 }
 
@@ -37,7 +36,6 @@ CoreStateMachine.prototype.getQueue = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
 
 	console.log('CoreStateMachine::play');
-	var _this = this;
 
 	if (this.currentStatus === 'stop') {
 		this.currentStatus = 'playPending';
@@ -152,9 +150,42 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 }
 
+// Volumio sync state from MPD
+// Input state object has the form {status: 'play', repeat: 0, random: 0, single: 0, position: 0, seek: 0, duration: 0}
+CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
+
+	console.log('CoreStateMachine::syncStateFromMpd');
+	var _this = this;
+
+	this.timeLastServiceStateUpdate = Date.now();
+
+	if (stateMpd.status === 'play') {
+
+		// We are waiting for playback to begin, and it has just begun
+		// Or we are playing, and the playback service has announced an updated play state (next track, etc)
+		if (this.currentStatus === 'playPending' || this.currentStatus === 'play') {
+			this.currentStatus = 'play';
+			this.currentPosition = stateMpd.position + this.currentTrackBlock.startindex;
+			this.currentSeek = stateMpd.seek;
+			this.currentDuration = stateMpd.duration;
+
+			this.startPlaybackTimer(this.currentSeek)
+				.catch(_this.pushError.bind(_this))
+
+			return this.pushState();
+
+		}
+
+	}
+
+	return libQ.reject('Error: MPD state \"' + stateMpd.status + '\" not recognized when Volumio state is \"' + this.currentStatus + '\"');
+
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
+// Perform a clear-add-play action on the current track block
 CoreStateMachine.prototype.serviceClearAddPlay = function () {
 
 	console.log('CoreStateMachine::serviceClearAddPlay');
@@ -183,10 +214,39 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 	this.currentStatus = 'stop';
 	this.currentPosition = 0;
 	this.currentSeek = 0;
+	this.currentDuration = 0;
 	this.currentTrackBlock = [];
-	this.currentService = '';
+	this.timeLastServiceStateUpdate = 0;
+	this.timerPlayback = null;
 
 	// Return a resolved empty promise to represent completion
+	return libQ();
+
+}
+
+// Start the timer to track playback time (counts in ms)
+CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
+
+	console.log('CoreStateMachine::startPlaybackTimer');
+	var _this = this;
+
+	return this.stopPlaybackTimer()
+		.then(function () {
+			_this.timerPlayback = setInterval(function () {
+				_this.currentSeek = nStartTime + Date.now() - _this.timeLastServiceStateUpdate;
+
+			}, 500);
+
+		});
+
+}
+
+// Stop playback timer
+CoreStateMachine.prototype.stopPlaybackTimer = function () {
+
+	console.log('CoreStateMachine::stopPlaybackTimer');
+	clearInterval(this.timerPlayback);
+
 	return libQ();
 
 }
