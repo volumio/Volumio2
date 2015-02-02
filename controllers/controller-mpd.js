@@ -113,6 +113,24 @@ ControllerMpd.prototype.stop = function () {
 
 }
 
+// MPD pause
+ControllerMpd.prototype.pause = function () {
+
+	console.log('ControllerMpd::pause');
+
+	return this.sendMpdCommand('pause', []);
+
+}
+
+// MPD resume
+ControllerMpd.prototype.resume = function () {
+
+	console.log('ControllerMpd::resume');
+
+	return this.sendMpdCommand('play', []);
+
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -214,9 +232,9 @@ ControllerMpd.prototype.parseState = function (objState) {
 	var nChannels = null;
 	if ('audio' in objState) {
 		var objMetrics = objState.audio.split(':');
-		nSampleRate = objMetrics[0];
-		nBitDepth = objMetrics[1];
-		nChannels = objMetrics[2];
+		nSampleRate = Number(objMetrics[0]);
+		nBitDepth = Number(objMetrics[1]);
+		nChannels = Number(objMetrics[2]);
 
 	}
 

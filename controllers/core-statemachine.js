@@ -18,8 +18,6 @@ CoreStateMachine.prototype.getState = function () {
 
 	console.log('CoreStateMachine::getState');
 
-	// <- TODO - update seek pos here
-
 	return libQ({
 		status: this.currentStatus,
 		position: this.currentPosition,
@@ -58,7 +56,8 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 	// Pause -> Play transition
 	} else if (this.currentStatus === 'pause') {
 		this.currentStatus = 'play';
-		// TODO action here
+
+		return this.serviceResume();
 
 	}
 
@@ -100,7 +99,9 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 
 		this.currentStatus = 'play';
 		this.currentSeek = 0;
-		// TODO action here
+
+		return this.updateTrackBlock()
+			.then(_this.serviceClearAddPlay.bind(_this));
 
 	}
 
@@ -143,7 +144,10 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 		this.currentStatus = 'play';
 		this.currentSeek = 0;
-		// TODO action here
+
+		return this.updateTrackBlock()
+			.then(_this.serviceClearAddPlay.bind(_this));
+
 
 	}
 
@@ -163,12 +167,13 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		return this.updateTrackBlock()
 			.then(_this.serviceStop.bind(_this));
 
-
 	// Pause -> Stop transition
 	} else if (this.currentStatus === 'pause') {
 		this.currentStatus = 'stop';
 		this.currentSeek = 0;
-		// TODO action here
+
+		return this.updateTrackBlock()
+			.then(_this.serviceStop.bind(_this));
 
 	}
 
@@ -183,8 +188,8 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 	// Play -> Pause transition
 	if (this.currentStatus === 'play') {
 		this.currentStatus = 'pause';
-		// <- TODO - update seek pos here
-		// TODO action here
+
+		this.servicePause();
 
 	}
 
@@ -209,6 +214,7 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 		// We are waiting for playback to begin, and it has just begun
 		// Or we are playing, and the playback service has announced an updated play state (next track, etc)
 		if (this.currentStatus === 'play') {
+			this.currentStatus = 'play';
 			this.currentPosition = stateMpd.position + this.currentTrackBlock.startindex;
 			this.currentSeek = stateMpd.seek;
 			this.currentDuration = stateMpd.duration;
@@ -259,6 +265,19 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
 		}
 
+	} else if (stateMpd.status === 'pause') {
+
+		if (this.currentStatus === 'pause') {
+			this.stopPlaybackTimer()
+				.catch(_this.pushError.bind(_this));
+
+			this.pushState();
+
+			// Return a resolved empty promise to represent completion
+			return libQ();
+
+		}
+
 	}
 
 	return libQ.reject('Error: MPD state \"' + stateMpd.status + '\" not recognized when Volumio state is \"' + this.currentStatus + '\"');
@@ -294,7 +313,7 @@ CoreStateMachine.prototype.serviceClearAddPlay = function () {
 
 	} else {
 
-		return libQ.reject('Service ' + trackBlock.service + ' is not recognized for \"clear-add-play\" action');
+		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"clear-add-play\" action');
 
 	}
 
@@ -312,7 +331,43 @@ CoreStateMachine.prototype.serviceStop = function () {
 
 	} else {
 
-		return libQ.reject('Service ' + trackBlock.service + ' is not recognized for \"stop\" action');
+		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"stop\" action');
+
+	}
+
+}
+
+// Pause the current track block playback
+CoreStateMachine.prototype.servicePause = function () {
+
+	console.log('CoreStateMachine::servicePause');
+	var trackBlock = this.currentTrackBlock;
+
+	if (trackBlock.service === 'mpd') {
+
+		return this.commandRouter.mpdPause();
+
+	} else {
+
+		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"pause\" action');
+
+	}
+
+}
+
+// Resume the current track block playback
+CoreStateMachine.prototype.serviceResume = function () {
+
+	console.log('CoreStateMachine::serviceResume');
+	var trackBlock = this.currentTrackBlock;
+
+	if (trackBlock.service === 'mpd') {
+
+		return this.commandRouter.mpdResume();
+
+	} else {
+
+		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"resume\" action');
 
 	}
 

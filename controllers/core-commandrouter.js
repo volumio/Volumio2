@@ -30,6 +30,14 @@ CoreCommandRouter.prototype.volumioPlay = function () {
 
 }
 
+// Volumio Pause
+CoreCommandRouter.prototype.volumioPause = function () {
+
+	console.log('CoreCommandRouter::volumioPause');
+	return this.stateMachine.pause();
+
+}
+
 // Volumio Stop
 CoreCommandRouter.prototype.volumioStop = function () {
 
@@ -117,6 +125,22 @@ CoreCommandRouter.prototype.mpdStop = function () {
 
 	console.log('CoreCommandRouter::mpdStop');
 	return this.controllerMpd.stop();
+
+}
+
+// MPD Pause
+CoreCommandRouter.prototype.mpdPause = function () {
+
+	console.log('CoreCommandRouter::mpdPause');
+	return this.controllerMpd.pause();
+
+}
+
+// MPD Resume
+CoreCommandRouter.prototype.mpdResume = function () {
+
+	console.log('CoreCommandRouter::mpdResume');
+	return this.controllerMpd.resume();
 
 }
 

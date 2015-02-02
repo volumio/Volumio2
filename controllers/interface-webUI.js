@@ -50,6 +50,15 @@ function InterfaceWebUI (server, commandRouter) {
 
 		});
 
+		connWebSocket.on('volumioPause', function() {
+
+			logStart('Client requests Volumio pause')
+				.then(commandRouter.volumioPause.bind(commandRouter))
+				.catch(console.log)
+				.done(logDone);
+
+		});
+
 		connWebSocket.on('volumioStop', function() {
 
 			logStart('Client requests Volumio stop')

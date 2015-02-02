@@ -15,17 +15,17 @@
 		<button id='button-volumioprev' class='control-websocket' disabled>Prev</button>
 		<button id='button-volumionext' class='control-websocket' disabled>Next</button>
 
+		<h3>Player State</h3>
+		<div id='playerstate'></div>
+
+		<h3>Play Queue</h3>
+		<ol id='playqueue' start='0'></ol>
+
 		<h3>Console</h3>
 		<button id='button-clearconsole'>Clear</button>
 		<div id='div-console' style='border: 1px solid black; height: 300px; overflow-y: scroll;'>
 			<ul id='console' style='font-family: monospace;'></ul>
 		</div>
-
-		<h3>Player State</h3>
-		<div id='playerstate'></div>
-
-		<h3>Play Queue</h3>
-		<ol id='playqueue'></ul>
 
 		<!-- <script src="./scripts/assets/jquery.1.11.1.min.js"></script> -->
   		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
