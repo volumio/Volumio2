@@ -1,6 +1,6 @@
 // This module work as interface for all the third parties client wich want to talk with an MPD server.
 // This module get all the MPD client request but they will be handled from Volumio Core Module
-
+var libQ = require('q');
 var net = require('net');
 var sys = require('sys');
 // server settings
