@@ -387,7 +387,7 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 		return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushQueue', queue);
 
 	}
-	*//
+	*/
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
