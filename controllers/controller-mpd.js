@@ -42,9 +42,20 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 ControllerMpd.prototype.getState = function () {
 
 	console.log('ControllerMpd::getState');
+	var _this = this;
+	var collectedState = {};
+
 	return this.sendMpdCommand('status', [])
-		.then(function (sState) {
-			return libQ(parseState).fcall(sState);
+		.then(_this.parseState.bind(_this))
+		.then(function (state) {
+			collectedState = state;
+			return _this.sendMpdCommand('playlistinfo', [state.position]);
+
+		})
+		.then(_this.parseTrackInfo.bind(_this))
+		.then(function (trackinfo) {
+			collectedState.dynamictitle = trackinfo.dynamictitle;
+			return libQ(collectedState);
 
 		});
 
@@ -54,11 +65,10 @@ ControllerMpd.prototype.getState = function () {
 ControllerMpd.prototype.getQueue = function () {
 
 	console.log('ControllerMpd::getQueue');
-	return this.sendCommand('playlist', [])
-		.then(function (sPlaylist) {
-			return libQ(parsePlaylist).fcall(sPlaylist);
+	var _this = this;
 
-		});
+	return this.sendCommand('playlist', [])
+		.then(_this.parsePlaylist.bind(_this));
 
 }
 
@@ -136,36 +146,48 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 		.then(function () {
 			return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
 
-		});
+		})
+		.then(libMpd.parseKeyValueMessage.bind(libMpd));
 
 }
 
-// Internal helper functions --------------------------------------------------------------------------
-// These are static, and not 'this' aware
+// Parse MPD's track info text into Volumio recognizable object
+ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
+
+	console.log('ControllerMpd::parseTrackInfo');
+
+	if ('Title' in objTrackInfo) {
+		return libQ({dynamictitle: objTrackInfo.Title});
+
+	} else {
+		return libQ({dynamictitle: null});
+
+	}
+
+}
 
 // Parse MPD's text playlist into a Volumio recognizable playlist object
-function parsePlaylist (sPlaylist) {
+ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 
-	// Convert text playlist to object
-	var objQueue = libMpd.parseKeyValueMessage(sPlaylist);
+	console.log('ControllerMpd::parsePlaylist');
 
 	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
-	return Object.keys(objQueue)
+	return libQ(Object.keys(objQueue)
 		.map(function (currentKey) {
 			return convertUriToTrackId(objQueue[currentKey]);
 
-		});
+		}));
 
 }
 
 // Parse MPD's text status into a Volumio recognizable status object
-function parseState (sState) {
+ControllerMpd.prototype.parseState = function (objState) {
 
-	var objState = libMpd.parseKeyValueMessage(sState);
+	console.log('ControllerMpd::parseState');
 
 	// Pull track duration out of status message
-	var nDuration = 0;
+	var nDuration = null;
 	if ('time' in objState) {
 		var arrayTimeData = objState.time.split(':');
 		nDuration = Number(arrayTimeData[1]);
@@ -173,31 +195,49 @@ function parseState (sState) {
 	}
 
 	// Pull the elapsed time
-	var nSeek = 0;
+	var nSeek = null;
 	if ('elapsed' in objState) {
 		nSeek = Number(objState.elapsed) * 1000;
 
 	}
 
-	// Pull the queue position
-	var nPosition = 0;
+	// Pull the queue position of the current track
+	var nPosition = null;
 	if ('song' in objState) {
 		nPosition = Number(objState.song);
 
 	}
 
-	return {
+	// Pull audio metrics
+	var nBitDepth = null;
+	var nSampleRate = null;
+	var nChannels = null;
+	if ('audio' in objState) {
+		var objMetrics = objState.audio.split(':');
+		nSampleRate = objMetrics[0];
+		nBitDepth = objMetrics[1];
+		nChannels = objMetrics[2];
+
+	}
+
+	return libQ({
 		status: objState.state,
 		repeat: Number(objState.repeat),
 		random: Number(objState.random),
 		single: Number(objState.single),
 		position: nPosition,
 		seek: nSeek,
-		duration: nDuration
+		duration: nDuration,
+		samplerate: nSampleRate,
+		bitdepth: nBitDepth,
+		channels: nChannels
 
-	};
+	});
 
 }
+
+// Internal helper functions --------------------------------------------------------------------------
+// These are static, and not 'this' aware
 
 // Helper function to convert trackId to URI
 function convertTrackIdToUri (input) {

@@ -20,7 +20,17 @@ CoreStateMachine.prototype.getState = function () {
 
 	// <- TODO - update seek pos here
 
-	return libQ({status: this.currentStatus, position: this.currentPosition, seek: this.currentSeek, duration: this.currentDuration});
+	return libQ({
+		status: this.currentStatus,
+		position: this.currentPosition,
+		dynamictitle: this.currentDynamicTitle,
+		seek: this.currentSeek,
+		duration: this.currentDuration,
+		samplerate: this.currentSampleRate,
+		bitdepth: this.currentBitDepth,
+		channels: this.currentChannels
+
+	});
 
 }
 
@@ -181,7 +191,7 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 }
 
 // Volumio sync state from MPD
-// Input state object has the form {status: 'play', repeat: 0, random: 0, single: 0, position: 0, seek: 0, duration: 0}
+// Input state object has the form {status: 'play', repeat: 0, random: 0, single: 0, position: 0, seek: 0, duration: 0, dynamictitle: ''}
 CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
 	if (this.currentTrackBlock.service !== 'mpd') {
@@ -202,6 +212,10 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 			this.currentPosition = stateMpd.position + this.currentTrackBlock.startindex;
 			this.currentSeek = stateMpd.seek;
 			this.currentDuration = stateMpd.duration;
+			this.currentDynamicTitle = stateMpd.dynamictitle;
+			this.currentSampleRate = stateMpd.samplerate;
+			this.currentBitDepth = stateMpd.bitdepth;
+			this.currentChannels = stateMpd.channels;
 
 			this.startPlaybackTimer(this.currentSeek)
 				.catch(_this.pushError.bind(_this));
@@ -219,6 +233,10 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 		if (this.currentStatus === 'play') {
 			this.currentSeek = 0;
 			this.currentDuration = 0;
+			this.currentDynamicTitle = null;
+			this.currentSampleRate = null;
+			this.currentBitDepth = null;
+			this.currentChannels = null;
 
 			return this.next();
 
@@ -226,6 +244,10 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 		} else if (this.currentStatus === 'stop') {
 			this.currentSeek = 0;
 			this.currentDuration = 0;
+			this.currentDynamicTitle = null;
+			this.currentSampleRate = null;
+			this.currentBitDepth = null;
+			this.currentChannels = null;
 
 			this.stopPlaybackTimer()
 				.catch(_this.pushError.bind(_this));
@@ -307,6 +329,10 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 	this.currentTrackBlock = [];
 	this.timeLastServiceStateUpdate = 0;
 	this.timerPlayback = null;
+	this.currentDynamicTitle = null;
+	this.currentSampleRate = null;
+	this.currentBitDepth = null;
+	this.currentChannels = null;
 
 	// Return a resolved empty promise to represent completion
 	return libQ();
