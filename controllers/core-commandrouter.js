@@ -10,6 +10,7 @@ function CoreCommandRouter (server) {
 	// Start the client interfaces
 	this.arrayInterfaces = [];
 	this.arrayInterfaces.push(new (require('../controllers/interface-webUI.js'))(server, this));
+	this.arrayInterfaces.push(new (require('../controllers/interface-mpd.js'))(server, this));
 
 	// Move these variables out at some point
 	var nMpdPort = 6600;
