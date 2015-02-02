@@ -218,11 +218,17 @@ function InterfaceMPD (server, commandRouter) {
 									socket.write("OK\n");
 									break;
 							case command.NEXT :
-									sendSingleCommandToCore(sCommand, sParam);
+									logStart('Client requests Volumio next' )
+										.then(commandRouter.volumioNext.bind(commandRouter))
+										.catch(console.log)
+										.done(logDone);
 									socket.write("OK\n");
 									break;
 							case command.PAUSE :
-									sendSingleCommandToCore(sCommand, sParam);
+									logStart('Client requests Volumio pause' )
+										.then(commandRouter.volumioPause.bind(commandRouter))
+										.catch(console.log)
+										.done(logDone);
 									socket.write("OK\n");
 									break;
 						case command.PLAY :
@@ -253,7 +259,10 @@ function InterfaceMPD (server, commandRouter) {
 								socket.write("OK\n");
 								break;        
 							case command.PREVIOUS:
-									sendSingleCommandToCore(sCommand, sParam);
+									logStart('Client requests Volumio previous' )
+										.then(commandRouter.volumioPrevious.bind(commandRouter))
+										.catch(console.log)
+										.done(logDone);
 									socket.write("OK\n");
 									break;
 							case command.RANDOM :
@@ -289,7 +298,10 @@ function InterfaceMPD (server, commandRouter) {
 									socket.write("OK\n");
 									break;
 							case command.STOP :
-									sendSingleCommandToCore(sCommand, sParam);
+									logStart('Client requests Volumio stop' )
+										.then(commandRouter.volumioStop.bind(commandRouter))
+										.catch(console.log)
+										.done(logDone);
 									socket.write("OK\n");
 									break;
 							case command.UPDATE :
