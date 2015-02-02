@@ -155,6 +155,9 @@ socket.on('volumioPushState', function (state) {
 	if (state.status === 'play') {
 		startPlaybackTimer(state.seek);
 
+	} else {
+		stopPlaybackTimer();
+
 	}
 
 	printConsoleMessage('volumioPushState: ' + JSON.stringify(state));

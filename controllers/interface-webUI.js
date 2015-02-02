@@ -42,10 +42,36 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioPlay', function() {
-			_thisConnWebSocket = this;
 
 			logStart('Client requests Volumio play')
 				.then(commandRouter.volumioPlay.bind(commandRouter))
+				.catch(console.log)
+				.done(logDone);
+
+		});
+
+		connWebSocket.on('volumioStop', function() {
+
+			logStart('Client requests Volumio stop')
+				.then(commandRouter.volumioStop.bind(commandRouter))
+				.catch(console.log)
+				.done(logDone);
+
+		});
+
+		connWebSocket.on('volumioPrevious', function() {
+
+			logStart('Client requests Volumio previous')
+				.then(commandRouter.volumioPrevious.bind(commandRouter))
+				.catch(console.log)
+				.done(logDone);
+
+		});
+
+		connWebSocket.on('volumioNext', function() {
+
+			logStart('Client requests Volumio next')
+				.then(commandRouter.volumioNext.bind(commandRouter))
 				.catch(console.log)
 				.done(logDone);
 

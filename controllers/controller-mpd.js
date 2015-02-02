@@ -94,6 +94,15 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 }
 
+// MPD stop
+ControllerMpd.prototype.stop = function () {
+
+	console.log('ControllerMpd::stop');
+
+	return this.sendMpdCommand('stop', []);
+
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -102,7 +111,6 @@ ControllerMpd.prototype.pushState = function (state) {
 
 	console.log('ControllerMpd::pushState');
 
-	// Return a resolved empty promise to represent completion
 	return this.commandRouter.mpdPushState(state);
 
 }
@@ -156,7 +164,7 @@ function parseState (sState) {
 
 	var objState = libMpd.parseKeyValueMessage(sState);
 
-	// Pull time data out of status message
+	// Pull track duration out of status message
 	var nDuration = 0;
 	if ('time' in objState) {
 		var arrayTimeData = objState.time.split(':');
@@ -164,6 +172,7 @@ function parseState (sState) {
 
 	}
 
+	// Pull the elapsed time
 	var nSeek = 0;
 	if ('elapsed' in objState) {
 		nSeek = Number(objState.elapsed) * 1000;

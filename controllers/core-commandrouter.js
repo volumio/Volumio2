@@ -30,6 +30,30 @@ CoreCommandRouter.prototype.volumioPlay = function () {
 
 }
 
+// Volumio Stop
+CoreCommandRouter.prototype.volumioStop = function () {
+
+	console.log('CoreCommandRouter::volumioStop');
+	return this.stateMachine.stop();
+
+}
+
+// Volumio Previous
+CoreCommandRouter.prototype.volumioPrevious = function () {
+
+	console.log('CoreCommandRouter::volumioPrevious');
+	return this.stateMachine.previous();
+
+}
+
+// Volumio Next
+CoreCommandRouter.prototype.volumioNext = function () {
+
+	console.log('CoreCommandRouter::volumioNext');
+	return this.stateMachine.next();
+
+}
+
 // Volumio Get State
 CoreCommandRouter.prototype.volumioGetState = function () {
 
@@ -85,6 +109,14 @@ CoreCommandRouter.prototype.mpdGetQueue = function () {
 
 	console.log('CoreCommandRouter::mpdGetQueue');
 	return this.controllerMpd.getQueue();
+
+}
+
+// MPD Stop
+CoreCommandRouter.prototype.mpdStop = function () {
+
+	console.log('CoreCommandRouter::mpdStop');
+	return this.controllerMpd.stop();
 
 }
 

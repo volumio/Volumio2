@@ -36,15 +36,16 @@ CoreStateMachine.prototype.getQueue = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
 
 	console.log('CoreStateMachine::play');
+	var _this = this;
 
+	// Stop -> Play transition
 	if (this.currentStatus === 'stop') {
-		this.currentStatus = 'playPending';
+		this.currentStatus = 'play';
 
-		this.pushState()
-			.catch(console.log);
+		return this.updateTrackBlock()
+			.then(_this.serviceClearAddPlay.bind(_this));
 
-		return this.serviceClearAddPlay();
-
+	// Pause -> Play transition
 	} else if (this.currentStatus === 'pause') {
 		this.currentStatus = 'play';
 		// TODO action here
@@ -57,21 +58,30 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 CoreStateMachine.prototype.next = function (promisedResponse) {
 
 	console.log('CoreStateMachine::next');
+	var _this = this;
+
+	// Stop -> Next transition
 	if (this.currentStatus === 'stop') {
 		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
 			this.currentPosition++;
-			// TODO action here
+
+			return this.updateTrackBlock()
+				.then(_this.pushState.bind(_this));
 
 		}
 
+	// Play -> Next transition
 	} else if (this.currentStatus === 'play') {
 		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
 			this.currentPosition++;
 			this.currentSeek = 0;
-			// TODO action here
+
+			return this.updateTrackBlock()
+				.then(_this.serviceClearAddPlay.bind(_this));
 
 		}
 
+	// Pause -> Next transitiom
 	} else if (this.currentStatus === 'pause') {
 		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
 			this.currentPosition++;
@@ -90,21 +100,31 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 	console.log('CoreStateMachine::previous');
+	var _this = this;
+
+	// Stop -> Previous transition
 	if (this.currentStatus === 'stop') {
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
-			// TODO action here
+
+			return this.updateTrackBlock()
+				.then(_this.pushState.bind(_this));
 
 		}
 
+	// Play -> Previous transition
 	} else if (this.currentStatus === 'play') {
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
 			this.currentSeek = 0;
-			// TODO action here
+
+			return this.updateTrackBlock()
+				.then(_this.serviceClearAddPlay.bind(_this));
+
 
 		}
 
+	// Pause -> Previous transition
 	} else if (this.currentStatus === 'pause') {
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
@@ -123,11 +143,18 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 CoreStateMachine.prototype.stop = function (promisedResponse) {
 
 	console.log('CoreStateMachine::stop');
+	var _this = this;
+
+	// Play -> Stop transition
 	if (this.currentStatus === 'play') {
 		this.currentStatus = 'stop';
 		this.currentSeek = 0;
-		// TODO action here
 
+		return this.updateTrackBlock()
+			.then(_this.serviceStop.bind(_this));
+
+
+	// Pause -> Stop transition
 	} else if (this.currentStatus === 'pause') {
 		this.currentStatus = 'stop';
 		this.currentSeek = 0;
@@ -141,6 +168,9 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 	console.log('CoreStateMachine::pause');
+	var _this = this;
+
+	// Play -> Pause transition
 	if (this.currentStatus === 'play') {
 		this.currentStatus = 'pause';
 		// <- TODO - update seek pos here
@@ -154,6 +184,11 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 // Input state object has the form {status: 'play', repeat: 0, random: 0, single: 0, position: 0, seek: 0, duration: 0}
 CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
+	if (this.currentTrackBlock.service !== 'mpd') {
+		return libQ.reject('Error: MPD announced a state update when it is not the currently active service');
+
+	}
+
 	console.log('CoreStateMachine::syncStateFromMpd');
 	var _this = this;
 
@@ -163,16 +198,42 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
 		// We are waiting for playback to begin, and it has just begun
 		// Or we are playing, and the playback service has announced an updated play state (next track, etc)
-		if (this.currentStatus === 'playPending' || this.currentStatus === 'play') {
-			this.currentStatus = 'play';
+		if (this.currentStatus === 'play') {
 			this.currentPosition = stateMpd.position + this.currentTrackBlock.startindex;
 			this.currentSeek = stateMpd.seek;
 			this.currentDuration = stateMpd.duration;
 
 			this.startPlaybackTimer(this.currentSeek)
-				.catch(_this.pushError.bind(_this))
+				.catch(_this.pushError.bind(_this));
 
-			return this.pushState();
+			this.pushState();
+
+			// Return a resolved empty promise to represent completion
+			return libQ();
+
+		}
+
+	} else if (stateMpd.status === 'stop') {
+
+		// MPD has stopped, meaning it is finished playing its track block
+		if (this.currentStatus === 'play') {
+			this.currentSeek = 0;
+			this.currentDuration = 0;
+
+			return this.next();
+
+		// Client has requested stop
+		} else if (this.currentStatus === 'stop') {
+			this.currentSeek = 0;
+			this.currentDuration = 0;
+
+			this.stopPlaybackTimer()
+				.catch(_this.pushError.bind(_this));
+
+			this.pushState();
+
+			// Return a resolved empty promise to represent completion
+			return libQ();
 
 		}
 
@@ -185,25 +246,53 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
-// Perform a clear-add-play action on the current track block
-CoreStateMachine.prototype.serviceClearAddPlay = function () {
+// Update the currently active track block
+CoreStateMachine.prototype.updateTrackBlock = function () {
 
-	console.log('CoreStateMachine::serviceClearAddPlay');
+	console.log('CoreStateMachine::updateTrackBlock');
 	var _this = this;
 
 	return this.playQueue.getTrackBlock(this.currentPosition)
 		.then(function (trackBlock) {
 			_this.currentTrackBlock = trackBlock;
 
-			if (trackBlock.service === 'mpd') {
-				return _this.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
-
-			} else {
-				return libQ.reject('Service ' + trackBlock.service + ' is not recognized for clear-add-play action');
-
-			}
-
 		});
+
+}
+
+// Perform a clear-add-play action on the current track block
+CoreStateMachine.prototype.serviceClearAddPlay = function () {
+
+	console.log('CoreStateMachine::serviceClearAddPlay');
+	var trackBlock = this.currentTrackBlock;
+
+	if (trackBlock.service === 'mpd') {
+
+		return this.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
+
+	} else {
+
+		return libQ.reject('Service ' + trackBlock.service + ' is not recognized for \"clear-add-play\" action');
+
+	}
+
+}
+
+// Stop the current track block playback
+CoreStateMachine.prototype.serviceStop = function () {
+
+	console.log('CoreStateMachine::serviceStop');
+	var trackBlock = this.currentTrackBlock;
+
+	if (trackBlock.service === 'mpd') {
+
+		return this.commandRouter.mpdStop();
+
+	} else {
+
+		return libQ.reject('Service ' + trackBlock.service + ' is not recognized for \"stop\" action');
+
+	}
 
 }
 
@@ -230,14 +319,13 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 	console.log('CoreStateMachine::startPlaybackTimer');
 	var _this = this;
 
-	return this.stopPlaybackTimer()
-		.then(function () {
-			_this.timerPlayback = setInterval(function () {
-				_this.currentSeek = nStartTime + Date.now() - _this.timeLastServiceStateUpdate;
+	clearInterval(this.timerPlayback);
+	this.timerPlayback = setInterval(function () {
+		_this.currentSeek = nStartTime + Date.now() - _this.timeLastServiceStateUpdate;
 
-			}, 500);
+	}, 500);
 
-		});
+	return libQ();
 
 }
 
@@ -245,6 +333,7 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 CoreStateMachine.prototype.stopPlaybackTimer = function () {
 
 	console.log('CoreStateMachine::stopPlaybackTimer');
+
 	clearInterval(this.timerPlayback);
 
 	return libQ();
