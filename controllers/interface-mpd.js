@@ -139,7 +139,9 @@ function InterfaceMPD (server, commandRouter) {
 	// create server
 	var protocolServer = net.createServer(function(socket) {
 		socket.setEncoding('utf8');
+		
 		// add client to list
+		clients.push(socket);
 		socket.on('connection', function(socket) {
 			sys.puts("New client connected: " + socket.remoteAddress +':'+ socket.remotePort);
 			clients.push(socket);
@@ -164,7 +166,7 @@ function InterfaceMPD (server, commandRouter) {
 				// get 1 line from our buffer to process
 				var message = results[0];
 				// Print message (for debugging purposes)
-				sys.puts("Received: "+message);
+				//sys.puts("Received: "+message);
 				
 				// some vars to help extract command/parameters from line
 				var nSpaceLocation = 0;
@@ -181,7 +183,7 @@ function InterfaceMPD (server, commandRouter) {
 					sCommand = message.substring(0,nSpaceLocation);
 					sParam = message.substring(nSpaceLocation+1, message.length);
 				}
-				sys.puts("Command: " + sCommand + "\nParam: "+sParam);
+				//sys.puts("Command: " + sCommand + "\nParam: "+sParam);
 				
 				switch(sCommand) {
 						case command.ADD :
@@ -406,7 +408,7 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 InterfaceMPD.prototype.volumioPushState = function (state) {
 
 	console.log('InterfaceMPD::volumioPushState');
-	console.log('volumioPushState: ' + JSON.stringify(state));
+	//console.log('volumioPushState: ' + JSON.stringify(state));
 	
 	//var _this = this;
 
