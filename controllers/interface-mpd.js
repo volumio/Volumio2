@@ -226,7 +226,7 @@ function InterfaceMPD (server, commandRouter) {
 									socket.write("OK\n");
 									break;
 						case command.PLAY :
-									logStart('Client requests Volumio play; )
+									logStart('Client requests Volumio play' )
 										.then(commandRouter.volumioPlay.bind(commandRouter))
 										.catch(console.log)
 										.done(logDone);
@@ -311,7 +311,7 @@ function InterfaceMPD (server, commandRouter) {
 			sys.puts("socket error:", err.stack);
 			socket.destroy();
 		}
-	});
+	}).listen(6500, '0.0.0.0');
 	// on error
 	protocolServer.on('error', function(err) {
 		if (err.code === 'EADDRINUSE') {
