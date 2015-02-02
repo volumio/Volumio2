@@ -359,6 +359,56 @@ String.prototype.startsWith = function (str){
 	return this.slice(0, str.length) == str;
 };
 
+// Receive console messages from commandRouter and broadcast to all connected clients
+InterfaceMPD.prototype.printConsoleMessage = function (message) {
+
+	console.log('InterfaceMPD::printConsoleMessage');
+	// Push the message all clients
+	//this.libSocketIO.emit('printConsoleMessage', message);
+
+	// Return a resolved empty promise to represent completion
+	return libQ();
+
+}
+
+// Receive player queue updates from commandRouter and broadcast to all connected clients
+InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
+
+	console.log('InterfaceMPD::volumioPushQueue');
+	
+	/**
+	var _this = this;
+
+	if (connWebSocket) {
+		return libQ.invoke(connWebSocket, 'emit', 'volumioPushQueue', queue);
+
+	} else {
+		// Push the updated queue to all clients
+		return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushQueue', queue);
+
+	}
+	*//
+}
+
+// Receive player state updates from commandRouter and broadcast to all connected clients
+InterfaceMPD.prototype.volumioPushState = function (state, connWebSocket) {
+
+	console.log('InterfaceMPD::volumioPushState');
+	/*
+	var _this = this;
+
+	if (connWebSocket) {
+		return libQ.invoke(connWebSocket, 'emit', 'volumioPushState', state);
+
+	} else {
+		// Push the updated state to all clients
+		return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushState', state);
+
+	}
+	*/
+
+}
+
 function logDone () {
 
 	console.log('------------------------------');
