@@ -403,21 +403,16 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushState = function (state, connWebSocket) {
+InterfaceMPD.prototype.volumioPushState = function (state) {
 
 	console.log('InterfaceMPD::volumioPushState');
-	/*
-	var _this = this;
+	console.log('volumioPushState: ' + JSON.stringify(state));
+	
+	//var _this = this;
 
-	if (connWebSocket) {
-		return libQ.invoke(connWebSocket, 'emit', 'volumioPushState', state);
-
-	} else {
-		// Push the updated state to all clients
-		return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushState', state);
-
-	}
-	*/
+	clients.forEach(function () {
+	      client.write(message);
+    	});
 
 }
 
