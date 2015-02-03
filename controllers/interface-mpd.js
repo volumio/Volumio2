@@ -191,7 +191,10 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 InterfaceMPD.prototype.volumioPushState = function (state, connWebSocket) {
 
 	console.log('InterfaceMPD::volumioPushState');
-	
+	// broadcast state changed to all idlers
+	clients.forEach(function (client) {
+		client.write(message);
+    });
 	// TODO
 
 }
