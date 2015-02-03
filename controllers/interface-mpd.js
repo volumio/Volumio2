@@ -191,10 +191,14 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 InterfaceMPD.prototype.volumioPushState = function (state, connWebSocket) {
 
 	console.log('InterfaceMPD::volumioPushState');
+	
+	// pass state to the helper
+	helper.setState(state);
+
 	// broadcast state changed to all idlers
 	clients.forEach(function (client) {
 		client.write(message);
-    });
+	});
 	// TODO
 
 }
@@ -328,11 +332,11 @@ function handleMessage(message, socket) {
 			socket.write("OK\n");
 			break;
 		case command.STATS :
-			socket.write(printArray(protocol.getStats()));
+			socket.write(helper.printStats());
 			socket.write("OK\n");
 			break;
 		case command.STATUS :
-			socket.write(printArray(protocol.getStatus()));
+			socket.write(helper.printStatus());
 			socket.write("OK\n");
 			break;
 		case command.STOP :
