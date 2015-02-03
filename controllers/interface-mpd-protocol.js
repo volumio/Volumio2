@@ -43,6 +43,7 @@ const command = { // List of all MPD commands
     MOVE            : 'move',
     MOVEID          : 'moveid',
     NEXT            : 'next',
+	NOTCOMMANDS     : 'notcommands',
     NOIDLE          : 'noidle',
     OUTPUTS         : 'outputs',
     PASSWORD        : 'password',
