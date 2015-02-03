@@ -1,4 +1,5 @@
 var net = require('net');
+var libQ = require('q');
 
 // keep track of 'idle' clients (listeners)
 var idles = []
