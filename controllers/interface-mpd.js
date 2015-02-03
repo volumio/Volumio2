@@ -5,6 +5,8 @@ var libQ = require('q');
 var idles = []
 // helper class (contains most MPD output/formats)
 var helper = require('./interface-mpd-helper');
+// commandRouter reference
+var commRouter;
 
 // MPD info
 var mpdPort = 6500;
@@ -113,7 +115,10 @@ const command = { // List of all MPD commands
 
 // Define the InterfaceMPD class
 module.exports = InterfaceMPD;
-function InterfaceMPD () {
+function InterfaceMPD (server, commandRouter) {
+	
+	var _this = this;
+	commRouter = commandRouter;
 	
 	// create server
 	var protocolServer = net.createServer(function(client) {
@@ -249,21 +254,21 @@ function handleMessage(message, client) {
 			break;
 		case command.NEXT :
 			logStart('Client requests Volumio next' )
-				.then(commandRouter.volumioNext.bind(commandRouter))
+				.then(commRouter.volumioNext.bind(commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.PAUSE :
 			logStart('Client requests Volumio pause' )
-				.then(commandRouter.volumioPause.bind(commandRouter))
+				.then(commRouter.volumioPause.bind(commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.PLAY :
 			logStart('Client requests Volumio play' )
-				.then(commandRouter.volumioPlay.bind(commandRouter))
+				.then(commRouter.volumioPlay.bind(commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
@@ -290,7 +295,7 @@ function handleMessage(message, client) {
 			break;        
 		case command.PREVIOUS:
 			logStart('Client requests Volumio previous' )
-				.then(commandRouter.volumioPrevious.bind(commandRouter))
+				.then(commRouter.volumioPrevious.bind(commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
@@ -329,7 +334,7 @@ function handleMessage(message, client) {
 			break;
 		case command.STOP :
 			logStart('Client requests Volumio stop' )
-				.then(commandRouter.volumioStop.bind(commandRouter))
+				.then(commRouter.volumioStop.bind(commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
