@@ -200,7 +200,7 @@ InterfaceMPD.prototype.volumioPushState = function (state, connWebSocket) {
 // ================================ INTERNAL FUNCTIONS
 
 // Incoming message handler
-function handleMessage(message, client) {
+function handleMessage(message, socket) {
 	// some vars to help extract command/parameters from line
 	var nSpaceLocation = 0;
 	var sCommand = '';
