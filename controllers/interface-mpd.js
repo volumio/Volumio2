@@ -134,7 +134,7 @@ const tagtypes = { // List of all MPD tagtypes
 // Define the InterfaceMPD class
 module.exports = InterfaceMPD;
 function InterfaceMPD (server, commandRouter) {
-	_this = this;
+	var _this = this;
 
 	// create server
 	var protocolServer = net.createServer(function(socket) {

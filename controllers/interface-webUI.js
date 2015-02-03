@@ -4,7 +4,7 @@ var libQ = require('q');
 module.exports = InterfaceWebUI;
 function InterfaceWebUI (server, commandRouter) {
 
-	_this = this;
+	var _this = this;
 
 	// Init SocketIO listener, unique to each instance of InterfaceWebUI
 	this.libSocketIO = require('socket.io')(server);
