@@ -208,14 +208,14 @@ ControllerMpd.prototype.parseState = function (objState) {
 	var nDuration = null;
 	if ('time' in objState) {
 		var arrayTimeData = objState.time.split(':');
-		nDuration = Number(arrayTimeData[1]);
+		nDuration = Math.round(Number(arrayTimeData[1]));
 
 	}
 
 	// Pull the elapsed time
 	var nSeek = null;
 	if ('elapsed' in objState) {
-		nSeek = Number(objState.elapsed) * 1000;
+		nSeek = Math.round(Number(objState.elapsed) * 1000);
 
 	}
 

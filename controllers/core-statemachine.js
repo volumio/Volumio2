@@ -18,6 +18,12 @@ CoreStateMachine.prototype.getState = function () {
 
 	console.log('CoreStateMachine::getState');
 
+	var sService = null;
+	if ('service' in this.currentTrackBlock) {
+		sService = this.currentTrackBlock.service;
+
+	}
+
 	return libQ({
 		status: this.currentStatus,
 		position: this.currentPosition,
@@ -26,7 +32,8 @@ CoreStateMachine.prototype.getState = function () {
 		duration: this.currentDuration,
 		samplerate: this.currentSampleRate,
 		bitdepth: this.currentBitDepth,
-		channels: this.currentChannels
+		channels: this.currentChannels,
+		service: sService
 
 	});
 
@@ -189,7 +196,7 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 	if (this.currentStatus === 'play') {
 		this.currentStatus = 'pause';
 
-		this.servicePause();
+		return this.servicePause();
 
 	}
 
@@ -389,8 +396,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 	this.currentBitDepth = null;
 	this.currentChannels = null;
 
-	// Return a resolved empty promise to represent completion
-	return libQ();
+	return this.updateTrackBlock();
 
 }
 
