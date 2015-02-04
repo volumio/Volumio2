@@ -1,9 +1,6 @@
 var net = require('net');
 var libQ = require('q');
 
-// keep track of 'idle' clients (listeners)
-// var idles = [];
-
 // MPD info
 var mpdPort = 6500;
 var mpdAddress = '0.0.0.0';
@@ -123,7 +120,6 @@ function InterfaceMPD (server, commandRouter) {
 	var protocolServer = net.createServer(function(client) {
 		// set Encoding (TODO check if this is necessary)
 		client.setEncoding('utf8');
-		_this.idles.push(client);
 				
 		// MPD welcome command
 		client.write("OK MPD 0.19.0\n"); // TODO not hardcoded?
@@ -191,15 +187,13 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 InterfaceMPD.prototype.volumioPushState = function (state) {
 
 	console.log('InterfaceMPD::volumioPushState');	
-	var _this = this;
 
 	// pass state to the helper
-	//_this.helper.setState(state);
+	this.helper.setStatus(state);
 	
-	// console.log(JSON.stringify(state));
 	// broadcast state changed to all idlers
 	this.idles.forEach(function (client) {
-		client.write("state changed\n");
+		client.write("changed: player\n");
 	});
 	// TODO
 
@@ -263,6 +257,9 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 		case command.DELETE :
 			sendSingleCommandToCore(sCommand, sParam);
 			socket.write("OK\n");
+			break;
+		case command.IDLE :
+			_this.idles.push(socket);
 			break;
 		case command.NEXT :
 			logStart('Client requests Volumio next' )

@@ -214,8 +214,7 @@ module.exports = {
 	
 	// Set the Status
 	setStatus: function(message) {
-		console.log('breakpoint-helper');
-
+		
 		// copy values
 		status.state = message.status;	// playstate
 		status.song = message.position // song nr in playlist
