@@ -146,7 +146,7 @@ function InterfaceMPD (server, commandRouter) {
 				// get 1 line from our buffer to process
 				var message = results[0];
 				// Handle message elsewhere (keep it clean)
-				handleMessage(message, client);
+				_this.handleMessage(message, client);
 				
 				buffer = buffer.substring(lineIndex+1); // Cuts off the processed line
 				break;
@@ -210,6 +210,9 @@ InterfaceMPD.prototype.volumioPushState = function (state) {
 
 // Incoming message handler
 InterfaceMPD.prototype.handleMessage = function (message, socket) {
+	
+	var _this = this;
+
 	// some vars to help extract command/parameters from line
 	var nSpaceLocation = 0;
 	var sCommand = '';
@@ -263,21 +266,21 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 			break;
 		case command.NEXT :
 			logStart('Client requests Volumio next' )
-				.then(commRouter.volumioNext.bind(_this.commRouter))
+				.then(_this.commRouter.volumioNext.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.PAUSE :
 			logStart('Client requests Volumio pause' )
-				.then(commRouter.volumioPause.bind(_this.commRouter))
+				.then(_this.commRouter.volumioPause.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.PLAY :
 			logStart('Client requests Volumio play' )
-				.then(commRouter.volumioPlay.bind(_this.commRouter))
+				.then(_this.commRouter.volumioPlay.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
@@ -304,7 +307,7 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 			break;        
 		case command.PREVIOUS:
 			logStart('Client requests Volumio previous' )
-				.then(commRouter.volumioPrevious.bind(_this.commRouter))
+				.then(_this.commRouter.volumioPrevious.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
