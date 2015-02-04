@@ -176,11 +176,19 @@ InterfaceMPD.prototype.printConsoleMessage = function (message) {
 }
 
 // Receive player queue updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
+InterfaceMPD.prototype.volumioPushQueue = function (queue) {
 
 	console.log('InterfaceMPD::volumioPushQueue');
 	
-	// TODO
+	// pass queue to the helper
+	this.helper.setQueue(queue);
+
+	// broadcast playlist changed to all idlers
+	this.idles.forEach(function (client) {
+		client.write("changed: playlist\n");
+	});
+
+	// TODO q-stuff
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
@@ -195,7 +203,8 @@ InterfaceMPD.prototype.volumioPushState = function (state) {
 	this.idles.forEach(function (client) {
 		client.write("changed: player\n");
 	});
-	// TODO
+
+	// TODO q-stuff
 
 }
 // END OF PUBLIC FUNCTIONS
@@ -282,9 +291,21 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 				.done(logDone);
 			socket.write("OK\n");
 			break;
+		case command.PLAYLIST :
+			logStart('Client requests Volumio queue')
+				.then(_this.commRouter.volumioGetQueue.bind(_this.commRouter))
+				.then(function (queue) {
+					_this.helper.setQueue(queue);
+				}).then(function() {
+					socket.write(_this.helper.printPlaylist());
+					socket.write("OK\n");
+				})
+				.catch(console.log)
+				.done(logDone);
+			break;
 		case command.PLAYLISTID :
 			// Temporary Disabled and HardCoded
-			//socket.write(printArray(protocol.getPlaylistId()));
+			//socket.write(_this.helper.getPlaylistId()));
 			//socket.write("OK\n");
 			socket.write("ACK [50@0] {playlistid} No such song\n");
 			break;

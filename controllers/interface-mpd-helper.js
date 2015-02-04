@@ -173,6 +173,9 @@ var playlistId = { // DUMMY FOR NOW!
     "Id"            : 10
 }
 
+var queue = [];	// hold playlistFiles (given by commandRouter)
+
+
 // ======================= START OF MODULE EXPORT
 module.exports = {
 // ======================= Tools (called from outside)
@@ -195,6 +198,17 @@ module.exports = {
 			// print tagtype: 'tagtype' [newline]
 			output += "tagtype: " + tagtypes[index] + "\n";
 		}
+		return output;
+	},
+
+	// Give MPD output of queue
+	printPlaylist: function() {
+		var output = "";
+		queue.forEach(function (track) {
+			output += track.position + ":";
+			output += "file: \"[" + track.service + "] " + track.metadata.name + "\"";
+			output += "\n";
+		});
 		return output;
 	},
 	
@@ -223,7 +237,26 @@ module.exports = {
 		status.time = message.duration; // song time
 		status.audio = message.samplerate + ":" + message.bitdepth + ":" + message.channels; // (44000:24:2) default
 		// message.service unhandled
+	},
+
+	// Set the queue
+	setQueue: function(newQueue) {
+		queue = [];
+		var positionNr = 0;
+		newQueue.forEach(function (track) {
+			var t = {
+				position : positionNr,
+				service : track.service,
+				trackid : track.trackid,
+				metadata : {
+					name : track.metadata.name
+				}
+			}
+			positionNr++;
+			queue.push(t);
+		});
 	}
+
 // END OF SETTERS
 };
 //  END OF MODULE.EXPORT
