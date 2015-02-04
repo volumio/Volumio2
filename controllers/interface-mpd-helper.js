@@ -2,6 +2,8 @@
 // Contains tools to print commands in MPD format.
 // Contains setters to set data in MPD format.
 
+var libQ = require('q');
+
 const command = { // List of all MPD commands
     ADD             : 'add',
     ADDID           : 'addid',
@@ -137,7 +139,7 @@ var status = { // default format, fill with real data
     single          : 0,
     consume         : 0,
     playlist        : 0,
-    playlistlength  : 8,
+    playlistlength  : 0,
     mixrampdb       : 0.0,
     state           : 'pause',
     song            : 0,
@@ -211,9 +213,14 @@ module.exports = {
 		});
 		return output;
 	},
-	
+
 	// Give MPD output of status
-	printStatus: function() {
+	printStatus: function(state) {
+
+		if(state) {
+			this.setStatus(state);
+		}
+
 		return printArray(status);
 	},
 	
@@ -228,15 +235,18 @@ module.exports = {
 	
 	// Set the Status
 	setStatus: function(message) {
-		
+
 		// copy values
 		status.state = message.status;	// playstate
-		status.song = message.position // song nr in playlist
+		status.song = message.position; // song nr in playlist
 		// message.dynamictitle unhandled
 		status.elapsed = message.seek; // time elapsed
 		status.time = message.duration; // song time
 		status.audio = message.samplerate + ":" + message.bitdepth + ":" + message.channels; // (44000:24:2) default
 		// message.service unhandled
+
+		// Return a resolved empty promise to represent completion
+		return libQ();
 	},
 
 	// Set the queue
@@ -255,6 +265,11 @@ module.exports = {
 			positionNr++;
 			queue.push(t);
 		});
+
+		status.playlistlength = positionNr;
+
+		// Return a resolved empty promise to represent completion
+		return libQ();
 	}
 
 // END OF SETTERS
@@ -273,5 +288,19 @@ function printArray(array) {
 		output += index + ": " + array[index] + "\n";
 	}
 	return output;
+}
+
+function logDone () {
+
+	console.log('------------------------------');
+	return libQ();
+
+}
+
+function logStart (sCommand) {
+
+	console.log('\n---------------------------- ' + sCommand);
+	return libQ();
+
 }
 // END OF INTERNAL FUNCTIONS

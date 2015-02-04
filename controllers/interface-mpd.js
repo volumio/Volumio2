@@ -113,9 +113,10 @@ function InterfaceMPD (server, commandRouter) {
 	var _this = this;
 	this.commRouter = commandRouter;
 
+	// helpers
 	this.helper = require('./interface-mpd-helper.js');
 	this.idles = [];
-	
+
 	// create server
 	var protocolServer = net.createServer(function(client) {
 		// set Encoding (TODO check if this is necessary)
@@ -192,18 +193,23 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue) {
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushState = function (state) {
+InterfaceMPD.prototype.volumioPushState = function (state, socket) {
 
 	console.log('InterfaceMPD::volumioPushState');	
-
-	// pass state to the helper
-	this.helper.setStatus(state);
+	var _this = this;
 	
-	// broadcast state changed to all idlers
-	this.idles.forEach(function (client) {
-		client.write("changed: player\n");
-	});
 
+	if(socket) {
+		socket.write(_this.helper.printStatus(state));
+	} else {
+		// pass state to the helper
+		_this.helper.setStatus(state);
+		
+		// broadcast state changed to all idlers
+		this.idles.forEach(function (client) {
+			client.write("changed: player\n");
+		});
+	}
 	// TODO q-stuff
 
 }
@@ -231,7 +237,8 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 		sCommand = message.substring(0,nSpaceLocation);
 		sParam = message.substring(nSpaceLocation+1, message.length);
 	}
-	console.log("Incoming command: " + sCommand + "\nParam: "+sParam);
+	
+	//console.log("Incoming command: " + sCommand + "\nParam: "+sParam);
 	
 	switch(sCommand) {
 		case command.ADD :
@@ -355,11 +362,19 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 			socket.write("OK\n");
 			break;
 		case command.STATS :
-			socket.write(_this.helper.printStats());
+			logStart('Client requests Volumio stats')
+				.then(socket.write(_this.helper.printStats()))
+				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.STATUS :
-			socket.write(_this.helper.printStatus());
+			logStart('Client requests Volumio status')
+				.then(_this.commRouter.volumioGetState.bind(_this.commRouter))
+				.then(function (state) {
+					_this.volumioPushState.call(_this, state, socket);
+				})
+				.catch(console.log)
+				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.STOP :
