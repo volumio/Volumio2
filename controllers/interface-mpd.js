@@ -2,11 +2,7 @@ var net = require('net');
 var libQ = require('q');
 
 // keep track of 'idle' clients (listeners)
-var idles = []
-// helper class (contains most MPD output/formats)
-var helper = require('./interface-mpd-helper');
-// commandRouter reference
-var commRouter;
+// var idles = [];
 
 // MPD info
 var mpdPort = 6500;
@@ -118,13 +114,17 @@ module.exports = InterfaceMPD;
 function InterfaceMPD (server, commandRouter) {
 	
 	var _this = this;
-	commRouter = commandRouter;
+	this.commRouter = commandRouter;
+
+	this.helper = require('./interface-mpd-helper.js');
+	this.idles = [];
 	
 	// create server
 	var protocolServer = net.createServer(function(client) {
 		// set Encoding (TODO check if this is necessary)
 		client.setEncoding('utf8');
-		
+		_this.idles.push(client);
+				
 		// MPD welcome command
 		client.write("OK MPD 0.19.0\n"); // TODO not hardcoded?
 		
@@ -188,16 +188,18 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue, connWebSocket) {
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushState = function (state, connWebSocket) {
+InterfaceMPD.prototype.volumioPushState = function (state) {
 
-	console.log('InterfaceMPD::volumioPushState');
-	
+	console.log('InterfaceMPD::volumioPushState');	
+	var _this = this;
+
 	// pass state to the helper
-	helper.setState(state);
-
+	//_this.helper.setState(state);
+	
+	// console.log(JSON.stringify(state));
 	// broadcast state changed to all idlers
-	clients.forEach(function (client) {
-		client.write(message);
+	this.idles.forEach(function (client) {
+		client.write("state changed\n");
 	});
 	// TODO
 
@@ -336,7 +338,7 @@ function handleMessage(message, socket) {
 			socket.write("OK\n");
 			break;
 		case command.STATUS :
-			socket.write(helper.printStatus());
+			socket.write(this.helper.printStatus());
 			socket.write("OK\n");
 			break;
 		case command.STOP :
