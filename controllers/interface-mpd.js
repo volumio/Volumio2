@@ -209,7 +209,7 @@ InterfaceMPD.prototype.volumioPushState = function (state) {
 // ================================ INTERNAL FUNCTIONS
 
 // Incoming message handler
-function handleMessage(message, socket) {
+InterfaceMPD.prototype.handleMessage = function (message, socket) {
 	// some vars to help extract command/parameters from line
 	var nSpaceLocation = 0;
 	var sCommand = '';
@@ -233,7 +233,7 @@ function handleMessage(message, socket) {
 			socket.write("OK\n");
 			break;
 		case command.COMMANDS :
-			socket.write(printCommandList());
+			socket.write(_this.helper.printCommandList());
 			socket.write("OK\n");
 			break;
 		case command.NOTCOMMANDS :
@@ -263,21 +263,21 @@ function handleMessage(message, socket) {
 			break;
 		case command.NEXT :
 			logStart('Client requests Volumio next' )
-				.then(commRouter.volumioNext.bind(commRouter))
+				.then(commRouter.volumioNext.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.PAUSE :
 			logStart('Client requests Volumio pause' )
-				.then(commRouter.volumioPause.bind(commRouter))
+				.then(commRouter.volumioPause.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
 			break;
 		case command.PLAY :
 			logStart('Client requests Volumio play' )
-				.then(commRouter.volumioPlay.bind(commRouter))
+				.then(commRouter.volumioPlay.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
@@ -304,7 +304,7 @@ function handleMessage(message, socket) {
 			break;        
 		case command.PREVIOUS:
 			logStart('Client requests Volumio previous' )
-				.then(commRouter.volumioPrevious.bind(commRouter))
+				.then(commRouter.volumioPrevious.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
@@ -334,16 +334,16 @@ function handleMessage(message, socket) {
 			socket.write("OK\n");
 			break;
 		case command.STATS :
-			socket.write(helper.printStats());
+			socket.write(_this.helper.printStats());
 			socket.write("OK\n");
 			break;
 		case command.STATUS :
-			socket.write(this.helper.printStatus());
+			socket.write(_this.helper.printStatus());
 			socket.write("OK\n");
 			break;
 		case command.STOP :
 			logStart('Client requests Volumio stop' )
-				.then(commRouter.volumioStop.bind(commRouter))
+				.then(_this.commRouter.volumioStop.bind(_this.commRouter))
 				.catch(console.log)
 				.done(logDone);
 			socket.write("OK\n");
