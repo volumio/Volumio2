@@ -19,6 +19,9 @@ function CoreCommandRouter (server) {
 	// Start the MPD controller
 	this.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdPort, nMpdHost, this);
 
+	// Start the Spotify controller
+	//this.controllerSpotify = new (require('../controllers/controller-spotify'))(this);
+
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
