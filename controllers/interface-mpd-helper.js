@@ -1,7 +1,8 @@
-// This file holds all the variables the MPD is using for keeping track 
-// of play status/playlist/database stuff that is set by the core
-// Uses getters/setters for updating for now
+// Helper for interface-mpd. 
+// Contains tools to print commands in MPD format.
+// Contains setters to set data in MPD format.
 
+var libQ = require('q');
 
 const command = { // List of all MPD commands
     ADD             : 'add',
@@ -15,7 +16,7 @@ const command = { // List of all MPD commands
     COMMANDS        : 'commands',
     NOTCOMMANDS     : 'notcommands',
     CONFIG          : 'config',
-    CONSTUME        : 'consume',
+    CONSUME        : 'consume',
     COUNT           : 'count',
     CROSSFADE       : 'crossfade',
     CURRENTSONG     : 'currentsong',
@@ -44,7 +45,8 @@ const command = { // List of all MPD commands
     MOVE            : 'move',
     MOVEID          : 'moveid',
     NEXT            : 'next',
-    NOTCOMMANDs     : 'notcommands',
+    NOIDLE          : 'noidle',
+	NOTCOMMANDS     : 'notcommands',
     OUTPUTS         : 'outputs',
     PASSWORD        : 'password',
     PAUSE           : 'pause',
@@ -102,6 +104,24 @@ const command = { // List of all MPD commands
     VOLUME          : 'volume'    
 };
 
+const tagtypes = { // List of all MPD tagtypes
+		ARTIST                     : 'Artist',
+		ARTISTSORT                 : 'ArtistSort',
+		ALBUM                      : 'Album',
+		ALBUMARTIST                : 'AlbumArtist',
+		ALBUMTITLE                 : 'AlbumTitle',
+		TITLE                      : 'Title',
+		TRACK                      : 'Track',
+		NAME                       : 'Name',
+		GENRE                      : 'Genre',
+		DATE                       : 'Date',
+		PERFORMER                  : 'Performer',
+		DISC                       : 'Disc',
+		MUSICBRAINZ_ARTIS          : 'MUSICBRAINZ_ARTISTID',
+		MUSICBRAINZ_ALBUMARTISTID  : 'MUSICBRAINZ_ALBUMARTISTID',
+		MUSICBRAINZ_TRACKID        : 'MUSICBRAINZ_TRACKID',
+};
+
 var stats = { // DUMMY FOR NOW!
     uptime          : 0,
     playtime        : 0,
@@ -119,7 +139,7 @@ var status = { // default format, fill with real data
     single          : 0,
     consume         : 0,
     playlist        : 0,
-    playlistlength  : 8,
+    playlistlength  : 0,
     mixrampdb       : 0.0,
     state           : 'pause',
     song            : 0,
@@ -155,41 +175,132 @@ var playlistId = { // DUMMY FOR NOW!
     "Id"            : 10
 }
 
-// method to print a list of available commands (command.COMMANDS)
-function printCommandList() {
-    var output = "";
-    // for the length of command (nr of commands)
-    for(var index in command) {
-        // print command: 'command' [newline]
-        output += "command: " + command[index] + "\n";
-    }
-    return output;
+var queue = [];	// hold playlistFiles (given by commandRouter)
+
+
+// ======================= START OF MODULE EXPORT
+module.exports = {
+// ======================= Tools (called from outside)
+
+	// Give MPD output of Commands (command.COMMANDS)
+	printCommandList: function() {
+		var output = "";
+		// for the length of command (nr of commands)
+		for(var index in command) {
+			// print command: 'command' [newline]
+			output += "command: " + command[index] + "\n";
+		}
+		return output;
+	},
+	
+	// Give MPD output of tagtypes
+	printTagTypes: function() {
+		var output = "";
+		for(var index in tagtypes) {
+			// print tagtype: 'tagtype' [newline]
+			output += "tagtype: " + tagtypes[index] + "\n";
+		}
+		return output;
+	},
+
+	// Give MPD output of queue
+	printPlaylist: function() {
+		var output = "";
+		queue.forEach(function (track) {
+			output += track.position + ":";
+			output += "file: \"[" + track.service + "] " + track.metadata.name + "\"";
+			output += "\n";
+		});
+		return output;
+	},
+
+	// Give MPD output of status
+	printStatus: function(state) {
+
+		if(state) {
+			this.setStatus(state);
+		}
+
+		return printArray(status);
+	},
+	
+	// Give MPD output of stats
+	printStats: function() {
+		return printArray(stats);
+	},
+// END OF TOOLS
+
+
+// ======================== SETTERS (called from outside)
+	
+	// Set the Status
+	setStatus: function(message) {
+
+		// copy values
+		status.state = message.status;	// playstate
+		status.song = message.position; // song nr in playlist
+		// message.dynamictitle unhandled
+		status.elapsed = message.seek; // time elapsed
+		status.time = message.duration; // song time
+		status.audio = message.samplerate + ":" + message.bitdepth + ":" + message.channels; // (44000:24:2) default
+		// message.service unhandled
+
+		// Return a resolved empty promise to represent completion
+		return libQ();
+	},
+
+	// Set the queue
+	setQueue: function(newQueue) {
+		queue = [];
+		var positionNr = 0;
+		newQueue.forEach(function (track) {
+			var t = {
+				position : positionNr,
+				service : track.service,
+				trackid : track.trackid,
+				metadata : {
+					name : track.metadata.name
+				}
+			}
+			positionNr++;
+			queue.push(t);
+		});
+
+		status.playlistlength = positionNr;
+
+		// Return a resolved empty promise to represent completion
+		return libQ();
+	}
+
+// END OF SETTERS
+};
+//  END OF MODULE.EXPORT
+
+
+
+// ======================== INTERNAL FUNCTIONS (called from this file)
+// print array with 'key: value' output
+function printArray(array) {
+	var output = "";
+	// for the length of array (nr of fields)
+	for(var index in array) {
+		// print status: 'status' [newline]
+		output += index + ": " + array[index] + "\n";
+	}
+	return output;
 }
 
-// setter for play status
-function setPlayStatus(status) {
-    // check for acceptable input
-    if(status == 'pause' || status == 'play' || status == 'stop')
-        this.status.state = status;
+function logDone () {
+
+	console.log('------------------------------');
+	return libQ();
+
 }
 
-// getter for status
-function getStatus() {
-    return status;
-}
+function logStart (sCommand) {
 
-// getter for stats
-function getStats() {
-    return stats;
-}
+	console.log('\n---------------------------- ' + sCommand);
+	return libQ();
 
-// getter for playlistID
-function getPlaylistID() {
-    return getPlaylistID;
 }
-
-module.exports.printCommandList = printCommandList();
-module.exports.setPlayStatus = setPlayStatus;
-module.exports.getStatus = getStatus;
-module.exports.getStats = getStats;
-module.exports.getPlaylistID = getPlaylistID;
+// END OF INTERNAL FUNCTIONS
