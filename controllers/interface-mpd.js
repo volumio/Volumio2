@@ -190,287 +190,287 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 	
 	switch(sCommand) {
 		case command.ADD :
-            handleAdd(sCommand, sParam, socket);
-            break;
-        case command.ADDID :
-            handleAddid(sCommand, sParam, socket);
-            break;
-        case command.ADDTAGID :
-            handleAddtagid(sCommand, sParam, socket);
-            break;
-        case command.CHANNELS :
-            handleChannels(sCommand, sParam, socket);
-            break;
-        case command.CLEAR :
-            handleClear(sCommand, sParam, socket);
-            break;
-        case command.CLEARERROR :
-            handleClearerror(sCommand, sParam, socket);
-            break;
-        case command.CLEARTAGID :
-            handleCleartagid(sCommand, sParam, socket);
-            break;
-        case command.CLOSE :
-            handleClose(sCommand, sParam, socket);
-            break;
-        case command.COMMANDS :
-            handleCommands(sCommand, sParam, socket);
-            break;
-        case command.CONFIG :
-            handleConfig(sCommand, sParam, socket);
-            break;
-        case command.CONSUME :
-            handleConsume(sCommand, sParam, socket);
-            break;
-        case command.COUNT :
-            handleCount(sCommand, sParam, socket);
-            break;
-        case command.CROSSFADE :
-            handleCrossfade(sCommand, sParam, socket);
-            break;
-        case command.CURRENTSONG :
-            handleCurrentsong(sCommand, sParam, socket);
-            break;
-        case command.DECODERS :
-            handleDecoders(sCommand, sParam, socket);
-            break;
-        case command.DELETE :
-            handleDelete(sCommand, sParam, socket);
-            break;
-        case command.DELETEID :
-            handleDeleteid(sCommand, sParam, socket);
-            break;
-        case command.DISABLEOUTPUT :
-            handleDisableoutput(sCommand, sParam, socket);
-            break;
-        case command.ENABLEOUTPUT :
-            handleEnableoutput(sCommand, sParam, socket);
-            break;
-        case command.FIND :
-            handleFind(sCommand, sParam, socket);
-            break;
-        case command.FINDADD :
-            handleFindadd(sCommand, sParam, socket);
-            break;
-        case command.IDLE :
-            handleIdle(sCommand, sParam, socket);
-            break;
-        case command.KILL :
-            handleKill(sCommand, sParam, socket);
-            break;
-        case command.LIST :
-            handleList(sCommand, sParam, socket);
-            break;
-        case command.LISTALL :
-            handleListall(sCommand, sParam, socket);
-            break;
-        case command.LISTALLINFO :
-            handleListallinfo(sCommand, sParam, socket);
-            break;
-        case command.LISTFILES :
-            handleListfiles(sCommand, sParam, socket);
-            break;
-        case command.LISTMOUNTS :
-            handleListmounts(sCommand, sParam, socket);
-            break;
-        case command.LISTPLAYLIST :
-            handleListplaylist(sCommand, sParam, socket);
-            break;
-        case command.LISTPLAYLISTINFO :
-            handleListplaylistinfo(sCommand, sParam, socket);
-            break;
-        case command.LISTPLAYLISTS :
-            handleListplaylists(sCommand, sParam, socket);
-            break;
-        case command.LOAD :
-            handleLoad(sCommand, sParam, socket);
-            break;
-        case command.LSINFO :
-            handleLsinfo(sCommand, sParam, socket);
-            break;
-        case command.MIXRAMPDB :
-            handleMixrampdb(sCommand, sParam, socket);
-            break;
-        case command.MIXRAMPDELAY :
-            handleMixrampdelay(sCommand, sParam, socket);
-            break;
-        case command.MOUNT :
-            handleMount(sCommand, sParam, socket);
-            break;
-        case command.MOVE :
-            handleMove(sCommand, sParam, socket);
-            break;
-        case command.MOVEID :
-            handleMoveid(sCommand, sParam, socket);
-            break;
-        case command.NEXT :
-            handleNext(sCommand, sParam, socket);
-            break;
-        case command.NOTCOMMANDS :
-            handleNotcommands(sCommand, sParam, socket);
-            break;
-        case command.OUTPUTS :
-            handleOutputs(sCommand, sParam, socket);
-            break;
-        case command.PASSWORD :
-            handlePassword(sCommand, sParam, socket);
-            break;
-        case command.PAUSE :
-            handlePause(sCommand, sParam, socket);
-            break;
-        case command.PING :
-            handlePing(sCommand, sParam, socket);
-            break;
-        case command.PLAY :
-            handlePlay(sCommand, sParam, socket);
-            break;
-        case command.PLAYID :
-            handlePlayid(sCommand, sParam, socket);
-            break;
-        case command.PLAYLIST :
-            handlePlaylist(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTADD :
-            handlePlaylistadd(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTCLEAR :
-            handlePlaylistclear(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTDELETE :
-            handlePlaylistdelete(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTFIND :
-            handlePlaylistfind(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTID :
-            handlePlaylistid(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTINFO :
-            handlePlaylistinfo(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTMOVE :
-            handlePlaylistmove(sCommand, sParam, socket);
-            break;
-        case command.PLAYLISTSEARCH :
-            handlePlaylistsearch(sCommand, sParam, socket);
-            break;
-        case command.PLCHANGES :
-            handlePlchanges(sCommand, sParam, socket);
-            break;
-        case command.PLCHANGESPOSID :
-            handlePlchangesposid(sCommand, sParam, socket);
-            break;
-        case command.PREVIOUS :
-            handlePrevious(sCommand, sParam, socket);
-            break;
-        case command.PRIO :
-            handlePrio(sCommand, sParam, socket);
-            break;
-        case command.PRIOID :
-            handlePrioid(sCommand, sParam, socket);
-            break;
-        case command.RANDOM :
-            handleRandom(sCommand, sParam, socket);
-            break;
-        case command.RANGEID :
-            handleRangeid(sCommand, sParam, socket);
-            break;
-        case command.READCOMMENTS :
-            handleReadcomments(sCommand, sParam, socket);
-            break;
-        case command.READMESSAGES :
-            handleReadmessages(sCommand, sParam, socket);
-            break;
-        case command.RENAME :
-            handleRename(sCommand, sParam, socket);
-            break;
-        case command.REPEAT :
-            handleRepeat(sCommand, sParam, socket);
-            break;
-        case command.REPLAY_GAIN_MODE :
-            handleReplay_gain_mode(sCommand, sParam, socket);
-            break;
-        case command.REPLAY_GAIN_STATUS :
-            handleReplay_gain_status(sCommand, sParam, socket);
-            break;
-        case command.RESCAN :
-            handleRescan(sCommand, sParam, socket);
-            break;
-        case command.RM :
-            handleRm(sCommand, sParam, socket);
-            break;
-        case command.SAVE :
-            handleSave(sCommand, sParam, socket);
-            break;
-        case command.SEARCH :
-            handleSearch(sCommand, sParam, socket);
-            break;
-        case command.SEARCHADD :
-            handleSearchadd(sCommand, sParam, socket);
-            break;
-        case command.SEARCHADDPL :
-            handleSearchaddpl(sCommand, sParam, socket);
-            break;
-        case command.SEEK :
-            handleSeek(sCommand, sParam, socket);
-            break;
-        case command.SEEKCUR :
-            handleSeekcur(sCommand, sParam, socket);
-            break;
-        case command.SEEKID :
-            handleSeekid(sCommand, sParam, socket);
-            break;
-        case command.SENDMESSAGE :
-            handleSendmessage(sCommand, sParam, socket);
-            break;
-        case command.SETVOL :
-            handleSetvol(sCommand, sParam, socket);
-            break;
-        case command.SHUFFLE :
-            handleShuffle(sCommand, sParam, socket);
-            break;
-        case command.SINGLE :
-            handleSingle(sCommand, sParam, socket);
-            break;
-        case command.STATS :
-            handleStats(sCommand, sParam, socket);
-            break;
-        case command.STATUS :
-            handleStatus(sCommand, sParam, socket);
-            break;
-        case command.STOP :
-            handleStop(sCommand, sParam, socket);
-            break;
-        case command.SUBSCRIBE :
-            handleSubscribe(sCommand, sParam, socket);
-            break;
-        case command.SWAP :
-            handleSwap(sCommand, sParam, socket);
-            break;
-        case command.SWAPID :
-            handleSwapid(sCommand, sParam, socket);
-            break;
-        case command.TAGTYPES :
-            handleTagtypes(sCommand, sParam, socket);
-            break;
-        case command.TOGGLEOUTPUT :
-            handleToggleoutput(sCommand, sParam, socket);
-            break;
-        case command.UNMOUNT :
-            handleUnmount(sCommand, sParam, socket);
-            break;
-        case command.UNSUBSCRIBE :
-            handleUnsubscribe(sCommand, sParam, socket);
-            break;
-        case command.UPDATE :
-            handleUpdate(sCommand, sParam, socket);
-            break;
-        case command.URLHANDLERS :
-            handleUrlhandlers(sCommand, sParam, socket);
-            break;
-        case command.VOLUME :
-            handleVolume(sCommand, sParam, socket);
-            break;
+			_this.handleAdd(sCommand, sParam, socket);
+			break;
+		case command.ADDID :
+			_this.handleAddid(sCommand, sParam, socket);
+			break;
+		case command.ADDTAGID :
+			_this.handleAddtagid(sCommand, sParam, socket);
+			break;
+		case command.CHANNELS :
+			_this.handleChannels(sCommand, sParam, socket);
+			break;
+		case command.CLEAR :
+			_this.handleClear(sCommand, sParam, socket);
+			break;
+		case command.CLEARERROR :
+			_this.handleClearerror(sCommand, sParam, socket);
+			break;
+		case command.CLEARTAGID :
+			_this.handleCleartagid(sCommand, sParam, socket);
+			break;
+		case command.CLOSE :
+			_this.handleClose(sCommand, sParam, socket);
+			break;
+		case command.COMMANDS :
+			_this.handleCommands(sCommand, sParam, socket);
+			break;
+		case command.CONFIG :
+			_this.handleConfig(sCommand, sParam, socket);
+			break;
+		case command.CONSUME :
+			_this.handleConsume(sCommand, sParam, socket);
+			break;
+		case command.COUNT :
+			_this.handleCount(sCommand, sParam, socket);
+			break;
+		case command.CROSSFADE :
+			_this.handleCrossfade(sCommand, sParam, socket);
+			break;
+		case command.CURRENTSONG :
+			_this.handleCurrentsong(sCommand, sParam, socket);
+			break;
+		case command.DECODERS :
+			_this.handleDecoders(sCommand, sParam, socket);
+			break;
+		case command.DELETE :
+			_this.handleDelete(sCommand, sParam, socket);
+			break;
+		case command.DELETEID :
+			_this.handleDeleteid(sCommand, sParam, socket);
+			break;
+		case command.DISABLEOUTPUT :
+			_this.handleDisableoutput(sCommand, sParam, socket);
+			break;
+		case command.ENABLEOUTPUT :
+			_this.handleEnableoutput(sCommand, sParam, socket);
+			break;
+		case command.FIND :
+			_this.handleFind(sCommand, sParam, socket);
+			break;
+		case command.FINDADD :
+			_this.handleFindadd(sCommand, sParam, socket);
+			break;
+		case command.IDLE :
+			_this.handleIdle(sCommand, sParam, socket);
+			break;
+		case command.KILL :
+			_this.handleKill(sCommand, sParam, socket);
+			break;
+		case command.LIST :
+			_this.handleList(sCommand, sParam, socket);
+			break;
+		case command.LISTALL :
+			_this.handleListall(sCommand, sParam, socket);
+			break;
+		case command.LISTALLINFO :
+			_this.handleListallinfo(sCommand, sParam, socket);
+			break;
+		case command.LISTFILES :
+			_this.handleListfiles(sCommand, sParam, socket);
+			break;
+		case command.LISTMOUNTS :
+			_this.handleListmounts(sCommand, sParam, socket);
+			break;
+		case command.LISTPLAYLIST :
+			_this.handleListplaylist(sCommand, sParam, socket);
+			break;
+		case command.LISTPLAYLISTINFO :
+			_this.handleListplaylistinfo(sCommand, sParam, socket);
+			break;
+		case command.LISTPLAYLISTS :
+			_this.handleListplaylists(sCommand, sParam, socket);
+			break;
+		case command.LOAD :
+			_this.handleLoad(sCommand, sParam, socket);
+			break;
+		case command.LSINFO :
+			_this.handleLsinfo(sCommand, sParam, socket);
+			break;
+		case command.MIXRAMPDB :
+			_this.handleMixrampdb(sCommand, sParam, socket);
+			break;
+		case command.MIXRAMPDELAY :
+			_this.handleMixrampdelay(sCommand, sParam, socket);
+			break;
+		case command.MOUNT :
+			_this.handleMount(sCommand, sParam, socket);
+			break;
+		case command.MOVE :
+			_this.handleMove(sCommand, sParam, socket);
+			break;
+		case command.MOVEID :
+			_this.handleMoveid(sCommand, sParam, socket);
+			break;
+		case command.NEXT :
+			_this.handleNext(sCommand, sParam, socket);
+			break;
+		case command.NOTCOMMANDS :
+			_this.handleNotcommands(sCommand, sParam, socket);
+			break;
+		case command.OUTPUTS :
+			_this.handleOutputs(sCommand, sParam, socket);
+			break;
+		case command.PASSWORD :
+			_this.handlePassword(sCommand, sParam, socket);
+			break;
+		case command.PAUSE :
+			_this.handlePause(sCommand, sParam, socket);
+			break;
+		case command.PING :
+			_this.handlePing(sCommand, sParam, socket);
+			break;
+		case command.PLAY :
+			_this.handlePlay(sCommand, sParam, socket);
+			break;
+		case command.PLAYID :
+			_this.handlePlayid(sCommand, sParam, socket);
+			break;
+		case command.PLAYLIST :
+			_this.handlePlaylist(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTADD :
+			_this.handlePlaylistadd(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTCLEAR :
+			_this.handlePlaylistclear(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTDELETE :
+			_this.handlePlaylistdelete(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTFIND :
+			_this.handlePlaylistfind(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTID :
+			_this.handlePlaylistid(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTINFO :
+			_this.handlePlaylistinfo(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTMOVE :
+			_this.handlePlaylistmove(sCommand, sParam, socket);
+			break;
+		case command.PLAYLISTSEARCH :
+			_this.handlePlaylistsearch(sCommand, sParam, socket);
+			break;
+		case command.PLCHANGES :
+			_this.handlePlchanges(sCommand, sParam, socket);
+			break;
+		case command.PLCHANGESPOSID :
+			_this.handlePlchangesposid(sCommand, sParam, socket);
+			break;
+		case command.PREVIOUS :
+			_this.handlePrevious(sCommand, sParam, socket);
+			break;
+		case command.PRIO :
+			_this.handlePrio(sCommand, sParam, socket);
+			break;
+		case command.PRIOID :
+			_this.handlePrioid(sCommand, sParam, socket);
+			break;
+		case command.RANDOM :
+			_this.handleRandom(sCommand, sParam, socket);
+			break;
+		case command.RANGEID :
+			_this.handleRangeid(sCommand, sParam, socket);
+			break;
+		case command.READCOMMENTS :
+			_this.handleReadcomments(sCommand, sParam, socket);
+			break;
+		case command.READMESSAGES :
+			_this.handleReadmessages(sCommand, sParam, socket);
+			break;
+		case command.RENAME :
+			_this.handleRename(sCommand, sParam, socket);
+			break;
+		case command.REPEAT :
+			_this.handleRepeat(sCommand, sParam, socket);
+			break;
+		case command.REPLAY_GAIN_MODE :
+			_this.handleReplay_gain_mode(sCommand, sParam, socket);
+			break;
+		case command.REPLAY_GAIN_STATUS :
+			_this.handleReplay_gain_status(sCommand, sParam, socket);
+			break;
+		case command.RESCAN :
+			_this.handleRescan(sCommand, sParam, socket);
+			break;
+		case command.RM :
+			_this.handleRm(sCommand, sParam, socket);
+			break;
+		case command.SAVE :
+			_this.handleSave(sCommand, sParam, socket);
+			break;
+		case command.SEARCH :
+			_this.handleSearch(sCommand, sParam, socket);
+			break;
+		case command.SEARCHADD :
+			_this.handleSearchadd(sCommand, sParam, socket);
+			break;
+		case command.SEARCHADDPL :
+			_this.handleSearchaddpl(sCommand, sParam, socket);
+			break;
+		case command.SEEK :
+			_this.handleSeek(sCommand, sParam, socket);
+			break;
+		case command.SEEKCUR :
+			_this.handleSeekcur(sCommand, sParam, socket);
+			break;
+		case command.SEEKID :
+			_this.handleSeekid(sCommand, sParam, socket);
+			break;
+		case command.SENDMESSAGE :
+			_this.handleSendmessage(sCommand, sParam, socket);
+			break;
+		case command.SETVOL :
+			_this.handleSetvol(sCommand, sParam, socket);
+			break;
+		case command.SHUFFLE :
+			_this.handleShuffle(sCommand, sParam, socket);
+			break;
+		case command.SINGLE :
+			_this.handleSingle(sCommand, sParam, socket);
+			break;
+		case command.STATS :
+			_this.handleStats(sCommand, sParam, socket);
+			break;
+		case command.STATUS :
+			_this.handleStatus(sCommand, sParam, socket);
+			break;
+		case command.STOP :
+			_this.handleStop(sCommand, sParam, socket);
+			break;
+		case command.SUBSCRIBE :
+			_this.handleSubscribe(sCommand, sParam, socket);
+			break;
+		case command.SWAP :
+			_this.handleSwap(sCommand, sParam, socket);
+			break;
+		case command.SWAPID :
+			_this.handleSwapid(sCommand, sParam, socket);
+			break;
+		case command.TAGTYPES :
+			_this.handleTagtypes(sCommand, sParam, socket);
+			break;
+		case command.TOGGLEOUTPUT :
+			_this.handleToggleoutput(sCommand, sParam, socket);
+			break;
+		case command.UNMOUNT :
+			_this.handleUnmount(sCommand, sParam, socket);
+			break;
+		case command.UNSUBSCRIBE :
+			_this.handleUnsubscribe(sCommand, sParam, socket);
+			break;
+		case command.UPDATE :
+			_this.handleUpdate(sCommand, sParam, socket);
+			break;
+		case command.URLHANDLERS :
+			_this.handleUrl_this.handlers(sCommand, sParam, socket);
+			break;
+		case command.VOLUME :
+			_this.handleVolume(sCommand, sParam, socket);
+			break;
 		default:
 			console.log("default");
 	}
@@ -750,10 +750,10 @@ InterfaceMPD.prototype.handleMoveid = function(sCommand, sParam, client) {
 
 // Handler for command: NEXT
 InterfaceMPD.prototype.handleNext = function(sCommand, sParam, client) {
-
+	var _this = this;
     // send Next command to CommandRouter
     logStart('Client requests Volumio next' )
-        .then(this.commRouter.volumioNext.bind(this.commRouter))
+        .then(_this.commRouter.volumioNext.bind(_this.commRouter))
         .catch(console.log)
         .done(logDone);
     
@@ -790,7 +790,8 @@ InterfaceMPD.prototype.handlePassword = function(sCommand, sParam, client) {
 
 // Handler for command: PAUSE
 InterfaceMPD.prototype.handlePause = function(sCommand, sParam, client) {
-
+	var _this = this;
+	
     // Send pause command to CommandRouter
     logStart('Client requests Volumio pause' )
 				.then(_this.commRouter.volumioPause.bind(_this.commRouter))
@@ -810,10 +811,11 @@ InterfaceMPD.prototype.handlePing = function(sCommand, sParam, client) {
 
 // Handler for command: PLAY
 InterfaceMPD.prototype.handlePlay = function(sCommand, sParam, client) {
-
+	var _this = this;
+	
     // Send play command to CommandRouter
     logStart('Client requests Volumio play' )
-        .then(this.commRouter.volumioPlay.bind(this.commRouter))
+        .then(_this.commRouter.volumioPlay.bind(_this.commRouter))
         .catch(console.log)
         .done(logDone);
     
@@ -830,13 +832,14 @@ InterfaceMPD.prototype.handlePlayid = function(sCommand, sParam, client) {
 
 // Handler for command: PLAYLIST
 InterfaceMPD.prototype.handlePlaylist = function(sCommand, sParam, client) {
-
+	var _this = this;
+	
     // Fetch queue from CommandRouter
     logStart('Client requests Volumio queue')
-        .then(this.commRouter.volumioGetQueue.bind(this.commRouter))
+        .then(_this.commRouter.volumioGetQueue.bind(_this.commRouter))
         .then(function (queue) {
             // forward queue to helper
-            this.helper.setQueue(queue);
+            _this.helper.setQueue(queue);
         }).then(function() {
             // fetch MPD output from helper
             client.write(_this.helper.printPlaylist());
@@ -923,10 +926,11 @@ InterfaceMPD.prototype.handlePlchangesposid = function(sCommand, sParam, client)
 
 // Handler for command: PREVIOUS
 InterfaceMPD.prototype.handlePrevious = function(sCommand, sParam, client) {
-
+	var _this = this;
+	
     // Send previous command to CommandRouter
     logStart('Client requests Volumio previous' )
-        .then(this.commRouter.volumioPrevious.bind(this.commRouter))
+        .then(_this.commRouter.volumioPrevious.bind(_this.commRouter))
         .catch(console.log)
         .done(logDone);
     
@@ -1097,10 +1101,11 @@ InterfaceMPD.prototype.handleSingle = function(sCommand, sParam, client) {
 
 // Handler for command: STATS
 InterfaceMPD.prototype.handleStats = function(sCommand, sParam, client) {
-
+	var _this = this;
+	
     // Fetch proper MPD output from helper
     logStart('Client requests Volumio stats')
-        .then(client.write(this.helper.printStats()))
+        .then(client.write(_this.helper.printStats()))
         .done(logDone);
 
 	// Respond with default 'OK'
@@ -1109,13 +1114,14 @@ InterfaceMPD.prototype.handleStats = function(sCommand, sParam, client) {
 
 // Handler for command: STATUS
 InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
-    
+    var _this = this;
+	
     // Fetch status from CommandRouter
     logStart('Client requests Volumio status')
-        .then(this.commRouter.volumioGetState.bind(this.commRouter))
+        .then(_this.commRouter.volumioGetState.bind(_this.commRouter))
         // Forward state to volumioPushState function
         .then(function (state) {
-            this.volumioPushState.call(this, state, client);
+            _this.volumioPushState.call(_this, state, client);
         })
         .catch(console.log)
         .done(logDone);
@@ -1126,10 +1132,11 @@ InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
 
 // Handler for command: STOP
 InterfaceMPD.prototype.handleStop = function(sCommand, sParam, client) {
-    
+	var _this = this;
+	
     // Call stop on CommandRouter
     logStart('Client requests Volumio stop' )
-        .then(this.commRouter.volumioStop.bind(this.commRouter))
+        .then(_this.commRouter.volumioStop.bind(_this.commRouter))
         .catch(console.log)
         .done(logDone);
     
