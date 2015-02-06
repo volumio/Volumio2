@@ -21,9 +21,8 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 	this.clientMpd.on('system-player', function () {
 
 		logStart('MPD announces state update')
-			.then(_this.getState.bind(_this)) // Get the updated state
-			.then(_this.pushState.bind(_this)) // then handle the updated state
-			.catch(_this.pushError.bind(_this)) // ... or pass the error
+			.then(_this.pushState.bind(_this))
+			.catch(_this.pushError.bind(_this))
 			.done(logDone);
 
 	})
@@ -37,40 +36,6 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
-
-// Define a method to get the MPD state
-ControllerMpd.prototype.getState = function () {
-
-	console.log('ControllerMpd::getState');
-	var _this = this;
-	var collectedState = {};
-
-	return this.sendMpdCommand('status', [])
-		.then(_this.parseState.bind(_this))
-		.then(function (state) {
-			collectedState = state;
-			return _this.sendMpdCommand('playlistinfo', [state.position]);
-
-		})
-		.then(_this.parseTrackInfo.bind(_this))
-		.then(function (trackinfo) {
-			collectedState.dynamictitle = trackinfo.dynamictitle;
-			return libQ(collectedState);
-
-		});
-
-}
-
-// MPD get queue, returns array of strings, each representing the URI of a track
-ControllerMpd.prototype.getQueue = function () {
-
-	console.log('ControllerMpd::getQueue');
-	var _this = this;
-
-	return this.sendCommand('playlist', [])
-		.then(_this.parsePlaylist.bind(_this));
-
-}
 
 // Define a method to clear, add, and play an array of tracks
 ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
@@ -134,12 +99,37 @@ ControllerMpd.prototype.resume = function () {
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
+// Define a method to get the MPD state
+ControllerMpd.prototype.getState = function () {
+
+	console.log('ControllerMpd::getState');
+	var _this = this;
+	var collectedState = {};
+
+	return this.sendMpdCommand('status', [])
+		.then(_this.parseState.bind(_this))
+		.then(function (state) {
+			collectedState = state;
+			return _this.sendMpdCommand('playlistinfo', [state.position]);
+
+		})
+		.then(_this.parseTrackInfo.bind(_this))
+		.then(function (trackinfo) {
+			collectedState.dynamictitle = trackinfo.dynamictitle;
+			return libQ(collectedState);
+
+		});
+
+}
+
 // Announce updated MPD state
-ControllerMpd.prototype.pushState = function (state) {
+ControllerMpd.prototype.pushState = function () {
 
 	console.log('ControllerMpd::pushState');
+	var _this = this;
 
-	return this.commandRouter.mpdPushState(state);
+	return this.getState()
+		.then(_this.commandRouter.mpdPushState.bind(_this.commandRouter));
 
 }
 
@@ -240,9 +230,6 @@ ControllerMpd.prototype.parseState = function (objState) {
 
 	return libQ({
 		status: objState.state,
-		repeat: Number(objState.repeat),
-		random: Number(objState.random),
-		single: Number(objState.single),
 		position: nPosition,
 		seek: nSeek,
 		duration: nDuration,

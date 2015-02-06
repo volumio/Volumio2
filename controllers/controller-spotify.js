@@ -52,6 +52,17 @@ function ControllerSpotify (commandRouter) {
 		.catch(console.log);
 */
 
+	// Track Spotify player state (since node-spotify does not maintain its own)
+	this.playQueue = [];
+	this.currentStatus = 'stop';
+	this.currentPosition = 0;
+	this.currentSeek = 0;
+	this.currentDuration = 0;
+	this.currentDynamicTitle = null;
+	this.currentSampleRate = null;
+	this.currentBitDepth = null;
+	this.currentChannels = null;
+
 	// Make a temporary track library for testing purposes
 	this.library = new Object();
 	this.library['c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn'] = {service: 'spotify', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}};
@@ -62,20 +73,6 @@ function ControllerSpotify (commandRouter) {
 
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
-
-// Define a method to get the Spotify state
-ControllerSpotify.prototype.getState = function () {
-
-	console.log('ControllerSpotify::getState');
-
-}
-
-// Spotify get queue, returns array of strings, each representing the URI of a track
-ControllerSpotify.prototype.getQueue = function () {
-
-	console.log('ControllerSpotify::getQueue');
-
-}
 
 // Define a method to clear, add, and play an array of tracks
 ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
@@ -89,6 +86,9 @@ ControllerSpotify.prototype.stop = function () {
 
 	console.log('ControllerSpotify::stop');
 
+	this.clientSpotify.player.stop();
+	return this.pushState();
+
 }
 
 // Spotify pause
@@ -96,12 +96,18 @@ ControllerSpotify.prototype.pause = function () {
 
 	console.log('ControllerSpotify::pause');
 
+	this.clientSpotify.player.pause();
+	return libQ();
+
 }
 
 // Spotify resume
 ControllerSpotify.prototype.resume = function () {
 
 	console.log('ControllerSpotify::resume');
+
+	this.clientSpotify.player.resume();
+	return libQ();
 
 }
 
@@ -112,6 +118,18 @@ ControllerSpotify.prototype.resume = function () {
 ControllerSpotify.prototype.pushState = function (state) {
 
 	console.log('ControllerSpotify::pushState');
+
+	return this.commandRouter.spotifyPushState({
+		status: this.currentStatus,
+		position: this.currentPosition,
+		seek: this.currentSeek,
+		duration: this.currentDuration,
+		samplerate: this.currentSampleRate,
+		bitdepth: this.currentBitDepth,
+		channels: this.currentChannels,
+		dynamictitle: this.currentDynamicTitle
+
+	});
 
 }
 

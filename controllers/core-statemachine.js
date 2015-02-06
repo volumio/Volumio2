@@ -202,92 +202,19 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 }
 
-// Volumio sync state from MPD
-// Input state object has the form {status: 'play', repeat: 0, random: 0, single: 0, position: 0, seek: 0, duration: 0, dynamictitle: ''}
+// Sync state from MPD
 CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
+
+	console.log('CoreStateMachine::syncStateFromMpd');
 
 	if (this.currentTrackBlock.service !== 'mpd') {
 		return libQ.reject('Error: MPD announced a state update when it is not the currently active service');
 
-	}
-
-	console.log('CoreStateMachine::syncStateFromMpd');
-	var _this = this;
-
-	this.timeLastServiceStateUpdate = Date.now();
-
-	if (stateMpd.status === 'play') {
-
-		// We are waiting for playback to begin, and it has just begun
-		// Or we are playing, and the playback service has announced an updated play state (next track, etc)
-		if (this.currentStatus === 'play') {
-			this.currentStatus = 'play';
-			this.currentPosition = stateMpd.position + this.currentTrackBlock.startindex;
-			this.currentSeek = stateMpd.seek;
-			this.currentDuration = stateMpd.duration;
-			this.currentDynamicTitle = stateMpd.dynamictitle;
-			this.currentSampleRate = stateMpd.samplerate;
-			this.currentBitDepth = stateMpd.bitdepth;
-			this.currentChannels = stateMpd.channels;
-
-			this.startPlaybackTimer(this.currentSeek)
-				.catch(_this.pushError.bind(_this));
-
-			this.pushState();
-
-			// Return a resolved empty promise to represent completion
-			return libQ();
-
-		}
-
-	} else if (stateMpd.status === 'stop') {
-
-		// MPD has stopped, meaning it is finished playing its track block
-		if (this.currentStatus === 'play') {
-			this.currentSeek = 0;
-			this.currentDuration = 0;
-			this.currentDynamicTitle = null;
-			this.currentSampleRate = null;
-			this.currentBitDepth = null;
-			this.currentChannels = null;
-
-			return this.next();
-
-		// Client has requested stop
-		} else if (this.currentStatus === 'stop') {
-			this.currentSeek = 0;
-			this.currentDuration = 0;
-			this.currentDynamicTitle = null;
-			this.currentSampleRate = null;
-			this.currentBitDepth = null;
-			this.currentChannels = null;
-
-			this.stopPlaybackTimer()
-				.catch(_this.pushError.bind(_this));
-
-			this.pushState();
-
-			// Return a resolved empty promise to represent completion
-			return libQ();
-
-		}
-
-	} else if (stateMpd.status === 'pause') {
-
-		if (this.currentStatus === 'pause') {
-			this.stopPlaybackTimer()
-				.catch(_this.pushError.bind(_this));
-
-			this.pushState();
-
-			// Return a resolved empty promise to represent completion
-			return libQ();
-
-		}
+	} else {
+		return this.syncState(stateMpd, 'mpd');
 
 	}
 
-	return libQ.reject('Error: MPD state \"' + stateMpd.status + '\" not recognized when Volumio state is \"' + this.currentStatus + '\"');
 
 }
 
@@ -443,6 +370,81 @@ CoreStateMachine.prototype.pushError = function (sReason) {
 
 	console.log('CoreStateMachine::pushError');
 	console.log(sReason);
+
+}
+
+// Sync state from service status announcement
+// Input state object has the form {status: sStatus, position: nPosition, seek: nSeek, duration: nDuration, samplerate: nSampleRate, bitdepth: nBitDepth, channels: nChannels, dynamictitle: sTitle}
+CoreStateMachine.prototype.syncState = function (stateService, sService) {
+
+	console.log('CoreStateMachine::syncState');
+	var _this = this;
+
+	this.timeLastServiceStateUpdate = Date.now();
+
+	if (stateService.status === 'play') {
+
+		// We are waiting for playback to begin, and service has just begun playing
+		// Or we are currently playing, and the playback service has announced an updated play state (next track, etc)
+		if (this.currentStatus === 'play') {
+			this.currentPosition = stateService.position + this.currentTrackBlock.startindex;
+			this.currentSeek = stateService.seek;
+			this.currentDuration = stateService.duration;
+			this.currentDynamicTitle = stateService.dynamictitle;
+			this.currentSampleRate = stateService.samplerate;
+			this.currentBitDepth = stateService.bitdepth;
+			this.currentChannels = stateService.channels;
+
+			this.pushState();
+
+			return this.startPlaybackTimer(this.currentSeek);
+
+		}
+
+	} else if (stateService.status === 'stop') {
+
+		// Service has stopped without client request, meaning it is finished playing its track block. Move on to next track block.
+		if (this.currentStatus === 'play') {
+			this.currentSeek = 0;
+			this.currentDuration = 0;
+			this.currentDynamicTitle = null;
+			this.currentSampleRate = null;
+			this.currentBitDepth = null;
+			this.currentChannels = null;
+
+			// Don't need to pushState here, since it will be called later when the next service announces playback
+
+			return this.stopPlaybackTimer()
+				.then(_this.next.bind(_this));
+
+		// Client has requested stop, so stop the timer
+		} else if (this.currentStatus === 'stop') {
+			this.currentSeek = 0;
+			this.currentDuration = 0;
+			this.currentDynamicTitle = null;
+			this.currentSampleRate = null;
+			this.currentBitDepth = null;
+			this.currentChannels = null;
+
+			this.pushState();
+
+			return this.stopPlaybackTimer();
+
+		}
+
+	} else if (stateService.status === 'pause') {
+
+		// Client has requested pause, and service has just paused
+		if (this.currentStatus === 'pause') {
+			this.pushState();
+
+			return this.stopPlaybackTimer();
+
+		}
+
+	}
+
+	return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + this.currentStatus + '\"');
 
 }
 

@@ -9,7 +9,7 @@ function CoreCommandRouter (server) {
 
 	// Start the client interfaces
 	this.arrayInterfaces = [];
-	this.arrayInterfaces.push(new (require('../controllers/interface-webUI.js'))(server, this));
+	this.arrayInterfaces.push(new (require('../controllers/interface-webui.js'))(server, this));
 	this.arrayInterfaces.push(new (require('../controllers/interface-mpd.js'))(server, this));
 
 	// Move these variables out at some point
@@ -20,7 +20,7 @@ function CoreCommandRouter (server) {
 	this.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdPort, nMpdHost, this);
 
 	// Start the Spotify controller
-	//this.controllerSpotify = new (require('../controllers/controller-spotify'))(this);
+	this.controllerSpotify = new (require('../controllers/controller-spotify'))(this);
 
 }
 
@@ -105,22 +105,6 @@ CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('CoreCommandRouter::mpdClearAddPlayTracks');
 	return this.controllerMpd.clearAddPlayTracks(arrayTrackIds)
-
-}
-
-// MPD Get State
-CoreCommandRouter.prototype.mpdGetState = function () {
-
-	console.log('CoreCommandRouter::mpdGetState');
-	return this.controllerMpd.getState()
-
-}
-
-// MPD Get Queue
-CoreCommandRouter.prototype.mpdGetQueue = function () {
-
-	console.log('CoreCommandRouter::mpdGetQueue');
-	return this.controllerMpd.getQueue();
 
 }
 
