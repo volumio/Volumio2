@@ -132,6 +132,38 @@ CoreCommandRouter.prototype.mpdResume = function () {
 
 }
 
+// Spotify Clear-Add-Play
+CoreCommandRouter.prototype.spotifyClearAddPlayTracks = function (arrayTrackIds) {
+
+	console.log('CoreCommandRouter::spotifyClearAddPlayTracks');
+	return this.controllerSpotify.clearAddPlayTracks(arrayTrackIds)
+
+}
+
+// Spotify Stop
+CoreCommandRouter.prototype.spotifyStop = function () {
+
+	console.log('CoreCommandRouter::spotifyStop');
+	return this.controllerSpotify.stop();
+
+}
+
+// Spotify Pause
+CoreCommandRouter.prototype.spotifyPause = function () {
+
+	console.log('CoreCommandRouter::spotifyPause');
+	return this.controllerSpotify.pause();
+
+}
+
+// Spotify Resume
+CoreCommandRouter.prototype.spotifyResume = function () {
+
+	console.log('CoreCommandRouter::spotifyResume');
+	return this.controllerSpotify.resume();
+
+}
+
 // Methods usually called by the service controllers --------------------------------------------------------------
 
 CoreCommandRouter.prototype.mpdPushState = function (state) {
@@ -140,3 +172,11 @@ CoreCommandRouter.prototype.mpdPushState = function (state) {
 	return this.stateMachine.syncStateFromMpd(state);
 
 }
+
+CoreCommandRouter.prototype.spotifyPushState = function (state) {
+
+	console.log('CoreCommandRouter::spotifyPushState');
+	return this.stateMachine.syncStateFromSpotify(state);
+
+}
+

@@ -20,10 +20,8 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 	// When playback status changes
 	this.clientMpd.on('system-player', function () {
 
-		logStart('MPD announces state update')
-			.then(_this.pushState.bind(_this))
+		_this.pushState()
 			.catch(_this.pushError.bind(_this))
-			.done(logDone);
 
 	})
 
@@ -52,8 +50,8 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	// Clear the queue, add the first track, and start playback
 	var promisedActions = this.sendMpdCommand('clear', [])
-		.then(this.sendMpdCommand('add', [arrayTrackUris.shift()]))
-		.then(this.sendMpdCommand('play', []));
+		.then(_this.sendMpdCommand('add', [arrayTrackUris.shift()]))
+		.then(_this.sendMpdCommand('play', []));
 
 	// If there are more tracks in the array, add those also
 	if (arrayTrackUris.length > 0) {
@@ -128,8 +126,10 @@ ControllerMpd.prototype.pushState = function () {
 	console.log('ControllerMpd::pushState');
 	var _this = this;
 
-	return this.getState()
-		.then(_this.commandRouter.mpdPushState.bind(_this.commandRouter));
+	return logStart('MPD announces state update')
+		.then(_this.getState.bind(_this))
+		.then(_this.commandRouter.mpdPushState.bind(_this.commandRouter))
+		.then(logDone);
 
 }
 

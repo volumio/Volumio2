@@ -8,7 +8,7 @@ function CorePlayQueue () {
 	this.arrayQueue = [
 		{service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {name: 'Go Ham Radio'}}
 		, {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {name: 'KUSC Radio'}}
-		, {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo2cjUwOWM0V3ZIYUgxT2N0bWNMek52', metadata: {name: 'Gates of Gold 1)Arrival: a View From Sea'}}
+		, {service: 'spotify', trackid: 'c3BvdGlmeTp0cmFjazo2cjUwOWM0V3ZIYUgxT2N0bWNMek52', metadata: {name: 'Gates of Gold 1)Arrival: a View From Sea'}}
 
 	];
 

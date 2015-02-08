@@ -218,6 +218,22 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
 }
 
+// Sync state from Spotify
+CoreStateMachine.prototype.syncStateFromSpotify = function (stateSpotify) {
+
+	console.log('CoreStateMachine::syncStateFromSpotify');
+
+	if (this.currentTrackBlock.service !== 'spotify') {
+		return libQ.reject('Error: Spotify announced a state update when it is not the currently active service');
+
+	} else {
+		return this.syncState(stateSpotify, 'spotify');
+
+	}
+
+
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -245,6 +261,10 @@ CoreStateMachine.prototype.serviceClearAddPlay = function () {
 
 		return this.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
 
+	} else if (trackBlock.service === 'spotify') {
+
+		return this.commandRouter.spotifyClearAddPlayTracks(trackBlock.trackids);
+
 	} else {
 
 		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"clear-add-play\" action');
@@ -262,6 +282,10 @@ CoreStateMachine.prototype.serviceStop = function () {
 	if (trackBlock.service === 'mpd') {
 
 		return this.commandRouter.mpdStop();
+
+	} else if (trackBlock.service === 'spotify') {
+
+		return this.commandRouter.spotifyStop();
 
 	} else {
 
@@ -281,6 +305,10 @@ CoreStateMachine.prototype.servicePause = function () {
 
 		return this.commandRouter.mpdPause();
 
+	} else if (trackBlock.service === 'spotify') {
+
+		return this.commandRouter.spotifyPause();
+
 	} else {
 
 		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"pause\" action');
@@ -298,6 +326,10 @@ CoreStateMachine.prototype.serviceResume = function () {
 	if (trackBlock.service === 'mpd') {
 
 		return this.commandRouter.mpdResume();
+
+	} else if (trackBlock.service === 'spotify') {
+
+		return this.commandRouter.spotifyResume();
 
 	} else {
 

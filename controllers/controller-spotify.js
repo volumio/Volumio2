@@ -41,6 +41,12 @@ function ControllerSpotify (commandRouter) {
 
 	});
 
+	// Make a listener for end-of-track event to move to next track
+	this.clientSpotify.player.on({
+		endOfTrack: _this.next.bind(_this)
+
+	});
+
 	// Play a track to test connection
 /*
 	this.spotifyReady
@@ -79,15 +85,23 @@ ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('ControllerSpotify::clearAddPlayTracks');
 
+	this.playQueue = arrayTrackIds.map(convertTrackIdToUri);
+	this.currentPosition = 0;
+
+	return this.play();
+
 }
 
 // Spotify stop
 ControllerSpotify.prototype.stop = function () {
 
 	console.log('ControllerSpotify::stop');
+	var _this = this;
 
-	this.clientSpotify.player.stop();
-	return this.pushState();
+	this.currentStatus = 'stop';
+
+	return libQ(this.clientSpotify.player.stop())
+		.then(this.pushState.bind(this));
 
 }
 
@@ -95,8 +109,15 @@ ControllerSpotify.prototype.stop = function () {
 ControllerSpotify.prototype.pause = function () {
 
 	console.log('ControllerSpotify::pause');
+	var _this = this;
 
 	this.clientSpotify.player.pause();
+	this.currentStatus = 'pause';
+	this.currentSeek = this.clientSpotify.player.currentSecond * 1000;
+
+	this.pushState()
+		.catch(_this.pushError.bind(_this));
+
 	return libQ();
 
 }
@@ -105,8 +126,15 @@ ControllerSpotify.prototype.pause = function () {
 ControllerSpotify.prototype.resume = function () {
 
 	console.log('ControllerSpotify::resume');
+	var _this = this;
 
 	this.clientSpotify.player.resume();
+	this.currentStatus = 'play';
+	this.currentSeek = this.clientSpotify.player.currentSecond * 1000;
+
+	this.pushState()
+		.catch(_this.pushError.bind(_this));
+
 	return libQ();
 
 }
@@ -114,12 +142,12 @@ ControllerSpotify.prototype.resume = function () {
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
-// Announce updated Spotify state
-ControllerSpotify.prototype.pushState = function (state) {
+// Spotify get state
+ControllerSpotify.prototype.getState = function () {
 
-	console.log('ControllerSpotify::pushState');
+	console.log('ControllerSpotify::getState');
 
-	return this.commandRouter.spotifyPushState({
+	var state = {
 		status: this.currentStatus,
 		position: this.currentPosition,
 		seek: this.currentSeek,
@@ -129,7 +157,65 @@ ControllerSpotify.prototype.pushState = function (state) {
 		channels: this.currentChannels,
 		dynamictitle: this.currentDynamicTitle
 
-	});
+	};
+
+	return libQ(state);
+
+}
+
+// Announce updated Spotify state
+ControllerSpotify.prototype.pushState = function () {
+
+	console.log('ControllerSpotify::pushState');
+	var _this = this;
+
+	return logStart('Spotify announces state update')
+		.then(_this.getState.bind(_this))
+		.then(_this.commandRouter.spotifyPushState.bind(_this.commandRouter))
+		.then(logDone);
+
+}
+
+// Spotify play
+ControllerSpotify.prototype.play = function () {
+
+	console.log('ControllerSpotify::play');
+	var _this = this;
+	var currentTrack = this.clientSpotify.createFromLink(this.playQueue[this.currentPosition]);
+
+	this.currentStatus = 'play';
+	this.currentSeek = 0;
+	this.currentDuration = currentTrack.duration * 1000;
+	this.currentDynamicTitle = currentTrack.name;
+
+
+	this.pushState()
+		.catch(_this.pushError.bind(_this));
+
+	return libQ(this.clientSpotify.player.play(currentTrack));
+
+}
+
+// Spotify next
+ControllerSpotify.prototype.next = function () {
+
+	console.log('ControllerSpotify::next');
+	var _this = this;
+
+	if (this.currentPosition < this.playQueue.length - 1) {
+		this.currentPosition++;
+
+		return this.play();
+
+	} else {
+		this.currentStatus = 'stop';
+
+		this.pushState()
+			.catch(_this.pushError.bind(_this));
+
+		return libQ();
+
+	}
 
 }
 
