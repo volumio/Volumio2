@@ -1,4 +1,4 @@
-var libQ = require('q');
+var libQ = require('kew');
 
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
@@ -17,6 +17,7 @@ function CoreStateMachine (commandRouter) {
 CoreStateMachine.prototype.getState = function () {
 
 	console.log('CoreStateMachine::getState');
+	console.log(Date.now());
 
 	var sService = null;
 	if ('service' in this.currentTrackBlock) {
@@ -24,7 +25,7 @@ CoreStateMachine.prototype.getState = function () {
 
 	}
 
-	return libQ({
+	return libQ.resolve({
 		status: this.currentStatus,
 		position: this.currentPosition,
 		dynamictitle: this.currentDynamicTitle,
@@ -43,6 +44,7 @@ CoreStateMachine.prototype.getState = function () {
 CoreStateMachine.prototype.getQueue = function () {
 
 	console.log('CoreStateMachine::getQueue');
+	console.log(Date.now());
 	return this.playQueue.getQueue();
 
 }
@@ -51,6 +53,7 @@ CoreStateMachine.prototype.getQueue = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
 
 	console.log('CoreStateMachine::play');
+	console.log(Date.now());
 	var _this = this;
 
 	// Stop -> Play transition
@@ -74,6 +77,7 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 CoreStateMachine.prototype.next = function (promisedResponse) {
 
 	console.log('CoreStateMachine::next');
+	console.log(Date.now());
 	var _this = this;
 
 	// Stop -> Next transition
@@ -82,6 +86,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 			this.currentPosition++;
 
 			return this.updateTrackBlock()
+				.then(_this.getState.bind(_this))
 				.then(_this.pushState.bind(_this));
 
 		}
@@ -118,6 +123,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 	console.log('CoreStateMachine::previous');
+	console.log(Date.now());
 	var _this = this;
 
 	// Stop -> Previous transition
@@ -126,6 +132,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			this.currentPosition--;
 
 			return this.updateTrackBlock()
+				.then(_this.getState.bind(_this))
 				.then(_this.pushState.bind(_this));
 
 		}
@@ -164,6 +171,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 CoreStateMachine.prototype.stop = function (promisedResponse) {
 
 	console.log('CoreStateMachine::stop');
+	console.log(Date.now());
 	var _this = this;
 
 	// Play -> Stop transition
@@ -190,6 +198,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 	console.log('CoreStateMachine::pause');
+	console.log(Date.now());
 	var _this = this;
 
 	// Play -> Pause transition
@@ -206,6 +215,7 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
 	console.log('CoreStateMachine::syncStateFromMpd');
+	console.log(Date.now());
 
 	if (this.currentTrackBlock.service !== 'mpd') {
 		return libQ.reject('Error: MPD announced a state update when it is not the currently active service');
@@ -222,6 +232,7 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 CoreStateMachine.prototype.syncStateFromSpotify = function (stateSpotify) {
 
 	console.log('CoreStateMachine::syncStateFromSpotify');
+	console.log(Date.now());
 
 	if (this.currentTrackBlock.service !== 'spotify') {
 		return libQ.reject('Error: Spotify announced a state update when it is not the currently active service');
@@ -241,6 +252,7 @@ CoreStateMachine.prototype.syncStateFromSpotify = function (stateSpotify) {
 CoreStateMachine.prototype.updateTrackBlock = function () {
 
 	console.log('CoreStateMachine::updateTrackBlock');
+	console.log(Date.now());
 	var _this = this;
 
 	return this.playQueue.getTrackBlock(this.currentPosition)
@@ -255,15 +267,27 @@ CoreStateMachine.prototype.updateTrackBlock = function () {
 CoreStateMachine.prototype.serviceClearAddPlay = function () {
 
 	console.log('CoreStateMachine::serviceClearAddPlay');
+	console.log(Date.now());
+	var _this = this;
+
 	var trackBlock = this.currentTrackBlock;
 
 	if (trackBlock.service === 'mpd') {
 
-		return this.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
+		return this.commandRouter.spotifyStop()
+			.delay(5000) // Spop does not release ALSA immediately - adjust this delay as needed
+			.then(function () {
+				return _this.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
+
+			});
 
 	} else if (trackBlock.service === 'spotify') {
 
-		return this.commandRouter.spotifyClearAddPlayTracks(trackBlock.trackids);
+		return this.commandRouter.mpdStop()
+			.then(function () {
+				return _this.commandRouter.spotifyClearAddPlayTracks(trackBlock.trackids);
+
+			});
 
 	} else {
 
@@ -277,6 +301,7 @@ CoreStateMachine.prototype.serviceClearAddPlay = function () {
 CoreStateMachine.prototype.serviceStop = function () {
 
 	console.log('CoreStateMachine::serviceStop');
+	console.log(Date.now());
 	var trackBlock = this.currentTrackBlock;
 
 	if (trackBlock.service === 'mpd') {
@@ -299,6 +324,7 @@ CoreStateMachine.prototype.serviceStop = function () {
 CoreStateMachine.prototype.servicePause = function () {
 
 	console.log('CoreStateMachine::servicePause');
+	console.log(Date.now());
 	var trackBlock = this.currentTrackBlock;
 
 	if (trackBlock.service === 'mpd') {
@@ -321,6 +347,7 @@ CoreStateMachine.prototype.servicePause = function () {
 CoreStateMachine.prototype.serviceResume = function () {
 
 	console.log('CoreStateMachine::serviceResume');
+	console.log(Date.now());
 	var trackBlock = this.currentTrackBlock;
 
 	if (trackBlock.service === 'mpd') {
@@ -343,6 +370,7 @@ CoreStateMachine.prototype.serviceResume = function () {
 CoreStateMachine.prototype.resetVolumioState = function () {
 
 	console.log('CoreStateMachine::resetVolumioState');
+	console.log(Date.now());
 	this.currentStatus = 'stop';
 	this.currentPosition = 0;
 	this.currentSeek = 0;
@@ -363,6 +391,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 
 	console.log('CoreStateMachine::startPlaybackTimer');
+	console.log(Date.now());
 	var _this = this;
 
 	clearInterval(this.timerPlayback);
@@ -371,7 +400,7 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 
 	}, 500);
 
-	return libQ();
+	return libQ.resolve();
 
 }
 
@@ -379,21 +408,21 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 CoreStateMachine.prototype.stopPlaybackTimer = function () {
 
 	console.log('CoreStateMachine::stopPlaybackTimer');
+	console.log(Date.now());
 
 	clearInterval(this.timerPlayback);
 
-	return libQ();
+	return libQ.resolve();
 
 }
 
 // Announce updated Volumio state
-CoreStateMachine.prototype.pushState = function () {
+CoreStateMachine.prototype.pushState = function (state) {
 
 	console.log('CoreStateMachine::pushState');
-	var _this = this;
+	console.log(Date.now());
 
-	return this.getState()
-			.then(_this.commandRouter.volumioPushState.bind(_this.commandRouter));
+	return this.commandRouter.volumioPushState(state);
 
 }
 
@@ -401,6 +430,7 @@ CoreStateMachine.prototype.pushState = function () {
 CoreStateMachine.prototype.pushError = function (sReason) {
 
 	console.log('CoreStateMachine::pushError');
+	console.log(Date.now());
 	console.log(sReason);
 
 }
@@ -410,6 +440,7 @@ CoreStateMachine.prototype.pushError = function (sReason) {
 CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 	console.log('CoreStateMachine::syncState');
+	console.log(Date.now());
 	var _this = this;
 
 	this.timeLastServiceStateUpdate = Date.now();
@@ -427,7 +458,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentBitDepth = stateService.bitdepth;
 			this.currentChannels = stateService.channels;
 
-			this.pushState();
+			this.getState()
+				.then(_this.pushState.bind(_this))
+				.fail(_this.pushError.bind(_this));
 
 			return this.startPlaybackTimer(this.currentSeek);
 
@@ -444,10 +477,24 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentBitDepth = null;
 			this.currentChannels = null;
 
-			// Don't need to pushState here, since it will be called later when the next service announces playback
+			// If we have reached the end of the queue
+			if (this.currentPosition >= this.playQueue.arrayQueue.length - 1) {
+				this.currentStatus = 'stop';
 
-			return this.stopPlaybackTimer()
-				.then(_this.next.bind(_this));
+				this.getState()
+					.then(_this.pushState.bind(_this))
+					.fail(_this.pushError.bind(_this));
+
+				return this.stopPlaybackTimer();
+
+			// Else move to next track
+			} else {
+
+				// Don't need to pushState here, since it will be called later during the next operation
+				return this.stopPlaybackTimer()
+					.then(_this.next.bind(_this));
+
+			}
 
 		// Client has requested stop, so stop the timer
 		} else if (this.currentStatus === 'stop') {
@@ -458,7 +505,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentBitDepth = null;
 			this.currentChannels = null;
 
-			this.pushState();
+			this.getState()
+				.then(_this.pushState.bind(_this))
+				.fail(_this.pushError.bind(_this));
 
 			return this.stopPlaybackTimer();
 
@@ -468,7 +517,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 		// Client has requested pause, and service has just paused
 		if (this.currentStatus === 'pause') {
-			this.pushState();
+			this.getState()
+				.then(_this.pushState.bind(_this))
+				.fail(_this.pushError.bind(_this));
 
 			return this.stopPlaybackTimer();
 

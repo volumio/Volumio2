@@ -1,5 +1,5 @@
 var net = require('net');
-var libQ = require('q');
+var libQ = require('kew');
 
 // MPD info
 var mpdPort = 6500;
@@ -1233,14 +1233,14 @@ InterfaceMPD.prototype.handleVolume = function(sCommand, sParam, client) {
 function logDone () {
 
 	console.log('------------------------------');
-	return libQ();
+	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
 	console.log('\n---------------------------- ' + sCommand);
-	return libQ();
+	return libQ.resolve();
 
 }
 // END OF STATIC FUNCTIONS
@@ -1258,7 +1258,7 @@ InterfaceMPD.prototype.printConsoleMessage = function (message) {
 	// MPD clients dont need to receive console messages
 	
 	// Return a resolved empty promise to represent completion
-	return libQ();
+	return libQ.resolve();
 
 }
 

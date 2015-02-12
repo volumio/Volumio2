@@ -1,9 +1,9 @@
 var libMpd = require('mpd');
-var libQ = require('q');
+var libQ = require('kew');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
-function ControllerMpd (nPort, nHost, commandRouter) {
+function ControllerMpd (nHost, nPort, commandRouter) {
 
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var _this = this;
@@ -15,15 +15,23 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 	this.clientMpd = libMpd.connect({port: nPort, host: nHost});
 
 	// Make a promise for when the MPD connection is ready to receive events
-	this.mpdReady = libQ.ninvoke(_this.clientMpd, 'on', 'ready');
+	//this.mpdReady = libQ.ninvoke(_this.clientMpd, 'on', 'ready');
+	this.mpdReady = libQ.nfcall(_this.clientMpd.on.bind(_this.clientMpd), 'ready');
 
 	// When playback status changes
 	this.clientMpd.on('system-player', function () {
 
-		_this.pushState()
-			.catch(_this.pushError.bind(_this))
+		var timeStart = Date.now(); 
+		logStart('MPD announces state update')
+			.then(_this.getState.bind(_this))
+			.then(_this.pushState.bind(_this))
+			.fail(_this.pushError.bind(_this))
+			.done(function () {
+				return logDone(timeStart);
 
-	})
+			});
+
+	});
 
 	// Make a temporary track library for testing purposes
 	this.library = new Object();
@@ -39,31 +47,37 @@ function ControllerMpd (nPort, nHost, commandRouter) {
 ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('ControllerMpd::clearAddPlayTracks');
+	console.log(Date.now());
 	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
-	var arrayTrackUris = arrayTrackIds.map(function (curTrackId) {
-
-		return convertTrackIdToUri(curTrackId);
-
-	});
+	var arrayTrackUris = arrayTrackIds.map(convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
-	var promisedActions = this.sendMpdCommand('clear', [])
-		.then(_this.sendMpdCommand('add', [arrayTrackUris.shift()]))
-		.then(_this.sendMpdCommand('play', []));
+	return this.sendMpdCommandArray([
+		{command: 'clear', parameters: []},
+		{command: 'add',   parameters: [arrayTrackUris.shift()]},
+		{command: 'play',  parameters: []}
 
-	// If there are more tracks in the array, add those also
-	if (arrayTrackUris.length > 0) {
-		promisedActions = arrayTrackUris.reduce(function (previousPromise, curTrackUri) {
-			return previousPromise
-				.then(_this.sendMpdCommand('add', [curTrackUri]));
+	])
+	.then(function () {
 
-		}, promisedActions);
+		// If there are more tracks in the array, add those also
+		if (arrayTrackUris.length > 0) {
+			return _this.sendMpdCommandArray(
+				arrayTrackUris.map(function (currentTrack) {
+					return {command: 'add',   parameters: [currentTrack]};
 
-	}
+				})
 
-	return promisedActions;
+			);
+
+		} else {
+			return libQ.resolve();
+
+		}
+
+	});
 
 }
 
@@ -71,6 +85,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 ControllerMpd.prototype.stop = function () {
 
 	console.log('ControllerMpd::stop');
+	console.log(Date.now());
 
 	return this.sendMpdCommand('stop', []);
 
@@ -80,6 +95,7 @@ ControllerMpd.prototype.stop = function () {
 ControllerMpd.prototype.pause = function () {
 
 	console.log('ControllerMpd::pause');
+	console.log(Date.now());
 
 	return this.sendMpdCommand('pause', []);
 
@@ -89,6 +105,7 @@ ControllerMpd.prototype.pause = function () {
 ControllerMpd.prototype.resume = function () {
 
 	console.log('ControllerMpd::resume');
+	console.log(Date.now());
 
 	return this.sendMpdCommand('play', []);
 
@@ -101,35 +118,33 @@ ControllerMpd.prototype.resume = function () {
 ControllerMpd.prototype.getState = function () {
 
 	console.log('ControllerMpd::getState');
+	console.log(Date.now());
 	var _this = this;
 	var collectedState = {};
 
 	return this.sendMpdCommand('status', [])
-		.then(_this.parseState.bind(_this))
+		.then(this.parseState)
 		.then(function (state) {
 			collectedState = state;
 			return _this.sendMpdCommand('playlistinfo', [state.position]);
 
 		})
-		.then(_this.parseTrackInfo.bind(_this))
+		.then(this.parseTrackInfo)
 		.then(function (trackinfo) {
 			collectedState.dynamictitle = trackinfo.dynamictitle;
-			return libQ(collectedState);
+			return libQ.resolve(collectedState);
 
 		});
 
 }
 
 // Announce updated MPD state
-ControllerMpd.prototype.pushState = function () {
+ControllerMpd.prototype.pushState = function (state) {
 
 	console.log('ControllerMpd::pushState');
-	var _this = this;
+	console.log(Date.now());
 
-	return logStart('MPD announces state update')
-		.then(_this.getState.bind(_this))
-		.then(_this.commandRouter.mpdPushState.bind(_this.commandRouter))
-		.then(logDone);
+	return this.commandRouter.mpdPushState(state);
 
 }
 
@@ -137,10 +152,11 @@ ControllerMpd.prototype.pushState = function () {
 ControllerMpd.prototype.pushError = function (sReason) {
 
 	console.log('ControllerMpd::pushError');
+	console.log(Date.now());
 	console.log(sReason);
 
 	// Return a resolved empty promise to represent completion
-	return libQ();
+	return libQ.resolve();
 
 }
 
@@ -148,11 +164,42 @@ ControllerMpd.prototype.pushError = function (sReason) {
 ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 
 	console.log('ControllerMpd::sendMpdCommand');
+	console.log(Date.now());
 	var _this = this;
 
 	return this.mpdReady
 		.then(function () {
-			return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
+			console.log(Date.now());
+			//return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
+			return libQ.nfcall(_this.clientMpd.sendCommand.bind(_this.clientMpd), libMpd.cmd(sCommand, arrayParameters));
+
+		})
+		.then(function (response) {
+			console.log(Date.now());
+			return libMpd.parseKeyValueMessage.bind(libMpd)(response);
+
+		});
+
+}
+
+// Define a general method for sending an array of MPD commands, and return a promise for its execution
+// Command array takes the form [{command: sCommand, parameters: arrayParameters}, ...]
+ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
+
+	console.log('ControllerMpd::sendMpdCommandArray');
+	console.log(Date.now());
+	var _this = this;
+
+	return this.mpdReady
+		.then(function () {
+			//return libQ.ninvoke(_this.clientMpd, 'sendCommands',
+			return libQ.nfcall(_this.clientMpd.sendCommands.bind(_this.clientMpd),
+				arrayCommands.map(function (currentCommand) {
+					return libMpd.cmd(currentCommand.command, currentCommand.parameters);
+
+				})
+
+			);
 
 		})
 		.then(libMpd.parseKeyValueMessage.bind(libMpd));
@@ -163,12 +210,13 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	console.log('ControllerMpd::parseTrackInfo');
+	console.log(Date.now());
 
 	if ('Title' in objTrackInfo) {
-		return libQ({dynamictitle: objTrackInfo.Title});
+		return libQ.resolve({dynamictitle: objTrackInfo.Title});
 
 	} else {
-		return libQ({dynamictitle: null});
+		return libQ.resolve({dynamictitle: null});
 
 	}
 
@@ -178,10 +226,11 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 
 	console.log('ControllerMpd::parsePlaylist');
+	console.log(Date.now());
 
 	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
-	return libQ(Object.keys(objQueue)
+	return libQ.resolve(Object.keys(objQueue)
 		.map(function (currentKey) {
 			return convertUriToTrackId(objQueue[currentKey]);
 
@@ -193,6 +242,7 @@ ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 ControllerMpd.prototype.parseState = function (objState) {
 
 	console.log('ControllerMpd::parseState');
+	console.log(Date.now());
 
 	// Pull track duration out of status message
 	var nDuration = null;
@@ -228,8 +278,14 @@ ControllerMpd.prototype.parseState = function (objState) {
 
 	}
 
-	return libQ({
-		status: objState.state,
+	var sStatus = null;
+	if ('state' in objState) {
+		sStatus = objState.state;
+
+	}
+
+	return libQ.resolve({
+		status: sStatus,
 		position: nPosition,
 		seek: nSeek,
 		duration: nDuration,
@@ -260,16 +316,16 @@ function convertUriToTrackId (input) {
 
 }
 
-function logDone () {
+function logDone (timeStart) {
 
-	console.log('------------------------------');
-	return libQ();
+	console.log('------------------------------ ' + (Date.now() - timeStart));
+	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
 	console.log('\n---------------------------- ' + sCommand);
-	return libQ();
+	return libQ.resolve();
 
 }

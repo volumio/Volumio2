@@ -1,4 +1,4 @@
-var libQ = require('q');
+var libQ = require('kew');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -12,15 +12,17 @@ function CoreCommandRouter (server) {
 	this.arrayInterfaces.push(new (require('../controllers/interface-webui.js'))(server, this));
 	this.arrayInterfaces.push(new (require('../controllers/interface-mpd.js'))(server, this));
 
+	// Start the MPD controller
 	// Move these variables out at some point
 	var nMpdPort = 6600;
 	var nMpdHost = 'localhost';
-
-	// Start the MPD controller
-	this.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdPort, nMpdHost, this);
+	this.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdHost, nMpdPort, this);
 
 	// Start the Spotify controller
-	this.controllerSpotify = new (require('../controllers/controller-spotify'))(this);
+	// Move these variables out at some point
+	var nSpotifyPort = 6602;
+	var nSpotifyHost = 'localhost';
+	this.controllerSpotify = new (require('../controllers/controller-spotify'))(nSpotifyHost, nSpotifyPort, this);
 
 }
 

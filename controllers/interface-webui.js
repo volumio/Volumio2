@@ -1,4 +1,4 @@
-var libQ = require('q');
+var libQ = require('kew');
 
 // Define the InterfaceWebUI class
 module.exports = InterfaceWebUI;
@@ -16,73 +16,101 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioGetState', function() {
 			_thisConnWebSocket = this;
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio state')
 				.then(commandRouter.volumioGetState.bind(commandRouter))
 				.then(function (state) {
 					return _this.volumioPushState.call(_this, state, _thisConnWebSocket);
 
 				})
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
 		connWebSocket.on('volumioGetQueue', function() {
 			_thisConnWebSocket = this;
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio queue')
 				.then(commandRouter.volumioGetQueue.bind(commandRouter))
 				.then(function (queue) {
 					return _this.volumioPushQueue.call(_this, queue, _thisConnWebSocket);
 
 				})
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
 		connWebSocket.on('volumioPlay', function() {
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio play')
 				.then(commandRouter.volumioPlay.bind(commandRouter))
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
 		connWebSocket.on('volumioPause', function() {
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio pause')
 				.then(commandRouter.volumioPause.bind(commandRouter))
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
 		connWebSocket.on('volumioStop', function() {
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio stop')
 				.then(commandRouter.volumioStop.bind(commandRouter))
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
 		connWebSocket.on('volumioPrevious', function() {
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio previous')
 				.then(commandRouter.volumioPrevious.bind(commandRouter))
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
 		connWebSocket.on('volumioNext', function() {
 
+			var timeStart = Date.now(); 
 			logStart('Client requests Volumio next')
 				.then(commandRouter.volumioNext.bind(commandRouter))
-				.catch(console.log)
-				.done(logDone);
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		});
 
@@ -94,11 +122,12 @@ function InterfaceWebUI (server, commandRouter) {
 InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 
 	console.log('InterfaceWebUI::printConsoleMessage');
+	console.log(Date.now());
 	// Push the message all clients
 	this.libSocketIO.emit('printConsoleMessage', message);
 
 	// Return a resolved empty promise to represent completion
-	return libQ();
+	return libQ.resolve();
 
 }
 
@@ -106,14 +135,17 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 
 	console.log('InterfaceWebUI::volumioPushQueue');
+	console.log(Date.now());
 	var _this = this;
 
 	if (connWebSocket) {
-		return libQ.invoke(connWebSocket, 'emit', 'volumioPushQueue', queue);
+		//return libQ.invoke(connWebSocket, 'emit', 'volumioPushQueue', queue);
+		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'volumioPushQueue', queue);
 
 	} else {
 		// Push the updated queue to all clients
-		return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushQueue', queue);
+		//return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushQueue', queue);
+		return libQ.fcall(_this.libSocketIO.emit.bind(_this.libSocketIO), 'volumioPushQueue', queue);
 
 	}
 
@@ -123,29 +155,32 @@ InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 InterfaceWebUI.prototype.volumioPushState = function (state, connWebSocket) {
 
 	console.log('InterfaceWebUI::volumioPushState');
+	console.log(Date.now());
 	var _this = this;
 
 	if (connWebSocket) {
-		return libQ.invoke(connWebSocket, 'emit', 'volumioPushState', state);
+		//return libQ.invoke(connWebSocket, 'emit', 'volumioPushState', state);
+		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'volumioPushState', state);
 
 	} else {
 		// Push the updated state to all clients
-		return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushState', state);
+		//return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushState', state);
+		return libQ.fcall(_this.libSocketIO.emit.bind(_this.libSocketIO), 'volumioPushState', state);
 
 	}
 
 }
 
-function logDone () {
+function logDone (timeStart) {
 
-	console.log('------------------------------');
-	return libQ();
+	console.log('------------------------------ ' + (Date.now() - timeStart));
+	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
 	console.log('\n---------------------------- ' + sCommand);
-	return libQ();
+	return libQ.resolve();
 
 }

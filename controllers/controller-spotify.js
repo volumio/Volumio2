@@ -1,11 +1,10 @@
-// Note: You need to make your own ./spotify/credentials.txt file to log in to Spotify. Follow the provided template.
-
-var libQ = require('q');
-var libFs = require('fs');
+// This controller connects to Spop to interface with libspotify
+var libQ = require('kew');
+var libNet = require('net');
 
 // Define the ControllerSpotify class
 module.exports = ControllerSpotify;
-function ControllerSpotify (commandRouter) {
+function ControllerSpotify (nHost, nPort, commandRouter) {
 
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var _this = this;
@@ -13,61 +12,75 @@ function ControllerSpotify (commandRouter) {
 	// Save a reference to the parent commandRouter
 	this.commandRouter = commandRouter;
 
-	// Configure options and initialize a Spotify object
-	// Need permanent values later
-	var options = {
-		appkeyFile: './controllers/spotify/spotify.key',
-		cacheFolder: './controllers/spotify/cache',
-		settingsFolder: './controllers/spotify/settings'
-	};
+	// Each core gets its own set of Spop sockets connected
+	this.connSpopCommand = libNet.createConnection(nPort, nHost); // Socket to send commands and receive track listings
+	this.connSpopStatus = libNet.createConnection(nPort, nHost); // Socket to listen for status changes
 
-	this.clientSpotify = require('node-spotify')(options);
+	// Init some command socket variables
+	this.bSpopCommandGotFirstMessage = false;
 
-	// Read Spotify credentials then log in
-	libQ.nfcall(libFs.readFile, './controllers/spotify/credentials.txt')
-		.then(function (buffer) {
-			var objCredentials = JSON.parse(buffer.toString());
-			_this.clientSpotify.login(objCredentials.username, objCredentials.password, false, false);
+	this.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
+	this.spopCommandReady = this.spopCommandReadyDeferred.promise;
 
-		})
-		.catch(console.log);
+	this.spopResponseDeferred = libQ.defer();
+	this.spopResponse = this.spopResponseDeferred.promise;
 
-	// Make a promise for when the Spotify client is ready to receive events
-	var spotifyReadyDeferred = libQ.defer();
-	this.spotifyReady = spotifyReadyDeferred.promise;
+	// Start a listener for command socket messages (command responses)
+	this.connSpopCommand.on('data', function (data) {
 
-	this.clientSpotify.on({
-		ready: spotifyReadyDeferred.resolve
+		// If this is the first message, then the connection is open
+		if (!_this.bSpopCommandGotFirstMessage) {
+			_this.bSpopCommandGotFirstMessage = true;
+
+			try {
+				_this.spopCommandReadyDeferred.resolve();
+
+			} catch (error) {
+				_this.pushError(error);
+
+			}
+
+		// Else this is a command response
+		} else {
+			try {
+				_this.spopResponseDeferred.resolve(data.toString());
+
+			} catch (error) {
+				_this.pushError(error);
+
+			}
+
+		}
 
 	});
 
-	// Make a listener for end-of-track event to move to next track
-	this.clientSpotify.player.on({
-		endOfTrack: _this.next.bind(_this)
+	// Init some status socket variables
+	this.bSpopStatusGotFirstMessage = false;
+
+	// Start a listener for status socket messages
+	this.connSpopStatus.on('data', function (data) {
+
+		// Put socket back into monitoring mode
+		_this.connSpopStatus.write('idle\n');
+
+		// If this is the first message, then the connection is open
+		if (!_this.bSpopStatusGotFirstMessage) {
+			_this.bSpopStatusGotFirstMessage = true;
+
+		// Else this is a state update announcement
+		} else {
+			logStart('Spop announces state update')
+				.then(function () {
+					return _this.parseState.call(_this, data.toString());
+
+				})
+				.then(_this.pushState.bind(_this))
+				.fail(_this.pushError.bind(_this))
+				.done(logDone);
+
+		}
 
 	});
-
-	// Play a track to test connection
-/*
-	this.spotifyReady
-		.then(function () {
-			var track = _this.clientSpotify.createFromLink('spotify:track:2fnmXjugEkCtQ6xA8zjUJg');
-			_this.clientSpotify.player.play(track);
-
-		})
-		.catch(console.log);
-*/
-
-	// Track Spotify player state (since node-spotify does not maintain its own)
-	this.playQueue = [];
-	this.currentStatus = 'stop';
-	this.currentPosition = 0;
-	this.currentSeek = 0;
-	this.currentDuration = 0;
-	this.currentDynamicTitle = null;
-	this.currentSampleRate = null;
-	this.currentBitDepth = null;
-	this.currentChannels = null;
 
 	// Make a temporary track library for testing purposes
 	this.library = new Object();
@@ -84,11 +97,29 @@ function ControllerSpotify (commandRouter) {
 ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('ControllerSpotify::clearAddPlayTracks');
+	var _this = this;
 
-	this.playQueue = arrayTrackIds.map(convertTrackIdToUri);
-	this.currentPosition = 0;
+	// From the array of track IDs, get array of track URIs to play
+	var arrayTrackUris = arrayTrackIds.map(convertTrackIdToUri);
 
-	return this.play();
+	// Clear the queue, add the first track, and start playback
+	var firstTrack = arrayTrackUris.shift();
+	var promisedActions = this.sendSpopCommand('uplay', [firstTrack]);
+
+	// If there are more tracks in the array, add those also
+	if (arrayTrackUris.length > 0) {
+		promisedActions = arrayTrackUris.reduce(function (previousPromise, curTrackUri) {
+			return previousPromise
+				.then(function () {
+					return _this.sendSpopCommand('uadd', [curTrackUri]);
+
+				});
+
+		}, promisedActions);
+
+	}
+
+	return promisedActions;
 
 }
 
@@ -96,12 +127,8 @@ ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 ControllerSpotify.prototype.stop = function () {
 
 	console.log('ControllerSpotify::stop');
-	var _this = this;
 
-	this.currentStatus = 'stop';
-
-	return libQ(this.clientSpotify.player.stop())
-		.then(this.pushState.bind(this));
+	return this.sendSpopCommand('stop', []);
 
 }
 
@@ -109,16 +136,9 @@ ControllerSpotify.prototype.stop = function () {
 ControllerSpotify.prototype.pause = function () {
 
 	console.log('ControllerSpotify::pause');
-	var _this = this;
 
-	this.clientSpotify.player.pause();
-	this.currentStatus = 'pause';
-	this.currentSeek = this.clientSpotify.player.currentSecond * 1000;
-
-	this.pushState()
-		.catch(_this.pushError.bind(_this));
-
-	return libQ();
+	// TODO don't send 'toggle' if already paused
+	return this.sendSpopCommand('toggle', []);
 
 }
 
@@ -126,96 +146,116 @@ ControllerSpotify.prototype.pause = function () {
 ControllerSpotify.prototype.resume = function () {
 
 	console.log('ControllerSpotify::resume');
-	var _this = this;
 
-	this.clientSpotify.player.resume();
-	this.currentStatus = 'play';
-	this.currentSeek = this.clientSpotify.player.currentSecond * 1000;
-
-	this.pushState()
-		.catch(_this.pushError.bind(_this));
-
-	return libQ();
+	// TODO don't send 'toggle' if already playing
+	return this.sendSpopCommand('toggle', []);
 
 }
 
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
+// Send command to Spop
+ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameters) {
+
+	console.log('ControllerSpotify::sendSpopCommand');
+	var _this = this;
+
+	// Convert the array of parameters to a string
+	var sParameters = arrayParameters.reduce(function (sCollected, sCurrent) {
+		return sCollected + ' ' + sCurrent;
+
+	},'');
+
+	// Pass the command to Spop when the command socket is ready
+	this.spopCommandReady
+		.then(function () {
+			//return libQ.ninvoke(_this.connSpopCommand, 'write', sCommand + sParameters + '\n', "utf-8");
+			return libQ.nfcall(_this.connSpopCommand.write.bind(_this.connSpopCommand), sCommand + sParameters + '\n', "utf-8");
+
+		});
+
+	// Return the command response
+	return this.spopResponse
+		.then(function (sResponse) {
+
+			// Reset the response promise so it can be reused for future commands
+			_this.spopResponseDeferred = libQ.defer();
+
+			return sResponse;
+
+		})
+		.fail(_this.pushError.bind(_this));
+
+}
+
 // Spotify get state
 ControllerSpotify.prototype.getState = function () {
 
 	console.log('ControllerSpotify::getState');
 
-	var state = {
-		status: this.currentStatus,
-		position: this.currentPosition,
-		seek: this.currentSeek,
-		duration: this.currentDuration,
-		samplerate: this.currentSampleRate,
-		bitdepth: this.currentBitDepth,
-		channels: this.currentChannels,
-		dynamictitle: this.currentDynamicTitle
+	return this.sendSpopCommand('status', []);
 
-	};
+}
 
-	return libQ(state);
+// Spotify parse state
+ControllerSpotify.prototype.parseState = function (sState) {
+
+	console.log('ControllerSpotify::parseState');
+	var objState = JSON.parse(sState);
+
+	var nSeek = null;
+	if ('position' in objState) {
+		nSeek = objState.position * 1000;
+
+	}
+
+	var nDuration = null;
+	if ('duration' in objState) {
+		nDuration = objState.duration;
+
+	}
+
+	var sStatus = null;
+	if ('status' in objState) {
+		if (objState.status === 'playing') {
+			sStatus = 'play';
+
+		} else if (objState.status === 'paused') {
+			sStatus = 'pause';
+
+		} else if (objState.status === 'stopped') {
+			sStatus = 'stop';
+
+		}
+
+	}
+
+	var nPosition = null;
+	if ('current_track' in objState) {
+		nPosition = objState.current_track - 1;
+
+	}
+
+	return libQ.resolve({
+		status: sStatus,
+		position: nPosition,
+		seek: nSeek,
+		duration: nDuration,
+		samplerate: null, // Pull these values from somwhere else since they are not provided in the Spop state
+		bitdepth: null,
+		channels: null
+
+	});
 
 }
 
 // Announce updated Spotify state
-ControllerSpotify.prototype.pushState = function () {
+ControllerSpotify.prototype.pushState = function (state) {
 
 	console.log('ControllerSpotify::pushState');
-	var _this = this;
 
-	return logStart('Spotify announces state update')
-		.then(_this.getState.bind(_this))
-		.then(_this.commandRouter.spotifyPushState.bind(_this.commandRouter))
-		.then(logDone);
-
-}
-
-// Spotify play
-ControllerSpotify.prototype.play = function () {
-
-	console.log('ControllerSpotify::play');
-	var _this = this;
-	var currentTrack = this.clientSpotify.createFromLink(this.playQueue[this.currentPosition]);
-
-	this.currentStatus = 'play';
-	this.currentSeek = 0;
-	this.currentDuration = currentTrack.duration * 1000;
-	this.currentDynamicTitle = currentTrack.name;
-
-
-	this.pushState()
-		.catch(_this.pushError.bind(_this));
-
-	return libQ(this.clientSpotify.player.play(currentTrack));
-
-}
-
-// Spotify next
-ControllerSpotify.prototype.next = function () {
-
-	console.log('ControllerSpotify::next');
-	var _this = this;
-
-	if (this.currentPosition < this.playQueue.length - 1) {
-		this.currentPosition++;
-
-		return this.play();
-
-	} else {
-		this.currentStatus = 'stop';
-
-		this.pushState()
-			.catch(_this.pushError.bind(_this));
-
-		return libQ();
-
-	}
+	return this.commandRouter.spotifyPushState(state);
 
 }
 
@@ -226,7 +266,7 @@ ControllerSpotify.prototype.pushError = function (sReason) {
 	console.log(sReason);
 
 	// Return a resolved empty promise to represent completion
-	return libQ();
+	return libQ.resolve();
 
 }
 
@@ -252,13 +292,13 @@ function convertUriToTrackId (input) {
 function logDone () {
 
 	console.log('------------------------------');
-	return libQ();
+	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
 	console.log('\n---------------------------- ' + sCommand);
-	return libQ();
+	return libQ.resolve();
 
 }

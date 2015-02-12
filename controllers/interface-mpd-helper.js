@@ -2,7 +2,7 @@
 // Contains tools to print commands in MPD format.
 // Contains setters to set data in MPD format.
 
-var libQ = require('q');
+var libQ = require('kew');
 
 const command = { // List of all MPD commands
     ADD             : 'add',
@@ -246,7 +246,7 @@ module.exports = {
 		// message.service unhandled
 
 		// Return a resolved empty promise to represent completion
-		return libQ();
+		return libQ.resolve();
 	},
 
 	// Set the queue
@@ -269,7 +269,7 @@ module.exports = {
 		status.playlistlength = positionNr;
 
 		// Return a resolved empty promise to represent completion
-		return libQ();
+		return libQ.resolve();
 	}
 
 // END OF SETTERS
@@ -293,14 +293,14 @@ function printArray(array) {
 function logDone () {
 
 	console.log('------------------------------');
-	return libQ();
+	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
 	console.log('\n---------------------------- ' + sCommand);
-	return libQ();
+	return libQ.resolve();
 
 }
 // END OF INTERNAL FUNCTIONS
