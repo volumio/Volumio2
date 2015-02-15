@@ -137,12 +137,10 @@ InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 	var _this = this;
 
 	if (connWebSocket) {
-		//return libQ.invoke(connWebSocket, 'emit', 'volumioPushQueue', queue);
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'volumioPushQueue', queue);
 
 	} else {
 		// Push the updated queue to all clients
-		//return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushQueue', queue);
 		return libQ.fcall(_this.libSocketIO.emit.bind(_this.libSocketIO), 'volumioPushQueue', queue);
 
 	}
@@ -156,12 +154,10 @@ InterfaceWebUI.prototype.volumioPushState = function (state, connWebSocket) {
 	var _this = this;
 
 	if (connWebSocket) {
-		//return libQ.invoke(connWebSocket, 'emit', 'volumioPushState', state);
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'volumioPushState', state);
 
 	} else {
 		// Push the updated state to all clients
-		//return libQ.invoke(_this.libSocketIO, 'emit', 'volumioPushState', state);
 		return libQ.fcall(_this.libSocketIO.emit.bind(_this.libSocketIO), 'volumioPushState', state);
 
 	}

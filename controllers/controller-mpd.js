@@ -15,7 +15,6 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 	this.clientMpd = libMpd.connect({port: nPort, host: nHost});
 
 	// Make a promise for when the MPD connection is ready to receive events
-	//this.mpdReady = libQ.ninvoke(_this.clientMpd, 'on', 'ready');
 	this.mpdReady = libQ.nfcall(_this.clientMpd.on.bind(_this.clientMpd), 'ready');
 
 	// When playback status changes
@@ -118,16 +117,26 @@ ControllerMpd.prototype.getState = function () {
 	var collectedState = {};
 
 	return this.sendMpdCommand('status', [])
-		.then(this.parseState)
+		.then(_this.parseState)
 		.then(function (state) {
 			collectedState = state;
-			return _this.sendMpdCommand('playlistinfo', [state.position]);
 
-		})
-		.then(this.parseTrackInfo)
-		.then(function (trackinfo) {
-			collectedState.dynamictitle = trackinfo.dynamictitle;
-			return libQ.resolve(collectedState);
+			// If there is a track listed as currently playing, get the track info
+			if (collectedState.position !== null) {
+				return _this.sendMpdCommand('playlistinfo', [collectedState.position])
+					.then(_this.parseTrackInfo)
+					.then(function (trackinfo) {
+						collectedState.dynamictitle = trackinfo.dynamictitle;
+						return libQ.resolve(collectedState);
+
+					});
+
+			// Else return null track info
+			} else {
+				collectedState.dynamictitle = null;
+				return libQ.resolve(collectedState);
+
+			}
 
 		});
 
@@ -162,7 +171,6 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 	return this.mpdReady
 		.then(function () {
 			console.log('[' + Date.now() + '] ' + 'sending command...');
-			//return libQ.ninvoke(_this.clientMpd, 'sendCommand', libMpd.cmd(sCommand, arrayParameters));
 			return libQ.nfcall(_this.clientMpd.sendCommand.bind(_this.clientMpd), libMpd.cmd(sCommand, arrayParameters));
 
 		})
@@ -183,7 +191,6 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 
 	return this.mpdReady
 		.then(function () {
-			//return libQ.ninvoke(_this.clientMpd, 'sendCommands',
 			return libQ.nfcall(_this.clientMpd.sendCommands.bind(_this.clientMpd),
 				arrayCommands.map(function (currentCommand) {
 					return libMpd.cmd(currentCommand.command, currentCommand.parameters);

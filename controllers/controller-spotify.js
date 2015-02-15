@@ -174,7 +174,6 @@ ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameter
 	// Pass the command to Spop when the command socket is ready
 	this.spopCommandReady
 		.then(function () {
-			//return libQ.ninvoke(_this.connSpopCommand, 'write', sCommand + sParameters + '\n', "utf-8");
 			return libQ.nfcall(_this.connSpopCommand.write.bind(_this.connSpopCommand), sCommand + sParameters + '\n', "utf-8");
 
 		});
