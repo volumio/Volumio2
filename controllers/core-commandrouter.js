@@ -31,7 +31,7 @@ function CoreCommandRouter (server) {
 // Volumio Play
 CoreCommandRouter.prototype.volumioPlay = function () {
 
-	console.log('CoreCommandRouter::volumioPlay');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPlay');
 	return this.stateMachine.play();
 
 }
@@ -39,7 +39,7 @@ CoreCommandRouter.prototype.volumioPlay = function () {
 // Volumio Pause
 CoreCommandRouter.prototype.volumioPause = function () {
 
-	console.log('CoreCommandRouter::volumioPause');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPause');
 	return this.stateMachine.pause();
 
 }
@@ -47,7 +47,7 @@ CoreCommandRouter.prototype.volumioPause = function () {
 // Volumio Stop
 CoreCommandRouter.prototype.volumioStop = function () {
 
-	console.log('CoreCommandRouter::volumioStop');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioStop');
 	return this.stateMachine.stop();
 
 }
@@ -55,7 +55,7 @@ CoreCommandRouter.prototype.volumioStop = function () {
 // Volumio Previous
 CoreCommandRouter.prototype.volumioPrevious = function () {
 
-	console.log('CoreCommandRouter::volumioPrevious');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPrevious');
 	return this.stateMachine.previous();
 
 }
@@ -63,7 +63,7 @@ CoreCommandRouter.prototype.volumioPrevious = function () {
 // Volumio Next
 CoreCommandRouter.prototype.volumioNext = function () {
 
-	console.log('CoreCommandRouter::volumioNext');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioNext');
 	return this.stateMachine.next();
 
 }
@@ -71,7 +71,7 @@ CoreCommandRouter.prototype.volumioNext = function () {
 // Volumio Get State
 CoreCommandRouter.prototype.volumioGetState = function () {
 
-	console.log('CoreCommandRouter::volumioGetState');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetState');
 	return this.stateMachine.getState();
 
 }
@@ -79,7 +79,7 @@ CoreCommandRouter.prototype.volumioGetState = function () {
 // Volumio Get Queue
 CoreCommandRouter.prototype.volumioGetQueue = function () {
 
-	console.log('CoreCommandRouter::volumioGetQueue');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetQueue');
 	return this.stateMachine.getQueue();
 
 }
@@ -88,7 +88,7 @@ CoreCommandRouter.prototype.volumioGetQueue = function () {
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 
-	console.log('CoreCommandRouter::volumioPushState');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPushState');
 	var _this = this;
 
 	// Announce new player state to each client interface
@@ -105,7 +105,7 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 // MPD Clear-Add-Play
 CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('CoreCommandRouter::mpdClearAddPlayTracks');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdClearAddPlayTracks');
 	return this.controllerMpd.clearAddPlayTracks(arrayTrackIds)
 
 }
@@ -113,7 +113,7 @@ CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 // MPD Stop
 CoreCommandRouter.prototype.mpdStop = function () {
 
-	console.log('CoreCommandRouter::mpdStop');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdStop');
 	return this.controllerMpd.stop();
 
 }
@@ -121,7 +121,7 @@ CoreCommandRouter.prototype.mpdStop = function () {
 // MPD Pause
 CoreCommandRouter.prototype.mpdPause = function () {
 
-	console.log('CoreCommandRouter::mpdPause');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPause');
 	return this.controllerMpd.pause();
 
 }
@@ -129,7 +129,7 @@ CoreCommandRouter.prototype.mpdPause = function () {
 // MPD Resume
 CoreCommandRouter.prototype.mpdResume = function () {
 
-	console.log('CoreCommandRouter::mpdResume');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdResume');
 	return this.controllerMpd.resume();
 
 }
@@ -137,7 +137,7 @@ CoreCommandRouter.prototype.mpdResume = function () {
 // Spotify Clear-Add-Play
 CoreCommandRouter.prototype.spotifyClearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('CoreCommandRouter::spotifyClearAddPlayTracks');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyClearAddPlayTracks');
 	return this.controllerSpotify.clearAddPlayTracks(arrayTrackIds)
 
 }
@@ -145,7 +145,7 @@ CoreCommandRouter.prototype.spotifyClearAddPlayTracks = function (arrayTrackIds)
 // Spotify Stop
 CoreCommandRouter.prototype.spotifyStop = function () {
 
-	console.log('CoreCommandRouter::spotifyStop');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyStop');
 	return this.controllerSpotify.stop();
 
 }
@@ -153,7 +153,7 @@ CoreCommandRouter.prototype.spotifyStop = function () {
 // Spotify Pause
 CoreCommandRouter.prototype.spotifyPause = function () {
 
-	console.log('CoreCommandRouter::spotifyPause');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyPause');
 	return this.controllerSpotify.pause();
 
 }
@@ -161,7 +161,7 @@ CoreCommandRouter.prototype.spotifyPause = function () {
 // Spotify Resume
 CoreCommandRouter.prototype.spotifyResume = function () {
 
-	console.log('CoreCommandRouter::spotifyResume');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyResume');
 	return this.controllerSpotify.resume();
 
 }
@@ -170,14 +170,14 @@ CoreCommandRouter.prototype.spotifyResume = function () {
 
 CoreCommandRouter.prototype.mpdPushState = function (state) {
 
-	console.log('CoreCommandRouter::mpdPushState');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPushState');
 	return this.stateMachine.syncStateFromMpd(state);
 
 }
 
 CoreCommandRouter.prototype.spotifyPushState = function (state) {
 
-	console.log('CoreCommandRouter::spotifyPushState');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyPushState');
 	return this.stateMachine.syncStateFromSpotify(state);
 
 }

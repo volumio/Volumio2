@@ -1232,14 +1232,14 @@ InterfaceMPD.prototype.handleVolume = function(sCommand, sParam, client) {
 // =============== STATIC FUNCTIONS
 function logDone () {
 
-	console.log('------------------------------');
+	console.log('[' + Date.now() + '] ' + '------------------------------');
 	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
-	console.log('\n---------------------------- ' + sCommand);
+	console.log('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 
 }
@@ -1253,7 +1253,7 @@ function logStart (sCommand) {
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.printConsoleMessage = function (message) {
 
-	console.log('InterfaceMPD::printConsoleMessage');
+	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::printConsoleMessage');
 	
 	// MPD clients dont need to receive console messages
 	
@@ -1265,7 +1265,7 @@ InterfaceMPD.prototype.printConsoleMessage = function (message) {
 // Receive player queue updates from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.volumioPushQueue = function (queue) {
 
-	console.log('InterfaceMPD::volumioPushQueue');
+	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushQueue');
 	
 	// pass queue to the helper
 	this.helper.setQueue(queue);
@@ -1281,7 +1281,7 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue) {
 // Receive player state updates from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.volumioPushState = function (state, socket) {
 
-	console.log('InterfaceMPD::volumioPushState');	
+	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushState');	
 	var _this = this;
 	
 	// if requested by client, respond

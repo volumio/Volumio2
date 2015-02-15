@@ -69,6 +69,7 @@ function ControllerSpotify (nHost, nPort, commandRouter) {
 
 		// Else this is a state update announcement
 		} else {
+			var timeStart = Date.now(); 
 			logStart('Spop announces state update')
 				.then(function () {
 					return _this.parseState.call(_this, data.toString());
@@ -76,7 +77,10 @@ function ControllerSpotify (nHost, nPort, commandRouter) {
 				})
 				.then(_this.pushState.bind(_this))
 				.fail(_this.pushError.bind(_this))
-				.done(logDone);
+				.done(function () {
+					return logDone(timeStart);
+
+				});
 
 		}
 
@@ -96,7 +100,7 @@ function ControllerSpotify (nHost, nPort, commandRouter) {
 // Define a method to clear, add, and play an array of tracks
 ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('ControllerSpotify::clearAddPlayTracks');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::clearAddPlayTracks');
 	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
@@ -126,7 +130,7 @@ ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 // Spotify stop
 ControllerSpotify.prototype.stop = function () {
 
-	console.log('ControllerSpotify::stop');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::stop');
 
 	return this.sendSpopCommand('stop', []);
 
@@ -135,7 +139,7 @@ ControllerSpotify.prototype.stop = function () {
 // Spotify pause
 ControllerSpotify.prototype.pause = function () {
 
-	console.log('ControllerSpotify::pause');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::pause');
 
 	// TODO don't send 'toggle' if already paused
 	return this.sendSpopCommand('toggle', []);
@@ -145,7 +149,7 @@ ControllerSpotify.prototype.pause = function () {
 // Spotify resume
 ControllerSpotify.prototype.resume = function () {
 
-	console.log('ControllerSpotify::resume');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::resume');
 
 	// TODO don't send 'toggle' if already playing
 	return this.sendSpopCommand('toggle', []);
@@ -158,7 +162,7 @@ ControllerSpotify.prototype.resume = function () {
 // Send command to Spop
 ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameters) {
 
-	console.log('ControllerSpotify::sendSpopCommand');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::sendSpopCommand');
 	var _this = this;
 
 	// Convert the array of parameters to a string
@@ -192,7 +196,7 @@ ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameter
 // Spotify get state
 ControllerSpotify.prototype.getState = function () {
 
-	console.log('ControllerSpotify::getState');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::getState');
 
 	return this.sendSpopCommand('status', []);
 
@@ -201,7 +205,7 @@ ControllerSpotify.prototype.getState = function () {
 // Spotify parse state
 ControllerSpotify.prototype.parseState = function (sState) {
 
-	console.log('ControllerSpotify::parseState');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::parseState');
 	var objState = JSON.parse(sState);
 
 	var nSeek = null;
@@ -253,7 +257,7 @@ ControllerSpotify.prototype.parseState = function (sState) {
 // Announce updated Spotify state
 ControllerSpotify.prototype.pushState = function (state) {
 
-	console.log('ControllerSpotify::pushState');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::pushState');
 
 	return this.commandRouter.spotifyPushState(state);
 
@@ -262,7 +266,7 @@ ControllerSpotify.prototype.pushState = function (state) {
 // Pass the error if we don't want to handle it
 ControllerSpotify.prototype.pushError = function (sReason) {
 
-	console.log('ControllerSpotify::pushError');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::pushError');
 	console.log(sReason);
 
 	// Return a resolved empty promise to represent completion
@@ -289,16 +293,16 @@ function convertUriToTrackId (input) {
 
 }
 
-function logDone () {
+function logDone (timeStart) {
 
-	console.log('------------------------------');
+	console.log('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
-	console.log('\n---------------------------- ' + sCommand);
+	console.log('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 
 }

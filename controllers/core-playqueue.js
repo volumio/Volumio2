@@ -22,7 +22,7 @@ function CorePlayQueue () {
 // Get a promise for contents of play queue
 CorePlayQueue.prototype.getQueue = function () {
 
-	console.log('CorePlayQueue::getQueue');
+	console.log('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
 	return libQ.resolve(this.arrayQueue);
 
 }
@@ -30,7 +30,7 @@ CorePlayQueue.prototype.getQueue = function () {
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
-	console.log('CorePlayQueue::getTrackBlock');
+	console.log('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
 	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
 

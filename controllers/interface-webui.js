@@ -121,8 +121,7 @@ function InterfaceWebUI (server, commandRouter) {
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 
-	console.log('InterfaceWebUI::printConsoleMessage');
-	console.log(Date.now());
+	console.log('[' + Date.now() + '] ' + 'InterfaceWebUI::printConsoleMessage');
 	// Push the message all clients
 	this.libSocketIO.emit('printConsoleMessage', message);
 
@@ -134,8 +133,7 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 // Receive player queue updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 
-	console.log('InterfaceWebUI::volumioPushQueue');
-	console.log(Date.now());
+	console.log('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushQueue');
 	var _this = this;
 
 	if (connWebSocket) {
@@ -154,8 +152,7 @@ InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 // Receive player state updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.volumioPushState = function (state, connWebSocket) {
 
-	console.log('InterfaceWebUI::volumioPushState');
-	console.log(Date.now());
+	console.log('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushState');
 	var _this = this;
 
 	if (connWebSocket) {
@@ -173,14 +170,14 @@ InterfaceWebUI.prototype.volumioPushState = function (state, connWebSocket) {
 
 function logDone (timeStart) {
 
-	console.log('------------------------------ ' + (Date.now() - timeStart));
+	console.log('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 	return libQ.resolve();
 
 }
 
 function logStart (sCommand) {
 
-	console.log('\n---------------------------- ' + sCommand);
+	console.log('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 
 }
