@@ -1,4 +1,5 @@
 var libQ = require('kew');
+var libFast = require('fast.js');
 
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
@@ -58,7 +59,7 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 		this.currentStatus = 'play';
 
 		return this.updateTrackBlock()
-			.then(_this.serviceClearAddPlay.bind(_this));
+			.then(libFast.bind(_this.serviceClearAddPlay, _this));
 
 	// Pause -> Play transition
 	} else if (this.currentStatus === 'pause') {
@@ -82,8 +83,8 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 			this.currentPosition++;
 
 			return this.updateTrackBlock()
-				.then(_this.getState.bind(_this))
-				.then(_this.pushState.bind(_this));
+				.then(libFast.bind(_this.getState, _this))
+				.then(libFast.bind(_this.pushState, _this));
 
 		}
 
@@ -94,7 +95,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 			this.currentSeek = 0;
 
 			return this.updateTrackBlock()
-				.then(_this.serviceClearAddPlay.bind(_this));
+				.then(libFast.bind(_this.serviceClearAddPlay, _this));
 
 		}
 
@@ -109,7 +110,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 		this.currentSeek = 0;
 
 		return this.updateTrackBlock()
-			.then(_this.serviceClearAddPlay.bind(_this));
+			.then(libFast.bind(_this.serviceClearAddPlay, _this));
 
 	}
 
@@ -127,8 +128,8 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			this.currentPosition--;
 
 			return this.updateTrackBlock()
-				.then(_this.getState.bind(_this))
-				.then(_this.pushState.bind(_this));
+				.then(libFast.bind(_this.getState, _this))
+				.then(libFast.bind(_this.pushState, _this));
 
 		}
 
@@ -139,7 +140,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			this.currentSeek = 0;
 
 			return this.updateTrackBlock()
-				.then(_this.serviceClearAddPlay.bind(_this));
+				.then(libFast.bind(_this.serviceClearAddPlay, _this));
 
 
 		}
@@ -155,7 +156,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		this.currentSeek = 0;
 
 		return this.updateTrackBlock()
-			.then(_this.serviceClearAddPlay.bind(_this));
+			.then(libFast.bind(_this.serviceClearAddPlay, _this));
 
 
 	}
@@ -174,7 +175,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		this.currentSeek = 0;
 
 		return this.updateTrackBlock()
-			.then(_this.serviceStop.bind(_this));
+			.then(libFast.bind(_this.serviceStop, _this));
 
 	// Pause -> Stop transition
 	} else if (this.currentStatus === 'pause') {
@@ -182,7 +183,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		this.currentSeek = 0;
 
 		return this.updateTrackBlock()
-			.then(_this.serviceStop.bind(_this));
+			.then(libFast.bind(_this.serviceStop, _this));
 
 	}
 
@@ -439,8 +440,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentChannels = stateService.channels;
 
 			this.getState()
-				.then(_this.pushState.bind(_this))
-				.fail(_this.pushError.bind(_this));
+				.then(libFast.bind(_this.pushState, _this))
+				.fail(libFast.bind(_this.pushError, _this));
 
 			return this.startPlaybackTimer(this.currentSeek);
 
@@ -462,8 +463,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 				this.currentStatus = 'stop';
 
 				this.getState()
-					.then(_this.pushState.bind(_this))
-					.fail(_this.pushError.bind(_this));
+					.then(libFast.bind(_this.pushState, _this))
+					.fail(libFast.bind(_this.pushError, _this));
 
 				return this.stopPlaybackTimer();
 
@@ -472,7 +473,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 				// Don't need to pushState here, since it will be called later during the next operation
 				return this.stopPlaybackTimer()
-					.then(_this.next.bind(_this));
+					.then(libFast.bind(_this.next, _this));
 
 			}
 
@@ -486,8 +487,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentChannels = null;
 
 			this.getState()
-				.then(_this.pushState.bind(_this))
-				.fail(_this.pushError.bind(_this));
+				.then(libFast.bind(_this.pushState, _this))
+				.fail(libFast.bind(_this.pushError, _this));
 
 			return this.stopPlaybackTimer();
 
@@ -498,8 +499,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		// Client has requested pause, and service has just paused
 		if (this.currentStatus === 'pause') {
 			this.getState()
-				.then(_this.pushState.bind(_this))
-				.fail(_this.pushError.bind(_this));
+				.then(libFast.bind(_this.pushState, _this))
+				.fail(libFast.bind(_this.pushError, _this));
 
 			return this.stopPlaybackTimer();
 

@@ -1,5 +1,6 @@
 var libMpd = require('mpd');
 var libQ = require('kew');
+var libFast = require('fast.js');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -15,16 +16,20 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 	this.clientMpd = libMpd.connect({port: nPort, host: nHost});
 
 	// Make a promise for when the MPD connection is ready to receive events
-	this.mpdReady = libQ.nfcall(_this.clientMpd.on.bind(_this.clientMpd), 'ready');
+	this.mpdReady = libQ.nfcall(libFast.bind(_this.clientMpd.on, _this.clientMpd), 'ready');
+
+	// This tracks the the timestamp of the newest detected status change
+	this.timeLatestStatus = 0;
 
 	// When playback status changes
 	this.clientMpd.on('system-player', function () {
 
 		var timeStart = Date.now(); 
+
 		logStart('MPD announces state update')
-			.then(_this.getState.bind(_this))
-			.then(_this.pushState.bind(_this))
-			.fail(_this.pushError.bind(_this))
+			.then(libFast.bind(_this.getState, _this))
+			.then(libFast.bind(_this.pushState, _this))
+			.fail(libFast.bind(_this.pushError, _this))
 			.done(function () {
 				return logDone(timeStart);
 
@@ -49,7 +54,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
-	var arrayTrackUris = arrayTrackIds.map(convertTrackIdToUri);
+	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
 	return this.sendMpdCommandArray([
@@ -63,7 +68,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 		// If there are more tracks in the array, add those also
 		if (arrayTrackUris.length > 0) {
 			return _this.sendMpdCommandArray(
-				arrayTrackUris.map(function (currentTrack) {
+				libFast.map(arrayTrackUris, function (currentTrack) {
 					return {command: 'add',   parameters: [currentTrack]};
 
 				})
@@ -115,16 +120,34 @@ ControllerMpd.prototype.getState = function () {
 	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getState');
 	var _this = this;
 	var collectedState = {};
+	var timeCurrentUpdate = Date.now();
+	this.timeLatestUpdate = timeCurrentUpdate;
 
 	return this.sendMpdCommand('status', [])
+		.then(function (data) {
+			return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+
+		})
 		.then(_this.parseState)
+		.then(function (data) {
+			return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+
+		})
 		.then(function (state) {
 			collectedState = state;
 
 			// If there is a track listed as currently playing, get the track info
 			if (collectedState.position !== null) {
 				return _this.sendMpdCommand('playlistinfo', [collectedState.position])
+					.then(function (data) {
+						return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+
+					})
 					.then(_this.parseTrackInfo)
+					.then(function (data) {
+						return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+
+					})
 					.then(function (trackinfo) {
 						collectedState.dynamictitle = trackinfo.dynamictitle;
 						return libQ.resolve(collectedState);
@@ -138,7 +161,26 @@ ControllerMpd.prototype.getState = function () {
 
 			}
 
+		})
+		.then(function (data) {
+			return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+
 		});
+
+}
+
+// Stop the current status update thread if a newer one exists
+ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentThread) {
+
+	console.log('[' + Date.now() + '] ' + 'ControllerMpd::haltIfNewerUpdateRunning');
+
+	if (this.timeLatestUpdate > timeCurrentThread) {
+		return libQ.reject('Alert: Aborting status update - newer one detected');
+
+	} else {
+		return libQ.resolve(data);
+
+	}
 
 }
 
@@ -171,12 +213,12 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 	return this.mpdReady
 		.then(function () {
 			console.log('[' + Date.now() + '] ' + 'sending command...');
-			return libQ.nfcall(_this.clientMpd.sendCommand.bind(_this.clientMpd), libMpd.cmd(sCommand, arrayParameters));
+			return libQ.nfcall(libFast.bind(_this.clientMpd.sendCommand, _this.clientMpd), libMpd.cmd(sCommand, arrayParameters));
 
 		})
 		.then(function (response) {
 			console.log('[' + Date.now() + '] ' + 'parsing response...');
-			return libMpd.parseKeyValueMessage.bind(libMpd)(response);
+			return libQ.resolve(libMpd.parseKeyValueMessage.call(libMpd, response));
 
 		});
 
@@ -191,8 +233,8 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 
 	return this.mpdReady
 		.then(function () {
-			return libQ.nfcall(_this.clientMpd.sendCommands.bind(_this.clientMpd),
-				arrayCommands.map(function (currentCommand) {
+			return libQ.nfcall(libFast.bind(_this.clientMpd.sendCommands, _this.clientMpd),
+				libFast.map(arrayCommands, function (currentCommand) {
 					return libMpd.cmd(currentCommand.command, currentCommand.parameters);
 
 				})
@@ -200,7 +242,7 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 			);
 
 		})
-		.then(libMpd.parseKeyValueMessage.bind(libMpd));
+		.then(libFast.bind(libMpd.parseKeyValueMessage, libMpd));
 
 }
 
@@ -226,11 +268,13 @@ ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 
 	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
-	return libQ.resolve(Object.keys(objQueue)
-		.map(function (currentKey) {
+	return libQ.resolve(
+		libFast.map(Object.keys(objQueue), function (currentKey) {
 			return convertUriToTrackId(objQueue[currentKey]);
 
-		}));
+		})
+
+	);
 
 }
 

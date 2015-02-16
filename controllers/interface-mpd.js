@@ -1,5 +1,6 @@
 var net = require('net');
 var libQ = require('kew');
+var libFast = require('fast.js');
 
 // MPD info
 var mpdPort = 6500;
@@ -753,7 +754,7 @@ InterfaceMPD.prototype.handleNext = function(sCommand, sParam, client) {
 	var _this = this;
     // send Next command to CommandRouter
     logStart('Client requests Volumio next' )
-        .then(_this.commRouter.volumioNext.bind(_this.commRouter))
+        .then(libFast.bind(_this.commRouter.volumioNext, _this.commRouter))
         .catch(console.log)
         .done(logDone);
     
@@ -794,7 +795,7 @@ InterfaceMPD.prototype.handlePause = function(sCommand, sParam, client) {
 	
     // Send pause command to CommandRouter
     logStart('Client requests Volumio pause' )
-				.then(_this.commRouter.volumioPause.bind(_this.commRouter))
+				.then(libFast.bind(_this.commRouter.volumioPause, _this.commRouter))
 				.catch(console.log)
 				.done(logDone);
     
@@ -815,7 +816,7 @@ InterfaceMPD.prototype.handlePlay = function(sCommand, sParam, client) {
 	
     // Send play command to CommandRouter
     logStart('Client requests Volumio play' )
-        .then(_this.commRouter.volumioPlay.bind(_this.commRouter))
+        .then(libFast.bind(_this.commRouter.volumioPlay, _this.commRouter))
         .catch(console.log)
         .done(logDone);
     
@@ -836,7 +837,7 @@ InterfaceMPD.prototype.handlePlaylist = function(sCommand, sParam, client) {
 	
     // Fetch queue from CommandRouter
     logStart('Client requests Volumio queue')
-        .then(_this.commRouter.volumioGetQueue.bind(_this.commRouter))
+        .then(libFast.bind(_this.commRouter.volumioGetQueue, _this.commRouter))
         .then(function (queue) {
             // forward queue to helper
             _this.helper.setQueue(queue);
@@ -930,7 +931,7 @@ InterfaceMPD.prototype.handlePrevious = function(sCommand, sParam, client) {
 	
     // Send previous command to CommandRouter
     logStart('Client requests Volumio previous' )
-        .then(_this.commRouter.volumioPrevious.bind(_this.commRouter))
+        .then(libFast.bind(_this.commRouter.volumioPrevious, _this.commRouter))
         .catch(console.log)
         .done(logDone);
     
@@ -1118,7 +1119,7 @@ InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
 	
     // Fetch status from CommandRouter
     logStart('Client requests Volumio status')
-        .then(_this.commRouter.volumioGetState.bind(_this.commRouter))
+        .then(libFast.bind(_this.commRouter.volumioGetState, _this.commRouter))
         // Forward state to volumioPushState function
         .then(function (state) {
             _this.volumioPushState.call(_this, state, client);
@@ -1136,7 +1137,7 @@ InterfaceMPD.prototype.handleStop = function(sCommand, sParam, client) {
 	
     // Call stop on CommandRouter
     logStart('Client requests Volumio stop' )
-        .then(_this.commRouter.volumioStop.bind(_this.commRouter))
+        .then(libFast.bind(_this.commRouter.volumioStop, _this.commRouter))
         .catch(console.log)
         .done(logDone);
     

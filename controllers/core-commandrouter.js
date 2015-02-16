@@ -1,4 +1,5 @@
 var libQ = require('kew');
+var libFast = require('fast.js');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -93,7 +94,7 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 
 	// Announce new player state to each client interface
 	return libQ.all(
-		_this.arrayInterfaces.map(function (thisInterface) {
+		libFast.map(_this.arrayInterfaces, function (thisInterface) {
 			return thisInterface.volumioPushState(state);
 
 		})

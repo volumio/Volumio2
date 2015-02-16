@@ -1,4 +1,5 @@
 var libQ = require('kew');
+var libFast = require('fast.js');
 
 // Define the InterfaceWebUI class
 module.exports = InterfaceWebUI;
@@ -18,7 +19,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio state')
-				.then(commandRouter.volumioGetState.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
 				.then(function (state) {
 					return _this.volumioPushState.call(_this, state, _thisConnWebSocket);
 
@@ -36,7 +37,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio queue')
-				.then(commandRouter.volumioGetQueue.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioGetQueue, commandRouter))
 				.then(function (queue) {
 					return _this.volumioPushQueue.call(_this, queue, _thisConnWebSocket);
 
@@ -53,7 +54,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio play')
-				.then(commandRouter.volumioPlay.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioPlay, commandRouter))
 				.fail(console.log)
 				.done(function () {
 					return logDone(timeStart);
@@ -66,7 +67,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio pause')
-				.then(commandRouter.volumioPause.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioPause, commandRouter))
 				.fail(console.log)
 				.done(function () {
 					return logDone(timeStart);
@@ -79,7 +80,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio stop')
-				.then(commandRouter.volumioStop.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioStop, commandRouter))
 				.fail(console.log)
 				.done(function () {
 					return logDone(timeStart);
@@ -92,7 +93,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio previous')
-				.then(commandRouter.volumioPrevious.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioPrevious, commandRouter))
 				.fail(console.log)
 				.done(function () {
 					return logDone(timeStart);
@@ -105,7 +106,7 @@ function InterfaceWebUI (server, commandRouter) {
 
 			var timeStart = Date.now(); 
 			logStart('Client requests Volumio next')
-				.then(commandRouter.volumioNext.bind(commandRouter))
+				.then(libFast.bind(commandRouter.volumioNext, commandRouter))
 				.fail(console.log)
 				.done(function () {
 					return logDone(timeStart);
@@ -137,11 +138,11 @@ InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 	var _this = this;
 
 	if (connWebSocket) {
-		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'volumioPushQueue', queue);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushQueue', queue);
 
 	} else {
 		// Push the updated queue to all clients
-		return libQ.fcall(_this.libSocketIO.emit.bind(_this.libSocketIO), 'volumioPushQueue', queue);
+		return libQ.fcall(libFast.bind(_this.libSocketIO.emit, _this.libSocketIO), 'volumioPushQueue', queue);
 
 	}
 
@@ -154,11 +155,11 @@ InterfaceWebUI.prototype.volumioPushState = function (state, connWebSocket) {
 	var _this = this;
 
 	if (connWebSocket) {
-		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'volumioPushState', state);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushState', state);
 
 	} else {
 		// Push the updated state to all clients
-		return libQ.fcall(_this.libSocketIO.emit.bind(_this.libSocketIO), 'volumioPushState', state);
+		return libQ.fcall(libFast.bind(_this.libSocketIO.emit, _this.libSocketIO), 'volumioPushState', state);
 
 	}
 

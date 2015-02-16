@@ -1,4 +1,5 @@
 var libQ = require('kew');
+var libFast = require('fast.js');
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
@@ -44,12 +45,10 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 	}
 
-	var arrayTrackIds = this.arrayQueue
-		.slice(nStartIndex, nEndIndex + 1)
-		.map(function (curTrack) {
-			return curTrack.trackid;
+	var arrayTrackIds = libFast.map(this.arrayQueue.slice(nStartIndex, nEndIndex + 1), function (curTrack) {
+		return curTrack.trackid;
 
-		});
+	});
 
 	return libQ.resolve({service: sTargetService, trackids: arrayTrackIds, startindex: nStartIndex});
 

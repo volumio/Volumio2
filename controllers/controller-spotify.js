@@ -1,6 +1,7 @@
 // This controller connects to Spop to interface with libspotify
 var libQ = require('kew');
 var libNet = require('net');
+var libFast = require('fast.js');
 
 // Define the ControllerSpotify class
 module.exports = ControllerSpotify;
@@ -75,8 +76,8 @@ function ControllerSpotify (nHost, nPort, commandRouter) {
 					return _this.parseState.call(_this, data.toString());
 
 				})
-				.then(_this.pushState.bind(_this))
-				.fail(_this.pushError.bind(_this))
+				.then(libFast.bind(_this.pushState, _this))
+				.fail(libFast.bind(_this.pushError, _this))
 				.done(function () {
 					return logDone(timeStart);
 
@@ -104,7 +105,7 @@ ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
-	var arrayTrackUris = arrayTrackIds.map(convertTrackIdToUri);
+	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
 	var firstTrack = arrayTrackUris.shift();
@@ -112,7 +113,7 @@ ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	// If there are more tracks in the array, add those also
 	if (arrayTrackUris.length > 0) {
-		promisedActions = arrayTrackUris.reduce(function (previousPromise, curTrackUri) {
+		promisedActions = libFast.reduce(arrayTrackUris, function (previousPromise, curTrackUri) {
 			return previousPromise
 				.then(function () {
 					return _this.sendSpopCommand('uadd', [curTrackUri]);
@@ -166,7 +167,7 @@ ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameter
 	var _this = this;
 
 	// Convert the array of parameters to a string
-	var sParameters = arrayParameters.reduce(function (sCollected, sCurrent) {
+	var sParameters = libFast.reduce(arrayParameters, function (sCollected, sCurrent) {
 		return sCollected + ' ' + sCurrent;
 
 	},'');
@@ -174,7 +175,7 @@ ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameter
 	// Pass the command to Spop when the command socket is ready
 	this.spopCommandReady
 		.then(function () {
-			return libQ.nfcall(_this.connSpopCommand.write.bind(_this.connSpopCommand), sCommand + sParameters + '\n', "utf-8");
+			return libQ.nfcall(libFast.bind(_this.connSpopCommand.write, _this.connSpopCommand), sCommand + sParameters + '\n', "utf-8");
 
 		});
 
@@ -188,7 +189,7 @@ ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameter
 			return sResponse;
 
 		})
-		.fail(_this.pushError.bind(_this));
+		.fail(libFast.bind(_this.pushError, _this));
 
 }
 
