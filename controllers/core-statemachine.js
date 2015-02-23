@@ -221,16 +221,16 @@ CoreStateMachine.prototype.syncStateFromMpd = function (stateMpd) {
 
 }
 
-// Sync state from Spotify
-CoreStateMachine.prototype.syncStateFromSpotify = function (stateSpotify) {
+// Sync state from Spop
+CoreStateMachine.prototype.syncStateFromSpop = function (stateSpop) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreStateMachine::syncStateFromSpotify');
+	console.log('[' + Date.now() + '] ' + 'CoreStateMachine::syncStateFromSpop');
 
-	if (this.currentTrackBlock.service !== 'spotify') {
-		return libQ.reject('Error: Spotify announced a state update when it is not the currently active service');
+	if (this.currentTrackBlock.service !== 'spop') {
+		return libQ.reject('Error: Spop announced a state update when it is not the currently active service');
 
 	} else {
-		return this.syncState(stateSpotify, 'spotify');
+		return this.syncState(stateSpop, 'spop');
 
 	}
 
@@ -264,18 +264,18 @@ CoreStateMachine.prototype.serviceClearAddPlay = function () {
 
 	if (trackBlock.service === 'mpd') {
 
-		return this.commandRouter.spotifyStop()
+		return this.commandRouter.spopStop()
 			//.delay(5000) // Spop does not release ALSA immediately - adjust this delay as needed
 			.then(function () {
 				return _this.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
 
 			});
 
-	} else if (trackBlock.service === 'spotify') {
+	} else if (trackBlock.service === 'spop') {
 
 		return this.commandRouter.mpdStop()
 			.then(function () {
-				return _this.commandRouter.spotifyClearAddPlayTracks(trackBlock.trackids);
+				return _this.commandRouter.spopClearAddPlayTracks(trackBlock.trackids);
 
 			});
 
@@ -297,9 +297,9 @@ CoreStateMachine.prototype.serviceStop = function () {
 
 		return this.commandRouter.mpdStop();
 
-	} else if (trackBlock.service === 'spotify') {
+	} else if (trackBlock.service === 'spop') {
 
-		return this.commandRouter.spotifyStop();
+		return this.commandRouter.spopStop();
 
 	} else {
 
@@ -319,9 +319,9 @@ CoreStateMachine.prototype.servicePause = function () {
 
 		return this.commandRouter.mpdPause();
 
-	} else if (trackBlock.service === 'spotify') {
+	} else if (trackBlock.service === 'spop') {
 
-		return this.commandRouter.spotifyPause();
+		return this.commandRouter.spopPause();
 
 	} else {
 
@@ -341,9 +341,9 @@ CoreStateMachine.prototype.serviceResume = function () {
 
 		return this.commandRouter.mpdResume();
 
-	} else if (trackBlock.service === 'spotify') {
+	} else if (trackBlock.service === 'spop') {
 
-		return this.commandRouter.spotifyResume();
+		return this.commandRouter.spopResume();
 
 	} else {
 
