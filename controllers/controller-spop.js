@@ -1,11 +1,10 @@
-// This controller connects to Spop to interface with libspotify
 var libQ = require('kew');
 var libNet = require('net');
 var libFast = require('fast.js');
 
-// Define the ControllerSpotify class
-module.exports = ControllerSpotify;
-function ControllerSpotify (nHost, nPort, commandRouter) {
+// Define the ControllerSpop class
+module.exports = ControllerSpop;
+function ControllerSpop (nHost, nPort, commandRouter) {
 
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var _this = this;
@@ -89,9 +88,9 @@ function ControllerSpotify (nHost, nPort, commandRouter) {
 
 	// Make a temporary track library for testing purposes
 	this.library = new Object();
-	this.library['c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn'] = {service: 'spotify', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}};
-	this.library['c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp'] = {service: 'spotify', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}};
-	this.library['c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ'] = {service: 'spotify', trackid: 'c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ', metadata: {title: 'Radio Song'}};
+	this.library['c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}};
+	this.library['c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}};
+	this.library['c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ', metadata: {title: 'Radio Song'}};
 
 }
 
@@ -99,9 +98,9 @@ function ControllerSpotify (nHost, nPort, commandRouter) {
 // These are 'this' aware, and return a promise
 
 // Define a method to clear, add, and play an array of tracks
-ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
+ControllerSpop.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::clearAddPlayTracks');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
 	var _this = this;
 
 	// From the array of track IDs, get array of track URIs to play
@@ -128,32 +127,45 @@ ControllerSpotify.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 }
 
-// Spotify stop
-ControllerSpotify.prototype.stop = function () {
+// Spop stop
+ControllerSpop.prototype.stop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::stop');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::stop');
 
 	return this.sendSpopCommand('stop', []);
 
 }
 
-// Spotify pause
-ControllerSpotify.prototype.pause = function () {
+// Spop pause
+ControllerSpop.prototype.pause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::pause');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pause');
 
 	// TODO don't send 'toggle' if already paused
 	return this.sendSpopCommand('toggle', []);
 
 }
 
-// Spotify resume
-ControllerSpotify.prototype.resume = function () {
+// Spop resume
+ControllerSpop.prototype.resume = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::resume');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::resume');
 
 	// TODO don't send 'toggle' if already playing
 	return this.sendSpopCommand('toggle', []);
+
+}
+
+// Spop music library
+ControllerSpop.prototype.getLibrary = function () {
+
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getLibrary');
+	var _this = this;
+
+	return libQ.fcall(libFast.map, Object.keys(this.library), function (currentKey) {
+		return _this.library[currentKey];
+
+	});
 
 }
 
@@ -161,9 +173,9 @@ ControllerSpotify.prototype.resume = function () {
 // These are 'this' aware, and may or may not return a promise
 
 // Send command to Spop
-ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameters) {
+ControllerSpop.prototype.sendSpopCommand = function (sCommand, arrayParameters) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::sendSpopCommand');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
 	var _this = this;
 
 	// Convert the array of parameters to a string
@@ -193,19 +205,19 @@ ControllerSpotify.prototype.sendSpopCommand = function (sCommand, arrayParameter
 
 }
 
-// Spotify get state
-ControllerSpotify.prototype.getState = function () {
+// Spop get state
+ControllerSpop.prototype.getState = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::getState');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getState');
 
 	return this.sendSpopCommand('status', []);
 
 }
 
-// Spotify parse state
-ControllerSpotify.prototype.parseState = function (sState) {
+// Spop parse state
+ControllerSpop.prototype.parseState = function (sState) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::parseState');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::parseState');
 	var objState = JSON.parse(sState);
 
 	var nSeek = null;
@@ -254,19 +266,19 @@ ControllerSpotify.prototype.parseState = function (sState) {
 
 }
 
-// Announce updated Spotify state
-ControllerSpotify.prototype.pushState = function (state) {
+// Announce updated Spop state
+ControllerSpop.prototype.pushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::pushState');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushState');
 
-	return this.commandRouter.spotifyPushState(state);
+	return this.commandRouter.spopPushState(state);
 
 }
 
 // Pass the error if we don't want to handle it
-ControllerSpotify.prototype.pushError = function (sReason) {
+ControllerSpop.prototype.pushError = function (sReason) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpotify::pushError');
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushError');
 	console.log(sReason);
 
 	// Return a resolved empty promise to represent completion

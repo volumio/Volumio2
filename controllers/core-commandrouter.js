@@ -19,11 +19,14 @@ function CoreCommandRouter (server) {
 	var nMpdHost = 'localhost';
 	this.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdHost, nMpdPort, this);
 
-	// Start the Spotify controller
+	// Start the Spop controller
 	// Move these variables out at some point
-	var nSpotifyPort = 6602;
-	var nSpotifyHost = 'localhost';
-	this.controllerSpotify = new (require('../controllers/controller-spotify'))(nSpotifyHost, nSpotifyPort, this);
+	var nSpopPort = 6602;
+	var nSpopHost = 'localhost';
+	this.controllerSpop = new (require('../controllers/controller-spop'))(nSpopHost, nSpopPort, this);
+
+	// Start the music library
+	this.musicLibrary = new (require('../controllers/core-musiclibrary'))(this);
 
 }
 
@@ -85,6 +88,14 @@ CoreCommandRouter.prototype.volumioGetQueue = function () {
 
 }
 
+// Volumio Get Library (by title)
+CoreCommandRouter.prototype.volumioGetLibraryByTitle = function () {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryByTitle');
+	return this.musicLibrary.getLibraryByTitle();
+
+}
+
 // Methods usually called by the State Machine --------------------------------------------------------------------
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
@@ -135,35 +146,35 @@ CoreCommandRouter.prototype.mpdResume = function () {
 
 }
 
-// Spotify Clear-Add-Play
-CoreCommandRouter.prototype.spotifyClearAddPlayTracks = function (arrayTrackIds) {
+// Spop Clear-Add-Play
+CoreCommandRouter.prototype.spopClearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyClearAddPlayTracks');
-	return this.controllerSpotify.clearAddPlayTracks(arrayTrackIds)
-
-}
-
-// Spotify Stop
-CoreCommandRouter.prototype.spotifyStop = function () {
-
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyStop');
-	return this.controllerSpotify.stop();
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
+	return this.controllerSpop.clearAddPlayTracks(arrayTrackIds)
 
 }
 
-// Spotify Pause
-CoreCommandRouter.prototype.spotifyPause = function () {
+// Spop Stop
+CoreCommandRouter.prototype.spopStop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyPause');
-	return this.controllerSpotify.pause();
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
+	return this.controllerSpop.stop();
 
 }
 
-// Spotify Resume
-CoreCommandRouter.prototype.spotifyResume = function () {
+// Spop Pause
+CoreCommandRouter.prototype.spopPause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyResume');
-	return this.controllerSpotify.resume();
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
+	return this.controllerSpop.pause();
+
+}
+
+// Spop Resume
+CoreCommandRouter.prototype.spopResume = function () {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
+	return this.controllerSpop.resume();
 
 }
 
@@ -176,10 +187,42 @@ CoreCommandRouter.prototype.mpdPushState = function (state) {
 
 }
 
-CoreCommandRouter.prototype.spotifyPushState = function (state) {
+CoreCommandRouter.prototype.spopPushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spotifyPushState');
-	return this.stateMachine.syncStateFromSpotify(state);
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPushState');
+	return this.stateMachine.syncStateFromSpop(state);
 
 }
 
+// Methods usually called by the music library ---------------------------------------------------------------------
+
+// Get libraries from all services and concatenate them together
+CoreCommandRouter.prototype.getCombinedLibrary = function () {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::getCombinedLibrary');
+
+	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
+	return libQ.all([this.mpdGetLibrary(), this.spopGetLibrary()])
+		.then(function (arrayLibraries) {
+			return libQ.fcall(libFast.reduce, arrayLibraries, function (collectedLibraries, currentLibrary) {
+				return libFast.concat(collectedLibraries, currentLibrary);
+
+			}, []);
+
+		});
+
+}
+
+CoreCommandRouter.prototype.mpdGetLibrary = function () {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdGetLibrary');
+	return this.controllerMpd.getLibrary();
+
+}
+
+CoreCommandRouter.prototype.spopGetLibrary = function () {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopGetLibrary');
+	return this.controllerSpop.getLibrary();
+
+}

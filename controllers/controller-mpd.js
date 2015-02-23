@@ -111,6 +111,19 @@ ControllerMpd.prototype.resume = function () {
 
 }
 
+// MPD music library
+ControllerMpd.prototype.getLibrary = function () {
+
+	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getLibrary');
+	var _this = this;
+
+	return libQ.fcall(libFast.map, Object.keys(_this.library), function (currentKey) {
+		return _this.library[currentKey];
+
+	});
+
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -129,10 +142,6 @@ ControllerMpd.prototype.getState = function () {
 
 		})
 		.then(_this.parseState)
-		.then(function (data) {
-			return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
-
-		})
 		.then(function (state) {
 			collectedState = state;
 
@@ -144,10 +153,6 @@ ControllerMpd.prototype.getState = function () {
 
 					})
 					.then(_this.parseTrackInfo)
-					.then(function (data) {
-						return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
-
-					})
 					.then(function (trackinfo) {
 						collectedState.dynamictitle = trackinfo.dynamictitle;
 						return libQ.resolve(collectedState);
@@ -160,10 +165,6 @@ ControllerMpd.prototype.getState = function () {
 				return libQ.resolve(collectedState);
 
 			}
-
-		})
-		.then(function (data) {
-			return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
 
 		});
 
@@ -268,13 +269,10 @@ ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 
 	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
-	return libQ.resolve(
-		libFast.map(Object.keys(objQueue), function (currentKey) {
-			return convertUriToTrackId(objQueue[currentKey]);
+	return libQ.fcall(libFast.map, Object.keys(objQueue), function (currentKey) {
+		return convertUriToTrackId(objQueue[currentKey]);
 
-		})
-
-	);
+	});
 
 }
 

@@ -120,6 +120,36 @@ function clearPlayQueue () {
 
 }
 
+function updateMusicLibrary (arrayLibrary) {
+	clearMusicLibrary();
+
+	var nodeMusicLibrary = document.getElementById('musiclibrary');
+	var nodeListItem = null;
+	var nodeText = null;
+	for (i = 0; i < arrayLibrary.length; i++) {
+		nodeListItem = document.createElement('LI');
+		nodeText = document.createTextNode(JSON.stringify(arrayLibrary[i]));
+
+		nodeListItem.appendChild(nodeText);
+		nodeMusicLibrary.appendChild(nodeListItem);
+
+	}
+
+}
+
+function clearMusicLibrary () {
+	var nodeMusicLibrary = document.getElementById('musiclibrary');
+
+	if (nodeMusicLibrary.firstChild) {
+		while (nodeMusicLibrary.firstChild) {
+			nodeMusicLibrary.removeChild(nodeMusicLibrary.firstChild);
+
+		}
+
+	}
+
+}
+
 function emitClientEvent (sEvent, sData) {
 	socket.emit(sEvent, sData);
 	printConsoleMessage(sEvent + ': ' + sData);
@@ -134,7 +164,13 @@ socket.on('connect', function () {
 
 	// Get the state upon load
 	emitClientEvent('volumioGetState', '');
+
+	// Get the play queue
 	emitClientEvent('volumioGetQueue', '');
+
+	// Get the music library view
+	// TODO - only call this when user requests view of music library
+	emitClientEvent('volumioGetLibraryByTitle', '');
 
 });
 
@@ -142,6 +178,7 @@ socket.on('disconnect', function () {
 	printConsoleMessage('Websocket disconnected.');
 	disableControls();
 	clearPlayQueue();
+	clearMusicLibrary();
 	clearPlayerStateDisplay();
 	stopPlaybackTimer();
 
@@ -167,6 +204,12 @@ socket.on('volumioPushState', function (state) {
 socket.on('volumioPushQueue', function (arrayQueue) {
 	updatePlayerQueue(arrayQueue);
 	printConsoleMessage('volumioPushQueue: ' + JSON.stringify(arrayQueue));
+
+});
+
+socket.on('volumioPushLibrary', function (arrayLibrary) {
+	updateMusicLibrary(arrayLibrary);
+	printConsoleMessage('volumioPushLibrary: ' + JSON.stringify(arrayLibrary));
 
 });
 

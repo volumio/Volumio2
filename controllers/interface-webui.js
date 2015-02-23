@@ -50,6 +50,24 @@ function InterfaceWebUI (server, commandRouter) {
 
 		});
 
+		connWebSocket.on('volumioGetLibraryByTitle', function() {
+			_thisConnWebSocket = this;
+
+			var timeStart = Date.now();
+			logStart('Client requests Volumio library by title')
+				.then(libFast.bind(commandRouter.volumioGetLibraryByTitle, commandRouter))
+				.then(function (library) {
+					return _this.volumioPushLibrary.call(_this, library, _thisConnWebSocket);
+
+				})
+				.fail(console.log)
+				.done(function () {
+					return logDone(timeStart);
+
+				});
+
+		});
+
 		connWebSocket.on('volumioPlay', function() {
 
 			var timeStart = Date.now(); 
@@ -137,12 +155,31 @@ InterfaceWebUI.prototype.volumioPushQueue = function (queue, connWebSocket) {
 	console.log('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushQueue');
 	var _this = this;
 
+	// If a specific client is given, push to just that client
 	if (connWebSocket) {
 		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushQueue', queue);
 
+	// Else push to all connected clients
 	} else {
-		// Push the updated queue to all clients
 		return libQ.fcall(libFast.bind(_this.libSocketIO.emit, _this.libSocketIO), 'volumioPushQueue', queue);
+
+	}
+
+}
+
+// Receive music library updates from commandRouter and broadcast to all connected clients
+InterfaceWebUI.prototype.volumioPushLibrary = function (library, connWebSocket) {
+
+	console.log('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushLibrary');
+	var _this = this;
+
+	// If a specific client is given, push to just that client
+	if (connWebSocket) {
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushLibrary', library);
+
+	// Else push to all connected clients
+	} else {
+		return libQ.fcall(libFast.bind(_this.libSocketIO.emit, _this.libSocketIO), 'volumioPushLibrary', library);
 
 	}
 
