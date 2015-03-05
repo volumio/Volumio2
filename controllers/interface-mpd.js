@@ -653,9 +653,21 @@ InterfaceMPD.prototype.handleList = function(sCommand, sParam, client) {
 
 // Handler for command: LISTALL
 InterfaceMPD.prototype.handleListall = function(sCommand, sParam, client) {
+	var _this = this;
+	var timeStart = Date.now();
+			logStart('Client requests Volumio library by title')
+				.then(libFast.bind(_this.commRouter.volumioGetLibraryByTitle, _this.commRouter))
+				.then(function (library) {
+					_this.volumioPushLibrary.call(_this, library, client);
 
-	// Respond with default 'OK'
-	client.write("OK\n");
+				})
+				.fail(console.log)
+				.done(function () {
+					// Respond with default 'OK'
+					client.write("OK\n");
+					return logDone(timeStart);
+
+				});
 }
 
 // Handler for command: LISTALLINFO
@@ -755,7 +767,7 @@ InterfaceMPD.prototype.handleNext = function(sCommand, sParam, client) {
     // send Next command to CommandRouter
     logStart('Client requests Volumio next' )
         .then(libFast.bind(_this.commRouter.volumioNext, _this.commRouter))
-        .catch(console.log)
+        .fail(console.log)
         .done(logDone);
     
 	// Respond with default 'OK'
@@ -796,7 +808,7 @@ InterfaceMPD.prototype.handlePause = function(sCommand, sParam, client) {
     // Send pause command to CommandRouter
     logStart('Client requests Volumio pause' )
 				.then(libFast.bind(_this.commRouter.volumioPause, _this.commRouter))
-				.catch(console.log)
+				.fail(console.log)
 				.done(logDone);
     
 	// Respond with default 'OK'
@@ -817,7 +829,7 @@ InterfaceMPD.prototype.handlePlay = function(sCommand, sParam, client) {
     // Send play command to CommandRouter
     logStart('Client requests Volumio play' )
         .then(libFast.bind(_this.commRouter.volumioPlay, _this.commRouter))
-        .catch(console.log)
+        .fail(console.log)
         .done(logDone);
     
 	// Respond with default 'OK'
@@ -845,7 +857,7 @@ InterfaceMPD.prototype.handlePlaylist = function(sCommand, sParam, client) {
             // fetch MPD output from helper
             client.write(_this.helper.printPlaylist());
         })
-        .catch(console.log)
+        .fail(console.log)
         .done(logDone);
     
 	// Respond with default 'OK'
@@ -932,7 +944,7 @@ InterfaceMPD.prototype.handlePrevious = function(sCommand, sParam, client) {
     // Send previous command to CommandRouter
     logStart('Client requests Volumio previous' )
         .then(libFast.bind(_this.commRouter.volumioPrevious, _this.commRouter))
-        .catch(console.log)
+        .fail(console.log)
         .done(logDone);
     
 	// Respond with default 'OK'
@@ -1124,7 +1136,7 @@ InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
         .then(function (state) {
             _this.volumioPushState.call(_this, state, client);
         })
-        .catch(console.log)
+        .fail(console.log)
         .done(logDone);
     
 	// Respond with default 'OK'
@@ -1138,7 +1150,7 @@ InterfaceMPD.prototype.handleStop = function(sCommand, sParam, client) {
     // Call stop on CommandRouter
     logStart('Client requests Volumio stop' )
         .then(libFast.bind(_this.commRouter.volumioStop, _this.commRouter))
-        .catch(console.log)
+        .fail(console.log)
         .done(logDone);
     
 	// Respond with default 'OK'
@@ -1231,9 +1243,9 @@ InterfaceMPD.prototype.handleVolume = function(sCommand, sParam, client) {
 
 
 // =============== STATIC FUNCTIONS
-function logDone () {
+function logDone (timeStart) {
 
-	console.log('[' + Date.now() + '] ' + '------------------------------');
+	console.log('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 	return libQ.resolve();
 
 }
@@ -1260,6 +1272,25 @@ InterfaceMPD.prototype.printConsoleMessage = function (message) {
 	
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
+
+}
+
+// Receive music library updates from commandRouter and broadcast to all connected clients
+InterfaceMPD.prototype.volumioPushLibrary = function (library, client) {
+
+	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushLibrary');
+	var _this = this;
+
+	// If a specific client is given, push to just that client
+	if (client) {
+		client.write(_this.helper.printLibrary(library));
+
+	// Else push to all connected clients
+	} else {
+		_this.idles.forEach(function (client) {
+			client.write("changed: database");
+		});
+	}
 
 }
 

@@ -193,6 +193,18 @@ module.exports = {
 		return output;
 	},
 	
+	// Give MPD output of library (listall)
+	printLibrary: function(library) {
+		var output = "";
+		// For each item
+		library.forEach(function (item) {
+			// print: file: "[service] title"
+			output += "file: \"[" + item.service + "] " + item.metadata.title + "\"";
+			output += "\n";
+		});
+		return output;
+	},
+	
 	// Give MPD output of tagtypes
 	printTagTypes: function() {
 		var output = "";
@@ -208,7 +220,7 @@ module.exports = {
 		var output = "";
 		queue.forEach(function (track) {
 			output += track.position + ":";
-			output += "file: \"[" + track.service + "] " + track.metadata.name + "\"";
+			output += "file: \"[" + track.service + "] " + track.metadata.title + "\"";
 			output += "\n";
 		});
 		return output;
@@ -259,7 +271,7 @@ module.exports = {
 				service : track.service,
 				trackid : track.trackid,
 				metadata : {
-					name : track.metadata.name
+					title : track.metadata.title
 				}
 			}
 			positionNr++;
