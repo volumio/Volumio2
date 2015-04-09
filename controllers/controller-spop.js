@@ -86,11 +86,15 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 
 	});
 
-	// Make a temporary track library for testing purposes
 	this.library = new Object();
-	this.library['c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}};
-	this.library['c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}};
-	this.library['c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ', metadata: {title: 'Radio Song'}};
+
+	this.libraryReady = libQ.fcall(function () {
+		// Make a temporary track library for testing purposes
+		_this.library['c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}};
+		_this.library['c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}};
+		_this.library['c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ', metadata: {title: 'Radio Song'}};
+
+	});
 
 }
 
@@ -162,10 +166,14 @@ ControllerSpop.prototype.getLibrary = function () {
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getLibrary');
 	var _this = this;
 
-	return libQ.fcall(libFast.map, Object.keys(this.library), function (currentKey) {
-		return _this.library[currentKey];
+	return this.libraryReady
+		.then(function () {
+			return libQ.fcall(libFast.map, Object.keys(_this.library), function (currentKey) {
+				return _this.library[currentKey];
 
-	});
+			});
+
+		});
 
 }
 

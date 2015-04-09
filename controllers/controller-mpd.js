@@ -1,6 +1,7 @@
 var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
+var libRandomString = require('random-string'); // for testing purposes
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -37,10 +38,22 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 
 	});
 
-	// Make a temporary track library for testing purposes
 	this.library = new Object();
-	this.library['aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND'] = {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}};
-	this.library['aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv'] = {service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}};
+
+	this.libraryReady = libQ.fcall(function () {
+		// Make a temporary track library for testing purposes
+		_this.library['aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND'] = {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}};
+		_this.library['aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv'] = {service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}};
+
+		// Throw in a bunch of random library entries to test performance
+		var sRandom = '';
+		for (var i = 0; i < 1000; i++) {
+			sRandom = libRandomString({length: 20});
+			_this.library[convertUriToTrackId(sRandom)] = {service: 'mpd', trackid: convertUriToTrackId(sRandom), metadata: {title: sRandom}};
+
+		}
+
+	});
 
 }
 
@@ -117,10 +130,14 @@ ControllerMpd.prototype.getLibrary = function () {
 	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getLibrary');
 	var _this = this;
 
-	return libQ.fcall(libFast.map, Object.keys(_this.library), function (currentKey) {
-		return _this.library[currentKey];
+	return this.libraryReady
+		.then(function () {
+			return libQ.fcall(libFast.map, Object.keys(_this.library), function (currentKey) {
+				return _this.library[currentKey];
 
-	});
+			});
+
+		});
 
 }
 
