@@ -2,7 +2,7 @@
 
 ## Latest Volumio 2 Image file
 
-[Alpha1](volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
+[Alpha1](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
 
 System Image is built with [Volumio Builder](https://github.com/volumio/Build)
 
