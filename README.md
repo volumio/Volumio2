@@ -1,31 +1,85 @@
+# Volumio 2 WebUI
 
+## Latest Volumio 2 Image file
 
-# WebUI-NODE
+[Alpha1](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
 
-
+System Image is built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
 
-First thing is to get node:
-
-       sudo apt-get install curl
-       sudo curl -sL https://deb.nodesource.com/setup | bash -
-       sudo apt-get install -y nodejs
-
 Clone the repo
 
-       git clone https://github.com/volumio/WebUI-NODE.git 
+       git clone https://github.com/volumio/WebUI-NODE.git \volumio
 
 All dependecies are in the package JSON, from the working directory just run
 
-       cd WebUI-NODE
+       cd \volumio
        npm install
 
 You can run all the servers in one single step just running with nodejs
 
        nodejs bin/www 
+       
+## System Architecture
+       
+![volumiosystemarchitecture](http://lightflo.ws/images/VolumioArchitecture2.png)
 
-## Developing
+
+## Development tasks and milestones
+
+### Operating System
+
+- [ ] Custom Debian Based Operating System
+ - [X] Minimal Jessie Based BSP
+ - [X] SystemD migration
+ - [ ] Volumio APT repo
+
+- [ ] Custom Compiled Core Packages 
+ - [X] MPD
+ - [ ] SPOP
+ - [ ] Upmpdcli
+ - [X] NodeJS
+
+
+### Node Backend
+
+- [ ] Volumio Core 
+ - [X] MPD Emulation Interface
+ - [ ] Command Router 
+ - [ ] WebUI Endpoints
+ - [ ] Mixer Controls
+ 
+- [ ] Audio services Controllers 
+ - [ ] MPD Service and Library
+ - [ ] SPOP Service and Library
+ - [ ] Shairport Service and Library
+ - [ ] UPNP Service and Library
+ - [ ] (groove?) Service and Library
+ - [ ] Pulse Service and Library
+
+- [ ] System manager worker
+ - [ ] Networking
+ - [ ] CIFS\SAMBA
+ - [ ] I2S Driver
+ - [ ] Hardware Layer
+ - [ ] USB Drives
+ 
+### Frontend
+
+- [ ] Volumio 2 WebUI (Playback)
+ - [ ] Boostrap Based Structure
+ - [ ] Playback Handling 
+ - [ ] Library retrieval
+ - [ ] SPOP Hooks  
+ - [ ] Airplay Hooks
+
+- [ ] Volumio 2 WebUI (Configuration)
+ - [ ] Playback Option Configuration
+ - [ ] Network Option Configuration 
+ - [ ] Plug-in System Configuration
+ - [ ] System Configuration 
+
 
 * ToDos, Tasks and Bugs [here](https://github.com/volumio/WebUI-NODE#boards) (you need to associate your github account with [ZenHub])(https://www.zenhub.io/) 
 * [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics 
