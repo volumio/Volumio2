@@ -25,73 +25,92 @@ CoreMusicLibrary.prototype.getLibraryByTitle = function (sPath) {
 
 // Function to populate a music library, to be called by service controllers.
 // Metadata fields to roughly follow Ogg Vorbis standards (http://xiph.org/vorbis/doc/v-comment.html)
-CoreMusicLibrary.prototype.populateLibrary = function (objTrackList) {
+CoreMusicLibrary.prototype.populateLibrary = function (arrayItems) {
 	var tableGenres = new Object();
 	var tableArtists = new Object();
 	var tableAlbums = new Object();
-	var tableTitles = new Object();
-	var objReturn = {'genretable': tableGenres, 'artisttable': tableArtists, 'albumtable': tableAlbums, 'titletable': tableTitles};
+	var tableTracks = new Object();
+	var tableItems = new Object();
+	var objReturn = {'genretable': tableGenres, 'artisttable': tableArtists, 'albumtable': tableAlbums, 'tracktable': tableTracks, 'itemtable': tableItems};
 
-	var arrayTrackKeys = Object.keys(objTrackList);
+	var timeLastUpdate = Date.now();
 
 	var curAlbums = new Array();
 	var curArtists = new Array();
 	var curGenres = new Array();
-	for (var iTrackKey = 0; iTrackKey < arrayTrackKeys.length; iTrackKey++) {
-		curTrackKey = arrayTrackKeys[iTrackKey];
-		curTrackObject = objTrackList[curTrackKey];
-
-		curTitleKey = convertStringToHashkey(curTrackObject['metadata']['title']);
-
-		if (!(curTitleKey in tableTitles)) {
-			tableTitles[curTitleKey] = new Object();
-			tableTitles[curTitleKey]['tracks'] = new Object();
-			tableTitles[curTitleKey]['albums'] = new Object();
+	for (var iItem = 0; iItem < arrayItems.length; iItem++) {
+		if (Date.now() - timeLastUpdate > 3000) {
+			console.log('   ' + (Math.round((iItem + 1) / arrayItems.length * 1000) / 10) + '%');
+			timeLastUpdate = Date.now();
 
 		}
 
-		tableTitles[curTitleKey]['tracks'][curTrackKey] = null;
+		curItemObject = arrayItems[iItem];
 
-		curAlbums = curTrackObject['metadata']['albums'];
+		curItemKey = convertStringToHashkey(curItemObject['service'] + curItemObject['uri']);
+		tableItems[curItemKey] = curItemObject;
+		tableItems[curItemKey]['trackkey'] = new Object();
+
+		curTrackKey = convertStringToHashkey(curItemObject['metadata']['title']);
+
+		if (!(curTrackKey in tableTracks)) {
+			tableTracks[curTrackKey] = new Object();
+			tableTracks[curTrackKey]['itemkeys'] = new Object();
+			tableTracks[curTrackKey]['albumkeys'] = new Object();
+			tableTracks[curTrackKey]['metadata'] = new Object();
+			tableTracks[curTrackKey]['metadata']['title'] = curItemObject['metadata']['title'];
+
+		}
+
+		tableTracks[curTrackKey]['itemkeys'][curItemKey] = null;
+		tableItems[curItemKey]['trackkey'][curTrackKey] = null;
+
+		curAlbums = curItemObject['metadata']['albums'];
 		for (var iAlbum = 0; iAlbum < curAlbums.length; iAlbum++) {
 			curAlbumKey = convertStringToHashkey(curAlbums[iAlbum]);
 
 			if (!(curAlbumKey in tableAlbums)) {
 				tableAlbums[curAlbumKey] = new Object();
-				tableAlbums[curAlbumKey]['titles'] = new Object();
-				tableAlbums[curAlbumKey]['artists'] = new Object();
+				tableAlbums[curAlbumKey]['trackkeys'] = new Object();
+				tableAlbums[curAlbumKey]['artistkeys'] = new Object();
+				tableAlbums[curAlbumKey]['metadata'] = new Object();
+				tableAlbums[curAlbumKey]['metadata']['title'] = curAlbums[iAlbum];
 
 			}
 
-			tableAlbums[curAlbumKey]['titles'][curTitleKey] = null;
-			tableTitles[curTitleKey]['albums'][curAlbumKey] = null;
+			tableAlbums[curAlbumKey]['trackkeys'][curTrackKey] = null;
+			tableTracks[curTrackKey]['albumkeys'][curAlbumKey] = null;
 
-			curArtists = curTrackObject['metadata']['artists'];
+			curArtists = curItemObject['metadata']['artists'];
 			for (var iArtist = 0; iArtist < curArtists.length; iArtist++) {
 				curArtistKey = convertStringToHashkey(curArtists[iArtist]);
 
 				if (!(curArtistKey in tableArtists)) {
 					tableArtists[curArtistKey] = new Object();
-					tableArtists[curArtistKey]['albums'] = new Object();
-					tableArtists[curArtistKey]['genres'] = new Object();
+					tableArtists[curArtistKey]['albumkeys'] = new Object();
+					tableArtists[curArtistKey]['genrekeys'] = new Object();
+					tableArtists[curArtistKey]['metadata'] = new Object();
+					tableArtists[curArtistKey]['metadata']['name'] = curArtists[iArtist];
 
 				}
 
-				tableArtists[curArtistKey]['albums'][curAlbumKey] = null;
-				tableAlbums[curAlbumKey]['artists'][curArtistKey] = null;
+				tableArtists[curArtistKey]['albumkeys'][curAlbumKey] = null;
+				tableAlbums[curAlbumKey]['artistkeys'][curArtistKey] = null;
 
-				curGenres = curTrackObject['metadata']['genres'];
+				curGenres = curItemObject['metadata']['genres'];
 				for (var iGenre = 0; iGenre < curGenres.length; iGenre++) {
 					curGenreKey = convertStringToHashkey(curGenres[iGenre]);
 
 					if (!(curGenreKey in tableGenres)) {
 						tableGenres[curGenreKey] = new Object();
-						tableGenres[curGenreKey]['artists'] = new Object();
+						tableGenres[curGenreKey]['artistkeys'] = new Object();
+						tableGenres[curGenreKey]['metadata'] = new Object();
+						tableGenres[curGenreKey]['metadata']['name'] = curGenres[iGenre];
 
 					}
 
-					tableGenres[curGenreKey]['artists'][curArtistKey] = null;
-					tableArtists[curArtistKey]['genres'][curGenreKey] = null;
+					tableGenres[curGenreKey]['artistkeys'][curArtistKey] = null;
+					tableArtists[curArtistKey]['genrekeys'][curGenreKey] = null;
 
 				}
 

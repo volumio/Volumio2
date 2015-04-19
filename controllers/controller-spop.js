@@ -24,31 +24,41 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 
 	this.spopResponseDeferred = libQ.defer();
 	this.spopResponse = this.spopResponseDeferred.promise;
+	this.sResponseBuffer = '';
 
 	// Start a listener for command socket messages (command responses)
 	this.connSpopCommand.on('data', function (data) {
+		_this.sResponseBuffer = _this.sResponseBuffer.concat(data.toString());
 
-		// If this is the first message, then the connection is open
-		if (!_this.bSpopCommandGotFirstMessage) {
-			_this.bSpopCommandGotFirstMessage = true;
+		// If the last character in the data chunk is a newline, this is the end of the response
+		if (data.slice(data.length - 1).toString() === '\n') {
 
-			try {
-				_this.spopCommandReadyDeferred.resolve();
+			// If this is the first message, then the connection is open
+			if (!_this.bSpopCommandGotFirstMessage) {
+				_this.bSpopCommandGotFirstMessage = true;
 
-			} catch (error) {
-				_this.pushError(error);
+				try {
+					_this.spopCommandReadyDeferred.resolve();
+
+				} catch (error) {
+					_this.pushError(error);
+
+				}
+
+			// Else this is a command response
+			} else {
+				try {
+					_this.spopResponseDeferred.resolve(_this.sResponseBuffer);
+
+				} catch (error) {
+					_this.pushError(error);
+
+				}
 
 			}
 
-		// Else this is a command response
-		} else {
-			try {
-				_this.spopResponseDeferred.resolve(data.toString());
-
-			} catch (error) {
-				_this.pushError(error);
-
-			}
+			// Reset the response buffer
+			_this.sResponseBuffer = '';
 
 		}
 
@@ -56,31 +66,43 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 
 	// Init some status socket variables
 	this.bSpopStatusGotFirstMessage = false;
+	this.sStatusBuffer = '';
 
 	// Start a listener for status socket messages
 	this.connSpopStatus.on('data', function (data) {
+		_this.sStatusBuffer = _this.sStatusBuffer.concat(data.toString());
 
-		// Put socket back into monitoring mode
-		_this.connSpopStatus.write('idle\n');
+		// If the last character in the data chunk is a newline, this is the end of the status update
+		if (data.slice(data.length - 1).toString() === '\n') {
 
-		// If this is the first message, then the connection is open
-		if (!_this.bSpopStatusGotFirstMessage) {
-			_this.bSpopStatusGotFirstMessage = true;
+			// Put socket back into monitoring mode
+			_this.connSpopStatus.write('idle\n');
 
-		// Else this is a state update announcement
-		} else {
-			var timeStart = Date.now(); 
-			logStart('Spop announces state update')
-				.then(function () {
-					return _this.parseState.call(_this, data.toString());
+			// If this is the first message, then the connection is open
+			if (!_this.bSpopStatusGotFirstMessage) {
+				_this.bSpopStatusGotFirstMessage = true;
 
-				})
-				.then(libFast.bind(_this.pushState, _this))
-				.fail(libFast.bind(_this.pushError, _this))
-				.done(function () {
-					return logDone(timeStart);
+			// Else this is a state update announcement
+			} else {
+				var timeStart = Date.now(); 
+				var sStatus = _this.sStatusBuffer;
 
-				});
+				logStart('Spop announces state update')
+					.then(function () {
+						return _this.parseState.call(_this, sStatus);
+
+					})
+					.then(libFast.bind(_this.pushState, _this))
+					.fail(libFast.bind(_this.pushError, _this))
+					.done(function () {
+						return logDone(timeStart);
+
+					});
+
+			}
+
+			// Reset the status buffer
+			_this.sStatusBuffer = '';
 
 		}
 
@@ -88,13 +110,10 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 
 	this.library = new Object();
 
-	this.libraryReady = libQ.fcall(function () {
-		// Make a temporary track library for testing purposes
-		_this.library['c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}};
-		_this.library['c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}};
-		_this.library['c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ'] = {service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ', metadata: {title: 'Radio Song'}};
-
-	});
+	this.libraryReady = 
+		this.sendSpopCommand('ls', [])
+		//.then(this.parseTracksInPlaylist)
+		.fail(console.log);
 
 }
 
@@ -291,6 +310,15 @@ ControllerSpop.prototype.pushError = function (sReason) {
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
+
+}
+
+// Parse tracks in playlists
+ControllerSpop.prototype.parseTracksInPlaylists = function (sInput) {
+
+	var objInput = JSON.parse(sInput);
+
+	return objInput;
 
 }
 
