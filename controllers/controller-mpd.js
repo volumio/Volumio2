@@ -20,7 +20,7 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
 
 	// This tracks the the timestamp of the newest detected status change
-	self.timeLatestStatus = 0;
+	self.timeLatestUpdate = 0;
 
 	// When playback status changes
 	self.clientMpd.on('system-player', function () {
@@ -145,7 +145,7 @@ ControllerMpd.prototype.getState = function () {
 			return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
 
 		})
-		.then(self.parseState)
+		.then(libFast.bind(self.parseState, self))
 		.then(function (state) {
 			collectedState = state;
 
@@ -156,7 +156,7 @@ ControllerMpd.prototype.getState = function () {
 						return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
 
 					})
-					.then(self.parseTrackInfo)
+					.then(libFast.bind(self.parseTrackInfo, self))
 					.then(function (trackinfo) {
 						collectedState.dynamictitle = trackinfo.dynamictitle;
 						return libQ.resolve(collectedState);
