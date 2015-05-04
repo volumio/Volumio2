@@ -8,7 +8,7 @@ module.exports = ControllerMpd;
 function ControllerMpd (nHost, nPort, commandRouter) {
 
 	// This fixed variable will let us refer to 'this' object at deeper scopes
-	var _this = this;
+	var self = this;
 
 	// Save a reference to the parent commandRouter
 	this.commandRouter = commandRouter;
@@ -17,7 +17,7 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 	this.clientMpd = libMpd.connect({port: nPort, host: nHost});
 
 	// Make a promise for when the MPD connection is ready to receive events
-	this.mpdReady = libQ.nfcall(libFast.bind(_this.clientMpd.on, _this.clientMpd), 'ready');
+	this.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
 
 	// This tracks the the timestamp of the newest detected status change
 	this.timeLatestStatus = 0;
@@ -28,9 +28,9 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 		var timeStart = Date.now(); 
 
 		logStart('MPD announces state update')
-			.then(libFast.bind(_this.getState, _this))
-			.then(libFast.bind(_this.pushState, _this))
-			.fail(libFast.bind(_this.pushError, _this))
+			.then(libFast.bind(self.getState, self))
+			.then(libFast.bind(self.pushState, self))
+			.fail(libFast.bind(self.pushError, self))
 			.done(function () {
 				return logDone(timeStart);
 
@@ -38,14 +38,8 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 
 	});
 
-	this.library = new Object();
-
-	this.libraryReady = libQ.fcall(function () {
-		// Make a temporary track library for testing purposes
-		_this.library['aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND'] = {service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}};
-		_this.library['aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv'] = {service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}};
-
-	});
+	this.tracklist = []
+	this.tracklistReady = libQ.resolve();
 
 }
 
@@ -56,7 +50,7 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks');
-	var _this = this;
+	var self = this;
 
 	// From the array of track IDs, get array of track URIs to play
 	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
@@ -72,7 +66,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 		// If there are more tracks in the array, add those also
 		if (arrayTrackUris.length > 0) {
-			return _this.sendMpdCommandArray(
+			return self.sendMpdCommandArray(
 				libFast.map(arrayTrackUris, function (currentTrack) {
 					return {command: 'add',   parameters: [currentTrack]};
 
@@ -117,17 +111,14 @@ ControllerMpd.prototype.resume = function () {
 }
 
 // MPD music library
-ControllerMpd.prototype.getLibrary = function () {
+ControllerMpd.prototype.getTracklist = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getLibrary');
-	var _this = this;
+	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getTracklist');
+	var self = this;
 
-	return this.libraryReady
+	return this.tracklistReady
 		.then(function () {
-			return libQ.fcall(libFast.map, Object.keys(_this.library), function (currentKey) {
-				return _this.library[currentKey];
-
-			});
+			return self.tracklist;
 
 		});
 
@@ -140,28 +131,28 @@ ControllerMpd.prototype.getLibrary = function () {
 ControllerMpd.prototype.getState = function () {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getState');
-	var _this = this;
+	var self = this;
 	var collectedState = {};
 	var timeCurrentUpdate = Date.now();
 	this.timeLatestUpdate = timeCurrentUpdate;
 
 	return this.sendMpdCommand('status', [])
 		.then(function (data) {
-			return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+			return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
 
 		})
-		.then(_this.parseState)
+		.then(self.parseState)
 		.then(function (state) {
 			collectedState = state;
 
 			// If there is a track listed as currently playing, get the track info
 			if (collectedState.position !== null) {
-				return _this.sendMpdCommand('playlistinfo', [collectedState.position])
+				return self.sendMpdCommand('playlistinfo', [collectedState.position])
 					.then(function (data) {
-						return _this.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
+						return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
 
 					})
-					.then(_this.parseTrackInfo)
+					.then(self.parseTrackInfo)
 					.then(function (trackinfo) {
 						collectedState.dynamictitle = trackinfo.dynamictitle;
 						return libQ.resolve(collectedState);
@@ -218,12 +209,12 @@ ControllerMpd.prototype.pushError = function (sReason) {
 ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommand');
-	var _this = this;
+	var self = this;
 
 	return this.mpdReady
 		.then(function () {
 			console.log('[' + Date.now() + '] ' + 'sending command...');
-			return libQ.nfcall(libFast.bind(_this.clientMpd.sendCommand, _this.clientMpd), libMpd.cmd(sCommand, arrayParameters));
+			return libQ.nfcall(libFast.bind(self.clientMpd.sendCommand, self.clientMpd), libMpd.cmd(sCommand, arrayParameters));
 
 		})
 		.then(function (response) {
@@ -239,11 +230,11 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommandArray');
-	var _this = this;
+	var self = this;
 
 	return this.mpdReady
 		.then(function () {
-			return libQ.nfcall(libFast.bind(_this.clientMpd.sendCommands, _this.clientMpd),
+			return libQ.nfcall(libFast.bind(self.clientMpd.sendCommands, self.clientMpd),
 				libFast.map(arrayCommands, function (currentCommand) {
 					return libMpd.cmd(currentCommand.command, currentCommand.parameters);
 

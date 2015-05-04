@@ -1,99 +1,94 @@
 var libQ = require('kew');
 var libNet = require('net');
 var libFast = require('fast.js');
+var libCrypto = require('crypto');
+var libBase64Url = require('base64-url');
+var libUtil = require('util');
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
 function ControllerSpop (nHost, nPort, commandRouter) {
 
 	// This fixed variable will let us refer to 'this' object at deeper scopes
-	var _this = this;
+	var self = this;
 
 	// Save a reference to the parent commandRouter
-	this.commandRouter = commandRouter;
+	self.commandRouter = commandRouter;
 
 	// Each core gets its own set of Spop sockets connected
-	this.connSpopCommand = libNet.createConnection(nPort, nHost); // Socket to send commands and receive track listings
-	this.connSpopStatus = libNet.createConnection(nPort, nHost); // Socket to listen for status changes
+	self.connSpopCommand = libNet.createConnection(nPort, nHost); // Socket to send commands and receive track listings
+	self.connSpopStatus = libNet.createConnection(nPort, nHost); // Socket to listen for status changes
 
 	// Init some command socket variables
-	this.bSpopCommandGotFirstMessage = false;
-
-	this.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
-	this.spopCommandReady = this.spopCommandReadyDeferred.promise;
-
-	this.spopResponseDeferred = libQ.defer();
-	this.spopResponse = this.spopResponseDeferred.promise;
-	this.sResponseBuffer = '';
+	self.bSpopCommandGotFirstMessage = false;
+	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
+	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
+	self.arrayResponseStack = [];
+	self.sResponseBuffer = '';
 
 	// Start a listener for command socket messages (command responses)
-	this.connSpopCommand.on('data', function (data) {
-		_this.sResponseBuffer = _this.sResponseBuffer.concat(data.toString());
+	self.connSpopCommand.on('data', function (data) {
+		self.sResponseBuffer = self.sResponseBuffer.concat(data.toString());
 
 		// If the last character in the data chunk is a newline, this is the end of the response
 		if (data.slice(data.length - 1).toString() === '\n') {
 
 			// If this is the first message, then the connection is open
-			if (!_this.bSpopCommandGotFirstMessage) {
-				_this.bSpopCommandGotFirstMessage = true;
-
+			if (!self.bSpopCommandGotFirstMessage) {
+				self.bSpopCommandGotFirstMessage = true;
 				try {
-					_this.spopCommandReadyDeferred.resolve();
-
+					self.spopCommandReadyDeferred.resolve();
 				} catch (error) {
-					_this.pushError(error);
-
+					self.pushError(error);
 				}
 
 			// Else this is a command response
 			} else {
 				try {
-					_this.spopResponseDeferred.resolve(_this.sResponseBuffer);
-
+					self.arrayResponseStack.shift().resolve(self.sResponseBuffer);
 				} catch (error) {
-					_this.pushError(error);
-
+					self.pushError(error);
 				}
 
 			}
 
 			// Reset the response buffer
-			_this.sResponseBuffer = '';
+			self.sResponseBuffer = '';
 
 		}
 
 	});
 
 	// Init some status socket variables
-	this.bSpopStatusGotFirstMessage = false;
-	this.sStatusBuffer = '';
+	self.bSpopStatusGotFirstMessage = false;
+	self.sStatusBuffer = '';
 
 	// Start a listener for status socket messages
-	this.connSpopStatus.on('data', function (data) {
-		_this.sStatusBuffer = _this.sStatusBuffer.concat(data.toString());
+	self.connSpopStatus.on('data', function (data) {
+		self.sStatusBuffer = self.sStatusBuffer.concat(data.toString());
 
 		// If the last character in the data chunk is a newline, this is the end of the status update
 		if (data.slice(data.length - 1).toString() === '\n') {
 
 			// Put socket back into monitoring mode
-			_this.connSpopStatus.write('idle\n');
+			self.connSpopStatus.write('idle\n');
 
 			// If this is the first message, then the connection is open
-			if (!_this.bSpopStatusGotFirstMessage) {
-				_this.bSpopStatusGotFirstMessage = true;
+			if (!self.bSpopStatusGotFirstMessage) {
+				self.bSpopStatusGotFirstMessage = true;
 
 			// Else this is a state update announcement
 			} else {
 				var timeStart = Date.now(); 
-				var sStatus = _this.sStatusBuffer;
+				var sStatus = self.sStatusBuffer;
 
 				logStart('Spop announces state update')
 					.then(function () {
-						return _this.parseState.call(_this, sStatus);
+						return self.parseState.call(self, sStatus);
 
 					})
-					.then(libFast.bind(_this.pushState, _this))
-					.fail(libFast.bind(_this.pushError, _this))
+					.then(libFast.bind(self.pushState, self))
+					.fail(libFast.bind(self.pushError, self))
 					.done(function () {
 						return logDone(timeStart);
 
@@ -102,43 +97,58 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 			}
 
 			// Reset the status buffer
-			_this.sStatusBuffer = '';
+			self.sStatusBuffer = '';
 
 		}
 
 	});
 
-	this.library = new Object();
-
-	this.libraryReady = 
-		this.sendSpopCommand('ls', [])
-		//.then(this.parseTracksInPlaylist)
-		.fail(console.log);
+	self.tracklistReadyDeferred = libQ.defer();
+	self.tracklistReady = self.tracklistReadyDeferred.promise;
+	self.tracklist = new Array();
 
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
 
+// Rebuild a library of user's playlisted Spotify tracks
+ControllerSpop.prototype.rebuildTracklist = function () {
+
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklist');
+	var self = this;
+	self.tracklist = new Array();
+
+	// Scan the user's playlists and populate the music library
+	return self.sendSpopCommand('ls', [])
+		.then(JSON.parse)
+		.then(libFast.bind(self.rebuildTracklistFromSpopPlaylists, self))
+		.then(function () {
+			self.tracklistReadyDeferred.resolve();
+
+		});
+
+}
+
 // Define a method to clear, add, and play an array of tracks
 ControllerSpop.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
-	var _this = this;
+	var self = this;
 
 	// From the array of track IDs, get array of track URIs to play
 	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
 	var firstTrack = arrayTrackUris.shift();
-	var promisedActions = this.sendSpopCommand('uplay', [firstTrack]);
+	var promisedActions = self.sendSpopCommand('uplay', [firstTrack]);
 
 	// If there are more tracks in the array, add those also
 	if (arrayTrackUris.length > 0) {
 		promisedActions = libFast.reduce(arrayTrackUris, function (previousPromise, curTrackUri) {
 			return previousPromise
 				.then(function () {
-					return _this.sendSpopCommand('uadd', [curTrackUri]);
+					return self.sendSpopCommand('uadd', [curTrackUri]);
 
 				});
 
@@ -154,8 +164,9 @@ ControllerSpop.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 ControllerSpop.prototype.stop = function () {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::stop');
+	var self = this;
 
-	return this.sendSpopCommand('stop', []);
+	return self.sendSpopCommand('stop', []);
 
 }
 
@@ -163,9 +174,10 @@ ControllerSpop.prototype.stop = function () {
 ControllerSpop.prototype.pause = function () {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pause');
+	var self = this;
 
 	// TODO don't send 'toggle' if already paused
-	return this.sendSpopCommand('toggle', []);
+	return self.sendSpopCommand('toggle', []);
 
 }
 
@@ -173,24 +185,22 @@ ControllerSpop.prototype.pause = function () {
 ControllerSpop.prototype.resume = function () {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::resume');
+	var self = this;
 
 	// TODO don't send 'toggle' if already playing
-	return this.sendSpopCommand('toggle', []);
+	return self.sendSpopCommand('toggle', []);
 
 }
 
 // Spop music library
-ControllerSpop.prototype.getLibrary = function () {
+ControllerSpop.prototype.getTracklist = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getLibrary');
-	var _this = this;
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getTracklist');
+	var self = this;
 
-	return this.libraryReady
+	return self.tracklistReady
 		.then(function () {
-			return libQ.fcall(libFast.map, Object.keys(_this.library), function (currentKey) {
-				return _this.library[currentKey];
-
-			});
+			return self.tracklist;
 
 		});
 
@@ -203,7 +213,7 @@ ControllerSpop.prototype.getLibrary = function () {
 ControllerSpop.prototype.sendSpopCommand = function (sCommand, arrayParameters) {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
-	var _this = this;
+	var self = this;
 
 	// Convert the array of parameters to a string
 	var sParameters = libFast.reduce(arrayParameters, function (sCollected, sCurrent) {
@@ -212,23 +222,18 @@ ControllerSpop.prototype.sendSpopCommand = function (sCommand, arrayParameters) 
 	},'');
 
 	// Pass the command to Spop when the command socket is ready
-	this.spopCommandReady
+	self.spopCommandReady
 		.then(function () {
-			return libQ.nfcall(libFast.bind(_this.connSpopCommand.write, _this.connSpopCommand), sCommand + sParameters + '\n', "utf-8");
+			return libQ.nfcall(libFast.bind(self.connSpopCommand.write, self.connSpopCommand), sCommand + sParameters + '\n', "utf-8");
 
 		});
 
-	// Return the command response
-	return this.spopResponse
-		.then(function (sResponse) {
+	var spopResponseDeferred = libQ.defer();
+	var spopResponse = spopResponseDeferred.promise;
+	self.arrayResponseStack.push(spopResponseDeferred);
 
-			// Reset the response promise so it can be reused for future commands
-			_this.spopResponseDeferred = libQ.defer();
-
-			return sResponse;
-
-		})
-		.fail(libFast.bind(_this.pushError, _this));
+	// Return a promise for the command response
+	return spopResponse;
 
 }
 
@@ -236,8 +241,9 @@ ControllerSpop.prototype.sendSpopCommand = function (sCommand, arrayParameters) 
 ControllerSpop.prototype.getState = function () {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getState');
+	var self = this;
 
-	return this.sendSpopCommand('status', []);
+	return self.sendSpopCommand('status', []);
 
 }
 
@@ -297,49 +303,91 @@ ControllerSpop.prototype.parseState = function (sState) {
 ControllerSpop.prototype.pushState = function (state) {
 
 	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushState');
+	var self = this;
 
-	return this.commandRouter.spopPushState(state);
+	return self.commandRouter.spopPushState(state);
 
 }
 
 // Pass the error if we don't want to handle it
 ControllerSpop.prototype.pushError = function (sReason) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushError');
-	console.log(sReason);
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushError(' + sReason + ')');
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
 
 }
 
-// Parse tracks in playlists
-ControllerSpop.prototype.parseTracksInPlaylists = function (sInput) {
+// Scan tracks in playlists via Spop and populates library
+ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function (objInput) {
 
-	var objInput = JSON.parse(sInput);
+	console.log('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklistFromSpopPlaylists');
 
-	return objInput;
+	if (!('playlists' in objInput)) {
+		return objReturn;
+
+	}
+
+	var self = this;
+
+	var arrayPlaylists = objInput['playlists'];
+	var promisedActions = libQ.resolve();
+
+	libFast.map(arrayPlaylists, function (curPlaylist) {
+		if (!('index' in curPlaylist)) {
+			return;
+
+		}
+
+		var curPlaylistIndex = curPlaylist['index'];
+
+		promisedActions = promisedActions
+			.then(function () {
+				return self.sendSpopCommand('ls', [curPlaylistIndex])
+
+			})
+			.then(JSON.parse)
+			.then(function (curTracklist) {
+				var nTracks = 0;
+
+				if (!('tracks' in curTracklist)) {
+					return;
+
+				}
+
+				nTracks = curTracklist['tracks'].length;
+
+				for (var j = 0; j < nTracks; j++) {
+					self.tracklist.push({
+						'service': 'spop',
+						'uri': curTracklist['tracks'][j]['uri'],
+						'metadata': {
+							'title': curTracklist['tracks'][j]['title'],
+							'album': curTracklist['tracks'][j]['album'],
+							'artists': libFast.map(curTracklist['tracks'][j]['artist'].split(','), function (sArtist) {
+									return sArtist.trim();
+								}),
+							'genres': []
+
+						}
+
+					});
+
+				}
+
+				return libQ.resolve();
+
+			});
+
+	});
+
+	return promisedActions;
 
 }
 
 // Internal helper functions --------------------------------------------------------------------------
 // These are static, and not 'this' aware
-
-// Helper function to convert trackId to URI
-function convertTrackIdToUri (input) {
-
-	// Convert base64->utf8
-	return (new Buffer(input, 'base64')).toString('utf8');
-
-}
-
-// Helper function to convert URI to trackId
-function convertUriToTrackId (input) {
-
-	// Convert utf8->base64
-	return (new Buffer(input, 'utf8')).toString('base64');
-
-}
 
 function logDone (timeStart) {
 

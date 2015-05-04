@@ -9,7 +9,70 @@ document.getElementById('button-volumiopause').onclick = function() {emitClientE
 document.getElementById('button-volumiostop').onclick = function() {emitClientEvent('volumioStop', '');}
 document.getElementById('button-volumioprev').onclick = function() {emitClientEvent('volumioPrevious', '');}
 document.getElementById('button-volumionext').onclick = function() {emitClientEvent('volumioNext', '');}
+document.getElementById('button-spopupdatetracklist').onclick = function() {emitClientEvent('spopUpdateTracklist', '');}
+document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitClientEvent('volumioRebuildLibrary', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
+
+// Create listeners for websocket events--------------------------------
+
+socket.on('connect', function () {
+	printConsoleMessage('Websocket connected.');
+	enableControls();
+
+	// Get the state upon load
+	emitClientEvent('volumioGetState', '');
+
+	// Get the play queue
+	emitClientEvent('volumioGetQueue', '');
+
+	// Request the music library root
+	emitClientEvent('volumioBrowseLibrary', '');
+
+});
+
+socket.on('disconnect', function () {
+	printConsoleMessage('Websocket disconnected.');
+	disableControls();
+	clearPlayQueue();
+	clearBrowseView();
+	clearPlayerStateDisplay();
+	stopPlaybackTimer();
+
+});
+
+socket.on('volumioPushState', function (state) {
+	playerState = state;
+	timeLastStateUpdate = Date.now();
+	updatePlayerStateDisplay();
+
+	if (state.status === 'play') {
+		startPlaybackTimer(state.seek);
+
+	} else {
+		stopPlaybackTimer();
+
+	}
+
+//	printConsoleMessage('volumioPushState: ' + JSON.stringify(state));
+
+});
+
+socket.on('volumioPushQueue', function (arrayQueue) {
+	updatePlayerQueue(arrayQueue);
+//	printConsoleMessage('volumioPushQueue: ' + JSON.stringify(arrayQueue));
+
+});
+
+socket.on('volumioPushBrowseData', function (objBrowseData) {
+	updateBrowseView(objBrowseData);
+//	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
+
+});
+
+socket.on('printConsoleMessage', function (sMessage) {
+	printConsoleMessage(sMessage);
+
+});
 
 // Define internal functions ----------------------------------------------
 function clearConsole () {
@@ -120,29 +183,45 @@ function clearPlayQueue () {
 
 }
 
-function updateMusicLibrary (arrayLibrary) {
-	clearMusicLibrary();
+function updateBrowseView (objBrowseData) {
+	clearBrowseView();
 
-	var nodeMusicLibrary = document.getElementById('musiclibrary');
-	var nodeListItem = null;
-	var nodeText = null;
-	for (i = 0; i < arrayLibrary.length; i++) {
-		nodeListItem = document.createElement('LI');
-		nodeText = document.createTextNode(JSON.stringify(arrayLibrary[i]));
+	var nodeBrowseView = document.getElementById('browseview');
+	var arrayDataKeys = Object.keys(objBrowseData);
 
-		nodeListItem.appendChild(nodeText);
-		nodeMusicLibrary.appendChild(nodeListItem);
+	for (i = 0; i < arrayDataKeys.length; i++) {
+		var curEntry = objBrowseData[arrayDataKeys[i]];
+
+		var nodeListItem = document.createElement('LI');
+
+		var nodeLink = document.createElement('a');
+		nodeLink.setAttribute('href', '#');
+		nodeLink.onclick = registerBrowseLibraryLink(curEntry['id']);
+
+		var nodeText = document.createTextNode(curEntry['name']);
+
+		nodeLink.appendChild(nodeText);
+		nodeListItem.appendChild(nodeLink);
+		nodeBrowseView.appendChild(nodeListItem);
 
 	}
 
 }
 
-function clearMusicLibrary () {
-	var nodeMusicLibrary = document.getElementById('musiclibrary');
+function registerBrowseLibraryLink (sId) {
+	return function() {
+		emitClientEvent('volumioBrowseLibrary', sId);
 
-	if (nodeMusicLibrary.firstChild) {
-		while (nodeMusicLibrary.firstChild) {
-			nodeMusicLibrary.removeChild(nodeMusicLibrary.firstChild);
+	}
+
+}
+
+function clearBrowseView () {
+	var nodeBrowseView = document.getElementById('browseview');
+
+	if (nodeBrowseView.firstChild) {
+		while (nodeBrowseView.firstChild) {
+			nodeBrowseView.removeChild(nodeBrowseView.firstChild);
 
 		}
 
@@ -156,64 +235,3 @@ function emitClientEvent (sEvent, sData) {
 
 }
 
-// Create listeners for websocket events--------------------------------
-
-socket.on('connect', function () {
-	printConsoleMessage('Websocket connected.');
-	enableControls();
-
-	// Get the state upon load
-	emitClientEvent('volumioGetState', '');
-
-	// Get the play queue
-	emitClientEvent('volumioGetQueue', '');
-
-	// Get the music library view
-	// TODO - only call this when user requests view of music library
-	emitClientEvent('volumioGetLibraryByTitle', '');
-
-});
-
-socket.on('disconnect', function () {
-	printConsoleMessage('Websocket disconnected.');
-	disableControls();
-	clearPlayQueue();
-	clearMusicLibrary();
-	clearPlayerStateDisplay();
-	stopPlaybackTimer();
-
-});
-
-socket.on('volumioPushState', function (state) {
-	playerState = state;
-	timeLastStateUpdate = Date.now();
-	updatePlayerStateDisplay();
-
-	if (state.status === 'play') {
-		startPlaybackTimer(state.seek);
-
-	} else {
-		stopPlaybackTimer();
-
-	}
-
-	printConsoleMessage('volumioPushState: ' + JSON.stringify(state));
-
-});
-
-socket.on('volumioPushQueue', function (arrayQueue) {
-	updatePlayerQueue(arrayQueue);
-	printConsoleMessage('volumioPushQueue: ' + JSON.stringify(arrayQueue));
-
-});
-
-socket.on('volumioPushLibrary', function (arrayLibrary) {
-	updateMusicLibrary(arrayLibrary);
-	printConsoleMessage('volumioPushLibrary: ' + JSON.stringify(arrayLibrary));
-
-});
-
-socket.on('printConsoleMessage', function (sMessage) {
-	printConsoleMessage(sMessage);
-
-});

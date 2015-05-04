@@ -5,28 +5,31 @@ var libFast = require('fast.js');
 module.exports = CoreCommandRouter;
 function CoreCommandRouter (server) {
 
+	// This fixed variable will let us refer to 'this' object at deeper scopes
+	var self = this;
+
 	// Start the state machine
-	this.stateMachine = new (require('../controllers/core-statemachine'))(this);
+	self.stateMachine = new (require('../controllers/core-statemachine'))(this);
 
 	// Start the client interfaces
-	this.arrayInterfaces = [];
-	this.arrayInterfaces.push(new (require('../controllers/interface-webui.js'))(server, this));
-	this.arrayInterfaces.push(new (require('../controllers/interface-mpd.js'))(server, this));
+	self.arrayInterfaces = [];
+	self.arrayInterfaces.push(new (require('../controllers/interface-webui.js'))(server, this));
+	self.arrayInterfaces.push(new (require('../controllers/interface-mpd.js'))(server, this));
 
 	// Start the MPD controller
 	// Move these variables out at some point
 	var nMpdPort = 6600;
 	var nMpdHost = 'localhost';
-	this.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdHost, nMpdPort, this);
+	self.controllerMpd = new (require('../controllers/controller-mpd'))(nMpdHost, nMpdPort, this);
 
 	// Start the Spop controller
 	// Move these variables out at some point
 	var nSpopPort = 6602;
 	var nSpopHost = 'localhost';
-	this.controllerSpop = new (require('../controllers/controller-spop'))(nSpopHost, nSpopPort, this);
+	self.controllerSpop = new (require('../controllers/controller-spop'))(nSpopHost, nSpopPort, this);
 
 	// Start the music library
-	this.musicLibrary = new (require('../controllers/core-musiclibrary'))(this);
+	self.musicLibrary = new (require('../controllers/core-musiclibrary'))(this);
 
 }
 
@@ -36,7 +39,9 @@ function CoreCommandRouter (server) {
 CoreCommandRouter.prototype.volumioPlay = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPlay');
-	return this.stateMachine.play();
+	var self = this;
+
+	return self.stateMachine.play();
 
 }
 
@@ -44,7 +49,9 @@ CoreCommandRouter.prototype.volumioPlay = function () {
 CoreCommandRouter.prototype.volumioPause = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPause');
-	return this.stateMachine.pause();
+	var self = this;
+
+	return self.stateMachine.pause();
 
 }
 
@@ -52,7 +59,9 @@ CoreCommandRouter.prototype.volumioPause = function () {
 CoreCommandRouter.prototype.volumioStop = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioStop');
-	return this.stateMachine.stop();
+	var self = this;
+
+	return self.stateMachine.stop();
 
 }
 
@@ -60,7 +69,9 @@ CoreCommandRouter.prototype.volumioStop = function () {
 CoreCommandRouter.prototype.volumioPrevious = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPrevious');
-	return this.stateMachine.previous();
+	var self = this;
+
+	return self.stateMachine.previous();
 
 }
 
@@ -68,7 +79,9 @@ CoreCommandRouter.prototype.volumioPrevious = function () {
 CoreCommandRouter.prototype.volumioNext = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioNext');
-	return this.stateMachine.next();
+	var self = this;
+
+	return self.stateMachine.next();
 
 }
 
@@ -76,7 +89,9 @@ CoreCommandRouter.prototype.volumioNext = function () {
 CoreCommandRouter.prototype.volumioGetState = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetState');
-	return this.stateMachine.getState();
+	var self = this;
+
+	return self.stateMachine.getState();
 
 }
 
@@ -84,15 +99,39 @@ CoreCommandRouter.prototype.volumioGetState = function () {
 CoreCommandRouter.prototype.volumioGetQueue = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetQueue');
-	return this.stateMachine.getQueue();
+	var self = this;
+
+	return self.stateMachine.getQueue();
 
 }
 
-// Volumio Get Library (by title)
-CoreCommandRouter.prototype.volumioGetLibraryByTitle = function () {
+// Volumio Rebuild Library
+CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryByTitle');
-	return this.musicLibrary.getLibraryByTitle();
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRebuildLibrary');
+	var self = this;
+
+	return self.musicLibrary.rebuildLibrary();
+
+}
+
+// Volumio Browse Library
+CoreCommandRouter.prototype.volumioBrowseLibrary = function (sId) {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + sId + ')');
+	var self = this;
+
+	return self.musicLibrary.browseLibrary(sId);
+
+}
+
+// Spop Update Tracklist
+CoreCommandRouter.prototype.spopUpdateTracklist = function () {
+
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
+	var self = this;
+
+	return self.controllerSpop.rebuildTracklist();
 
 }
 
@@ -101,11 +140,11 @@ CoreCommandRouter.prototype.volumioGetLibraryByTitle = function () {
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPushState');
-	var _this = this;
+	var self = this;
 
 	// Announce new player state to each client interface
 	return libQ.all(
-		libFast.map(_this.arrayInterfaces, function (thisInterface) {
+		libFast.map(self.arrayInterfaces, function (thisInterface) {
 			return thisInterface.volumioPushState(state);
 
 		})
@@ -118,7 +157,9 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdClearAddPlayTracks');
-	return this.controllerMpd.clearAddPlayTracks(arrayTrackIds)
+	var self = this;
+
+	return self.controllerMpd.clearAddPlayTracks(arrayTrackIds)
 
 }
 
@@ -126,7 +167,9 @@ CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 CoreCommandRouter.prototype.mpdStop = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdStop');
-	return this.controllerMpd.stop();
+	var self = this;
+
+	return self.controllerMpd.stop();
 
 }
 
@@ -134,7 +177,9 @@ CoreCommandRouter.prototype.mpdStop = function () {
 CoreCommandRouter.prototype.mpdPause = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPause');
-	return this.controllerMpd.pause();
+	var self = this;
+
+	return self.controllerMpd.pause();
 
 }
 
@@ -142,7 +187,9 @@ CoreCommandRouter.prototype.mpdPause = function () {
 CoreCommandRouter.prototype.mpdResume = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdResume');
-	return this.controllerMpd.resume();
+	var self = this;
+
+	return self.controllerMpd.resume();
 
 }
 
@@ -150,7 +197,9 @@ CoreCommandRouter.prototype.mpdResume = function () {
 CoreCommandRouter.prototype.spopClearAddPlayTracks = function (arrayTrackIds) {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
-	return this.controllerSpop.clearAddPlayTracks(arrayTrackIds)
+	var self = this;
+
+	return self.controllerSpop.clearAddPlayTracks(arrayTrackIds)
 
 }
 
@@ -158,7 +207,9 @@ CoreCommandRouter.prototype.spopClearAddPlayTracks = function (arrayTrackIds) {
 CoreCommandRouter.prototype.spopStop = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
-	return this.controllerSpop.stop();
+	var self = this;
+
+	return self.controllerSpop.stop();
 
 }
 
@@ -166,7 +217,9 @@ CoreCommandRouter.prototype.spopStop = function () {
 CoreCommandRouter.prototype.spopPause = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
-	return this.controllerSpop.pause();
+	var self = this;
+
+	return self.controllerSpop.pause();
 
 }
 
@@ -174,7 +227,9 @@ CoreCommandRouter.prototype.spopPause = function () {
 CoreCommandRouter.prototype.spopResume = function () {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
-	return this.controllerSpop.resume();
+	var self = this;
+
+	return self.controllerSpop.resume();
 
 }
 
@@ -183,46 +238,31 @@ CoreCommandRouter.prototype.spopResume = function () {
 CoreCommandRouter.prototype.mpdPushState = function (state) {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPushState');
-	return this.stateMachine.syncStateFromMpd(state);
+	var self = this;
+
+	return self.stateMachine.syncStateFromMpd(state);
 
 }
 
 CoreCommandRouter.prototype.spopPushState = function (state) {
 
 	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPushState');
-	return this.stateMachine.syncStateFromSpop(state);
+	var self = this;
+
+	return self.stateMachine.syncStateFromSpop(state);
 
 }
 
 // Methods usually called by the music library ---------------------------------------------------------------------
 
-// Get libraries from all services and concatenate them together
-CoreCommandRouter.prototype.getCombinedLibrary = function () {
+// Get tracklists from all services and return them as an array
+CoreCommandRouter.prototype.getAllTracklists = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::getCombinedLibrary');
+	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::getAllTracklists');
+	var self = this;
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
-	return libQ.all([this.mpdGetLibrary(), this.spopGetLibrary()])
-		.then(function (arrayLibraries) {
-			return libQ.fcall(libFast.reduce, arrayLibraries, function (collectedLibraries, currentLibrary) {
-				return libFast.concat(collectedLibraries, currentLibrary);
-
-			}, []);
-
-		});
+	return libQ.all([self.controllerMpd.getTracklist(), self.controllerSpop.getTracklist()]);
 
 }
 
-CoreCommandRouter.prototype.mpdGetLibrary = function () {
-
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdGetLibrary');
-	return this.controllerMpd.getLibrary();
-
-}
-
-CoreCommandRouter.prototype.spopGetLibrary = function () {
-
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopGetLibrary');
-	return this.controllerSpop.getLibrary();
-
-}
