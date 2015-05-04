@@ -38,8 +38,8 @@ function CoreCommandRouter (server) {
 // Volumio Play
 CoreCommandRouter.prototype.volumioPlay = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPlay');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPlay');
 
 	return self.stateMachine.play();
 
@@ -48,8 +48,8 @@ CoreCommandRouter.prototype.volumioPlay = function () {
 // Volumio Pause
 CoreCommandRouter.prototype.volumioPause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPause');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPause');
 
 	return self.stateMachine.pause();
 
@@ -58,8 +58,8 @@ CoreCommandRouter.prototype.volumioPause = function () {
 // Volumio Stop
 CoreCommandRouter.prototype.volumioStop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioStop');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioStop');
 
 	return self.stateMachine.stop();
 
@@ -68,8 +68,8 @@ CoreCommandRouter.prototype.volumioStop = function () {
 // Volumio Previous
 CoreCommandRouter.prototype.volumioPrevious = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPrevious');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPrevious');
 
 	return self.stateMachine.previous();
 
@@ -78,8 +78,8 @@ CoreCommandRouter.prototype.volumioPrevious = function () {
 // Volumio Next
 CoreCommandRouter.prototype.volumioNext = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioNext');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioNext');
 
 	return self.stateMachine.next();
 
@@ -88,8 +88,8 @@ CoreCommandRouter.prototype.volumioNext = function () {
 // Volumio Get State
 CoreCommandRouter.prototype.volumioGetState = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetState');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetState');
 
 	return self.stateMachine.getState();
 
@@ -98,8 +98,8 @@ CoreCommandRouter.prototype.volumioGetState = function () {
 // Volumio Get Queue
 CoreCommandRouter.prototype.volumioGetQueue = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetQueue');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetQueue');
 
 	return self.stateMachine.getQueue();
 
@@ -108,8 +108,8 @@ CoreCommandRouter.prototype.volumioGetQueue = function () {
 // Volumio Rebuild Library
 CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRebuildLibrary');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRebuildLibrary');
 
 	return self.musicLibrary.rebuildLibrary();
 
@@ -118,8 +118,8 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
 // Volumio Browse Library
 CoreCommandRouter.prototype.volumioBrowseLibrary = function (sId) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + sId + ')');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + sId + ')');
 
 	return self.musicLibrary.browseLibrary(sId);
 
@@ -128,8 +128,8 @@ CoreCommandRouter.prototype.volumioBrowseLibrary = function (sId) {
 // Spop Update Tracklist
 CoreCommandRouter.prototype.spopUpdateTracklist = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 
 	return self.controllerSpop.rebuildTracklist();
 
@@ -139,8 +139,8 @@ CoreCommandRouter.prototype.spopUpdateTracklist = function () {
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPushState');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPushState');
 
 	// Announce new player state to each client interface
 	return libQ.all(
@@ -156,8 +156,8 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 // MPD Clear-Add-Play
 CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdClearAddPlayTracks');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdClearAddPlayTracks');
 
 	return self.controllerMpd.clearAddPlayTracks(arrayTrackIds)
 
@@ -166,8 +166,8 @@ CoreCommandRouter.prototype.mpdClearAddPlayTracks = function (arrayTrackIds) {
 // MPD Stop
 CoreCommandRouter.prototype.mpdStop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdStop');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdStop');
 
 	return self.controllerMpd.stop();
 
@@ -176,8 +176,8 @@ CoreCommandRouter.prototype.mpdStop = function () {
 // MPD Pause
 CoreCommandRouter.prototype.mpdPause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPause');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPause');
 
 	return self.controllerMpd.pause();
 
@@ -186,8 +186,8 @@ CoreCommandRouter.prototype.mpdPause = function () {
 // MPD Resume
 CoreCommandRouter.prototype.mpdResume = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdResume');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdResume');
 
 	return self.controllerMpd.resume();
 
@@ -196,8 +196,8 @@ CoreCommandRouter.prototype.mpdResume = function () {
 // Spop Clear-Add-Play
 CoreCommandRouter.prototype.spopClearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
 
 	return self.controllerSpop.clearAddPlayTracks(arrayTrackIds)
 
@@ -206,8 +206,8 @@ CoreCommandRouter.prototype.spopClearAddPlayTracks = function (arrayTrackIds) {
 // Spop Stop
 CoreCommandRouter.prototype.spopStop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
 
 	return self.controllerSpop.stop();
 
@@ -216,8 +216,8 @@ CoreCommandRouter.prototype.spopStop = function () {
 // Spop Pause
 CoreCommandRouter.prototype.spopPause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
 
 	return self.controllerSpop.pause();
 
@@ -226,8 +226,8 @@ CoreCommandRouter.prototype.spopPause = function () {
 // Spop Resume
 CoreCommandRouter.prototype.spopResume = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
 
 	return self.controllerSpop.resume();
 
@@ -237,8 +237,8 @@ CoreCommandRouter.prototype.spopResume = function () {
 
 CoreCommandRouter.prototype.mpdPushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPushState');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPushState');
 
 	return self.stateMachine.syncStateFromMpd(state);
 
@@ -246,8 +246,8 @@ CoreCommandRouter.prototype.mpdPushState = function (state) {
 
 CoreCommandRouter.prototype.spopPushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPushState');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPushState');
 
 	return self.stateMachine.syncStateFromSpop(state);
 
@@ -258,11 +258,24 @@ CoreCommandRouter.prototype.spopPushState = function (state) {
 // Get tracklists from all services and return them as an array
 CoreCommandRouter.prototype.getAllTracklists = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreCommandRouter::getAllTracklists');
 	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::getAllTracklists');
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
 	return libQ.all([self.controllerMpd.getTracklist(), self.controllerSpop.getTracklist()]);
 
 }
 
+// Utility functions ---------------------------------------------------------------------------------------------
+
+CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
+
+	var self = this;
+	//console.log(sMessage);
+
+	libFast.map(self.arrayInterfaces, function (curInterface) {
+		libFast.bind(curInterface.printConsoleMessage, curInterface)(sMessage);
+
+	})
+
+}

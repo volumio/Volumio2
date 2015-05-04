@@ -43,8 +43,8 @@ function CoreMusicLibrary (commandRouter) {
 
 CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildLibrary');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildLibrary');
 
 	self.tableGenres = new Object();
 	self.tableArtists = new Object();
@@ -71,11 +71,11 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 		.then(function () {
 			self.libraryReadyDeferred.resolve();
 
-			console.log('Genres: ' + Object.keys(self['tableGenres']).length);
-			console.log('Artists: ' + Object.keys(self['tableArtists']).length);
-			console.log('Albums: ' + Object.keys(self['tableAlbums']).length);
-			console.log('Tracks: ' + Object.keys(self['tableTracks']).length);
-			console.log('Items: ' + Object.keys(self['tableItems']).length);
+			self.commandRouter.pushConsoleMessage('Genres: ' + Object.keys(self['tableGenres']).length);
+			self.commandRouter.pushConsoleMessage('Artists: ' + Object.keys(self['tableArtists']).length);
+			self.commandRouter.pushConsoleMessage('Albums: ' + Object.keys(self['tableAlbums']).length);
+			self.commandRouter.pushConsoleMessage('Tracks: ' + Object.keys(self['tableTracks']).length);
+			self.commandRouter.pushConsoleMessage('Items: ' + Object.keys(self['tableItems']).length);
 
 			return libQ.resolve();
 
@@ -85,8 +85,8 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
 CoreMusicLibrary.prototype.browseLibrary = function (sId) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
 
 	if (sId === '') {
 		return self.getIndexRoot();
@@ -116,8 +116,8 @@ CoreMusicLibrary.prototype.browseLibrary = function (sId) {
 
 CoreMusicLibrary.prototype.getIndexRoot = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::getIndexRoot');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getIndexRoot');
 
 	return self.libraryReady
 		.then(function () {
@@ -132,8 +132,8 @@ CoreMusicLibrary.prototype.getIndexRoot = function () {
 
 CoreMusicLibrary.prototype.getIndex = function (sIndex) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::getIndex');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getIndex');
 
 	return self.libraryReady
 		.then(function () {
@@ -145,8 +145,8 @@ CoreMusicLibrary.prototype.getIndex = function (sIndex) {
 
 CoreMusicLibrary.prototype.getGenre = function (sInput) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::getGenre');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getGenre');
 
 	return self.libraryReady
 		.then(function () {
@@ -161,8 +161,8 @@ CoreMusicLibrary.prototype.getGenre = function (sInput) {
 
 CoreMusicLibrary.prototype.getArtist = function (sInput) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::getArtist');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getArtist');
 
 	return self.libraryReady
 		.then(function () {
@@ -177,8 +177,8 @@ CoreMusicLibrary.prototype.getArtist = function (sInput) {
 
 CoreMusicLibrary.prototype.getAlbum = function (sInput) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::getAlbum');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getAlbum');
 
 	return self.libraryReady
 		.then(function () {
@@ -196,7 +196,8 @@ CoreMusicLibrary.prototype.getAlbum = function (sInput) {
 // Pass the error if we don't want to handle it
 CoreMusicLibrary.prototype.pushError = function (sReason) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::pushError(' + sReason + ')');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::pushError(' + sReason + ')');
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
@@ -206,8 +207,8 @@ CoreMusicLibrary.prototype.pushError = function (sReason) {
 // Put the contents of a tracklist into the library
 CoreMusicLibrary.prototype.populateLibraryFromTracklist = function (arrayTrackList) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::populateLibraryFromTracklist');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::populateLibraryFromTracklist');
 
 	return libFast.map(arrayTrackList, function (curTrack) {
 		return self.addLibraryItem(
@@ -227,11 +228,11 @@ CoreMusicLibrary.prototype.populateLibraryFromTracklist = function (arrayTrackLi
 // Create a single index of a given table
 CoreMusicLibrary.prototype.rebuildSingleIndex = function (sIndexName, sTableName, sPathToSortField) {
 
-	console.log('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildSingleIndex');
 	var self = this;
-console.log('Building index for "' + sIndexName + '"');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildSingleIndex');
+self.commandRouter.pushConsoleMessage('Building index for "' + sIndexName + '"');
 	if (!(sTableName in self)) {
-		console.log('Specified table ' + sTableName + ' not found in library for indexing');
+		self.commandRouter.pushConsoleMessage('Specified table ' + sTableName + ' not found in library for indexing');
 		return;
 
 	}

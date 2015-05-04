@@ -3,10 +3,17 @@ var libFast = require('fast.js');
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
-function CorePlayQueue () {
+function CorePlayQueue (commandRouter) {
+
+	var self = this;
+
+	self.commandRouter = commandRouter;
+
+	self.queueReadyDeferred = libQ.defer();
+	self.queueReady = self.queueReadyDeferred.promise;
 
 	// Init temporary play queue for testing purposes
-	this.arrayQueue = [
+	self.arrayQueue = [
 		{service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}},
 		{service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}},
 		{service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}},
@@ -14,6 +21,8 @@ function CorePlayQueue () {
 		{service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}}
 
 	];
+
+	self.queueReadyDeferred.resolve();
 
 }
 
@@ -23,20 +32,27 @@ function CorePlayQueue () {
 // Get a promise for contents of play queue
 CorePlayQueue.prototype.getQueue = function () {
 
-	console.log('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
-	return libQ.resolve(this.arrayQueue);
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
+
+	return self.queueReady
+		.then(function () {
+			return self.arrayQueue;
+
+		});
 
 }
 
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
-	console.log('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
-	var sTargetService = this.arrayQueue[nStartIndex].service;
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
+	var sTargetService = self.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
 
-	while (nEndIndex < this.arrayQueue.length - 1) {
-		if (this.arrayQueue[nEndIndex + 1].service !== sTargetService) {
+	while (nEndIndex < self.arrayQueue.length - 1) {
+		if (self.arrayQueue[nEndIndex + 1].service !== sTargetService) {
 			break;
 
 		}
@@ -45,7 +61,7 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 	}
 
-	var arrayTrackIds = libFast.map(this.arrayQueue.slice(nStartIndex, nEndIndex + 1), function (curTrack) {
+	var arrayTrackIds = libFast.map(self.arrayQueue.slice(nStartIndex, nEndIndex + 1), function (curTrack) {
 		return curTrack.trackid;
 
 	});

@@ -2,6 +2,8 @@ var socket = io();
 var playerState = {};
 var timeLastStateUpdate = 0;
 var timerPlayback = null;
+var libraryHistory = new Array();
+var nLibraryHistoryPosition = 0;
 
 // Define button actions --------------------------------------------
 document.getElementById('button-volumioplay').onclick = function() {emitClientEvent('volumioPlay', '');}
@@ -12,12 +14,15 @@ document.getElementById('button-volumionext').onclick = function() {emitClientEv
 document.getElementById('button-spopupdatetracklist').onclick = function() {emitClientEvent('spopUpdateTracklist', '');}
 document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitClientEvent('volumioRebuildLibrary', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
+document.getElementById('button-libraryback').onclick = libraryBack;
+document.getElementById('button-libraryforward').onclick = libraryForward;
 
 // Create listeners for websocket events--------------------------------
 
 socket.on('connect', function () {
 	printConsoleMessage('Websocket connected.');
 	enableControls();
+	updateLibraryHistoryButtons();
 
 	// Get the state upon load
 	emitClientEvent('volumioGetState', '');
@@ -32,6 +37,10 @@ socket.on('connect', function () {
 
 socket.on('disconnect', function () {
 	printConsoleMessage('Websocket disconnected.');
+	libraryHistory = new Array();
+	nLibraryHistoryPosition = 0;
+	updateLibraryHistoryButtons();
+
 	disableControls();
 	clearPlayQueue();
 	clearBrowseView();
@@ -64,7 +73,8 @@ socket.on('volumioPushQueue', function (arrayQueue) {
 });
 
 socket.on('volumioPushBrowseData', function (objBrowseData) {
-	updateBrowseView(objBrowseData);
+	libraryHistory.splice(nLibraryHistoryPosition + 1, libraryHistory.length - nLibraryHistoryPosition - 1, objBrowseData);
+	libraryForward();
 //	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
 
 });
@@ -226,6 +236,73 @@ function clearBrowseView () {
 		}
 
 	}
+
+}
+
+function updateLibraryHistoryButtons () {
+	var nHistoryItems = libraryHistory.length;
+
+	if (nHistoryItems <= 1) {
+		document.getElementById('button-libraryback').disabled = true;
+		document.getElementById('button-libraryforward').disabled = true;
+
+	} else if (nLibraryHistoryPosition <= 0) {
+		document.getElementById('button-libraryback').disabled = true;
+		document.getElementById('button-libraryforward').disabled = false;
+
+	} else if (nLibraryHistoryPosition >= nHistoryItems - 1) {
+		document.getElementById('button-libraryback').disabled = false;
+		document.getElementById('button-libraryforward').disabled = true;
+
+	} else {
+		document.getElementById('button-libraryback').disabled = false;
+		document.getElementById('button-libraryforward').disabled = false;
+
+	}
+
+}
+
+function libraryForward () {
+	var nHistoryItems = libraryHistory.length;
+
+	if (nHistoryItems <= 1) {
+		nLibraryHistoryPosition = 0;
+
+	} else if (nLibraryHistoryPosition <= 0) {
+		nLibraryHistoryPosition = 1;
+
+	} else if (nLibraryHistoryPosition >= nHistoryItems - 1) {
+		nLibraryHistoryPosition = nHistoryItems - 1;
+
+	} else {
+		nLibraryHistoryPosition++;
+
+	}
+
+	updateBrowseView(libraryHistory[nLibraryHistoryPosition]);
+	updateLibraryHistoryButtons();
+
+}
+
+function libraryBack () {
+	var nHistoryItems = libraryHistory.length;
+
+	if (nHistoryItems <= 1) {
+		nLibraryHistoryPosition = 0;
+
+	} else if (nLibraryHistoryPosition <= 0) {
+		nLibraryHistoryPosition = 0;
+
+	} else if (nLibraryHistoryPosition >= nHistoryItems - 1) {
+		nLibraryHistoryPosition = nHistoryItems - 2;
+
+	} else {
+		nLibraryHistoryPosition--;
+
+	}
+
+	updateBrowseView(libraryHistory[nLibraryHistoryPosition]);
+	updateLibraryHistoryButtons();
 
 }
 

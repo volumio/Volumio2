@@ -82,7 +82,7 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 				var timeStart = Date.now(); 
 				var sStatus = self.sStatusBuffer;
 
-				logStart('Spop announces state update')
+				self.logStart('Spop announces state update')
 					.then(function () {
 						return self.parseState.call(self, sStatus);
 
@@ -90,7 +90,7 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 					.then(libFast.bind(self.pushState, self))
 					.fail(libFast.bind(self.pushError, self))
 					.done(function () {
-						return logDone(timeStart);
+						return self.logDone(timeStart);
 
 					});
 
@@ -115,8 +115,8 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 // Rebuild a library of user's playlisted Spotify tracks
 ControllerSpop.prototype.rebuildTracklist = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklist');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklist');
 	self.tracklist = new Array();
 
 	// Scan the user's playlists and populate the music library
@@ -133,8 +133,8 @@ ControllerSpop.prototype.rebuildTracklist = function () {
 // Define a method to clear, add, and play an array of tracks
 ControllerSpop.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
 
 	// From the array of track IDs, get array of track URIs to play
 	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
@@ -163,8 +163,8 @@ ControllerSpop.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 // Spop stop
 ControllerSpop.prototype.stop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::stop');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::stop');
 
 	return self.sendSpopCommand('stop', []);
 
@@ -173,8 +173,8 @@ ControllerSpop.prototype.stop = function () {
 // Spop pause
 ControllerSpop.prototype.pause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pause');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pause');
 
 	// TODO don't send 'toggle' if already paused
 	return self.sendSpopCommand('toggle', []);
@@ -184,8 +184,8 @@ ControllerSpop.prototype.pause = function () {
 // Spop resume
 ControllerSpop.prototype.resume = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::resume');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::resume');
 
 	// TODO don't send 'toggle' if already playing
 	return self.sendSpopCommand('toggle', []);
@@ -195,8 +195,8 @@ ControllerSpop.prototype.resume = function () {
 // Spop music library
 ControllerSpop.prototype.getTracklist = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getTracklist');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::getTracklist');
 
 	return self.tracklistReady
 		.then(function () {
@@ -212,8 +212,8 @@ ControllerSpop.prototype.getTracklist = function () {
 // Send command to Spop
 ControllerSpop.prototype.sendSpopCommand = function (sCommand, arrayParameters) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
 
 	// Convert the array of parameters to a string
 	var sParameters = libFast.reduce(arrayParameters, function (sCollected, sCurrent) {
@@ -240,8 +240,8 @@ ControllerSpop.prototype.sendSpopCommand = function (sCommand, arrayParameters) 
 // Spop get state
 ControllerSpop.prototype.getState = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::getState');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::getState');
 
 	return self.sendSpopCommand('status', []);
 
@@ -250,7 +250,9 @@ ControllerSpop.prototype.getState = function () {
 // Spop parse state
 ControllerSpop.prototype.parseState = function (sState) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::parseState');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::parseState');
+
 	var objState = JSON.parse(sState);
 
 	var nSeek = null;
@@ -302,8 +304,8 @@ ControllerSpop.prototype.parseState = function (sState) {
 // Announce updated Spop state
 ControllerSpop.prototype.pushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushState');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pushState');
 
 	return self.commandRouter.spopPushState(state);
 
@@ -312,7 +314,8 @@ ControllerSpop.prototype.pushState = function (state) {
 // Pass the error if we don't want to handle it
 ControllerSpop.prototype.pushError = function (sReason) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::pushError(' + sReason + ')');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pushError(' + sReason + ')');
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
@@ -322,7 +325,8 @@ ControllerSpop.prototype.pushError = function (sReason) {
 // Scan tracks in playlists via Spop and populates library
 ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function (objInput) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklistFromSpopPlaylists');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklistFromSpopPlaylists');
 
 	if (!('playlists' in objInput)) {
 		return objReturn;
@@ -386,19 +390,33 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function (objInput)
 
 }
 
-// Internal helper functions --------------------------------------------------------------------------
-// These are static, and not 'this' aware
+ControllerSpop.prototype.logDone = function (timeStart) {
 
-function logDone (timeStart) {
-
-	console.log('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 	return libQ.resolve();
 
 }
 
-function logStart (sCommand) {
+ControllerSpop.prototype.logStart = function (sCommand) {
 
-	console.log('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+	var self = this;
+	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
+
+}
+
+// Internal helper functions --------------------------------------------------------------------------
+// These are static, and not 'this' aware
+
+function convertTrackIdToUri (input) {
+	// Convert base64->utf8
+	return (new Buffer(input, 'base64')).toString('utf8');
+
+}
+
+function convertUriToTrackId (input) {
+	// Convert utf8->base64
+	return (new Buffer(input, 'utf8')).toString('base64');
 
 }

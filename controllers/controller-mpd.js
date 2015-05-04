@@ -11,35 +11,35 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 	var self = this;
 
 	// Save a reference to the parent commandRouter
-	this.commandRouter = commandRouter;
+	self.commandRouter = commandRouter;
 
 	// Connect to MPD
-	this.clientMpd = libMpd.connect({port: nPort, host: nHost});
+	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
 
 	// Make a promise for when the MPD connection is ready to receive events
-	this.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
+	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
 
 	// This tracks the the timestamp of the newest detected status change
-	this.timeLatestStatus = 0;
+	self.timeLatestStatus = 0;
 
 	// When playback status changes
-	this.clientMpd.on('system-player', function () {
+	self.clientMpd.on('system-player', function () {
 
 		var timeStart = Date.now(); 
 
-		logStart('MPD announces state update')
+		self.logStart('MPD announces state update')
 			.then(libFast.bind(self.getState, self))
 			.then(libFast.bind(self.pushState, self))
 			.fail(libFast.bind(self.pushError, self))
 			.done(function () {
-				return logDone(timeStart);
+				return self.logDone(timeStart);
 
 			});
 
 	});
 
-	this.tracklist = []
-	this.tracklistReady = libQ.resolve();
+	self.tracklist = []
+	self.tracklistReady = libQ.resolve();
 
 }
 
@@ -49,14 +49,14 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 // Define a method to clear, add, and play an array of tracks
 ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks');
 
 	// From the array of track IDs, get array of track URIs to play
 	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
-	return this.sendMpdCommandArray([
+	return self.sendMpdCommandArray([
 		{command: 'clear', parameters: []},
 		{command: 'add',   parameters: [arrayTrackUris.shift()]},
 		{command: 'play',  parameters: []}
@@ -86,37 +86,40 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 // MPD stop
 ControllerMpd.prototype.stop = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::stop');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::stop');
 
-	return this.sendMpdCommand('stop', []);
+	return self.sendMpdCommand('stop', []);
 
 }
 
 // MPD pause
 ControllerMpd.prototype.pause = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::pause');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pause');
 
-	return this.sendMpdCommand('pause', []);
+	return self.sendMpdCommand('pause', []);
 
 }
 
 // MPD resume
 ControllerMpd.prototype.resume = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::resume');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::resume');
 
-	return this.sendMpdCommand('play', []);
+	return self.sendMpdCommand('play', []);
 
 }
 
 // MPD music library
 ControllerMpd.prototype.getTracklist = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getTracklist');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::getTracklist');
 
-	return this.tracklistReady
+	return self.tracklistReady
 		.then(function () {
 			return self.tracklist;
 
@@ -130,13 +133,14 @@ ControllerMpd.prototype.getTracklist = function () {
 // Define a method to get the MPD state
 ControllerMpd.prototype.getState = function () {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::getState');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::getState');
+
 	var collectedState = {};
 	var timeCurrentUpdate = Date.now();
-	this.timeLatestUpdate = timeCurrentUpdate;
+	self.timeLatestUpdate = timeCurrentUpdate;
 
-	return this.sendMpdCommand('status', [])
+	return self.sendMpdCommand('status', [])
 		.then(function (data) {
 			return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
 
@@ -173,9 +177,10 @@ ControllerMpd.prototype.getState = function () {
 // Stop the current status update thread if a newer one exists
 ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentThread) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::haltIfNewerUpdateRunning');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::haltIfNewerUpdateRunning');
 
-	if (this.timeLatestUpdate > timeCurrentThread) {
+	if (self.timeLatestUpdate > timeCurrentThread) {
 		return libQ.reject('Alert: Aborting status update - newer one detected');
 
 	} else {
@@ -188,17 +193,19 @@ ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentTh
 // Announce updated MPD state
 ControllerMpd.prototype.pushState = function (state) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::pushState');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushState');
 
-	return this.commandRouter.mpdPushState(state);
+	return self.commandRouter.mpdPushState(state);
 
 }
 
 // Pass the error if we don't want to handle it
 ControllerMpd.prototype.pushError = function (sReason) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::pushError');
-	console.log(sReason);
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushError');
+	self.commandRouter.pushConsoleMessage(sReason);
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
@@ -208,17 +215,17 @@ ControllerMpd.prototype.pushError = function (sReason) {
 // Define a general method for sending an MPD command, and return a promise for its execution
 ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommand');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommand');
 
-	return this.mpdReady
+	return self.mpdReady
 		.then(function () {
-			console.log('[' + Date.now() + '] ' + 'sending command...');
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'sending command...');
 			return libQ.nfcall(libFast.bind(self.clientMpd.sendCommand, self.clientMpd), libMpd.cmd(sCommand, arrayParameters));
 
 		})
 		.then(function (response) {
-			console.log('[' + Date.now() + '] ' + 'parsing response...');
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'parsing response...');
 			return libQ.resolve(libMpd.parseKeyValueMessage.call(libMpd, response));
 
 		});
@@ -229,10 +236,10 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 // Command array takes the form [{command: sCommand, parameters: arrayParameters}, ...]
 ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommandArray');
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommandArray');
 
-	return this.mpdReady
+	return self.mpdReady
 		.then(function () {
 			return libQ.nfcall(libFast.bind(self.clientMpd.sendCommands, self.clientMpd),
 				libFast.map(arrayCommands, function (currentCommand) {
@@ -250,7 +257,8 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 // Parse MPD's track info text into Volumio recognizable object
 ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
 	if ('Title' in objTrackInfo) {
 		return libQ.resolve({dynamictitle: objTrackInfo.Title});
@@ -265,7 +273,8 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 // Parse MPD's text playlist into a Volumio recognizable playlist object
 ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::parsePlaylist');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parsePlaylist');
 
 	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
@@ -279,7 +288,8 @@ ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 // Parse MPD's text status into a Volumio recognizable status object
 ControllerMpd.prototype.parseState = function (objState) {
 
-	console.log('[' + Date.now() + '] ' + 'ControllerMpd::parseState');
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseState');
 
 	// Pull track duration out of status message
 	var nDuration = null;
@@ -334,6 +344,22 @@ ControllerMpd.prototype.parseState = function (objState) {
 
 }
 
+ControllerMpd.prototype.logDone = function (timeStart) {
+
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+	return libQ.resolve();
+
+}
+
+ControllerMpd.prototype.logStart = function (sCommand) {
+
+	var self = this;
+	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+	return libQ.resolve();
+
+}
+
 // Internal helper functions --------------------------------------------------------------------------
 // These are static, and not 'this' aware
 
@@ -353,16 +379,3 @@ function convertUriToTrackId (input) {
 
 }
 
-function logDone (timeStart) {
-
-	console.log('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
-	return libQ.resolve();
-
-}
-
-function logStart (sCommand) {
-
-	console.log('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
-	return libQ.resolve();
-
-}

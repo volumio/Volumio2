@@ -111,12 +111,12 @@ const command = { // List of all MPD commands
 module.exports = InterfaceMPD;
 function InterfaceMPD (server, commandRouter) {
 	
-	var _this = this;
-	this.commRouter = commandRouter;
+	var self = this;
+	self.commRouter = commandRouter;
 
 	// helpers
-	this.helper = require('./interface-mpd-helper.js');
-	this.idles = [];
+	self.helper = require('./interface-mpd-helper.js');
+	self.idles = [];
 
 	// create server
 	var protocolServer = net.createServer(function(client) {
@@ -144,7 +144,7 @@ function InterfaceMPD (server, commandRouter) {
 				// get 1 line from our buffer to process
 				var message = results[0];
 				// Handle message elsewhere (keep it clean)
-				_this.handleMessage(message, client);
+				self.handleMessage(message, client);
 				
 				buffer = buffer.substring(lineIndex+1); // Cuts off the processed line
 				break;
@@ -156,7 +156,7 @@ function InterfaceMPD (server, commandRouter) {
 	protocolServer.on('error', function(err) {
 		if (err.code === 'EADDRINUSE') {
 			// address is in use
-			console.log("Failed to bind MPD protocol to port " + mpdPort +
+			self.commRouter.pushConsoleMessage("Failed to bind MPD protocol to port " + mpdPort +
 			": Address in use.");
 		} else {
 			throw err;
@@ -169,7 +169,7 @@ function InterfaceMPD (server, commandRouter) {
 // Incoming message handler
 InterfaceMPD.prototype.handleMessage = function (message, socket) {
 	
-	var _this = this;
+	var self = this;
 
 	// some vars to help extract command/parameters from line
 	var nSpaceLocation = 0;
@@ -187,294 +187,310 @@ InterfaceMPD.prototype.handleMessage = function (message, socket) {
 		sParam = message.substring(nSpaceLocation+1, message.length);
 	}
 	
-	//console.log("Incoming command: " + sCommand + "\nParam: "+sParam);
+	//self.commRouter.pushConsoleMessage("Incoming command: " + sCommand + "\nParam: "+sParam);
 	
 	switch(sCommand) {
 		case command.ADD :
-			_this.handleAdd(sCommand, sParam, socket);
+			self.handleAdd(sCommand, sParam, socket);
 			break;
 		case command.ADDID :
-			_this.handleAddid(sCommand, sParam, socket);
+			self.handleAddid(sCommand, sParam, socket);
 			break;
 		case command.ADDTAGID :
-			_this.handleAddtagid(sCommand, sParam, socket);
+			self.handleAddtagid(sCommand, sParam, socket);
 			break;
 		case command.CHANNELS :
-			_this.handleChannels(sCommand, sParam, socket);
+			self.handleChannels(sCommand, sParam, socket);
 			break;
 		case command.CLEAR :
-			_this.handleClear(sCommand, sParam, socket);
+			self.handleClear(sCommand, sParam, socket);
 			break;
 		case command.CLEARERROR :
-			_this.handleClearerror(sCommand, sParam, socket);
+			self.handleClearerror(sCommand, sParam, socket);
 			break;
 		case command.CLEARTAGID :
-			_this.handleCleartagid(sCommand, sParam, socket);
+			self.handleCleartagid(sCommand, sParam, socket);
 			break;
 		case command.CLOSE :
-			_this.handleClose(sCommand, sParam, socket);
+			self.handleClose(sCommand, sParam, socket);
 			break;
 		case command.COMMANDS :
-			_this.handleCommands(sCommand, sParam, socket);
+			self.handleCommands(sCommand, sParam, socket);
 			break;
 		case command.CONFIG :
-			_this.handleConfig(sCommand, sParam, socket);
+			self.handleConfig(sCommand, sParam, socket);
 			break;
 		case command.CONSUME :
-			_this.handleConsume(sCommand, sParam, socket);
+			self.handleConsume(sCommand, sParam, socket);
 			break;
 		case command.COUNT :
-			_this.handleCount(sCommand, sParam, socket);
+			self.handleCount(sCommand, sParam, socket);
 			break;
 		case command.CROSSFADE :
-			_this.handleCrossfade(sCommand, sParam, socket);
+			self.handleCrossfade(sCommand, sParam, socket);
 			break;
 		case command.CURRENTSONG :
-			_this.handleCurrentsong(sCommand, sParam, socket);
+			self.handleCurrentsong(sCommand, sParam, socket);
 			break;
 		case command.DECODERS :
-			_this.handleDecoders(sCommand, sParam, socket);
+			self.handleDecoders(sCommand, sParam, socket);
 			break;
 		case command.DELETE :
-			_this.handleDelete(sCommand, sParam, socket);
+			self.handleDelete(sCommand, sParam, socket);
 			break;
 		case command.DELETEID :
-			_this.handleDeleteid(sCommand, sParam, socket);
+			self.handleDeleteid(sCommand, sParam, socket);
 			break;
 		case command.DISABLEOUTPUT :
-			_this.handleDisableoutput(sCommand, sParam, socket);
+			self.handleDisableoutput(sCommand, sParam, socket);
 			break;
 		case command.ENABLEOUTPUT :
-			_this.handleEnableoutput(sCommand, sParam, socket);
+			self.handleEnableoutput(sCommand, sParam, socket);
 			break;
 		case command.FIND :
-			_this.handleFind(sCommand, sParam, socket);
+			self.handleFind(sCommand, sParam, socket);
 			break;
 		case command.FINDADD :
-			_this.handleFindadd(sCommand, sParam, socket);
+			self.handleFindadd(sCommand, sParam, socket);
 			break;
 		case command.IDLE :
-			_this.handleIdle(sCommand, sParam, socket);
+			self.handleIdle(sCommand, sParam, socket);
 			break;
 		case command.KILL :
-			_this.handleKill(sCommand, sParam, socket);
+			self.handleKill(sCommand, sParam, socket);
 			break;
 		case command.LIST :
-			_this.handleList(sCommand, sParam, socket);
+			self.handleList(sCommand, sParam, socket);
 			break;
 		case command.LISTALL :
-			_this.handleListall(sCommand, sParam, socket);
+			self.handleListall(sCommand, sParam, socket);
 			break;
 		case command.LISTALLINFO :
-			_this.handleListallinfo(sCommand, sParam, socket);
+			self.handleListallinfo(sCommand, sParam, socket);
 			break;
 		case command.LISTFILES :
-			_this.handleListfiles(sCommand, sParam, socket);
+			self.handleListfiles(sCommand, sParam, socket);
 			break;
 		case command.LISTMOUNTS :
-			_this.handleListmounts(sCommand, sParam, socket);
+			self.handleListmounts(sCommand, sParam, socket);
 			break;
 		case command.LISTPLAYLIST :
-			_this.handleListplaylist(sCommand, sParam, socket);
+			self.handleListplaylist(sCommand, sParam, socket);
 			break;
 		case command.LISTPLAYLISTINFO :
-			_this.handleListplaylistinfo(sCommand, sParam, socket);
+			self.handleListplaylistinfo(sCommand, sParam, socket);
 			break;
 		case command.LISTPLAYLISTS :
-			_this.handleListplaylists(sCommand, sParam, socket);
+			self.handleListplaylists(sCommand, sParam, socket);
 			break;
 		case command.LOAD :
-			_this.handleLoad(sCommand, sParam, socket);
+			self.handleLoad(sCommand, sParam, socket);
 			break;
 		case command.LSINFO :
-			_this.handleLsinfo(sCommand, sParam, socket);
+			self.handleLsinfo(sCommand, sParam, socket);
 			break;
 		case command.MIXRAMPDB :
-			_this.handleMixrampdb(sCommand, sParam, socket);
+			self.handleMixrampdb(sCommand, sParam, socket);
 			break;
 		case command.MIXRAMPDELAY :
-			_this.handleMixrampdelay(sCommand, sParam, socket);
+			self.handleMixrampdelay(sCommand, sParam, socket);
 			break;
 		case command.MOUNT :
-			_this.handleMount(sCommand, sParam, socket);
+			self.handleMount(sCommand, sParam, socket);
 			break;
 		case command.MOVE :
-			_this.handleMove(sCommand, sParam, socket);
+			self.handleMove(sCommand, sParam, socket);
 			break;
 		case command.MOVEID :
-			_this.handleMoveid(sCommand, sParam, socket);
+			self.handleMoveid(sCommand, sParam, socket);
 			break;
 		case command.NEXT :
-			_this.handleNext(sCommand, sParam, socket);
+			self.handleNext(sCommand, sParam, socket);
 			break;
 		case command.NOTCOMMANDS :
-			_this.handleNotcommands(sCommand, sParam, socket);
+			self.handleNotcommands(sCommand, sParam, socket);
 			break;
 		case command.OUTPUTS :
-			_this.handleOutputs(sCommand, sParam, socket);
+			self.handleOutputs(sCommand, sParam, socket);
 			break;
 		case command.PASSWORD :
-			_this.handlePassword(sCommand, sParam, socket);
+			self.handlePassword(sCommand, sParam, socket);
 			break;
 		case command.PAUSE :
-			_this.handlePause(sCommand, sParam, socket);
+			self.handlePause(sCommand, sParam, socket);
 			break;
 		case command.PING :
-			_this.handlePing(sCommand, sParam, socket);
+			self.handlePing(sCommand, sParam, socket);
 			break;
 		case command.PLAY :
-			_this.handlePlay(sCommand, sParam, socket);
+			self.handlePlay(sCommand, sParam, socket);
 			break;
 		case command.PLAYID :
-			_this.handlePlayid(sCommand, sParam, socket);
+			self.handlePlayid(sCommand, sParam, socket);
 			break;
 		case command.PLAYLIST :
-			_this.handlePlaylist(sCommand, sParam, socket);
+			self.handlePlaylist(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTADD :
-			_this.handlePlaylistadd(sCommand, sParam, socket);
+			self.handlePlaylistadd(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTCLEAR :
-			_this.handlePlaylistclear(sCommand, sParam, socket);
+			self.handlePlaylistclear(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTDELETE :
-			_this.handlePlaylistdelete(sCommand, sParam, socket);
+			self.handlePlaylistdelete(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTFIND :
-			_this.handlePlaylistfind(sCommand, sParam, socket);
+			self.handlePlaylistfind(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTID :
-			_this.handlePlaylistid(sCommand, sParam, socket);
+			self.handlePlaylistid(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTINFO :
-			_this.handlePlaylistinfo(sCommand, sParam, socket);
+			self.handlePlaylistinfo(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTMOVE :
-			_this.handlePlaylistmove(sCommand, sParam, socket);
+			self.handlePlaylistmove(sCommand, sParam, socket);
 			break;
 		case command.PLAYLISTSEARCH :
-			_this.handlePlaylistsearch(sCommand, sParam, socket);
+			self.handlePlaylistsearch(sCommand, sParam, socket);
 			break;
 		case command.PLCHANGES :
-			_this.handlePlchanges(sCommand, sParam, socket);
+			self.handlePlchanges(sCommand, sParam, socket);
 			break;
 		case command.PLCHANGESPOSID :
-			_this.handlePlchangesposid(sCommand, sParam, socket);
+			self.handlePlchangesposid(sCommand, sParam, socket);
 			break;
 		case command.PREVIOUS :
-			_this.handlePrevious(sCommand, sParam, socket);
+			self.handlePrevious(sCommand, sParam, socket);
 			break;
 		case command.PRIO :
-			_this.handlePrio(sCommand, sParam, socket);
+			self.handlePrio(sCommand, sParam, socket);
 			break;
 		case command.PRIOID :
-			_this.handlePrioid(sCommand, sParam, socket);
+			self.handlePrioid(sCommand, sParam, socket);
 			break;
 		case command.RANDOM :
-			_this.handleRandom(sCommand, sParam, socket);
+			self.handleRandom(sCommand, sParam, socket);
 			break;
 		case command.RANGEID :
-			_this.handleRangeid(sCommand, sParam, socket);
+			self.handleRangeid(sCommand, sParam, socket);
 			break;
 		case command.READCOMMENTS :
-			_this.handleReadcomments(sCommand, sParam, socket);
+			self.handleReadcomments(sCommand, sParam, socket);
 			break;
 		case command.READMESSAGES :
-			_this.handleReadmessages(sCommand, sParam, socket);
+			self.handleReadmessages(sCommand, sParam, socket);
 			break;
 		case command.RENAME :
-			_this.handleRename(sCommand, sParam, socket);
+			self.handleRename(sCommand, sParam, socket);
 			break;
 		case command.REPEAT :
-			_this.handleRepeat(sCommand, sParam, socket);
+			self.handleRepeat(sCommand, sParam, socket);
 			break;
 		case command.REPLAY_GAIN_MODE :
-			_this.handleReplay_gain_mode(sCommand, sParam, socket);
+			self.handleReplay_gain_mode(sCommand, sParam, socket);
 			break;
 		case command.REPLAY_GAIN_STATUS :
-			_this.handleReplay_gain_status(sCommand, sParam, socket);
+			self.handleReplay_gain_status(sCommand, sParam, socket);
 			break;
 		case command.RESCAN :
-			_this.handleRescan(sCommand, sParam, socket);
+			self.handleRescan(sCommand, sParam, socket);
 			break;
 		case command.RM :
-			_this.handleRm(sCommand, sParam, socket);
+			self.handleRm(sCommand, sParam, socket);
 			break;
 		case command.SAVE :
-			_this.handleSave(sCommand, sParam, socket);
+			self.handleSave(sCommand, sParam, socket);
 			break;
 		case command.SEARCH :
-			_this.handleSearch(sCommand, sParam, socket);
+			self.handleSearch(sCommand, sParam, socket);
 			break;
 		case command.SEARCHADD :
-			_this.handleSearchadd(sCommand, sParam, socket);
+			self.handleSearchadd(sCommand, sParam, socket);
 			break;
 		case command.SEARCHADDPL :
-			_this.handleSearchaddpl(sCommand, sParam, socket);
+			self.handleSearchaddpl(sCommand, sParam, socket);
 			break;
 		case command.SEEK :
-			_this.handleSeek(sCommand, sParam, socket);
+			self.handleSeek(sCommand, sParam, socket);
 			break;
 		case command.SEEKCUR :
-			_this.handleSeekcur(sCommand, sParam, socket);
+			self.handleSeekcur(sCommand, sParam, socket);
 			break;
 		case command.SEEKID :
-			_this.handleSeekid(sCommand, sParam, socket);
+			self.handleSeekid(sCommand, sParam, socket);
 			break;
 		case command.SENDMESSAGE :
-			_this.handleSendmessage(sCommand, sParam, socket);
+			self.handleSendmessage(sCommand, sParam, socket);
 			break;
 		case command.SETVOL :
-			_this.handleSetvol(sCommand, sParam, socket);
+			self.handleSetvol(sCommand, sParam, socket);
 			break;
 		case command.SHUFFLE :
-			_this.handleShuffle(sCommand, sParam, socket);
+			self.handleShuffle(sCommand, sParam, socket);
 			break;
 		case command.SINGLE :
-			_this.handleSingle(sCommand, sParam, socket);
+			self.handleSingle(sCommand, sParam, socket);
 			break;
 		case command.STATS :
-			_this.handleStats(sCommand, sParam, socket);
+			self.handleStats(sCommand, sParam, socket);
 			break;
 		case command.STATUS :
-			_this.handleStatus(sCommand, sParam, socket);
+			self.handleStatus(sCommand, sParam, socket);
 			break;
 		case command.STOP :
-			_this.handleStop(sCommand, sParam, socket);
+			self.handleStop(sCommand, sParam, socket);
 			break;
 		case command.SUBSCRIBE :
-			_this.handleSubscribe(sCommand, sParam, socket);
+			self.handleSubscribe(sCommand, sParam, socket);
 			break;
 		case command.SWAP :
-			_this.handleSwap(sCommand, sParam, socket);
+			self.handleSwap(sCommand, sParam, socket);
 			break;
 		case command.SWAPID :
-			_this.handleSwapid(sCommand, sParam, socket);
+			self.handleSwapid(sCommand, sParam, socket);
 			break;
 		case command.TAGTYPES :
-			_this.handleTagtypes(sCommand, sParam, socket);
+			self.handleTagtypes(sCommand, sParam, socket);
 			break;
 		case command.TOGGLEOUTPUT :
-			_this.handleToggleoutput(sCommand, sParam, socket);
+			self.handleToggleoutput(sCommand, sParam, socket);
 			break;
 		case command.UNMOUNT :
-			_this.handleUnmount(sCommand, sParam, socket);
+			self.handleUnmount(sCommand, sParam, socket);
 			break;
 		case command.UNSUBSCRIBE :
-			_this.handleUnsubscribe(sCommand, sParam, socket);
+			self.handleUnsubscribe(sCommand, sParam, socket);
 			break;
 		case command.UPDATE :
-			_this.handleUpdate(sCommand, sParam, socket);
+			self.handleUpdate(sCommand, sParam, socket);
 			break;
 		case command.URLHANDLERS :
-			_this.handleUrl_this.handlers(sCommand, sParam, socket);
+			self.handleUrlself.handlers(sCommand, sParam, socket);
 			break;
 		case command.VOLUME :
-			_this.handleVolume(sCommand, sParam, socket);
+			self.handleVolume(sCommand, sParam, socket);
 			break;
 		default:
-			console.log("default");
+			self.commRouter.pushConsoleMessage("default");
 	}
+}
+
+InterfaceMPD.prototype.logDone = function (timeStart) {
+
+	var self = this;
+	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+	return libQ.resolve();
+
+}
+
+InterfaceMPD.prototype.logStart = function (sCommand) {
+
+	var self = this;
+	self.commRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+	return libQ.resolve();
+
 }
 
 // ============================ COMMAND HANDLERS
@@ -630,8 +646,10 @@ InterfaceMPD.prototype.handleFindadd = function(sCommand, sParam, client) {
 // Handler for command: IDLE
 InterfaceMPD.prototype.handleIdle = function(sCommand, sParam, client) {
 
+	var self = this;
+
     // keep client in idle list
-    this.idles.push(client);
+    self.idles.push(client);
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -653,21 +671,22 @@ InterfaceMPD.prototype.handleList = function(sCommand, sParam, client) {
 
 // Handler for command: LISTALL
 InterfaceMPD.prototype.handleListall = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
 	var timeStart = Date.now();
-			logStart('Client requests Volumio library by title')
-				.then(libFast.bind(_this.commRouter.volumioGetLibraryByTitle, _this.commRouter))
-				.then(function (library) {
-					_this.volumioPushLibrary.call(_this, library, client);
 
-				})
-				.fail(console.log)
-				.done(function () {
-					// Respond with default 'OK'
-					client.write("OK\n");
-					return logDone(timeStart);
+	self.logStart('Client requests Volumio library by title')
+		.then(libFast.bind(self.commRouter.volumioGetLibraryByTitle, self.commRouter))
+		.then(function (library) {
+			self.volumioPushLibrary.call(self, library, client);
 
-				});
+		})
+		.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+		.done(function () {
+			// Respond with default 'OK'
+			client.write("OK\n");
+			return self.logDone(timeStart);
+
+		});
 }
 
 // Handler for command: LISTALLINFO
@@ -763,12 +782,16 @@ InterfaceMPD.prototype.handleMoveid = function(sCommand, sParam, client) {
 
 // Handler for command: NEXT
 InterfaceMPD.prototype.handleNext = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
     // send Next command to CommandRouter
-    logStart('Client requests Volumio next' )
-        .then(libFast.bind(_this.commRouter.volumioNext, _this.commRouter))
-        .fail(console.log)
-        .done(logDone);
+    self.logStart('Client requests Volumio next' )
+        .then(libFast.bind(self.commRouter.volumioNext, self.commRouter))
+        .fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -803,13 +826,17 @@ InterfaceMPD.prototype.handlePassword = function(sCommand, sParam, client) {
 
 // Handler for command: PAUSE
 InterfaceMPD.prototype.handlePause = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
 	
     // Send pause command to CommandRouter
-    logStart('Client requests Volumio pause' )
-				.then(libFast.bind(_this.commRouter.volumioPause, _this.commRouter))
-				.fail(console.log)
-				.done(logDone);
+    self.logStart('Client requests Volumio pause' )
+		.then(libFast.bind(self.commRouter.volumioPause, self.commRouter))
+		.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+		.done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -824,13 +851,17 @@ InterfaceMPD.prototype.handlePing = function(sCommand, sParam, client) {
 
 // Handler for command: PLAY
 InterfaceMPD.prototype.handlePlay = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
 	
     // Send play command to CommandRouter
-    logStart('Client requests Volumio play' )
-        .then(libFast.bind(_this.commRouter.volumioPlay, _this.commRouter))
-        .fail(console.log)
-        .done(logDone);
+    self.logStart('Client requests Volumio play' )
+        .then(libFast.bind(self.commRouter.volumioPlay, self.commRouter))
+        .fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -845,20 +876,24 @@ InterfaceMPD.prototype.handlePlayid = function(sCommand, sParam, client) {
 
 // Handler for command: PLAYLIST
 InterfaceMPD.prototype.handlePlaylist = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
 	
     // Fetch queue from CommandRouter
-    logStart('Client requests Volumio queue')
-        .then(libFast.bind(_this.commRouter.volumioGetQueue, _this.commRouter))
+    self.logStart('Client requests Volumio queue')
+        .then(libFast.bind(self.commRouter.volumioGetQueue, self.commRouter))
         .then(function (queue) {
             // forward queue to helper
-            _this.helper.setQueue(queue);
+            self.helper.setQueue(queue);
         }).then(function() {
             // fetch MPD output from helper
-            client.write(_this.helper.printPlaylist());
+            client.write(self.helper.printPlaylist());
         })
-        .fail(console.log)
-        .done(logDone);
+        .fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -939,13 +974,17 @@ InterfaceMPD.prototype.handlePlchangesposid = function(sCommand, sParam, client)
 
 // Handler for command: PREVIOUS
 InterfaceMPD.prototype.handlePrevious = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
 	
     // Send previous command to CommandRouter
-    logStart('Client requests Volumio previous' )
-        .then(libFast.bind(_this.commRouter.volumioPrevious, _this.commRouter))
-        .fail(console.log)
-        .done(logDone);
+    self.logStart('Client requests Volumio previous' )
+        .then(libFast.bind(self.commRouter.volumioPrevious, self.commRouter))
+        .fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -1114,12 +1153,16 @@ InterfaceMPD.prototype.handleSingle = function(sCommand, sParam, client) {
 
 // Handler for command: STATS
 InterfaceMPD.prototype.handleStats = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
 	
     // Fetch proper MPD output from helper
-    logStart('Client requests Volumio stats')
-        .then(client.write(_this.helper.printStats()))
-        .done(logDone);
+    self.logStart('Client requests Volumio stats')
+        .then(client.write(self.helper.printStats()))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
 
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -1127,17 +1170,21 @@ InterfaceMPD.prototype.handleStats = function(sCommand, sParam, client) {
 
 // Handler for command: STATUS
 InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
-    var _this = this;
+    var self = this;
+	var timeStart = Date.now();
 	
     // Fetch status from CommandRouter
-    logStart('Client requests Volumio status')
-        .then(libFast.bind(_this.commRouter.volumioGetState, _this.commRouter))
+    self.logStart('Client requests Volumio status')
+        .then(libFast.bind(self.commRouter.volumioGetState, self.commRouter))
         // Forward state to volumioPushState function
         .then(function (state) {
-            _this.volumioPushState.call(_this, state, client);
+            self.volumioPushState.call(self, state, client);
         })
-        .fail(console.log)
-        .done(logDone);
+        .fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -1145,13 +1192,17 @@ InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
 
 // Handler for command: STOP
 InterfaceMPD.prototype.handleStop = function(sCommand, sParam, client) {
-	var _this = this;
+	var self = this;
+	var timeStart = Date.now();
 	
     // Call stop on CommandRouter
-    logStart('Client requests Volumio stop' )
-        .then(libFast.bind(_this.commRouter.volumioStop, _this.commRouter))
-        .fail(console.log)
-        .done(logDone);
+    self.logStart('Client requests Volumio stop' )
+        .then(libFast.bind(self.commRouter.volumioStop, self.commRouter))
+        .fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+        .done(function () {
+			return self.logDone(timeStart);
+
+		});
     
 	// Respond with default 'OK'
 	client.write("OK\n");
@@ -1180,7 +1231,9 @@ InterfaceMPD.prototype.handleSwapid = function(sCommand, sParam, client) {
 
 // Handler for command: TAGTYPES
 InterfaceMPD.prototype.handleTagtypes = function(sCommand, sParam, client) {
-    client.write(this.helper.printTagTypes());
+	var self = this;
+
+    client.write(self.helper.printTagTypes());
 	// Respond with default 'OK'
 	client.write("OK\n");
 }
@@ -1243,19 +1296,6 @@ InterfaceMPD.prototype.handleVolume = function(sCommand, sParam, client) {
 
 
 // =============== STATIC FUNCTIONS
-function logDone (timeStart) {
-
-	console.log('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
-	return libQ.resolve();
-
-}
-
-function logStart (sCommand) {
-
-	console.log('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
-	return libQ.resolve();
-
-}
 // END OF STATIC FUNCTIONS
 
 
@@ -1266,8 +1306,6 @@ function logStart (sCommand) {
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.printConsoleMessage = function (message) {
 
-	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::printConsoleMessage');
-	
 	// MPD clients dont need to receive console messages
 	
 	// Return a resolved empty promise to represent completion
@@ -1278,16 +1316,16 @@ InterfaceMPD.prototype.printConsoleMessage = function (message) {
 // Receive music library updates from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.volumioPushLibrary = function (library, client) {
 
-	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushLibrary');
-	var _this = this;
+	var self = this;
+	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushLibrary');
 
 	// If a specific client is given, push to just that client
 	if (client) {
-		client.write(_this.helper.printLibrary(library));
+		client.write(self.helper.printLibrary(library));
 
 	// Else push to all connected clients
 	} else {
-		_this.idles.forEach(function (client) {
+		self.idles.forEach(function (client) {
 			client.write("changed: database");
 		});
 	}
@@ -1297,13 +1335,14 @@ InterfaceMPD.prototype.volumioPushLibrary = function (library, client) {
 // Receive player queue updates from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.volumioPushQueue = function (queue) {
 
-	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushQueue');
+	var self = this;
+	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushQueue');
 	
 	// pass queue to the helper
-	this.helper.setQueue(queue);
+	self.helper.setQueue(queue);
 
 	// broadcast playlist changed to all idlers
-	this.idles.forEach(function (client) {
+	self.idles.forEach(function (client) {
 		client.write("changed: playlist\n");
 	});
 
@@ -1313,19 +1352,18 @@ InterfaceMPD.prototype.volumioPushQueue = function (queue) {
 // Receive player state updates from commandRouter and broadcast to all connected clients
 InterfaceMPD.prototype.volumioPushState = function (state, socket) {
 
-	console.log('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushState');	
-	var _this = this;
+	var self = this;
 	
 	// if requested by client, respond
 	if(socket) {
-		socket.write(_this.helper.printStatus(state));
+		socket.write(self.helper.printStatus(state));
 	// else broadcast to all idlers
 	} else {
 		// pass state to the helper
-		_this.helper.setStatus(state);
+		self.helper.setStatus(state);
 		
 		// broadcast state changed to all idlers
-		this.idles.forEach(function (client) {
+		self.idles.forEach(function (client) {
 			client.write("changed: player\n");
 		});
 	}
