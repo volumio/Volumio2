@@ -19,6 +19,12 @@ function ControllerMpd (nHost, nPort, commandRouter) {
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
 
+    // Catch and log errors
+    self.clientMpd.on('error', function(err) {
+        console.error("MPD error: ");
+        console.error(err);
+    });
+
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
 

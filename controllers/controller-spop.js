@@ -26,6 +26,16 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 	self.arrayResponseStack = [];
 	self.sResponseBuffer = '';
 
+	// Start a listener for receiving errors
+	self.connSpopCommand.on('error', function (err) {
+        console.error("SPOP command error:");
+        console.error(err);
+    });
+	self.connSpopStatus.on('error', function (err) {
+        console.error("SPOP status error:");
+        console.error(err);
+    });
+
 	// Start a listener for command socket messages (command responses)
 	self.connSpopCommand.on('data', function (data) {
 		self.sResponseBuffer = self.sResponseBuffer.concat(data.toString());
