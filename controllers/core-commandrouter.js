@@ -271,7 +271,7 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
 
 	var self = this;
-	//console.log(sMessage);
+	console.log(sMessage);
 
 	libFast.map(self.arrayInterfaces, function (curInterface) {
 		libFast.bind(curInterface.printConsoleMessage, curInterface)(sMessage);

@@ -4,6 +4,7 @@ var libFast = require('fast.js');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
 var libUtil = require('util');
+var libLevel = require('level');
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
@@ -113,30 +114,121 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 
 	});
 
-	self.tracklistReadyDeferred = libQ.defer();
-	self.tracklistReady = self.tracklistReadyDeferred.promise;
 	self.tracklist = new Array();
+
+	// Start tracklist promise as rejected, so requestors do not wait for it if not immediately available.
+	// This is okay because no part of Volumio requires a populated tracklist to function.
+	self.tracklistReadyDeferred = null;
+	self.tracklistReady = libQ.reject('Tracklist not yet populated.');
+
+	// Attempt to load tracklist from database on disk
+	self.sTracklistPath = './db/spopTracklist';
+	self.loadTracklistFromDB()
+		.fail(libFast.bind(self.pushError, self));
 
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
 
+// Load the tracklist from database on disk
+ControllerSpop.prototype.loadTracklistFromDB = function () {
+
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::loadTracklistFromDB');
+
+	self.tracklist = new Array();
+
+	self.tracklistReadyDeferred = libQ.defer();
+	self.tracklistReady = self.tracklistReadyDeferred.promise;
+
+	var dbTracklist = libLevel(self.sTracklistPath, {'valueEncoding': 'json', 'createIfMissing': true});
+
+	return libQ.resolve()
+		.then(function () {
+			return libQ.nfcall(libFast.bind(dbTracklist.get, dbTracklist), 'tracklist');
+
+		})
+		.then(function (result) {
+			self['tracklist'] = result;
+
+			self.commandRouter.pushConsoleMessage('Spop tracklist loaded from DB.');
+
+			try {
+				self.tracklistReadyDeferred.resolve();
+			} catch (error) {
+				self.pushError('Unable to resolve tracklist promise: ' + error);
+			}
+
+			return libQ.resolve();
+
+		})
+		.fail(function (sError) {
+			try {
+				self.tracklistReadyDeferred.reject(sError);
+			} catch (error) {
+				self.pushError('Unable to reject tracklist promise: ' + error);
+			}
+
+			throw new Error('Error reading DB: ' + sError);
+
+		})
+		.fin(libFast.bind(dbTracklist.close, dbTracklist));
+
+}
+
 // Rebuild a library of user's playlisted Spotify tracks
 ControllerSpop.prototype.rebuildTracklist = function () {
 
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklist');
-	self.tracklist = new Array();
 
-	// Scan the user's playlists and populate the music library
+	self.tracklist = new Array();
+	self.tracklistReadyDeferred = libQ.defer();
+	self.tracklistReady = self.tracklistReadyDeferred.promise;
+
+	var dbTracklist = libLevel(self.sTracklistPath, {'valueEncoding': 'json', 'createIfMissing': true});
+
+	self.commandRouter.pushConsoleMessage('Populating Spop tracklist...');
+
+	// Scan the user's Spotify playlists and populate the tracklist
 	return self.sendSpopCommand('ls', [])
 		.then(JSON.parse)
 		.then(libFast.bind(self.rebuildTracklistFromSpopPlaylists, self))
 		.then(function () {
-			self.tracklistReadyDeferred.resolve();
+			self.commandRouter.pushConsoleMessage('Storing Spop tracklist in db...');
 
-		});
+			var ops = [
+				{type: 'put', key: 'tracklist', value: self['tracklist']}
+
+			];
+
+			return libQ.nfcall(libFast.bind(dbTracklist.batch, dbTracklist), ops);
+
+		})
+		.then(function () {
+			self.commandRouter.pushConsoleMessage('Spop tracklist rebuild complete.');
+
+			try {
+				self.tracklistReadyDeferred.resolve();
+			} catch (error) {
+				self.pushError('Unable to resolve tracklist promise: ' + error);
+			}
+
+			return libQ.resolve();
+
+		})
+		.fail(function (sError) {
+			try {
+				self.tracklistReadyDeferred.reject(sError);
+			} catch (error) {
+				self.pushError('Unable to reject tracklist promise: ' + error);
+			}
+
+			throw new Error('Tracklist Rebuild Error: ' + sError);
+
+		})
+		.fin(libFast.bind(dbTracklist.close, dbTracklist));
 
 }
 

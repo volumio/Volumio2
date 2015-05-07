@@ -3,6 +3,7 @@ var libFast = require('fast.js');
 var libSortOn = require('sort-on');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
+var libLevel = require('level');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
@@ -34,12 +35,100 @@ function CoreMusicLibrary (commandRouter) {
 
 	];
 
-	self.libraryReadyDeferred = libQ.defer();
-	self.libraryReady = self.libraryReadyDeferred.promise;
+	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
+	// This is okay because no part of Volumio requires a populated library to function.
+	self.libraryReadyDeferred = null;
+	self.libraryReady = libQ.reject('Library not yet loaded.');
+
+	// Attempt to load library from database on disk
+	self.sLibraryPath = './db/musicLibrary';
+	self.loadLibraryFromDB()
+		.fail(libFast.bind(self.pushError, self));
 
 }
 
 // Public methods -----------------------------------------------------------------------------------
+
+CoreMusicLibrary.prototype.loadLibraryFromDB = function () {
+
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::loadLibraryFromDB');
+
+	self.tableGenres = new Object();
+	self.tableArtists = new Object();
+	self.tableAlbums = new Object();
+	self.tableTracks = new Object();
+	self.tableItems = new Object();
+	self.index = new Object();
+
+	self.libraryReadyDeferred = libQ.defer();
+	self.libraryReady = self.libraryReadyDeferred.promise;
+
+	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
+
+	return libQ.resolve()
+		.then(function () {
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableGenres');
+
+		})
+		.then(function (result) {
+			self['tableGenres'] = result;
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableArtists');
+
+		})
+		.then(function (result) {
+			self['tableArtists'] = result;
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableAlbums');
+
+		})
+		.then(function (result) {
+			self['tableAlbums'] = result;
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableTracks');
+
+		})
+		.then(function (result) {
+			self['tableTracks'] = result;
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableItems');
+
+		})
+		.then(function (result) {
+			self['tableItems'] = result;
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'index');
+
+		})
+		.then(function (result) {
+			self['index'] = result;
+
+			self.commandRouter.pushConsoleMessage('Library loaded from DB.');
+
+			try {
+				self.libraryReadyDeferred.resolve();
+			} catch (error) {
+				self.pushError('Unable to resolve library promise: ' + error);
+			}
+
+			self.commandRouter.pushConsoleMessage('Genres: ' + Object.keys(self['tableGenres']).length);
+			self.commandRouter.pushConsoleMessage('Artists: ' + Object.keys(self['tableArtists']).length);
+			self.commandRouter.pushConsoleMessage('Albums: ' + Object.keys(self['tableAlbums']).length);
+			self.commandRouter.pushConsoleMessage('Tracks: ' + Object.keys(self['tableTracks']).length);
+			self.commandRouter.pushConsoleMessage('Items: ' + Object.keys(self['tableItems']).length);
+
+			return libQ.resolve();
+
+		})
+		.fail(function (sError) {
+			try {
+				self.libraryReadyDeferred.reject(sError);
+			} catch (error) {
+				self.pushError('Unable to reject library promise: ' + error);
+			}
+
+			throw new Error('Error reading DB: ' + sError);
+
+		})
+		.fin(libFast.bind(dbLibrary.close, dbLibrary));
+
+}
 
 CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
@@ -53,8 +142,15 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 	self.tableItems = new Object();
 	self.index = new Object();
 
+	self.libraryReadyDeferred = libQ.defer();
+	self.libraryReady = self.libraryReadyDeferred.promise;
+
+	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
+
 	return self.commandRouter.getAllTracklists()
 		.then(function (arrayAllTrackLists) {
+			self.commandRouter.pushConsoleMessage('Populating library...');
+
 			return libFast.map(arrayAllTrackLists, function (arrayTrackList) {
 				return self.populateLibraryFromTracklist(arrayTrackList);
 
@@ -62,6 +158,8 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
 		})
 		.then(function () {
+			self.commandRouter.pushConsoleMessage('Generating indexes...');
+
 			return libFast.map(self.arrayIndexDefinitions, function (curIndexDefinition) {
 				return self.rebuildSingleIndex(curIndexDefinition[0], curIndexDefinition[1], curIndexDefinition[2]);
 
@@ -69,7 +167,29 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
 		})
 		.then(function () {
-			self.libraryReadyDeferred.resolve();
+			self.commandRouter.pushConsoleMessage('Storing library in db...');
+
+			var ops = [
+				{type: 'put', key: 'tableGenres', value: self['tableGenres']},
+				{type: 'put', key: 'tableArtists', value: self['tableArtists']},
+				{type: 'put', key: 'tableAlbums', value: self['tableAlbums']},
+				{type: 'put', key: 'tableTracks', value: self['tableTracks']},
+				{type: 'put', key: 'tableItems', value: self['tableItems']},
+				{type: 'put', key: 'index', value: self['index']}
+
+			];
+
+			return libQ.nfcall(libFast.bind(dbLibrary.batch, dbLibrary), ops);
+
+		})
+		.then(function () {
+			self.commandRouter.pushConsoleMessage('Library rebuild complete.');
+
+			try {
+				self.libraryReadyDeferred.resolve();
+			} catch (error) {
+				self.pushError('Unable to resolve library promise: ' + error);
+			}
 
 			self.commandRouter.pushConsoleMessage('Genres: ' + Object.keys(self['tableGenres']).length);
 			self.commandRouter.pushConsoleMessage('Artists: ' + Object.keys(self['tableArtists']).length);
@@ -79,7 +199,18 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
 			return libQ.resolve();
 
-		});
+		})
+		.fail(function (sError) {
+			try {
+				self.libraryReadyDeferred.reject(sError);
+			} catch (error) {
+				self.pushError('Unable to reject library promise: ' + error);
+			}
+
+			throw new Error('Library Rebuild Error: ' + sError);
+
+		})
+		.fin(libFast.bind(dbLibrary.close, dbLibrary));
 
 }
 
