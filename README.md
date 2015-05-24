@@ -30,7 +30,7 @@ nodejs bin/www
 
 ## System Architecture
 
-![volumiosystemarchitecture](http://lightflo.ws/images/VolumioArchitecture2.png)
+![volumiosystemarchitecture](http://lightflo.ws/images/VolumioArchitecture3.png)
 
 
 ## Development tasks and milestones
