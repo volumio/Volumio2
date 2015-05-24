@@ -10,20 +10,26 @@ System Image is built with [Volumio Builder](https://github.com/volumio/Build)
 
 Clone the repo
 
-       git clone https://github.com/volumio/WebUI-NODE.git \volumio
+```shell
+git clone https://github.com/volumio/WebUI-NODE.git volumio
+```
 
 Now install [libgroove](https://github.com/andrewrk/libgroove).  
 All other dependecies are in the package JSON, from the working directory just run
 
-       cd \volumio
-       npm install
+```shell
+cd volumio
+npm install
+```
 
 You can run all the servers in one single step just running with nodejs
 
-       nodejs bin/www 
-       
+```shell
+nodejs bin/www
+```
+
 ## System Architecture
-       
+
 ![volumiosystemarchitecture](http://lightflo.ws/images/VolumioArchitecture2.png)
 
 
@@ -36,7 +42,7 @@ You can run all the servers in one single step just running with nodejs
  - [X] SystemD migration
  - [ ] Volumio APT repo
 
-- [ ] Custom Compiled Core Packages 
+- [ ] Custom Compiled Core Packages
  - [X] MPD
  - [ ] SPOP
  - [ ] Upmpdcli
@@ -45,13 +51,13 @@ You can run all the servers in one single step just running with nodejs
 
 ### Node Backend
 
-- [ ] Volumio Core 
+- [ ] Volumio Core
  - [X] MPD Emulation Interface
- - [ ] Command Router 
+ - [ ] Command Router
  - [ ] WebUI Endpoints
  - [ ] Mixer Controls
  
-- [ ] Audio services Controllers 
+- [ ] Audio services Controllers
  - [ ] MPD Service and Library
  - [ ] SPOP Service and Library
  - [ ] Shairport Service and Library
@@ -70,20 +76,20 @@ You can run all the servers in one single step just running with nodejs
 
 - [ ] Volumio 2 WebUI (Playback)
  - [ ] Boostrap Based Structure
- - [ ] Playback Handling 
+ - [ ] Playback Handling
  - [ ] Library retrieval
- - [ ] SPOP Hooks  
+ - [ ] SPOP Hooks
  - [ ] Airplay Hooks
 
 - [ ] Volumio 2 WebUI (Configuration)
  - [ ] Playback Option Configuration
- - [ ] Network Option Configuration 
+ - [ ] Network Option Configuration
  - [ ] Plug-in System Configuration
- - [ ] System Configuration 
+ - [ ] System Configuration
 
 
-* ToDos, Tasks and Bugs [here](https://github.com/volumio/WebUI-NODE#boards) (you need to associate your github account with [ZenHub])(https://www.zenhub.io/) 
-* [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics 
+* ToDos, Tasks and Bugs [here](https://github.com/volumio/WebUI-NODE#boards) (you need to associate your github account with [ZenHub])(https://www.zenhub.io/)
+* [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics
 * [Wiki](https://github.com/volumio/WebUI-NODE/wiki) (Internal, Will be made public once released)
 
 
@@ -94,7 +100,6 @@ You can run all the servers in one single step just running with nodejs
 ## Development Guidelines
 
 * This is intended to run on Low Power Devices (r-pi). Let's keep code efficient and lightweight
-* To allow code mantainability, always comment your code properly and update DOCs if needed 
+* To allow code mantainability, always comment your code properly and update DOCs if needed
 * Adhere to [MVC Best Practices](http://www.yiiframework.com/doc/guide/1.1/en/basics.best-practices) to maximize project quality
 * Have fun and enjoy what you're doing!
-
