@@ -12,7 +12,8 @@ Clone the repo
 
        git clone https://github.com/volumio/WebUI-NODE.git \volumio
 
-All dependecies are in the package JSON, from the working directory just run
+Now install [libgroove](https://github.com/andrewrk/libgroove).  
+All other dependecies are in the package JSON, from the working directory just run
 
        cd \volumio
        npm install
