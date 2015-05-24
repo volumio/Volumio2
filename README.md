@@ -37,6 +37,23 @@ nodejs bin/www
 
 ## Development tasks and milestones
 
+### Current Tasks
+
+- [ ] Templating System
+
+The idea is to allow the installation of different templates and skins. To allow that a template system needs to be created: as general guidelines we'll provide a set of Java functions to hook with the WebSockets connection. The different templates then will be a folder containing just css js and html.
+
+- [ ] Plugin System 
+
+Every service (input, output, visualization etc) will be treated as a standalone entity. This will allow to add external plugins in the future. The plugins will be composed of a folder, with all the methods, and a "manifest file" which is an executable that sends via nodes js its name, its available methods and other informations. At system startup every manifest in the manifest folder is executed, so the system receives with WS all the available plugins and their capabilities and methods.  Then the core knows what is availbable and how to call them. 
+
+- [ ] Music Database System
+
+Every music service available will feature its own LevelDB database, storing its pertaining music file. The Volumio core then needs to query those databases to retrieve available music, so it can route the appropriate request to the right service for a certain song. 
+
+
+
+
 ### Operating System
 
 - [ ] Custom Debian Based Operating System
