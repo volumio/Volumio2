@@ -11,7 +11,7 @@ System Image is built with [Volumio Builder](https://github.com/volumio/Build)
 Clone the repo
 
 ```shell
-git clone https://github.com/volumio/WebUI-NODE.git volumio
+git clone https://github.com/volumio/Volumio2.git volumio
 ```
 
 Now install [libgroove](https://github.com/andrewrk/libgroove).  
