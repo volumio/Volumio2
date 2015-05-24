@@ -15,24 +15,53 @@ function CoreMusicLibrary (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	// These are hash tables of all items in library
-	// Rebuilding a library creates these from scratch
-	self.tableGenres = new Object();
-	self.tableArtists = new Object();
-	self.tableAlbums = new Object();
-	self.tableTracks = new Object();
-	self.tableItems = new Object();
-
-	// This is a sorted index of all items in library
-	self.index = new Object();
-
-	// These are sorted indexes of all items in library, to be used for browsing
+	// The library contains hash tables for genres, artists, albums, and tracks
+	self.library = new Object();
 	self.arrayIndexDefinitions = [
-		['Genres', 'tableGenres', 'metadata.name'],
-		['Artists', 'tableArtists', 'metadata.name'],
-		['Albums', 'tableAlbums', 'metadata.name'],
-		['Tracks', 'tableTracks', 'metadata.name']
-
+		{
+			'name': 'Genres by Name',
+			'table': 'genre',
+			'sortby': 'name',
+			'storefields': {
+				'name': 'name'
+			}
+		},
+		{
+			'name': 'Artists by Name',
+			'table': 'artist',
+			'sortby': 'name',
+			'storefields': {
+				'name': 'name'
+			}
+		},
+		{
+			'name': 'Albums by Name',
+			'table': 'album',
+			'sortby': 'name',
+			'storefields': {
+				'name': 'name',
+				'artists': 'parents:#:name'
+			}
+		},
+		{
+			'name': 'Albums by Artist',
+			'table': 'album',
+			'sortby': 'parents:#:name',
+			'storefields': {
+				'name': 'name',
+				'artists': 'parents:#:name'
+			}
+		},
+		{
+			'name': 'Tracks by Name',
+			'table': 'track',
+			'sortby': 'name',
+			'storefields': {
+				'name': 'name',
+				'album': 'parents:#0:name',
+				'artists': 'parents:#0:parents:#:name'
+			}
+		}
 	];
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
@@ -41,7 +70,7 @@ function CoreMusicLibrary (commandRouter) {
 	self.libraryReady = libQ.reject('Library not yet loaded.');
 
 	// Attempt to load library from database on disk
-	self.sLibraryPath = './db/musicLibrary';
+	self.sLibraryPath = './db/MusicLibrary';
 	self.loadLibraryFromDB()
 		.fail(libFast.bind(self.pushError, self));
 
@@ -49,56 +78,25 @@ function CoreMusicLibrary (commandRouter) {
 
 // Public methods -----------------------------------------------------------------------------------
 
+// Load a LevelDB from disk containing the music library and indexes
 CoreMusicLibrary.prototype.loadLibraryFromDB = function () {
 
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::loadLibraryFromDB');
 
-	self.tableGenres = new Object();
-	self.tableArtists = new Object();
-	self.tableAlbums = new Object();
-	self.tableTracks = new Object();
-	self.tableItems = new Object();
-	self.index = new Object();
+	self.library = new Object();
 
 	self.libraryReadyDeferred = libQ.defer();
 	self.libraryReady = self.libraryReadyDeferred.promise;
 
 	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
-
 	return libQ.resolve()
 		.then(function () {
-			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableGenres');
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'library');
 
 		})
 		.then(function (result) {
-			self['tableGenres'] = result;
-			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableArtists');
-
-		})
-		.then(function (result) {
-			self['tableArtists'] = result;
-			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableAlbums');
-
-		})
-		.then(function (result) {
-			self['tableAlbums'] = result;
-			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableTracks');
-
-		})
-		.then(function (result) {
-			self['tableTracks'] = result;
-			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'tableItems');
-
-		})
-		.then(function (result) {
-			self['tableItems'] = result;
-			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'index');
-
-		})
-		.then(function (result) {
-			self['index'] = result;
-
+			self.library = result;
 			self.commandRouter.pushConsoleMessage('Library loaded from DB.');
 
 			try {
@@ -107,11 +105,12 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function () {
 				self.pushError('Unable to resolve library promise: ' + error);
 			}
 
-			self.commandRouter.pushConsoleMessage('Genres: ' + Object.keys(self['tableGenres']).length);
-			self.commandRouter.pushConsoleMessage('Artists: ' + Object.keys(self['tableArtists']).length);
-			self.commandRouter.pushConsoleMessage('Albums: ' + Object.keys(self['tableAlbums']).length);
-			self.commandRouter.pushConsoleMessage('Tracks: ' + Object.keys(self['tableTracks']).length);
-			self.commandRouter.pushConsoleMessage('Items: ' + Object.keys(self['tableItems']).length);
+			self.commandRouter.pushConsoleMessage('  Genres: ' + Object.keys(self.library['genre']).length);
+			self.commandRouter.pushConsoleMessage('  Artists: ' + Object.keys(self.library['artist']).length);
+			self.commandRouter.pushConsoleMessage('  Albums: ' + Object.keys(self.library['album']).length);
+			self.commandRouter.pushConsoleMessage('  Tracks: ' + Object.keys(self.library['track']).length);
+			self.commandRouter.pushConsoleMessage('  Items: ' + Object.keys(self.library['item']).length);
+			self.commandRouter.pushConsoleMessage('  Indexes: ' + Object.keys(self.library['index']).length);
 
 			return libQ.resolve();
 
@@ -130,23 +129,25 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function () {
 
 }
 
-CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
+// Query all services for their tracklists, scan each track, and build music library
+// This currently needs to be rerun when any tracklist changes, TODO make this updatable in place
+CoreMusicLibrary.prototype.rebuildLibrary = function () {
 
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildLibrary');
 
-	self.tableGenres = new Object();
-	self.tableArtists = new Object();
-	self.tableAlbums = new Object();
-	self.tableTracks = new Object();
-	self.tableItems = new Object();
-	self.index = new Object();
+	self.library = new Object();
+	self.library['genre'] = new Object();
+	self.library['artist'] = new Object();
+	self.library['album'] = new Object();
+	self.library['track'] = new Object();
+	self.library['item'] = new Object();
+	self.library['index'] = new Object();
 
 	self.libraryReadyDeferred = libQ.defer();
 	self.libraryReady = self.libraryReadyDeferred.promise;
 
 	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
-
 	return self.commandRouter.getAllTracklists()
 		.then(function (arrayAllTrackLists) {
 			self.commandRouter.pushConsoleMessage('Populating library...');
@@ -158,10 +159,16 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
 		})
 		.then(function () {
+			self.commandRouter.pushConsoleMessage('  Genres: ' + Object.keys(self.library['genre']).length);
+			self.commandRouter.pushConsoleMessage('  Artists: ' + Object.keys(self.library['artist']).length);
+			self.commandRouter.pushConsoleMessage('  Albums: ' + Object.keys(self.library['album']).length);
+			self.commandRouter.pushConsoleMessage('  Tracks: ' + Object.keys(self.library['track']).length);
+			self.commandRouter.pushConsoleMessage('  Items: ' + Object.keys(self.library['item']).length);
+
 			self.commandRouter.pushConsoleMessage('Generating indexes...');
 
 			return libFast.map(self.arrayIndexDefinitions, function (curIndexDefinition) {
-				return self.rebuildSingleIndex(curIndexDefinition[0], curIndexDefinition[1], curIndexDefinition[2]);
+				return self.rebuildSingleIndex(curIndexDefinition);
 
 			});
 
@@ -169,17 +176,7 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 		.then(function () {
 			self.commandRouter.pushConsoleMessage('Storing library in db...');
 
-			var ops = [
-				{type: 'put', key: 'tableGenres', value: self['tableGenres']},
-				{type: 'put', key: 'tableArtists', value: self['tableArtists']},
-				{type: 'put', key: 'tableAlbums', value: self['tableAlbums']},
-				{type: 'put', key: 'tableTracks', value: self['tableTracks']},
-				{type: 'put', key: 'tableItems', value: self['tableItems']},
-				{type: 'put', key: 'index', value: self['index']}
-
-			];
-
-			return libQ.nfcall(libFast.bind(dbLibrary.batch, dbLibrary), ops);
+			return libQ.nfcall(libFast.bind(dbLibrary.put, dbLibrary), 'library', self.library);
 
 		})
 		.then(function () {
@@ -190,12 +187,6 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 			} catch (error) {
 				self.pushError('Unable to resolve library promise: ' + error);
 			}
-
-			self.commandRouter.pushConsoleMessage('Genres: ' + Object.keys(self['tableGenres']).length);
-			self.commandRouter.pushConsoleMessage('Artists: ' + Object.keys(self['tableArtists']).length);
-			self.commandRouter.pushConsoleMessage('Albums: ' + Object.keys(self['tableAlbums']).length);
-			self.commandRouter.pushConsoleMessage('Tracks: ' + Object.keys(self['tableTracks']).length);
-			self.commandRouter.pushConsoleMessage('Items: ' + Object.keys(self['tableItems']).length);
 
 			return libQ.resolve();
 
@@ -214,124 +205,85 @@ CoreMusicLibrary.prototype.rebuildLibrary = function (arrayAllTrackLists) {
 
 }
 
-CoreMusicLibrary.prototype.browseLibrary = function (sId) {
+// Return the children of an object for use in browsing
+CoreMusicLibrary.prototype.browseLibrary = function (sId, sSortBy, nEntries, nOffset) {
 
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
 
-	if (sId === '') {
-		return self.getIndexRoot();
-
-	} else {
-		var arrayIdParts = sId.split(':');
-
-		if (arrayIdParts[0] === 'index') {
-			return self.getIndex(arrayIdParts[1]);
-
-		} else if (arrayIdParts[0] === 'genre') {
-			return self.getGenre(arrayIdParts[1]);
-
-		} else if (arrayIdParts[0] === 'artist') {
-            return self.getArtist(arrayIdParts[1]);
-
-        } else if (arrayIdParts[0] === 'album') {
-            return self.getAlbum(arrayIdParts[1]);
-
-        }
-
-		return libQ.reject('ID ' + sId + ' not recognized.');
-
-	}
-
-}
-
-CoreMusicLibrary.prototype.getIndexRoot = function () {
-
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getIndexRoot');
-
 	return self.libraryReady
 		.then(function () {
-			return libFast.map(self.arrayIndexDefinitions, function (curEntry) {
-				return {'id': 'index:' + curEntry[1], 'name': curEntry[0]};
+			// No object specified, list all the indexes instead
+			if (sId === '') {
+				return libFast.map(self.arrayIndexDefinitions, function (curEntry) {
+					return {'uid': 'index:' + curEntry[1], 'metadata': {'name': curEntry[0]}};
 
-			})
+				});
 
-		});
+			// An index is specified. List the contents of the index.
+			} else if (sId.substr(0, 6) === 'index:') {
+				return self.getIndex(sId)
+					.then(function (objRequested) {
+						return objRequested.index;
 
-}
+					});
 
-CoreMusicLibrary.prototype.getIndex = function (sIndex) {
+			// A library object is specified. List the children of the object, sorted as requested.
+			} else {
+				return self.getLibraryObject(sId)
+					.then(function (objRequested) {
+						return self.sortUids(Object.keys(objRequested.children), 'metadata.name');
 
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getIndex');
+					})
+					.then(function (arraySorted) {
+						return libFast.map(arraySorted, function (sChildId) {
+							return {'id': sChildId, 'metadata': self.getLibraryObject(sChildId)['metadata']}
 
-	return self.libraryReady
-		.then(function () {
-			return self.index[sIndex];
+						});
 
-		});
+					});
 
-}
+			}
 
-CoreMusicLibrary.prototype.getGenre = function (sInput) {
-
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getGenre');
-
-	return self.libraryReady
-		.then(function () {
-			return libFast.map(Object.keys(self.tableGenres[sInput]['children']), function (curChildKey) {
-				return {'id': 'artist:' + curChildKey, 'name': self.tableArtists[curChildKey]['metadata']['name']};
-
-			})
-
-		});
-
-}
-
-CoreMusicLibrary.prototype.getArtist = function (sInput) {
-
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getArtist');
-
-	return self.libraryReady
-		.then(function () {
-			return libFast.map(Object.keys(self.tableArtists[sInput]['children']), function (curChildKey) {
-				return {'id': 'album:' + curChildKey, 'name': self.tableAlbums[curChildKey]['metadata']['name']};
-
-			})
-
-		});
-
-}
-
-CoreMusicLibrary.prototype.getAlbum = function (sInput) {
-
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getAlbum');
-
-	return self.libraryReady
-		.then(function () {
-			return libFast.map(Object.keys(self.tableAlbums[sInput]['children']), function (curChildKey) {
-				return {'id': 'track:' + curChildKey, 'name': self.tableTracks[curChildKey]['metadata']['name']};
-
-			})
-
-		});
+		})
 
 }
 
 // Internal methods ---------------------------------------------------------------------------
 
-// Pass the error if we don't want to handle it
-CoreMusicLibrary.prototype.pushError = function (sReason) {
-
+// Navigate through a source object via the provided path and retrieve a target object.
+// The source object can the the entire library, or any sub-object.
+// The path is a string with each field to navigate down separated by ':'.
+// Use of '#' indicates that all Uids shown at that level are to be recursed down, and the result will be
+// presented in an array. Using '#x' will pick out the Uid at index x, where x is a number.
+// For example:
+// getLibraryObject(self.library, 'track:XYZ:name') -> 'track XYZ name'
+// getLibraryObject(self.library.album.ABC, 'parents:#:name') -> ['artist 1 name', 'artist 2 name']
+// getLibraryObject(self.library.artist.DEF, 'parents:#0') -> <the object representing the first genre of artist DEF>
+CoreMusicLibrary.prototype.getLibraryObject = function (objSource, sPath) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::pushError(' + sReason + ')');
 
-	// Return a resolved empty promise to represent completion
-	return libQ.resolve();
+	if (sPath.indexOf(':') == -1) {
+		return objSource[sPath];
+
+	}
+
+	var curStep = sPath.slice(0, sPath.indexOf(':'));
+	var sNewPath = sPath.slice(sPath.indexOf(':') + 1);
+
+	if (curStep === '#') {
+		return libFast.map(Object.keys(objSource), function (curUid) {
+			return self.getObject(self.library, curUid + ':' + sNewPath);
+
+		});
+
+	} else if (curStep.substr(0,1) === '#') {
+		return self.getObject(self.library, Object.keys(objSource)[curStep.substr(1)] + ':' + sNewPath);
+
+	} else {
+		return self.getObject(objSource[curStep], sNewPath);
+
+	}
 
 }
 
@@ -356,66 +308,89 @@ CoreMusicLibrary.prototype.populateLibraryFromTracklist = function (arrayTrackLi
 
 }
 
-// Create a single index of a given table
-CoreMusicLibrary.prototype.rebuildSingleIndex = function (sIndexName, sTableName, sPathToSortField) {
+// Create a single sorted index of a given music library table
+CoreMusicLibrary.prototype.rebuildSingleIndex = function (objIndexDefinition) {
 
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildSingleIndex');
-self.commandRouter.pushConsoleMessage('Building index for "' + sIndexName + '"');
-	if (!(sTableName in self)) {
+
+	var sIndexName = objIndexDefinition['name'];
+	var sTableName = objIndexDefinition['table'];
+	var sSortBy = objIndexDefinition['sortby'];
+	var objStoreFields = objIndexDefinition['storefields'];
+
+	if (!(sTableName in self.library)) {
 		self.commandRouter.pushConsoleMessage('Specified table ' + sTableName + ' not found in library for indexing');
 		return;
 
 	}
 
-	var arrayPathToSortField = sPathToSortField.split('.');
-
-	var unsortedIndex = libFast.map(Object.keys(self[sTableName]), function (curKey) {
-
-		var curSortValue = libFast.reduce(arrayPathToSortField, function (objCollector, curPathToSortField) {
-			if (!(curPathToSortField in objCollector)) {
-				return '';
-
-			}
-
-			return objCollector[curPathToSortField];
-
-		}, self[sTableName][curKey]);
-
-		return {'id': self[sTableName][curKey]['id'], 'name': curSortValue};
+	var arrayUids = libFast.map(Object.keys(self.library[sTableName]), function (curKey) {
+		return sTableName + ':' + curKey;
 
 	});
 
-	self.index[sTableName] = libSortOn(unsortedIndex, 'name');
+	return self.generateSortedIndex(arrayUids, sSortBy, objStoreFields)
+		.then(function (arraySortedIndex) {
+			self.library.index[sIndexName] = arraySortedIndex;
 
-	return libQ.resolve();
+		});
 
 }
 
-// Function to add an item to the database, to be called by service controllers.
-// Metadata fields to roughly conform to Ogg Vorbis standards (http://xiph.org/vorbis/doc/v-comment.html)
+// Sort an array of UIDs based on a provided sort field. Returns a sorted array of UIDs, along with the fields which were specified to be stored.
+CoreMusicLibrary.prototype.generateSortedIndex = function (arrayUids, sSortBy, objStoreFields) {
+
+	var self = this;
+
+	return libQ.resolve()
+		.then(function () {
+			return libFast.map(arrayUids, function (curUid) {
+				var curSortValue = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + sSortBy));
+
+				var curStoreValue = new Object();
+				libFast.map(Object.keys(objStoreFields), function (curStoreField) {
+					curStoreValue[curStoreField] = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + objStoreFields[curStoreField]));
+
+				});
+
+				return {'sortvalue': curSortValue, 'uid': curUid, 'storevalues': curStoreValue};
+
+			});
+
+		})
+		.then(function (arrayUnsorted) {
+			return libQ.fcall(libSortOn, arrayUnsorted, 'sortvalue');
+
+		})
+		.then(function (arraySorted) {
+			return libFast.map(arraySorted, function (curEntry) {
+				return {'uid': curEntry['uid'], 'storevalues': curEntry['storevalues']};
+
+			});
+
+		});
+
+}
+
+// Function to add an item to all tables in the database.
 CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sAlbum, arrayArtists, arrayGenres) {
 
 	var self = this;
 
-	var tableGenres = self.tableGenres;
-	var tableArtists = self.tableArtists;
-	var tableAlbums = self.tableAlbums;
-	var tableTracks = self.tableTracks;
-	var tableItems = self.tableItems;
+	var tableGenres = self.library['genre'];
+	var tableArtists = self.library['artist'];
+	var tableAlbums = self.library['album'];
+	var tableTracks = self.library['track'];
+	var tableItems = self.library['item'];
 
 	curItemKey = convertStringToHashkey(sService + sUri);
 
 	tableItems[curItemKey] = {
-		metadata: {
-/*			title: sTitle,
-			album: sAlbum,
-			artists: arrayArtists,
-			genres: arrayGenres*/
-			service: sService,
-			uri: sUri
-		},
-		id: 'item:' + curItemKey,
+		id: curItemKey,
+		type: 'item',
+		service: sService,
+		uri: sUri
 
 	};
 
@@ -426,16 +401,17 @@ CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sA
 
 	if (!(curTrackKey in tableTracks)) {
 		tableTracks[curTrackKey] = new Object();
-		tableTracks[curTrackKey]['metadata'] = new Object();
-		tableTracks[curTrackKey]['metadata']['name'] = sTitle;
-		tableTracks[curTrackKey]['id'] = 'track:' + curTrackKey;
+		tableTracks[curTrackKey] = new Object();
+		tableTracks[curTrackKey]['name'] = sTitle;
+		tableTracks[curTrackKey]['id'] = curTrackKey;
+		tableTracks[curTrackKey]['type'] = 'track';
 		tableTracks[curTrackKey]['children'] = new Object();
 		tableTracks[curTrackKey]['parents'] = new Object();
 
 	}
 
-	tableTracks[curTrackKey]['children'][curItemKey] = null;
-	tableItems[curItemKey]['parents'][curTrackKey] = null;
+	tableTracks[curTrackKey]['children']['item:' + curItemKey] = null;
+	tableItems[curItemKey]['parents']['track:' + curTrackKey] = null;
 
 	if (sAlbum === 'Greatest Hits') {
 		// The 'Greatest Hits' album name is a repeat offender for unrelated albums being grouped together.
@@ -451,48 +427,51 @@ CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sA
 
 	if (!(curAlbumKey in tableAlbums)) {
 		tableAlbums[curAlbumKey] = new Object();
-		tableAlbums[curAlbumKey]['metadata'] = new Object();
-		tableAlbums[curAlbumKey]['metadata']['name'] = sAlbum;
-		tableAlbums[curAlbumKey]['id'] = 'album:' + curAlbumKey;
+		tableAlbums[curAlbumKey] = new Object();
+		tableAlbums[curAlbumKey]['name'] = sAlbum;
+		tableAlbums[curAlbumKey]['id'] = curAlbumKey;
+		tableAlbums[curAlbumKey]['type'] = 'album';
 		tableAlbums[curAlbumKey]['children'] = new Object();
 		tableAlbums[curAlbumKey]['parents'] = new Object();
 
 	}
 
-	tableAlbums[curAlbumKey]['children'][curTrackKey] = null;
-	tableTracks[curTrackKey]['parents'][curAlbumKey] = null;
+	tableAlbums[curAlbumKey]['children']['track:' + curTrackKey] = null;
+	tableTracks[curTrackKey]['parents']['album:' + curAlbumKey] = null;
 
 	for (var iArtist = 0; iArtist < arrayArtists.length; iArtist++) {
 		curArtistKey = convertStringToHashkey(arrayArtists[iArtist]);
 
 		if (!(curArtistKey in tableArtists)) {
 			tableArtists[curArtistKey] = new Object();
-			tableArtists[curArtistKey]['metadata'] = new Object();
-			tableArtists[curArtistKey]['metadata']['name'] = arrayArtists[iArtist];
-			tableArtists[curArtistKey]['id'] = 'artist:' + curArtistKey;
+			tableArtists[curArtistKey] = new Object();
+			tableArtists[curArtistKey]['name'] = arrayArtists[iArtist];
+			tableArtists[curArtistKey]['id'] = curArtistKey;
+			tableArtists[curArtistKey]['type'] = 'artist';
 			tableArtists[curArtistKey]['children'] = new Object();
 			tableArtists[curArtistKey]['parents'] = new Object();
 
 		}
 
-		tableArtists[curArtistKey]['children'][curAlbumKey] = null;
-		tableAlbums[curAlbumKey]['parents'][curArtistKey] = null;
+		tableArtists[curArtistKey]['children']['album:' + curAlbumKey] = null;
+		tableAlbums[curAlbumKey]['parents']['artist:' + curArtistKey] = null;
 
 		for (var iGenre = 0; iGenre < arrayGenres.length; iGenre++) {
 			curGenreKey = convertStringToHashkey(arrayGenres[iGenre]);
 
 			if (!(curGenreKey in tableGenres)) {
 				tableGenres[curGenreKey] = new Object();
-				tableGenres[curGenreKey]['metadata'] = new Object();
-				tableGenres[curGenreKey]['metadata']['name'] = arrayGenres[iGenre];
-				tableGenres[curGenreKey]['id'] = 'genre:' + curGenreKey;
+				tableGenres[curGenreKey] = new Object();
+				tableGenres[curGenreKey]['name'] = arrayGenres[iGenre];
+				tableGenres[curGenreKey]['id'] = curGenreKey;
+				tableGenres[curGenreKey]['type'] = 'genre';
 				tableGenres[curGenreKey]['children'] = new Object();
 				tableGenres[curGenreKey]['parents'] = new Object();
 
 			}
 
-			tableGenres[curGenreKey]['children'][curArtistKey] = null;
-			tableArtists[curArtistKey]['parents'][curGenreKey] = null;
+			tableGenres[curGenreKey]['children']['artist:' + curArtistKey] = null;
+			tableArtists[curArtistKey]['parents']['genre:' + curGenreKey] = null;
 
 		}
 
@@ -502,8 +481,23 @@ CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sA
 
 }
 
+// Pass the error if we don't want to handle it
+// TODO calls to this function should instead be replaced by 'throw new Error()', which would be caught by
+// any listening promise failure handler.
+CoreMusicLibrary.prototype.pushError = function (sReason) {
+
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::pushError(' + sReason + ')');
+
+	// Return a resolved empty promise to represent completion
+	return libQ.resolve();
+
+}
+
 // Helper functions ------------------------------------------------------------------------------------
 
+// Create a URL safe hashkey for a given string. The result will be a constant length string containing
+// upper and lower case letters, numbers, '-', and '_'.
 function convertStringToHashkey (input) {
     if (input === null) {
         input = '';
@@ -511,6 +505,32 @@ function convertStringToHashkey (input) {
     }
 
 	return libBase64Url.escape(libCrypto.createHash('sha256').update(input, 'utf8').digest('base64'));
+
+}
+
+// Takes a nested array of strings and produces a comma-delmited string. Example:
+// ['a', [['b', 'c'], 'd']] -> 'a, b, c, d'
+function flattenArrayToCSV (arrayInput) {
+
+	if (typeof arrayInput === "string") {
+		return arrayInput;
+
+	} else if (typeof arrayInput === "object") {
+		return libFast.reduce(arrayInput, function (sReturn, curEntry, nIndex) {
+			if (nIndex > 0) {
+				return sReturn + ", " + flattenArrayToCSV(curEntry);
+
+			} else {
+				return flattenArrayToCSV(curEntry);
+
+			}
+
+		},"");
+
+	} else {
+		return "";
+
+	}
 
 }
 

@@ -122,7 +122,7 @@ function ControllerSpop (nHost, nPort, commandRouter) {
 	self.tracklistReady = libQ.reject('Tracklist not yet populated.');
 
 	// Attempt to load tracklist from database on disk
-	self.sTracklistPath = './db/spopTracklist';
+	self.sTracklistPath = './db/TracklistSpop';
 	self.loadTracklistFromDB()
 		.fail(libFast.bind(self.pushError, self));
 
@@ -424,7 +424,8 @@ ControllerSpop.prototype.pushError = function (sReason) {
 
 }
 
-// Scan tracks in playlists via Spop and populates library
+// Scan tracks in playlists via Spop and populates tracklist
+// Metadata fields to roughly conform to Ogg Vorbis standards (http://xiph.org/vorbis/doc/v-comment.html)
 ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function (objInput) {
 
 	var self = this;
