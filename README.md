@@ -55,7 +55,7 @@ You can run all the servers in one single step just running with nodejs
  - [ ] SPOP Service and Library
  - [ ] Shairport Service and Library
  - [ ] UPNP Service and Library
- - [ ] (groove?) Service and Library
+ - [ ] \(groove?\) Service and Library
  - [ ] Pulse Service and Library
 
 - [ ] System manager worker
