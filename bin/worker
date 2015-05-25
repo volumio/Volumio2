@@ -8,84 +8,84 @@ var launchMPD = 1;
 var spawn = require('child_process').spawn;
 // node exec, needed to get response in buffer (all in once). We should use it only to execute command
 var exec = require('child_process').exec;
-// recover the process environment, need to pass this in spawn call in order to avoid ENOENT exception 
+// recover the process environment, need to pass this in spawn call in order to avoid ENOENT exception
 var productionEnv = process.env;
 
-//launching mpd as service
-if(launchMPD == 1){
-	var mpd = exec('echo <passwordhere>  | sudo -S service mpd start',['']);
-	console.log('Spawned MPD pid: ' + mpd.pid);
-	// proxing the stdout of mpd exec to out console
-	mpd.stdout.on('data', function (data) {
-		  console.log('' + data);
-	});
-	//proxing the stder of mpd exec to out console
-	mpd.stderr.on('data', function (data) {
-		  console.log('grep stderr: ' + data);
-	});
-	
-	// not very usefull, an exec will be closed almost instant
-	mpd.on('close', function (code, signal) {
-		console.log('Exiting with code ' + code);
-		if(code == 0){
-			console.log('Received code zero');
-		}
-		  console.log('child process terminated due to receipt of signal '+signal);
-	});
+// launching mpd as service
+if (launchMPD === 1) {
+  var mpd = exec('echo <passwordhere> | sudo -S service mpd start', ['']);
+  console.log('Spawned MPD pid: ' + mpd.pid);
+  // proxing the stdout of mpd exec to out console
+  mpd.stdout.on('data', function(data) {
+    console.log('' + data);
+  });
+  // proxing the stder of mpd exec to out console
+  mpd.stderr.on('data', function(data) {
+    console.log('grep stderr: ' + data);
+  });
+
+  // not very usefull, an exec will be closed almost instant
+  mpd.on('close', function(code, signal) {
+    console.log('Exiting with code ' + code);
+    if (code === 0) {
+      console.log('Received code zero');
+    }
+    console.log('child process terminated due to receipt of signal ' + signal);
+  });
 }
 // spawning volumio, note the {env: productionEnv} is necessary!
-var volumio = spawn('nodejs',['www'],{env: productionEnv});
+var volumio = spawn('nodejs', ['www'], {env: productionEnv});
 
 
-volumio.stdout.on('data', function (data) {
-	  console.log('' + data);
+volumio.stdout.on('data', function(data) {
+  console.log('' + data);
 });
 
-volumio.stderr.on('data', function (data) {
-	  console.log('Volumio stderr: ' + data);
+volumio.stderr.on('data', function(data) {
+  console.log('Volumio stderr: ' + data);
 });
 
-volumio.on('close', function (code, signal) {
-	console.log('Volumio Exiting with code ' + code);
-	if(code == 0){
-		console.log('Volumio Received code zero');
-	}
-	  console.log('Volumio child process terminated due to receipt of signal '+signal);
+volumio.on('close', function(code, signal) {
+  console.log('Volumio Exiting with code ' + code);
+  if (code === 0) {
+    console.log('Volumio Received code zero');
+  }
+  console.log('Volumio child process terminated due to receipt of signal ' + signal);
 });
 
 volumio.on('exit', function(code) {
-	console.log('Volumio Exiting with code ' + code);
-    if (code != 0) {
-        console.log('Volumio Failed: ' + code);
-    }
+  console.log('Volumio Exiting with code ' + code);
+  if (code !== 0) {
+    console.log('Volumio Failed: ' + code);
+  }
 });
 
 console.log('Volumio pid is : ' + volumio.pid);
 
 // Still testing this, I would like that id the process is closed all the children will killed too
 process.on('exit', function(code) {
-	  // do *NOT* do this
-	  setTimeout(function() {
-	    console.log('This will not run');
-	  }, 500);
-	  
-	  console.log('Killing volumio');
-	  exec('kill -9 '+ volumio.pid);
-	  console.log('About to exit with code:', code);
-});
+    // do *NOT* do this
+    setTimeout(function() {
+      console.log('This will not run');
+    }, 500);
+
+    console.log('Killing volumio');
+    exec('kill -9 ' + volumio.pid);
+    console.log('About to exit with code:', code);
+  });
 
 
 process.on('close', function(code) {
-	  // do *NOT* do this
-	  setTimeout(function() {
-	    console.log('This will not run');
-	  }, 500);
-	  
-	  console.log('Killing volumio');
-	  exec('kill -9 '+ volumio.pid);
-	  console.log('About to exit with code:', code);
-});
+    // do *NOT* do this
+    setTimeout(function() {
+      console.log('This will not run');
+    }, 500);
+
+    console.log('Killing volumio');
+    exec('kill -9 ' + volumio.pid);
+    console.log('About to exit with code:', code);
+  });
 
 process.on('uncaughtException', function(err) {
-	  console.log('Caught exception: ' + err);
+  console.log('Caught exception: ' + err);
 });
