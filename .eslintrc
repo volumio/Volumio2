@@ -8,7 +8,7 @@ rules:
   default-case: 2
   eol-last: 0
   eqeqeq: [2, "smart"]
-  indent: [2, 2]
+  indent: [2, "tab"]
   key-spacing: 2
   new-parens: 2
   no-debugger: 2
