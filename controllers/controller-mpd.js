@@ -74,8 +74,8 @@ ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackIds) {
   // Clear the queue, add the first track, and start playback
   return self.sendMpdCommandArray([
     {command: 'clear', parameters: []},
-    {command: 'add',   parameters: [arrayTrackUris.shift()]},
-    {command: 'play',  parameters: []}
+    {command: 'add', parameters: [arrayTrackUris.shift()]},
+    {command: 'play', parameters: []}
   ])
   .then(function() {
     // If there are more tracks in the array, add those also

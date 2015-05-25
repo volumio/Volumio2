@@ -18,7 +18,7 @@ rules:
   no-ex-assign: 2
   no-extra-parens: 1
   no-fallthrough: 2
-  no-multi-spaces: [2, { exceptions: { "ObjectExpression": true } }]
+  no-multi-spaces: 2
   no-reserved-keys: 2
   no-throw-literal: 1
   no-unreachable: 2
