@@ -76,7 +76,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackIds) {
     {command: 'clear', parameters: []},
     {command: 'add',   parameters: [arrayTrackUris.shift()]},
     {command: 'play',  parameters: []}
-    ])
+  ])
   .then(function() {
     // If there are more tracks in the array, add those also
     if (arrayTrackUris.length > 0) {

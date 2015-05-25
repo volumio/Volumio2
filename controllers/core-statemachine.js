@@ -2,7 +2,6 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 
 // Define the CoreStateMachine class
-module.exports = CoreStateMachine;
 function CoreStateMachine(commandRouter) {
   var self = this;
   self.commandRouter = commandRouter;
@@ -440,3 +439,5 @@ function convertUriToTrackId(input) {
   // Convert utf8->base64
   return (new Buffer(input, 'utf8')).toString('base64');
 }
+
+module.exports = CoreStateMachine;
