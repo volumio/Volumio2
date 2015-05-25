@@ -2,11 +2,11 @@
 
 # Volumio 2
 
-## Latest Volumio 2 Image file
+## Volumio 2 System Images
 
-[Alpha1](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
+* [Alpha1 (2015-02-04)](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
 
-System Image is built with [Volumio Builder](https://github.com/volumio/Build)
+System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
 
@@ -29,9 +29,7 @@ You can run all the servers in one single step just running with nodejs
 nodejs bin/www
 ```
 
-## System Architecture
-
-![volumiosystemarchitecture](http://lightflo.ws/volumio/VolumioArchitecture4.png)
+Finally, point your browser to http://(ip address):3000 to access the test UI.
 
 ## Development tasks and milestones
 
@@ -39,15 +37,15 @@ nodejs bin/www
 
 - [ ] Templating System
 
-The idea is to allow the installation of different templates and skins. To allow that a template system needs to be created: as general guidelines we'll provide a set of Java functions to hook with the WebSockets connection. The different templates then will be a folder containing just css js and html.
+    The idea is to allow the installation of different templates and skins. To allow that a template system needs to be created: as general guidelines we'll provide a set of Java functions to hook with the WebSockets connection. The different templates then will be a folder containing just css js and html.
 
-- [ ] Plugin System 
+- [ ] Plugin System
 
-Every service (input, output, visualization etc) will be treated as a standalone entity. This will allow to add external plugins in the future. The plugins will be composed of a folder, with all the methods, and a "manifest file" which is an executable that sends via nodes js its name, its available methods and other informations. At system startup every manifest in the manifest folder is executed, so the system receives with WS all the available plugins and their capabilities and methods.  Then the core knows what is availbable and how to call them. 
+    Every service (input, output, visualization etc) will be treated as a standalone entity. This will allow to add external plugins in the future. The plugins will be composed of a folder, with all the methods, and a "manifest file" which is an executable that sends via nodes js its name, its available methods and other informations. At system startup every manifest in the manifest folder is executed, so the system receives with WS all the available plugins and their capabilities and methods.  Then the core knows what is availbable and how to call them. 
 
 - [ ] Music Database System
 
-Every music service available will feature its own LevelDB database, storing its pertaining music file. The Volumio core then needs to query those databases to retrieve available music, so it can route the appropriate request to the right service for a certain song. 
+    Every music service available will feature its own LevelDB database, storing its pertaining music file. The Volumio core then needs to query those databases to retrieve available music, so it can route the appropriate request to the right service for a certain song. 
 
 ### Operating System
 
@@ -99,12 +97,11 @@ Every music service available will feature its own LevelDB database, storing its
  - [ ] Plug-in System Configuration
  - [ ] System Configuration
 
-* [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics
-* [Wiki](https://github.com/volumio/Volumio2/wiki)
-
 ## Development Guidelines
 
-* This is intended to run on Low Power Devices (r-pi). Let's keep code efficient and lightweight
-* To allow code mantainability, always comment your code properly and update DOCs if needed
-* Adhere to [MVC Best Practices](http://www.yiiframework.com/doc/guide/1.1/en/basics.best-practices) to maximize project quality
+* [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics.
+* Document your work where possible on the [Wiki](https://github.com/volumio/Volumio2/wiki).
+* This is intended to run on Low Power Devices (r-pi). Let's keep code efficient and lightweight.
+* To allow code mantainability, always comment your code properly and update DOCs if needed.
+* Adhere to [MVC Best Practices](http://www.yiiframework.com/doc/guide/1.1/en/basics.best-practices) to maximize project quality.
 * Have fun and enjoy what you're doing!
