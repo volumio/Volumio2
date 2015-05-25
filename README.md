@@ -19,7 +19,7 @@ git clone https://github.com/volumio/Volumio2.git volumio2
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
-cd volumio
+cd volumio2
 npm install
 ```
 
@@ -100,7 +100,7 @@ Every music service available will feature its own LevelDB database, storing its
  - [ ] System Configuration
 
 * [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics
-* [Wiki](https://github.com/volumio/Volumio2/wiki) (Internal, Will be made public once released)
+* [Wiki](https://github.com/volumio/Volumio2/wiki)
 
 ## Development Guidelines
 
