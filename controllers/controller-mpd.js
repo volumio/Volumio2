@@ -64,8 +64,8 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 	// Clear the queue, add the first track, and start playback
 	return self.sendMpdCommandArray([
 		{command: 'clear', parameters: []},
-		{command: 'add',   parameters: [arrayTrackUris.shift()]},
-		{command: 'play',  parameters: []}
+		{command: 'add', parameters: [arrayTrackUris.shift()]},
+		{command: 'play', parameters: []}
 
 	])
 	.then(function () {
@@ -74,7 +74,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackIds) {
 		if (arrayTrackUris.length > 0) {
 			return self.sendMpdCommandArray(
 				libFast.map(arrayTrackUris, function (currentTrack) {
-					return {command: 'add',   parameters: [currentTrack]};
+					return {command: 'add', parameters: [currentTrack]};
 
 				})
 

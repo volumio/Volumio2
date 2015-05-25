@@ -931,7 +931,7 @@ InterfaceMPD.prototype.handlePlaylistfind = function(sCommand, sParam, client) {
 InterfaceMPD.prototype.handlePlaylistid = function(sCommand, sParam, client) {
 
     // Temporary Disabled and HardCoded
-    socket.write("ACK [50@0] {playlistid} No such song\n");
+    client.write("ACK [50@0] {playlistid} No such song\n");
     
 	// Respond with default 'OK'
 	//client.write("OK\n");

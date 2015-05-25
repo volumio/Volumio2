@@ -168,11 +168,6 @@ var playlistId = { // DUMMY FOR NOW!
     "Time"          : 3261,
     "Pos"           : 0,
     "Id"            : 9,
-    "file"          : 'USB/Music/Example2.mp3',
-    "Last-Modified" : '2014-08-19T09:03:52Z',
-    "Time"          : 2961,
-    "Pos"           : 1,
-    "Id"            : 10
 }
 
 var queue = [];	// hold playlistFiles (given by commandRouter)

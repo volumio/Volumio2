@@ -432,7 +432,7 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function (objInput)
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklistFromSpopPlaylists');
 
 	if (!('playlists' in objInput)) {
-		return objReturn;
+		throw new Error("Error building Spop tracklist - no playlists found.");
 
 	}
 
