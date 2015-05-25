@@ -1,6 +1,6 @@
-# Volumio 2 WebUI
-
 [![Join the chat at https://gitter.im/volumio/Volumio2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/volumio/Volumio2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+# Volumio 2
 
 ## Latest Volumio 2 Image file
 
@@ -13,10 +13,9 @@ System Image is built with [Volumio Builder](https://github.com/volumio/Build)
 Clone the repo
 
 ```shell
-git clone https://github.com/volumio/Volumio2.git volumio
+git clone https://github.com/volumio/Volumio2.git volumio2
 ```
 
-Now install [libgroove](https://github.com/andrewrk/libgroove).  
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
@@ -32,8 +31,7 @@ nodejs bin/www
 
 ## System Architecture
 
-![volumiosystemarchitecture](http://lightflo.ws/images/VolumioArchitecture3.png)
-
+![volumiosystemarchitecture](http://lightflo.ws/volumio/VolumioArchitecture4.png)
 
 ## Development tasks and milestones
 
@@ -51,9 +49,6 @@ Every service (input, output, visualization etc) will be treated as a standalone
 
 Every music service available will feature its own LevelDB database, storing its pertaining music file. The Volumio core then needs to query those databases to retrieve available music, so it can route the appropriate request to the right service for a certain song. 
 
-
-
-
 ### Operating System
 
 - [ ] Custom Debian Based Operating System
@@ -67,18 +62,17 @@ Every music service available will feature its own LevelDB database, storing its
  - [ ] Upmpdcli
  - [X] NodeJS
 
-
 ### Node Backend
 
 - [ ] Volumio Core
  - [X] MPD Emulation Interface
- - [ ] Command Router
- - [ ] WebUI Endpoints
+ - [X] Command Router
+ - [X] WebUI Endpoints
  - [ ] Mixer Controls
  
 - [ ] Audio services Controllers
- - [ ] MPD Service and Library
- - [ ] SPOP Service and Library
+ - [X] MPD Service and Library
+ - [X] SPOP Service and Library
  - [ ] Shairport Service and Library
  - [ ] UPNP Service and Library
  - [ ] \(groove?\) Service and Library
@@ -95,9 +89,8 @@ Every music service available will feature its own LevelDB database, storing its
 
 - [ ] Volumio 2 WebUI (Playback)
  - [ ] Boostrap Based Structure
- - [ ] Playback Handling
- - [ ] Library retrieval
- - [ ] SPOP Hooks
+ - [X] Playback Handling
+ - [X] Library retrieval
  - [ ] Airplay Hooks
 
 - [ ] Volumio 2 WebUI (Configuration)
@@ -106,15 +99,8 @@ Every music service available will feature its own LevelDB database, storing its
  - [ ] Plug-in System Configuration
  - [ ] System Configuration
 
-
-* ToDos, Tasks and Bugs [here](https://github.com/volumio/WebUI-NODE#boards) (you need to associate your github account with [ZenHub])(https://www.zenhub.io/)
 * [Forum Threads](http://volumio.org/forum/discussion-t2098-10.html) for internal discussion, remember to subscribe topics
-* [Wiki](https://github.com/volumio/WebUI-NODE/wiki) (Internal, Will be made public once released)
-
-
-### Tools
-
-* Created with [Nodeclipse](https://github.com/Nodeclipse/nodeclipse-1)
+* [Wiki](https://github.com/volumio/Volumio2/wiki) (Internal, Will be made public once released)
 
 ## Development Guidelines
 
