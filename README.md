@@ -31,6 +31,9 @@ nodejs bin/www
 
 Finally, point your browser to http://(ip address):3000 to access the test UI.
 
+To make development more confortable, a samba server is installed. This way the /volumio folder is accessible (and editable) via Network. Just mount it on your dev workstation and it will be available as local filesystem.
+Testing on PI is strongly suggested.
+
 ## Development tasks and milestones
 
 ### Current Tasks
