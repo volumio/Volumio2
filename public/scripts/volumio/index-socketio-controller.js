@@ -202,16 +202,34 @@ function updateBrowseView (objBrowseData) {
 	for (i = 0; i < arrayDataKeys.length; i++) {
 		var curEntry = objBrowseData[arrayDataKeys[i]];
 
-		var nodeListItem = document.createElement('LI');
+		var sText = curEntry.datavalues.name;
+		var sSubText = '';
+		if ('service' in curEntry.datavalues) {
+			sSubText = sSubText.concat(' service:(' + curEntry.datavalues.service + ')');
+		}
+		if ('uri' in curEntry.datavalues) {
+			sSubText = sSubText.concat(' uri:(' + curEntry.datavalues.uri + ')');
+		}
+		if ('artists' in curEntry.datavalues) {
+			sSubText = sSubText.concat(' ' + curEntry.datavalues.artists);
+		}
+		if ('album' in curEntry.datavalues) {
+			sSubText = sSubText.concat(' [' + curEntry.datavalues.album + ']');
+		}
 
 		var nodeLink = document.createElement('a');
 		nodeLink.setAttribute('href', '#');
-		nodeLink.onclick = registerBrowseLibraryLink(curEntry['id']);
+		nodeLink.appendChild(document.createTextNode(sText));
+		nodeLink.onclick = registerBrowseLibraryLink(curEntry['uid']);
 
-		var nodeText = document.createTextNode(curEntry['name']);
+		var nodeSpan = document.createElement('span');
+		nodeSpan.appendChild(nodeLink);
+		nodeSpan.appendChild(document.createElement('br'));
+		nodeSpan.appendChild(document.createTextNode(sSubText));
 
-		nodeLink.appendChild(nodeText);
-		nodeListItem.appendChild(nodeLink);
+		var nodeListItem = document.createElement('LI');
+		nodeListItem.appendChild(nodeSpan);
+		nodeListItem.style.whiteSpace="nowrap";
 		nodeBrowseView.appendChild(nodeListItem);
 
 	}

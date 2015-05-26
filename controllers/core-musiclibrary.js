@@ -4,6 +4,7 @@ var libSortOn = require('sort-on');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
 var libLevel = require('level');
+var libUtil = require('util');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
@@ -22,7 +23,7 @@ function CoreMusicLibrary (commandRouter) {
 			'name': 'Genres by Name',
 			'table': 'genre',
 			'sortby': 'name',
-			'storefields': {
+			'datafields': {
 				'name': 'name'
 			}
 		},
@@ -30,15 +31,16 @@ function CoreMusicLibrary (commandRouter) {
 			'name': 'Artists by Name',
 			'table': 'artist',
 			'sortby': 'name',
-			'storefields': {
-				'name': 'name'
+			'datafields': {
+				'name': 'name',
+				'genres': 'parents:#:name'
 			}
 		},
 		{
 			'name': 'Albums by Name',
 			'table': 'album',
 			'sortby': 'name',
-			'storefields': {
+			'datafields': {
 				'name': 'name',
 				'artists': 'parents:#:name'
 			}
@@ -47,7 +49,7 @@ function CoreMusicLibrary (commandRouter) {
 			'name': 'Albums by Artist',
 			'table': 'album',
 			'sortby': 'parents:#:name',
-			'storefields': {
+			'datafields': {
 				'name': 'name',
 				'artists': 'parents:#:name'
 			}
@@ -56,7 +58,7 @@ function CoreMusicLibrary (commandRouter) {
 			'name': 'Tracks by Name',
 			'table': 'track',
 			'sortby': 'name',
-			'storefields': {
+			'datafields': {
 				'name': 'name',
 				'album': 'parents:#0:name',
 				'artists': 'parents:#0:parents:#:name'
@@ -77,6 +79,63 @@ function CoreMusicLibrary (commandRouter) {
 }
 
 // Public methods -----------------------------------------------------------------------------------
+
+// Return a music library view for a given object UID
+CoreMusicLibrary.prototype.browseLibrary = function (sUid, sSortBy, nEntries, nOffset) {
+
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
+
+	//TODO implement use of nEntries and nOffset for paging of results
+
+	return self.libraryReady
+		.then(function () {
+
+			// No object specified, list all the indexes instead
+			if (sUid === '') {
+				return libFast.map(self.arrayIndexDefinitions, function (curEntry) {
+					return {'uid': 'index:' + curEntry.name, 'datavalues': {'name': curEntry.name}};
+
+				});
+
+			// An index is specified. List the contents of the index.
+			}
+
+			var sPrefix = sUid.split(':')[0];
+			if (sPrefix === 'index') {
+				return self.getLibraryObject(self.library, sUid);
+
+			} else if (sPrefix === 'item') {
+				// TODO implement this
+				return null;
+
+			// A library object is specified. List the children of the object, sorted by name.
+			} else {
+				var objDataFields = new Object();
+
+				if (sPrefix === 'genre') {
+					objDataFields = {'name': 'name', 'genres': 'parents:#:name'};
+
+				} else if (sPrefix === 'artist') {
+					objDataFields = {'name': 'name', 'artists': 'parents:#:name'};
+
+				} else if (sPrefix === 'album') {
+					objDataFields = {'name': 'name', 'album': 'parents:#0:name', 'artists': 'parents:#0:parents:#:name'};
+
+				} else if (sPrefix === 'track') {
+					objDataFields = {'service': 'service', 'uri': 'uri'};
+
+				}
+
+				var objRequested = self.getLibraryObject(self.library, sUid)
+
+				return self.generateSortedIndex(Object.keys(objRequested.children), sSortBy, objDataFields);
+
+			}
+
+		});
+
+}
 
 // Load a LevelDB from disk containing the music library and indexes
 CoreMusicLibrary.prototype.loadLibraryFromDB = function () {
@@ -167,10 +226,10 @@ CoreMusicLibrary.prototype.rebuildLibrary = function () {
 
 			self.commandRouter.pushConsoleMessage('Generating indexes...');
 
-			return libFast.map(self.arrayIndexDefinitions, function (curIndexDefinition) {
+			return libQ.all(libFast.map(self.arrayIndexDefinitions, function (curIndexDefinition) {
 				return self.rebuildSingleIndex(curIndexDefinition);
 
-			});
+			}));
 
 		})
 		.then(function () {
@@ -205,50 +264,6 @@ CoreMusicLibrary.prototype.rebuildLibrary = function () {
 
 }
 
-// Return the children of an object for use in browsing
-CoreMusicLibrary.prototype.browseLibrary = function (sId, sSortBy, nEntries, nOffset) {
-
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
-
-	return self.libraryReady
-		.then(function () {
-			// No object specified, list all the indexes instead
-			if (sId === '') {
-				return libFast.map(self.arrayIndexDefinitions, function (curEntry) {
-					return {'uid': 'index:' + curEntry[1], 'metadata': {'name': curEntry[0]}};
-
-				});
-
-			// An index is specified. List the contents of the index.
-			} else if (sId.substr(0, 6) === 'index:') {
-				return self.getIndex(sId)
-					.then(function (objRequested) {
-						return objRequested.index;
-
-					});
-
-			// A library object is specified. List the children of the object, sorted as requested.
-			} else {
-				return self.getLibraryObject(sId)
-					.then(function (objRequested) {
-						return self.sortUids(Object.keys(objRequested.children), 'metadata.name');
-
-					})
-					.then(function (arraySorted) {
-						return libFast.map(arraySorted, function (sChildId) {
-							return {'id': sChildId, 'metadata': self.getLibraryObject(sChildId)['metadata']}
-
-						});
-
-					});
-
-			}
-
-		})
-
-}
-
 // Internal methods ---------------------------------------------------------------------------
 
 // Navigate through a source object via the provided path and retrieve a target object.
@@ -264,24 +279,37 @@ CoreMusicLibrary.prototype.getLibraryObject = function (objSource, sPath) {
 	var self = this;
 
 	if (sPath.indexOf(':') == -1) {
-		return objSource[sPath];
+		try {
+			return objSource[sPath];
+		} catch (error) {
+			throw new Error('getLibraryObject cannot navigate path: ' + sPath + '. Error: ' + error + '\nObject:\n' + libUtil.inspect(objSource, {depth: 2}));
+		}
 
 	}
 
+//console.log('Path: ' + sPath + '\nObject:\n' + libUtil.inspect(objSource, {depth: 0}));
 	var curStep = sPath.slice(0, sPath.indexOf(':'));
 	var sNewPath = sPath.slice(sPath.indexOf(':') + 1);
 
 	if (curStep === '#') {
 		return libFast.map(Object.keys(objSource), function (curUid) {
-			return self.getObject(self.library, curUid + ':' + sNewPath);
+			return self.getLibraryObject(self.library, curUid + ':' + sNewPath);
 
 		});
 
 	} else if (curStep.substr(0,1) === '#') {
-		return self.getObject(self.library, Object.keys(objSource)[curStep.substr(1)] + ':' + sNewPath);
+		return self.getLibraryObject(self.library, Object.keys(objSource)[curStep.substr(1)] + ':' + sNewPath);
 
 	} else {
-		return self.getObject(objSource[curStep], sNewPath);
+		var objCurStep = new Object();
+
+		try {
+			objCurStep = objSource[curStep];
+		} catch (error) {
+			throw new Error('getLibraryObject cannot navigate path: ' + curStep + '. Error: ' + error + '\nObject:\n' + libUtil.inspect(objSource, {depth: 2}));
+		}
+
+		return self.getLibraryObject(objCurStep, sNewPath);
 
 	}
 
@@ -317,7 +345,7 @@ CoreMusicLibrary.prototype.rebuildSingleIndex = function (objIndexDefinition) {
 	var sIndexName = objIndexDefinition['name'];
 	var sTableName = objIndexDefinition['table'];
 	var sSortBy = objIndexDefinition['sortby'];
-	var objStoreFields = objIndexDefinition['storefields'];
+	var objDataFields = objIndexDefinition['datafields'];
 
 	if (!(sTableName in self.library)) {
 		self.commandRouter.pushConsoleMessage('Specified table ' + sTableName + ' not found in library for indexing');
@@ -330,7 +358,7 @@ CoreMusicLibrary.prototype.rebuildSingleIndex = function (objIndexDefinition) {
 
 	});
 
-	return self.generateSortedIndex(arrayUids, sSortBy, objStoreFields)
+	return self.generateSortedIndex(arrayUids, sSortBy, objDataFields)
 		.then(function (arraySortedIndex) {
 			self.library.index[sIndexName] = arraySortedIndex;
 
@@ -339,7 +367,7 @@ CoreMusicLibrary.prototype.rebuildSingleIndex = function (objIndexDefinition) {
 }
 
 // Sort an array of UIDs based on a provided sort field. Returns a sorted array of UIDs, along with the fields which were specified to be stored.
-CoreMusicLibrary.prototype.generateSortedIndex = function (arrayUids, sSortBy, objStoreFields) {
+CoreMusicLibrary.prototype.generateSortedIndex = function (arrayUids, sSortBy, objDataFields) {
 
 	var self = this;
 
@@ -348,13 +376,13 @@ CoreMusicLibrary.prototype.generateSortedIndex = function (arrayUids, sSortBy, o
 			return libFast.map(arrayUids, function (curUid) {
 				var curSortValue = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + sSortBy));
 
-				var curStoreValue = new Object();
-				libFast.map(Object.keys(objStoreFields), function (curStoreField) {
-					curStoreValue[curStoreField] = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + objStoreFields[curStoreField]));
+				var curDataValue = new Object();
+				libFast.map(Object.keys(objDataFields), function (curDataField) {
+					curDataValue[curDataField] = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + objDataFields[curDataField]));
 
 				});
 
-				return {'sortvalue': curSortValue, 'uid': curUid, 'storevalues': curStoreValue};
+				return {'sortvalue': curSortValue, 'uid': curUid, 'datavalues': curDataValue};
 
 			});
 
@@ -365,7 +393,7 @@ CoreMusicLibrary.prototype.generateSortedIndex = function (arrayUids, sSortBy, o
 		})
 		.then(function (arraySorted) {
 			return libFast.map(arraySorted, function (curEntry) {
-				return {'uid': curEntry['uid'], 'storevalues': curEntry['storevalues']};
+				return {'uid': curEntry['uid'], 'datavalues': curEntry['datavalues']};
 
 			});
 

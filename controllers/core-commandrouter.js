@@ -116,12 +116,12 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
 }
 
 // Volumio Browse Library
-CoreCommandRouter.prototype.volumioBrowseLibrary = function (sId) {
+CoreCommandRouter.prototype.volumioBrowseLibrary = function (sUid, sSortBy, nEntries, nOffset) {
 
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + sId + ')');
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + sUid + ', ' + sSortBy + ', ' + nEntries + ', ' + nOffset + ')');
 
-	return self.musicLibrary.browseLibrary(sId);
+	return self.musicLibrary.browseLibrary(sUid, sSortBy, nEntries, nOffset);
 
 }
 

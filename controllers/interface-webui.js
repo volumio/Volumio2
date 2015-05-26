@@ -51,17 +51,20 @@ function InterfaceWebUI (server, commandRouter) {
 
 		});
 
-		connWebSocket.on('volumioBrowseLibrary', function(sId) {
+		connWebSocket.on('volumioBrowseLibrary', function(sUid) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
 			self.logStart('Client requests browse')
 				.then(function () {
-					return commandRouter.volumioBrowseLibrary.call(commandRouter, sId);
+					return commandRouter.volumioBrowseLibrary.call(commandRouter, sUid, 'name', 0, 0);
 
 				})
 				.then(function (objBrowseData) {
-					return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
+					if (objBrowseData) {
+						return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
+
+					}
 
 				})
 				.fail(libFast.bind(self.commandRouter.pushConsoleMessage, self.commandRouter))

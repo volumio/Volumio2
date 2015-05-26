@@ -3,6 +3,20 @@
 	<head>
 		<title><%= title %></title>
 
+		<style>
+			#div-console {
+				border: 1px solid black;
+				height: 400px;
+				overflow-y: scroll;
+			}
+
+			#div-browser {
+				overflow-x: hidden;
+			}
+
+
+		</style>
+
 	</head>
 
 	<body>
@@ -28,8 +42,10 @@
 			<button id='button-libraryback' class='control-local' disabled>Back</button>
 			<button id='button-libraryforward' class='control-local' disabled>Forward</button>
 
-			<ol id='browseview' start='0'>
-			</ol>
+			<div id='div-browsertitle'></div>
+			<div id='div-browser'>
+				<ol id='browseview' start='0'></ol>
+			</div>
 
 		<h3>Console</h3>
 			<button id='button-clearconsole'>Clear</button>
