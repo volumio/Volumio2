@@ -1,45 +1,61 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title><%= title %></title>
+	<head>
+		<title><%= title %></title>
 
-</head>
+		<style>
+			#div-console {
+				border: 1px solid black;
+				height: 400px;
+				overflow-y: scroll;
+			}
 
-<body>
-  <h3>Player State</h3>
-  <button id='button-volumioplay' class='control-websocket' disabled>Play</button>
-  <button id='button-volumiopause' class='control-websocket' disabled>Pause</button>
-  <button id='button-volumiostop' class='control-websocket' disabled>Stop</button>
-  <button id='button-volumioprev' class='control-websocket' disabled>Prev</button>
-  <button id='button-volumionext' class='control-websocket' disabled>Next</button>
+			#div-browser {
+				overflow-x: hidden;
+			}
 
-  <br />
-  <br />
-  <div id='playerstate'></div>
 
-  <h3>Play Queue</h3>
-  <ol id='playqueue' start='0'></ol>
+		</style>
 
-  <h3>Music Library</h3>
-  <button id='button-spopupdatetracklist' class='control-websocket' disabled>Refresh Spop Tracklist</button>
-  <button id='button-volumiorebuildlibrary' class='control-websocket' disabled>Rebuild Volumio Library</button>
-  <br />
-  <br />
-  <button id='button-libraryback' class='control-local' disabled>Back</button>
-  <button id='button-libraryforward' class='control-local' disabled>Forward</button>
+	</head>
 
-  <ol id='browseview' start='0'>
-  </ol>
+	<body>
+		<h3>Player State</h3>
+			<button id='button-volumioplay' class='control-websocket' disabled>Play</button>
+			<button id='button-volumiopause' class='control-websocket' disabled>Pause</button>
+			<button id='button-volumiostop' class='control-websocket' disabled>Stop</button>
+			<button id='button-volumioprev' class='control-websocket' disabled>Prev</button>
+			<button id='button-volumionext' class='control-websocket' disabled>Next</button>
 
-  <h3>Console</h3>
-  <button id='button-clearconsole'>Clear</button>
-  <div id='div-console' style='border: 1px solid black; height: 400px; overflow-y: scroll;'>
-    <ul id='console' style='font-family: monospace;'></ul>
-  </div>
+			<br />
+			<br />
+			<div id='playerstate'></div>
 
-  <script src="./scripts/assets/socket.io-1.2.0.js"></script>
-  <script src="./scripts/volumio/index-socketio-controller.js"></script>
+		<h3>Play Queue</h3>
+			<ol id='playqueue' start='0'></ol>
 
-</body>
+		<h3>Music Library</h3>
+			<button id='button-spopupdatetracklist' class='control-websocket' disabled>Refresh Spop Tracklist</button>
+			<button id='button-volumiorebuildlibrary' class='control-websocket' disabled>Rebuild Volumio Library</button>
+			<br />
+			<br />
+			<button id='button-libraryback' class='control-local' disabled>Back</button>
+			<button id='button-libraryforward' class='control-local' disabled>Forward</button>
+
+			<div id='div-browsertitle'></div>
+			<div id='div-browser'>
+				<ol id='browseview' start='0'></ol>
+			</div>
+
+		<h3>Console</h3>
+			<button id='button-clearconsole'>Clear</button>
+			<div id='div-console' style='border: 1px solid black; height: 400px; overflow-y: scroll;'>
+				<ul id='console' style='font-family: monospace;'></ul>
+			</div>
+
+		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
+		<script src="./scripts/volumio/index-socketio-controller.js"></script>
+
+	</body>
 
 </html>
