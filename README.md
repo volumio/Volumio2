@@ -4,6 +4,10 @@
 
 ## Volumio 2 System Images
 
+LATEST
+* [Alpha2 (2015-31-05)](https://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha2-2015-05-31PI.img.zip)
+
+PREVIOUS VERSIONS
 * [Alpha1 (2015-02-04)](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
 
 System Images built with [Volumio Builder](https://github.com/volumio/Build)
@@ -13,7 +17,7 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 Clone the repo
 
 ```shell
-git clone https://github.com/volumio/Volumio2.git volumio2
+git clone https://github.com/volumio/Volumio2.git /volumio/
 ```
 
 All other dependecies are in the package JSON, from the working directory just run
@@ -26,6 +30,7 @@ npm install
 You can run all the servers in one single step just running with nodejs
 
 ```shell
+cd /volumio/
 nodejs bin/www
 ```
 
@@ -33,6 +38,8 @@ Finally, point your browser to http://(ip address):3000 to access the test UI.
 
 To make development more confortable, a samba server is installed. This way the /volumio folder is accessible (and editable) via Network. Just mount it on your dev workstation and it will be available as local filesystem.
 Testing on PI is strongly suggested.
+
+Please take a look at the [Developer Info and Guidelines](https://github.com/volumio/Volumio2/wiki/Setting-Up-a-Dev-Environment)
 
 ## Development tasks and milestones
 
