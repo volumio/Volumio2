@@ -23,7 +23,7 @@ git clone https://github.com/volumio/Volumio2.git /volumio/
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
-cd volumio2
+cd volumio
 npm install
 ```
 
