@@ -114,20 +114,37 @@ CoreMusicLibrary.prototype.browseLibrary = function (sUid, sSortBy, nEntries, nO
 				var objDataFields = new Object();
 
 				if (sPrefix === 'genre') {
+					// List artists in a given genre
 					objDataFields = {'name': 'name', 'genres': 'parents:#:name'};
+					if (!sSortBy) {
+						sSortBy = 'name';
+					}
 
 				} else if (sPrefix === 'artist') {
-					objDataFields = {'name': 'name', 'artists': 'parents:#:name'};
+					// List albums by a given artist
+					objDataFields = {'name': 'name', 'artists': 'parents:#:name', 'date': 'children:#0:date'};
+					if (!sSortBy) {
+						sSortBy = 'date';
+					}
 
 				} else if (sPrefix === 'album') {
-					objDataFields = {'name': 'name', 'album': 'parents:#0:name', 'artists': 'parents:#0:parents:#:name'};
+					// List tracks in a given album
+					objDataFields = {'name': 'name', 'album': 'parents:#0:name', 'artists': 'parents:#0:parents:#:name', 'tracknumber': 'tracknumber', 'date': 'date'};
+					if (!sSortBy) {
+						sSortBy = 'tracknumber';
+					}
 
 				} else if (sPrefix === 'track') {
+					// List versions of a given track (among the available services)
 					objDataFields = {'service': 'service', 'uri': 'uri'};
+					if (!sSortBy) {
+						sSortBy = 'service';
+					}
 
 				}
 
 				var objRequested = self.getLibraryObject(self.library, sUid)
+				// self.commandRouter.pushConsoleMessage(objRequested);
 
 				return self.generateSortedIndex(Object.keys(objRequested.children), sSortBy, objDataFields);
 
@@ -287,7 +304,6 @@ CoreMusicLibrary.prototype.getLibraryObject = function (objSource, sPath) {
 
 	}
 
-//console.log('Path: ' + sPath + '\nObject:\n' + libUtil.inspect(objSource, {depth: 0}));
 	var curStep = sPath.slice(0, sPath.indexOf(':'));
 	var sNewPath = sPath.slice(sPath.indexOf(':') + 1);
 
@@ -328,7 +344,9 @@ CoreMusicLibrary.prototype.populateLibraryFromTracklist = function (arrayTrackLi
 			curTrack['metadata']['title'],
 			curTrack['metadata']['album'],
 			curTrack['metadata']['artists'],
-			curTrack['metadata']['genres']
+			curTrack['metadata']['genres'],
+			curTrack['metadata']['tracknumber'],
+			curTrack['metadata']['date']
 
 		);
 
@@ -379,30 +397,24 @@ CoreMusicLibrary.prototype.generateSortedIndex = function (arrayUids, sSortBy, o
 				var curDataValue = new Object();
 				libFast.map(Object.keys(objDataFields), function (curDataField) {
 					curDataValue[curDataField] = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + objDataFields[curDataField]));
-
 				});
 
 				return {'sortvalue': curSortValue, 'uid': curUid, 'datavalues': curDataValue};
-
 			});
-
 		})
 		.then(function (arrayUnsorted) {
+			// TODO - use a sort function which ignores prefixes "the", "a", etc., and case
 			return libQ.fcall(libSortOn, arrayUnsorted, 'sortvalue');
-
 		})
 		.then(function (arraySorted) {
 			return libFast.map(arraySorted, function (curEntry) {
 				return {'uid': curEntry['uid'], 'datavalues': curEntry['datavalues']};
-
 			});
-
 		});
-
 }
 
 // Function to add an item to all tables in the database.
-CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sAlbum, arrayArtists, arrayGenres) {
+CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sAlbum, arrayArtists, arrayGenres, nTrackNumber, dateTrackDate) {
 
 	var self = this;
 
@@ -433,6 +445,8 @@ CoreMusicLibrary.prototype.addLibraryItem = function (sService, sUri, sTitle, sA
 		tableTracks[curTrackKey]['name'] = sTitle;
 		tableTracks[curTrackKey]['id'] = curTrackKey;
 		tableTracks[curTrackKey]['type'] = 'track';
+		tableTracks[curTrackKey]['tracknumber'] = nTrackNumber;
+		tableTracks[curTrackKey]['date'] = dateTrackDate;
 		tableTracks[curTrackKey]['children'] = new Object();
 		tableTracks[curTrackKey]['parents'] = new Object();
 
@@ -539,11 +553,7 @@ function convertStringToHashkey (input) {
 // Takes a nested array of strings and produces a comma-delmited string. Example:
 // ['a', [['b', 'c'], 'd']] -> 'a, b, c, d'
 function flattenArrayToCSV (arrayInput) {
-
-	if (typeof arrayInput === "string") {
-		return arrayInput;
-
-	} else if (typeof arrayInput === "object") {
+	if (typeof arrayInput === "object") {
 		return libFast.reduce(arrayInput, function (sReturn, curEntry, nIndex) {
 			if (nIndex > 0) {
 				return sReturn + ", " + flattenArrayToCSV(curEntry);
@@ -556,7 +566,7 @@ function flattenArrayToCSV (arrayInput) {
 		},"");
 
 	} else {
-		return "";
+		return arrayInput;
 
 	}
 

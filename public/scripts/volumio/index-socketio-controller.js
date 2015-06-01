@@ -216,6 +216,12 @@ function updateBrowseView (objBrowseData) {
 		if ('album' in curEntry.datavalues) {
 			sSubText = sSubText.concat(' [' + curEntry.datavalues.album + ']');
 		}
+		if ('tracknumber' in curEntry.datavalues) {
+			sSubText = sSubText.concat(' #' + curEntry.datavalues.tracknumber);
+		}
+		if ('date' in curEntry.datavalues) {
+			sSubText = sSubText.concat(' (' + curEntry.datavalues.date + ')');
+		}
 
 		var nodeLink = document.createElement('a');
 		nodeLink.setAttribute('href', '#');

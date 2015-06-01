@@ -407,10 +407,6 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput) 
 
       nTracks = curTracklist.tracks.length;
 
-      function trimArtist(sArtist) {
-        return sArtist.trim();
-      }
-
       for (var j = 0; j < nTracks; j++) {
         self.tracklist.push({
           'service': 'spop',
@@ -418,8 +414,14 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput) 
           'metadata': {
             'title': curTracklist.tracks[j].title,
             'album': curTracklist.tracks[j].album,
-            'artists': libFast.map(curTracklist.tracks[j].artist.split(','), trimArtist),
-            'genres': []
+            'artists': libFast.map(curTracklist.tracks[j].artist.split(','), function(sArtist) {
+				// TODO - parse other options in artist string, such as "feat."
+				return sArtist.trim();
+
+			}),
+            'genres': [],
+			'tracknumber': 0,
+			'date': ''
           }
         });
       }
