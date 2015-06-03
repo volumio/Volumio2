@@ -5,20 +5,12 @@
 
 var main = require('../server');
 var Router = require('../controllers/core-commandrouter');
-// var MPDInterface = require('../controllers/interface-mpd');
-
-/*
-// initializing MPD interfce. This will listen for all MPD third parties clients
-var mdpInterfacePort = 6500;
-var mpdInterfaceHost = '0.0.0.0';
-var mpdThirdPatiesInteface = new MPDInterface(mdpInterfacePort, mpdInterfaceHost, volumioCore);
-*/
 
 // initializing the main server module
 var app = main.app;
 app.set('port', 3000);
 var server = app.listen(app.get('port'), function() {
-  console.log('Express server listening on port ' + server.address().port);
+	console.log('Express server listening on port ' + server.address().port);
 });
 
 var commandRouter = new Router(server);

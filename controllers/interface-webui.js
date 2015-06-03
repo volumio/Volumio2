@@ -4,7 +4,6 @@ var libFast = require('fast.js');
 // Define the InterfaceWebUI class
 module.exports = InterfaceWebUI;
 function InterfaceWebUI (server, commandRouter) {
-
 	var self = this;
 	self.commandRouter = commandRouter;
 
@@ -13,7 +12,6 @@ function InterfaceWebUI (server, commandRouter) {
 
 	// When a websocket connection is made
 	self.libSocketIO.on('connection', function(connWebSocket) {
-
 		// Listen for the various types of client events -----------------------------
 		connWebSocket.on('volumioGetState', function() {
 			selfConnWebSocket = this;
@@ -160,7 +158,6 @@ function InterfaceWebUI (server, commandRouter) {
 
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function(message) {
-
 	var self = this;
 
 	// Push the message all clients
@@ -172,7 +169,6 @@ InterfaceWebUI.prototype.printConsoleMessage = function(message) {
 
 // Receive player queue updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.volumioPushQueue = function(queue, connWebSocket) {
-
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushQueue');
 
@@ -187,7 +183,6 @@ InterfaceWebUI.prototype.volumioPushQueue = function(queue, connWebSocket) {
 
 // Receive music library data from commandRouter and send to requester
 InterfaceWebUI.prototype.volumioPushBrowseData = function(browsedata, connWebSocket) {
-
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushBrowseData');
 
@@ -199,7 +194,6 @@ InterfaceWebUI.prototype.volumioPushBrowseData = function(browsedata, connWebSoc
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.volumioPushState = function(state, connWebSocket) {
-
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushState');
 
@@ -212,14 +206,12 @@ InterfaceWebUI.prototype.volumioPushState = function(state, connWebSocket) {
 }
 
 InterfaceWebUI.prototype.logDone = function(timeStart) {
-
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 	return libQ.resolve();
 }
 
 InterfaceWebUI.prototype.logStart = function(sCommand) {
-
 	var self = this;
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();

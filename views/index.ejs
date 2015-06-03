@@ -2,23 +2,17 @@
 <html>
 	<head>
 		<title><%= title %></title>
-
 		<style>
 			#div-console {
 				border: 1px solid black;
 				height: 400px;
 				overflow-y: scroll;
 			}
-
 			#div-browser {
 				overflow-x: hidden;
 			}
-
-
 		</style>
-
 	</head>
-
 	<body>
 		<h3>Player State</h3>
 			<button id='button-volumioplay' class='control-websocket' disabled>Play</button>
@@ -26,7 +20,6 @@
 			<button id='button-volumiostop' class='control-websocket' disabled>Stop</button>
 			<button id='button-volumioprev' class='control-websocket' disabled>Prev</button>
 			<button id='button-volumionext' class='control-websocket' disabled>Next</button>
-
 			<br />
 			<br />
 			<div id='playerstate'></div>
@@ -55,7 +48,5 @@
 
 		<script src="./scripts/assets/socket.io-1.2.0.js"></script>
 		<script src="./scripts/volumio/index-socketio-controller.js"></script>
-
 	</body>
-
 </html>

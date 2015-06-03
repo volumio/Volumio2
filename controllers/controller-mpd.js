@@ -3,25 +3,8 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var libUtil = require('util');
 
-// for testing purposes:
-// var libRandomString = require('random-string');
-
-// Internal helper functions
-// These are static, and not 'this' aware
-
-// Helper function toconvert trackId to URI
-function convertTrackIdToUri(input) {
-	// Convert base64->utf8
-	return new Buffer(input, 'base64').toString('utf8');
-}
-
-// Helper function toconvert URI to trackId
-function convertUriToTrackId(input) {
-	// Convert utf8->base64
-	return new Buffer(input, 'utf8').toString('base64');
-}
-
 // Define the ControllerMpd class
+module.exports = ControllerMpd;
 function ControllerMpd(nHost, nPort, commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
@@ -56,15 +39,6 @@ function ControllerMpd(nHost, nPort, commandRouter) {
 			return self.logDone(timeStart);
 		});
 	});
-
-	/*self.getTracklist()
-		.then(function(arrayResult) {
-			console.log(libUtil.inspect(arrayResult, {'depth': null}));
-
-		})
-		.fail(function(sError) {
-			throw new Error(sError);
-		});*/
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -151,7 +125,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 	objReturn.playlists = [];
 
 	for (var i = 0; i < arrayLines.length; i++) {
-		var arrayLineParts = libFast.map(arrayLines[i].split(':'), function (sPart) {
+		var arrayLineParts = libFast.map(arrayLines[i].split(':'), function(sPart) {
 			return sPart.trim();
 		});
 
@@ -168,9 +142,13 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 		} else if (arrayLineParts[0] === 'Title') {
 			curEntry.metadata.title = arrayLineParts[1];
 		} else if (arrayLineParts[0] === 'Artist') {
-			curEntry.metadata.artists = libFast.map(arrayLineParts[1].split(','), function (sArtist) {
+			curEntry.metadata.artists = libFast.map(arrayLineParts[1].split(','), function(sArtist) {
 				// TODO - parse other options in artist string, such as "feat."
 				return sArtist.trim();
+			});
+		} else if (arrayLineParts[0] === 'AlbumArtist') {
+			curEntry.metadata.performers = libFast.map(arrayLineParts[1].split(','), function(sPerformer) {
+				return sPerformer.trim();
 			});
 		} else if (arrayLineParts[0] === 'Album') {
 			curEntry.metadata.album = arrayLineParts[1];
@@ -371,4 +349,18 @@ ControllerMpd.prototype.logStart = function(sCommand) {
 	return libQ.resolve();
 };
 
-module.exports = ControllerMpd;
+// Internal helper functions ----------------------------------------------------------------------------------
+// These are static, and not 'this' aware
+
+// Helper function toconvert trackId to URI
+function convertTrackIdToUri(input) {
+	// Convert base64->utf8
+	return new Buffer(input, 'base64').toString('utf8');
+}
+
+// Helper function toconvert URI to trackId
+function convertUriToTrackId(input) {
+	// Convert utf8->base64
+	return new Buffer(input, 'utf8').toString('base64');
+}
+
