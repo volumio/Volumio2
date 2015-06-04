@@ -31,7 +31,7 @@ You can run all the servers in one single step just running with nodejs
 
 ```shell
 cd /volumio/
-nodejs bin/www
+node bin/www
 ```
 
 Finally, point your browser to http://(ip address):3000 to access the test UI.
