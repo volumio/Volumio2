@@ -89,6 +89,14 @@ CoreCommandRouter.prototype.volumioGetQueue = function() {
 	return self.stateMachine.getQueue();
 }
 
+// Volumio Get Queue
+CoreCommandRouter.prototype.volumioRemoveQueueItem = function(nIndex) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRemoveQueueItem');
+
+	return self.stateMachine.removeQueueItem(nIndex);
+}
+
 // Volumio Rebuild Library
 CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 	var self = this;
@@ -123,6 +131,18 @@ CoreCommandRouter.prototype.volumioPushState = function(state) {
 	return libQ.all(
 		libFast.map(self.arrayInterfaces, function(thisInterface) {
 			return thisInterface.volumioPushState(state);
+		})
+	);
+}
+
+CoreCommandRouter.prototype.volumioPushQueue = function(queue) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioPushQueue');
+
+	// Announce new player queue to each client interface
+	return libQ.all(
+		libFast.map(self.arrayInterfaces, function(thisInterface) {
+			return thisInterface.volumioPushQueue(queue);
 		})
 	);
 }

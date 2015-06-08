@@ -146,20 +146,51 @@ function clearPlayerStateDisplay() {
 function updatePlayerQueue(arrayQueue) {
 	clearPlayQueue();
 
-	var nodePlayQueue = document.getElementById('playqueue');
-	var nodeListItem = null;
-	var nodeText = null;
-	for (i = 0; i < arrayQueue.length; i++) {
-		nodeListItem = document.createElement('LI');
-		nodeText = document.createTextNode(JSON.stringify(arrayQueue[i]));
+	var nodePlayQueue = document.getElementById('div-playqueue');
 
-		nodeListItem.appendChild(nodeText);
+	for (i = 0; i < arrayQueue.length; i++) {
+		var curEntry = arrayQueue[i];
+
+		var sText = curEntry.name;
+		var sSubText = '';
+		if ('service' in curEntry) {
+			sSubText = sSubText.concat(' [Service]: ' + curEntry.service + '');
+		}
+		if ('uri' in curEntry) {
+			sSubText = sSubText.concat(' [Uri]: ' + curEntry.uri + '');
+		}
+		if ('artists' in curEntry) {
+			sSubText = sSubText.concat(' [Artists]: ' + curEntry.artists);
+		}
+		if ('album' in curEntry) {
+			sSubText = sSubText.concat(' [Album]: ' + curEntry.album + '');
+		}
+		if ('tracknumber' in curEntry) {
+			sSubText = sSubText.concat(' [Tracknumber]: ' + curEntry.tracknumber);
+		}
+		if ('date' in curEntry) {
+			sSubText = sSubText.concat(' [Date]: ' + curEntry.date + '');
+		}
+
+		var buttonRemove = document.createElement('button');
+		buttonRemove.appendChild(document.createTextNode('Remove'));
+		buttonRemove.className = 'button-itemaction';
+		buttonRemove.onclick = removeQueueItem(i);
+
+		var nodeSpan = document.createElement('span');
+		nodeSpan.appendChild(document.createTextNode(sText));
+		nodeSpan.appendChild(buttonRemove);
+		nodeSpan.appendChild(document.createElement('br'));
+		nodeSpan.appendChild(document.createTextNode(sSubText));
+
+		var nodeListItem = document.createElement('li');
+		nodeListItem.appendChild(nodeSpan);
 		nodePlayQueue.appendChild(nodeListItem);
 	}
 }
 
 function clearPlayQueue() {
-	var nodePlayQueue = document.getElementById('playqueue');
+	var nodePlayQueue = document.getElementById('div-playqueue');
 
 	if (nodePlayQueue.firstChild) {
 		while (nodePlayQueue.firstChild) {
@@ -177,47 +208,64 @@ function updateBrowseView(objBrowseData) {
 	for (i = 0; i < arrayDataKeys.length; i++) {
 		var curEntry = objBrowseData[arrayDataKeys[i]];
 
-		var sText = curEntry.datavalues.name;
+		var sText = curEntry.name;
 		var sSubText = '';
-		if ('service' in curEntry.datavalues) {
-			sSubText = sSubText.concat(' service:(' + curEntry.datavalues.service + ')');
+		if ('service' in curEntry) {
+			sSubText = sSubText.concat(' [Service]: ' + curEntry.service + '');
 		}
-		if ('uri' in curEntry.datavalues) {
-			sSubText = sSubText.concat(' uri:(' + curEntry.datavalues.uri + ')');
+		if ('uri' in curEntry) {
+			sSubText = sSubText.concat(' [Uri]: ' + curEntry.uri + '');
 		}
-		if ('artists' in curEntry.datavalues) {
-			sSubText = sSubText.concat(' ' + curEntry.datavalues.artists);
+		if ('artists' in curEntry) {
+			sSubText = sSubText.concat(' [Artists]: ' + curEntry.artists);
 		}
-		if ('album' in curEntry.datavalues) {
-			sSubText = sSubText.concat(' [' + curEntry.datavalues.album + ']');
+		if ('album' in curEntry) {
+			sSubText = sSubText.concat(' [Album]: ' + curEntry.album + '');
 		}
-		if ('tracknumber' in curEntry.datavalues) {
-			sSubText = sSubText.concat(' #' + curEntry.datavalues.tracknumber);
+		if ('tracknumber' in curEntry) {
+			sSubText = sSubText.concat(' [Tracknumber]: ' + curEntry.tracknumber);
 		}
-		if ('date' in curEntry.datavalues) {
-			sSubText = sSubText.concat(' (' + curEntry.datavalues.date + ')');
+		if ('date' in curEntry) {
+			sSubText = sSubText.concat(' [Date]: ' + curEntry.date + '');
 		}
+
+		var buttonAdd = document.createElement('button');
+		buttonAdd.appendChild(document.createTextNode('Add'));
+		buttonAdd.className = 'button-itemaction';
+		buttonAdd.onclick = addQueueItem(curEntry['uid']);
 
 		var nodeLink = document.createElement('a');
 		nodeLink.setAttribute('href', '#');
 		nodeLink.appendChild(document.createTextNode(sText));
-		nodeLink.onclick = registerBrowseLibraryLink(curEntry['uid']);
+		nodeLink.onclick = browseLibraryLink(curEntry['uid']);
 
 		var nodeSpan = document.createElement('span');
 		nodeSpan.appendChild(nodeLink);
+		nodeSpan.appendChild(buttonAdd);
 		nodeSpan.appendChild(document.createElement('br'));
 		nodeSpan.appendChild(document.createTextNode(sSubText));
 
 		var nodeListItem = document.createElement('LI');
 		nodeListItem.appendChild(nodeSpan);
-		nodeListItem.style.whiteSpace="nowrap";
 		nodeBrowseView.appendChild(nodeListItem);
 	}
 }
 
-function registerBrowseLibraryLink(sId) {
+function browseLibraryLink(sId) {
 	return function() {
 		emitClientEvent('volumioBrowseLibrary', sId);
+	}
+}
+
+function addQueueItem(sId) {
+	return function() {
+		emitClientEvent('volumioAddQueueItem', sId);
+	}
+}
+
+function removeQueueItem(nIndex) {
+	return function() {
+		emitClientEvent('volumioRemoveQueueItem', nIndex);
 	}
 }
 
@@ -285,6 +333,6 @@ function libraryBack() {
 
 function emitClientEvent(sEvent, sData) {
 	socket.emit(sEvent, sData);
-	printConsoleMessage(sEvent + ': ' + sData);
+	printConsoleMessage('[Client Event] ' + sEvent + ' ' + sData);
 }
 

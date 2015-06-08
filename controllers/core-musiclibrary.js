@@ -23,7 +23,9 @@ function CoreMusicLibrary (commandRouter) {
 			'table': 'genre',
 			'sortby': 'name',
 			'datafields': {
-				'name': 'name'
+				'name': 'name',
+				'type': 'type',
+				'uid': 'uid'
 			}
 		},
 		{
@@ -32,6 +34,8 @@ function CoreMusicLibrary (commandRouter) {
 			'sortby': 'name',
 			'datafields': {
 				'name': 'name',
+				'uid': 'uid',
+				'type': 'type',
 				'genres': 'parents:#:name'
 			}
 		},
@@ -41,6 +45,8 @@ function CoreMusicLibrary (commandRouter) {
 			'sortby': 'name',
 			'datafields': {
 				'name': 'name',
+				'uid': 'uid',
+				'type': 'type',
 				'artists': 'parents:#:name'
 			}
 		},
@@ -50,6 +56,8 @@ function CoreMusicLibrary (commandRouter) {
 			'sortby': 'parents:#:name',
 			'datafields': {
 				'name': 'name',
+				'uid': 'uid',
+				'type': 'type',
 				'artists': 'parents:#:name'
 			}
 		},
@@ -59,6 +67,8 @@ function CoreMusicLibrary (commandRouter) {
 			'sortby': 'name',
 			'datafields': {
 				'name': 'name',
+				'uid': 'uid',
+				'type': 'type',
 				'album': 'parents:#0:name',
 				'artists': 'parents:#0:parents:#:name'
 			}
@@ -90,7 +100,7 @@ CoreMusicLibrary.prototype.browseLibrary = function(sUid, sSortBy, nEntries, nOf
 			if (sUid === '') {
 				// No object specified, list all the indexes instead
 				return libFast.map(self.arrayIndexDefinitions, function(curEntry) {
-					return {'uid': 'index:' + curEntry.name, 'datavalues': {'name': curEntry.name}};
+					return {'uid': 'index:' + curEntry.name, 'type': 'index', 'name': curEntry.name};
 				});
 			}
 
@@ -108,32 +118,32 @@ CoreMusicLibrary.prototype.browseLibrary = function(sUid, sSortBy, nEntries, nOf
 
 				if (sPrefix === 'genre') {
 					// List artists in a given genre
-					objDataFields = {'name': 'name', 'genres': 'parents:#:name'};
+					objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': 'parents:#:name'};
 					if (!sSortBy) {
 						sSortBy = 'name';
 					}
 				} else if (sPrefix === 'artist') {
 					// List albums by a given artist
-					objDataFields = {'name': 'name', 'artists': 'parents:#:name', 'date': 'children:#0:date'};
+					objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': 'parents:#:name', 'date': 'children:#0:date'};
 					if (!sSortBy) {
 						sSortBy = 'date';
 					}
 				} else if (sPrefix === 'album') {
 					// List tracks in a given album
-					objDataFields = {'name': 'name', 'album': 'parents:#0:name', 'artists': 'parents:#0:parents:#:name', 'tracknumber': 'tracknumber', 'date': 'date'};
+					objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'album': 'parents:#0:name', 'artists': 'parents:#0:parents:#:name', 'tracknumber': 'tracknumber', 'date': 'date'};
 					if (!sSortBy) {
 						sSortBy = 'tracknumber';
 					}
 				} else if (sPrefix === 'track') {
 					// List versions of a given track (among the available services)
-					objDataFields = {'service': 'service', 'uri': 'uri'};
+					objDataFields = {'uid': 'uid', 'type': 'type', 'service': 'service', 'uri': 'uri'};
 					if (!sSortBy) {
 						sSortBy = 'service';
 					}
 				}
 
 				var objRequested = self.getLibraryObject(self.library, sUid)
-				// self.commandRouter.pushConsoleMessage(objRequested);
+				//self.commandRouter.pushConsoleMessage(JSON.stringify(objRequested));
 
 				return self.generateSortedIndex(Object.keys(objRequested.children), sSortBy, objDataFields);
 			}
@@ -348,24 +358,20 @@ CoreMusicLibrary.prototype.generateSortedIndex = function(arrayUids, sSortBy, ob
 	return libQ.resolve()
 		.then(function() {
 			return libFast.map(arrayUids, function(curUid) {
-				var curSortValue = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + sSortBy));
-
-				var curDataValue = new Object();
+				var objReturn = {};
 				libFast.map(Object.keys(objDataFields), function(curDataField) {
-					curDataValue[curDataField] = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + objDataFields[curDataField]));
+					objReturn[curDataField] = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + objDataFields[curDataField]));
 				});
 
-				return {'sortvalue': curSortValue, 'uid': curUid, 'datavalues': curDataValue};
+				var curSortValue = flattenArrayToCSV(self.getLibraryObject(self.library, curUid + ':' + sSortBy));
+				objReturn.sortvalue = curSortValue;
+
+				return objReturn;
 			});
 		})
 		.then(function(arrayUnsorted) {
 			// TODO - use a sort function which ignores prefixes "the", "a", etc., and case
 			return libQ.fcall(libSortOn, arrayUnsorted, 'sortvalue');
-		})
-		.then(function(arraySorted) {
-			return libFast.map(arraySorted, function(curEntry) {
-				return {'uid': curEntry['uid'], 'datavalues': curEntry['datavalues']};
-			});
 		});
 }
 
@@ -382,10 +388,10 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 	curItemKey = convertStringToHashkey(sService + sUri);
 
 	tableItems[curItemKey] = {
-		id: curItemKey,
-		type: 'item',
-		service: sService,
-		uri: sUri
+		'uid': 'item:' + curItemKey,
+		'type': 'item',
+		'service': sService,
+		'uri': sUri
 	};
 
 	tableItems[curItemKey]['children'] = new Object();
@@ -397,7 +403,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 		tableTracks[curTrackKey] = new Object();
 		tableTracks[curTrackKey] = new Object();
 		tableTracks[curTrackKey]['name'] = sTitle;
-		tableTracks[curTrackKey]['id'] = curTrackKey;
+		tableTracks[curTrackKey]['uid'] = 'track:' + curTrackKey;
 		tableTracks[curTrackKey]['type'] = 'track';
 		tableTracks[curTrackKey]['tracknumber'] = nTrackNumber;
 		tableTracks[curTrackKey]['date'] = dateTrackDate;
@@ -422,7 +428,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 		tableAlbums[curAlbumKey] = new Object();
 		tableAlbums[curAlbumKey] = new Object();
 		tableAlbums[curAlbumKey]['name'] = sAlbum;
-		tableAlbums[curAlbumKey]['id'] = curAlbumKey;
+		tableAlbums[curAlbumKey]['uid'] = 'album:' + curAlbumKey;
 		tableAlbums[curAlbumKey]['type'] = 'album';
 		tableAlbums[curAlbumKey]['children'] = new Object();
 		tableAlbums[curAlbumKey]['parents'] = new Object();
@@ -438,7 +444,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 			tableArtists[curArtistKey] = new Object();
 			tableArtists[curArtistKey] = new Object();
 			tableArtists[curArtistKey]['name'] = arrayArtists[iArtist];
-			tableArtists[curArtistKey]['id'] = curArtistKey;
+			tableArtists[curArtistKey]['uid'] = 'artist:' + curArtistKey;
 			tableArtists[curArtistKey]['type'] = 'artist';
 			tableArtists[curArtistKey]['children'] = new Object();
 			tableArtists[curArtistKey]['parents'] = new Object();
@@ -454,7 +460,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 				tableGenres[curGenreKey] = new Object();
 				tableGenres[curGenreKey] = new Object();
 				tableGenres[curGenreKey]['name'] = arrayGenres[iGenre];
-				tableGenres[curGenreKey]['id'] = curGenreKey;
+				tableGenres[curGenreKey]['uid'] = 'genre:' + curGenreKey;
 				tableGenres[curGenreKey]['type'] = 'genre';
 				tableGenres[curGenreKey]['children'] = new Object();
 				tableGenres[curGenreKey]['parents'] = new Object();

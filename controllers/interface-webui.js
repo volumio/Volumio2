@@ -47,6 +47,22 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
+		connWebSocket.on('volumioRemoveQueueItem', function(nIndex) {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now(); 
+			self.logStart('Client requests Volumio queue')
+				.then(function () {
+					return commandRouter.volumioRemoveQueueItem.call(commandRouter, nIndex);
+				})
+				.fail(function(error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function() {
+					return self.logDone(timeStart);
+				});
+		});
+
 		connWebSocket.on('volumioBrowseLibrary', function(sUid) {
 			selfConnWebSocket = this;
 
@@ -57,6 +73,7 @@ function InterfaceWebUI (server, commandRouter) {
 				})
 				.then(function(objBrowseData) {
 					if (objBrowseData) {
+						//self.commandRouter.pushConsoleMessage(JSON.stringify(objBrowseData));
 						return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})

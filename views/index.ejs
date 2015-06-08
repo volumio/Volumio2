@@ -8,8 +8,11 @@
 				height: 400px;
 				overflow-y: scroll;
 			}
-			#div-browser {
-				overflow-x: hidden;
+			#div-browser li, #div-playqueue li {
+				clear: both;
+			}
+			.button-itemaction {
+				float: right;
 			}
 		</style>
 	</head>
@@ -25,13 +28,9 @@
 			<div id='playerstate'></div>
 
 		<h3>Play Queue</h3>
-			<ol id='playqueue' start='0'></ol>
+			<ol id='div-playqueue' start='0'></ol>
 
 		<h3>Music Library</h3>
-			<button id='button-spopupdatetracklist' class='control-websocket' disabled>Refresh Spop Tracklist</button>
-			<button id='button-volumiorebuildlibrary' class='control-websocket' disabled>Rebuild Volumio Library</button>
-			<br />
-			<br />
 			<button id='button-libraryback' class='control-local' disabled>Back</button>
 			<button id='button-libraryforward' class='control-local' disabled>Forward</button>
 
@@ -39,6 +38,10 @@
 			<div id='div-browser'>
 				<ol id='browseview' start='0'></ol>
 			</div>
+
+		<h3>Settings</h3>
+			<button id='button-spopupdatetracklist' class='control-websocket' disabled>Refresh Spop Tracklist</button>
+			<button id='button-volumiorebuildlibrary' class='control-websocket' disabled>Rebuild Volumio Library</button>
 
 		<h3>Console</h3>
 			<button id='button-clearconsole'>Clear</button>
