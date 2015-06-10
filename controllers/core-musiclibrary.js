@@ -16,7 +16,7 @@ function CoreMusicLibrary (commandRouter) {
 	self.commandRouter = commandRouter;
 
 	// The library contains hash tables for genres, artists, albums, and tracks
-	self.library = new Object();
+	self.library = {};
 	self.arrayIndexDefinitions = [
 		{
 			'name': 'Genres by Name',
@@ -36,7 +36,7 @@ function CoreMusicLibrary (commandRouter) {
 				'name': 'name',
 				'uid': 'uid',
 				'type': 'type',
-				'genres': 'parents:#:name'
+				'genres': 'genreuids:#:name'
 			}
 		},
 		{
@@ -47,18 +47,18 @@ function CoreMusicLibrary (commandRouter) {
 				'name': 'name',
 				'uid': 'uid',
 				'type': 'type',
-				'artists': 'parents:#:name'
+				'artists': 'artistuids:#:name'
 			}
 		},
 		{
 			'name': 'Albums by Artist',
 			'table': 'album',
-			'sortby': 'parents:#:name',
+			'sortby': 'artistuids:#:name',
 			'datafields': {
 				'name': 'name',
 				'uid': 'uid',
 				'type': 'type',
-				'artists': 'parents:#:name'
+				'artists': 'artistuids:#:name'
 			}
 		},
 		{
@@ -69,8 +69,8 @@ function CoreMusicLibrary (commandRouter) {
 				'name': 'name',
 				'uid': 'uid',
 				'type': 'type',
-				'album': 'parents:#0:name',
-				'artists': 'parents:#0:parents:#:name'
+				'album': 'albumuids:#0:name',
+				'artists': 'artistuids:#:name'
 			}
 		}
 	];
@@ -89,63 +89,22 @@ function CoreMusicLibrary (commandRouter) {
 // Public methods -----------------------------------------------------------------------------------
 
 // Return a music library view for a given object UID
-CoreMusicLibrary.prototype.browseLibrary = function(sUid, sSortBy, nEntries, nOffset) {
+CoreMusicLibrary.prototype.browseLibrary = function(objBrowseParameters) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
 
-	//TODO implement use of nEntries and nOffset for paging of results
-
 	return self.libraryReady
 		.then(function() {
-			if (sUid === '') {
-				// No object specified, list all the indexes instead
-				return libFast.map(self.arrayIndexDefinitions, function(curEntry) {
-					return {'uid': 'index:' + curEntry.name, 'type': 'index', 'name': curEntry.name};
-				});
-			}
+			//TODO implement use of nEntries and nOffset for paging of results
+			var sUid = objBrowseParameters.uid;
+			var sSortBy = objBrowseParameters.sortby;
+			var objDataFields = objBrowseParameters.datafields;
 
-			var sPrefix = sUid.split(':')[0];
-
-			if (sPrefix === 'index') {
-				// An index is specified. List the contents of the index.
-				return self.getLibraryObject(self.library, sUid);
-			} else if (sPrefix === 'item') {
-				// TODO implement this
-				return null;
+			var objRequested = self.getLibraryObject(self.library, sUid)
+			if (Object.keys(objDataFields).length === 0) {
+				return objRequested;
 			} else {
-				// A library object is specified. List the children of the object, sorted by name.
-				var objDataFields = new Object();
-
-				if (sPrefix === 'genre') {
-					// List artists in a given genre
-					objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': 'parents:#:name'};
-					if (!sSortBy) {
-						sSortBy = 'name';
-					}
-				} else if (sPrefix === 'artist') {
-					// List albums by a given artist
-					objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': 'parents:#:name', 'date': 'children:#0:date'};
-					if (!sSortBy) {
-						sSortBy = 'date';
-					}
-				} else if (sPrefix === 'album') {
-					// List tracks in a given album
-					objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'album': 'parents:#0:name', 'artists': 'parents:#0:parents:#:name', 'tracknumber': 'tracknumber', 'date': 'date'};
-					if (!sSortBy) {
-						sSortBy = 'tracknumber';
-					}
-				} else if (sPrefix === 'track') {
-					// List versions of a given track (among the available services)
-					objDataFields = {'uid': 'uid', 'type': 'type', 'service': 'service', 'uri': 'uri'};
-					if (!sSortBy) {
-						sSortBy = 'service';
-					}
-				}
-
-				var objRequested = self.getLibraryObject(self.library, sUid)
-				//self.commandRouter.pushConsoleMessage(JSON.stringify(objRequested));
-
-				return self.generateSortedIndex(Object.keys(objRequested.children), sSortBy, objDataFields);
+				return self.generateSortedIndex(Object.keys(objRequested), sSortBy, objDataFields);
 			}
 		});
 }
@@ -155,7 +114,7 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::loadLibraryFromDB');
 
-	self.library = new Object();
+	self.library = {};
 
 	self.libraryReadyDeferred = libQ.defer();
 	self.libraryReady = self.libraryReadyDeferred.promise;
@@ -202,13 +161,13 @@ CoreMusicLibrary.prototype.rebuildLibrary = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::rebuildLibrary');
 
-	self.library = new Object();
-	self.library['genre'] = new Object();
-	self.library['artist'] = new Object();
-	self.library['album'] = new Object();
-	self.library['track'] = new Object();
-	self.library['item'] = new Object();
-	self.library['index'] = new Object();
+	self.library = {};
+	self.library['genre'] = {};
+	self.library['artist'] = {};
+	self.library['album'] = {};
+	self.library['track'] = {};
+	self.library['item'] = {};
+	self.library['index'] = {};
 
 	self.libraryReadyDeferred = libQ.defer();
 	self.libraryReady = self.libraryReadyDeferred.promise;
@@ -236,6 +195,13 @@ CoreMusicLibrary.prototype.rebuildLibrary = function() {
 			}));
 		})
 		.then(function() {
+			self.commandRouter.pushConsoleMessage('Writing root listing...');
+
+			self.library.root = libFast.map(self.arrayIndexDefinitions, function(curEntry) {
+				return {'uid': 'index:' + curEntry.name, 'type': 'index', 'name': curEntry.name};
+			});
+		})
+		.then(function() {
 			self.commandRouter.pushConsoleMessage('Storing library in db...');
 
 			return libQ.nfcall(libFast.bind(dbLibrary.put, dbLibrary), 'library', self.library);
@@ -250,15 +216,6 @@ CoreMusicLibrary.prototype.rebuildLibrary = function() {
 			}
 
 			return libQ.resolve();
-		})
-		.fail(function(sError) {
-			try {
-				self.libraryReadyDeferred.reject(sError);
-			} catch (error) {
-				self.pushError('Unable to reject library promise: ' + error);
-			}
-
-			throw new Error('Library Rebuild Error: ' + sError);
 		})
 		.fin(libFast.bind(dbLibrary.close, dbLibrary));
 }
@@ -277,7 +234,7 @@ CoreMusicLibrary.prototype.rebuildLibrary = function() {
 CoreMusicLibrary.prototype.getLibraryObject = function(objSource, sPath) {
 	var self = this;
 
-	if (sPath.indexOf(':') == -1) {
+	if (sPath.indexOf(':') === -1) {
 		try {
 			return objSource[sPath];
 		} catch (error) {
@@ -295,7 +252,7 @@ CoreMusicLibrary.prototype.getLibraryObject = function(objSource, sPath) {
 	} else if (curStep.substr(0,1) === '#') {
 		return self.getLibraryObject(self.library, Object.keys(objSource)[curStep.substr(1)] + ':' + sNewPath);
 	} else {
-		var objCurStep = new Object();
+		var objCurStep = {};
 
 		try {
 			objCurStep = objSource[curStep];
@@ -394,25 +351,24 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 		'uri': sUri
 	};
 
-	tableItems[curItemKey]['children'] = new Object();
-	tableItems[curItemKey]['parents'] = new Object();
+	tableItems[curItemKey]['trackuids'] = {};
 
 	curTrackKey = convertStringToHashkey(sAlbum + sTitle);
 
 	if (!(curTrackKey in tableTracks)) {
-		tableTracks[curTrackKey] = new Object();
-		tableTracks[curTrackKey] = new Object();
+		tableTracks[curTrackKey] = {};
 		tableTracks[curTrackKey]['name'] = sTitle;
 		tableTracks[curTrackKey]['uid'] = 'track:' + curTrackKey;
 		tableTracks[curTrackKey]['type'] = 'track';
 		tableTracks[curTrackKey]['tracknumber'] = nTrackNumber;
 		tableTracks[curTrackKey]['date'] = dateTrackDate;
-		tableTracks[curTrackKey]['children'] = new Object();
-		tableTracks[curTrackKey]['parents'] = new Object();
+		tableTracks[curTrackKey]['itemuids'] = {};
+		tableTracks[curTrackKey]['albumuids'] = {};
+		tableTracks[curTrackKey]['artistuids'] = {};
 	}
 
-	tableTracks[curTrackKey]['children']['item:' + curItemKey] = null;
-	tableItems[curItemKey]['parents']['track:' + curTrackKey] = null;
+	tableTracks[curTrackKey]['itemuids']['item:' + curItemKey] = null;
+	tableItems[curItemKey]['trackuids']['track:' + curTrackKey] = null;
 
 	if (sAlbum === 'Greatest Hits') {
 		// The 'Greatest Hits' album name is a repeat offender for unrelated albums being grouped together.
@@ -425,49 +381,52 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 	}
 
 	if (!(curAlbumKey in tableAlbums)) {
-		tableAlbums[curAlbumKey] = new Object();
-		tableAlbums[curAlbumKey] = new Object();
+		tableAlbums[curAlbumKey] = {};
 		tableAlbums[curAlbumKey]['name'] = sAlbum;
 		tableAlbums[curAlbumKey]['uid'] = 'album:' + curAlbumKey;
 		tableAlbums[curAlbumKey]['type'] = 'album';
-		tableAlbums[curAlbumKey]['children'] = new Object();
-		tableAlbums[curAlbumKey]['parents'] = new Object();
+		tableAlbums[curAlbumKey]['trackuids'] = {};
+		tableAlbums[curAlbumKey]['artistuids'] = {};
 	}
 
-	tableAlbums[curAlbumKey]['children']['track:' + curTrackKey] = null;
-	tableTracks[curTrackKey]['parents']['album:' + curAlbumKey] = null;
+	tableAlbums[curAlbumKey]['trackuids']['track:' + curTrackKey] = null;
+	tableTracks[curTrackKey]['albumuids']['album:' + curAlbumKey] = null;
 
 	for (var iArtist = 0; iArtist < arrayArtists.length; iArtist++) {
 		curArtistKey = convertStringToHashkey(arrayArtists[iArtist]);
 
 		if (!(curArtistKey in tableArtists)) {
-			tableArtists[curArtistKey] = new Object();
-			tableArtists[curArtistKey] = new Object();
+			tableArtists[curArtistKey] = {};
 			tableArtists[curArtistKey]['name'] = arrayArtists[iArtist];
 			tableArtists[curArtistKey]['uid'] = 'artist:' + curArtistKey;
 			tableArtists[curArtistKey]['type'] = 'artist';
-			tableArtists[curArtistKey]['children'] = new Object();
-			tableArtists[curArtistKey]['parents'] = new Object();
+			tableArtists[curArtistKey]['albumuids'] = {};
+			tableArtists[curArtistKey]['genreuids'] = {};
+			tableArtists[curArtistKey]['trackuids'] = {};
 		}
 
-		tableArtists[curArtistKey]['children']['album:' + curAlbumKey] = null;
-		tableAlbums[curAlbumKey]['parents']['artist:' + curArtistKey] = null;
+		tableArtists[curArtistKey]['albumuids']['album:' + curAlbumKey] = null;
+		tableArtists[curArtistKey]['trackuids']['track:' + curTrackKey] = null;
+		tableAlbums[curAlbumKey]['artistuids']['artist:' + curArtistKey] = null;
+		tableTracks[curTrackKey]['artistuids']['artist:' + curArtistKey] = null;
 
 		for (var iGenre = 0; iGenre < arrayGenres.length; iGenre++) {
 			curGenreKey = convertStringToHashkey(arrayGenres[iGenre]);
 
 			if (!(curGenreKey in tableGenres)) {
-				tableGenres[curGenreKey] = new Object();
-				tableGenres[curGenreKey] = new Object();
+				tableGenres[curGenreKey] = {};
 				tableGenres[curGenreKey]['name'] = arrayGenres[iGenre];
 				tableGenres[curGenreKey]['uid'] = 'genre:' + curGenreKey;
 				tableGenres[curGenreKey]['type'] = 'genre';
-				tableGenres[curGenreKey]['children'] = new Object();
-				tableGenres[curGenreKey]['parents'] = new Object();
+				tableGenres[curGenreKey]['artistuids'] = {};
+				tableGenres[curGenreKey]['albumuids'] = {};
+				tableGenres[curGenreKey]['trackuids'] = {};
 			}
 
-			tableGenres[curGenreKey]['children']['artist:' + curArtistKey] = null;
-			tableArtists[curArtistKey]['parents']['genre:' + curGenreKey] = null;
+			tableGenres[curGenreKey]['artistuids']['artist:' + curArtistKey] = null;
+			tableGenres[curGenreKey]['albumuids']['album:' + curAlbumKey] = null;
+			tableGenres[curGenreKey]['trackuids']['track:' + curTrackKey] = null;
+			tableArtists[curArtistKey]['genreuids']['genre:' + curGenreKey] = null;
 		}
 	}
 

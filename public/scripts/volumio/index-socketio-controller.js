@@ -31,7 +31,7 @@ socket.on('connect', function() {
 	emitClientEvent('volumioGetQueue', '');
 
 	// Request the music library root
-	emitClientEvent('volumioBrowseLibrary', '');
+	emitClientEvent('volumioBrowseLibrary', {'uid': 'root', 'sortby': '', 'datafields': {}, 'entries': 0, 'index': 0});
 });
 
 socket.on('disconnect', function() {
@@ -202,6 +202,8 @@ function clearPlayQueue() {
 function updateBrowseView(objBrowseData) {
 	clearBrowseView();
 
+	//printConsoleMessage(JSON.stringify(objBrowseData));
+
 	var nodeBrowseView = document.getElementById('browseview');
 	var arrayDataKeys = Object.keys(objBrowseData);
 
@@ -229,6 +231,28 @@ function updateBrowseView(objBrowseData) {
 			sSubText = sSubText.concat(' [Date]: ' + curEntry.date + '');
 		}
 
+		var sBrowseField = '';
+		var sSortBy = '';
+		var objDataFields = {};
+		if (curEntry.type === 'genre') {
+			sBrowseField = ':artistuids';
+			sSortBy = 'name';
+			objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': 'genreuids:#:name'};
+		} else if (curEntry.type === 'artist') {
+			sBrowseField = ':albumuids';
+			sSortBy = 'date';
+			objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': 'artistuids:#:name', 'date': 'trackuids:#0:date'};
+		} else if (curEntry.type === 'album') {
+			sBrowseField = ':trackuids';
+			sSortBy = 'tracknumber';
+			objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'album': 'albumuids:#0:name', 'artists': 'artistuids:#:name', 'tracknumber': 'tracknumber', 'date': 'date'};
+		} else if (curEntry.type === 'track') {
+			sBrowseField = ':itemuids';
+			sSortBy = 'service';
+			objDataFields = {'uid': 'uid', 'type': 'type', 'service': 'service', 'uri': 'uri'};
+		}
+		var objBrowseParameters = {'uid': curEntry['uid'] + sBrowseField, 'sortby': sSortBy, 'datafields': objDataFields, 'entries': 0, 'index': 0};
+
 		var buttonAdd = document.createElement('button');
 		buttonAdd.appendChild(document.createTextNode('Add'));
 		buttonAdd.className = 'button-itemaction';
@@ -237,7 +261,7 @@ function updateBrowseView(objBrowseData) {
 		var nodeLink = document.createElement('a');
 		nodeLink.setAttribute('href', '#');
 		nodeLink.appendChild(document.createTextNode(sText));
-		nodeLink.onclick = browseLibraryLink(curEntry['uid']);
+		nodeLink.onclick = browseLibraryLink(objBrowseParameters);
 
 		var nodeSpan = document.createElement('span');
 		nodeSpan.appendChild(nodeLink);
@@ -251,9 +275,9 @@ function updateBrowseView(objBrowseData) {
 	}
 }
 
-function browseLibraryLink(sId) {
+function browseLibraryLink(objBrowseParameters) {
 	return function() {
-		emitClientEvent('volumioBrowseLibrary', sId);
+		emitClientEvent('volumioBrowseLibrary', objBrowseParameters);
 	}
 }
 

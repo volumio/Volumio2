@@ -63,17 +63,16 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('volumioBrowseLibrary', function(sUid) {
+		connWebSocket.on('volumioBrowseLibrary', function(objBrowseParameters) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
 			self.logStart('Client requests browse')
 				.then(function() {
-					return commandRouter.volumioBrowseLibrary.call(commandRouter, sUid, '', 0, 0);
+					return commandRouter.volumioBrowseLibrary.call(commandRouter, objBrowseParameters);
 				})
 				.then(function(objBrowseData) {
 					if (objBrowseData) {
-						//self.commandRouter.pushConsoleMessage(JSON.stringify(objBrowseData));
 						return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})

@@ -106,11 +106,11 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 }
 
 // Volumio Browse Library
-CoreCommandRouter.prototype.volumioBrowseLibrary = function(sUid, sSortBy, nEntries, nOffset) {
+CoreCommandRouter.prototype.volumioBrowseLibrary = function(objBrowseParameters) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + sUid + ', ' + sSortBy + ', ' + nEntries + ', ' + nOffset + ')');
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + JSON.stringify(objBrowseParameters) + ')');
 
-	return self.musicLibrary.browseLibrary(sUid, sSortBy, nEntries, nOffset);
+	return self.musicLibrary.browseLibrary(objBrowseParameters);
 }
 
 // Spop Update Tracklist
