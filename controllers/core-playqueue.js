@@ -70,3 +70,15 @@ CorePlayQueue.prototype.removeQueueItem = function(nIndex) {
 			return self.commandRouter.volumioPushQueue(self.arrayQueue);
 		});
 };
+
+// Add one item to the queue
+CorePlayQueue.prototype.addQueueItem = function(objItem) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItem');
+
+	return self.queueReady
+		.then(function() {
+			self.arrayQueue.push(objItem);
+			return self.commandRouter.volumioPushQueue(self.arrayQueue);
+		});
+};

@@ -213,6 +213,19 @@ CoreStateMachine.prototype.syncStateFromSpop = function(stateSpop) {
 	}
 };
 
+// Add the child tracks of a library object into the play queue
+CoreStateMachine.prototype.addQueueObject = function(sUid) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueObject');
+
+	return self.commandRouter.getObjectItems(sUid)
+		.then(function(arrayItems) {
+			libFast.map(arrayItems, function(curItem) {
+				self.playQueue.addQueueItem(curItem);
+			})
+		});
+};
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 

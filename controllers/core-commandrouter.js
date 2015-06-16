@@ -102,7 +102,7 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRebuildLibrary');
 
-	return self.musicLibrary.rebuildLibrary();
+	return self.musicLibrary.buildLibrary();
 }
 
 // Volumio Browse Library

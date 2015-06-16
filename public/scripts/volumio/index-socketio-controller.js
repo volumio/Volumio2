@@ -31,7 +31,7 @@ socket.on('connect', function() {
 	emitClientEvent('volumioGetQueue', '');
 
 	// Request the music library root
-	emitClientEvent('volumioBrowseLibrary', {'uid': 'root', 'sortby': '', 'datafields': {}, 'entries': 0, 'index': 0});
+	emitClientEvent('volumioBrowseLibrary', {'uid': 'index:root', 'sortby': '', 'datapath': [], 'entries': 0, 'index': 0});
 });
 
 socket.on('disconnect', function() {
@@ -102,10 +102,11 @@ function disableControls() {
 }
 
 function printConsoleMessage(message) {
-	var nodeListItem = document.createElement('LI');
-	var nodeText = document.createTextNode(message);
+	var nodeListItem = document.createElement('li');
+	var nodePre = document.createElement('PRE');
+	nodePre.appendChild(document.createTextNode(message))
 
-	nodeListItem.appendChild(nodeText);
+	nodeListItem.appendChild(nodePre);
 	document.getElementById('console').appendChild(nodeListItem);
 
 	var divConsole = document.getElementById('div-console');
@@ -206,52 +207,41 @@ function updateBrowseView(objBrowseData) {
 
 	var nodeBrowseView = document.getElementById('browseview');
 	var arrayDataKeys = Object.keys(objBrowseData);
-
 	for (i = 0; i < arrayDataKeys.length; i++) {
 		var curEntry = objBrowseData[arrayDataKeys[i]];
 
 		var sText = curEntry.name;
 		var sSubText = '';
-		if ('service' in curEntry) {
-			sSubText = sSubText.concat(' [Service]: ' + curEntry.service + '');
-		}
-		if ('uri' in curEntry) {
-			sSubText = sSubText.concat(' [Uri]: ' + curEntry.uri + '');
-		}
 		if ('artists' in curEntry) {
-			sSubText = sSubText.concat(' [Artists]: ' + curEntry.artists);
+			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
 		}
 		if ('album' in curEntry) {
-			sSubText = sSubText.concat(' [Album]: ' + curEntry.album + '');
+			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.album) + '');
 		}
 		if ('tracknumber' in curEntry) {
-			sSubText = sSubText.concat(' [Tracknumber]: ' + curEntry.tracknumber);
+			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
 		}
 		if ('date' in curEntry) {
-			sSubText = sSubText.concat(' [Date]: ' + curEntry.date + '');
+			sSubText = sSubText.concat(' [Date]: ' + JSON.stringify(curEntry.date) + '');
+		}
+		if ('uris' in curEntry) {
+			sSubText = sSubText.concat(' [Uris]: ' + JSON.stringify(curEntry.uris) + '');
 		}
 
 		var sBrowseField = '';
 		var sSortBy = '';
-		var objDataFields = {};
+		var arrayDataPath = [];
 		if (curEntry.type === 'genre') {
-			sBrowseField = ':artistuids';
 			sSortBy = 'name';
-			objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': 'genreuids:#:name'};
+			arrayDataPath = ['artistuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': ['genreuids', '#', {'name': 'name', 'uid': 'uid'}]}];
 		} else if (curEntry.type === 'artist') {
-			sBrowseField = ':albumuids';
 			sSortBy = 'date';
-			objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': 'artistuids:#:name', 'date': 'trackuids:#0:date'};
+			arrayDataPath = ['albumuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'date': 'date'}];
 		} else if (curEntry.type === 'album') {
-			sBrowseField = ':trackuids';
 			sSortBy = 'tracknumber';
-			objDataFields = {'name': 'name', 'uid': 'uid', 'type': 'type', 'album': 'albumuids:#0:name', 'artists': 'artistuids:#:name', 'tracknumber': 'tracknumber', 'date': 'date'};
-		} else if (curEntry.type === 'track') {
-			sBrowseField = ':itemuids';
-			sSortBy = 'service';
-			objDataFields = {'uid': 'uid', 'type': 'type', 'service': 'service', 'uri': 'uri'};
+			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'album': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
 		}
-		var objBrowseParameters = {'uid': curEntry['uid'] + sBrowseField, 'sortby': sSortBy, 'datafields': objDataFields, 'entries': 0, 'index': 0};
+		var objBrowseParameters = {'uid': curEntry['uid'], 'sortby': sSortBy, 'datapath': arrayDataPath, 'entries': 0, 'index': 0};
 
 		var buttonAdd = document.createElement('button');
 		buttonAdd.appendChild(document.createTextNode('Add'));
@@ -357,6 +347,6 @@ function libraryBack() {
 
 function emitClientEvent(sEvent, sData) {
 	socket.emit(sEvent, sData);
-	printConsoleMessage('[Client Event] ' + sEvent + ' ' + sData);
+	printConsoleMessage('[Client Event]: ' + sEvent + ' [Parameters]:' + JSON.stringify(sData));
 }
 
