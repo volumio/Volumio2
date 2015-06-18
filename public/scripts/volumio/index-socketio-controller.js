@@ -161,16 +161,16 @@ function updatePlayerQueue(arrayQueue) {
 			sSubText = sSubText.concat(' [Uri]: ' + curEntry.uri + '');
 		}
 		if ('artists' in curEntry) {
-			sSubText = sSubText.concat(' [Artists]: ' + curEntry.artists);
+			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
 		}
-		if ('album' in curEntry) {
-			sSubText = sSubText.concat(' [Album]: ' + curEntry.album + '');
+		if ('albums' in curEntry) {
+			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.album) + '');
 		}
 		if ('tracknumber' in curEntry) {
-			sSubText = sSubText.concat(' [Tracknumber]: ' + curEntry.tracknumber);
+			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
 		}
 		if ('date' in curEntry) {
-			sSubText = sSubText.concat(' [Date]: ' + curEntry.date + '');
+			sSubText = sSubText.concat(' [Date]: ' + JSON.stringify(curEntry.date) + '');
 		}
 
 		var buttonRemove = document.createElement('button');
@@ -215,7 +215,7 @@ function updateBrowseView(objBrowseData) {
 		if ('artists' in curEntry) {
 			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
 		}
-		if ('album' in curEntry) {
+		if ('albums' in curEntry) {
 			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.album) + '');
 		}
 		if ('tracknumber' in curEntry) {
@@ -239,14 +239,14 @@ function updateBrowseView(objBrowseData) {
 			arrayDataPath = ['albumuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'date': 'date'}];
 		} else if (curEntry.type === 'album') {
 			sSortBy = 'tracknumber';
-			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'album': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
+			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
 		}
 		var objBrowseParameters = {'uid': curEntry['uid'], 'sortby': sSortBy, 'datapath': arrayDataPath, 'entries': 0, 'index': 0};
 
 		var buttonAdd = document.createElement('button');
 		buttonAdd.appendChild(document.createTextNode('Add'));
 		buttonAdd.className = 'button-itemaction';
-		buttonAdd.onclick = addQueueItem(curEntry['uid']);
+		buttonAdd.onclick = addQueueUids([curEntry['uid']]);
 
 		var nodeLink = document.createElement('a');
 		nodeLink.setAttribute('href', '#');
@@ -271,9 +271,9 @@ function browseLibraryLink(objBrowseParameters) {
 	}
 }
 
-function addQueueItem(sId) {
+function addQueueUids(arrayUids) {
 	return function() {
-		emitClientEvent('volumioAddQueueItem', sId);
+		emitClientEvent('volumioAddQueueUids', arrayUids);
 	}
 }
 

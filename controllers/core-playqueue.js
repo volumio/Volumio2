@@ -12,12 +12,7 @@ function CorePlayQueue(commandRouter, stateMachine) {
 	self.queueReadyDeferred = libQ.defer();
 	self.queueReady = self.queueReadyDeferred.promise;
 
-	// Init temporary play queue for testing purposes
-	self.arrayQueue = [
-		{"name":"Rush","album":"Cowboy Bebop OST 1","artists":"Seatbelts, Steven Berstein, Yoko Kanno, Steve Conte, New York Musicians","tracknumber":2,"date":"1998", "uid":"item:W1wOyONFf1abxZeslZlqOwTraHFCKvVo5Eik3hu-qXM", "service":"mpd","uri":"NAS/Soundtrack/Cowboy Bebop OST/Cowboy Bebop - Original Soundtrack 1/02 - Rush.flac"},
-		{"name":"Rush2","album":"Cowboy Bebop OST 1","artists":"Seatbelts, Steven Berstein, Yoko Kanno, Steve Conte, New York Musicians","tracknumber":2,"date":"1998", "uid":"item:W1wOyONFf1abxZeslZlqOwTraHFCKvVo5Eik3hu-qXM", "service":"mpd","uri":"NAS/Soundtrack/Cowboy Bebop OST/Cowboy Bebop - Original Soundtrack 1/02 - Rush.flac"},
-		{"name":"Rush3","album":"Cowboy Bebop OST 1","artists":"Seatbelts, Steven Berstein, Yoko Kanno, Steve Conte, New York Musicians","tracknumber":2,"date":"1998", "uid":"item:W1wOyONFf1abxZeslZlqOwTraHFCKvVo5Eik3hu-qXM", "service":"mpd","uri":"NAS/Soundtrack/Cowboy Bebop OST/Cowboy Bebop - Original Soundtrack 1/02 - Rush.flac"}
-	];
+	self.arrayQueue = [];
 
 	self.queueReadyDeferred.resolve();
 }
@@ -72,13 +67,13 @@ CorePlayQueue.prototype.removeQueueItem = function(nIndex) {
 };
 
 // Add one item to the queue
-CorePlayQueue.prototype.addQueueItem = function(objItem) {
+CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItem');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
 
 	return self.queueReady
 		.then(function() {
-			self.arrayQueue.push(objItem);
+			self.arrayQueue = self.arrayQueue.concat(arrayItems);
 			return self.commandRouter.volumioPushQueue(self.arrayQueue);
 		});
 };

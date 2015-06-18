@@ -15,6 +15,9 @@ function CoreMusicLibrary (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
+	// Specify the preference for service when adding tracks to the queue
+	self.servicePriority = ['mpd', 'spop'];
+
 	// The library contains hash tables for genres, artists, albums, and tracks
 	self.library = {};
 	self.library.index = {};
@@ -75,6 +78,17 @@ function CoreMusicLibrary (commandRouter) {
 			}]
 		}
 	];
+	self.queueItemDataPath = [
+		{
+			'name': 'name',
+			'uid': 'uid',
+			'type': 'type',
+			'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}],
+			'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}],
+			'tracknumber': 'tracknumber',
+			'date': 'date'
+		}
+	];
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
 	// This is okay because no part of Volumio requires a populated library to function.
@@ -112,6 +126,49 @@ CoreMusicLibrary.prototype.browseLibrary = function(objBrowseParameters) {
 				return self.getObjectInfo(objRequested, arrayPath);
 			}
 		});
+}
+
+CoreMusicLibrary.prototype.addQueueUids = function(arrayUids) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::addUidsToQueue');
+
+	return self.libraryReady
+		.then(function () {
+			var arrayQueueItems = [];
+
+			libFast.map(arrayUids, function(sCurrentUid) {
+				var objCurrent = self.getLibraryObject(sCurrentUid);
+				if (objCurrent.type === 'track') {
+					arrayQueueItems.push(self.makeQueueItem(objCurrent));
+				} else {
+					libFast.map(Object.keys(objCurrent.trackuids), function(sCurrentKey) {
+						// TODO - allow adding tracks per a given sort order
+						var objCurrentTrack = self.getLibraryObject(sCurrentKey);
+						arrayQueueItems.push(self.makeQueueItem(objCurrentTrack));
+					});
+				}
+			});
+			self.commandRouter.addQueueItems(arrayQueueItems);
+		});
+}
+
+CoreMusicLibrary.prototype.makeQueueItem = function(objTrack) {
+	var self = this;
+
+	for (i = 0; i < self.servicePriority.length; i++) {
+		if (self.servicePriority[i] in objTrack.uris) {
+			var objQueueItem = objTrack.uris[self.servicePriority[i]];
+			objQueueItem.service = self.servicePriority[i];
+			objTrackInfo = self.getObjectInfo(objTrack, self.queueItemDataPath);
+
+			libFast.map(Object.keys(objTrackInfo), function(sCurField) {
+				objQueueItem[sCurField] = objTrackInfo[sCurField];
+			});
+
+			return objQueueItem;
+		}
+	}
+	return {};
 }
 
 // Load a LevelDB from disk containing the music library and indexes

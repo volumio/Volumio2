@@ -16,7 +16,7 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioGetState', function() {
 			selfConnWebSocket = this;
 
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio state')
 				.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
 				.then(function(state) {
@@ -33,7 +33,7 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioGetQueue', function() {
 			selfConnWebSocket = this;
 
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio queue')
 				.then(libFast.bind(commandRouter.volumioGetQueue, commandRouter))
 				.then(function(queue) {
@@ -50,10 +50,26 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('volumioRemoveQueueItem', function(nIndex) {
 			selfConnWebSocket = this;
 
-			var timeStart = Date.now(); 
-			self.logStart('Client requests Volumio queue')
+			var timeStart = Date.now();
+			self.logStart('Client requests remove Volumio queue item')
 				.then(function () {
 					return commandRouter.volumioRemoveQueueItem.call(commandRouter, nIndex);
+				})
+				.fail(function(error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function() {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('volumioAddQueueUids', function(arrayUids) {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests add Volumio queue items')
+				.then(function () {
+					return commandRouter.volumioAddQueueUids.call(commandRouter, arrayUids);
 				})
 				.fail(function(error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
@@ -85,7 +101,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioPlay', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio play')
 				.then(libFast.bind(commandRouter.volumioPlay, commandRouter))
 				.fail(function(error) {
@@ -97,7 +113,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioPause', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio pause')
 				.then(libFast.bind(commandRouter.volumioPause, commandRouter))
 				.fail(function(error) {
@@ -109,7 +125,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioStop', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio stop')
 				.then(libFast.bind(commandRouter.volumioStop, commandRouter))
 				.fail(function(error) {
@@ -121,7 +137,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioPrevious', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio previous')
 				.then(libFast.bind(commandRouter.volumioPrevious, commandRouter))
 				.fail(function(error) {
@@ -133,7 +149,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioNext', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio next')
 				.then(libFast.bind(commandRouter.volumioNext, commandRouter))
 				.fail(function(error) {
@@ -145,7 +161,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('spopUpdateTracklist', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Spop Update Tracklist')
 				.then(libFast.bind(commandRouter.spopUpdateTracklist, commandRouter))
 				.fail(function(error) {
@@ -158,7 +174,7 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 		connWebSocket.on('volumioRebuildLibrary', function() {
-			var timeStart = Date.now(); 
+			var timeStart = Date.now();
 			self.logStart('Client requests Volumio Rebuild Library')
 				.then(libFast.bind(commandRouter.volumioRebuildLibrary, commandRouter))
 				.fail(function(error) {

@@ -10,7 +10,6 @@ function CoreStateMachine(commandRouter) {
 	self.playQueue = new (require('./core-playqueue.js'))(commandRouter, self);
 	self.resetVolumioState();
 
-	self.servicePriority = ['mpd', 'spop'];
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -53,6 +52,14 @@ CoreStateMachine.prototype.removeQueueItem = function(nIndex) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
 
 	return self.playQueue.removeQueueItem(nIndex);
+};
+
+// Add array of items to queue
+CoreStateMachine.prototype.addQueueItems = function(arrayItems) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueItems');
+
+	return self.playQueue.addQueueItems(arrayItems);
 };
 
 // Volumio Play Command

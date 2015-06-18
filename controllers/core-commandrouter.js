@@ -89,12 +89,20 @@ CoreCommandRouter.prototype.volumioGetQueue = function() {
 	return self.stateMachine.getQueue();
 }
 
-// Volumio Get Queue
+// Volumio Remove Queue Item
 CoreCommandRouter.prototype.volumioRemoveQueueItem = function(nIndex) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRemoveQueueItem');
 
 	return self.stateMachine.removeQueueItem(nIndex);
+}
+
+// Volumio Add Queue Uids
+CoreCommandRouter.prototype.volumioAddQueueUids = function(arrayUids) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioAddQueueUids');
+
+	return self.musicLibrary.addQueueUids(arrayUids);
 }
 
 // Volumio Rebuild Library
@@ -236,6 +244,14 @@ CoreCommandRouter.prototype.getAllTracklists = function() {
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
 	return libQ.all([self.controllerMpd.getTracklist(), self.controllerSpop.getTracklist()]);
+}
+
+// Volumio Add Queue Items
+CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioAddQueueItems');
+
+	return self.stateMachine.addQueueItems(arrayItems);
 }
 
 // Utility functions ---------------------------------------------------------------------------------------------
