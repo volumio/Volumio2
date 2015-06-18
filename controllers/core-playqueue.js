@@ -3,22 +3,16 @@ var libFast = require('fast.js');
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
-function CorePlayQueue(commandRouter) {
+function CorePlayQueue(commandRouter, stateMachine) {
 	var self = this;
 
 	self.commandRouter = commandRouter;
+	self.stateMachine = stateMachine;
 
 	self.queueReadyDeferred = libQ.defer();
 	self.queueReady = self.queueReadyDeferred.promise;
 
-	// Init temporary play queue for testing purposes
-	self.arrayQueue = [
-		{service: 'mpd', trackid: 'aHR0cDovL3VrNC5pbnRlcm5ldC1yYWRpby5jb206MTU5Mzgv', metadata: {title: 'Go Ham Radio'}},
-		{service: 'mpd', trackid: 'aHR0cDovLzIzNjMubGl2ZS5zdHJlYW10aGV3b3JsZC5jb206ODAvS1VTQ01QMTI4X1ND', metadata: {title: 'KUSC Radio'}},
-		{service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazoyZm5tWGp1Z0VrQ3RRNnhBOHpqVUpn', metadata: {title: 'Gates of Gold 3)Call of the Mountain'}},
-		{service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazo0ZnhwcEhwalRYdnhVQkFxNHQ5QlpJ', metadata: {title: 'Radio Song'}},
-		{service: 'spop', trackid: 'c3BvdGlmeTp0cmFjazozNmM0Sm9oYXlCOXFkNjRlaWRRTUJp', metadata: {title: 'Doin\' it Right'}}
-	];
+	self.arrayQueue = [];
 
 	self.queueReadyDeferred.resolve();
 }
@@ -32,9 +26,9 @@ CorePlayQueue.prototype.getQueue = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
 
 	return self.queueReady
-	.then(function() {
-		return self.arrayQueue;
-	});
+		.then(function() {
+			return self.arrayQueue;
+		});
 };
 
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
@@ -60,3 +54,26 @@ CorePlayQueue.prototype.getTrackBlock = function(nStartIndex) {
 	return libQ.resolve({service: sTargetService, trackids: arrayTrackIds, startindex: nStartIndex});
 };
 
+// Removes one item from the queue
+CorePlayQueue.prototype.removeQueueItem = function(nIndex) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem');
+
+	return self.queueReady
+		.then(function() {
+			self.arrayQueue.splice(nIndex, 1);
+			return self.commandRouter.volumioPushQueue(self.arrayQueue);
+		});
+};
+
+// Add one item to the queue
+CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
+
+	return self.queueReady
+		.then(function() {
+			self.arrayQueue = self.arrayQueue.concat(arrayItems);
+			return self.commandRouter.volumioPushQueue(self.arrayQueue);
+		});
+};

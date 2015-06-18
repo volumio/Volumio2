@@ -7,8 +7,9 @@ function CoreStateMachine(commandRouter) {
 	var self = this;
 	self.commandRouter = commandRouter;
 
-	self.playQueue = new (require('./core-playqueue.js'))(commandRouter);
+	self.playQueue = new (require('./core-playqueue.js'))(commandRouter, self);
 	self.resetVolumioState();
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -43,6 +44,22 @@ CoreStateMachine.prototype.getQueue = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getQueue');
 
 	return self.playQueue.getQueue();
+};
+
+// Remove one item from the queue
+CoreStateMachine.prototype.removeQueueItem = function(nIndex) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
+
+	return self.playQueue.removeQueueItem(nIndex);
+};
+
+// Add array of items to queue
+CoreStateMachine.prototype.addQueueItems = function(arrayItems) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueItems');
+
+	return self.playQueue.addQueueItems(arrayItems);
 };
 
 // Volumio Play Command
@@ -201,6 +218,19 @@ CoreStateMachine.prototype.syncStateFromSpop = function(stateSpop) {
 	} else {
 		return self.syncState(stateSpop, 'spop');
 	}
+};
+
+// Add the child tracks of a library object into the play queue
+CoreStateMachine.prototype.addQueueObject = function(sUid) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueObject');
+
+	return self.commandRouter.getObjectItems(sUid)
+		.then(function(arrayItems) {
+			libFast.map(arrayItems, function(curItem) {
+				self.playQueue.addQueueItem(curItem);
+			})
+		});
 };
 
 // Internal methods ---------------------------------------------------------------------------
