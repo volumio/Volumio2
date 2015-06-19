@@ -164,7 +164,7 @@ function updatePlayerQueue(arrayQueue) {
 			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
 		}
 		if ('albums' in curEntry) {
-			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.album) + '');
+			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.albums) + '');
 		}
 		if ('tracknumber' in curEntry) {
 			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
@@ -216,7 +216,7 @@ function updateBrowseView(objBrowseData) {
 			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
 		}
 		if ('albums' in curEntry) {
-			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.album) + '');
+			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.albums) + '');
 		}
 		if ('tracknumber' in curEntry) {
 			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
