@@ -47,11 +47,11 @@ CorePlayQueue.prototype.getTrackBlock = function(nStartIndex) {
 		nEndIndex++;
 	}
 
-	var arrayTrackIds = libFast.map(self.arrayQueue.slice(nStartIndex, nEndIndex + 1), function(curTrack) {
-		return curTrack.trackid;
+	var arrayUris = libFast.map(self.arrayQueue.slice(nStartIndex, nEndIndex + 1), function(curTrack) {
+		return curTrack.uri;
 	});
 
-	return libQ.resolve({service: sTargetService, trackids: arrayTrackIds, startindex: nStartIndex});
+	return libQ.resolve({service: sTargetService, uris: arrayUris, startindex: nStartIndex});
 };
 
 // Removes one item from the queue

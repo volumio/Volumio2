@@ -45,12 +45,9 @@ function ControllerMpd(nHost, nPort, commandRouter) {
 // These are 'this' aware, and return a promise
 
 // Define a method to clear, add, and play an array of tracks
-ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackIds) {
+ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackUris) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks');
-
-	// From the array of track IDs, get array of track URIs to play
-	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
 	return self.sendMpdCommandArray([
@@ -348,19 +345,4 @@ ControllerMpd.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
-
-// Internal helper functions ----------------------------------------------------------------------------------
-// These are static, and not 'this' aware
-
-// Helper function toconvert trackId to URI
-function convertTrackIdToUri(input) {
-	// Convert base64->utf8
-	return new Buffer(input, 'base64').toString('utf8');
-}
-
-// Helper function toconvert URI to trackId
-function convertUriToTrackId(input) {
-	// Convert utf8->base64
-	return new Buffer(input, 'utf8').toString('base64');
-}
 

@@ -175,6 +175,7 @@ CoreMusicLibrary.prototype.makeQueueItem = function(objTrack) {
 CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::loadLibraryFromDB');
+	self.commandRouter.pushConsoleMessage('Loading library from DB...');
 
 	self.library = {};
 

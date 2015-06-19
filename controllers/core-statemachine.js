@@ -220,19 +220,6 @@ CoreStateMachine.prototype.syncStateFromSpop = function(stateSpop) {
 	}
 };
 
-// Add the child tracks of a library object into the play queue
-CoreStateMachine.prototype.addQueueObject = function(sUid) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueObject');
-
-	return self.commandRouter.getObjectItems(sUid)
-		.then(function(arrayItems) {
-			libFast.map(arrayItems, function(curItem) {
-				self.playQueue.addQueueItem(curItem);
-			})
-		});
-};
-
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -258,12 +245,12 @@ CoreStateMachine.prototype.serviceClearAddPlay = function() {
 		return self.commandRouter.spopStop()
 		// .delay(5000) // Spop does not release ALSA immediately - adjust this delay as needed
 		.then(function() {
-			return self.commandRouter.mpdClearAddPlayTracks(trackBlock.trackids);
+			return self.commandRouter.mpdClearAddPlayTracks(trackBlock.uris);
 		});
 	} else if (trackBlock.service === 'spop') {
 		return self.commandRouter.mpdStop()
 		.then(function() {
-			return self.commandRouter.spopClearAddPlayTracks(trackBlock.trackids);
+			return self.commandRouter.spopClearAddPlayTracks(trackBlock.uris);
 		});
 	} else {
 		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"clear-add-play\" action');
@@ -457,17 +444,4 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 
 	return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
 };
-
-// Internal helper functions --------------------------------------------------------------------------
-// These are static, and not 'this' aware
-
-function convertTrackIdToUri(input) {
-	// Convert base64->utf8
-	return (new Buffer(input, 'base64')).toString('utf8');
-}
-
-function convertUriToTrackId(input) {
-	// Convert utf8->base64
-	return (new Buffer(input, 'utf8')).toString('base64');
-}
 

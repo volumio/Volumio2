@@ -118,6 +118,7 @@ function ControllerSpop(nHost, nPort, commandRouter) {
 ControllerSpop.prototype.loadTracklistFromDB = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::loadTracklistFromDB');
+	self.commandRouter.pushConsoleMessage('Loading Spop tracklist from DB...');
 
 	self.tracklist = [];
 
@@ -205,12 +206,9 @@ ControllerSpop.prototype.rebuildTracklist = function() {
 };
 
 // Define a method to clear, add, and play an array of tracks
-ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackIds) {
+ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackUris) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
-
-	// From the array of track IDs, get array of track URIs to play
-	var arrayTrackUris = libFast.map(arrayTrackIds, convertTrackIdToUri);
 
 	// Clear the queue, add the first track, and start playback
 	var firstTrack = arrayTrackUris.shift();
@@ -432,17 +430,4 @@ ControllerSpop.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
-
-// Internal helper functions --------------------------------------------------------------------------
-// These are static, and not 'this' aware
-
-function convertTrackIdToUri(input) {
-	// Convert base64->utf8
-	return (new Buffer(input, 'base64')).toString('utf8');
-}
-
-function convertUriToTrackId(input) {
-	// Convert utf8->base64
-	return (new Buffer(input, 'utf8')).toString('base64');
-}
 
