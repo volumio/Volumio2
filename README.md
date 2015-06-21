@@ -30,7 +30,6 @@ npm install
 You can run all the servers in one single step just running with nodejs
 
 ```shell
-cd volumio/
 node index.js
 ```
 
