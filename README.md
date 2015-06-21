@@ -14,24 +14,24 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
 
-Clone the repo
+Clone the repo in the directory of your choice
 
 ```shell
-git clone https://github.com/volumio/Volumio2.git /volumio/
+git clone https://github.com/volumio/Volumio2.git volumio/
 ```
 
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
-cd volumio
+cd volumio/
 npm install
 ```
 
 You can run all the servers in one single step just running with nodejs
 
 ```shell
-cd /volumio/
-node bin/www
+cd volumio/
+node index.js
 ```
 
 Finally, point your browser to http://(ip address):3000 to access the test UI.
