@@ -29,6 +29,9 @@ function CoreCommandRouter (server) {
 
 	// Start the music library
 	self.musicLibrary = new (require('./musiclibrary.js'))(self);
+
+	// Start the volume controller
+	self.VolumeController = new (require('./volumecontrol.js'))(self);
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -95,6 +98,14 @@ CoreCommandRouter.prototype.volumioRemoveQueueItem = function(nIndex) {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRemoveQueueItem');
 
 	return self.stateMachine.removeQueueItem(nIndex);
+}
+
+// Volumio Set Volume
+CoreCommandRouter.prototype.volumiosetvolume = function(VolumeInteger) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumiosetvolume' + VolumeInteger);
+
+	return self.VolumeController.alsavolume(VolumeInteger);
 }
 
 // Volumio Add Queue Uids

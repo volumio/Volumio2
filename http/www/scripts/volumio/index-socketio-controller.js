@@ -16,7 +16,10 @@ document.getElementById('button-volumiorebuildlibrary').onclick = function() {em
 document.getElementById('button-clearconsole').onclick = clearConsole;
 document.getElementById('button-libraryback').onclick = libraryBack;
 document.getElementById('button-libraryforward').onclick = libraryForward;
-
+document.getElementById('button-volumeup').onclick = function() {emitClientEvent('volume', '+');}
+document.getElementById('button-volumedown').onclick = function() {emitClientEvent('volume', '-');}
+document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'MUTE');}
+document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'UNMUTE');}
 // Create listeners for websocket events--------------------------------
 
 socket.on('connect', function() {

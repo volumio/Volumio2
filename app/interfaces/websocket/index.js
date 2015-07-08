@@ -11,43 +11,43 @@ function InterfaceWebUI (server, commandRouter) {
 	self.libSocketIO = require('socket.io')(server);
 
 	// When a websocket connection is made
-	self.libSocketIO.on('connection', function(connWebSocket) {
+	self.libSocketIO.on('connection', function (connWebSocket) {
 		// Listen for the various types of client events -----------------------------
-		connWebSocket.on('volumioGetState', function() {
+		connWebSocket.on('volumioGetState', function () {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio state')
 				.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
-				.then(function(state) {
+				.then(function (state) {
 					return self.volumioPushState.call(self, state, selfConnWebSocket);
 				})
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioGetQueue', function() {
+		connWebSocket.on('volumioGetQueue', function () {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio queue')
 				.then(libFast.bind(commandRouter.volumioGetQueue, commandRouter))
-				.then(function(queue) {
+				.then(function (queue) {
 					return self.volumioPushQueue.call(self, queue, selfConnWebSocket);
 				})
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioRemoveQueueItem', function(nIndex) {
+		connWebSocket.on('volumioRemoveQueueItem', function (nIndex) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -55,15 +55,15 @@ function InterfaceWebUI (server, commandRouter) {
 				.then(function () {
 					return commandRouter.volumioRemoveQueueItem.call(commandRouter, nIndex);
 				})
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioAddQueueUids', function(arrayUids) {
+		connWebSocket.on('volumioAddQueueUids', function (arrayUids) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -71,122 +71,140 @@ function InterfaceWebUI (server, commandRouter) {
 				.then(function () {
 					return commandRouter.volumioAddQueueUids.call(commandRouter, arrayUids);
 				})
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioBrowseLibrary', function(objBrowseParameters) {
+		connWebSocket.on('volumioBrowseLibrary', function (objBrowseParameters) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
 			self.logStart('Client requests browse')
-				.then(function() {
+				.then(function () {
 					return commandRouter.volumioBrowseLibrary.call(commandRouter, objBrowseParameters);
 				})
-				.then(function(objBrowseData) {
+				.then(function (objBrowseData) {
 					if (objBrowseData) {
 						return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioPlay', function() {
+		connWebSocket.on('volumioPlay', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio play')
 				.then(libFast.bind(commandRouter.volumioPlay, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioPause', function() {
+		connWebSocket.on('volumioPause', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio pause')
 				.then(libFast.bind(commandRouter.volumioPause, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioStop', function() {
+		connWebSocket.on('volumioStop', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio stop')
 				.then(libFast.bind(commandRouter.volumioStop, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioPrevious', function() {
+		connWebSocket.on('volumioPrevious', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio previous')
 				.then(libFast.bind(commandRouter.volumioPrevious, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioNext', function() {
+		connWebSocket.on('volumioNext', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio next')
 				.then(libFast.bind(commandRouter.volumioNext, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('spopUpdateTracklist', function() {
+		connWebSocket.on('spopUpdateTracklist', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Spop Update Tracklist')
 				.then(libFast.bind(commandRouter.spopUpdateTracklist, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					self.printConsoleMessage('Spop tracklist update completed.');
 					return self.logDone(timeStart);
 				});
 		});
 
-		connWebSocket.on('volumioRebuildLibrary', function() {
+		connWebSocket.on('volumioRebuildLibrary', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio Rebuild Library')
 				.then(libFast.bind(commandRouter.volumioRebuildLibrary, commandRouter))
-				.fail(function(error) {
+				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
-				.done(function() {
+				.done(function () {
 					self.printConsoleMessage('Volumio library rebuild completed.');
 					return self.logDone(timeStart);
 				});
 		});
+
+		connWebSocket.on('volume', function (VolumeInteger) {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests Volume ' + VolumeInteger)
+				.then(function () {
+					return commandRouter.volumiosetvolume.call(commandRouter, VolumeInteger);
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 	});
 }
+
 
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function(message) {
