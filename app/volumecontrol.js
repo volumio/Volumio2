@@ -5,11 +5,6 @@
 
 var libQ = require('kew');
 var libFast = require('fast.js');
-var libSortOn = require('sort-on');
-var libCrypto = require('crypto');
-var libBase64Url = require('base64-url');
-var libLevel = require('level');
-var libUtil = require('util');
 var spawn = require('child_process').spawn;
 
 module.exports = CoreVolumeController;
@@ -42,14 +37,14 @@ function CoreVolumeController (commandRouter) {
 
     var reDefaultDevice = /Simple mixer control \'([a-z0-9 -]+)\',[0-9]+/i;
     var defaultDeviceCache = null;
-    var defaultDevice = function(cb) {
-        if(defaultDeviceCache === null) {
+    var defaultDevice = function (cb) {
+        if (defaultDeviceCache === null) {
             amixer([], function (err, data) {
-                if(err) {
+                if (err) {
                     cb(err);
                 } else {
                     var res = reDefaultDevice.exec(data);
-                    if(res === null) {
+                    if (res === null) {
                         cb(new Error('Alsa Mixer Error: failed to parse output'));
                     } else {
                         defaultDeviceCache = res[1];
@@ -65,15 +60,15 @@ function CoreVolumeController (commandRouter) {
     var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
     var getInfo = function (cb) {
         defaultDevice(function (err, dev) {
-            if(err) {
+            if (err) {
                 cb(err);
             } else {
                 amixer(['get', dev], function (err, data) {
-                    if(err) {
+                    if (err) {
                         cb(err);
                     } else {
                         var res = reInfo.exec(data);
-                        if(res === null) {
+                        if (res === null) {
                             cb(new Error('Alsa Mixer Error: failed to parse output'));
                         } else {
                             cb(null, {
@@ -89,7 +84,7 @@ function CoreVolumeController (commandRouter) {
 
     self.getVolume = function (cb) {
         getInfo(function (err, obj) {
-            if(err) {
+            if (err) {
                 cb(err);
             } else {
                 cb(null, obj.volume);
@@ -99,7 +94,7 @@ function CoreVolumeController (commandRouter) {
 
     self.setVolume = function (val, cb) {
         defaultDevice(function (err, dev) {
-            if(err) {
+            if (err) {
                 cb(err);
             } else {
                 amixer(['set', dev, val + '%'], function (err) {
@@ -109,9 +104,9 @@ function CoreVolumeController (commandRouter) {
         });
     };
 
-    module.exports.getMuted = function (cb) {
+    self.getMuted = function (cb) {
         getInfo(function (err, obj) {
-            if(err) {
+            if (err) {
                 cb(err);
             } else {
                 cb(null, obj.muted);
@@ -119,12 +114,11 @@ function CoreVolumeController (commandRouter) {
         });
     };
 
-    module.exports.setMuted = function (val, cb) {
-        amixer(['set', 'PCM', (val?'mute':'unmute')], function (err) {
+    self.setMuted = function (val, cb) {
+        amixer(['set', 'PCM', (val ? 'mute' : 'unmute')], function (err) {
             cb(err);
         });
     };
-
 }
 // Public methods -----------------------------------------------------------------------------------
 CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
@@ -134,22 +128,31 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
     switch(VolumeInteger)
     {
         case 'MUTE':
-            //Mute
-            self.setVolume(0, function (err) {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Mute ');
+            //Mute or Unmute, depending on state
+            self.getMuted(function (err, mute) {
+            if (mute == false)
+                {
+                    self.setMuted(true, function (err) {
+                        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Muted ');
+                    });
+                } else if (mute == true) {
+                    self.setMuted(false, function (err) {
+                        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                    });
+                }
             });
             break;
         case 'UNMUTE':
             //UnMute
-            self.setVolume(50, function (err) {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMute ');
+            self.setMuted(false, function (err) {
+                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
             });
             break;
         case '+':
             //Incrase Volume by one
             this.getVolume(function (err, vol) {
                 self.setVolume(vol+1, function (err) {
-                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol+1);
+                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
                 });
             });
             break;
@@ -157,11 +160,12 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             //Decrase Volume by one
             this.getVolume(function (err, vol) {
                 self.setVolume(vol-1, function (err) {
-                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol-1);
+                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
                 });
             });
             break;
         default:
+            // Set the Volume with numeric value 0-100
             self.setVolume(VolumeInteger, function (err) {
                 self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
             });
