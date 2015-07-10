@@ -108,6 +108,24 @@ CoreCommandRouter.prototype.volumiosetvolume = function(VolumeInteger) {
 	return self.VolumeController.alsavolume(VolumeInteger);
 }
 
+// Volumio Update Volume
+CoreCommandRouter.prototype.volumioupdatevolume = function(vol) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioupdatevolume' + vol);
+
+	return self.stateMachine.updateVolume(vol);
+}
+
+// Volumio Retrieve Volume
+CoreCommandRouter.prototype.volumioretrievevolume = function(vol) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioRetrievevolume');
+
+	return self.VolumeController.retrievevolume();
+}
+
+
+
 // Volumio Add Queue Uids
 CoreCommandRouter.prototype.volumioAddQueueUids = function(arrayUids) {
 	var self = this;

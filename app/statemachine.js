@@ -19,7 +19,7 @@ function CoreStateMachine(commandRouter) {
 CoreStateMachine.prototype.getState = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
-
+	self.commandRouter.volumioretrievevolume();
 	var sService = null;
 	if ('service' in self.currentTrackBlock) {
 		sService = self.currentTrackBlock.service;
@@ -34,6 +34,7 @@ CoreStateMachine.prototype.getState = function() {
 		samplerate: self.currentSampleRate,
 		bitdepth: self.currentBitDepth,
 		channels: self.currentChannels,
+		volume: self.currentVolume,
 		service: sService
 	});
 };
@@ -321,6 +322,7 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentBitDepth = null;
 		self.currentChannels = null;
 
+
 		return self.updateTrackBlock();
 	});
 };
@@ -336,6 +338,21 @@ CoreStateMachine.prototype.startPlaybackTimer = function(nStartTime) {
 	}, 500);
 
 	return libQ.resolve();
+};
+
+//Update Volume Value
+CoreStateMachine.prototype.updateVolume = function(vol) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + vol);
+	self.currentVolume = vol;
+	return self.currentVolume;
+
+};
+CoreStateMachine.prototype.getcurrentVolume = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getcurrentVolume');
+	self.commandRouter.volumioretrievevolume();
+
 };
 
 // Stop playback timer
@@ -368,7 +385,7 @@ CoreStateMachine.prototype.pushError = function(sReason) {
 CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
-
+	self.commandRouter.volumioretrievevolume();
 	self.timeLastServiceStateUpdate = Date.now();
 
 	if (stateService.status === 'play') {

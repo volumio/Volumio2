@@ -134,6 +134,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
                 {
                     self.setMuted(true, function (err) {
                         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Muted ');
+                        self.commandRouter.volumioupdatevolume('mute');
                     });
                 } else if (mute == true) {
                     self.setMuted(false, function (err) {
@@ -153,6 +154,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             this.getVolume(function (err, vol) {
                 self.setVolume(vol+1, function (err) {
                     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+                    self.commandRouter.volumioupdatevolume(vol);
                 });
             });
             break;
@@ -161,6 +163,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             this.getVolume(function (err, vol) {
                 self.setVolume(vol-1, function (err) {
                     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+                    self.commandRouter.volumioupdatevolume(vol);
                 });
             });
             break;
@@ -171,3 +174,11 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             });
     }
 }
+
+    CoreVolumeController.prototype.retrievevolume = function() {
+        var self = this;
+        this.getVolume(function (err, vol) {
+            self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+            self.commandRouter.volumioupdatevolume(vol);
+            });
+    }
