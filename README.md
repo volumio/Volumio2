@@ -5,10 +5,23 @@
 ## Volumio 2 System Images
 
 LATEST
-* [Alpha2 (2015-31-05)](https://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha2-2015-05-31PI.img.zip)
+* [Alpha3 (2015-13-07)](http://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha3-2015-07-13PI.img.zip)
 
 PREVIOUS VERSIONS
 * [Alpha1 (2015-02-04)](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
+* [Alpha2 (2015-31-05)](https://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha2-2015-05-31PI.img.zip)
+
+
+## Volumio 2 Virtual Machines 
+
+Useful for fast developing, no need for a Raspberry Pi (also much faster)
+
+VMWARE Image is suggested, as Network configuration is tricky with Virtual Box 
+
+* [VMWare Virtual Machine](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VMWare.zip)
+* [Virtual Box Virtual Machine)](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VirtualBox.zip)
+
+
 
 System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
