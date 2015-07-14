@@ -19,7 +19,7 @@ Useful for fast developing, no need for a Raspberry Pi (also much faster)
 VMWARE Image is suggested, as Network configuration is tricky with Virtual Box 
 
 * [VMWare Virtual Machine](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VMWare.zip)
-* [Virtual Box Virtual Machine)](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VirtualBox.zip)
+* [Virtual Box Virtual Machine](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VirtualBox.zip)
 
 
 
