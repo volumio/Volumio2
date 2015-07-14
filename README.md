@@ -5,11 +5,11 @@
 ## Volumio 2 System Images
 
 LATEST
-* [Alpha3 (2015-13-07)](http://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha3-2015-07-13PI.img.zip)
+* [Alpha2 (2015-31-05)](https://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha2-2015-05-31PI.img.zip)
 
 PREVIOUS VERSIONS
 * [Alpha1 (2015-02-04)](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
-* [Alpha2 (2015-31-05)](https://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha2-2015-05-31PI.img.zip)
+
 
 
 ## Volumio 2 Virtual Machines 
