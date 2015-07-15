@@ -15,6 +15,9 @@ function CoreMusicLibrary (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
+	// Start up a extra metadata handler
+	//self.metadataCache = new (require('./metadatacache.js'))(self);
+
 	// Specify the preference for service when adding tracks to the queue
 	self.servicePriority = ['mpd', 'spop'];
 
@@ -96,7 +99,7 @@ function CoreMusicLibrary (commandRouter) {
 	self.libraryReady = libQ.reject('Library not yet loaded.');
 
 	// Attempt to load library from database on disk
-	self.sLibraryPath = './db/musiclibrary';
+	self.sLibraryPath = './app/db/musiclibrary';
 	self.loadLibraryFromDB()
 		.fail(libFast.bind(self.pushError, self));
 }
@@ -121,8 +124,9 @@ CoreMusicLibrary.prototype.browseLibrary = function(objBrowseParameters) {
 			} else if (!sSortBy) {
 				return self.getObjectInfo(objRequested, arrayPath);
 			} else if (arrayPath.length === 0) {
-
+				// TODO - return raw object?
 			} else {
+				// TODO - sort data before returning
 				return self.getObjectInfo(objRequested, arrayPath);
 			}
 		});
@@ -273,6 +277,8 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 			} catch (error) {
 				self.pushError('Unable to resolve library promise: ' + error);
 			}
+
+			//self.commandRouter.announceLibraryReset();
 
 			return libQ.resolve();
 		})
@@ -455,6 +461,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 	tableTracks[curTrackKey].uris[sService].samplerate = '';
 	tableTracks[curTrackKey].uris[sService].channels = '';
 	tableTracks[curTrackKey].uris[sService].duration = '';
+	//self.metadataCache.addTask.call(self.metadataCache, 'track', curTrackKey);
 
 	if (sAlbum === 'Greatest Hits') {
 		// The 'Greatest Hits' album name is a repeat offender for unrelated albums being grouped together.
@@ -477,6 +484,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 
 	tableAlbums[curAlbumKey].trackuids['track:' + curTrackKey] = null;
 	tableTracks[curTrackKey].albumuids['album:' + curAlbumKey] = null;
+	//self.metadataCache.addTask.call(self.metadataCache, 'album', curAlbumKey);
 
 	for (var iArtist = 0; iArtist < arrayArtists.length; iArtist++) {
 		curArtistKey = convertStringToHashkey(arrayArtists[iArtist]);
@@ -495,6 +503,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 		tableArtists[curArtistKey].trackuids['track:' + curTrackKey] = null;
 		tableAlbums[curAlbumKey].artistuids['artist:' + curArtistKey] = null;
 		tableTracks[curTrackKey].artistuids['artist:' + curArtistKey] = null;
+		//self.metadataCache.addTask.call(self.metadataCache, 'artist', curArtistKey);
 
 		for (var iGenre = 0; iGenre < arrayGenres.length; iGenre++) {
 			curGenreKey = convertStringToHashkey(arrayGenres[iGenre]);
@@ -513,6 +522,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAl
 			tableGenres[curGenreKey].albumuids['album:' + curAlbumKey] = null;
 			tableGenres[curGenreKey].trackuids['track:' + curTrackKey] = null;
 			tableArtists[curArtistKey].genreuids['genre:' + curGenreKey] = null;
+			//self.metadataCache.addTask.call(self.metadataCache, 'genre', curGenreKey);
 		}
 	}
 

@@ -107,7 +107,7 @@ function ControllerSpop(nHost, nPort, commandRouter) {
 
 	// Attempt to load tracklist from database on disk
 	// TODO make this a relative path
-	self.sTracklistPath = './app/controllers/spop/db_tracklist';
+	self.sTracklistPath = './app/controllers/spop/db/tracklist';
 	self.loadTracklistFromDB()
 	.fail(libFast.bind(self.pushError, self));
 }
