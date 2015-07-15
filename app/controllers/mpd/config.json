@@ -1,4 +1,6 @@
 {
+  "nHost":{"modifiable":false,"value":"localhost","type":"string"},
+  "nPort":{"modifiable":false,"value":"6600","type":"int"},
   "music_directory":{"modifiable":false,"value":"/var/lib/mpd/music","type":"string"},
   "playlist_directory":{"modifiable":false,"value":"/var/lib/mpd/playlists","type":"string"},
   "db_file":{"modifiable":false,"value":"/var/lib/mpd/tag_cache","type":"string"},

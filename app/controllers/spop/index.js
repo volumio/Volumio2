@@ -6,9 +6,15 @@ var fs=require('fs-extra');
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
-function ControllerSpop(nHost, nPort, commandRouter) {
+function ControllerSpop(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
+
+
+	//getting configuration
+	var config=fs.readJsonSync(__dirname+'/config.json');
+	var nHost=config['nHost'].value;
+	var nPort=config['nPort'].value;
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
@@ -108,7 +114,7 @@ function ControllerSpop(nHost, nPort, commandRouter) {
 
 	// Attempt to load tracklist from database on disk
 	// TODO make this a relative path
-	self.sTracklistPath = './app/controllers/spop/db/tracklist';
+	self.sTracklistPath = __dirname+'/db/tracklist';
 	self.loadTracklistFromDB()
 	.fail(libFast.bind(self.pushError, self));
 }
@@ -438,7 +444,7 @@ ControllerSpop.prototype.logStart = function(sCommand) {
  * The Core controller checks if the method is defined and executes it on startup if it exists.
  */
 ControllerSpop.prototype.onVolumioStart = function() {
-	console.log("Plugin mpd startup");
+	console.log("Plugin spopd startup");
 }
 
 /*

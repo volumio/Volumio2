@@ -1,5 +1,6 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
+var fs=require('fs-extra');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -15,21 +16,8 @@ function CoreCommandRouter (server) {
 	self.arrayInterfaces.push(new (require('./interfaces/websocket/index.js'))(server, self));
 	self.arrayInterfaces.push(new (require('./interfaces/mpdemulation/index.js'))(server, self));
 
-	// Start the MPD controller
-	// Move these variables out at some point
-	var nMpdPort = 6600;
-	var nMpdHost = 'localhost';
-	self.controllerMpd = new (require('./controllers/mpd/index.js'))(nMpdHost, nMpdPort, self);
-
-	var mainConfig={"locale":"IT"};
-	console.log(self.controllerMpd.getConfiguration(mainConfig));
-
-	// Start the Spop controller
-	// Move these variables out at some point
-	var nSpopPort = 6602;
-	var nSpopHost = 'localhost';
-	self.controllerSpop = new (require('./controllers/spop/index.js'))(nSpopHost, nSpopPort, self);
-	console.log(self.controllerSpop.getConfiguration(mainConfig));
+	console.log("Loading controllers...");
+	self.loadControllers();
 
 	// Start the music library
 	self.musicLibrary = new (require('./musiclibrary.js'))(self);
@@ -37,6 +25,30 @@ function CoreCommandRouter (server) {
 	// Start the volume controller
 	self.VolumeController = new (require('./volumecontrol.js'))(self);
 }
+
+CoreCommandRouter.prototype.loadControllers=function()
+{
+	var self = this;
+
+	var controllerFolders=fs.readdirSync(__dirname+'/controllers');
+	for(var i in controllerFolders)
+	{
+		var pluginName=controllerFolders[i];
+		console.log("Initializing controller "+pluginName);
+
+		var varName='controller'+self.capitalizeFirstLetter(pluginName);
+		self[varName]=new (require(__dirname+'/controllers/'+pluginName+'/index.js'))(self);
+
+		//calling onVolumioStart
+		if(self[varName].onVolumioStart !=undefined)
+			self[varName].onVolumioStart();
+	}
+}
+
+CoreCommandRouter.prototype.capitalizeFirstLetter=function(string) {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 

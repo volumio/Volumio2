@@ -1,4 +1,6 @@
 {
+  "nHost":{"modifiable":false,"value":"localhost","type":"string"},
+  "nPort":{"modifiable":false,"value":"6602","type":"int"},
   "spotify_username":{"modifiable":true,"value":"","type":"string","ui_label_key":"spotify_username"},
   "spotify_password":{"modifiable":true,"value":"","type":"password","ui_label_key":"spotify_password"},
   "high_bitrate":{"modifiable":true,"value":"true","type":"boolean","ui_label_key":"high_bitrate"},

@@ -6,9 +6,14 @@ var fs=require('fs-extra');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
-function ControllerMpd(nHost, nPort, commandRouter) {
+function ControllerMpd(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
+
+	//getting configuration
+	var config=fs.readJsonSync(__dirname+'/config.json');
+	var nHost=config['nHost'].value;
+	var nPort=config['nPort'].value;
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
