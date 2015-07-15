@@ -10,6 +10,19 @@ LATEST
 PREVIOUS VERSIONS
 * [Alpha1 (2015-02-04)](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
 
+
+
+## Volumio 2 Virtual Machines 
+
+Useful for fast developing, no need for a Raspberry Pi (also much faster)
+
+VMWARE Image is suggested, as Network configuration is tricky with Virtual Box 
+
+* [VMWare Virtual Machine](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VMWare.zip)
+* [Virtual Box Virtual Machine](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VirtualBox.zip)
+
+
+
 System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
@@ -25,6 +38,15 @@ All other dependecies are in the package JSON, from the working directory just r
 ```shell
 cd volumio/
 npm install
+```
+
+Now, download the static UI from its repo (temporary fix, untile we find an automated procedure)
+
+All other dependecies are in the package JSON, from the working directory just run
+
+```shell
+cd volumio/
+svn checkout https://github.com/volumio/Volumio2-UI/trunk/dist http
 ```
 
 You can run all the servers in one single step just running with nodejs
@@ -65,18 +87,24 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
 
 - [ ] Custom Compiled Core Packages
  - [X] MPD
- - [ ] SPOP
- - [ ] Upmpdcli
+ - [X] SPOP
+ - [X] Upmpdcli
+ - [X] Shairport Sync
  - [X] NodeJS
 
 ### Node Backend
 
 - [ ] Volumio Core
- - [X] MPD Emulation Interface
  - [X] Command Router
  - [X] WebUI Endpoints
  - [ ] Mixer Controls
+ - [X] Volume Controls
  
+- [ ] Communication Interfaces 
+ - [X] Socket.io Controller
+ - [ ] API Controller 
+ - [X] MPD Emulation Interface
+
 - [ ] Audio services Controllers
  - [X] MPD Service and Library
  - [X] SPOP Service and Library
@@ -91,13 +119,15 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
  - [ ] I2S Driver
  - [ ] Hardware Layer
  - [ ] USB Drives
- 
+ - [ ] UPNP Service Discovery 
+ - 
 ### Frontend
 
 - [ ] Volumio 2 WebUI (Playback)
- - [ ] Boostrap Based Structure
+ - [X] Boostrap Based Structure
  - [X] Playback Handling
  - [X] Library retrieval
+ - [ ] Library Sorting 
  - [ ] Airplay Hooks
 
 - [ ] Volumio 2 WebUI (Configuration)
