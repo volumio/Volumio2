@@ -2,6 +2,7 @@ var libQ = require('kew');
 var libNet = require('net');
 var libFast = require('fast.js');
 var libLevel = require('level');
+var fs=require('fs-extra');
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
@@ -431,4 +432,55 @@ ControllerSpop.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
+
+/*
+ * This method can be defined by every plugin which needs to be informed of the startup of Volumio.
+ * The Core controller checks if the method is defined and executes it on startup if it exists.
+ */
+ControllerSpop.prototype.onVolumioStart = function() {
+	console.log("Plugin mpd startup");
+}
+
+/*
+ * This method shall be defined by every plugin which needs to be configured.
+ */
+ControllerSpop.prototype.getConfiguration = function(mainConfig) {
+
+	var language=__dirname+"/i18n/"+mainConfig.locale+".json";
+	if(!fs.existsSync(language))
+	{
+		language=__dirname+"/i18n/EN.json";
+	}
+
+	var languageJSON=fs.readJsonSync(language);
+
+	var config=fs.readJsonSync(__dirname+'/config.json');
+	var uiConfig={};
+
+	for(var key in config)
+	{
+		if(config[key].modifiable==true)
+		{
+			uiConfig[key]={
+				"value":config[key].value,
+				"type":config[key].type,
+				"label":languageJSON[config[key].ui_label_key]
+			};
+
+
+			if(config[key].enabled_by!=undefined)
+				uiConfig[key].enabled_by=config[key].enabled_by;
+		}
+	}
+
+	return uiConfig;
+}
+
+
+/*
+ * This method shall be defined by every plugin which needs to be configured.
+ */
+ControllerSpop.prototype.setConfiguration = function(configuration) {
+	//DO something intelligent
+}
 

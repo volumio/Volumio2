@@ -21,11 +21,15 @@ function CoreCommandRouter (server) {
 	var nMpdHost = 'localhost';
 	self.controllerMpd = new (require('./controllers/mpd/index.js'))(nMpdHost, nMpdPort, self);
 
+	var mainConfig={"locale":"IT"};
+	console.log(self.controllerMpd.getConfiguration(mainConfig));
+
 	// Start the Spop controller
 	// Move these variables out at some point
 	var nSpopPort = 6602;
 	var nSpopHost = 'localhost';
 	self.controllerSpop = new (require('./controllers/spop/index.js'))(nSpopHost, nSpopPort, self);
+	console.log(self.controllerSpop.getConfiguration(mainConfig));
 
 	// Start the music library
 	self.musicLibrary = new (require('./musiclibrary.js'))(self);
