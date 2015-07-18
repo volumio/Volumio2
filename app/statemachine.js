@@ -35,6 +35,7 @@ CoreStateMachine.prototype.getState = function() {
 		bitdepth: self.currentBitDepth,
 		channels: self.currentChannels,
 		volume: self.currentVolume,
+		mute: self.currentMute,
 		service: sService
 	});
 };
@@ -321,8 +322,8 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentSampleRate = null;
 		self.currentBitDepth = null;
 		self.currentChannels = null;
-
-
+		self.currentVolume = null;
+		self.currentMute = null;
 		return self.updateTrackBlock();
 	});
 };
@@ -340,11 +341,25 @@ CoreStateMachine.prototype.startPlaybackTimer = function(nStartTime) {
 	return libQ.resolve();
 };
 
+
+// TODO Use a single array for Volume value and Mute Value
 //Update Volume Value
 CoreStateMachine.prototype.updateVolume = function(vol) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + vol);
 	self.currentVolume = vol;
+	self.getState()
+		.then(libFast.bind(self.pushState, self))
+		.fail(libFast.bind(self.pushError, self));
+
+
+
+};
+
+CoreStateMachine.prototype.updateMute = function(mute) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + mute);
+	self.currentMute = mute;
 	self.getState()
 		.then(libFast.bind(self.pushState, self))
 		.fail(libFast.bind(self.pushError, self));

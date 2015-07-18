@@ -116,6 +116,13 @@ CoreCommandRouter.prototype.volumioupdatevolume = function(vol) {
 	return self.stateMachine.updateVolume(vol);
 }
 
+CoreCommandRouter.prototype.volumioupdatemute = function(mute) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioupdatemute' + mute);
+
+	return self.stateMachine.updateMute(mute);
+}
+
 // Volumio Retrieve Volume
 CoreCommandRouter.prototype.volumioretrievevolume = function(vol) {
 	var self = this;
