@@ -19,7 +19,7 @@ function CoreStateMachine(commandRouter) {
 CoreStateMachine.prototype.getState = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
-	self.commandRouter.volumioretrievevolume();
+	//self.commandRouter.volumioretrievevolume();
 	var sService = null;
 	if ('service' in self.currentTrackBlock) {
 		sService = self.currentTrackBlock.service;
@@ -345,7 +345,11 @@ CoreStateMachine.prototype.updateVolume = function(vol) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + vol);
 	self.currentVolume = vol;
-	return self.currentVolume;
+	self.getState()
+		.then(libFast.bind(self.pushState, self))
+		.fail(libFast.bind(self.pushError, self));
+
+
 
 };
 CoreStateMachine.prototype.getcurrentVolume = function() {
@@ -457,7 +461,9 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 
 			return self.stopPlaybackTimer();
 		}
-	}
+	} else if (stateService.status === 'undefined') {
+	stateService.status = 'stop';
+}
 
 	return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
 };
