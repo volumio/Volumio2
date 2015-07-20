@@ -32,6 +32,9 @@ function CoreCommandRouter (server) {
 
 	// Start the volume controller
 	self.VolumeController = new (require('./volumecontrol.js'))(self);
+
+	// Start the playlist manager
+	self.playlistManager = new (require('./playlistmanager.js'))(self);
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -156,6 +159,14 @@ CoreCommandRouter.prototype.spopUpdateTracklist = function() {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 
 	return self.controllerSpop.rebuildTracklist();
+}
+
+// Volumio Import Playlists
+CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioImportServicePlaylists');
+
+	return self.playlistManager.importServicePlaylists();
 }
 
 // Methods usually called by the State Machine --------------------------------------------------------------------

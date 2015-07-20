@@ -127,33 +127,42 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 		});
 
 		if (arrayLineParts[0] === 'file') {
-			var objNewMetadata = {'title': '', 'artists': [], 'album': '', 'genres': []};
-			curEntry = {'service': 'mpd', 'uri': arrayLineParts[1], 'metadata': objNewMetadata};
+			curEntry = {
+				'name': '',
+				'service': 'mpd',
+				'uri': arrayLineParts[1],
+				'browsepath': arrayLineParts[1].split('/').slice(0, -1),
+				'artists': [],
+				'album': '',
+				'genres': [],
+				'performers': [],
+				'tracknumber': 0,
+				'date': '',
+				'duration': 0
+			};
 			objReturn.tracks.push(curEntry);
 		} else if (arrayLineParts[0] === 'playlist') {
-			var objNewMetadata = {'title': '', 'artists': [], 'album': '', 'genres': []};
-			curEntry = {'service': 'mpd', 'uri': arrayLineParts[1], 'metadata': objNewMetadata};
-			objReturn.playlists.push(curEntry);
+			// Do we even need to parse MPD playlists?
 		} else if (arrayLineParts[0] === 'Time') {
-			curEntry.metadata.duration = arrayLineParts[1];
+			curEntry.duration = arrayLineParts[1];
 		} else if (arrayLineParts[0] === 'Title') {
-			curEntry.metadata.title = arrayLineParts[1];
+			curEntry.name = arrayLineParts[1];
 		} else if (arrayLineParts[0] === 'Artist') {
-			curEntry.metadata.artists = libFast.map(arrayLineParts[1].split(','), function(sArtist) {
+			curEntry.artists = libFast.map(arrayLineParts[1].split(','), function(sArtist) {
 				// TODO - parse other options in artist string, such as "feat."
 				return sArtist.trim();
 			});
 		} else if (arrayLineParts[0] === 'AlbumArtist') {
-			curEntry.metadata.performers = libFast.map(arrayLineParts[1].split(','), function(sPerformer) {
+			curEntry.performers = libFast.map(arrayLineParts[1].split(','), function(sPerformer) {
 				return sPerformer.trim();
 			});
 		} else if (arrayLineParts[0] === 'Album') {
-			curEntry.metadata.album = arrayLineParts[1];
+			curEntry.album = arrayLineParts[1];
 		} else if (arrayLineParts[0] === 'Track') {
-			curEntry.metadata.tracknumber = Number(arrayLineParts[1]);
+			curEntry.tracknumber = Number(arrayLineParts[1]);
 		} else if (arrayLineParts[0] === 'Date') {
 			// TODO - parse into a date object
-			curEntry.metadata.date = arrayLineParts[1];
+			curEntry.date = arrayLineParts[1];
 		}
 	}
 

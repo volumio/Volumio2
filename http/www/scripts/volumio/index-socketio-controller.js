@@ -20,8 +20,9 @@ document.getElementById('button-volumeup').onclick = function() {emitClientEvent
 document.getElementById('button-volumedown').onclick = function() {emitClientEvent('volume', '-');}
 document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'MUTE');}
 document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'UNMUTE');}
-// Create listeners for websocket events--------------------------------
+document.getElementById('button-volumioimportplaylists').onclick = function() {emitClientEvent('volumioImportServicePlaylists', '');}
 
+// Create listeners for websocket events--------------------------------
 socket.on('connect', function() {
 	printConsoleMessage('Websocket connected.');
 	enableControls();

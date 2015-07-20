@@ -168,7 +168,6 @@ function InterfaceWebUI (server, commandRouter) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
 				.done(function () {
-					self.printConsoleMessage('Spop tracklist update completed.');
 					return self.logDone(timeStart);
 				});
 		});
@@ -181,7 +180,6 @@ function InterfaceWebUI (server, commandRouter) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
 				.done(function () {
-					self.printConsoleMessage('Volumio library rebuild completed.');
 					return self.logDone(timeStart);
 				});
 		});
@@ -194,6 +192,18 @@ function InterfaceWebUI (server, commandRouter) {
 				.then(function () {
 					return commandRouter.volumiosetvolume.call(commandRouter, VolumeInteger);
 				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('volumioImportServicePlaylists', function () {
+			var timeStart = Date.now();
+			self.logStart('Client requests import of playlists')
+				.then(libFast.bind(commandRouter.volumioImportServicePlaylists, commandRouter))
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})

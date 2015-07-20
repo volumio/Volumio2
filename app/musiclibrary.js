@@ -239,11 +239,12 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 
 	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
 	return self.commandRouter.getAllTracklists()
-		.then(function(arrayAllTrackLists) {
+		.then(function(arrayAllTracklists) {
 			self.commandRouter.pushConsoleMessage('Populating library...');
 
-			return libFast.map(arrayAllTrackLists, function(arrayTrackList) {
-				return self.populateLibraryFromTracklist(arrayTrackList);
+			// need to wrap this with libQ.all()?
+			return libFast.map(arrayAllTracklists, function(arrayTracklist) {
+				return self.populateLibraryFromTracklist(arrayTracklist);
 			});
 		})
 		.then(function() {
@@ -379,21 +380,13 @@ CoreMusicLibrary.prototype.getObjectInfo = function(objSource, arrayPath) {
 }
 
 // Put the contents of a tracklist into the library
-CoreMusicLibrary.prototype.populateLibraryFromTracklist = function(arrayTrackList) {
+CoreMusicLibrary.prototype.populateLibraryFromTracklist = function(arrayTracklist) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::populateLibraryFromTracklist');
 
-	return libFast.map(arrayTrackList, function(curTrack) {
-		return self.addLibraryItem(
-			curTrack['service'],
-			curTrack['uri'],
-			curTrack['metadata']['title'],
-			curTrack['metadata']['album'],
-			curTrack['metadata']['artists'],
-			curTrack['metadata']['genres'],
-			curTrack['metadata']['tracknumber'],
-			curTrack['metadata']['date']
-		);
+	// need to wrap this with libQ.all()?
+	return libFast.map(arrayTracklist, function(curTrack) {
+		return self.addLibraryItem(curTrack);
 	});
 }
 
@@ -432,19 +425,28 @@ CoreMusicLibrary.prototype.sortDataArray = function(arrayData, sSortBy) {
 }
 
 // Function to add an item to all tables in the database.
-CoreMusicLibrary.prototype.addLibraryItem = function(sService, sUri, sTitle, sAlbum, arrayArtists, arrayGenres, nTrackNumber, dateTrackDate) {
+CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 	var self = this;
+
+	var sService = curTrack.service;
+	var sUri = curTrack.uri;
+	var sName = curTrack.metadata.name;
+	var sAlbum = curTrack.metadata.album;
+	var arrayArtists = curTrack.metadata.artists;
+	var arrayGenres = curTrack.metadata.genres;
+	var nTrackNumber = curTrack.metadata.tracknumber;
+	var dateTrackDate = curTrack.metadata.date;
 
 	var tableGenres = self.library.genre;
 	var tableArtists = self.library.artist;
 	var tableAlbums = self.library.album;
 	var tableTracks = self.library.track;
 
-	curTrackKey = convertStringToHashkey(sAlbum + sTitle);
+	curTrackKey = convertStringToHashkey(sAlbum + sName);
 
 	if (!(curTrackKey in tableTracks)) {
 		tableTracks[curTrackKey] = {};
-		tableTracks[curTrackKey].name = sTitle;
+		tableTracks[curTrackKey].name = sName;
 		tableTracks[curTrackKey].uid = 'track:' + curTrackKey;
 		tableTracks[curTrackKey].type = 'track';
 		tableTracks[curTrackKey].tracknumber = nTrackNumber;

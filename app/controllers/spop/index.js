@@ -173,7 +173,9 @@ ControllerSpop.prototype.rebuildTracklist = function() {
 	// Scan the user's Spotify playlists and populate the tracklist
 	return self.sendSpopCommand('ls', [])
 	.then(JSON.parse)
-	.then(libFast.bind(self.rebuildTracklistFromSpopPlaylists, self))
+	.then(function(objPlaylists) {
+		return self.rebuildTracklistFromSpopPlaylists(objPlaylists, []);
+	})
 	.then(function() {
 		self.commandRouter.pushConsoleMessage('Storing Spop tracklist in db...');
 
@@ -362,7 +364,7 @@ ControllerSpop.prototype.pushError = function(sReason) {
 
 // Scan tracks in playlists via Spop and populates tracklist
 // Metadata fields to roughly conform to Ogg Vorbis standards (http://xiph.org/vorbis/doc/v-comment.html)
-ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput) {
+ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput, arrayPath) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklistFromSpopPlaylists');
 
@@ -371,50 +373,68 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput) 
 	}
 
 	var arrayPlaylists = objInput.playlists;
+	// We want each playlist to be parsed sequentially instead of simultaneously so that Spop is not overwhelmed
+	// with requests. Use this chained promisedActions to guarantee sequential execution.
 	var promisedActions = libQ.resolve();
 
 	libFast.map(arrayPlaylists, function(curPlaylist) {
+/*
 		if (!('index' in curPlaylist)) {
 			return;
+		}*/
+		var sPlaylistName = '';
+		if (curPlaylist.name === '') {
+			// The Starred playlist has a blank name
+			sPlaylistName = 'Starred';
+		} else {
+			sPlaylistName = curPlaylist.name;
 		}
+		var arrayNewPath = arrayPath.concat(sPlaylistName);
 
-		var curPlaylistIndex = curPlaylist.index;
+		if (curPlaylist.type === 'folder') {
+			promisedActions = promisedActions
+				.then(function() {
+					return self.rebuildTracklistFromSpopPlaylists(curPlaylist, arrayNewPath);
+				});
 
-		promisedActions = promisedActions
-		.then(function() {
-			return self.sendSpopCommand('ls', [curPlaylistIndex]);
-		})
-		.then(JSON.parse)
-		.then(function(curTracklist) {
-			var nTracks = 0;
+		} else if (curPlaylist.type === 'playlist') {
+			var curPlaylistIndex = curPlaylist.index;
 
-			if (!('tracks' in curTracklist)) {
-				return;
-			}
+			promisedActions = promisedActions
+			.then(function() {
+				return self.sendSpopCommand('ls', [curPlaylistIndex]);
+			})
+			.then(JSON.parse)
+			.then(function(curTracklist) {
+				var nTracks = 0;
 
-			nTracks = curTracklist.tracks.length;
+				if (!('tracks' in curTracklist)) {
+					return;
+				}
 
-			for (var j = 0; j < nTracks; j++) {
-				self.tracklist.push({
-					'service': 'spop',
-					'uri': curTracklist.tracks[j].uri,
-					'metadata': {
-						'title': curTracklist.tracks[j].title,
+				nTracks = curTracklist.tracks.length;
+
+				for (var j = 0; j < nTracks; j++) {
+					self.tracklist.push({
+						'name': curTracklist.tracks[j].title,
+						'service': 'spop',
+						'uri': curTracklist.tracks[j].uri,
+						'browsepath': arrayNewPath,
 						'album': curTracklist.tracks[j].album,
 						'artists': libFast.map(curTracklist.tracks[j].artist.split(','), function(sArtist) {
 							// TODO - parse other options in artist string, such as "feat."
 							return sArtist.trim();
 
 						}),
+						'performers': [],
 						'genres': [],
 						'tracknumber': 0,
-						'date': ''
-					}
-				});
-			}
-
-			return libQ.resolve();
-		});
+						'date': '',
+						'duration': 0
+					});
+				}
+			});
+		}
 	});
 
 	return promisedActions;
