@@ -27,7 +27,7 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
 
-Clone the repo in the directory of your choice
+Clone the repo in the directory of your choice (default: /volumio)
 
 ```shell
 git clone https://github.com/volumio/Volumio2.git volumio/
@@ -45,8 +45,8 @@ Now, download the static UI from its repo (temporary fix, untile we find an auto
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
-cd volumio/
-svn checkout https://github.com/volumio/Volumio2-UI/trunk/dist http
+cd /volumio
+svn checkout https://github.com/volumio/Volumio2-UI/trunk/dist http/www
 ```
 
 You can run all the servers in one single step just running with nodejs
@@ -55,7 +55,9 @@ You can run all the servers in one single step just running with nodejs
 node index.js
 ```
 
-Finally, point your browser to http://(ip address):3000 to access the test UI.
+Finally, point your browser to http://(ip address):3000 to access the UI.
+
+A DEV Console is available at http://(ip address):3000/dev
 
 To make development more confortable, a samba server is installed. This way the /volumio folder is accessible (and editable) via Network. Just mount it on your dev workstation and it will be available as local filesystem.
 Testing on PI is strongly suggested.

@@ -134,11 +134,12 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
                 {
                     self.setMuted(true, function (err) {
                         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Muted ');
-                        self.commandRouter.volumioupdatevolume('mute');
+                        self.commandRouter.volumioupdatemute('true');
                     });
                 } else if (mute == true) {
                     self.setMuted(false, function (err) {
                         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                        self.commandRouter.volumioupdatemute('false');
                     });
                 }
             });
@@ -147,14 +148,18 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             //UnMute
             self.setMuted(false, function (err) {
                 self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                self.commandRouter.volumioupdatemute('false');
             });
             break;
         case '+':
             //Incrase Volume by one
-            this.getVolume(function (err, vol) {
-                self.setVolume(vol+1, function (err) {
-                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-                    self.commandRouter.volumioupdatevolume(vol);
+            self.setMuted(false, function (err) {
+                self.getVolume(function (err, vol) {
+                    self.setVolume(vol + 1, function (err) {
+                        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+                        self.commandRouter.volumioupdatevolume(vol);
+                        self.commandRouter.volumioupdatemute('false');
+                    });
                 });
             });
             break;
@@ -169,8 +174,12 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             break;
         default:
             // Set the Volume with numeric value 0-100
-            self.setVolume(VolumeInteger, function (err) {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+            self.setMuted(false, function (err) {
+                self.setVolume(VolumeInteger, function (err) {
+                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+                    self.commandRouter.volumioupdatevolume(VolumeInteger);
+                    self.commandRouter.volumioupdatemute('false');
+                });
             });
     }
 }
