@@ -130,7 +130,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
 
     switch(VolumeInteger)
     {
-        case 'MUTE':
+        case 'mute':
             //Mute or Unmute, depending on state
             self.getMuted(function (err, mute) {
             if (mute == false)
@@ -155,7 +155,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
                 }
             });
             break;
-        case 'UNMUTE':
+        case 'unmute':
             //UnMute
             self.setMuted(false, function (err) {
                 self.getVolume(function (err, vol) {

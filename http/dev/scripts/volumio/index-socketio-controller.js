@@ -18,8 +18,8 @@ document.getElementById('button-libraryback').onclick = libraryBack;
 document.getElementById('button-libraryforward').onclick = libraryForward;
 document.getElementById('button-volumeup').onclick = function() {emitClientEvent('volume', '+');}
 document.getElementById('button-volumedown').onclick = function() {emitClientEvent('volume', '-');}
-document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'MUTE');}
-document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'UNMUTE');}
+document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'mute');}
+document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'unmute');}
 
 // Socket.io form
 var input1 = document.getElementById('form-ws-1');
