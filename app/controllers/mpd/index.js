@@ -359,11 +359,20 @@ ControllerMpd.prototype.fswatch = function () {
 			watcher.close();
 			return self.waitupdate();
 		})
+		.on('addDir', function(path) {
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
+			self.sendMpdCommand('update', []);
+			watcher.close();
+			return self.waitupdate();
+		})
 		.on('unlink', function (path) {
-			console.log('File', path, 'has been removed');
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
+			self.sendMpdCommand('update', []);
+			watcher.close();
+			return self.waitupdate();
 		})
 		.on('error', function (error) {
-			console.error('Error happened', error);
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase ERROR');
 		})
 }
 
