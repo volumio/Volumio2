@@ -2,6 +2,8 @@ var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libUtil = require('util');
+var chokidar = require('chokidar');
+
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -17,7 +19,6 @@ function ControllerMpd(nHost, nPort, commandRouter) {
 
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
-
 	// Catch and log errors
 	self.clientMpd.on('error', function(err) {
 		console.error('MPD error: ');
@@ -27,6 +28,7 @@ function ControllerMpd(nHost, nPort, commandRouter) {
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
 
+	self.fswatch();
 	// When playback status changes
 	self.clientMpd.on('system-player', function() {
 		var timeStart = Date.now();
@@ -345,4 +347,49 @@ ControllerMpd.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
+
+ControllerMpd.prototype.fswatch = function () {
+	var self = this;
+	var watcher = chokidar.watch('/mnt/', {ignored: /^\./, persistent: true, interval: 100, ignoreInitial: true});
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::StartedWatchService');
+	watcher
+		.on('add', function (path) {
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
+			self.sendMpdCommand('update', []);
+			watcher.close();
+			return self.waitupdate();
+		})
+		.on('unlink', function (path) {
+			console.log('File', path, 'has been removed');
+		})
+		.on('error', function (error) {
+			console.error('Error happened', error);
+		})
+}
+
+ControllerMpd.prototype.waitupdate = function () {
+	var self = this;
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::WaitUpdatetoFinish');
+	//self.sendMpdCommand('idle update', []);
+	//self.mpdUpdated = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'update');
+	//return self.mpdUpdated
+	//	.then(function() {
+	//		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Updated');
+	//		self.fswatch();
+	//	})
+	//	.then (function() {
+    //
+	//	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::aaa');
+	setTimeout(function() {
+		//Temporary Fix: wait 30 seconds before restarting indexing service
+
+		self.commandRouter.volumioRebuildLibrary();
+		return self.fswatch()
+	}, 30000);
+
+	//});
+
+
+}
 
