@@ -6,6 +6,9 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var spawn = require('child_process').spawn;
+var Volume = {};
+Volume.vol = null;
+Volume.mute = null;
 
 module.exports = CoreVolumeController;
 function CoreVolumeController (commandRouter) {
@@ -127,58 +130,93 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
 
     switch(VolumeInteger)
     {
-        case 'MUTE':
+        case 'mute':
             //Mute or Unmute, depending on state
             self.getMuted(function (err, mute) {
             if (mute == false)
                 {
-                    self.setMuted(true, function (err) {
+                    self.getVolume(function (err, vol) {
+                        self.setMuted(true, function (err) {
                         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Muted ');
-                        self.commandRouter.volumioupdatevolume('mute');
+                            Volume.vol = vol;
+                            Volume.mute = true;
+                        self.commandRouter.volumioupdatevolume(Volume);
+                    });
                     });
                 } else if (mute == true) {
                     self.setMuted(false, function (err) {
-                        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                        self.getVolume(function (err, vol) {
+                            self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                            Volume.vol = vol;
+                            Volume.mute = false;
+                            self.commandRouter.volumioupdatevolume(Volume);
+                    });
                     });
                 }
             });
             break;
-        case 'UNMUTE':
+        case 'unmute':
             //UnMute
             self.setMuted(false, function (err) {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                self.getVolume(function (err, vol) {
+
+                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
+                    Volume.vol = vol;
+                    Volume.mute = false;
+                    self.commandRouter.volumioupdatevolume(Volume);
+                });
             });
             break;
         case '+':
-            //Incrase Volume by one
-            this.getVolume(function (err, vol) {
-                self.setVolume(vol+1, function (err) {
-                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-                    self.commandRouter.volumioupdatevolume(vol);
+            //Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
+            self.setMuted(false, function (err) {
+                self.getVolume(function (err, vol) {
+                    self.setVolume(vol+1, function (err) {
+                        Volume.vol = vol;
+                        Volume.mute = false;
+                        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+                        self.commandRouter.volumioupdatevolume(Volume);
+
+                    });
                 });
             });
             break;
         case '-':
-            //Decrase Volume by one
+            //Decrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
             this.getVolume(function (err, vol) {
                 self.setVolume(vol-1, function (err) {
                     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-                    self.commandRouter.volumioupdatevolume(vol);
+                    Volume.vol = vol;
+                    Volume.mute = false;
+                    self.commandRouter.volumioupdatevolume(Volume);
                 });
             });
             break;
         default:
             // Set the Volume with numeric value 0-100
-            self.setVolume(VolumeInteger, function (err) {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+            self.setMuted(false, function (err) {
+                self.setVolume(VolumeInteger, function (err) {
+                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+                    Volume.vol = VolumeInteger;
+                    Volume.mute = false;
+                    self.commandRouter.volumioupdatevolume(Volume);
+                });
             });
     }
-}
+};
 
-    CoreVolumeController.prototype.retrievevolume = function() {
-        var self = this;
-        this.getVolume(function (err, vol) {
-            self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-            self.commandRouter.volumioupdatevolume(vol);
+CoreVolumeController.prototype.retrievevolume = function() {
+    var self = this;
+    this.getVolume(function (err, vol) {
+        self.getMuted(function (err, mute) {
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController:: Volume=' + vol + ' Mute =' + mute);
+        Volume.vol = vol;
+        Volume.mute = mute;
+        return libQ.resolve(Volume)
+            .then(function (Volume) {
+                self.commandRouter.volumioupdatevolume(Volume);
             });
-    }
+
+        });
+    });
+};

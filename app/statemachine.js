@@ -19,7 +19,6 @@ function CoreStateMachine(commandRouter) {
 CoreStateMachine.prototype.getState = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
-	self.commandRouter.volumioretrievevolume();
 	var sService = null;
 	if ('service' in self.currentTrackBlock) {
 		sService = self.currentTrackBlock.service;
@@ -35,6 +34,7 @@ CoreStateMachine.prototype.getState = function() {
 		bitdepth: self.currentBitDepth,
 		channels: self.currentChannels,
 		volume: self.currentVolume,
+		mute: self.currentMute,
 		service: sService
 	});
 };
@@ -321,9 +321,9 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentSampleRate = null;
 		self.currentBitDepth = null;
 		self.currentChannels = null;
-
-
-		return self.updateTrackBlock();
+		self.currentVolume = null;
+		self.currentMute = null;
+		return self.getcurrentVolume();
 	});
 };
 
@@ -340,19 +340,26 @@ CoreStateMachine.prototype.startPlaybackTimer = function(nStartTime) {
 	return libQ.resolve();
 };
 
-//Update Volume Value
-CoreStateMachine.prototype.updateVolume = function(vol) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + vol);
-	self.currentVolume = vol;
-	return self.currentVolume;
 
+
+//Update Volume Value
+CoreStateMachine.prototype.updateVolume = function(Volume) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + Volume.vol);
+	self.currentVolume = Volume.vol;
+	self.currentMute = Volume.mute;
+	self.getState()
+		.then(libFast.bind(self.pushState, self))
+		.fail(libFast.bind(self.pushError, self));
 };
+
+//Gets current Volume and Mute Status
 CoreStateMachine.prototype.getcurrentVolume = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getcurrentVolume');
 	self.commandRouter.volumioretrievevolume();
 
+	return self.updateTrackBlock();
 };
 
 // Stop playback timer
@@ -457,7 +464,9 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 
 			return self.stopPlaybackTimer();
 		}
-	}
+	} else if (stateService.status === 'undefined') {
+	stateService.status = 'stop';
+}
 
 	return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
 };

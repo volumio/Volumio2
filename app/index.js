@@ -170,16 +170,12 @@ CoreCommandRouter.prototype.volumioRemoveQueueItem = function(nIndex) {
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function(VolumeInteger) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumiosetvolume' + VolumeInteger);
-
 	return self.VolumeController.alsavolume(VolumeInteger);
 }
 
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function(vol) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioupdatevolume' + vol);
-
 	return self.stateMachine.updateVolume(vol);
 }
 
