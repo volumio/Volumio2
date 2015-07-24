@@ -2,14 +2,19 @@ var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libUtil = require('util');
+var fs=require('fs-extra');
 var chokidar = require('chokidar');
-
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
-function ControllerMpd(nHost, nPort, commandRouter) {
+function ControllerMpd(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
+
+	//getting configuration
+	var config=fs.readJsonSync(__dirname+'/config.json');
+	var nHost=config['nHost'].value;
+	var nPort=config['nPort'].value;
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
@@ -348,6 +353,56 @@ ControllerMpd.prototype.logStart = function(sCommand) {
 	return libQ.resolve();
 };
 
+/*
+ * This method can be defined by every plugin which needs to be informed of the startup of Volumio.
+ * The Core controller checks if the method is defined and executes it on startup if it exists.
+ */
+ControllerMpd.prototype.onVolumioStart = function() {
+	console.log("Plugin mpd startup");
+}
+
+/*
+ * This method shall be defined by every plugin which needs to be configured.
+ */
+ControllerMpd.prototype.getConfiguration = function(mainConfig) {
+
+	var language=__dirname+"/i18n/"+mainConfig.locale+".json";
+	if(!fs.existsSync(language))
+	{
+		language=__dirname+"/i18n/EN.json";
+	}
+
+	var languageJSON=fs.readJsonSync(language);
+
+	var config=fs.readJsonSync(__dirname+'/config.json');
+	var uiConfig={};
+
+	for(var key in config)
+	{
+		if(config[key].modifiable==true)
+		{
+			uiConfig[key]={
+				"value":config[key].value,
+				"type":config[key].type,
+				"label":languageJSON[config[key].ui_label_key]
+			};
+
+			if(config[key].enabled_by!=undefined)
+				uiConfig[key].enabled_by=config[key].enabled_by;
+		}
+	}
+
+	return uiConfig;
+}
+
+
+/*
+ * This method shall be defined by every plugin which needs to be configured.
+ */
+ControllerMpd.prototype.setConfiguration = function(configuration) {
+	//DO something intelligent
+}
+
 ControllerMpd.prototype.fswatch = function () {
 	var self = this;
 	var watcher = chokidar.watch('/mnt/', {ignored: /^\./, persistent: true, interval: 100, ignoreInitial: true});
@@ -401,4 +456,3 @@ ControllerMpd.prototype.waitupdate = function () {
 
 
 }
-

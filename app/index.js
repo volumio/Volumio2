@@ -1,5 +1,6 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
+var fs=require('fs-extra');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -15,17 +16,15 @@ function CoreCommandRouter (server) {
 	self.arrayInterfaces.push(new (require('./interfaces/websocket/index.js'))(server, self));
 	self.arrayInterfaces.push(new (require('./interfaces/mpdemulation/index.js'))(server, self));
 
-	// Start the MPD controller
-	// Move these variables out at some point
-	var nMpdPort = 6600;
-	var nMpdHost = 'localhost';
-	self.controllerMpd = new (require('./controllers/mpd/index.js'))(nMpdHost, nMpdPort, self);
 
-	// Start the Spop controller
-	// Move these variables out at some point
-	var nSpopPort = 6602;
-	var nSpopHost = 'localhost';
-	self.controllerSpop = new (require('./controllers/spop/index.js'))(nSpopHost, nSpopPort, self);
+
+	self.pushConsoleMessage('Loading controllers...');
+	self.loadControllers();
+
+	self.pushConsoleMessage('Loading plugins...');
+	self.loadPlugins();
+
+
 
 	// Start the music library
 	self.musicLibrary = new (require('./musiclibrary.js'))(self);
@@ -33,6 +32,74 @@ function CoreCommandRouter (server) {
 	// Start the volume controller
 	self.VolumeController = new (require('./volumecontrol.js'))(self);
 }
+
+CoreCommandRouter.prototype.loadControllers=function()
+{
+	var self = this;
+
+	self['controllers']={};
+
+	var controllerFolders=fs.readdirSync(__dirname+'/controllers');
+	for(var i in controllerFolders)
+	{
+		var controllerName=controllerFolders[i];
+		console.log("Initializing controller "+controllerName);
+
+		var controllerInstance=new (require(__dirname+'/controllers/'+controllerName+'/index.js'))(self);
+		self['controllers'][controllerName]=controllerInstance;
+
+		if(controllerInstance.onVolumioStart !=undefined)
+			controllerInstance.onVolumioStart();
+	}
+}
+
+CoreCommandRouter.prototype.loadPlugins=function()
+{
+	var self = this;
+
+	self['plugins']={};
+
+	var pluginsFolder=fs.readdirSync(__dirname+'/plugins');
+	for(var i in pluginsFolder)
+	{
+		var category=pluginsFolder[i];
+		self.pushConsoleMessage('Processing plugin category '+category);
+
+		var categoryArray=[];
+		self['plugins'][category]={};
+
+		var categoryFolder=fs.readdirSync(__dirname+'/plugins/'+category);
+		for(var j in categoryFolder)
+		{
+			var pluginName=categoryFolder[j];
+
+			self.pushConsoleMessage('Initializing plugin '+pluginName);
+
+			var pluginInstance=new (require(__dirname+'/plugins/'+category+'/'+pluginName+'/index.js'))(self);
+			self['plugins'][category][pluginName]=pluginInstance;
+
+			if(pluginInstance.onVolumioStart !=undefined)
+				pluginInstance.onVolumioStart();
+		}
+	}
+
+	console.log(self['plugins']);
+}
+
+CoreCommandRouter.prototype.getPlugin=function(category, name) {
+	if(self['plugins']!=undefined && self['plugins'][category]!=undefined && self['plugins'][category][name]!=undefined)
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+CoreCommandRouter.prototype.getController=function( name) {
+	if(self['plugins']!=undefined && self['plugins'][category]!=undefined && self['plugins'][category][name]!=undefined)
+		return string.charAt(0).toUpperCase() + string.slice(1);
+}
+CoreCommandRouter.prototype.capitalizeFirstLetter=function(string) {
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
@@ -151,7 +218,7 @@ CoreCommandRouter.prototype.spopUpdateTracklist = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 
-	return self.controllerSpop.rebuildTracklist();
+	return self.getController('spop').rebuildTracklist();
 }
 
 // Methods usually called by the State Machine --------------------------------------------------------------------
@@ -185,7 +252,7 @@ CoreCommandRouter.prototype.mpdClearAddPlayTracks = function(arrayTrackIds) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdClearAddPlayTracks');
 
-	return self.controllerMpd.clearAddPlayTracks(arrayTrackIds)
+	return self.getController('mpd').clearAddPlayTracks(arrayTrackIds)
 }
 
 // MPD Stop
@@ -193,7 +260,7 @@ CoreCommandRouter.prototype.mpdStop = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdStop');
 
-	return self.controllerMpd.stop();
+	return self.getController('mpd').stop();
 }
 
 // MPD Pause
@@ -201,7 +268,7 @@ CoreCommandRouter.prototype.mpdPause = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdPause');
 
-	return self.controllerMpd.pause();
+	return self.getController('mpd').pause();
 }
 
 // MPD Resume
@@ -209,7 +276,7 @@ CoreCommandRouter.prototype.mpdResume = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::mpdResume');
 
-	return self.controllerMpd.resume();
+	return self.getController('mpd').resume();
 }
 
 // Spop Clear-Add-Play
@@ -217,7 +284,7 @@ CoreCommandRouter.prototype.spopClearAddPlayTracks = function(arrayTrackIds) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
 
-	return self.controllerSpop.clearAddPlayTracks(arrayTrackIds)
+	return self.getController('spop').clearAddPlayTracks(arrayTrackIds)
 }
 
 // Spop Stop
@@ -225,7 +292,7 @@ CoreCommandRouter.prototype.spopStop = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
 
-	return self.controllerSpop.stop();
+	return self.getController('spop').stop();
 }
 
 // Spop Pause
@@ -233,7 +300,7 @@ CoreCommandRouter.prototype.spopPause = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
 
-	return self.controllerSpop.pause();
+	return self.getController('spop').pause();
 }
 
 // Spop Resume
@@ -241,7 +308,7 @@ CoreCommandRouter.prototype.spopResume = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
 
-	return self.controllerSpop.resume();
+	return self.getController('spop').resume();
 }
 
 // Methods usually called by the service controllers --------------------------------------------------------------
@@ -268,7 +335,7 @@ CoreCommandRouter.prototype.getAllTracklists = function() {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::getAllTracklists');
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
-	return libQ.all([self.controllerMpd.getTracklist(), self.controllerSpop.getTracklist()]);
+	return libQ.all([self.getController('mpd').getTracklist(), self.getController('spop').getTracklist()]);
 }
 
 // Volumio Add Queue Items
@@ -277,6 +344,11 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioAddQueueItems');
 
 	return self.stateMachine.addQueueItems(arrayItems);
+}
+
+CoreCommandRouter.prototype.getConfiguration=function(componentCode)
+{
+	console.log("_________ "+componentCode);
 }
 
 // Utility functions ---------------------------------------------------------------------------------------------
