@@ -439,54 +439,52 @@ ControllerSpop.prototype.logStart = function(sCommand) {
 	return libQ.resolve();
 };
 
-/*
- * This method can be defined by every plugin which needs to be informed of the startup of Volumio.
- * The Core controller checks if the method is defined and executes it on startup if it exists.
- */
+
+
+//Plugin methods
 ControllerSpop.prototype.onVolumioStart = function() {
-	console.log("Plugin spopd startup");
+	//Perform startup tasks here
 }
 
-/*
- * This method shall be defined by every plugin which needs to be configured.
- */
-ControllerSpop.prototype.getConfiguration = function(mainConfig) {
-
-	var language=__dirname+"/i18n/"+mainConfig.locale+".json";
-	if(!fs.existsSync(language))
-	{
-		language=__dirname+"/i18n/EN.json";
-	}
-
-	var languageJSON=fs.readJsonSync(language);
-
-	var config=fs.readJsonSync(__dirname+'/config.json');
-	var uiConfig={};
-
-	for(var key in config)
-	{
-		if(config[key].modifiable==true)
-		{
-			uiConfig[key]={
-				"value":config[key].value,
-				"type":config[key].type,
-				"label":languageJSON[config[key].ui_label_key]
-			};
-
-
-			if(config[key].enabled_by!=undefined)
-				uiConfig[key].enabled_by=config[key].enabled_by;
-		}
-	}
-
-	return uiConfig;
+ControllerSpop.prototype.onStart = function() {
+	//Perform startup tasks here
 }
 
+ControllerSpop.prototype.onStop = function() {
+	//Perform startup tasks here
+}
 
-/*
- * This method shall be defined by every plugin which needs to be configured.
- */
-ControllerSpop.prototype.setConfiguration = function(configuration) {
-	//DO something intelligent
+ControllerSpop.prototype.onRestart = function() {
+	//Perform startup tasks here
+}
+
+ControllerSpop.prototype.onInstall = function()
+{
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.onUninstall = function()
+{
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.getUIConfig = function()
+{
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.setUIConfig = function(data)
+{
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.getConf = function(varName)
+{
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.setConf = function(varName, varValue)
+{
+	//Perform your installation tasks here
 }
 
