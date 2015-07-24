@@ -87,14 +87,19 @@ CoreCommandRouter.prototype.loadPlugins=function()
 }
 
 CoreCommandRouter.prototype.getPlugin=function(category, name) {
+	var self = this;
+
 	if(self['plugins']!=undefined && self['plugins'][category]!=undefined && self['plugins'][category][name]!=undefined)
-	return string.charAt(0).toUpperCase() + string.slice(1);
+	return self['plugins'][category][name];
 }
 
 CoreCommandRouter.prototype.getController=function( name) {
-	if(self['plugins']!=undefined && self['plugins'][category]!=undefined && self['plugins'][category][name]!=undefined)
-		return string.charAt(0).toUpperCase() + string.slice(1);
+	var self = this;
+
+	if(self['controllers']!=undefined && self['controllers'][name]!=undefined)
+		return self['controllers'][name];
 }
+
 CoreCommandRouter.prototype.capitalizeFirstLetter=function(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
