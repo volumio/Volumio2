@@ -224,6 +224,24 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
+		connWebSocket.on('getMenuItems', function () {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests Menu Items')
+				.then(function () {
+					var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
+					self.libSocketIO.emit('printConsoleMessage', menuitems);
+					return self.libSocketIO.emit('pushMenuItems', menuitems);
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 	});
 }
 
