@@ -4,7 +4,7 @@ var libFast = require('fast.js');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
 Wireless = require('wireless');
-var fs = require('fs');
+var fs=require('fs-extra');
 var connected = false;
 var iface = 'wlan0';
 
@@ -19,9 +19,13 @@ module.exports = ControllerNetwork;
 
 function ControllerNetwork(commandRouter) {
 	var self = this;
+
 	//getting configuration
 	var config=fs.readJsonSync(__dirname+'/config.json');
+	var eStatic=config['ethstatic'].value;
 
+	// Save a reference to the parent commandRouter
+	self.commandRouter = commandRouter;
 }
 
 ControllerNetwork.prototype.onVolumioStart = function() {
