@@ -5,10 +5,38 @@ var libLevel = require('level');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
 
-
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
+function ControllerSpop(commandRouter) {
+	// This fixed variable will let us refer to 'this' object at deeper scopes
+	var self = this;
 
+	//getting configuration
+	var config=fs.readJsonSync(__dirname+'/config.json');
+
+	// Save a reference to the parent commandRouter
+	self.commandRouter = commandRouter;
+
+	// Init some command socket variables
+	self.bSpopCommandGotFirstMessage = false;
+	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
+	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
+	self.arrayResponseStack = [];
+	self.sResponseBuffer = '';
+
+	self.tracklist = [];
+
+	// Start tracklist promise as rejected, so requestors do not wait for it if not immediately available.
+	// This is okay because no part of Volumio requires a populated tracklist to function.
+	self.tracklistReadyDeferred = null;
+	self.tracklistReady = libQ.reject('Tracklist not yet populated.');
+
+	// Attempt to load tracklist from database on disk
+	// TODO make this a relative path
+	self.sTracklistPath = __dirname + '/db/tracklist';
+	self.loadTracklistFromDB()
+		.fail(libFast.bind(self.pushError, self));
+}
 
 ControllerSpop.prototype.onStart = function() {
 	var self = this;
@@ -94,10 +122,9 @@ ControllerSpop.prototype.onStart = function() {
 		}
 	});
 
-
 }
 
-//Plugin methods
+// Plugin methods -----------------------------------------------------------------------------
 ControllerSpop.prototype.onVolumioStart = function() {
 	var self = this;
 	exec("spopd -c /etc/spopd.conf", function (error, stdout, stderr) {
@@ -110,89 +137,46 @@ ControllerSpop.prototype.onVolumioStart = function() {
 	});
 }
 
-
-
-
-
- ControllerSpop.prototype.onStop = function() {
- var self = this;
- exec("killall spopd", function (error, stdout, stderr) {
-
- });
- }
-
- ControllerSpop.prototype.onRestart = function() {
- var self = this;
- //
- }
-
- ControllerSpop.prototype.onInstall = function()
- {
- var self = this;
- //Perform your installation tasks here
- }
-
- ControllerSpop.prototype.onUninstall = function()
- {
- var self = this;
- //Perform your installation tasks here
- }
-
- ControllerSpop.prototype.getUIConfig = function()
- {
- var self = this;
- //Perform your installation tasks here
- }
-
- ControllerSpop.prototype.setUIConfig = function(data)
- {
- var self = this;
- //Perform your installation tasks here
- }
-
- ControllerSpop.prototype.getConf = function(varName)
- {
- var self = this;
- //Perform your installation tasks here
- }
-
- ControllerSpop.prototype.setConf = function(varName, varValue)
- {
- var self = this;
- //Perform your installation tasks here
- }
-
-
-
-function ControllerSpop(commandRouter) {
-	// This fixed variable will let us refer to 'this' object at deeper scopes
+ControllerSpop.prototype.onStop = function() {
 	var self = this;
+	exec("killall spopd", function (error, stdout, stderr) {
 
-	//getting configuration
-	var config=fs.readJsonSync(__dirname+'/config.json');
+	});
+}
 
-	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+ControllerSpop.prototype.onRestart = function() {
+	var self = this;
+	//
+}
 
-	// Init some command socket variables
-	self.bSpopCommandGotFirstMessage = false;
-	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
-	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
-	self.arrayResponseStack = [];
-	self.sResponseBuffer = '';
+ControllerSpop.prototype.onInstall = function() {
+	var self = this;
+	//Perform your installation tasks here
+}
 
-	self.tracklist = [];
+ControllerSpop.prototype.onUninstall = function() {
+	var self = this;
+	//Perform your installation tasks here
+}
 
-	// Start tracklist promise as rejected, so requestors do not wait for it if not immediately available.
-	// This is okay because no part of Volumio requires a populated tracklist to function.
-	self.tracklistReadyDeferred = null;
-	self.tracklistReady = libQ.reject('Tracklist not yet populated.');
+ControllerSpop.prototype.getUIConfig = function() {
+	var self = this;
+	//Perform your installation tasks here
+}
 
-	// Attempt to load tracklist from database on disk
-	// TODO make this a relative path
-	self.sTracklistPath = __dirname+'/db/tracklist';
-	self.loadTracklistFromDB()
-	.fail(libFast.bind(self.pushError, self));
+ControllerSpop.prototype.setUIConfig = function(data) {
+	var self = this;
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.getConf = function(varName) {
+	var self = this;
+	//Perform your installation tasks here
+}
+
+ControllerSpop.prototype.setConf = function(varName, varValue) {
+	var self = this;
+	//Perform your installation tasks here
 }
 
 // Public Methods ---------------------------------------------------------------------------------------

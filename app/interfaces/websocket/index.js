@@ -226,7 +226,6 @@ function InterfaceWebUI (server, commandRouter) {
 			var timeStart = Date.now();
 			self.logStart('Client requests import of playlists')
 				.then(libFast.bind(commandRouter.volumioImportServicePlaylists, commandRouter))
-				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})

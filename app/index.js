@@ -49,12 +49,12 @@ CoreCommandRouter.prototype.loadControllers=function()
 
 		//Calling Methods needed on Volumio Start for controllers
 		if(controllerInstance.onVolumioStart !=undefined)
-			controllerInstance.onVolumioStart();
+			libFast.bind(controllerInstance.onVolumioStart, controllerInstance)();
 
 		setTimeout(function () {
 		//Calling Methods needed to initiate Controllers
 			if(controllerInstance.onStart !=undefined)
-			return controllerInstance.onStart();
+				return libFast.bind(controllerInstance.onStart, controllerInstance)();
 		}, 1500)
 
 
