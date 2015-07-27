@@ -1,5 +1,5 @@
 var express = require('express');
-var app = require('/volumio/http/index.js')
+var app = require('../../../http/index.js')
 var bodyParser = require('body-parser');
 var ip = require('ip');
 var api = express.Router();

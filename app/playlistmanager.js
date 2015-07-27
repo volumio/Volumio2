@@ -14,7 +14,7 @@ function CorePlaylistManager (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	self.playlistDB = {'index': []};
+	self.playlistDB = {'playlist': {}, 'item': {}};
 }
 
 // Import existing playlists and folders from the various services
@@ -27,14 +27,14 @@ CorePlaylistManager.prototype.importServicePlaylists = function() {
 			self.commandRouter.pushConsoleMessage('Importing playlists from music services...');
 
 			return libQ.all(libFast.map(arrayAllTracklists, function(arrayTracklist) {
-				return libQ.all(libFast.map(arrayTracklist, function(curTrack) {
+				return libQ.all(libFast.map([arrayTracklist[0]], function(curTrack) {
 					return self.addPlaylistItem(curTrack);
 				}));
 			}));
-		});
+		})
 		.then(function() {
-			//console.log(libUtil.inspect(self.playlistDB, {depth: null}));
-			 self.commandRouter.pushConsoleMessage('Playlists imported.');
+			console.log(libUtil.inspect(self.playlistDB, {depth: null}));
+			self.commandRouter.pushConsoleMessage('Playlists imported.');
 		});
 }
 
@@ -54,7 +54,7 @@ CorePlaylistManager.prototype.addPlaylistItem = function(curTrack) {
 		if (!(sCurKey in self.playlistDB)) {
 			self.playlistDB[sCurKey] = {
 				'name': sCurPath,
-				'uid': sCurKey,
+				'uid': 'folder:' + sCurKey,
 				'type': 'folder',
 				'fullpath': arrayCurFullPath,
 				'children': []
@@ -78,15 +78,15 @@ CorePlaylistManager.prototype.addPlaylistItem = function(curTrack) {
 	var curTrackKey = convertStringToHashkey(curTrack.album + curTrack.name);
 	self.playlistDB[sCurKey].children.push({
 		'name': curTrack.name,
-		'uid': curTrackKey,
-		'type': 'track',
+		'uid': 'track:' + curTrackKey,
+		'type': 'track'/*,
 		'service': curTrack.service,
 		'uri': curTrack.uri,
 		'artists': curTrack.artists,
 		'albums': curTrack.albums,
 		'tracknumber': curTrack.tracknumber,
 		'date': curTrack.date,
-		'duration': curTrack.duration
+		'duration': curTrack.duration*/
 	});
 
 }
