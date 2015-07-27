@@ -9,15 +9,12 @@ module.exports=Config;
 function Config()
 {
     var self=this;
-
-    self.fileName="";
 }
 
 Config.prototype.loadFile=function(file)
 {
     var self=this;
 
-    self.fileName=file;
     self.data=fs.readJsonSync(file);
 }
 
@@ -46,12 +43,41 @@ Config.prototype.get=function(key)
 {
     var self=this;
     var prop=self.findProp(key);
-    return prop.value;
+
+    if(prop!=undefined)
+        return prop.value;
 }
 
 Config.prototype.set=function(key,value)
 {
     var self=this;
     var prop=self.findProp(key);
-    prop.value=value;
+
+    if(prop!=undefined)
+        prop.value=value;
+}
+
+Config.prototype.addConfigValue=function(key,type,value)
+{
+    var self=this;
+
+    var splitted=key.split('.');
+    var currentProp=self.data;
+
+    while (splitted.length > 0) {
+        var k = splitted.shift();
+
+        if(currentProp && currentProp[k]!=undefined)
+            currentProp=currentProp[k];
+        else
+        {
+            currentProp[k]={};
+            currentProp=currentProp[k];
+        }
+    }
+
+    var prop=self.findProp(key);
+    prop['type']=type;
+    prop['value']=value;
+
 }
