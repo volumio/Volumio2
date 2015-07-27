@@ -1,0 +1,9 @@
+{
+  "spotify_username":"Spotify username",
+  "spotify_password":"Spotify password",
+  "high_bitrate":"High quality",
+  "search_results":"Number of results",
+  "plugins":"Last.fm",
+  "last_fm_username":"Last.fm username",
+  "last_fm_password":"Last.fm password"
+}

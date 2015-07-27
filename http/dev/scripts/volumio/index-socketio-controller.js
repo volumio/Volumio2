@@ -18,9 +18,22 @@ document.getElementById('button-libraryback').onclick = libraryBack;
 document.getElementById('button-libraryforward').onclick = libraryForward;
 document.getElementById('button-volumeup').onclick = function() {emitClientEvent('volume', '+');}
 document.getElementById('button-volumedown').onclick = function() {emitClientEvent('volume', '-');}
-document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'MUTE');}
-document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'UNMUTE');}
+document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'mute');}
+document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'unmute');}
 document.getElementById('button-volumioimportplaylists').onclick = function() {emitClientEvent('volumioImportServicePlaylists', '');}
+
+// Socket.io form
+var input1 = document.getElementById('form-ws-1');
+var input2 = document.getElementById('form-ws-2');
+
+document.querySelector('form.pure-form').addEventListener('submit', function (e) {
+
+	//prevent the normal submission of the form
+	e.preventDefault();
+	// Emit first and second input value
+	socket.emit(input1.value, input2.value);
+	printConsoleMessage('WS Message '+ input1.value + ' ' + input2.value );
+});
 
 // Create listeners for websocket events--------------------------------
 socket.on('connect', function() {

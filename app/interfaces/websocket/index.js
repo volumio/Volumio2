@@ -1,18 +1,40 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 
-// Define the InterfaceWebUI class
+/** Define the InterfaceWebUI class (Used by DEV UI)
+ *
+ * @type {InterfaceWebUI}
+ */
 module.exports = InterfaceWebUI;
 function InterfaceWebUI (server, commandRouter) {
 	var self = this;
 	self.commandRouter = commandRouter;
 
-	// Init SocketIO listener, unique to each instance of InterfaceWebUI
+	/** Init SocketIO listener */
 	self.libSocketIO = require('socket.io')(server);
 
-	// When a websocket connection is made
+	/** On Client Connection, listen for various types of clients requests
+	 *
+	 */
 	self.libSocketIO.on('connection', function (connWebSocket) {
-		// Listen for the various types of client events -----------------------------
+
+		/** Request Volumio State
+		 * It returns an array definining the Playback state, Volume and other amenities
+		 * @example {"status":"stop","position":0,"dynamictitle":null,"seek":0,"duration":0,"samplerate":null,"bitdepth":null,"channels":null,"volume":82,"mute":false,"service":null}
+		 *
+		 * where
+		 * @status is the status of the player
+		 * @position is the position in the play queue of current playing track (if any)
+		 * @dynamictitle is the title
+		 * @seek is track's current elapsed play time
+		 * @duration track's duration
+		 * @samplerate current samplerate
+		 * @bitdepth bitdepth
+		 * @channels mono or stereo
+		 * @volume current Volume
+		 * @mute if true, Volumio is muted
+		 * @service current playback service (mpd, spop...)
+		 */
 		connWebSocket.on('volumioGetState', function () {
 			selfConnWebSocket = this;
 
@@ -204,6 +226,41 @@ function InterfaceWebUI (server, commandRouter) {
 			var timeStart = Date.now();
 			self.logStart('Client requests import of playlists')
 				.then(libFast.bind(commandRouter.volumioImportServicePlaylists, commandRouter))
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('getMenuItems', function () {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests Menu Items')
+				.then(function () {
+					var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
+					self.libSocketIO.emit('printConsoleMessage', menuitems);
+					return self.libSocketIO.emit('pushMenuItems', menuitems);
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('wirelessScan', function() {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests Wireless Network Scan ')
+				.then(function () {
+					return commandRouter.volumiowirelessscan.call(commandRouter);
+				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})

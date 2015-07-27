@@ -1,0 +1,8 @@
+{
+  "ethstatic":{"modifiable":true,"value":"false","type":"boolean","ui_label_key":"eth_static"},
+  "ethip":{"modifiable":true,"value":"","type":"ip","ui_label_key":"eth_ip"},
+  "ethnetmask":{"modifiable":true,"value":"","type":"ip","ui_label_key":"eth_netmask"},
+  "ethgateway":{"modifiable":true,"value":"","type":"ip","ui_label_key":"eth_gateway"},
+  "wlanssid":{"modifiable":true,"value":"","type":"string","ui_label_key":"wlan_ssid"},
+  "wlanpass":{"modifiable":true,"value":"","type":"string","ui_label_key":"wlan_pass"}
+}

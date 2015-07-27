@@ -19,7 +19,6 @@ function CoreStateMachine(commandRouter) {
 CoreStateMachine.prototype.getState = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
-	//self.commandRouter.volumioretrievevolume();
 	var sService = null;
 	if ('service' in self.currentTrackBlock) {
 		sService = self.currentTrackBlock.service;
@@ -324,7 +323,7 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentChannels = null;
 		self.currentVolume = null;
 		self.currentMute = null;
-		return self.updateTrackBlock();
+		return self.getcurrentVolume();
 	});
 };
 
@@ -342,36 +341,25 @@ CoreStateMachine.prototype.startPlaybackTimer = function(nStartTime) {
 };
 
 
-// TODO Use a single array for Volume value and Mute Value
+
 //Update Volume Value
-CoreStateMachine.prototype.updateVolume = function(vol) {
+CoreStateMachine.prototype.updateVolume = function(Volume) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + vol);
-	self.currentVolume = vol;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + Volume.vol);
+	self.currentVolume = Volume.vol;
+	self.currentMute = Volume.mute;
 	self.getState()
 		.then(libFast.bind(self.pushState, self))
 		.fail(libFast.bind(self.pushError, self));
-
-
-
 };
 
-CoreStateMachine.prototype.updateMute = function(mute) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + mute);
-	self.currentMute = mute;
-	self.getState()
-		.then(libFast.bind(self.pushState, self))
-		.fail(libFast.bind(self.pushError, self));
-
-
-
-};
+//Gets current Volume and Mute Status
 CoreStateMachine.prototype.getcurrentVolume = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getcurrentVolume');
 	self.commandRouter.volumioretrievevolume();
 
+	return self.updateTrackBlock();
 };
 
 // Stop playback timer
