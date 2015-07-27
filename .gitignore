@@ -30,3 +30,4 @@ node_modules
 # Other ignores
 *.swp
 spotify-login.txt
+.idea
