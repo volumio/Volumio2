@@ -3,7 +3,7 @@ var libNet = require('net');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
-Wireless = require('wireless');
+var Wireless = require('./lib/index.js');
 var fs=require('fs-extra');
 var connected = false;
 var iface = 'wlan0';
@@ -109,9 +109,65 @@ ControllerNetwork.prototype.setAdditionalConf = function()
 	//Perform your installation tasks here
 }
 
+
+var wireless = new Wireless({
+	iface: iface,
+	updateFrequency: 15,
+	vanishThreshold: 7,
+});
+
 ControllerNetwork.prototype.scanWirelessNetworks = function()
 {
 
+	wireless.enable(function(error) {
+		if (error) {
+			console.log("[ FAILURE] Unable to enable wireless card. Quitting...");
+			return;
+		}
+		console.log("[PROGRESS] Starting wireless scan...");
+
+		wireless.start();
+	});
+
+	wireless.on('appear', function(network) {
+		var quality = Math.floor(network.quality / 100 * 100);
+
+
+		if(network.strength >= 65)
+			signalStrength = 5;
+		else if(network.strength >= 50)
+			signalStrength = 4;
+		else if(network.strength >= 40)
+			signalStrength = 3;
+		else if(network.strength >= 30)
+			signalStrength = 2;
+		else if(network.strength >= 20)
+			signalStrength = 1;
+		var ssid = network.ssid || undefined;
+
+		var encryption_type = 'Open';
+		if (network.encryption_wep) {
+			encryption_type = 'WEP';
+		} else if (network.encryption_wpa && network.encryption_wpa2) {
+			encryption_type = 'WPA&WPA2';
+		} else if (network.encryption_wpa) {
+			encryption_type = 'WPA';
+		} else if (network.encryption_wpa2) {
+			encryption_type = 'WPA2';
+		}
+
+
+		wireless.stop(
+
+		function printit() {
+
+			var self = this;
+			if (ssid != undefined) {
+				console.log(ssid + " " + self.signalStrength + " " + encryption_type);
+			}
+		}
+		)
+	});
 }
 
 

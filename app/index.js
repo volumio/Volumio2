@@ -206,8 +206,6 @@ CoreCommandRouter.prototype.volumioretrievevolume = function(vol) {
 	return self.VolumeController.retrievevolume();
 }
 
-
-
 // Volumio Add Queue Uids
 CoreCommandRouter.prototype.volumioAddQueueUids = function(arrayUids) {
 	var self = this;
@@ -238,6 +236,14 @@ CoreCommandRouter.prototype.spopUpdateTracklist = function() {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 
 	return self.getController('spop').rebuildTracklist();
+}
+
+// Start WirelessScan
+CoreCommandRouter.prototype.volumiowirelessscan = function() {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::StartWirelessScan');
+
+	return self.getController('network').scanWirelessNetworks();
 }
 
 // Methods usually called by the State Machine --------------------------------------------------------------------

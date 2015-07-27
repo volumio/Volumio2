@@ -242,6 +242,22 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
+		connWebSocket.on('wirelessScan', function() {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests Wireless Network Scan ')
+				.then(function () {
+					return commandRouter.volumiowirelessscan.call(commandRouter);
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		})
+
 	});
 }
 
