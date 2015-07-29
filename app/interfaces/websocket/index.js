@@ -266,7 +266,7 @@ function InterfaceWebUI (server, commandRouter) {
 				.done(function () {
 					return self.logDone(timeStart);
 				});
-		});
+		})
 
 	});
 }

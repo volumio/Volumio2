@@ -112,13 +112,13 @@ ControllerNetwork.prototype.setAdditionalConf = function()
 
 var wireless = new Wireless({
 	iface: iface,
-	updateFrequency: 15,
+	updateFrequency: 20,
 	vanishThreshold: 7,
 });
 
 ControllerNetwork.prototype.scanWirelessNetworks = function()
 {
-
+	var self = this;
 	wireless.enable(function(error) {
 		if (error) {
 			console.log("[ FAILURE] Unable to enable wireless card. Quitting...");
@@ -133,15 +133,15 @@ ControllerNetwork.prototype.scanWirelessNetworks = function()
 		var quality = Math.floor(network.quality / 100 * 100);
 
 
-		if(network.strength >= 65)
+		if (network.strength >= 65)
 			signalStrength = 5;
-		else if(network.strength >= 50)
+		else if (network.strength >= 50)
 			signalStrength = 4;
-		else if(network.strength >= 40)
+		else if (network.strength >= 40)
 			signalStrength = 3;
-		else if(network.strength >= 30)
+		else if (network.strength >= 30)
 			signalStrength = 2;
-		else if(network.strength >= 20)
+		else if (network.strength >= 20)
 			signalStrength = 1;
 		var ssid = network.ssid || undefined;
 
@@ -157,17 +157,36 @@ ControllerNetwork.prototype.scanWirelessNetworks = function()
 		}
 
 
-		wireless.stop(
-
-		function printit() {
-
+		if (ssid != undefined) {
 			var self = this;
-			if (ssid != undefined) {
-				console.log(ssid + " " + self.signalStrength + " " + encryption_type);
-			}
+			var result = JSON.stringify({
+				networs_ssid: ssid,
+				signal: signalStrength,
+				encryption: encryption_type
+			});
+
+
+
+
+		wireless.disable(function () {
+			wireless.stop(
+				print(result));
+
+		});
 		}
-		)
 	});
+	function print(networkarray) {
+		self.pushWirelessNetworks(networkarray);
+	}
+
+
+
+}
+
+ControllerNetwork.prototype.pushWirelessNetworks = function(scanresult) {
+	var self = this;
+
+	return self.commandRouter.volumiopushwirelessnetworks(scanresult);
 }
 
 
