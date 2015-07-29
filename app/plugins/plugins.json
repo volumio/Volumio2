@@ -1,3 +1,14 @@
 {
-
+  "music_services": {
+    "spop": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STOPPED"
+      }
+    }
+  }
 }

@@ -9,13 +9,28 @@ module.exports=Config;
 function Config()
 {
     var self=this;
+
+    self.autosave=true;
+    self.autosaveDelay=1000;
+    self.saved=true;
 }
 
 Config.prototype.loadFile=function(file)
 {
     var self=this;
 
-    self.data=fs.readJsonSync(file);
+    self.filePath=file;
+
+    try
+    {
+        self.data=fs.readJsonSync(file);
+    }
+    catch(ex)
+    {
+        self.data={};
+        console.log('[' + Date.now() + '] Error reading configuration. Defaulting to empty conifguration');
+    }
+
 }
 
 Config.prototype.findProp=function(key)
@@ -54,7 +69,28 @@ Config.prototype.set=function(key,value)
     var prop=self.findProp(key);
 
     if(prop!=undefined)
+    {
         prop.value=value;
+        self.scheduleSave();
+    }
+
+}
+
+Config.prototype.scheduleSave=function()
+{
+    var self=this;
+    self.saved=false;
+
+    setTimeout(function()
+    {
+        if(self.saved==false)
+        {
+            self.saved=true;
+            fs.writeJsonSync(self.filePath,self.data);
+        }
+
+    },self.autosaveDelay);
+
 }
 
 Config.prototype.addConfigValue=function(key,type,value)
@@ -80,4 +116,5 @@ Config.prototype.addConfigValue=function(key,type,value)
     prop['type']=type;
     prop['value']=value;
 
+    self.scheduleSave();
 }
