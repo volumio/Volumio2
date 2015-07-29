@@ -249,6 +249,11 @@ CoreCommandRouter.prototype.volumiowirelessscan = function() {
 	return self.getController('network').scanWirelessNetworks();
 }
 
+// Push WirelessScan Results (TODO SEND VIA WS)
+CoreCommandRouter.prototype.volumiopushwirelessnetworks = function(results) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + results);
+}
 // Volumio Import Playlists
 CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
 	var self = this;
