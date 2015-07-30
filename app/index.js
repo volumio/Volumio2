@@ -13,11 +13,13 @@ function CoreCommandRouter (server) {
 	self.arrayInterfaces.push(new (require('./interfaces/websocket/index.js'))(server, self));
 	self.arrayInterfaces.push(new (require('./interfaces/mpdemulation/index.js'))(server, self));
 
-	self.pushConsoleMessage('Loading controllers...');
+	self.pushConsoleMessage('[' + Date.now() + '] ' +'Loading controllers...');
 	self.loadControllers();
 
-	self.pushConsoleMessage('Loading plugins...');
-	self.loadPlugins();
+	self.pushConsoleMessage('[' + Date.now() + '] ' +'Loading plugins...');
+	self.pluginManager=new (require(__dirname+'/pluginsManager.js'))(self);
+	self.pluginManager.loadPlugins();
+	self.pluginManager.startPlugins();
 
 	// Start the state machine
 	self.stateMachine = new (require('./statemachine.js'))(self);

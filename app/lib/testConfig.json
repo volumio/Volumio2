@@ -1,0 +1,21 @@
+{
+  "debug":{
+    "type" :"boolean",
+    "value" : false
+  },
+  "env":{
+    "type":"string",
+    "value":"TEST"
+  },
+  "structured":{
+    "a":{
+      "type":"integer",
+      "value":100
+    },
+    "b":{
+      "type":"integer",
+      "value":200
+    }
+  }
+
+}
