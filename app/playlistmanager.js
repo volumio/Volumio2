@@ -14,7 +14,8 @@ function CorePlaylistManager (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	self.playlistDB = {'playlist': {}, 'item': {}};
+	self.playlistFS = {};
+	self.root = [];
 }
 
 // Import existing playlists and folders from the various services
@@ -27,15 +28,21 @@ CorePlaylistManager.prototype.importServicePlaylists = function() {
 			self.commandRouter.pushConsoleMessage('Importing playlists from music services...');
 
 			return libQ.all(libFast.map(arrayAllTracklists, function(arrayTracklist) {
-				return libQ.all(libFast.map([arrayTracklist[0]], function(curTrack) {
+				return libQ.all(libFast.map([arrayTracklist[0], arrayTracklist[1], arrayTracklist[2]], function(curTrack) {
 					return self.addPlaylistItem(curTrack);
 				}));
 			}));
 		})
 		.then(function() {
-			console.log(libUtil.inspect(self.playlistDB, {depth: null}));
+			console.log(libUtil.inspect(self.root, {depth: null}));
 			self.commandRouter.pushConsoleMessage('Playlists imported.');
 		});
+}
+
+CorePlaylistManager.prototype.getRoot = function() {
+	var self = this;
+
+	return self.root;
 }
 
 // Add an track into the playlist filesystem
@@ -43,51 +50,58 @@ CorePlaylistManager.prototype.addPlaylistItem = function(curTrack) {
 	var self = this;
 
 	var arrayPath = curTrack.browsepath;
-	var objCurDepth = self.playlistDB.root;
 	var arrayCurFullPath = [];
-	var sCurKey = '';
+	var curFolderKey = '';
 
-	libFast.map(arrayPath, function(sCurPath) {
+	libFast.map(arrayPath, function(sCurPath, nIndex) {
 		arrayCurFullPath = arrayCurFullPath.concat(sCurPath);
 
-		sCurKey = convertStringToHashkey(arrayCurFullPath.join('/'));
-		if (!(sCurKey in self.playlistDB)) {
-			self.playlistDB[sCurKey] = {
+		curFolderKey = convertStringToHashkey(arrayCurFullPath.join('/'));
+		if (!(curFolderKey in self.playlistFS)) {
+			self.playlistFS[curFolderKey] = {
 				'name': sCurPath,
-				'uid': 'folder:' + sCurKey,
 				'type': 'folder',
+				'uid': curFolderKey,
 				'fullpath': arrayCurFullPath,
-				'children': []
+				'childindex': [],
+				'childuids': {}
 			};
+
+			if (nIndex === 0) {
+				self.root.push({
+					'name': sCurPath,
+					'type': 'folder',
+					'uid': curFolderKey
+				});
+			}
 		}
 
-		var objIndexEntry = {
-			'name': sCurPath,
-			'uid': sCurKey,
-			'type': 'folder'
-		};
 		var arrayParentPath = arrayCurFullPath.slice(0, -1);
 		if (arrayParentPath.length > 0) {
 			var sParentKey = convertStringToHashkey(arrayParentPath.join('/'));
-			self.playlistDB[sParentKey].children.push(objIndexEntry);
-		} else {
-			self.playlistDB.index.push(objIndexEntry);
+			if (!(curFolderKey in self.playlistFS[sParentKey].childuids)) {
+				var objChildEntry = {
+					'name': sCurPath,
+					'type': 'folder',
+					'uid': curFolderKey
+				};
+
+				self.playlistFS[sParentKey].childindex.push(objChildEntry);
+				self.playlistFS[sParentKey].childuids[curFolderKey] = null;
+			}
 		}
 	});
 
 	var curTrackKey = convertStringToHashkey(curTrack.album + curTrack.name);
-	self.playlistDB[sCurKey].children.push({
+	self.playlistFS[curFolderKey].childindex.push({
 		'name': curTrack.name,
-		'uid': 'track:' + curTrackKey,
-		'type': 'track'/*,
+		'type': 'item',
+		'trackuid': 'track:' + curTrackKey,
 		'service': curTrack.service,
 		'uri': curTrack.uri,
-		'artists': curTrack.artists,
-		'albums': curTrack.albums,
-		'tracknumber': curTrack.tracknumber,
-		'date': curTrack.date,
-		'duration': curTrack.duration*/
+		'duration': curTrack.duration
 	});
+	self.playlistFS[curFolderKey].childuids[curTrackKey] = null;
 
 }
 
