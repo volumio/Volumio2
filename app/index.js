@@ -19,6 +19,7 @@ function CoreCommandRouter (server) {
 	self.pushConsoleMessage('[' + Date.now() + '] ' +'Loading plugins...');
 	self.pluginManager=new (require(__dirname+'/pluginsManager.js'))(self);
 	self.pluginManager.loadPlugins();
+	self.pluginManager.onVolumioStart();
 	self.pluginManager.startPlugins();
 
 	// Start the state machine
@@ -61,48 +62,6 @@ CoreCommandRouter.prototype.loadControllers=function()
 
 
 	}
-}
-
-CoreCommandRouter.prototype.loadPlugins=function()
-{
-	var self = this;
-
-	self['plugins']={};
-
-	var pluginsFolder=fs.readdirSync(__dirname+'/plugins');
-	for(var i in pluginsFolder)
-	{
-		var category=pluginsFolder[i];
-		self.pushConsoleMessage('Processing plugin category '+category);
-
-		var categoryArray=[];
-		self['plugins'][category]={};
-
-		var categoryFolder=fs.readdirSync(__dirname+'/plugins/'+category);
-		for(var j in categoryFolder)
-		{
-			var pluginName=categoryFolder[j];
-
-			self.pushConsoleMessage('Initializing plugin '+pluginName);
-
-			var pluginInstance=new (require(__dirname+'/plugins/'+category+'/'+pluginName+'/index.js'))(self);
-			self['plugins'][category][pluginName]=pluginInstance;
-
-
-			//Calling Methods needed on Volumio Start for plugins
-			if(pluginInstance.onVolumioStart !=undefined)
-				pluginInstance.onVolumioStart();
-
-			//Calling Methods needed to initiate Plugins
-			setTimeout(function () {
-				if(pluginInstance.onStart !=undefined)
-					pluginInstance.onStart();
-			}, 1500)
-
-		}
-	}
-
-	console.log(self['plugins']);
 }
 
 CoreCommandRouter.prototype.getPlugin=function(category, name) {
@@ -240,7 +199,7 @@ CoreCommandRouter.prototype.spopUpdateTracklist = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 
-	return self.getController('spop').rebuildTracklist();
+	return self.pluginManager.getPlugin('music_services','spop').rebuildTracklist();
 }
 
 // Start WirelessScan
