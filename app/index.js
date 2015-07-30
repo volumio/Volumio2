@@ -286,7 +286,7 @@ CoreCommandRouter.prototype.spopClearAddPlayTracks = function(arrayTrackIds) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
 
-	return self.getController('spop').clearAddPlayTracks(arrayTrackIds)
+	return self.pluginManager.getPlugin('music_services','spop').clearAddPlayTracks(arrayTrackIds)
 }
 
 // Spop Stop
@@ -294,7 +294,7 @@ CoreCommandRouter.prototype.spopStop = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
 
-	return self.getController('spop').stop();
+	return self.pluginManager.getPlugin('music_services','spop').stop();
 }
 
 // Spop Pause
@@ -302,7 +302,7 @@ CoreCommandRouter.prototype.spopPause = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
 
-	return self.getController('spop').pause();
+	return self.pluginManager.getPlugin('music_services','spop').pause();
 }
 
 // Spop Resume
@@ -310,7 +310,7 @@ CoreCommandRouter.prototype.spopResume = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
 
-	return self.getController('spop').resume();
+	return self.pluginManager.getPlugin('music_services','spop').resume();
 }
 
 // Methods usually called by the service controllers --------------------------------------------------------------
@@ -337,7 +337,7 @@ CoreCommandRouter.prototype.getAllTracklists = function() {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::getAllTracklists');
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
-	return libQ.all([self.getController('mpd').getTracklist(), self.getController('spop').getTracklist()]);
+	return libQ.all([self.getController('mpd').getTracklist(), self.pluginManager.getPlugin('music_services','spop').getTracklist()]);
 }
 
 // Volumio Add Queue Items
