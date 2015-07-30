@@ -1,6 +1,6 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
-
+var now = new Date();
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
  * @type {InterfaceWebUI}
@@ -233,11 +233,11 @@ function InterfaceWebUI (server, commandRouter) {
 
 InterfaceWebUI.prototype.runActions = function(promisedActions, sStartMessage) {
 	var self = this;
-
+	var timeStart = Date.now();
 	return self.logStart(sStartMessage)
 		.then(function() {
 			return promisedActions;
-		}
+			})
 		.fail(function (error) {
 			self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 		})
