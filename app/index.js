@@ -19,6 +19,7 @@ function CoreCommandRouter (server) {
 	self.pushConsoleMessage('[' + Date.now() + '] ' +'Loading plugins...');
 	self.pluginManager=new (require(__dirname+'/pluginsManager.js'))(self);
 	self.pluginManager.loadPlugins();
+	self.pluginManager.onVolumioStart();
 	self.pluginManager.startPlugins();
 
 	// Start the state machine
@@ -61,48 +62,6 @@ CoreCommandRouter.prototype.loadControllers=function()
 
 
 	}
-}
-
-CoreCommandRouter.prototype.loadPlugins=function()
-{
-	var self = this;
-
-	self['plugins']={};
-
-	var pluginsFolder=fs.readdirSync(__dirname+'/plugins');
-	for(var i in pluginsFolder)
-	{
-		var category=pluginsFolder[i];
-		self.pushConsoleMessage('Processing plugin category '+category);
-
-		var categoryArray=[];
-		self['plugins'][category]={};
-
-		var categoryFolder=fs.readdirSync(__dirname+'/plugins/'+category);
-		for(var j in categoryFolder)
-		{
-			var pluginName=categoryFolder[j];
-
-			self.pushConsoleMessage('Initializing plugin '+pluginName);
-
-			var pluginInstance=new (require(__dirname+'/plugins/'+category+'/'+pluginName+'/index.js'))(self);
-			self['plugins'][category][pluginName]=pluginInstance;
-
-
-			//Calling Methods needed on Volumio Start for plugins
-			if(pluginInstance.onVolumioStart !=undefined)
-				pluginInstance.onVolumioStart();
-
-			//Calling Methods needed to initiate Plugins
-			setTimeout(function () {
-				if(pluginInstance.onStart !=undefined)
-					pluginInstance.onStart();
-			}, 1500)
-
-		}
-	}
-
-	console.log(self['plugins']);
 }
 
 CoreCommandRouter.prototype.getPlugin=function(category, name) {
@@ -240,7 +199,7 @@ CoreCommandRouter.prototype.spopUpdateTracklist = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopUpdateTracklist');
 
-	return self.getController('spop').rebuildTracklist();
+	return self.pluginManager.getPlugin('music_services','spop').rebuildTracklist();
 }
 
 // Start WirelessScan
@@ -327,7 +286,7 @@ CoreCommandRouter.prototype.spopClearAddPlayTracks = function(arrayTrackIds) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopClearAddPlayTracks');
 
-	return self.getController('spop').clearAddPlayTracks(arrayTrackIds)
+	return self.pluginManager.getPlugin('music_services','spop').clearAddPlayTracks(arrayTrackIds)
 }
 
 // Spop Stop
@@ -335,7 +294,7 @@ CoreCommandRouter.prototype.spopStop = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopStop');
 
-	return self.getController('spop').stop();
+	return self.pluginManager.getPlugin('music_services','spop').stop();
 }
 
 // Spop Pause
@@ -343,7 +302,7 @@ CoreCommandRouter.prototype.spopPause = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopPause');
 
-	return self.getController('spop').pause();
+	return self.pluginManager.getPlugin('music_services','spop').pause();
 }
 
 // Spop Resume
@@ -351,7 +310,7 @@ CoreCommandRouter.prototype.spopResume = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::spopResume');
 
-	return self.getController('spop').resume();
+	return self.pluginManager.getPlugin('music_services','spop').resume();
 }
 
 // Methods usually called by the service controllers --------------------------------------------------------------
@@ -378,7 +337,7 @@ CoreCommandRouter.prototype.getAllTracklists = function() {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::getAllTracklists');
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its library before continuing
-	return libQ.all([self.getController('mpd').getTracklist(), self.getController('spop').getTracklist()]);
+	return libQ.all([self.getController('mpd').getTracklist(), self.pluginManager.getPlugin('music_services','spop').getTracklist()]);
 }
 
 // Volumio Add Queue Items
@@ -387,6 +346,41 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioAddQueueItems');
 
 	return self.stateMachine.addQueueItems(arrayItems);
+}
+
+CoreCommandRouter.prototype.executeOnController = function(name,method,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnController');
+
+	var obj=self['controllers'][name];
+	return libFast.bind(obj[method],obj)(data);
+}
+
+CoreCommandRouter.prototype.executeOnPlugin = function(name,method,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');
+
+	var obj=self.getController(name);
+
+	return libFast.bind(obj[method],obj)(data);
+}
+
+
+CoreCommandRouter.prototype.getUIConfigOnController = function(name,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnController');
+
+	var obj=self['controllers'][name];
+	return libFast.bind(obj['getUIConfig'],obj)(data);
+}
+
+CoreCommandRouter.prototype.getUIConfigOnPlugin = function(name,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');
+
+	var obj=self.getController(name);
+
+	return libFast.bind(obj['getUIConfig'],obj)(data);
 }
 
 CoreCommandRouter.prototype.getConfiguration=function(componentCode)

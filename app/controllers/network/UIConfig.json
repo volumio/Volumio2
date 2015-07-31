@@ -1,0 +1,109 @@
+{
+  "page": {
+    "label": "Network"
+  },
+  "sections": [
+    {
+      "id": "section_wired_network",
+      "element": "section",
+      "label": "Wired Network",
+      "plugin": "network/wired_net_conf",
+      "onSave": "saveWiredNet",
+      "saveButton": {
+        "label": "Save",
+        "values": [
+          "airplay",
+          "upnp",
+          "upnp_dlna_indexing",
+          "upnp_dlna_indexing"
+        ]
+      },
+      "content": [
+        {
+          "id": "dhcp",
+          "element": "switch",
+          "label": "Automatic IP",
+          "value": "true"
+        },
+        {
+          "id": "static_ip",
+          "type": "ip",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.123"
+            }
+          ],
+          "label": "Static IP",
+          "value": "",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": "false"
+          }
+        },
+        {
+          "id": "static_netmask",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "255.255.255.0"
+            }
+          ],
+          "type": "ip",
+          "label": "Netmask",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": "false"
+          }
+        },
+        {
+          "id": "static_gateway",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.1"
+            }
+          ],
+          "type": "ip",
+          "label": "Gateway",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": "false"
+          }
+        }
+      ]
+    },
+    {
+      "id": "section_wireless_network",
+      "element": "section",
+      "label": "Wireless Network",
+      "plugin": "network/wireless_net_conf",
+      "onSave": "saveWirelessNet",
+      "saveButton": {
+        "label": "Save",
+        "values": [
+          "airplay",
+          "upnp",
+          "upnp_dlna_indexing",
+          "upnp_dlna_indexing"
+        ]
+      },
+      "content": [
+        {
+          "id": "network_ssid",
+          "type": "string",
+          "element": "input",
+          "label": "Network Name",
+          "value": ""
+        },
+        {
+          "id": "network_pass",
+          "type": "password",
+          "element": "input",
+          "label": "Passphrase",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}
