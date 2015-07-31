@@ -365,6 +365,24 @@ CoreCommandRouter.prototype.executeOnPlugin = function(name,method,data) {
 	return libFast.bind(obj[method],obj)(data);
 }
 
+
+CoreCommandRouter.prototype.getUIConfigOnController = function(name,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnController');
+
+	var obj=self['controllers'][name];
+	return libFast.bind(obj['getUIConfig'],obj)(data);
+}
+
+CoreCommandRouter.prototype.getUIConfigOnPlugin = function(name,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');
+
+	var obj=self.getController(name);
+
+	return libFast.bind(obj['getUIConfig'],obj)(data);
+}
+
 CoreCommandRouter.prototype.getConfiguration=function(componentCode)
 {
 	console.log("_________ "+componentCode);

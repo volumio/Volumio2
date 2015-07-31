@@ -270,6 +270,7 @@ function InterfaceWebUI (server, commandRouter) {
 			var promise;
 
 			var dataJson=JSON.parse(msg);
+			console.log(dataJson);
 
 			if(msg.plugin!=undefined)
 				promise=self.commandRouter.executeOnPlugin(dataJson.plugin,dataJson.method,dataJson.data);
@@ -278,14 +279,31 @@ function InterfaceWebUI (server, commandRouter) {
 			promise.then(function(result)
 			{
 				console.log("SCAN RESULT: "+result);
-				connWebSocket.emit(result);
+				connWebSocket.emit("callPluginMethodResponse",result);
 			})
 			.fail(function()
 			{
 				console.log("SCAN ERROR");
-				connWebSocket.emit({"ERRORE":"MESSAGGIO DI ERRRORE"});
+				connWebSocket.emit("callPluginMethodResponse",{"ERRORE":"MESSAGGIO DI ERRRORE"});
 			});
-		})
+		});
+
+
+		connWebSocket.on('getUIConfig', function(msg) {
+			selfConnWebSocket = this;
+
+			var dataJson=JSON.parse(msg);
+			console.log(dataJson);
+
+			var response;
+
+			if(msg.plugin!=undefined)
+				response=self.commandRouter.getUIConfigOnPlugin(dataJson.plugin,dataJson.data);
+			else response=self.commandRouter.getUIConfigOnController(dataJson.controller,dataJson.data);
+
+
+			connWebSocket.emit("getUIConfigResponse",response);
+		});
 
 	});
 }

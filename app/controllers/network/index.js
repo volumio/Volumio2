@@ -5,6 +5,7 @@ var fs=require('fs-extra');
 var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
 var fs=require('fs-extra');
+var config=new (require(__dirname+'/../../lib/config.js'))();
 var connected = false;
 var iface = 'wlan0';
 
@@ -21,8 +22,9 @@ function ControllerNetwork(commandRouter) {
 	var self = this;
 
 	//getting configuration
-	var config=fs.readJsonSync(__dirname+'/config.json');
-	var eStatic=config['ethstatic'].value;
+	config.loadFile(__dirname+'/config.json');
+
+	//var eStatic=config['ethstatic'].value;
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
@@ -63,7 +65,29 @@ ControllerNetwork.prototype.onUninstall = function()
 ControllerNetwork.prototype.getUIConfig = function()
 {
 	var self = this;
-	//Perform your installation tasks here
+
+	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
+
+	//dhcp
+	uiconf.sections[0].content[0].value=config.get('dhcp');
+
+	//static ip
+	uiconf.sections[0].content[1].value=config.get('ethip');
+
+	//static netmask
+	uiconf.sections[0].content[2].value=config.get('ethnetmask');
+
+	//static gateway
+	uiconf.sections[0].content[3].value=config.get('ethgateway');
+
+	//WLan ssid
+	uiconf.sections[1].content[0].value=config.get('wlanssid');
+
+	//
+	uiconf.sections[1].content[1].value=config.get('wlanpass');
+
+	console.log(JSON.stringify(uiconf));
+	return uiconf;
 }
 
 ControllerNetwork.prototype.setUIConfig = function(data)
@@ -75,13 +99,15 @@ ControllerNetwork.prototype.setUIConfig = function(data)
 ControllerNetwork.prototype.getConf = function(varName)
 {
 	var self = this;
-	//Perform your installation tasks here
+
+	return self.config.get(varName);
 }
 
 ControllerNetwork.prototype.setConf = function(varName, varValue)
 {
 	var self = this;
-	//Perform your installation tasks here
+
+	self.config.set(varName,varValue);
 }
 
 //Optional functions exposed for making development easier and more clear
