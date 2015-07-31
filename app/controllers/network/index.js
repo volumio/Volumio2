@@ -176,8 +176,14 @@ ControllerNetwork.prototype.scanWirelessNetworks = function(defer)
 		});
 		}
 	});
+
+	var deferDone=false;
 	function print(networkarray) {
-		defer.resolve(networkarray);
+		if(deferDone==false)
+		{
+			defer.resolve(networkarray);
+			deferDone=true;
+		}
 		self.pushWirelessNetworks(networkarray);
 
 	}
