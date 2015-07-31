@@ -116,12 +116,13 @@ var wireless = new Wireless({
 	vanishThreshold: 7,
 });
 
-ControllerNetwork.prototype.scanWirelessNetworks = function()
+ControllerNetwork.prototype.scanWirelessNetworks = function(defer)
 {
 	var self = this;
 	wireless.enable(function(error) {
 		if (error) {
 			console.log("[ FAILURE] Unable to enable wireless card. Quitting...");
+			defer.reject(new Error("[ FAILURE] Unable to enable wireless card. Quitting..."));
 			return;
 		}
 		console.log("[PROGRESS] Starting wireless scan...");
@@ -176,7 +177,9 @@ ControllerNetwork.prototype.scanWirelessNetworks = function()
 		}
 	});
 	function print(networkarray) {
+		defer.resolve(networkarray);
 		self.pushWirelessNetworks(networkarray);
+
 	}
 
 
@@ -189,5 +192,11 @@ ControllerNetwork.prototype.pushWirelessNetworks = function(scanresult) {
 	return self.commandRouter.volumiopushwirelessnetworks(scanresult);
 }
 
+ControllerNetwork.prototype.wirelessScan = function(scanresult) {
+	var self = this;
 
+	var defer = libQ.defer();
+	self.scanWirelessNetworks(defer);
+	return defer.promise;
+}
 

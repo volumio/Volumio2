@@ -348,6 +348,23 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	return self.stateMachine.addQueueItems(arrayItems);
 }
 
+CoreCommandRouter.prototype.executeOnController = function(name,method,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnController');
+
+	var obj=self['controllers'][name];
+	return libFast.bind(obj[method],obj)(data);
+}
+
+CoreCommandRouter.prototype.executeOnPlugin = function(name,method,data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');
+
+	var obj=self.getController(name);
+
+	return libFast.bind(obj[method],obj)(data);
+}
+
 CoreCommandRouter.prototype.getConfiguration=function(componentCode)
 {
 	console.log("_________ "+componentCode);

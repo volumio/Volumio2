@@ -252,10 +252,10 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('wirelessScan', function() {
+		connWebSocket.on('callPluginMethod', function(msg) {
 			selfConnWebSocket = this;
 
-			var timeStart = Date.now();
+			/*var timeStart = Date.now();
 			self.logStart('Client requests Wireless Network Scan ')
 				.then(function () {
 					return commandRouter.volumiowirelessscan.call(commandRouter);
@@ -265,7 +265,26 @@ function InterfaceWebUI (server, commandRouter) {
 				})
 				.done(function () {
 					return self.logDone(timeStart);
-				});
+				});*/
+
+			var promise;
+
+			var dataJson=JSON.parse(msg);
+
+			if(msg.plugin!=undefined)
+				promise=self.commandRouter.executeOnPlugin(dataJson.plugin,dataJson.method,dataJson.data);
+			else promise=self.commandRouter.executeOnController(dataJson.controller,dataJson.method,dataJson.data);
+
+			promise.then(function(result)
+			{
+				console.log("SCAN RESULT: "+result);
+				connWebSocket.emit(result);
+			})
+			.fail(function()
+			{
+				console.log("SCAN ERROR");
+				connWebSocket.emit({"ERRORE":"MESSAGGIO DI ERRRORE"});
+			});
 		})
 
 	});
