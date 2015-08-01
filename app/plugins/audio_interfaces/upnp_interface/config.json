@@ -1,0 +1,8 @@
+{
+  "mpdport":{"modifiable":false,"value":"6600","type":"int"},
+  "upnpav":{"modifiable":false,"value":"false","type":"boolean"},
+  "openhome":{"modifiable":false,"value":"true","type":"boolean"},
+  "ohmetapersist":{"modifiable":false,"value":"true","type":"boolean"},
+  "cachedir":{"modifiable":false,"value":"/tmp/upmpdcli","type":"string"},
+  "iconpath":{"modifiable":false,"value":"/volumio/app/plugins/audio_interfaces/upnp_interface/upnpicon.png","type":"string"}
+}

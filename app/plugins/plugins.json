@@ -13,11 +13,11 @@
     "dirble": {
       "enabled": {
         "type": "boolean",
-        "value": false
+        "value": true
       },
       "status": {
         "type": "string",
-        "value": "STOPPED"
+        "value": "STARTED"
       }
     },
     "example_plugin": {
@@ -29,15 +29,17 @@
         "type": "string",
         "value": "STOPPED"
       }
-    },
-    "dirble": {
+    }
+  },
+  "audio_interfaces": {
+    "upnp_interface": {
       "enabled": {
         "type": "boolean",
         "value": true
       },
       "status": {
         "type": "string",
-        "value": "STOPPED"
+        "value": "STARTED"
       }
     }
   }
