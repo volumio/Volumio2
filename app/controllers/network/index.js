@@ -6,6 +6,7 @@ var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
 var fs=require('fs-extra');
 var config=new (require(__dirname+'/../../lib/config.js'))();
+
 var connected = false;
 var iface = 'wlan0';
 
@@ -23,8 +24,6 @@ function ControllerNetwork(commandRouter) {
 
 	//getting configuration
 	config.loadFile(__dirname+'/config.json');
-
-	//var eStatic=config['ethstatic'].value;
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
@@ -86,14 +85,15 @@ ControllerNetwork.prototype.getUIConfig = function()
 	//
 	uiconf.sections[1].content[1].value=config.get('wlanpass');
 
-	console.log(JSON.stringify(uiconf));
 	return uiconf;
 }
 
 ControllerNetwork.prototype.setUIConfig = function(data)
 {
 	var self = this;
-	//Perform your installation tasks here
+
+	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
+
 }
 
 ControllerNetwork.prototype.getConf = function(varName)
