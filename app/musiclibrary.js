@@ -99,7 +99,7 @@ function CoreMusicLibrary (commandRouter) {
 	self.libraryReady = libQ.reject('Library not yet loaded.');
 
 	// Attempt to load library from database on disk
-	self.sLibraryPath = './app/db/musiclibrary';
+	self.sLibraryPath = '/volumio/app/db/musiclibrary';
 	self.loadLibraryFromDB()
 		.fail(libFast.bind(self.pushError, self));
 }
