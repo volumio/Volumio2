@@ -1,109 +1,93 @@
 {
   "page": {
-    "label": "Network"
+    "label": "Settings"
   },
   "sections": [
     {
-      "id": "section_wired_network",
+      "id": "section_general_settings",
       "element": "section",
-      "label": "Wired Network",
-      "plugin": "network/wired_net_conf",
-      "onSave": "saveWiredNet",
+      "label": "General Settings",
+      "type": "Controller",
+      "controller": "system/wired_net_conf",
+      "method": "setUiConfig",
       "saveButton": {
         "label": "Save",
         "values": [
-          "airplay",
-          "upnp",
-          "upnp_dlna_indexing",
-          "upnp_dlna_indexing"
+          "player_name",
+          "startup_sound"
         ]
       },
       "content": [
         {
-          "id": "dhcp",
-          "element": "switch",
-          "label": "Automatic IP",
-          "value": "true"
+          "id": "player_name",
+          "element": "textBox",
+          "label": "Player Name",
+          "value": "volumio"
         },
         {
-          "id": "static_ip",
-          "type": "ip",
-          "element": "input",
-          "attributes": [
-            {
-              "placeholder": "192.168.1.123"
-            }
-          ],
-          "label": "Static IP",
-          "value": "",
-          "visibleIf": {
-            "field": "dhcp",
-            "value": "false"
-          }
-        },
-        {
-          "id": "static_netmask",
-          "element": "input",
-          "attributes": [
-            {
-              "placeholder": "255.255.255.0"
-            }
-          ],
-          "type": "ip",
-          "label": "Netmask",
-          "visibleIf": {
-            "field": "dhcp",
-            "value": "false"
-          }
-        },
-        {
-          "id": "static_gateway",
-          "element": "input",
-          "attributes": [
-            {
-              "placeholder": "192.168.1.1"
-            }
-          ],
-          "type": "ip",
-          "label": "Gateway",
-          "visibleIf": {
-            "field": "dhcp",
-            "value": "false"
+          "startup_sound": {
+            "element": "switch",
+            "label": "Startup Sound",
+            "value": "true"
           }
         }
+
       ]
     },
     {
-      "id": "section_wireless_network",
-      "element": "section",
-      "label": "Wireless Network",
-      "plugin": "network/wireless_net_conf",
-      "onSave": "saveWirelessNet",
-      "saveButton": {
-        "label": "Save",
-        "values": [
-          "airplay",
-          "upnp",
-          "upnp_dlna_indexing",
-          "upnp_dlna_indexing"
-        ]
-      },
-      "content": [
-        {
-          "id": "network_ssid",
-          "type": "string",
-          "element": "input",
-          "label": "Network Name",
-          "value": ""
+      "section_sound_quality": {
+        "type": "section",
+        "label": "Sound quality tweaks",
+        "plugin": "/settings/playback_conf",
+        "onSave": "saveSoundQuality",
+        "savebutton": {
+          "label": "salva",
+          "values": [
+            "kernel_profile"
+          ]
         },
-        {
-          "id": "network_pass",
-          "type": "password",
-          "element": "input",
-          "label": "Passphrase",
-          "value": ""
-        }
-      ]
+        "text": "These profiles??.",
+        "content": [
+          {
+            "kernel_profile": {
+              "element": "select",
+              "label": "Kernel profile",
+              "value": "1",
+              "options": [
+                {
+                  "1": "Default"
+                },
+                {
+                  "2": "Less Jitter"
+                },
+                {
+                  "3": "Jitter"
+                },
+                {
+                  "4": "Focus"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "section_updates": {
+        "type": "section",
+        "label": "System updates",
+        "content": [
+          {
+            "update": {
+              "element": "button",
+              "label": "System updates",
+              "text": "You can check?...",
+              "plugin": "/settings/playback_conf",
+              "onClick": "systemUpdate"
+            }
+          }
+        ]
+      }
     }
   ]
 }
