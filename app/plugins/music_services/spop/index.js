@@ -161,7 +161,8 @@ ControllerSpop.prototype.onUninstall = function() {
 
 ControllerSpop.prototype.getUIConfig = function() {
 	var self = this;
-	//Perform your installation tasks here
+
+	return {success:true,plugin:"spop"};
 }
 
 ControllerSpop.prototype.setUIConfig = function(data) {

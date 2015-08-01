@@ -9,6 +9,16 @@
         "type": "string",
         "value": "STOPPED"
       }
+    },
+    "dirble": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STOPPED"
+      }
     }
   }
 }
