@@ -7,6 +7,26 @@
       },
       "status": {
         "type": "string",
+        "value": "STARTED"
+      }
+    },
+    "dirble": {
+      "enabled": {
+        "type": "boolean",
+        "value": false
+      },
+      "status": {
+        "type": "string",
+        "value": "STOPPED"
+      }
+    },
+    "example_plugin": {
+      "enabled": {
+        "type": "boolean",
+        "value": false
+      },
+      "status": {
+        "type": "string",
         "value": "STOPPED"
       }
     }
