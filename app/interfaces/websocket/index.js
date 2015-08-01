@@ -252,57 +252,36 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('callPluginMethod', function(msg) {
+		connWebSocket.on('callMethod', function(msg) {
 			selfConnWebSocket = this;
-
-			/*var timeStart = Date.now();
-			self.logStart('Client requests Wireless Network Scan ')
-				.then(function () {
-					return commandRouter.volumiowirelessscan.call(commandRouter);
-				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
-				.done(function () {
-					return self.logDone(timeStart);
-				});*/
 
 			var promise;
 
 			var dataJson=JSON.parse(msg);
-			console.log(dataJson);
 
-			if(msg.plugin!=undefined)
-				promise=self.commandRouter.executeOnPlugin(dataJson.plugin,dataJson.method,dataJson.data);
-			else promise=self.commandRouter.executeOnController(dataJson.controller,dataJson.method,dataJson.data);
+			if(dataJson.type=='plugin')
+				promise=self.commandRouter.executeOnPlugin(dataJson.endpoint,dataJson.method,dataJson.data);
+			else promise=self.commandRouter.executeOnController(dataJson.endpoint,dataJson.method,dataJson.data);
 
 			promise.then(function(result)
 			{
-				console.log("SCAN RESULT: "+result);
-				connWebSocket.emit("callPluginMethodResponse",result);
+				connWebSocket.emit("pushMethod",result);
 			})
 			.fail(function()
 			{
-				console.log("SCAN ERROR");
-				connWebSocket.emit("callPluginMethodResponse",{"ERRORE":"MESSAGGIO DI ERRRORE"});
+				connWebSocket.emit("pushMethod",{"ERRORE":"MESSAGGIO DI ERRRORE"});
 			});
 		});
 
 
-		connWebSocket.on('getUIConfig', function(msg) {
+		connWebSocket.on('getUIConfig', function(controllerName) {
 			selfConnWebSocket = this;
-
-			var dataJson=JSON.parse(msg);
-			console.log(dataJson);
 
 			var response;
 
-			if(msg.plugin!=undefined)
-				response=self.commandRouter.getUIConfigOnPlugin(dataJson.plugin,dataJson.data);
-			else response=self.commandRouter.getUIConfigOnController(dataJson.controller,dataJson.data);
+			response=self.commandRouter.getUIConfigOnController(controllerName,{});
 
-
-			connWebSocket.emit("getUIConfigResponse",response);
+			connWebSocket.emit("pushUIConfig",response);
 		});
 
 	});
