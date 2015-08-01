@@ -45,7 +45,8 @@ ExamplePlugin.prototype.onUninstall = function()
 ExamplePlugin.prototype.getUIConfig = function()
 {
     var self = this;
-    //Perform your installation tasks here
+
+    return {success:true,plugin:"example_plugin"};
 }
 
 ExamplePlugin.prototype.setUIConfig = function(data)

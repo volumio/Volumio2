@@ -38,7 +38,7 @@ DirBle.prototype.onUninstall = function()
 
 DirBle.prototype.getUIConfig = function()
 {
-    //Perform your installation tasks here
+	return {success:true,plugin:"dirble"};
 }
 
 DirBle.prototype.setUIConfig = function(data)

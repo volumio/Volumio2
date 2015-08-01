@@ -66,6 +66,12 @@ PluginManager.prototype.loadPlugins=function()
     }
 }
 
+PluginManager.prototype.isEnabled=function(category,pluginName)
+{
+    var self=this;
+    return self.config.get(category+'.'+pluginName+'.enabled');
+}
+
 
 PluginManager.prototype.onVolumioStart=function(category, name)
 {
