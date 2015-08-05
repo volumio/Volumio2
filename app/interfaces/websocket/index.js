@@ -274,19 +274,20 @@ function InterfaceWebUI (server, commandRouter) {
 		});
 
 
-		connWebSocket.on('getUIConfig', function(data) {
+		connWebSocket.on('getUiConfig', function(data) {
 			selfConnWebSocket = this;
 
+			console.log("GETUICONFIG "+data);
 			var response;
 
 			var reqJson=JSON.parse(data);
 
-			console.log("Requesting UI config for page "+reqJson.page);
 			response=self.commandRouter.getUIConfigOnController(reqJson.page,{});
 
-			connWebSocket.emit("pushUIConfig",response);
+
+			connWebSocket.emit("pushUiConfig",response);
 		});
- 
+
 	});
 }
 
