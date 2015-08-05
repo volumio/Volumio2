@@ -284,8 +284,8 @@ function InterfaceWebUI (server, commandRouter) {
 
 			response=self.commandRouter.getUIConfigOnController(reqJson.page,{});
 
-
-			connWebSocket.emit("pushUiConfig",response);
+			console.log(JSON.stringify(response));
+			self.libSocketIO.emit("pushUiConfig",response);
 		});
 
 	});
