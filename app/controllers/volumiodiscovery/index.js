@@ -43,22 +43,29 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var browser = mdns.createBrowser(mdns.tcp(serviceName),{resolverSequence: sequence});
 
 	browser.on('serviceUp', function(service) {
-		//if(uuid!=service.txtRecord.UUID)
-
-		if(foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
+		if(uuid!=service.txtRecord.UUID && foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
 		{
 			console.log("mDNS: Found device "+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.UUID',"string",service.txtRecord.UUID);
 			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.addresses',"string",service.addresses[0]);
+			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.osname',"string",service.name);
 
 			foundVolumioInstances.print();
 		}
 	});
 	browser.on('serviceDown', function(service) {
-		if(uuid!=service.txtRecord.UUID)
+		var keys=foundVolumioInstances.getKeys();
+
+		for(var i in keys)
 		{
-			console.log("Service "+service.txtRecord.volumioName+" disappeared.");
+			var key=keys[i];
+			var osname=foundVolumioInstances.get(key+'.osname');
+
+			if(osname==service.name)
+				foundVolumioInstances.delete(key);
 		}
+
+		foundVolumioInstances.print();
 	});
 	browser.start();
 }

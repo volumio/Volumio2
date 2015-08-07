@@ -130,3 +130,18 @@ Config.prototype.print=function()
 
     console.log(JSON.stringify(self.data));
 }
+
+//Only works with root key. TODO: fix
+Config.prototype.delete=function(key)
+{
+    var self=this;
+
+    delete self.data[key];
+}
+
+Config.prototype.getKeys=function()
+{
+    var self=this;
+
+    return Object.keys(self.data);
+}
