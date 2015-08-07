@@ -278,14 +278,14 @@ function InterfaceWebUI (server, commandRouter) {
 			selfConnWebSocket = this;
 
 			console.log("GETUICONFIG "+data);
-			var response;
-
 			var reqJson=JSON.parse(data);
 
-			response=self.commandRouter.getUIConfigOnController(reqJson.page,{});
+			var response=self.commandRouter.getUIConfigOnController(reqJson.page,{});
 
 			console.log(JSON.stringify(response));
-			self.libSocketIO.emit("pushUiConfig",response);
+			selfConnWebSocket.emit('pushUiConfig',response,function(data){
+				console.log(data);
+			});
 		});
 
 	});

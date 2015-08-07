@@ -14,6 +14,14 @@ function ControllerSystem(commandRouter) {
 	//getting configuration
 	config.loadFile(__dirname+'/config.json');
 
+	var uuid=config.get('uuid');
+	if(uuid==undefined)
+	{
+		console.log("No id defined. Creating one");
+		var uuid = require('node-uuid');
+		config.addConfigValue('uuid','string',uuid.v4());
+	}
+
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 }
@@ -71,14 +79,14 @@ ControllerSystem.prototype.getConf = function(varName)
 {
 	var self = this;
 
-	return self.config.get(varName);
+	return config.get(varName);
 }
 
 ControllerSystem.prototype.setConf = function(varName, varValue)
 {
 	var self = this;
 
-	self.config.set(varName,varValue);
+	config.set(varName,varValue);
 }
 
 //Optional functions exposed for making development easier and more clear

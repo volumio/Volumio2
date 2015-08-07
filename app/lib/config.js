@@ -13,6 +13,7 @@ function Config()
     self.autosave=true;
     self.autosaveDelay=1000;
     self.saved=true;
+    self.data={};
 }
 
 Config.prototype.loadFile=function(file)
@@ -79,17 +80,21 @@ Config.prototype.set=function(key,value)
 Config.prototype.scheduleSave=function()
 {
     var self=this;
-    self.saved=false;
 
-    setTimeout(function()
+    if(self.filePath!=undefined)
     {
-        if(self.saved==false)
-        {
-            self.saved=true;
-            fs.writeJsonSync(self.filePath,self.data);
-        }
+        self.saved=false;
 
-    },self.autosaveDelay);
+        setTimeout(function()
+        {
+            if(self.saved==false)
+            {
+                self.saved=true;
+                fs.writeJsonSync(self.filePath,self.data);
+            }
+
+        },self.autosaveDelay);
+    }
 
 }
 
@@ -117,4 +122,11 @@ Config.prototype.addConfigValue=function(key,type,value)
     prop['value']=value;
 
     self.scheduleSave();
+}
+
+Config.prototype.print=function()
+{
+    var self=this;
+
+    console.log(JSON.stringify(self.data));
 }
