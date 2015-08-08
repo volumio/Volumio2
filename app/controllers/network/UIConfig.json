@@ -12,10 +12,10 @@
       "saveButton": {
         "label": "Save",
         "values": [
-          "airplay",
-          "upnp",
-          "upnp_dlna_indexing",
-          "upnp_dlna_indexing"
+          "dhcp",
+          "static_ip",
+          "static_netmask",
+          "static_gateway"
         ]
       },
       "content": [
@@ -82,10 +82,8 @@
       "saveButton": {
         "label": "Save",
         "values": [
-          "airplay",
-          "upnp",
-          "upnp_dlna_indexing",
-          "upnp_dlna_indexing"
+          "network_ssid",
+          "network_pass"
         ]
       },
       "content": [
