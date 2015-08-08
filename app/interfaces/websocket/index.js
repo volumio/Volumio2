@@ -1,6 +1,5 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
-
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
  * @type {InterfaceWebUI}
