@@ -107,16 +107,15 @@ function CoreMusicLibrary (commandRouter) {
 // Public methods -----------------------------------------------------------------------------------
 
 // Return a music library view for a given object UID
-CoreMusicLibrary.prototype.browseLibrary = function(objBrowseParameters) {
+CoreMusicLibrary.prototype.getListing = function(sUid, objOptions) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getListing');
 
 	return self.libraryReady
 		.then(function() {
 			//TODO implement use of nEntries and nOffset for paging of results
-			var sUid = objBrowseParameters.uid;
-			var arrayPath = objBrowseParameters.datapath;
-			var sSortBy = objBrowseParameters.sortby;
+			var arrayPath = objOptions.datapath;
+			var sSortBy = objOptions.sortby;
 
 			var objRequested = self.getLibraryObject(sUid);
 			if (!sSortBy && arrayPath.length === 0) {

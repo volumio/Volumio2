@@ -11,35 +11,11 @@ function ControllerSpop(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 
-	//getting configuration
-	var config=fs.readJsonSync(__dirname+'/config.json');
-
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	// Init some command socket variables
-	self.bSpopCommandGotFirstMessage = false;
-	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
-	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
-	self.arrayResponseStack = [];
-	self.sResponseBuffer = '';
-
-	self.tracklist = [];
-
-	// Start tracklist promise as rejected, so requestors do not wait for it if not immediately available.
-	// This is okay because no part of Volumio requires a populated tracklist to function.
-	self.tracklistReadyDeferred = null;
-	self.tracklistReady = libQ.reject('Tracklist not yet populated.');
-
-	// Attempt to load tracklist from database on disk
-	// TODO make this a relative path
-	self.sTracklistPath = __dirname + '/db/tracklist';
-	self.loadTracklistFromDB()
-		.fail(libFast.bind(self.pushError, self));
-}
-
-ControllerSpop.prototype.onStart = function() {
-	var self = this;
+	//getting configuration
+	var config=fs.readJsonSync(__dirname+'/config.json');
 
 	// Each core gets its own set of Spop sockets connected
 	var nHost='localhost';
@@ -56,6 +32,13 @@ ControllerSpop.prototype.onStart = function() {
 		console.error('SPOP status error:');
 		console.error(err);
 	});
+
+	// Init some command socket variables
+	self.bSpopCommandGotFirstMessage = false;
+	self.spopCommandReadyDeferred = libQ.defer(); // Make a promise for when the Spop connection is ready to receive events (basically when it emits 'spop 0.0.1').
+	self.spopCommandReady = self.spopCommandReadyDeferred.promise;
+	self.arrayResponseStack = [];
+	self.sResponseBuffer = '';
 
 	// Start a listener for command socket messages (command responses)
 	self.connSpopCommand.on('data', function(data) {
@@ -121,6 +104,20 @@ ControllerSpop.prototype.onStart = function() {
 			self.sStatusBuffer = '';
 		}
 	});
+
+	// Define the tracklist
+	self.tracklist = [];
+
+	// Start tracklist promise as rejected, so requestors do not wait for it if not immediately available.
+	// This is okay because no part of Volumio requires a populated tracklist to function.
+	self.tracklistReadyDeferred = null;
+	self.tracklistReady = libQ.reject('Tracklist not yet populated.');
+
+	// Attempt to load tracklist from database on disk
+	// TODO make this a relative path
+	self.sTracklistPath = __dirname + '/db/tracklist';
+	self.loadTracklistFromDB()
+		.fail(libFast.bind(self.pushError, self));
 
 }
 

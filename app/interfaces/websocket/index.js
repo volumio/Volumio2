@@ -19,9 +19,9 @@ function InterfaceWebUI (server, commandRouter) {
 	self.libSocketIO.on('connection', function (connWebSocket) {
 
 		connWebSocket.on('playerCommand', function (param1, param2) {
-			var selfConnWebSocket = this;
+			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActions = libQ.resolve();
+			var promisedActions = null;
 			var sStartMessage = '';
 
 			if (param1 === 'getState') {
@@ -43,206 +43,162 @@ function InterfaceWebUI (server, commandRouter) {
 				 * @service current playback service (mpd, spop...)
 				 */
 				sStartMessage = 'Client requests player state';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
-					.then(function (state) {
-						return self.volumioPushState.call(self, state, selfConnWebSocket);
-					});
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioGetState.call(commandRouter);
+				})
+				.then(function (state) {
+					return self.pushState.call(self, state, thisWebsocketConnection);
+				});
 			} else if (param1 === 'getQueue') {
 				sStartMessage = 'Client requests queue listing';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioGetQueue, commandRouter))
-					.then(function (queue) {
-						return self.volumioPushQueue.call(self, queue, selfConnWebSocket);
-					});
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioGetQueue.call(commandRouter);
+				})
+				.then(function (queue) {
+					return self.pushQueue.call(self, queue, thisWebsocketConnection);
+				});
 			} else if (param1 === 'removeQueueItem') {
 				sStartMessage = 'Client requests remove queue item';
-				promisedActions = promisedActions
-					.then(function () {
-						return commandRouter.volumioRemoveQueueItem.call(commandRouter, param2);
-					});
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioRemoveQueueItem.call(commandRouter, param2);
+				});
 			} else if (param1 === 'addQueueUids') {
 				sStartMessage = 'Client requests add queue items';
-				promisedActions = promisedActions
-					.then(function () {
-						return commandRouter.volumioAddQueueUids.call(commandRouter, param2);
-					});
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioAddQueueUids.call(commandRouter, param2);
+				});
 			} else if (param1 === 'play') {
 				sStartMessage = 'Client requests play';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioPlay, commandRouter));
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioPlay.call(commandRouter);
+				});
 			} else if (param1 === 'pause') {
 				sStartMessage = 'Client requests pause';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioPause, commandRouter));
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioPause.call(commandRouter);
+				});
 			} else if (param1 === 'stop') {
 				sStartMessage = 'Client requests stop';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioStop, commandRouter));
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioStop.call(commandRouter);
+				});
 			} else if (param1 === 'previous') {
 				sStartMessage = 'Client requests previous';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioPrevious, commandRouter));
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioPrevious.call(commandRouter);
+				});
 			} else if (param1 === 'next') {
 				sStartMessage = 'Client requests next';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioNext, commandRouter));
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioNext.call(commandRouter);
+				});
 			} else if (param1 === 'rebuildLibrary') {
 				sStartMessage = 'Client requests rebuild library';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioRebuildLibrary, commandRouter));
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioRebuildLibrary.call(commandRouter);
+				});
 			} else if (param1 === 'setVolume') {
 				sStartMessage = 'Client requests set volume';
-				promisedActions = promisedActions
-					.then(function () {
-						return commandRouter.volumiosetvolume.call(commandRouter, param2);
-					});
-			} else {
-				sStartMessage = 'Client requests unrecognized command: ' + param1;
-				promisedActions = promisedActions
-					.then(function() {
-						return libQ.reject('Unrecognized command: ' + param1);
-					});
-			}
-
-			return self.runActions(promisedActions, sStartMessage);
-		});
-
-		connWebSocket.on('libraryCommand', function (param1, param2) {
-			var selfConnWebSocket = this;
-			var timeStart = Date.now();
-			var promisedActions = libQ.resolve();
-			var sStartMessage = '';
-
-			if (param1 === 'getLibraryListing') {
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumiosetvolume.call(commandRouter, param2);
+				});
+			} else if (param1 === 'getLibraryListing') {
 				sStartMessage = 'Client requests library listing';
-				promisedActions = promisedActions
-					.then(function () {
-						return commandRouter.volumioBrowseLibrary.call(commandRouter, param2);
-					})
-					.then(function (objBrowseData) {
-						if (objBrowseData) {
-							return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
-						}
-					});
-			} else {
-				sStartMessage = 'Client requests unrecognized command: ' + param1;
-				promisedActions = promisedActions
-					.then(function() {
-						return libQ.reject('Unrecognized command: ' + param1);
-					});
-			}
-
-			return self.runActions(promisedActions, sStartMessage);
-		});
-
-		connWebSocket.on('serviceCommand', function (param1, param2) {
-			var selfConnWebSocket = this;
-			var timeStart = Date.now();
-			var promisedActions = libQ.resolve();
-			var sStartMessage = '';
-
-			if (param1 === 'updateTracklist') {
-				sStartMessage = 'Client requests service update tracklist';
-				promisedActions = promisedActions
-					.then(function() {
-						return commandRouter.serviceUpdateTracklist.call(commandRouter, param2);
-					});
-			} else {
-				sStartMessage = 'Client requests unrecognized command: ' + param1;
-				promisedActions = promisedActions
-					.then(function() {
-						return libQ.reject('Unrecognized command: ' + param1);
-					});
-			}
-
-			return self.runActions(promisedActions, sStartMessage);
-		});
-
-		connWebSocket.on('playlistCommand', function (param1, param2) {
-			var selfConnWebSocket = this;
-			var timeStart = Date.now();
-			var promisedActions = libQ.resolve();
-			var sStartMessage = '';
-
-			if (param1 === 'importServicePlaylists') {
+				promisedActions = libQ.resolve()
+				.then(function() {
+					return commandRouter.volumioBrowseLibrary.call(commandRouter, param2.uid, param2.options)
+				})
+				.then(function (objBrowseData) {
+					if (objBrowseData) {
+						return self.pushLibraryListing.call(self, objBrowseData, thisWebsocketConnection);
+					}
+				});
+			} else if (param1 === 'getPlaylistRoot') {
+				sStartMessage = 'Client requests playlist root';
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioGetPlaylistRoot.call(commandRouter)
+				})
+				.then(function (objBrowseData) {
+					if (objBrowseData) {
+						return self.pushPlaylistRoot.call(self, objBrowseData, thisWebsocketConnection);
+					}
+				});
+			} else if (param1 === 'getPlaylistListing') {
+				sStartMessage = 'Client requests playlist listing';
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioGetPlaylistListing.call(commandRouter, param2)
+				})
+				.then(function (objBrowseData) {
+					if (objBrowseData) {
+console.log(objBrowseData);
+						return self.pushPlaylistListing.call(self, objBrowseData, thisWebsocketConnection);
+					}
+				});
+			} else if (param1 === 'importServicePlaylists') {
 				sStartMessage = 'Client requests import service playlists';
-				promisedActions = promisedActions
-					.then(libFast.bind(commandRouter.volumioImportServicePlaylists, commandRouter));
-			} else {
-				sStartMessage = 'Client requests unrecognized command: ' + param1;
-				promisedActions = promisedActions
-					.then(function() {
-						return libQ.reject('Unrecognized command: ' + param1);
-					});
-			}
-
-			return self.runActions(promisedActions, sStartMessage);
-		});
-
-		connWebSocket.on('interfaceCommand', function (param1, param2) {
-			var selfConnWebSocket = this;
-			var timeStart = Date.now();
-			var promisedActions = libQ.resolve();
-			var sStartMessage = '';
-
-			if (param1 === 'getMenuItems') {
+				promisedActions = libQ.fcall(function() {
+					return commandRouter.volumioImportServicePlaylists.call(commandRouter);
+				});
+			} else if (param1 === 'getMenuItems') {
 				sStartMessage = 'Client requests UI menu items';
-				promisedActions = promisedActions
-					.then(function () {
+				promisedActions = libQ.fcall(function() {
+					return libQ.fcall(function () {
 						var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
 						self.libSocketIO.emit('printConsoleMessage', menuitems);
 						return self.libSocketIO.emit('pushMenuItems', menuitems);
 					});
-			} else {
-				sStartMessage = 'Client requests unrecognized command: ' + param1;
-				promisedActions = promisedActions
-					.then(function() {
-						return libQ.reject('Unrecognized command: ' + param1);
-					});
+				});
 			}
 
-			return self.runActions(promisedActions, sStartMessage);
+			return self.runActions(promisedActions, sStartMessage, timeStart);
 		});
 
-		connWebSocket.on('systemCommand', function (param1, param2) {
-			var selfConnWebSocket = this;
+		connWebSocket.on('serviceCommand', function (param1, param2) {
+			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActions = libQ.resolve();
+			var promisedActions = libQ.reject('Command not recognized: ' + param1);
+			var sStartMessage = '';
+
+			if (param1 === 'updateTracklist') {
+				sStartMessage = 'Client requests service update tracklist';
+				promisedActions = commandRouter.serviceUpdateTracklist.call(commandRouter, param2);
+			}
+
+			return self.runActions(promisedActions, sStartMessage, timeStart);
+		});
+
+		connWebSocket.on('pluginCommand', function (param1, param2) {
+			var thisWebsocketConnection = this;
+			var timeStart = Date.now();
+			var promisedActions = libQ.reject('Command not recognized: ' + param1);
 			var sStartMessage = '';
 
 			if (param1 === 'scanWirelessNetworks') {
 				sStartMessage = 'Client requests wireless network scan';
-				promisedActions = promisedActions
-					.then(function () {
-						return commandRouter.volumiowirelessscan.call(commandRouter);
-					});
-			} else {
-				sStartMessage = 'Client requests unrecognized command: ' + param1;
-				promisedActions = promisedActions
-					.then(function() {
-						return libQ.reject('Unrecognized command: ' + param1);
-					});
+				promisedActions = commandRouter.volumiowirelessscan.call(commandRouter);
 			}
 
-			return self.runActions(promisedActions, sStartMessage);
+			return self.runActions(promisedActions, sStartMessage, timeStart);
 		});
 
 	});
 }
 
-InterfaceWebUI.prototype.runActions = function(promisedActions, sStartMessage) {
+InterfaceWebUI.prototype.runActions = function(promisedActions, sStartMessage, timeStart) {
 	var self = this;
 
-	return self.logStart(sStartMessage)
+	return libQ.resolve()
+		.then(function() {
+			return self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sStartMessage);
+		})
 		.then(function() {
 			return promisedActions;
-		}
+		})
 		.fail(function (error) {
-			self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 		})
 		.done(function () {
-			return self.logDone(timeStart);
+			return self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 		});
 
 }
@@ -259,51 +215,61 @@ InterfaceWebUI.prototype.printConsoleMessage = function(message) {
 }
 
 // Receive player queue updates from commandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.volumioPushQueue = function(queue, connWebSocket) {
+InterfaceWebUI.prototype.pushQueue = function(queue, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushQueue');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushQueue', queue);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushQueue', queue);
 	// Else push to all connected clients
 	} else {
-		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'volumioPushQueue', queue);
+		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'pushQueue', queue);
 	}
 }
 
 // Receive music library data from commandRouter and send to requester
-InterfaceWebUI.prototype.volumioPushBrowseData = function(browsedata, connWebSocket) {
+InterfaceWebUI.prototype.pushLibraryListing = function(browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushBrowseData');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryListing');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushBrowseData', browsedata);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushLibraryListing', browsedata);
+	}
+}
+
+// Push the playlist root
+InterfaceWebUI.prototype.pushPlaylistRoot = function(browsedata, connWebSocket) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistRoot');
+
+	// If a specific client is given, push to just that client
+	if (connWebSocket) {
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushPlaylistRoot', browsedata);
+	}
+}
+
+// Push the playlist vies
+InterfaceWebUI.prototype.pushPlaylistListing = function(browsedata, connWebSocket) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistListing');
+
+	// If a specific client is given, push to just that client
+	if (connWebSocket) {
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushPlaylistListing', browsedata);
 	}
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.volumioPushState = function(state, connWebSocket) {
+InterfaceWebUI.prototype.pushState = function(state, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushState');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushState');
 
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushState', state);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushState', state);
 	} else {
 		// Push the updated state to all clients
-		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'volumioPushState', state);
+		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'pushState', state);
 	}
-}
-
-InterfaceWebUI.prototype.logDone = function(timeStart) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
-	return libQ.resolve();
-}
-
-InterfaceWebUI.prototype.logStart = function(sCommand) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
-	return libQ.resolve();
 }

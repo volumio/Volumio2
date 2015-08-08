@@ -28,8 +28,8 @@ function CoreCommandRouter (server) {
 	// Start the volume controller
 	self.VolumeController = new (require('./volumecontrol.js'))(self);
 
-	// Start the playlist manager
-	self.playlistManager = new (require('./playlistmanager.js'))(self);
+	// Start the playlist FS
+	self.playlistFS = new (require('./playlistfs.js'))(self);
 }
 
 CoreCommandRouter.prototype.loadControllers=function()
@@ -50,13 +50,6 @@ CoreCommandRouter.prototype.loadControllers=function()
 		//Calling Methods needed on Volumio Start for controllers
 		if(controllerInstance.onVolumioStart !=undefined)
 			libFast.bind(controllerInstance.onVolumioStart, controllerInstance)();
-
-		setTimeout(function () {
-		//Calling Methods needed to initiate Controllers
-			if(controllerInstance.onStart !=undefined)
-				return libFast.bind(controllerInstance.onStart, controllerInstance)();
-		}, 1500)
-
 
 	}
 }
@@ -226,11 +219,27 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 }
 
 // Volumio Browse Library
-CoreCommandRouter.prototype.volumioBrowseLibrary = function(objBrowseParameters) {
+CoreCommandRouter.prototype.volumioGetLibraryListing = function(sUid, objOptions) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioBrowseLibrary(' + JSON.stringify(objBrowseParameters) + ')');
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryListing()');
 
-	return self.musicLibrary.browseLibrary(objBrowseParameters);
+	return self.musicLibrary.getListing(sUid, objOptions);
+}
+
+// Volumio Get Playlist Root
+CoreCommandRouter.prototype.volumioGetPlaylistRoot = function() {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetPlaylistRoot');
+
+	return self.playlistFS.getRoot();
+}
+
+// Volumio Get Playlist Listing
+CoreCommandRouter.prototype.volumioGetPlaylistListing = function(sUid) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetPlaylistListing');
+
+	return self.playlistFS.getListing(sUid);
 }
 
 // Spop Update Tracklist
@@ -254,7 +263,7 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioImportServicePlaylists');
 
-	return self.playlistManager.importServicePlaylists();
+	return self.playlistFS.importServicePlaylists();
 }
 
 // Methods usually called by the State Machine --------------------------------------------------------------------
@@ -266,7 +275,7 @@ CoreCommandRouter.prototype.volumioPushState = function(state) {
 	// Announce new player state to each client interface
 	return libQ.all(
 		libFast.map(self.arrayInterfaces, function(thisInterface) {
-			return thisInterface.volumioPushState(state);
+			return thisInterface.pushState(state);
 		})
 	);
 }
@@ -278,7 +287,7 @@ CoreCommandRouter.prototype.volumioPushQueue = function(queue) {
 	// Announce new player queue to each client interface
 	return libQ.all(
 		libFast.map(self.arrayInterfaces, function(thisInterface) {
-			return thisInterface.volumioPushQueue(queue);
+			return thisInterface.pushQueue(queue);
 		})
 	);
 }
@@ -395,5 +404,5 @@ CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 
 	libFast.map(self.arrayInterfaces, function(curInterface) {
 		libFast.bind(curInterface.printConsoleMessage, curInterface)(sMessage);
-	})
+	});
 }

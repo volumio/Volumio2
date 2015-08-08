@@ -3,24 +3,28 @@ var playerState = {};
 var timeLastStateUpdate = 0;
 var timerPlayback = null;
 var libraryHistory = new Array();
+var playlistHistory = new Array();
 var nLibraryHistoryPosition = 0;
+var nPlaylistHistoryPosition = 0;
 
 // Define button actions --------------------------------------------
-document.getElementById('button-volumioplay').onclick = function() {emitClientEvent('volumioPlay', '');}
-document.getElementById('button-volumiopause').onclick = function() {emitClientEvent('volumioPause', '');}
-document.getElementById('button-volumiostop').onclick = function() {emitClientEvent('volumioStop', '');}
-document.getElementById('button-volumioprev').onclick = function() {emitClientEvent('volumioPrevious', '');}
-document.getElementById('button-volumionext').onclick = function() {emitClientEvent('volumioNext', '');}
-document.getElementById('button-spopupdatetracklist').onclick = function() {emitClientEvent('spopUpdateTracklist', '');}
-document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitClientEvent('volumioRebuildLibrary', '');}
+document.getElementById('button-volumioplay').onclick = function() {emitPlayerCommand('play', '');}
+document.getElementById('button-volumiopause').onclick = function() {emitPlayerCommand('pause', '');}
+document.getElementById('button-volumiostop').onclick = function() {emitPlayerCommand('stop', '');}
+document.getElementById('button-volumioprev').onclick = function() {emitPlayerCommand('previous', '');}
+document.getElementById('button-volumionext').onclick = function() {emitPlayerCommand('next', '');}
+document.getElementById('button-spopupdatetracklist').onclick = function() {emitServiceCommand('updateTracklist', 'spop');}
+document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitPlayerCommand('rebuildLibrary', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
 document.getElementById('button-libraryback').onclick = libraryBack;
 document.getElementById('button-libraryforward').onclick = libraryForward;
-document.getElementById('button-volumeup').onclick = function() {emitClientEvent('volume', '+');}
-document.getElementById('button-volumedown').onclick = function() {emitClientEvent('volume', '-');}
-document.getElementById('button-volumemute').onclick = function() {emitClientEvent('volume', 'mute');}
-document.getElementById('button-volumeunmute').onclick = function() {emitClientEvent('volume', 'unmute');}
-document.getElementById('button-volumioimportplaylists').onclick = function() {emitClientEvent('volumioImportServicePlaylists', '');}
+document.getElementById('button-playlistback').onclick = playlistBack;
+document.getElementById('button-playlistforward').onclick = playlistForward;
+document.getElementById('button-volumeup').onclick = function() {emitPlayerCommand('volume', '+');}
+document.getElementById('button-volumedown').onclick = function() {emitPlayerCommand('volume', '-');}
+document.getElementById('button-volumemute').onclick = function() {emitPlayerCommand('volume', 'mute');}
+document.getElementById('button-volumeunmute').onclick = function() {emitPlayerCommand('volume', 'unmute');}
+document.getElementById('button-volumioimportplaylists').onclick = function() {emitPlayerCommand('importServicePlaylists', '');}
 
 // Socket.io form
 var input1 = document.getElementById('form-ws-1');
@@ -42,13 +46,15 @@ socket.on('connect', function() {
 	updateLibraryHistoryButtons();
 
 	// Get the state upon load
-	emitClientEvent('volumioGetState', '');
+	emitPlayerCommand('getState', '');
 
 	// Get the play queue
-	emitClientEvent('volumioGetQueue', '');
+	emitPlayerCommand('getQueue', '');
 
 	// Request the music library root
-	emitClientEvent('volumioBrowseLibrary', {'uid': 'index:root', 'sortby': '', 'datapath': [], 'entries': 0, 'index': 0});
+	emitPlayerCommand('getLibraryListing', {'uid': 'index:root', 'sortby': '', 'datapath': [], 'entries': 0, 'index': 0});
+
+	emitPlayerCommand('getPlaylistRoot', '');
 });
 
 socket.on('disconnect', function() {
@@ -64,7 +70,7 @@ socket.on('disconnect', function() {
 	stopPlaybackTimer();
 });
 
-socket.on('volumioPushState', function(state) {
+socket.on('pushState', function(state) {
 	playerState = state;
 	timeLastStateUpdate = Date.now();
 	updatePlayerStateDisplay();
@@ -78,14 +84,26 @@ socket.on('volumioPushState', function(state) {
 //	printConsoleMessage('volumioPushState: ' + JSON.stringify(state));
 });
 
-socket.on('volumioPushQueue', function(arrayQueue) {
+socket.on('pushQueue', function(arrayQueue) {
 	updatePlayerQueue(arrayQueue);
 //	printConsoleMessage('volumioPushQueue: ' + JSON.stringify(arrayQueue));
 });
 
-socket.on('volumioPushBrowseData', function(objBrowseData) {
+socket.on('pushLibraryListing', function(objBrowseData) {
 	libraryHistory.splice(nLibraryHistoryPosition + 1, libraryHistory.length - nLibraryHistoryPosition - 1, objBrowseData);
 	libraryForward();
+//	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
+});
+
+socket.on('pushPlaylistRoot', function(objBrowseData) {
+	playlistHistory.splice(nPlaylistHistoryPosition + 1, playlistHistory.length - nPlaylistHistoryPosition - 1, objBrowseData);
+	playlistForward();
+//	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
+});
+
+socket.on('pushPlaylistListing', function(objBrowseData) {
+	playlistHistory.splice(nPlaylistHistoryPosition + 1, playlistHistory.length - nPlaylistHistoryPosition - 1, objBrowseData);
+	playlistForward();
 //	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
 });
 
@@ -258,7 +276,7 @@ function updateBrowseView(objBrowseData) {
 			sSortBy = 'tracknumber';
 			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
 		}
-		var objBrowseParameters = {'uid': curEntry['uid'], 'sortby': sSortBy, 'datapath': arrayDataPath, 'entries': 0, 'index': 0};
+		var objBrowseParameters = {'uid': curEntry['uid'], 'options': {'sortby': sSortBy, 'datapath': arrayDataPath, 'entries': 0, 'index': 0}};
 
 		var buttonAdd = document.createElement('button');
 		buttonAdd.appendChild(document.createTextNode('Add'));
@@ -284,19 +302,89 @@ function updateBrowseView(objBrowseData) {
 
 function browseLibraryLink(objBrowseParameters) {
 	return function() {
-		emitClientEvent('volumioBrowseLibrary', objBrowseParameters);
+		emitPlayerCommand('getLibraryListing', objBrowseParameters);
+	}
+}
+
+function updatePlaylistView(objPlaylistData) {
+	clearPlaylistView();
+
+	//printConsoleMessage(JSON.stringify(objBrowseData));
+
+	var nodePlaylistView = document.getElementById('playlistview');
+	var arrayDataKeys = Object.keys(objPlaylistData);
+	for (i = 0; i < arrayDataKeys.length; i++) {
+		var curEntry = objPlaylistData[arrayDataKeys[i]];
+
+		var sText = curEntry.name;
+		var sSubText = '';
+		if ('artists' in curEntry) {
+			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
+		}
+		if ('albums' in curEntry) {
+			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.albums) + '');
+		}
+		if ('tracknumber' in curEntry) {
+			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
+		}
+		if ('date' in curEntry) {
+			sSubText = sSubText.concat(' [Date]: ' + JSON.stringify(curEntry.date) + '');
+		}
+		if ('uris' in curEntry) {
+			sSubText = sSubText.concat(' [Uris]: ' + JSON.stringify(curEntry.uris) + '');
+		}
+
+		var sPlaylistField = '';
+		var sSortBy = '';
+		var arrayDataPath = [];
+		if (curEntry.type === 'genre') {
+			sSortBy = 'name';
+			arrayDataPath = ['artistuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': ['genreuids', '#', {'name': 'name', 'uid': 'uid'}]}];
+		} else if (curEntry.type === 'artist') {
+			sSortBy = 'date';
+			arrayDataPath = ['albumuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'date': 'date'}];
+		} else if (curEntry.type === 'album') {
+			sSortBy = 'tracknumber';
+			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
+		}
+
+		var buttonAdd = document.createElement('button');
+		buttonAdd.appendChild(document.createTextNode('Add'));
+		buttonAdd.className = 'button-itemaction';
+		buttonAdd.onclick = addQueueUids([curEntry['uid']]);
+
+		var nodeLink = document.createElement('a');
+		nodeLink.setAttribute('href', '#');
+		nodeLink.appendChild(document.createTextNode(sText));
+		nodeLink.onclick = playlistBrowseLink(curEntry['uid']);
+
+		var nodeSpan = document.createElement('span');
+		nodeSpan.appendChild(nodeLink);
+		//nodeSpan.appendChild(buttonAdd);
+		nodeSpan.appendChild(document.createElement('br'));
+		nodeSpan.appendChild(document.createTextNode(sSubText));
+
+		var nodeListItem = document.createElement('LI');
+		nodeListItem.appendChild(nodeSpan);
+		nodePlaylistView.appendChild(nodeListItem);
+	}
+}
+
+function playlistBrowseLink(sUid) {
+	return function() {
+		emitPlayerCommand('getPlaylistListing', sUid);
 	}
 }
 
 function addQueueUids(arrayUids) {
 	return function() {
-		emitClientEvent('volumioAddQueueUids', arrayUids);
+		emitPlayerCommand('addQueueUids', arrayUids);
 	}
 }
 
 function removeQueueItem(nIndex) {
 	return function() {
-		emitClientEvent('volumioRemoveQueueItem', nIndex);
+		emitPlayerCommand('removeQueueItem', nIndex);
 	}
 }
 
@@ -306,6 +394,16 @@ function clearBrowseView() {
 	if (nodeBrowseView.firstChild) {
 		while (nodeBrowseView.firstChild) {
 			nodeBrowseView.removeChild(nodeBrowseView.firstChild);
+		}
+	}
+}
+
+function clearPlaylistView() {
+	var nodePlaylistView = document.getElementById('playlistview');
+
+	if (nodePlaylistView.firstChild) {
+		while (nodePlaylistView.firstChild) {
+			nodePlaylistView.removeChild(nodePlaylistView.firstChild);
 		}
 	}
 }
@@ -362,8 +460,79 @@ function libraryBack() {
 	updateLibraryHistoryButtons();
 }
 
-function emitClientEvent(sEvent, sData) {
-	socket.emit(sEvent, sData);
-	printConsoleMessage('[Client Event]: ' + sEvent + ' [Parameters]:' + JSON.stringify(sData));
+function updatePlaylistHistoryButtons() {
+	var nHistoryItems = playlistHistory.length;
+
+	if (nHistoryItems <= 1) {
+		document.getElementById('button-playlistback').disabled = true;
+		document.getElementById('button-playlistforward').disabled = true;
+	} else if (nPlaylistHistoryPosition <= 0) {
+		document.getElementById('button-playlistback').disabled = true;
+		document.getElementById('button-playlistforward').disabled = false;
+	} else if (nPlaylistHistoryPosition >= nHistoryItems - 1) {
+		document.getElementById('button-playlistback').disabled = false;
+		document.getElementById('button-playlistforward').disabled = true;
+	} else {
+		document.getElementById('button-playlistback').disabled = false;
+		document.getElementById('button-playlistforward').disabled = false;
+	}
 }
 
+function playlistForward() {
+	var nHistoryItems = playlistHistory.length;
+
+	if (nHistoryItems <= 1) {
+		nPlaylistHistoryPosition = 0;
+	} else if (nPlaylistHistoryPosition <= 0) {
+		nPlaylistHistoryPosition = 1;
+	} else if (nPlaylistHistoryPosition >= nHistoryItems - 1) {
+		nPlaylistHistoryPosition = nHistoryItems - 1;
+	} else {
+		nPlaylistHistoryPosition++;
+	}
+
+	updatePlaylistView(playlistHistory[nPlaylistHistoryPosition]);
+	updatePlaylistHistoryButtons();
+}
+
+function playlistBack() {
+	var nHistoryItems = playlistHistory.length;
+
+	if (nHistoryItems <= 1) {
+		nPlaylistHistoryPosition = 0;
+	} else if (nPlaylistHistoryPosition <= 0) {
+		nPlaylistHistoryPosition = 0;
+	} else if (nPlaylistHistoryPosition >= nHistoryItems - 1) {
+		nPlaylistHistoryPosition = nHistoryItems - 2;
+	} else {
+		nPlaylistHistoryPosition--;
+	}
+
+	updatePlaylistView(playlistHistory[nPlaylistHistoryPosition]);
+	updatePlaylistHistoryButtons();
+}
+
+function emitEvent(sEvent, sParam1, sParam2) {
+	socket.emit(sEvent, sParam1, sParam2);
+	printConsoleMessage('[Event]: ' + sEvent + ' [Parameters]:' + JSON.stringify(sParam1) + ', ' + JSON.stringify(sParam2));
+}
+
+function emitPlayerCommand(sCommand, sParam) {
+	socket.emit('playerCommand', sCommand, sParam);
+	printConsoleMessage('[Player Command]: ' + sCommand + ' [Parameters]:' + JSON.stringify(sParam));
+}
+
+function emitServiceCommand(sCommand, sParam) {
+	socket.emit('serviceCommand', sCommand, sParam);
+	printConsoleMessage('[Service Command]: ' + sCommand + ' [Parameters]:' + JSON.stringify(sParam));
+}
+
+function emitInterfaceCommand(sCommand, sParam) {
+	socket.emit('interfaceCommand', sCommand, sParam);
+	printConsoleMessage('[Interface Command]: ' + sCommand + ' [Parameters]:' + JSON.stringify(sParam));
+}
+
+function emitPluginCommand(sCommand, sParam) {
+	socket.emit('pluginCommand', sCommand, sParam);
+	printConsoleMessage('[Plugin Command]: ' + sCommand + ' [Parameters]:' + JSON.stringify(sParam));
+}
