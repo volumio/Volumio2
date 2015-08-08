@@ -70,6 +70,11 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	browser.start();
 }
 
+ControllerVolumioDiscovery.prototype.getDevices=function()
+{
+	console.log("GET MULTI ROOM");
+}
+
 ControllerVolumioDiscovery.prototype.onStart = function() {
 	var self = this;
 	//Perform startup tasks here

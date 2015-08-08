@@ -277,15 +277,18 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('getUiConfig', function(data) {
 			selfConnWebSocket = this;
 
-			console.log("GETUICONFIG "+data);
-			var reqJson=JSON.parse(data);
+			var response=self.commandRouter.getUIConfigOnController(data.page,{});
 
-			var response=self.commandRouter.getUIConfigOnController(reqJson.page,{});
+			selfConnWebSocket.emit('pushUiConfig',response);
+		});
 
-			console.log(JSON.stringify(response));
-			selfConnWebSocket.emit('pushUiConfig',response,function(data){
-				console.log(data);
-			});
+		connWebSocket.on('getMultiRoomDevices', function(data) {
+			selfConnWebSocket = this;
+
+			var volumiodiscovery=self.commandRouter.getController('volumiodiscovery');
+			var response=volumiodiscovery.getDevices();
+
+			selfConnWebSocket.emit('pushUiConfig',response);
 		});
 
 	});
