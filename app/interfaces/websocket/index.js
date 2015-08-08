@@ -288,7 +288,8 @@ function InterfaceWebUI (server, commandRouter) {
 			var volumiodiscovery=self.commandRouter.getController('volumiodiscovery');
 			var response=volumiodiscovery.getDevices();
 
-			selfConnWebSocket.emit('pushUiConfig',response);
+			console.log(response);
+			selfConnWebSocket.emit('pushMultiRoomDevices',response);
 		});
 
 	});

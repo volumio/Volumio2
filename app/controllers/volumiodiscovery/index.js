@@ -43,11 +43,14 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var browser = mdns.createBrowser(mdns.tcp(serviceName),{resolverSequence: sequence});
 
 	browser.on('serviceUp', function(service) {
+		console.log(service);
 		if(uuid!=service.txtRecord.UUID && foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
 		{
 			console.log("mDNS: Found device "+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.UUID',"string",service.txtRecord.UUID);
-			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.addresses',"string",service.addresses[0]);
+			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.address',"string",service.addresses[0]);
+			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.port',"string",service.port);
+
 			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.osname',"string",service.name);
 
 			foundVolumioInstances.print();
@@ -72,7 +75,41 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 
 ControllerVolumioDiscovery.prototype.getDevices=function()
 {
-	console.log("GET MULTI ROOM");
+	var self=this;
+
+	var response={
+		misc: {debug: true},
+		list: []};
+
+	var keys=foundVolumioInstances.getKeys();
+
+	for(var i in keys)
+	{
+		var key=keys[i];
+
+		var osname=foundVolumioInstances.get(key+'.osname');
+		var address=foundVolumioInstances.get(key+'.address');
+		var port=foundVolumioInstances.get(key+'.port');
+		var uuid=foundVolumioInstances.get(key+'.UUID');
+
+		var device={
+			id:uuid,
+			host:'http://'+address+":"+port,
+			name:key,
+			state: {
+				status: 'play',
+				volume: 80,
+				mute: false,
+				artist: 'Franz ferdinand',
+				track: 'No you Girls'
+			}
+		};
+
+		response.list.push(device);
+	}
+
+	return response;
+
 }
 
 ControllerVolumioDiscovery.prototype.onStart = function() {
