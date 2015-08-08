@@ -232,3 +232,15 @@ ControllerNetwork.prototype.wirelessScan = function(scanresult) {
 	return defer.promise;
 }
 
+
+ControllerNetwork.prototype.saveWiredNet=function(data)
+{
+	console.log("SAVE WIRED NET WITH DATA "+data);
+}
+
+
+ControllerNetwork.prototype.saveWirelessNet=function(data)
+{
+	console.log("SAVE WIRELESS NET WITH DATA "+data);
+}
+
