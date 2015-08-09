@@ -7,8 +7,7 @@
       "id": "section_wired_network",
       "element": "section",
       "label": "Wired Network",
-      "plugin": "network/wired_net_conf",
-      "onSave": "saveWiredNet",
+      "onSave": {"type":"controller", "endpoint":"network", "method":"saveWiredNet"},
       "saveButton": {
         "label": "Save",
         "values": [
@@ -77,8 +76,7 @@
       "id": "section_wireless_network",
       "element": "section",
       "label": "Wireless Network",
-      "plugin": "network/wireless_net_conf",
-      "onSave": "saveWirelessNet",
+      "onSave": {"type":"controller", "endpoint":"network", "method":"saveWirelessNet"},
       "saveButton": {
         "label": "Save",
         "values": [

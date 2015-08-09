@@ -7,9 +7,7 @@
       "id": "section_general_settings",
       "element": "section",
       "label": "General Settings",
-      "type": "Controller",
-      "controller": "system/wired_net_conf",
-      "method": "setUiConfig",
+      "onSave": {"type":"controller", "endpoint":"system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
         "values": [
@@ -25,11 +23,10 @@
           "value": "volumio"
         },
         {
-          "startup_sound": {
-            "element": "switch",
-            "label": "Startup Sound",
-            "value": "true"
-          }
+          "id":"startup_sound",
+          "element": "switch",
+          "label": "Startup Sound",
+          "value": "true"
         }
 
       ]
@@ -38,8 +35,7 @@
       "section_sound_quality": {
         "type": "section",
         "label": "Sound quality tweaks",
-        "plugin": "/settings/playback_conf",
-        "onSave": "saveSoundQuality",
+        "onSave": {"type":"controller", "endpoint":"network", "method":"saveSoundQuality"},
         "savebutton": {
           "label": "salva",
           "values": [
@@ -83,7 +79,7 @@
               "label": "System updates",
               "text": "You can check?...",
               "plugin": "/settings/playback_conf",
-              "onClick": "systemUpdate"
+              "onClick": {"type":"controller", "endpoint":"network", "method":"systemUpdate"}
             }
           }
         ]

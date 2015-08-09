@@ -235,12 +235,58 @@ ControllerNetwork.prototype.wirelessScan = function(scanresult) {
 
 ControllerNetwork.prototype.saveWiredNet=function(data)
 {
-	console.log("SAVE WIRED NET WITH DATA "+data);
+
+	var self = this;
+
+	var dhcp=self.getData(data,'dhcp');
+	var static_ip=self.getData(data,'static_ip');
+	var static_netmask=self.getData(data,'static_netmask');
+	var static_gateway=self.getData(data,'static_gateway');
+
+	if(kernel_profile==null)
+	{
+		//return an error
+	}
+	else
+	{
+		config.set('dhcp',dhcp);
+		config.set('static_ip',static_ip);
+		config.set('static_netmask',static_netmask);
+		config.set('static_gateway',static_gateway);
+	}
 }
 
 
 ControllerNetwork.prototype.saveWirelessNet=function(data)
 {
-	console.log("SAVE WIRELESS NET WITH DATA "+data);
+	var self = this;
+
+	var network_ssid=self.getData(data,'network_ssid');
+	var network_pass=self.getData(data,'network_pass');
+
+	if(kernel_profile==null)
+	{
+		//return an error
+	}
+	else
+	{
+		config.set('network_ssid',network_ssid);
+		config.set('network_pass',network_pass);
+	}
+}
+
+ControllerSystem.prototype.getData = function(data,key)
+{
+	var self = this;
+
+	for(var i in data)
+	{
+		var ithdata=data[i];
+
+		if(ithdata[key]!=undefined)
+			return ithdata[key];
+	}
+
+	return null;
 }
 

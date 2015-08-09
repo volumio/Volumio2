@@ -113,3 +113,62 @@ ControllerSystem.prototype.setAdditionalConf = function()
 	var self = this;
 	//Perform your installation tasks here
 }
+
+
+ControllerSystem.prototype.saveGeneralSettings = function(data)
+{
+	var self = this;
+
+	var player_name=self.getData(data,'player_name');
+	var startup_sound=self.getData(data,'startup_sound');
+
+	if(player_name==null || startup_sound==null)
+	{
+		//return an error
+	}
+	else
+	{
+		config.set('player_name',player_name);
+		config.set('startup_sound',startup_sound);
+	}
+}
+
+ControllerSystem.prototype.saveSoundQuality = function(data)
+{
+	var self = this;
+
+	var kernel_profile=self.getData(data,'kernel_profile');
+
+	if(kernel_profile==null)
+	{
+		//return an error
+	}
+	else
+	{
+		config.set('kernel_profile',kernel_profile);
+	}
+}
+
+ControllerSystem.prototype.systemUpdate = function(data)
+{
+	var self = this;
+
+
+	console.log("Performing system update");
+}
+
+
+ControllerSystem.prototype.getData = function(data,key)
+{
+	var self = this;
+
+	for(var i in data)
+	{
+		var ithdata=data[i];
+
+		if(ithdata[key]!=undefined)
+		return ithdata[key];
+	}
+
+	return null;
+}
