@@ -10,7 +10,7 @@
       "onSave": {"type":"controller", "endpoint":"system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
-        "data": [
+        "values": [
           "player_name",
           "startup_sound"
         ]
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "section_sound_quality": {
+      "id": "section_sound_quality",
         "type": "section",
         "label": "Sound quality tweaks",
         "onSave": {"type":"controller", "endpoint":"network", "method":"saveSoundQuality"},
@@ -45,9 +45,9 @@
         "text": "These profiles??.",
         "content": [
           {
-            "kernel_profile": {
-              "element": "select",
-              "label": "Kernel profile",
+            "id": "kernel_profile",
+            "element": "select",
+            "label": "Kernel profile",
               "value": "1",
               "options": [
                 {
@@ -63,27 +63,27 @@
                   "4": "Focus"
                 }
               ]
-            }
+
           }
         ]
-      }
+
     },
     {
-      "section_updates": {
+      "id":"section_updates",
         "type": "section",
         "label": "System updates",
         "content": [
           {
-            "update": {
+            "id":"update",
               "element": "button",
               "label": "System updates",
               "text": "You can check?...",
               "plugin": "/settings/playback_conf",
               "onClick": {"type":"controller", "endpoint":"network", "method":"systemUpdate"}
-            }
+
           }
         ]
-      }
+
     }
   ]
 }

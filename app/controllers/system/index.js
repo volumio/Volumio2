@@ -119,34 +119,30 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 {
 	var self = this;
 
-	var player_name=self.getData(data,'player_name');
-	var startup_sound=self.getData(data,'startup_sound');
+	var defer = libQ.defer();
 
-	if(player_name==null || startup_sound==null)
-	{
-		//return an error
-	}
-	else
-	{
-		config.set('player_name',player_name);
-		config.set('startup_sound',startup_sound);
-	}
+	var player_name=data['player_name'];
+	var startup_sound=data['startup_sound'];
+
+	config.set('playerName',player_name);
+	config.set('starupSound',startup_sound);
+
+	defer.resolve({});
+	return defer.promise;
 }
 
 ControllerSystem.prototype.saveSoundQuality = function(data)
 {
 	var self = this;
 
-	var kernel_profile=self.getData(data,'kernel_profile');
+	var defer = libQ.defer();
 
-	if(kernel_profile==null)
-	{
-		//return an error
-	}
-	else
-	{
-		config.set('kernel_profile',kernel_profile);
-	}
+	var kernel_profile=data['kernel_profile'];
+
+	config.set('kernelSetting',kernel_profile);
+
+	defer.resolve({});
+	return defer.promise;
 }
 
 ControllerSystem.prototype.systemUpdate = function(data)

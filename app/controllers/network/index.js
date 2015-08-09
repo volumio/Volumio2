@@ -235,25 +235,22 @@ ControllerNetwork.prototype.wirelessScan = function(scanresult) {
 
 ControllerNetwork.prototype.saveWiredNet=function(data)
 {
-
 	var self = this;
 
-	var dhcp=self.getData(data,'dhcp');
-	var static_ip=self.getData(data,'static_ip');
-	var static_netmask=self.getData(data,'static_netmask');
-	var static_gateway=self.getData(data,'static_gateway');
+	var defer = libQ.defer();
 
-	if(kernel_profile==null)
-	{
-		//return an error
-	}
-	else
-	{
-		config.set('dhcp',dhcp);
-		config.set('static_ip',static_ip);
-		config.set('static_netmask',static_netmask);
-		config.set('static_gateway',static_gateway);
-	}
+	var dhcp=data['dhcp'];
+	var static_ip=data['static_ip'];
+	var static_netmask=data['static_netmask'];
+	var static_gateway=data['static_gateway'];
+
+	config.set('dhcp',dhcp);
+	config.set('ethip',static_ip);
+	config.set('ethnetmask',static_netmask);
+	config.set('ethgateway',static_gateway);
+
+	defer.resolve({});
+	return defer.promise;
 }
 
 
@@ -261,18 +258,16 @@ ControllerNetwork.prototype.saveWirelessNet=function(data)
 {
 	var self = this;
 
-	var network_ssid=self.getData(data,'network_ssid');
-	var network_pass=self.getData(data,'network_pass');
+	var defer = libQ.defer();
 
-	if(kernel_profile==null)
-	{
-		//return an error
-	}
-	else
-	{
-		config.set('network_ssid',network_ssid);
-		config.set('network_pass',network_pass);
-	}
+	var network_ssid=data['network_ssid'];
+	var network_pass=data['network_pass'];
+
+	config.set('wlanssid',network_ssid);
+	config.set('wlanpass',network_pass);
+
+	defer.resolve({});
+	return defer.promise;
 }
 
 ControllerNetwork.prototype.getData = function(data,key)
