@@ -48,19 +48,24 @@
             "id": "kernel_profile",
             "element": "select",
             "label": "Kernel profile",
-              "value": "1",
+              "value":  {
+                "value":"1",
+                "label": "Default"
+              },
               "options": [
                 {
-                  "1": "Default"
+                  "value":"1",
+                  "label": "Default"
                 },
                 {
-                  "2": "Less Jitter"
-                },
-                {
-                  "3": "Jitter"
-                },
-                {
-                  "4": "Focus"
+                  "value":"2",
+                  "label": "Less Jitter"
+                }, {
+                  "value":"3",
+                  "label": "Jitter"
+                }, {
+                  "value":"4",
+                  "label": "Focus"
                 }
               ]
 
