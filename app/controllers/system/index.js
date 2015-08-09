@@ -64,6 +64,11 @@ ControllerSystem.prototype.getUIConfig = function()
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
+	uiconf.sections[0].content[0].value=config.get('playerName');
+	uiconf.sections[0].content[1].value=config.get('startupSound');
+	uiconf.sections[1].content[0].value.value=config.get('kernelSettingValue');
+	uiconf.sections[1].content[0].value.label=config.get('kernelSettingLabel');
+
 	return uiconf;
 }
 
@@ -121,11 +126,12 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 
 	var defer = libQ.defer();
 
+	console.log(data);
 	var player_name=data['player_name'];
 	var startup_sound=data['startup_sound'];
 
 	config.set('playerName',player_name);
-	config.set('starupSound',startup_sound);
+	config.set('startupSound',startup_sound);
 
 	defer.resolve({});
 	return defer.promise;
@@ -137,9 +143,13 @@ ControllerSystem.prototype.saveSoundQuality = function(data)
 
 	var defer = libQ.defer();
 
-	var kernel_profile=data['kernel_profile'];
+	console.log(data);
+	var kernel_profile_value=data['kernel_profile'].value;
+	var kernel_profile_label=data['kernel_profile'].label;
 
-	config.set('kernelSetting',kernel_profile);
+	config.set('kernelSettingValue',kernel_profile_value);
+	config.set('kernelSettingLabel',kernel_profile_label);
+
 
 	defer.resolve({});
 	return defer.promise;
@@ -149,8 +159,8 @@ ControllerSystem.prototype.systemUpdate = function(data)
 {
 	var self = this;
 
+	self.commandRouter.pushInfoToastMessage("System update",'System update is not yet implemented');
 
-	console.log("Performing system update");
 }
 
 

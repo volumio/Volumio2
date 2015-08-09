@@ -10,7 +10,7 @@
       "onSave": {"type":"controller", "endpoint":"system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
-        "values": [
+        "data": [
           "player_name",
           "startup_sound"
         ]
@@ -18,7 +18,8 @@
       "content": [
         {
           "id": "player_name",
-          "element": "textBox",
+          "type":"text",
+          "element": "input",
           "label": "Player Name",
           "value": "volumio"
         },
@@ -35,9 +36,9 @@
       "id": "section_sound_quality",
         "type": "section",
         "label": "Sound quality tweaks",
-        "onSave": {"type":"controller", "endpoint":"network", "method":"saveSoundQuality"},
-        "savebutton": {
-          "label": "salva",
+        "onSave": {"type":"controller", "endpoint":"system", "method":"saveSoundQuality"},
+        "saveButton": {
+          "label": "Save",
           "data": [
             "kernel_profile"
           ]
@@ -48,7 +49,7 @@
             "id": "kernel_profile",
             "element": "select",
             "label": "Kernel profile",
-              "value":  {
+            "value":  {
                 "value":"1",
                 "label": "Default"
               },
@@ -83,9 +84,7 @@
               "element": "button",
               "label": "System updates",
               "text": "You can check?...",
-              "plugin": "/settings/playback_conf",
               "onClick": {"type":"controller", "endpoint":"network", "method":"systemUpdate"}
-
           }
         ]
 

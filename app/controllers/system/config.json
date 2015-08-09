@@ -1,5 +1,6 @@
 {
   "playerName":{"value":"Volumio","type":"string"},
-  "starupSound":{"value":true,"type":"boolean"},
-  "kernelSetting":{"value":1,"type":"int"}
+  "startupSound":{"value":true,"type":"boolean"},
+  "kernelSettingValue":{"value":1,"type":"int"},
+  "kernelSettingLabel":{"value":"Default","type":"string"}
 }
