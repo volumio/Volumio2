@@ -395,6 +395,43 @@ CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 	console.log(sMessage);
 
 	libFast.map(self.arrayInterfaces, function(curInterface) {
-		libFast.bind(curInterface.printConsoleMessage, curInterface)(sMessage);
+		if(curInterface.notifyUser!=undefined)
+			libFast.bind(curInterface.printConsoleMessage, curInterface)(sMessage);
 	})
+}
+
+CoreCommandRouter.prototype.pushInfoToastMessage = function(title,message) {
+	var self = this;
+
+	libFast.map(self.arrayInterfaces, function(curInterface) {
+		if(curInterface.notifyUser!=undefined)
+			libFast.bind(curInterface.notifyUser, curInterface)('info',title,message);
+	});
+}
+
+CoreCommandRouter.prototype.pushSuccessToastMessage = function(title,message) {
+	var self = this;
+
+	libFast.map(self.arrayInterfaces, function(curInterface) {
+		if(curInterface.notifyUser!=undefined)
+			libFast.bind(curInterface.notifyUser, curInterface)('success',title,message);
+	});
+}
+
+CoreCommandRouter.prototype.pushErrorToastMessage = function(title,message) {
+	var self = this;
+
+	libFast.map(self.arrayInterfaces, function(curInterface) {
+		if(curInterface.notifyUser!=undefined)
+			libFast.bind(curInterface.notifyUser, curInterface)('error',title,message);
+	});
+}
+
+CoreCommandRouter.prototype.pushWarningToastMessage = function(title,message) {
+	var self = this;
+
+	libFast.map(self.arrayInterfaces, function(curInterface) {
+		if(curInterface.notifyUser!=undefined)
+			libFast.bind(curInterface.notifyUser, curInterface)('warning',title,message);
+	});
 }

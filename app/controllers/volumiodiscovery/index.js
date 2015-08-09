@@ -43,8 +43,7 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var browser = mdns.createBrowser(mdns.tcp(serviceName),{resolverSequence: sequence});
 
 	browser.on('serviceUp', function(service) {
-		console.log(service);
-		if(uuid!=service.txtRecord.UUID && foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
+		if(foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
 		{
 			console.log("mDNS: Found device "+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.UUID',"string",service.txtRecord.UUID);
@@ -53,7 +52,6 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 
 			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.osname',"string",service.name);
 
-			foundVolumioInstances.print();
 		}
 	});
 	browser.on('serviceDown', function(service) {
@@ -68,7 +66,6 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 				foundVolumioInstances.delete(key);
 		}
 
-		foundVolumioInstances.print();
 	});
 	browser.start();
 }
@@ -92,13 +89,16 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		var port=foundVolumioInstances.get(key+'.port');
 		var uuid=foundVolumioInstances.get(key+'.UUID');
 
+		//console.log(self.commandRouter.volumioGetState());
+		//console.log(self.commandRouter.volumioretrievevolume());
+
 		var device={
 			id:uuid,
 			host:'http://'+address+":"+port,
 			name:key,
 			state: {
 				status: 'play',
-				volume: 80,
+				volume: 90,
 				mute: false,
 				artist: 'Franz ferdinand',
 				track: 'No you Girls'

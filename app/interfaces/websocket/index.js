@@ -354,3 +354,14 @@ InterfaceWebUI.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 }
+
+InterfaceWebUI.prototype.notifyUser = function(type,title,message) {
+	var self = this;
+
+	// Push the message all clients
+	self.libSocketIO.emit('pushToastMessage', {
+		type:type,
+		title:title,
+		message:message
+	});
+}
