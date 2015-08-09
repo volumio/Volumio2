@@ -252,12 +252,10 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('callMethod', function(msg) {
+		connWebSocket.on('callMethod', function(dataJson) {
 			selfConnWebSocket = this;
 
 			var promise;
-
-			var dataJson=JSON.parse(msg);
 
 			if(dataJson.type=='plugin')
 				promise=self.commandRouter.executeOnPlugin(dataJson.endpoint,dataJson.method,dataJson.data);
