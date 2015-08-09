@@ -275,7 +275,7 @@ ControllerNetwork.prototype.saveWirelessNet=function(data)
 	}
 }
 
-ControllerSystem.prototype.getData = function(data,key)
+ControllerNetwork.prototype.getData = function(data,key)
 {
 	var self = this;
 
