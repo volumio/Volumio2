@@ -10,7 +10,7 @@
       "onSave": {"type":"controller", "endpoint":"network", "method":"saveWiredNet"},
       "saveButton": {
         "label": "Save",
-        "values": [
+        "data": [
           "dhcp",
           "static_ip",
           "static_netmask",
@@ -79,7 +79,7 @@
       "onSave": {"type":"controller", "endpoint":"network", "method":"saveWirelessNet"},
       "saveButton": {
         "label": "Save",
-        "values": [
+        "data": [
           "network_ssid",
           "network_pass"
         ]

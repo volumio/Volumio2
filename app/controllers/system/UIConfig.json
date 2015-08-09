@@ -10,7 +10,7 @@
       "onSave": {"type":"controller", "endpoint":"system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
-        "values": [
+        "data": [
           "player_name",
           "startup_sound"
         ]
@@ -38,7 +38,7 @@
         "onSave": {"type":"controller", "endpoint":"network", "method":"saveSoundQuality"},
         "savebutton": {
           "label": "salva",
-          "values": [
+          "data": [
             "kernel_profile"
           ]
         },
