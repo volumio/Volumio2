@@ -232,3 +232,61 @@ ControllerNetwork.prototype.wirelessScan = function(scanresult) {
 	return defer.promise;
 }
 
+
+ControllerNetwork.prototype.saveWiredNet=function(data)
+{
+	var self = this;
+
+	var defer = libQ.defer();
+
+	var dhcp=data['dhcp'];
+	var static_ip=data['static_ip'];
+	var static_netmask=data['static_netmask'];
+	var static_gateway=data['static_gateway'];
+
+	config.set('dhcp',dhcp);
+	config.set('ethip',static_ip);
+	config.set('ethnetmask',static_netmask);
+	config.set('ethgateway',static_gateway);
+
+
+	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
+
+	defer.resolve({});
+	return defer.promise;
+}
+
+
+ControllerNetwork.prototype.saveWirelessNet=function(data)
+{
+	var self = this;
+
+	var defer = libQ.defer();
+
+	var network_ssid=data['network_ssid'];
+	var network_pass=data['network_pass'];
+
+	config.set('wlanssid',network_ssid);
+	config.set('wlanpass',network_pass);
+
+	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
+
+	defer.resolve({});
+	return defer.promise;
+}
+
+ControllerNetwork.prototype.getData = function(data,key)
+{
+	var self = this;
+
+	for(var i in data)
+	{
+		var ithdata=data[i];
+
+		if(ithdata[key]!=undefined)
+			return ithdata[key];
+	}
+
+	return null;
+}
+

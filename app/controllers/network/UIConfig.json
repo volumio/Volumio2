@@ -7,15 +7,14 @@
       "id": "section_wired_network",
       "element": "section",
       "label": "Wired Network",
-      "plugin": "network/wired_net_conf",
-      "onSave": "saveWiredNet",
+      "onSave": {"type":"controller", "endpoint":"network", "method":"saveWiredNet"},
       "saveButton": {
         "label": "Save",
-        "values": [
-          "airplay",
-          "upnp",
-          "upnp_dlna_indexing",
-          "upnp_dlna_indexing"
+        "data": [
+          "dhcp",
+          "static_ip",
+          "static_netmask",
+          "static_gateway"
         ]
       },
       "content": [
@@ -77,15 +76,12 @@
       "id": "section_wireless_network",
       "element": "section",
       "label": "Wireless Network",
-      "plugin": "network/wireless_net_conf",
-      "onSave": "saveWirelessNet",
+      "onSave": {"type":"controller", "endpoint":"network", "method":"saveWirelessNet"},
       "saveButton": {
         "label": "Save",
-        "values": [
-          "airplay",
-          "upnp",
-          "upnp_dlna_indexing",
-          "upnp_dlna_indexing"
+        "data": [
+          "network_ssid",
+          "network_pass"
         ]
       },
       "content": [

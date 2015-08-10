@@ -252,12 +252,10 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('callMethod', function(msg) {
+		connWebSocket.on('callMethod', function(dataJson) {
 			selfConnWebSocket = this;
 
 			var promise;
-
-			var dataJson=JSON.parse(msg);
 
 			if(dataJson.type=='plugin')
 				promise=self.commandRouter.executeOnPlugin(dataJson.endpoint,dataJson.method,dataJson.data);
@@ -277,15 +275,19 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('getUiConfig', function(data) {
 			selfConnWebSocket = this;
 
-			console.log("GETUICONFIG "+data);
-			var response;
+			var response=self.commandRouter.getUIConfigOnController(data.page,{});
 
-			var reqJson=JSON.parse(data);
+			selfConnWebSocket.emit('pushUiConfig',response);
+		});
 
-			response=self.commandRouter.getUIConfigOnController(reqJson.page,{});
+		connWebSocket.on('getMultiRoomDevices', function(data) {
+			selfConnWebSocket = this;
 
-			console.log(JSON.stringify(response));
-			self.libSocketIO.emit("pushUiConfig",response);
+			var volumiodiscovery=self.commandRouter.getController('volumiodiscovery');
+			var response=volumiodiscovery.getDevices();
+
+			console.log(response);
+			selfConnWebSocket.emit('pushMultiRoomDevices',response);
 		});
 
 	});
@@ -351,4 +353,15 @@ InterfaceWebUI.prototype.logStart = function(sCommand) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
+}
+
+InterfaceWebUI.prototype.notifyUser = function(type,title,message) {
+	var self = this;
+
+	// Push the message all clients
+	self.libSocketIO.emit('pushToastMessage', {
+		type:type,
+		title:title,
+		message:message
+	});
 }

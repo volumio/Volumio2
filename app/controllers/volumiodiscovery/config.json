@@ -1,0 +1,12 @@
+{
+    "service": {
+        "type": "string",
+        "value": "volumio"
+      },
+      "port": {
+        "type": "int",
+        "value": 3000
+      }
+
+}
+

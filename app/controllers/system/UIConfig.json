@@ -7,12 +7,10 @@
       "id": "section_general_settings",
       "element": "section",
       "label": "General Settings",
-      "type": "Controller",
-      "controller": "system/wired_net_conf",
-      "method": "setUiConfig",
+      "onSave": {"type":"controller", "endpoint":"system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
-        "values": [
+        "data": [
           "player_name",
           "startup_sound"
         ]
@@ -20,74 +18,76 @@
       "content": [
         {
           "id": "player_name",
-          "element": "textBox",
+          "type":"text",
+          "element": "input",
           "label": "Player Name",
           "value": "volumio"
         },
         {
-          "startup_sound": {
-            "element": "switch",
-            "label": "Startup Sound",
-            "value": "true"
-          }
+          "id":"startup_sound",
+          "element": "switch",
+          "label": "Startup Sound",
+          "value": "true"
         }
 
       ]
     },
     {
-      "section_sound_quality": {
+      "id": "section_sound_quality",
         "type": "section",
         "label": "Sound quality tweaks",
-        "plugin": "/settings/playback_conf",
-        "onSave": "saveSoundQuality",
-        "savebutton": {
-          "label": "salva",
-          "values": [
+        "onSave": {"type":"controller", "endpoint":"system", "method":"saveSoundQuality"},
+        "saveButton": {
+          "label": "Save",
+          "data": [
             "kernel_profile"
           ]
         },
         "text": "These profiles??.",
         "content": [
           {
-            "kernel_profile": {
-              "element": "select",
-              "label": "Kernel profile",
-              "value": "1",
+            "id": "kernel_profile",
+            "element": "select",
+            "label": "Kernel profile",
+            "value":  {
+                "value":"1",
+                "label": "Default"
+              },
               "options": [
                 {
-                  "1": "Default"
+                  "value":"1",
+                  "label": "Default"
                 },
                 {
-                  "2": "Less Jitter"
-                },
-                {
-                  "3": "Jitter"
-                },
-                {
-                  "4": "Focus"
+                  "value":"2",
+                  "label": "Less Jitter"
+                }, {
+                  "value":"3",
+                  "label": "Jitter"
+                }, {
+                  "value":"4",
+                  "label": "Focus"
                 }
               ]
-            }
+
           }
         ]
-      }
+
     },
     {
-      "section_updates": {
+      "id":"section_updates",
         "type": "section",
         "label": "System updates",
         "content": [
           {
-            "update": {
+            "id":"update",
               "element": "button",
               "label": "System updates",
               "text": "You can check?...",
-              "plugin": "/settings/playback_conf",
-              "onClick": "systemUpdate"
-            }
+              "onClick": {"type":"controller", "endpoint":"system", "method":"systemUpdate"}
           }
         ]
-      }
+
     }
   ]
 }
