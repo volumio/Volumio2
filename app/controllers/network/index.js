@@ -250,7 +250,7 @@ ControllerNetwork.prototype.saveWiredNet=function(data)
 	config.set('ethgateway',static_gateway);
 
 
-	self.commandRouter.pushInfoToastMessage("Configuration update",'The configuration has been successfully updated');
+	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
 
 	defer.resolve({});
 	return defer.promise;
@@ -269,7 +269,7 @@ ControllerNetwork.prototype.saveWirelessNet=function(data)
 	config.set('wlanssid',network_ssid);
 	config.set('wlanpass',network_pass);
 
-	self.commandRouter.pushInfoToastMessage("Configuration update",'The configuration has been successfully updated');
+	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
 
 	defer.resolve({});
 	return defer.promise;

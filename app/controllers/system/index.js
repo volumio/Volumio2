@@ -133,6 +133,8 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 	config.set('playerName',player_name);
 	config.set('startupSound',startup_sound);
 
+	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
+
 	defer.resolve({});
 	return defer.promise;
 }
@@ -151,6 +153,8 @@ ControllerSystem.prototype.saveSoundQuality = function(data)
 	config.set('kernelSettingLabel',kernel_profile_label);
 
 
+	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
+
 	defer.resolve({});
 	return defer.promise;
 }
@@ -160,7 +164,7 @@ ControllerSystem.prototype.systemUpdate = function(data)
 	var self = this;
 
 	self.commandRouter.pushInfoToastMessage("System update",'System update is not yet implemented');
-	
+
 	var defer = libQ.defer();
 	defer.resolve({});
 	return defer.promise;
