@@ -244,13 +244,16 @@ ControllerNetwork.prototype.saveWiredNet=function(data)
 	var static_netmask=data['static_netmask'];
 	var static_gateway=data['static_gateway'];
 
-	config.set('dhcp',dhcp);
-	config.set('ethip',static_ip);
-	config.set('ethnetmask',static_netmask);
-	config.set('ethgateway',static_gateway);
+	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
 
+	config.set('dhcp', dhcp);
+	config.set('ethip', static_ip);
+	config.set('ethnetmask', static_netmask);
+	config.set('ethgateway', static_gateway);
 
-	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
+	self.rebuildNetworkConfig();
+	self.commandRouter.pushSuccessToastMessage("Configuration update", 'The configuration has been successfully updated');
+
 
 	defer.resolve({});
 	return defer.promise;
@@ -269,6 +272,7 @@ ControllerNetwork.prototype.saveWirelessNet=function(data)
 	config.set('wlanssid',network_ssid);
 	config.set('wlanpass',network_pass);
 
+	self.rebuildNetworkConfig();
 	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
 
 	defer.resolve({});
@@ -290,3 +294,56 @@ ControllerNetwork.prototype.getData = function(data,key)
 	return null;
 }
 
+ControllerNetwork.prototype.rebuildNetworkConfig = function()
+{
+	var self=this;
+
+	try{
+		var ws=fs.createOutputStream('/etc/network/interfaces');
+
+		ws.cork();
+		ws.write('auto lo\n');
+		ws.write('iface lo inet loopback\n');
+		ws.write('\n');
+
+		ws.write('auto eth0\n');
+		if(config.get('dhcp')==true || config.get('dhcp')=='true')
+		{
+			ws.write('iface eth0 inet dhcp\n');
+		}
+		else
+		{
+			ws.write('iface eth0 inet static\n');
+
+			ws.write('address '+config.get('ethip')+'\n');
+			ws.write('netmask '+config.get('ethnetmask')+'\n');
+			ws.write('gateway '+config.get('ethgateway')+'\n');
+		}
+
+		ws.write('\n');
+
+		ws.write('auto wlan0\n');
+		ws.write('iface wlan0 inet dhcp\n');
+		ws.write('wireless-power off\n');
+		ws.write('wpa-ssid '+config.get('wlanssid')+'\n');
+		ws.write('wpa-psk '+config.get('wlanpass')+'\n');
+
+		ws.uncork();
+		ws.end();
+
+		exec('service networking restart',
+			function (error, stdout, stderr) {
+
+				if (error !== null) {
+					self.commandRouter.pushErrorToastMessage("Network restart",'Error while restarting network: '+error);
+				}
+				else self.commandRouter.pushSuccessToastMessage("Network restart",'Network successfully restarted');
+
+			});
+	}
+	catch(err)
+	{
+		self.commandRouter.pushErrorToastMessage("Network setup",'Error while setting network: '+err);
+	}
+
+}
