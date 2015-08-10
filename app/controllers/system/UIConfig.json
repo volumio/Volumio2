@@ -84,7 +84,7 @@
               "element": "button",
               "label": "System updates",
               "text": "You can check?...",
-              "onClick": {"type":"controller", "endpoint":"network", "method":"systemUpdate"}
+              "onClick": {"type":"controller", "endpoint":"system", "method":"systemUpdate"}
           }
         ]
 
