@@ -52,9 +52,9 @@ socket.on('connect', function() {
 	emitPlayerCommand('getQueue', '');
 
 	// Request the music library root
-	emitPlayerCommand('getLibraryListing', {'uid': 'index:root', 'sortby': '', 'datapath': [], 'entries': 0, 'index': 0});
+	emitPlayerCommand('getLibraryIndex', 'root');
 
-	emitPlayerCommand('getPlaylistRoot', '');
+	emitPlayerCommand('getPlaylistIndex', 'root');
 });
 
 socket.on('disconnect', function() {
@@ -66,6 +66,7 @@ socket.on('disconnect', function() {
 	disableControls();
 	clearPlayQueue();
 	clearBrowseView();
+	clearPlaylistView();
 	clearPlayerStateDisplay();
 	stopPlaybackTimer();
 });
@@ -89,16 +90,22 @@ socket.on('pushQueue', function(arrayQueue) {
 //	printConsoleMessage('volumioPushQueue: ' + JSON.stringify(arrayQueue));
 });
 
+socket.on('pushLibraryIndex', function(objBrowseData) {
+	libraryHistory.splice(nLibraryHistoryPosition + 1, libraryHistory.length - nLibraryHistoryPosition - 1, objBrowseData);
+	libraryForward();
+	printConsoleMessage('pushLibraryIndex: ' + JSON.stringify(objBrowseData));
+});
+
 socket.on('pushLibraryListing', function(objBrowseData) {
 	libraryHistory.splice(nLibraryHistoryPosition + 1, libraryHistory.length - nLibraryHistoryPosition - 1, objBrowseData);
 	libraryForward();
-//	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
+	printConsoleMessage('pushLibraryListing: ' + JSON.stringify(objBrowseData));
 });
 
-socket.on('pushPlaylistRoot', function(objBrowseData) {
+socket.on('pushPlaylistIndex', function(objBrowseData) {
 	playlistHistory.splice(nPlaylistHistoryPosition + 1, playlistHistory.length - nPlaylistHistoryPosition - 1, objBrowseData);
 	playlistForward();
-//	printConsoleMessage('volumioPushBrowseData: ' + JSON.stringify(objBrowseData));
+	printConsoleMessage('pushPlaylistIndex: ' + JSON.stringify(objBrowseData));
 });
 
 socket.on('pushPlaylistListing', function(objBrowseData) {
@@ -266,22 +273,24 @@ function updateBrowseView(objBrowseData) {
 		var sBrowseField = '';
 		var sSortBy = '';
 		var arrayDataPath = [];
+		var bQueueable = false;
 		if (curEntry.type === 'genre') {
 			sSortBy = 'name';
 			arrayDataPath = ['artistuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': ['genreuids', '#', {'name': 'name', 'uid': 'uid'}]}];
+			bQueueable = true;
 		} else if (curEntry.type === 'artist') {
 			sSortBy = 'date';
 			arrayDataPath = ['albumuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'date': 'date'}];
+			bQueueable = true;
 		} else if (curEntry.type === 'album') {
 			sSortBy = 'tracknumber';
 			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
+			bQueueable = true;
+		} else if (curEntry.type === 'index') {
+			sSortBy = '';
+			arrayDataPath = ['childindex'];
 		}
 		var objBrowseParameters = {'uid': curEntry['uid'], 'options': {'sortby': sSortBy, 'datapath': arrayDataPath, 'entries': 0, 'index': 0}};
-
-		var buttonAdd = document.createElement('button');
-		buttonAdd.appendChild(document.createTextNode('Add'));
-		buttonAdd.className = 'button-itemaction';
-		buttonAdd.onclick = addQueueUids([curEntry['uid']]);
 
 		var nodeLink = document.createElement('a');
 		nodeLink.setAttribute('href', '#');
@@ -290,9 +299,16 @@ function updateBrowseView(objBrowseData) {
 
 		var nodeSpan = document.createElement('span');
 		nodeSpan.appendChild(nodeLink);
-		nodeSpan.appendChild(buttonAdd);
 		nodeSpan.appendChild(document.createElement('br'));
 		nodeSpan.appendChild(document.createTextNode(sSubText));
+
+		if (bQueueable) {
+			var buttonAdd = document.createElement('button');
+			buttonAdd.appendChild(document.createTextNode('Add'));
+			buttonAdd.className = 'button-itemaction';
+			buttonAdd.onclick = addQueueUids([curEntry['uid']]);
+			nodeSpan.appendChild(buttonAdd);
+		}
 
 		var nodeListItem = document.createElement('LI');
 		nodeListItem.appendChild(nodeSpan);
@@ -318,35 +334,6 @@ function updatePlaylistView(objPlaylistData) {
 
 		var sText = curEntry.name;
 		var sSubText = '';
-		if ('artists' in curEntry) {
-			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
-		}
-		if ('albums' in curEntry) {
-			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.albums) + '');
-		}
-		if ('tracknumber' in curEntry) {
-			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
-		}
-		if ('date' in curEntry) {
-			sSubText = sSubText.concat(' [Date]: ' + JSON.stringify(curEntry.date) + '');
-		}
-		if ('uris' in curEntry) {
-			sSubText = sSubText.concat(' [Uris]: ' + JSON.stringify(curEntry.uris) + '');
-		}
-
-		var sPlaylistField = '';
-		var sSortBy = '';
-		var arrayDataPath = [];
-		if (curEntry.type === 'genre') {
-			sSortBy = 'name';
-			arrayDataPath = ['artistuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'genres': ['genreuids', '#', {'name': 'name', 'uid': 'uid'}]}];
-		} else if (curEntry.type === 'artist') {
-			sSortBy = 'date';
-			arrayDataPath = ['albumuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'date': 'date'}];
-		} else if (curEntry.type === 'album') {
-			sSortBy = 'tracknumber';
-			arrayDataPath = ['trackuids', '#', {'name': 'name', 'uid': 'uid', 'type': 'type', 'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}], 'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}], 'tracknumber': 'tracknumber', 'date': 'date', 'uris': 'uris'}];
-		}
 
 		var buttonAdd = document.createElement('button');
 		buttonAdd.appendChild(document.createTextNode('Add'));

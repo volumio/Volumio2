@@ -15,27 +15,27 @@ function CorePlaylistFS (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	self.playlists = {};
-	self.playlistKeys = {};
-	self.playlistRoot = [];
+	// The playlistfs object is analogous to the library index object - its entries contain a list of ordered children
+	self.playlistIndex = {};
+	self.playlistIndex.root = {
+		'name': 'root',
+		'type': 'folder',
+		'uid': 'root',
+		'fullpath': [],
+		'children': [],
+		'childuids': {}
+	};
 
 	// Attempt to load playlists from database on disk
 	self.sPlaylistDBPath = './app/db/playlistfs';
 	self.loadPlaylistsFromDB();
 }
 
-CorePlaylistFS.prototype.getRoot = function() {
+CorePlaylistFS.prototype.getIndex = function(sUid) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlaylistFS::getRoot');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlaylistFS::getIndex');
 
-	return libQ.resolve(self.playlistRoot);
-}
-
-CorePlaylistFS.prototype.getListing = function(sUid) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlaylistFS::getListing');
-
-	return libQ.resolve(self.playlists[sUid].childindex);
+	return libQ.resolve(self.playlistIndex[sUid].children);
 }
 
 // Load a LevelDB from disk containing the music library and indexes
@@ -44,9 +44,15 @@ CorePlaylistFS.prototype.loadPlaylistsFromDB = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlaylistFS::loadPlaylistsFromDB');
 	self.commandRouter.pushConsoleMessage('Loading playlists from DB...');
 
-	self.playlists = {};
-	self.playlistKeys = {};
-	self.playlistRoot = [];
+	self.playlistIndex = {};
+	self.playlistIndex.root = {
+		'name': 'root',
+		'type': 'folder',
+		'uid': 'root',
+		'fullpath': [],
+		'children': [],
+		'childuids': {}
+	};
 
 	var dbPlaylists = libLevel(self.sPlaylistDBPath, {'valueEncoding': 'json', 'createIfMissing': true});
 	return libQ.resolve()
@@ -54,18 +60,18 @@ CorePlaylistFS.prototype.loadPlaylistsFromDB = function() {
 			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'playlists');
 		})
 		.then(function(result) {
-			self.playlists = result;
+			self.playlistIndex = result;
 			self.commandRouter.pushConsoleMessage('Playlists loaded from DB.');
 			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'keys');
 		})
 		.then(function(result) {
 			self.playlistKeys = result;
-			self.commandRouter.pushConsoleMessage('Keys loaded from DB.');
+			self.commandRouter.pushConsoleMessage('Playlist keys loaded from DB.');
 			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'root');
 		})
 		.then(function(result) {
 			self.playlistRoot = result;
-			self.commandRouter.pushConsoleMessage('Root loaded from DB.');
+			self.commandRouter.pushConsoleMessage('Playlist root loaded from DB.');
 		})
 		.fail(function(sError) {
 			throw new Error('Error reading DB: ' + sError);
@@ -104,19 +110,13 @@ CorePlaylistFS.prototype.importServicePlaylists = function() {
 			self.commandRouter.pushConsoleMessage('Importing playlists from music services...');
 
 			return libQ.all(libFast.map(arrayAllTracklists, function(arrayTracklist) {
-				return libQ.all(libFast.map([arrayTracklist[0], arrayTracklist[1], arrayTracklist[2]], function(curTrack) {
+				return libQ.all(libFast.map(arrayTracklist, function(curTrack) {
 					return self.addPlaylistItem(curTrack);
 				}));
 			}));
 		})
 		.then(function() {
-			return libQ.nfcall(libFast.bind(dbPlaylists.put, dbPlaylists), 'playlists', self.playlists);
-		})
-		.then(function() {
-			return libQ.nfcall(libFast.bind(dbPlaylists.put, dbPlaylists), 'keys', self.playlistKeys);
-		})
-		.then(function() {
-			return libQ.nfcall(libFast.bind(dbPlaylists.put, dbPlaylists), 'root', self.playlistRoot);
+			return libQ.nfcall(libFast.bind(dbPlaylists.put, dbPlaylists), 'playlistIndex', self.playlistIndex);
 		})
 		.then(function() {
 			self.commandRouter.pushConsoleMessage('Playlists imported.');
@@ -136,18 +136,20 @@ CorePlaylistFS.prototype.addPlaylistItem = function(curTrack) {
 		arrayCurFullPath = arrayCurFullPath.concat(sCurPath);
 
 		curFolderKey = convertStringToHashkey(arrayCurFullPath.join('/'));
-		if (!(curFolderKey in self.playlists)) {
-			self.playlists[curFolderKey] = {
+		if (!(curFolderKey in self.playlistIndex)) {
+			// Add folder to playlistfs object
+			self.playlistIndex[curFolderKey] = {
 				'name': sCurPath,
 				'type': 'folder',
 				'uid': curFolderKey,
 				'fullpath': arrayCurFullPath,
-				'childindex': [],
+				'children': [],
 				'childuids': {}
 			};
 
 			if (nIndex === 0) {
-				self.playlistRoot.push({
+				// If this folder is the top level, list it in the root object
+				self.playlistIndex.root.children.push({
 					'name': sCurPath,
 					'type': 'folder',
 					'uid': curFolderKey
@@ -157,22 +159,24 @@ CorePlaylistFS.prototype.addPlaylistItem = function(curTrack) {
 
 		var arrayParentPath = arrayCurFullPath.slice(0, -1);
 		if (arrayParentPath.length > 0) {
+			// If this folder has a parent, add an entry in the parent's list of children
 			var sParentKey = convertStringToHashkey(arrayParentPath.join('/'));
-			if (!(curFolderKey in self.playlists[sParentKey].childuids)) {
+			if (!(curFolderKey in self.playlistIndex[sParentKey].childuids)) {
 				var objChildEntry = {
 					'name': sCurPath,
 					'type': 'folder',
 					'uid': curFolderKey
 				};
 
-				self.playlists[sParentKey].childindex.push(objChildEntry);
-				self.playlists[sParentKey].childuids[curFolderKey] = null;
+				self.playlistIndex[sParentKey].children.push(objChildEntry);
+				self.playlistIndex[sParentKey].childuids[curFolderKey] = null;
 			}
 		}
 	});
 
+	// Add the track as a child to the last folder
 	var curTrackKey = convertStringToHashkey(curTrack.album + curTrack.name);
-	self.playlists[curFolderKey].childindex.push({
+	self.playlistIndex[curFolderKey].children.push({
 		'name': curTrack.name,
 		'type': 'item',
 		'trackuid': 'track:' + curTrackKey,
@@ -180,7 +184,7 @@ CorePlaylistFS.prototype.addPlaylistItem = function(curTrack) {
 		'uri': curTrack.uri,
 		'duration': curTrack.duration
 	});
-	self.playlists[curFolderKey].childuids[curTrackKey] = null;
+	self.playlistIndex[curFolderKey].childuids[curTrackKey] = null;
 
 }
 

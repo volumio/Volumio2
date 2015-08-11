@@ -218,28 +218,28 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 	return self.musicLibrary.buildLibrary();
 }
 
+// Volumio Get Library Index
+CoreCommandRouter.prototype.volumioGetLibraryIndex = function(sUid) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryIndex');
+
+	return self.musicLibrary.getIndex(sUid);
+}
+
 // Volumio Browse Library
 CoreCommandRouter.prototype.volumioGetLibraryListing = function(sUid, objOptions) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryListing()');
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryListing');
 
 	return self.musicLibrary.getListing(sUid, objOptions);
 }
 
-// Volumio Get Playlist Root
-CoreCommandRouter.prototype.volumioGetPlaylistRoot = function() {
+// Volumio Get Playlist Index
+CoreCommandRouter.prototype.volumioGetPlaylistIndex = function(sUid) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetPlaylistRoot');
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetPlaylistIndex');
 
-	return self.playlistFS.getRoot();
-}
-
-// Volumio Get Playlist Listing
-CoreCommandRouter.prototype.volumioGetPlaylistListing = function(sUid) {
-	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetPlaylistListing');
-
-	return self.playlistFS.getListing(sUid);
+	return self.playlistFS.getIndex(sUid);
 }
 
 // Spop Update Tracklist

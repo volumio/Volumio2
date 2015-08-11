@@ -105,32 +105,32 @@ function InterfaceWebUI (server, commandRouter) {
 				sStartMessage = 'Client requests library listing';
 				promisedActions = libQ.resolve()
 				.then(function() {
-					return commandRouter.volumioBrowseLibrary.call(commandRouter, param2.uid, param2.options)
+					return commandRouter.volumioGetLibraryListing.call(commandRouter, param2.uid, param2.options)
 				})
 				.then(function (objBrowseData) {
 					if (objBrowseData) {
 						return self.pushLibraryListing.call(self, objBrowseData, thisWebsocketConnection);
 					}
 				});
-			} else if (param1 === 'getPlaylistRoot') {
-				sStartMessage = 'Client requests playlist root';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioGetPlaylistRoot.call(commandRouter)
+			} else if (param1 === 'getLibraryIndex') {
+				sStartMessage = 'Client requests library index';
+				promisedActions = libQ.resolve()
+				.then(function() {
+					return commandRouter.volumioGetLibraryIndex.call(commandRouter, param2)
 				})
 				.then(function (objBrowseData) {
 					if (objBrowseData) {
-						return self.pushPlaylistRoot.call(self, objBrowseData, thisWebsocketConnection);
+						return self.pushLibraryIndex.call(self, objBrowseData, thisWebsocketConnection);
 					}
 				});
-			} else if (param1 === 'getPlaylistListing') {
-				sStartMessage = 'Client requests playlist listing';
+			} else if (param1 === 'getPlaylistIndex') {
+				sStartMessage = 'Client requests playlist index';
 				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioGetPlaylistListing.call(commandRouter, param2)
+					return commandRouter.volumioGetPlaylistIndex.call(commandRouter, param2)
 				})
 				.then(function (objBrowseData) {
 					if (objBrowseData) {
-console.log(objBrowseData);
-						return self.pushPlaylistListing.call(self, objBrowseData, thisWebsocketConnection);
+						return self.pushPlaylistIndex.call(self, objBrowseData, thisWebsocketConnection);
 					}
 				});
 			} else if (param1 === 'importServicePlaylists') {
@@ -227,6 +227,17 @@ InterfaceWebUI.prototype.pushQueue = function(queue, connWebSocket) {
 	}
 }
 
+// Push the library root
+InterfaceWebUI.prototype.pushLibraryIndex = function(browsedata, connWebSocket) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryIndex');
+
+	// If a specific client is given, push to just that client
+	if (connWebSocket) {
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushLibraryIndex', browsedata);
+	}
+}
+
 // Receive music library data from commandRouter and send to requester
 InterfaceWebUI.prototype.pushLibraryListing = function(browsedata, connWebSocket) {
 	var self = this;
@@ -238,25 +249,14 @@ InterfaceWebUI.prototype.pushLibraryListing = function(browsedata, connWebSocket
 	}
 }
 
-// Push the playlist root
-InterfaceWebUI.prototype.pushPlaylistRoot = function(browsedata, connWebSocket) {
+// Push the playlist view
+InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistRoot');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistIndex');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushPlaylistRoot', browsedata);
-	}
-}
-
-// Push the playlist vies
-InterfaceWebUI.prototype.pushPlaylistListing = function(browsedata, connWebSocket) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistListing');
-
-	// If a specific client is given, push to just that client
-	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushPlaylistListing', browsedata);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushPlaylistIndex', browsedata);
 	}
 }
 
