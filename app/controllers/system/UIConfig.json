@@ -27,7 +27,7 @@
           "id":"startup_sound",
           "element": "switch",
           "label": "Startup Sound",
-          "value": "true"
+          "value": true
         }
 
       ]
