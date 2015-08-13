@@ -1,10 +1,10 @@
 {
   "nHost":{"modifiable":false,"value":"localhost","type":"string"},
-  "nPort":{"modifiable":false,"value":"6602","type":"int"},
+  "nPort":{"modifiable":false,"value":"6602","type":"number"},
   "spotify_username":{"modifiable":true,"value":"","type":"string","ui_label_key":"spotify_username"},
   "spotify_password":{"modifiable":true,"value":"","type":"password","ui_label_key":"spotify_password"},
   "high_bitrate":{"modifiable":true,"value":"true","type":"boolean","ui_label_key":"high_bitrate"},
-  "search_results":{"modifiable":true,"value":"100","type":"int","ui_label_key":"search_results"},
+  "search_results":{"modifiable":true,"value":"100","type":"number","ui_label_key":"search_results"},
   "audio_output":{"modifiable":false,"value":"sox","type":"string"},
   "plugins":{"modifiable":true,"value":"true","type":"boolean","ui_label_key":"plugins"},
   "pretty_json":{"modifiable":false,"value":"false","type":"boolean"},
