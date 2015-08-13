@@ -435,3 +435,13 @@ CoreCommandRouter.prototype.pushWarningToastMessage = function(title,message) {
 			libFast.bind(curInterface.notifyUser, curInterface)('warning',title,message);
 	});
 }
+
+CoreCommandRouter.prototype.pushMultiroomDevices=function(data)
+{
+	var self=this;
+
+	libFast.map(self.arrayInterfaces, function(curInterface) {
+		if(curInterface.pushMultiroomDevices!=undefined)
+			libFast.bind(curInterface.pushMultiroomDevices, curInterface)(data);
+	});
+}
