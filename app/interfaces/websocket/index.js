@@ -20,8 +20,8 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('playerCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActionsDeferred = libQ.defer()
-			var promisedActions = promisedActionsDeferred.promise;
+			var deferredStart = libQ.defer();
+			var promisedActions = libQ.reject('playerCommand \"' + param1 + '\" not recognized.');
 			var sStartMessage = '';
 
 			if (param1 === 'getState') {
@@ -43,7 +43,7 @@ function InterfaceWebUI (server, commandRouter) {
 				 * @service current playback service (mpd, spop...)
 				 */
 				sStartMessage = 'Client requests player state';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioGetState.call(commandRouter);
 					})
@@ -52,7 +52,7 @@ function InterfaceWebUI (server, commandRouter) {
 					});
 			} else if (param1 === 'getQueue') {
 				sStartMessage = 'Client requests queue listing';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioGetQueue.call(commandRouter);
 					})
@@ -61,61 +61,61 @@ function InterfaceWebUI (server, commandRouter) {
 					});
 			} else if (param1 === 'removeQueueItem') {
 				sStartMessage = 'Client requests remove queue item';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioRemoveQueueItem.call(commandRouter, param2);
 					});
 			} else if (param1 === 'addQueueUids') {
 				sStartMessage = 'Client requests add queue items';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioAddQueueUids.call(commandRouter, param2);
 					});
 			} else if (param1 === 'play') {
 				sStartMessage = 'Client requests play';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioPlay.call(commandRouter);
 					});
 			} else if (param1 === 'pause') {
 				sStartMessage = 'Client requests pause';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioPause.call(commandRouter);
 					});
 			} else if (param1 === 'stop') {
 				sStartMessage = 'Client requests stop';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioStop.call(commandRouter);
 					});
 			} else if (param1 === 'previous') {
 				sStartMessage = 'Client requests previous';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioPrevious.call(commandRouter);
 					});
 			} else if (param1 === 'next') {
 				sStartMessage = 'Client requests next';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioNext.call(commandRouter);
 					});
 			} else if (param1 === 'rebuildLibrary') {
 				sStartMessage = 'Client requests rebuild library';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioRebuildLibrary.call(commandRouter);
 					});
 			} else if (param1 === 'setVolume') {
 				sStartMessage = 'Client requests set volume';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumiosetvolume.call(commandRouter, param2);
 					});
 			} else if (param1 === 'getLibraryListing') {
 				sStartMessage = 'Client requests library listing';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioGetLibraryListing.call(commandRouter, param2.uid, param2.options)
 					})
@@ -126,7 +126,7 @@ function InterfaceWebUI (server, commandRouter) {
 					});
 			} else if (param1 === 'getLibraryIndex') {
 				sStartMessage = 'Client requests library index';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioGetLibraryIndex.call(commandRouter, param2)
 					})
@@ -137,7 +137,7 @@ function InterfaceWebUI (server, commandRouter) {
 					});
 			} else if (param1 === 'getPlaylistIndex') {
 				sStartMessage = 'Client requests playlist index';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioGetPlaylistIndex.call(commandRouter, param2)
 					})
@@ -148,13 +148,13 @@ function InterfaceWebUI (server, commandRouter) {
 					});
 			} else if (param1 === 'importServicePlaylists') {
 				sStartMessage = 'Client requests import service playlists';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumioImportServicePlaylists.call(commandRouter);
 					});
 			} else if (param1 === 'getMenuItems') {
 				sStartMessage = 'Client requests UI menu items';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return libQ.fcall(function () {
 							var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
@@ -164,49 +164,49 @@ function InterfaceWebUI (server, commandRouter) {
 					});
 			}
 
-			return self.runActions(promisedActionsDeferred, sStartMessage, timeStart);
+			return self.runActions(promisedActions, sStartMessage, timeStart, deferredStart);
 		});
 
 		connWebSocket.on('serviceCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActionsDeferred = libQ.defer()
-			var promisedActions = promisedActionsDeferred.promise;
+			var deferredStart = libQ.defer();
+			var promisedActions = libQ.reject('serviceCommand \"' + param1 + '\" not recognized.');
 			var sStartMessage = '';
 
 			if (param1 === 'updateTracklist') {
 				sStartMessage = 'Client requests service update tracklist';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.serviceUpdateTracklist.call(commandRouter, param2);
 					});
 			}
 
-			return self.runActions(promisedActionsDeferred, sStartMessage, timeStart);
+			return self.runActions(promisedActions, sStartMessage, timeStart, deferredStart);
 		});
 
 		connWebSocket.on('pluginCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActionsDeferred = libQ.defer()
-			var promisedActions = promisedActionsDeferred.promise;
+			var deferredStart = libQ.defer();
+			var promisedActions = libQ.reject('pluginCommand \"' + param1 + '\" not recognized.');
 			var sStartMessage = '';
 
 			if (param1 === 'scanWirelessNetworks') {
 				sStartMessage = 'Client requests wireless network scan';
-				promisedActions = promisedActions
+				promisedActions = deferredStart.promise
 					.then(function() {
 						return commandRouter.volumiowirelessscan.call(commandRouter);
 					});
 			}
 
-			return self.runActions(promisedActionsDeferred, sStartMessage, timeStart);
+			return self.runActions(promisedActions, sStartMessage, timeStart, deferredStart);
 		});
 
 	});
 }
 
-InterfaceWebUI.prototype.runActions = function(promisedActionsDeferred, sStartMessage, timeStart) {
+InterfaceWebUI.prototype.runActions = function(promisedActions, sStartMessage, timeStart, deferredStart) {
 	var self = this;
 
 	return libQ.resolve()
@@ -214,14 +214,18 @@ InterfaceWebUI.prototype.runActions = function(promisedActionsDeferred, sStartMe
 			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, '\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sStartMessage);
 		})
 		.then(function() {
-			promisedActionsDeferred.resolve();
+			deferredStart.resolve();
 
-			return promisedActionsDeferred.promise;
+			return promisedActions;
 		})
 		.fail(function (error) {
-			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+			if ((typeof error) === 'string') {
+				return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
+			} else if ((typeof error) === 'object') {
+				return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
+			}
 		})
-		.done(function () {
+		.fin(function () {
 			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, '[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 		});
 
