@@ -22,7 +22,7 @@
           "id": "dhcp",
           "element": "switch",
           "label": "Automatic IP",
-          "value": "true"
+          "value": true
         },
         {
           "id": "static_ip",
@@ -37,7 +37,7 @@
           "value": "",
           "visibleIf": {
             "field": "dhcp",
-            "value": "false"
+            "value": false
           }
         },
         {
@@ -52,7 +52,7 @@
           "label": "Netmask",
           "visibleIf": {
             "field": "dhcp",
-            "value": "false"
+            "value": false
           }
         },
         {
@@ -67,7 +67,7 @@
           "label": "Gateway",
           "visibleIf": {
             "field": "dhcp",
-            "value": "false"
+            "value": false
           }
         }
       ]

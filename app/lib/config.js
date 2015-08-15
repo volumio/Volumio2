@@ -61,7 +61,7 @@ Config.prototype.get=function(key)
     var prop=self.findProp(key);
 
     if(prop!=undefined)
-        return prop.value;
+        return self.forceToType(prop.type,prop.value);
 }
 
 Config.prototype.set=function(key,value)
@@ -71,7 +71,7 @@ Config.prototype.set=function(key,value)
 
     if(prop!=undefined)
     {
-        prop.value=value;
+        prop.value=self.forceToType(prop.type,value);
         self.scheduleSave();
     }
 
@@ -118,10 +118,42 @@ Config.prototype.addConfigValue=function(key,type,value)
     }
 
     var prop=self.findProp(key);
+    self.assertSupportedType(type);
     prop['type']=type;
-    prop['value']=value;
+
+
+    prop['value']=self.forceToType(type,value);
 
     self.scheduleSave();
+}
+
+Config.prototype.assertSupportedType=function(type)
+{
+    if(type != 'string' && type!='boolean' && type!='number' && type!='array')
+    {
+        throw Error('Type '+type+' is not supported');
+    }
+}
+
+Config.prototype.forceToType=function(type,value)
+{
+    if(type=='string')
+    {
+        return ''+value;
+    }
+    else if(type=='boolean')
+    {
+        return Boolean(value);
+    }
+    else if(type=='number')
+    {
+        var i = Number(value);
+        if(Number.isNaN(i))
+            throw  Error('The value '+value+' is not a number');
+        else return i;
+    }
+    else return value;
+
 }
 
 Config.prototype.print=function()
