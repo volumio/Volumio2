@@ -20,7 +20,8 @@ function InterfaceWebUI (server, commandRouter) {
 		connWebSocket.on('playerCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActions = null;
+			var promisedActionsDeferred = libQ.defer()
+			var promisedActions = promisedActionsDeferred.promise;
 			var sStartMessage = '';
 
 			if (param1 === 'getState') {
@@ -42,162 +43,186 @@ function InterfaceWebUI (server, commandRouter) {
 				 * @service current playback service (mpd, spop...)
 				 */
 				sStartMessage = 'Client requests player state';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioGetState.call(commandRouter);
-				})
-				.then(function (state) {
-					return self.pushState.call(self, state, thisWebsocketConnection);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioGetState.call(commandRouter);
+					})
+					.then(function (state) {
+						return self.pushState.call(self, state, thisWebsocketConnection);
+					});
 			} else if (param1 === 'getQueue') {
 				sStartMessage = 'Client requests queue listing';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioGetQueue.call(commandRouter);
-				})
-				.then(function (queue) {
-					return self.pushQueue.call(self, queue, thisWebsocketConnection);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioGetQueue.call(commandRouter);
+					})
+					.then(function (queue) {
+						return self.pushQueue.call(self, queue, thisWebsocketConnection);
+					});
 			} else if (param1 === 'removeQueueItem') {
 				sStartMessage = 'Client requests remove queue item';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioRemoveQueueItem.call(commandRouter, param2);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioRemoveQueueItem.call(commandRouter, param2);
+					});
 			} else if (param1 === 'addQueueUids') {
 				sStartMessage = 'Client requests add queue items';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioAddQueueUids.call(commandRouter, param2);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioAddQueueUids.call(commandRouter, param2);
+					});
 			} else if (param1 === 'play') {
 				sStartMessage = 'Client requests play';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioPlay.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioPlay.call(commandRouter);
+					});
 			} else if (param1 === 'pause') {
 				sStartMessage = 'Client requests pause';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioPause.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioPause.call(commandRouter);
+					});
 			} else if (param1 === 'stop') {
 				sStartMessage = 'Client requests stop';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioStop.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioStop.call(commandRouter);
+					});
 			} else if (param1 === 'previous') {
 				sStartMessage = 'Client requests previous';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioPrevious.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioPrevious.call(commandRouter);
+					});
 			} else if (param1 === 'next') {
 				sStartMessage = 'Client requests next';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioNext.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioNext.call(commandRouter);
+					});
 			} else if (param1 === 'rebuildLibrary') {
 				sStartMessage = 'Client requests rebuild library';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioRebuildLibrary.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioRebuildLibrary.call(commandRouter);
+					});
 			} else if (param1 === 'setVolume') {
 				sStartMessage = 'Client requests set volume';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumiosetvolume.call(commandRouter, param2);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumiosetvolume.call(commandRouter, param2);
+					});
 			} else if (param1 === 'getLibraryListing') {
 				sStartMessage = 'Client requests library listing';
-				promisedActions = libQ.resolve()
-				.then(function() {
-					return commandRouter.volumioGetLibraryListing.call(commandRouter, param2.uid, param2.options)
-				})
-				.then(function (objBrowseData) {
-					if (objBrowseData) {
-						return self.pushLibraryListing.call(self, objBrowseData, thisWebsocketConnection);
-					}
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioGetLibraryListing.call(commandRouter, param2.uid, param2.options)
+					})
+					.then(function (objBrowseData) {
+						if (objBrowseData) {
+							return self.pushLibraryListing.call(self, objBrowseData, thisWebsocketConnection);
+						}
+					});
 			} else if (param1 === 'getLibraryIndex') {
 				sStartMessage = 'Client requests library index';
-				promisedActions = libQ.resolve()
-				.then(function() {
-					return commandRouter.volumioGetLibraryIndex.call(commandRouter, param2)
-				})
-				.then(function (objBrowseData) {
-					if (objBrowseData) {
-						return self.pushLibraryIndex.call(self, objBrowseData, thisWebsocketConnection);
-					}
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioGetLibraryIndex.call(commandRouter, param2)
+					})
+					.then(function (objBrowseData) {
+						if (objBrowseData) {
+							return self.pushLibraryIndex.call(self, objBrowseData, thisWebsocketConnection);
+						}
+					});
 			} else if (param1 === 'getPlaylistIndex') {
 				sStartMessage = 'Client requests playlist index';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioGetPlaylistIndex.call(commandRouter, param2)
-				})
-				.then(function (objBrowseData) {
-					if (objBrowseData) {
-						return self.pushPlaylistIndex.call(self, objBrowseData, thisWebsocketConnection);
-					}
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioGetPlaylistIndex.call(commandRouter, param2)
+					})
+					.then(function (objBrowseData) {
+						if (objBrowseData) {
+							return self.pushPlaylistIndex.call(self, objBrowseData, thisWebsocketConnection);
+						}
+					});
 			} else if (param1 === 'importServicePlaylists') {
 				sStartMessage = 'Client requests import service playlists';
-				promisedActions = libQ.fcall(function() {
-					return commandRouter.volumioImportServicePlaylists.call(commandRouter);
-				});
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumioImportServicePlaylists.call(commandRouter);
+					});
 			} else if (param1 === 'getMenuItems') {
 				sStartMessage = 'Client requests UI menu items';
-				promisedActions = libQ.fcall(function() {
-					return libQ.fcall(function () {
-						var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
-						self.libSocketIO.emit('printConsoleMessage', menuitems);
-						return self.libSocketIO.emit('pushMenuItems', menuitems);
+				promisedActions = promisedActions
+					.then(function() {
+						return libQ.fcall(function () {
+							var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
+							self.libSocketIO.emit('printConsoleMessage', menuitems);
+							return self.libSocketIO.emit('pushMenuItems', menuitems);
+						});
 					});
-				});
 			}
 
-			return self.runActions(promisedActions, sStartMessage, timeStart);
+			return self.runActions(promisedActionsDeferred, sStartMessage, timeStart);
 		});
 
 		connWebSocket.on('serviceCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActions = libQ.reject('Command not recognized: ' + param1);
+			var promisedActionsDeferred = libQ.defer()
+			var promisedActions = promisedActionsDeferred.promise;
 			var sStartMessage = '';
 
 			if (param1 === 'updateTracklist') {
 				sStartMessage = 'Client requests service update tracklist';
-				promisedActions = commandRouter.serviceUpdateTracklist.call(commandRouter, param2);
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.serviceUpdateTracklist.call(commandRouter, param2);
+					});
 			}
 
-			return self.runActions(promisedActions, sStartMessage, timeStart);
+			return self.runActions(promisedActionsDeferred, sStartMessage, timeStart);
 		});
 
 		connWebSocket.on('pluginCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();
-			var promisedActions = libQ.reject('Command not recognized: ' + param1);
+			var promisedActionsDeferred = libQ.defer()
+			var promisedActions = promisedActionsDeferred.promise;
 			var sStartMessage = '';
 
 			if (param1 === 'scanWirelessNetworks') {
 				sStartMessage = 'Client requests wireless network scan';
-				promisedActions = commandRouter.volumiowirelessscan.call(commandRouter);
+				promisedActions = promisedActions
+					.then(function() {
+						return commandRouter.volumiowirelessscan.call(commandRouter);
+					});
 			}
 
-			return self.runActions(promisedActions, sStartMessage, timeStart);
+			return self.runActions(promisedActionsDeferred, sStartMessage, timeStart);
 		});
 
 	});
 }
 
-InterfaceWebUI.prototype.runActions = function(promisedActions, sStartMessage, timeStart) {
+InterfaceWebUI.prototype.runActions = function(promisedActionsDeferred, sStartMessage, timeStart) {
 	var self = this;
 
 	return libQ.resolve()
 		.then(function() {
-			return self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sStartMessage);
+			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, '\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sStartMessage);
 		})
 		.then(function() {
-			return promisedActions;
+			promisedActionsDeferred.resolve();
+
+			return promisedActionsDeferred.promise;
 		})
 		.fail(function (error) {
 			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 		})
 		.done(function () {
-			return self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+			return self.commandRouter.pushConsoleMessage.call(self.commandRouter, '[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
 		});
 
 }

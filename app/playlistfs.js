@@ -4,7 +4,6 @@ var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
 var libLevel = require('level');
 var libUtil = require('util');
-var libFs = require('fs');
 
 // Define the CorePlaylistFS class
 module.exports = CorePlaylistFS;
@@ -57,46 +56,16 @@ CorePlaylistFS.prototype.loadPlaylistsFromDB = function() {
 	var dbPlaylists = libLevel(self.sPlaylistDBPath, {'valueEncoding': 'json', 'createIfMissing': true});
 	return libQ.resolve()
 		.then(function() {
-			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'playlists');
+			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'playlistIndex');
 		})
 		.then(function(result) {
 			self.playlistIndex = result;
 			self.commandRouter.pushConsoleMessage('Playlists loaded from DB.');
-			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'keys');
-		})
-		.then(function(result) {
-			self.playlistKeys = result;
-			self.commandRouter.pushConsoleMessage('Playlist keys loaded from DB.');
-			return libQ.nfcall(libFast.bind(dbPlaylists.get, dbPlaylists), 'root');
-		})
-		.then(function(result) {
-			self.playlistRoot = result;
-			self.commandRouter.pushConsoleMessage('Playlist root loaded from DB.');
 		})
 		.fail(function(sError) {
 			throw new Error('Error reading DB: ' + sError);
 		})
 		.fin(libFast.bind(dbPlaylists.close, dbPlaylists));
-}
-
-CorePlaylistFS.prototype.dumpDB = function(sPath) {
-	var self = this;
-
-	var streamDbRead = libLevel(sPath).createReadStream({valueEncoding: 'json'});
-	var streamFileWrite = libFs.createWriteStream(sPath + '.dump');
-
-	streamDbRead.on('data', function(data) {
-		streamFileWrite.write(data.key + ':\n' + libUtil.inspect(data.value, {depth: null}) + '\n\n');
-	});
-
-	streamDbRead.on('close', function() {
-		streamFileWrite.close();
-	});
-
-	streamDbRead.on('end', function() {
-		streamFileWrite.close();
-	});
-
 }
 
 // Import existing playlists and folders from the various services

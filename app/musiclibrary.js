@@ -140,7 +140,6 @@ CoreMusicLibrary.prototype.getListing = function(sUid, objOptions) {
 CoreMusicLibrary.prototype.getIndex = function(sUid) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreLibraryFS::getIndex');
-console.log(sUid);
 	return libQ.resolve(self.libraryIndex[sUid].children);
 }
 
@@ -210,7 +209,7 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 		.then(function() {
 			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'library');
 		})
-		.then(function() {
+		.then(function(result) {
 			self.library = result;
 			self.commandRouter.pushConsoleMessage('Library loaded from DB.');
 
@@ -230,7 +229,7 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 			self.commandRouter.pushConsoleMessage('  Artists: ' + Object.keys(self.library['artist']).length);
 			self.commandRouter.pushConsoleMessage('  Albums: ' + Object.keys(self.library['album']).length);
 			self.commandRouter.pushConsoleMessage('  Tracks: ' + Object.keys(self.library['track']).length);
-			self.commandRouter.pushConsoleMessage('  Indexes: ' + Object.keys(self.libraryIndex).length - 1);
+			self.commandRouter.pushConsoleMessage('  Indexes: ' + (Object.keys(self.libraryIndex).length - 1));
 
 			return libQ.resolve();
 		})
