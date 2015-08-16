@@ -1,6 +1,5 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
-
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
  * @type {InterfaceWebUI}
@@ -13,9 +12,7 @@ function InterfaceWebUI (server, commandRouter) {
 	/** Init SocketIO listener */
 	self.libSocketIO = require('socket.io')(server);
 
-	/** On Client Connection, listen for various types of clients requests
-	 *
-	 */
+	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
 
 		/** Request Volumio State
@@ -271,7 +268,6 @@ function InterfaceWebUI (server, commandRouter) {
 			});
 		});
 
-
 		connWebSocket.on('getUiConfig', function(data) {
 			selfConnWebSocket = this;
 
@@ -288,10 +284,8 @@ function InterfaceWebUI (server, commandRouter) {
 
 			selfConnWebSocket.emit('pushMultiRoomDevices',response);
 		});
-
 	});
 }
-
 
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function(message) {
@@ -305,53 +299,63 @@ InterfaceWebUI.prototype.printConsoleMessage = function(message) {
 }
 
 // Receive player queue updates from commandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.volumioPushQueue = function(queue, connWebSocket) {
+InterfaceWebUI.prototype.pushQueue = function(queue, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushQueue');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushQueue', queue);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushQueue', queue);
 	// Else push to all connected clients
 	} else {
-		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'volumioPushQueue', queue);
+		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'pushQueue', queue);
+	}
+}
+
+// Push the library root
+InterfaceWebUI.prototype.pushLibraryIndex = function(browsedata, connWebSocket) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryIndex');
+
+	// If a specific client is given, push to just that client
+	if (connWebSocket) {
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushLibraryIndex', browsedata);
 	}
 }
 
 // Receive music library data from commandRouter and send to requester
-InterfaceWebUI.prototype.volumioPushBrowseData = function(browsedata, connWebSocket) {
+InterfaceWebUI.prototype.pushLibraryListing = function(browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushBrowseData');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryListing');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushBrowseData', browsedata);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushLibraryListing', browsedata);
+	}
+}
+
+// Push the playlist view
+InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistIndex');
+
+	// If a specific client is given, push to just that client
+	if (connWebSocket) {
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushPlaylistIndex', browsedata);
 	}
 }
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
-InterfaceWebUI.prototype.volumioPushState = function(state, connWebSocket) {
+InterfaceWebUI.prototype.pushState = function(state, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::volumioPushState');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushState');
 
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'volumioPushState', state);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushState', state);
 	} else {
 		// Push the updated state to all clients
-		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'volumioPushState', state);
+		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'pushState', state);
 	}
-}
-
-InterfaceWebUI.prototype.logDone = function(timeStart) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
-	return libQ.resolve();
-}
-
-InterfaceWebUI.prototype.logStart = function(sCommand) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
-	return libQ.resolve();
 }
 
 InterfaceWebUI.prototype.notifyUser = function(type,title,message) {

@@ -646,7 +646,7 @@ InterfaceMPD.prototype.handleListall = function(sCommand, sParam, client) {
 	self.logStart('Client requests Volumio library by title')
 	.then(libFast.bind(self.commRouter.volumioGetLibraryByTitle, self.commRouter))
 	.then(function(library) {
-		self.volumioPushLibrary.call(self, library, client);
+		self.pushLibrary.call(self, library, client);
 	})
 	.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
 	.done(function() {
@@ -1086,9 +1086,9 @@ InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
 	// Fetch status from CommandRouter
 	self.logStart('Client requests Volumio status')
 	.then(libFast.bind(self.commRouter.volumioGetState, self.commRouter))
-	// Forward state to volumioPushState function
+	// Forward state to pushState function
 	.then(function(state) {
-		self.volumioPushState.call(self, state, client);
+		self.pushState.call(self, state, client);
 	})
 	.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
 	.done(function() {
@@ -1212,9 +1212,9 @@ InterfaceMPD.prototype.printConsoleMessage = function(message) {
 };
 
 // Receive music library updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushLibrary = function(library, client) {
+InterfaceMPD.prototype.pushLibrary = function(library, client) {
 	var self = this;
-	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushLibrary');
+	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::pushLibrary');
 
 	// If a specific client is given, push to just that client
 	if (client) {
@@ -1229,9 +1229,9 @@ InterfaceMPD.prototype.volumioPushLibrary = function(library, client) {
 };
 
 // Receive player queue updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushQueue = function(queue) {
+InterfaceMPD.prototype.pushQueue = function(queue) {
 	var self = this;
-	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::volumioPushQueue');
+	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::pushQueue');
 
 	// pass queue to the helper
 	self.helper.setQueue(queue);
@@ -1245,8 +1245,9 @@ InterfaceMPD.prototype.volumioPushQueue = function(queue) {
 };
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
-InterfaceMPD.prototype.volumioPushState = function(state, socket) {
+InterfaceMPD.prototype.pushState = function(state, socket) {
 	var self = this;
+	self.commRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceMPD::pushState');
 
 	// if requested by client, respond
 	if (socket) {

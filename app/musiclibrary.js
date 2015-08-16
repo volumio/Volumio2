@@ -23,7 +23,13 @@ function CoreMusicLibrary (commandRouter) {
 
 	// The library contains hash tables for genres, artists, albums, and tracks
 	self.library = {};
-	self.library.index = {};
+	self.libraryIndex = {};
+	self.libraryIndex.root = {
+		name: 'root',
+		uid: 'root',
+		type: 'index',
+		children: []
+	}
 	self.arrayIndexDefinitions = [
 		{
 			'name': 'Genres by Name',
@@ -107,16 +113,15 @@ function CoreMusicLibrary (commandRouter) {
 // Public methods -----------------------------------------------------------------------------------
 
 // Return a music library view for a given object UID
-CoreMusicLibrary.prototype.browseLibrary = function(objBrowseParameters) {
+CoreMusicLibrary.prototype.getListing = function(sUid, objOptions) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::browseLibrary');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getListing');
 
 	return self.libraryReady
 		.then(function() {
 			//TODO implement use of nEntries and nOffset for paging of results
-			var sUid = objBrowseParameters.uid;
-			var arrayPath = objBrowseParameters.datapath;
-			var sSortBy = objBrowseParameters.sortby;
+			var arrayPath = objOptions.datapath;
+			var sSortBy = objOptions.sortby;
 
 			var objRequested = self.getLibraryObject(sUid);
 			if (!sSortBy && arrayPath.length === 0) {
@@ -130,6 +135,12 @@ CoreMusicLibrary.prototype.browseLibrary = function(objBrowseParameters) {
 				return self.getObjectInfo(objRequested, arrayPath);
 			}
 		});
+}
+
+CoreMusicLibrary.prototype.getIndex = function(sUid) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreLibraryFS::getIndex');
+	return libQ.resolve(self.libraryIndex[sUid].children);
 }
 
 CoreMusicLibrary.prototype.addQueueUids = function(arrayUids) {
@@ -182,6 +193,13 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 	self.commandRouter.pushConsoleMessage('Loading library from DB...');
 
 	self.library = {};
+	self.libraryIndex = {};
+	self.libraryIndex.root = {
+		name: 'root',
+		uid: 'root',
+		type: 'index',
+		children: []
+	}
 
 	self.libraryReadyDeferred = libQ.defer();
 	self.libraryReady = self.libraryReadyDeferred.promise;
@@ -195,6 +213,12 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 			self.library = result;
 			self.commandRouter.pushConsoleMessage('Library loaded from DB.');
 
+			return libQ.nfcall(libFast.bind(dbLibrary.get, dbLibrary), 'libraryIndex');
+		})
+		.then(function(result) {
+			self.libraryIndex = result;
+			self.commandRouter.pushConsoleMessage('Library index loaded from DB.');
+
 			try {
 				self.libraryReadyDeferred.resolve();
 			} catch (error) {
@@ -205,7 +229,7 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 			self.commandRouter.pushConsoleMessage('  Artists: ' + Object.keys(self.library['artist']).length);
 			self.commandRouter.pushConsoleMessage('  Albums: ' + Object.keys(self.library['album']).length);
 			self.commandRouter.pushConsoleMessage('  Tracks: ' + Object.keys(self.library['track']).length);
-			self.commandRouter.pushConsoleMessage('  Indexes: ' + Object.keys(self.library['index']).length);
+			self.commandRouter.pushConsoleMessage('  Indexes: ' + (Object.keys(self.libraryIndex).length - 1));
 
 			return libQ.resolve();
 		})
@@ -228,11 +252,17 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::buildLibrary');
 
 	self.library = {};
-	self.library['genre'] = {};
-	self.library['artist'] = {};
-	self.library['album'] = {};
-	self.library['track'] = {};
-	self.library['index'] = {};
+	self.library.genre = {};
+	self.library.artist = {};
+	self.library.album = {};
+	self.library.track = {};
+	self.libraryIndex = {};
+	self.libraryIndex.root = {
+		name: 'root',
+		uid: 'root',
+		type: 'index',
+		children: []
+	}
 
 	self.libraryReadyDeferred = libQ.defer();
 	self.libraryReady = self.libraryReadyDeferred.promise;
@@ -262,13 +292,18 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 		.then(function() {
 			self.commandRouter.pushConsoleMessage('Writing root listing...');
 
-			self.library.index.root = libFast.map(self.arrayIndexDefinitions, function(curEntry) {
-				return {'uid': 'index:' + curEntry.name, 'type': 'index', 'name': curEntry.name};
+			self.libraryIndex.root.children = libFast.map(self.arrayIndexDefinitions, function(curEntry) {
+				var sUid = convertStringToHashkey(curEntry.name);
+				return {'uid': sUid, 'type': 'index', 'name': curEntry.name};
 			});
 		})
 		.then(function() {
 			self.commandRouter.pushConsoleMessage('Storing library in db...');
 			return libQ.nfcall(libFast.bind(dbLibrary.put, dbLibrary), 'library', self.library);
+		})
+		.then(function() {
+			self.commandRouter.pushConsoleMessage('Storing library index in db...');
+			return libQ.nfcall(libFast.bind(dbLibrary.put, dbLibrary), 'libraryIndex', self.libraryIndex);
 		})
 		.then(function() {
 			self.commandRouter.pushConsoleMessage('Library build complete.');
@@ -399,6 +434,7 @@ CoreMusicLibrary.prototype.buildSingleIndex = function(objIndexDefinition) {
 	var sTableName = objIndexDefinition.table;
 	var sSortBy = objIndexDefinition.sortby;
 	var arrayPath = objIndexDefinition.datapath;
+	var sIndexUid = convertStringToHashkey(sIndexName);
 
 	if (!(sTableName in self.library)) {
 		throw new Error('Specified table ' + sTableName + ' not found in library for indexing');
@@ -412,7 +448,12 @@ CoreMusicLibrary.prototype.buildSingleIndex = function(objIndexDefinition) {
 			return self.sortDataArray(arrayUnsorted, sSortBy);
 		})*/
 		.then(function(arraySorted) {
-			self.library.index[sIndexName] = arraySorted;
+			self.libraryIndex[sIndexUid] = {
+				name: sIndexName,
+				uid: sIndexUid,
+				type: 'index',
+				children: arraySorted
+			}
 		});
 }
 
@@ -430,12 +471,12 @@ CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 
 	var sService = curTrack.service;
 	var sUri = curTrack.uri;
-	var sName = curTrack.metadata.name;
-	var sAlbum = curTrack.metadata.album;
-	var arrayArtists = curTrack.metadata.artists;
-	var arrayGenres = curTrack.metadata.genres;
-	var nTrackNumber = curTrack.metadata.tracknumber;
-	var dateTrackDate = curTrack.metadata.date;
+	var sName = curTrack.name;
+	var sAlbum = curTrack.album;
+	var arrayArtists = curTrack.artists;
+	var arrayGenres = curTrack.genres;
+	var nTrackNumber = curTrack.tracknumber;
+	var dateTrackDate = curTrack.date;
 
 	var tableGenres = self.library.genre;
 	var tableArtists = self.library.artist;

@@ -197,30 +197,6 @@ CoreStateMachine.prototype.pause = function(promisedResponse) {
 	}
 };
 
-// Sync state from MPD
-CoreStateMachine.prototype.syncStateFromMpd = function(stateMpd) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncStateFromMpd');
-
-	if (self.currentTrackBlock.service !== 'mpd') {
-		return libQ.reject('Error: MPD announced a state update when it is not the currently active service');
-	} else {
-		return self.syncState(stateMpd, 'mpd');
-	}
-};
-
-// Sync state from Spop
-CoreStateMachine.prototype.syncStateFromSpop = function(stateSpop) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncStateFromSpop');
-
-	if (self.currentTrackBlock.service !== 'spop') {
-		return libQ.reject('Error: Spop announced a state update when it is not the currently active service');
-	} else {
-		return self.syncState(stateSpop, 'spop');
-	}
-};
-
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -241,66 +217,34 @@ CoreStateMachine.prototype.serviceClearAddPlay = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceClearAddPlay');
 
 	var trackBlock = self.currentTrackBlock;
-
-	if (trackBlock.service === 'mpd') {
-		return self.commandRouter.spopStop()
-		// .delay(5000) // Spop does not release ALSA immediately - adjust this delay as needed
-		.then(function() {
-			return self.commandRouter.mpdClearAddPlayTracks(trackBlock.uris);
-		});
-	} else if (trackBlock.service === 'spop') {
-		return self.commandRouter.mpdStop()
-		.then(function() {
-			return self.commandRouter.spopClearAddPlayTracks(trackBlock.uris);
-		});
-	} else {
-		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"clear-add-play\" action');
-	}
+	return self.commandRouter.serviceClearAddPlayTracks(trackBlock.uris, trackBlock.service);
 };
 
 // Stop the current track block playback
 CoreStateMachine.prototype.serviceStop = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceStop');
-	var trackBlock = self.currentTrackBlock;
 
-	if (trackBlock.service === 'mpd') {
-		return self.commandRouter.mpdStop();
-	} else if (trackBlock.service === 'spop') {
-		return self.commandRouter.spopStop();
-	} else {
-		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"stop\" action');
-	}
+	var trackBlock = self.currentTrackBlock;
+	return self.commandRouter.serviceStop(trackBlock.service);
 };
 
 // Pause the current track block playback
 CoreStateMachine.prototype.servicePause = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::servicePause');
-	var trackBlock = self.currentTrackBlock;
 
-	if (trackBlock.service === 'mpd') {
-		return self.commandRouter.mpdPause();
-	} else if (trackBlock.service === 'spop') {
-		return self.commandRouter.spopPause();
-	} else {
-		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"pause\" action');
-	}
+	var trackBlock = self.currentTrackBlock;
+	return self.commandRouter.servicePause(trackBlock.service);
 };
 
 // Resume the current track block playback
 CoreStateMachine.prototype.serviceResume = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceResume');
-	var trackBlock = self.currentTrackBlock;
 
-	if (trackBlock.service === 'mpd') {
-		return self.commandRouter.mpdResume();
-	} else if (trackBlock.service === 'spop') {
-		return self.commandRouter.spopResume();
-	} else {
-		return libQ.reject('Error: Service ' + trackBlock.service + ' is not recognized for \"resume\" action');
-	}
+	var trackBlock = self.currentTrackBlock;
+	return self.commandRouter.serviceResume(trackBlock.service);
 };
 
 // Reset the properties of the state machine
@@ -394,6 +338,10 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 	self.commandRouter.volumioretrievevolume();
 	self.timeLastServiceStateUpdate = Date.now();
+
+	if (self.currentTrackBlock.service !== sService) {
+		return libQ.reject('Error: ' + sService + ' announced a state update when it is not the currently active service');
+	}
 
 	if (stateService.status === 'play') {
 		if (self.currentStatus === 'play') {
