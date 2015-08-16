@@ -32,20 +32,18 @@ function CoreCommandRouter (server) {
 	self.playlistFS = new (require('./playlistfs.js'))(self);
 }
 
-CoreCommandRouter.prototype.loadControllers=function()
-{
+CoreCommandRouter.prototype.loadControllers = function() {
 	var self = this;
 
 	self.controllers={};
-
 	var controllerFolders=fs.readdirSync(__dirname+'/controllers');
-	for(var i in controllerFolders)
-	{
-		var controllerName=controllerFolders[i];
-		console.log("Initializing controller "+controllerName);
+	for(var i in controllerFolders) {
+		var controllerInstance = new (require(__dirname+'/controllers/'+controllerName+'/index.js'))(self);
 
-		var controllerInstance=new (require(__dirname+'/controllers/'+controllerName+'/index.js'))(self);
-		self.controllers[controllerName]=controllerInstance;
+		var controllerName = controllerInstance.servicename;
+		console.log("Initializing controller " + controllerName);
+
+		self.controllers[controllerName] = controllerInstance;
 
 		//Calling Methods needed on Volumio Start for controllers
 		if(controllerInstance.onVolumioStart !=undefined)
