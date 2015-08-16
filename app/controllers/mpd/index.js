@@ -11,6 +11,12 @@ function ControllerMpd(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 
+	// This is the service name reported to the backend. Must be a string legal for use as a key.
+	self.servicename = 'mpd';
+
+	// This is the name to be shown to users
+	self.displayname = 'MPD';
+
 	//getting configuration
 	var config=fs.readJsonSync(__dirname+'/config.json');
 	var nHost=config['nHost'].value;
@@ -136,9 +142,9 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 		if (arrayLineParts[0] === 'file') {
 			curEntry = {
 				'name': '',
-				'service': 'mpd',
+				'service': self.servicename,
 				'uri': arrayLineParts[1],
-				'browsepath': arrayLineParts[1].split('/').slice(0, -1),
+				'browsepath': arrayLineParts[1].split('/').slice(0, -1).unshift(self.displayname),
 				'artists': [],
 				'album': '',
 				'genres': [],
@@ -229,7 +235,7 @@ ControllerMpd.prototype.pushState = function(state) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushState');
 
-	return self.commandRouter.mpdPushState(state);
+	return self.commandRouter.servicePushState(state, self.servicename);
 };
 
 // Pass the error if we don't want to handle it

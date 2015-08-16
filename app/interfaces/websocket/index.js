@@ -12,11 +12,8 @@ function InterfaceWebUI (server, commandRouter) {
 	/** Init SocketIO listener */
 	self.libSocketIO = require('socket.io')(server);
 
-	/** On Client Connection, listen for various types of clients requests
-	 *
-	 */
+	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
-
 		connWebSocket.on('playerCommand', function (param1, param2) {
 			var thisWebsocketConnection = this;
 			var timeStart = Date.now();

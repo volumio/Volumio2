@@ -14,6 +14,12 @@ function ControllerSpop(commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
+	// This is the service name reported to the backend. Must be a string legal for use as a key.
+	self.servicename = 'spop';
+
+	// This is the name to be shown to users
+	self.displayname = 'Spotify';
+
 	//getting configuration
 	var config=fs.readJsonSync(__dirname+'/config.json');
 
@@ -238,7 +244,7 @@ ControllerSpop.prototype.rebuildTracklist = function() {
 	return self.sendSpopCommand('ls', [])
 	.then(JSON.parse)
 	.then(function(objPlaylists) {
-		return self.rebuildTracklistFromSpopPlaylists(objPlaylists, []);
+		return self.rebuildTracklistFromSpopPlaylists(objPlaylists, [self.displayname]);
 	})
 	.then(function() {
 		self.commandRouter.pushConsoleMessage('Storing Spop tracklist in db...');
@@ -414,7 +420,7 @@ ControllerSpop.prototype.pushState = function(state) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pushState');
 
-	return self.commandRouter.spopPushState(state);
+	return self.commandRouter.servicePushState(state, self.servicename);
 };
 
 // Pass the error if we don't want to handle it
@@ -481,7 +487,7 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput, 
 				for (var j = 0; j < nTracks; j++) {
 					self.tracklist.push({
 						'name': curTracklist.tracks[j].title,
-						'service': 'spop',
+						'service': self.servicename,
 						'uri': curTracklist.tracks[j].uri,
 						'browsepath': arrayNewPath,
 						'album': curTracklist.tracks[j].album,
