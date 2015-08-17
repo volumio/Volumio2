@@ -7,7 +7,7 @@
       "id": "section_general_settings",
       "element": "section",
       "label": "General Settings",
-      "onSave": {"type":"controller", "endpoint":"system", "method":"saveGeneralSettings"},
+      "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
         "data": [
@@ -36,7 +36,7 @@
       "id": "section_sound_quality",
         "type": "section",
         "label": "Sound quality tweaks",
-        "onSave": {"type":"controller", "endpoint":"system", "method":"saveSoundQuality"},
+        "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveSoundQuality"},
         "saveButton": {
           "label": "Save",
           "data": [
@@ -84,7 +84,7 @@
               "element": "button",
               "label": "System updates",
               "text": "You can check?...",
-              "onClick": {"type":"controller", "endpoint":"system", "method":"systemUpdate"}
+              "onClick": {"type":"controller", "endpoint":"system_controller/system", "method":"systemUpdate"}
           }
         ]
 

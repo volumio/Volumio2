@@ -26,7 +26,9 @@ function ControllerNetwork(commandRouter) {
 	config.loadFile(__dirname+'/config.json');
 
 	// Save a reference to the parent commandRouter
+
 	self.commandRouter = commandRouter;
+
 }
 
 ControllerNetwork.prototype.onVolumioStart = function() {
@@ -252,7 +254,7 @@ ControllerNetwork.prototype.saveWiredNet=function(data)
 	config.set('ethgateway', static_gateway);
 
 	self.rebuildNetworkConfig();
-	self.commandRouter.pushSuccessToastMessage("Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success',"Configuration update", 'The configuration has been successfully updated');
 
 
 	defer.resolve({});
@@ -273,7 +275,7 @@ ControllerNetwork.prototype.saveWirelessNet=function(data)
 	config.set('wlanpass',network_pass);
 
 	self.rebuildNetworkConfig();
-	self.commandRouter.pushSuccessToastMessage("Configuration update",'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 
 	defer.resolve({});
 	return defer.promise;
@@ -331,19 +333,20 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 		ws.uncork();
 		ws.end();
 
+		console.log("Restarting networking layer");
 		exec('service networking restart',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
-					self.commandRouter.pushErrorToastMessage("Network restart",'Error while restarting network: '+error);
+					self.commandRouter.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
 				}
-				else self.commandRouter.pushSuccessToastMessage("Network restart",'Network successfully restarted');
+				else self.commandRouter.pushToastMessage('success',"Network restart",'Network successfully restarted');
 
 			});
 	}
 	catch(err)
 	{
-		self.commandRouter.pushErrorToastMessage("Network setup",'Error while setting network: '+err);
+		self.commandRouter.pushToastMessage('error',"Network setup",'Error while setting network: '+err);
 	}
 
 }

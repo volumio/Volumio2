@@ -297,9 +297,9 @@ function InterfaceWebUI (commandRouter, server) {
 
 			var promise;
 
-			if(dataJson.type=='plugin')
-				promise=self.commandRouter.executeOnPlugin(dataJson.endpoint,dataJson.method,dataJson.data);
-			else promise=self.commandRouter.executeOnController(dataJson.endpoint,dataJson.method,dataJson.data);
+			var category=dataJson.endpoint.substring(0,dataJson.endpoint.indexOf('/'));
+			var name=dataJson.endpoint.substring(dataJson.endpoint.indexOf('/')+1);
+			promise=self.commandRouter.executeOnPlugin(category,name,dataJson.method,dataJson.data);
 
 			promise.then(function(result)
 			{
@@ -314,7 +314,7 @@ function InterfaceWebUI (commandRouter, server) {
 		connWebSocket.on('getUiConfig', function(data) {
 			selfConnWebSocket = this;
 
-			var response=self.commandRouter.getUIConfigOnController(data.page,{});
+			var response=self.commandRouter.getUIConfigOnPlugin('system_controller',data.page,{});
 
 			selfConnWebSocket.emit('pushUiConfig',response);
 		});
@@ -322,7 +322,7 @@ function InterfaceWebUI (commandRouter, server) {
 		connWebSocket.on('getMultiRoomDevices', function(data) {
 			selfConnWebSocket = this;
 
-			var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('volumiodiscovery');
+			var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
 			var response=volumiodiscovery.getDevices();
 
 			selfConnWebSocket.emit('pushMultiRoomDevices',response);
@@ -400,7 +400,7 @@ InterfaceWebUI.prototype.pushState = function(state, connWebSocket) {
 	}
 }
 
-InterfaceWebUI.prototype.notifyUser = function(type,title,message) {
+InterfaceWebUI.prototype.printToastMessage = function(type,title,message) {
 	var self = this;
 
 	// Push the message all clients

@@ -7,7 +7,7 @@
       "id": "section_wired_network",
       "element": "section",
       "label": "Wired Network",
-      "onSave": {"type":"controller", "endpoint":"network", "method":"saveWiredNet"},
+      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWiredNet"},
       "saveButton": {
         "label": "Save",
         "data": [
@@ -76,7 +76,7 @@
       "id": "section_wireless_network",
       "element": "section",
       "label": "Wireless Network",
-      "onSave": {"type":"controller", "endpoint":"network", "method":"saveWirelessNet"},
+      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWirelessNet"},
       "saveButton": {
         "label": "Save",
         "data": [
