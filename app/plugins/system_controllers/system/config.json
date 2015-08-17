@@ -1,7 +1,4 @@
 {
-  "plugin_type": "system_controller",
-  "plugin_name": "system",
-  "plugin_display_name": "Volumio System Control",
   "playerName":{"value":"Volumio","type":"string"},
   "startupSound":{"value":true,"type":"boolean"},
   "kernelSettingValue":{"value":1,"type":"number"},

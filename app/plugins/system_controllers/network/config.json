@@ -1,7 +1,4 @@
 {
-  "plugin_type": "system_controller",
-  "plugin_name": "network",
-  "plugin_display_name": "Network Controls",
   "dhcp":{"value":false,"type":"boolean"},
   "ethip":{"value":"127.0.0.1","type":"string"},
   "ethnetmask":{"value":"255.255.255.0","type":"string"},

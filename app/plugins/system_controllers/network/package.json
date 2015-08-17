@@ -1,0 +1,14 @@
+{
+  "name": "network",
+  "version": "1.0.0",
+  "description": "Network plugin for Volumio2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "system_controller"
+  }
+}

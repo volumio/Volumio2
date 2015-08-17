@@ -1,0 +1,14 @@
+{
+  "name": "dirble",
+  "version": "1.0.0",
+  "description": "Dirble plugin for Volumio2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Volumio2",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "music_service"
+  }
+}

@@ -1,5 +1,2 @@
 {
-  "plugin_type": "user_interface",
-  "plugin_name": "websocket",
-  "plugin_display_name": "Websocket Interface"
 }

@@ -1,0 +1,14 @@
+{
+  "name": "upnp",
+  "version": "1.0.0",
+  "description": "UPnP Interface for Volumio 2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Volumio",
+  "license": "ISC",
+  "volumio_info":{
+    "plugin_type": "audio_interface"
+  }
+}

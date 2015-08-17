@@ -39,6 +39,7 @@ function InterfaceWebUI (commandRouter, server) {
 			self.logStart('Client requests Volumio state')
 				.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
 				.then(function (state) {
+					console.log("ECCOCI!!");
 					return self.pushState.call(self, state, selfConnWebSocket);
 				})
 				.fail(function (error) {
@@ -323,7 +324,7 @@ function InterfaceWebUI (commandRouter, server) {
 		connWebSocket.on('getMultiRoomDevices', function(data) {
 			selfConnWebSocket = this;
 
-			var volumiodiscovery=self.commandRouter.getController('volumiodiscovery');
+			var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('volumiodiscovery');
 			var response=volumiodiscovery.getDevices();
 
 			selfConnWebSocket.emit('pushMultiRoomDevices',response);
