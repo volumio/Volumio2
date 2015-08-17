@@ -14,7 +14,6 @@ function InterfaceWebUI (commandRouter, server) {
 
 	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
-
 		/** Request Volumio State
 		 * It returns an array definining the Playback state, Volume and other amenities
 		 * @example {"status":"stop","position":0,"dynamictitle":null,"seek":0,"duration":0,"samplerate":null,"bitdepth":null,"channels":null,"volume":82,"mute":false,"service":null}
@@ -39,7 +38,6 @@ function InterfaceWebUI (commandRouter, server) {
 			self.logStart('Client requests Volumio state')
 				.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
 				.then(function (state) {
-					console.log("ECCOCI!!");
 					return self.pushState.call(self, state, selfConnWebSocket);
 				})
 				.fail(function (error) {
@@ -394,7 +392,6 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket)
 InterfaceWebUI.prototype.pushState = function(state, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushState');
-
 	if (connWebSocket) {
 		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushState', state);
 	} else {

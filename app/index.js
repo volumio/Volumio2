@@ -309,11 +309,11 @@ CoreCommandRouter.prototype.getConfiguration=function(componentCode)
 
 CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 	var self = this;
-	console.log(sMessage);
 
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames('user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+			if(thisInterface.printConsoleMessage !=undefined)
 			return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
 		})
 	);
@@ -325,7 +325,7 @@ CoreCommandRouter.prototype.pushToastMessage = function(type, title, message) {
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames('user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			if (printToastMessage in thisInterface)
+			if (thisInterface.printToastMessage !=undefined)
 				return thisInterface.printToastMessage.call(thisInterface, type, title, message);
 		})
 	);
@@ -338,7 +338,7 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames('user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			if (pushMultiroomDevices in thisInterface)
+			if (thisInterface.pushMultiroomDevices !=undefined)
 				return thisInterface.pushMultiroomDevices.call(thisInterface, data);
 		})
 	);

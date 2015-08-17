@@ -1,8 +1,8 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
-var config=new (require(__dirname+'/../../lib/config.js'))();
-var foundVolumioInstances=new (require(__dirname+'/../../lib/config.js'))();
+var config=new (require(__dirname+'/../../../lib/config.js'))();
+var foundVolumioInstances=new (require(__dirname+'/../../../lib/config.js'))();
 var mdns=require('mdns');
 
 // Define the ControllerVolumioDiscovery class
@@ -21,7 +21,7 @@ function ControllerVolumioDiscovery(commandRouter) {
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
 
-	var systemController=self.commandRouter.getController('system');
+	var systemController=self.commandRouter.pluginManager.getPlugin('system_controller','system');
 	var name=systemController.getConf('playerName');
 	var uuid=systemController.getConf('uuid');;
 	var serviceName=config.get('service');

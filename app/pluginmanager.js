@@ -2,13 +2,15 @@
  * Created by massi on 27/07/15.
  */
 var fs = require('fs-extra');
+var HashMap = require('hashmap');
+var libFast = require('fast.js');
 
 module.exports = PluginManager;
 function PluginManager (ccommand, server) {
     var self = this;
 
-    self.plugins = {};
-	self.pluginPath = __dirname+'/plugins/';
+    self.plugins = new HashMap();
+	self.pluginPath = [__dirname+'/plugins/','/plugins'];
 
     self.config = new (require(__dirname + '/lib/config.js'))();
     self.config.loadFile(__dirname + '/plugins/plugins.json');
@@ -16,24 +18,41 @@ function PluginManager (ccommand, server) {
 	self.websocketServer = server;
 }
 
-PluginManager.prototype.loadPlugin = function(category, pluginName) {
+PluginManager.prototype.loadPlugin = function(folder) {
     var self = this;
 
-	var objConfig = JSON.parse(fs.readFileSync(__dirname + '/plugins/' + category + '/'+pluginName+'/config.json').toString());
-    console.log('[' + Date.now() + '] Loading plugin \"' + objConfig.plugin_display_name + '\"...');
+    var package_json=self.getPackageJson(folder);
 
-    if (self.plugins[objConfig.plugin_type] == undefined)
-        self.plugins[objConfig.plugin_type] = {};
+    var category=package_json.volumio_info.plugin_type;
+    var name=package_json.name;
 
-	var pluginInstance = null;
-    if (objConfig.plugin_name === 'websocket') {
-		// TODO this is a hack to get the websocket server to connect. Need a more permanent solution
-		pluginInstance = new (require(__dirname + '/plugins/' + category + '/'+pluginName+'/index.js'))(self.coreCommand, self.websocketServer);
-	} else {
-		pluginInstance = new (require(__dirname + '/plugins/' + category + '/'+pluginName+'/index.js'))(self.coreCommand);
-	}
+    var key=category+'.'+name;
+    var configForPlugin=self.config.get(key+'.enabled');
 
-    self.plugins[objConfig.plugin_type][objConfig.plugin_name] = pluginInstance;
+    var shallStartup=configForPlugin!=undefined && configForPlugin==true;
+    if(shallStartup==true)
+    {
+        console.log('[' + Date.now() + '] Loading plugin \"' + name + '\"...');
+
+        var pluginInstance = null;
+        if (category=='user_interface') {
+            // TODO this is a hack to get the websocket server to connect. Need a more permanent solution
+            pluginInstance = new (require(folder+'/index.js'))(self.coreCommand, self.websocketServer);
+        } else {
+            pluginInstance = new (require(folder+'/index.js'))(self.coreCommand);
+        }
+
+        var pluginData={
+            name:name,
+            category:category,
+            folder:folder,
+            instance: pluginInstance
+        };
+
+        self.plugins.set(key,pluginData);
+    }
+    else console.log("Plugin "+name+" is not enabled");
+
 }
 
 
@@ -41,62 +60,54 @@ PluginManager.prototype.loadPlugins=function()
 {
     var self = this;
 
-    var pluginsFolder=fs.readdirSync(self.pluginPath);
-    for(var i in pluginsFolder)
+
+    for(var ppaths in self.pluginPath)
     {
-        var folder=pluginsFolder[i];
-        var dirPath=__dirname+'/plugins/'+folder;
+        var folder=self.pluginPath[ppaths];
+        console.log('Loading plugins from folder '+folder);
 
-        var stats=fs.statSync(dirPath);
-        if(stats.isDirectory())
+        if(fs.existsSync(folder))
         {
-
-            var folderContents=fs.readdirSync(dirPath);
-            for(var j in folderContents)
+            var pluginsFolder=fs.readdirSync(folder);
+            for(var i in pluginsFolder)
             {
-                var subfolder=folderContents[j];
-                var configForPlugin=self.config.get(folder+'.'+subfolder+'.enabled');
+                var groupfolder=folder+'/'+pluginsFolder[i];
 
-                var shallStartup=configForPlugin!=undefined && configForPlugin==true;
-                if(shallStartup==true)
+                var stats=fs.statSync(groupfolder);
+                if(stats.isDirectory())
                 {
-                    self.loadPlugin(folder,subfolder);
-                }/*
-                else
-                {
-                    self.config.addConfigValue(folder+'.'+subfolder+'.enabled','boolean',false);
-                    self.config.addConfigValue(folder+'.'+subfolder+'.status','string',"STOPPED");
-                }*/
+
+                    var folderContents=fs.readdirSync(groupfolder);
+                    for(var j in folderContents)
+                    {
+                        var subfolder=folderContents[j];
+
+                        //loading plugin package.json
+                        var pluginFolder=groupfolder+'/'+subfolder;
+                        self.loadPlugin(pluginFolder);
+                    }
+                }
 
             }
         }
 
     }
+
+
 }
+
+PluginManager.prototype.getPackageJson=function(folder)
+{
+    var self=this;
+
+    return fs.readJsonSync(folder+'/package.json');
+}
+
 
 PluginManager.prototype.isEnabled=function(category,pluginName)
 {
     var self=this;
     return self.config.get(category+'.'+pluginName+'.enabled');
-}
-
-
-PluginManager.prototype.onVolumioStart=function(category, name)
-{
-    var self=this;
-
-    var categories=self.getPluginCategories();
-    for(var i in categories) {
-        var category = categories[i];
-        var plugins = self.getPluginNames(category);
-
-        for (var j in plugins) {
-            var name = plugins[j];
-            var plugin=self.getplugin(category, name);
-
-            plugin.onVolumioStart();
-        }
-    }
 }
 
 PluginManager.prototype.startPlugin=function(category, name)
@@ -114,40 +125,33 @@ PluginManager.prototype.stopPlugin=function(category, name)
     var self=this;
 
     self.config.set(category+'.'+name+'.status',"STOPPED");
+    var plugin=self.getPlugin(category,name);
+    plugin.onStop();
 }
 
 PluginManager.prototype.startPlugins=function()
 {
     var self=this;
 
-    var categories=self.getPluginCategories();
-    for(var i in categories)
-    {
-        var category=categories[i];
-        var plugins=self.getPluginNames(category);
+    self.plugins.forEach(function(value, key) {
 
-        for(var j in plugins)
-        {
-            var name=plugins[j];
-            self.startPlugin(category,name);
-        }
-    }
+        self.config.set(key+'.status',"STARTED");
+
+        var plugin=value.instance;
+        plugin.onStart();
+    });
 }
 
 PluginManager.prototype.stopPlugins=function()
 {
     var self=this;
 
-    var categories=self.getPluginCategories();
-    for(var i in categories) {
-        var category = categories[i];
-        var plugins = self.getPluginNames(category);
+    self.plugins.forEach(function(value, key) {
+        self.config.set(key+'.status',"STOPPED");
 
-        for (var j in plugins) {
-            var name = plugins[j];
-            self.stopPlugin(category, name);
-        }
-    }
+        var plugin=value.instance;
+        plugin.onStop();
+    });
 }
 
 
@@ -155,42 +159,55 @@ PluginManager.prototype.getPluginCategories=function()
 {
     var self=this;
 
-	return Object.keys(self.plugins);
+    console.log("REQUESTING PLUGIN CATEGORIES");
+    var categories=[];
+
+    var values=self.plugins.values();
+    for(var i in values)
+    {
+        var metadata=values[i];
+        console.log(metadata.category);
+        if(libFast.indexOf(categories,metadata.category)==-1)
+            categories.push(metadata.category);
+    }
+
+    console.log(categories);
+
+    return names;
 }
 
 PluginManager.prototype.getPluginNames=function(category)
 {
     var self=this;
 
-    if(category in self.plugins) {
-		return Object.keys(self.plugins[category]);
-	} else {
-		return [];
-	}
+    var names=[];
+
+    var values=self.plugins.values();
+    for(var i in values)
+    {
+        var metadata=values[i];
+        if(metadata.category==category)
+            names.push(metadata.name);
+    }
+
+    return names;
 }
 
 PluginManager.prototype.onVolumioStart=function()
 {
     var self=this;
 
-    var categories=self.getPluginCategories();
-    for(var i in categories)
-    {
-        var plugins=self.getPluginNames(categories[i]);
-        for(var j in plugins)
-        {
-            var plugin=self.getPlugin(categories[i],plugins[j]);
-            if(plugin.onVolumioStart !=undefined)
-                plugin.onVolumioStart();
-        }
-    }
+    self.plugins.forEach(function(value, key) {
+      var plugin=value.instance;
 
+      if(plugin.onVolumioStart !=undefined)
+        plugin.onVolumioStart();
+    });
 }
 
 PluginManager.prototype.getPlugin=function(category,name)
 {
     var self=this;
 
-    if(self.plugins[category]!=undefined)
-        return self.plugins[category][name];
+    return self.plugins.get(category+'.'+name).instance;
 }

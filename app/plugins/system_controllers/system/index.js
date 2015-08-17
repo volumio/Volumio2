@@ -2,7 +2,7 @@ var libQ = require('kew');
 var libNet = require('net');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
-var config=new (require(__dirname+'/../../lib/config.js'))();
+var config=new (require(__dirname+'/../../../lib/config.js'))();
 
 
 // Define the ControllerSystem class

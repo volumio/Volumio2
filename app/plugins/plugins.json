@@ -1,5 +1,5 @@
 {
-  "music_services": {
+  "music_service": {
     "spop": {
       "enabled": {
         "type": "boolean",
@@ -41,7 +41,7 @@
       }
     }
   },
-  "audio_interfaces": {
+  "audio_interface": {
     "upnp": {
       "enabled": {
         "type": "boolean",
@@ -53,8 +53,57 @@
       }
     }
   },
-  "user_interfaces": {
+  "user_interface": {
     "websocket": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
+    "mpdemulation": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    }
+  },
+  "system_controller":{
+    "network": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },"services": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },"system": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },"volumiodiscovery": {
       "enabled": {
         "type": "boolean",
         "value": true

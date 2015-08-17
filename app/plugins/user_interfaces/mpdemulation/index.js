@@ -108,7 +108,7 @@ const command = { // List of all MPD commands
 
 // Define the InterfaceMPD class
 module.exports = InterfaceMPD;
-function InterfaceMPD(server, commandRouter) {
+function InterfaceMPD( commandRouter,server) {
 	var self = this;
 	self.commRouter = commandRouter;
 
