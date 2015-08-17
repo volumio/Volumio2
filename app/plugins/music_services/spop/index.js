@@ -14,12 +14,6 @@ function ControllerSpop(commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	// This is the service name reported to the backend. Must be a string legal for use as a key.
-	self.servicename = 'spop';
-
-	// This is the name to be shown to users
-	self.displayname = 'Spotify';
-
 	//getting configuration
 	var config=fs.readJsonSync(__dirname+'/config.json');
 

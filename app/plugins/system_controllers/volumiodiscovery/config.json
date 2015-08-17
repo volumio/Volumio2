@@ -1,4 +1,7 @@
 {
+  "plugin_type": "system_controller",
+  "plugin_name": "volumiodiscovery",
+  "plugin_display_name": "Volumio Network Discovery",
     "service": {
         "type": "string",
         "value": "volumio"

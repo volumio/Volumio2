@@ -14,10 +14,6 @@ DirBle.prototype.onVolumioStart = function() {
 	//Perform startup tasks here
 }
 
-DirBle.prototype.onStart = function() {
-    //Perform startup tasks here
-}
-
 DirBle.prototype.onStop = function() {
     //Perform startup tasks here
 }

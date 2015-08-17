@@ -122,11 +122,6 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 
 }
 
-ControllerVolumioDiscovery.prototype.onStart = function() {
-	var self = this;
-	//Perform startup tasks here
-}
-
 ControllerVolumioDiscovery.prototype.onStop = function() {
 	var self = this;
 	//Perform startup tasks here

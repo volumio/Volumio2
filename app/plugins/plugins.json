@@ -10,6 +10,16 @@
         "value": "STARTED"
       }
     },
+    "mpd": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
     "dirble": {
       "enabled": {
         "type": "boolean",
@@ -32,7 +42,19 @@
     }
   },
   "audio_interfaces": {
-    "upnp_interface": {
+    "upnp": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    }
+  },
+  "user_interfaces": {
+    "websocket": {
       "enabled": {
         "type": "boolean",
         "value": true

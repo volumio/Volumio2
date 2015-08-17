@@ -1,4 +1,7 @@
 {
+  "plugin_type": "music_service",
+  "plugin_name": "spop",
+  "plugin_display_name": "Spotify",
   "nHost":{"modifiable":false,"value":"localhost","type":"string"},
   "nPort":{"modifiable":false,"value":"6602","type":"number"},
   "spotify_username":{"modifiable":true,"value":"","type":"string","ui_label_key":"spotify_username"},

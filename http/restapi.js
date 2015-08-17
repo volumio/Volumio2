@@ -1,14 +1,13 @@
 var express = require('express');
-var app = require('../../../http/index.js')
+var app = require('./index.js')
 var bodyParser = require('body-parser');
 var ip = require('ip');
 var api = express.Router();
 
-
-
 function apiInterface(server, commandRouter) {
 
 }
+
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');

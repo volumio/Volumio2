@@ -1,0 +1,6 @@
+{
+  "plugin_type": "music_service",
+  "plugin_name": "example",
+  "plugin_display_name": "Example Service"
+}
+

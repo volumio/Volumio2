@@ -2,8 +2,8 @@ var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libUtil = require('util');
-var fs=require('fs-extra');
-var chokidar = require('chokidar');
+var libFsExtra = require('fs-extra');
+var libChokidar = require('chokidar');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -11,14 +11,8 @@ function ControllerMpd(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 
-	// This is the service name reported to the backend. Must be a string legal for use as a key.
-	self.servicename = 'mpd';
-
-	// This is the name to be shown to users
-	self.displayname = 'MPD';
-
 	//getting configuration
-	var config=fs.readJsonSync(__dirname+'/config.json');
+	var config=libFsExtra.readJsonSync(__dirname+'/config.json');
 	var nHost=config['nHost'].value;
 	var nPort=config['nPort'].value;
 
@@ -373,7 +367,6 @@ ControllerMpd.prototype.logStart = function(sCommand) {
  * The Core controller checks if the method is defined and executes it on startup if it exists.
  */
 ControllerMpd.prototype.onVolumioStart = function() {
-	console.log("Plugin mpd startup");
 }
 
 /*
@@ -382,14 +375,14 @@ ControllerMpd.prototype.onVolumioStart = function() {
 ControllerMpd.prototype.getConfiguration = function(mainConfig) {
 
 	var language=__dirname+"/i18n/"+mainConfig.locale+".json";
-	if(!fs.existsSync(language))
+	if(!libFsExtra.existsSync(language))
 	{
 		language=__dirname+"/i18n/EN.json";
 	}
 
-	var languageJSON=fs.readJsonSync(language);
+	var languageJSON=libFsExtra.readJsonSync(language);
 
-	var config=fs.readJsonSync(__dirname+'/config.json');
+	var config=libFsExtra.readJsonSync(__dirname+'/config.json');
 	var uiConfig={};
 
 	for(var key in config)
@@ -420,7 +413,7 @@ ControllerMpd.prototype.setConfiguration = function(configuration) {
 
 ControllerMpd.prototype.fswatch = function () {
 	var self = this;
-	var watcher = chokidar.watch('/mnt/', {ignored: /^\./, persistent: true, interval: 100, ignoreInitial: true});
+	var watcher = libChokidar.watch('/mnt/', {ignored: /^\./, persistent: true, interval: 100, ignoreInitial: true});
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::StartedWatchService');
 	watcher
 		.on('add', function (path) {

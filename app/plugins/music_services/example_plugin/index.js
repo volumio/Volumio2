@@ -15,11 +15,6 @@ ExamplePlugin.prototype.onVolumioStart = function() {
 	//Perform startup tasks here
 }
 
-ExamplePlugin.prototype.onStart = function() {
-    var self = this;
-    //Perform startup tasks here
-}
-
 ExamplePlugin.prototype.onStop = function() {
     var self = this;
     //Perform startup tasks here

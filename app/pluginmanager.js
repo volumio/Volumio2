@@ -1,26 +1,39 @@
 /**
  * Created by massi on 27/07/15.
  */
-var fs=require('fs-extra');
+var fs = require('fs-extra');
 
 module.exports = PluginManager;
-function PluginManager (ccommand) {
+function PluginManager (ccommand, server) {
     var self = this;
 
-    self['plugins']={};
-    self.config=new (require(__dirname+'/lib/config.js'))();
-    self.config.loadFile(__dirname+'/plugins/plugins.json');
-    self.coreCommand=ccommand;
+    self.plugins = {};
+	self.pluginPath = __dirname+'/plugins/';
+
+    self.config = new (require(__dirname + '/lib/config.js'))();
+    self.config.loadFile(__dirname + '/plugins/plugins.json');
+    self.coreCommand = ccommand;
+	self.websocketServer = server;
 }
 
-PluginManager.prototype.loadPlugin=function(category,pluginName) {
+PluginManager.prototype.loadPlugin = function(category, pluginName) {
     var self = this;
 
-    if(self['plugins'][category]==undefined)
-        self['plugins'][category]={};
+	var objConfig = JSON.parse(fs.readFileSync(__dirname + '/plugins/' + category + '/'+pluginName+'/config.json').toString());
+    console.log('[' + Date.now() + '] Loading plugin \"' + objConfig.plugin_display_name + '\"...');
 
-    var pluginInstance=new (require(__dirname+'/plugins/'+category+'/'+pluginName+'/index.js'))(self.coreCommand);
-    self['plugins'][category][pluginName]=pluginInstance;
+    if (self.plugins[objConfig.plugin_type] == undefined)
+        self.plugins[objConfig.plugin_type] = {};
+
+	var pluginInstance = null;
+    if (objConfig.plugin_name === 'websocket') {
+		// TODO this is a hack to get the websocket server to connect. Need a more permanent solution
+		pluginInstance = new (require(__dirname + '/plugins/' + category + '/'+pluginName+'/index.js'))(self.coreCommand, self.websocketServer);
+	} else {
+		pluginInstance = new (require(__dirname + '/plugins/' + category + '/'+pluginName+'/index.js'))(self.coreCommand);
+	}
+
+    self.plugins[objConfig.plugin_type][objConfig.plugin_name] = pluginInstance;
 }
 
 
@@ -28,37 +41,32 @@ PluginManager.prototype.loadPlugins=function()
 {
     var self = this;
 
-    var pluginsFolder=fs.readdirSync(__dirname+'/plugins');
+    var pluginsFolder=fs.readdirSync(self.pluginPath);
     for(var i in pluginsFolder)
     {
-        var category=pluginsFolder[i];
-        var dirPath=__dirname+'/plugins/'+category;
+        var folder=pluginsFolder[i];
+        var dirPath=__dirname+'/plugins/'+folder;
 
         var stats=fs.statSync(dirPath);
         if(stats.isDirectory())
         {
-            console.log('[' + Date.now() + '] Processing plugin category '+category);
 
-            var categoryFolder=fs.readdirSync(dirPath);
-            for(var j in categoryFolder)
+            var folderContents=fs.readdirSync(dirPath);
+            for(var j in folderContents)
             {
-                var pluginName=categoryFolder[j];
-
-                var configForPlugin=self.config.get(category+'.'+pluginName+'.enabled');
+                var subfolder=folderContents[j];
+                var configForPlugin=self.config.get(folder+'.'+subfolder+'.enabled');
 
                 var shallStartup=configForPlugin!=undefined && configForPlugin==true;
                 if(shallStartup==true)
                 {
-                    console.log('[' + Date.now() + '] Initializing plugin '+pluginName);
-                    self.loadPlugin(category,pluginName);
-                }
+                    self.loadPlugin(folder,subfolder);
+                }/*
                 else
                 {
-                    console.log('[' + Date.now() + '] Plugin '+pluginName+' is not enabled.');
-
-                    self.config.addConfigValue(category+'.'+pluginName+'.enabled','boolean',false);
-                    self.config.addConfigValue(category+'.'+pluginName+'.status','string',"STOPPED");
-                }
+                    self.config.addConfigValue(folder+'.'+subfolder+'.enabled','boolean',false);
+                    self.config.addConfigValue(folder+'.'+subfolder+'.status','string',"STOPPED");
+                }*/
 
             }
         }
@@ -147,26 +155,18 @@ PluginManager.prototype.getPluginCategories=function()
 {
     var self=this;
 
-    var array=[];
-    for(var i in self['plugins'])
-        array.push(i);
-
-
-    return array;
+	return Object.keys(self.plugins);
 }
 
 PluginManager.prototype.getPluginNames=function(category)
 {
     var self=this;
 
-    if(self['plugins'][category]!=undefined)
-    {
-        var array=[];
-        for(var i in self['plugins'][category])
-            array.push(i);
-
-        return array;
-    }
+    if(category in self.plugins) {
+		return Object.keys(self.plugins[category]);
+	} else {
+		return [];
+	}
 }
 
 PluginManager.prototype.onVolumioStart=function()
@@ -191,6 +191,6 @@ PluginManager.prototype.getPlugin=function(category,name)
 {
     var self=this;
 
-    if(self['plugins'][category]!=undefined)
-        return self['plugins'][category][name];
+    if(self.plugins[category]!=undefined)
+        return self.plugins[category][name];
 }

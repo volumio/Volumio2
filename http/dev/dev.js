@@ -8,23 +8,23 @@ var nLibraryHistoryPosition = 0;
 var nPlaylistHistoryPosition = 0;
 
 // Define button actions --------------------------------------------
-document.getElementById('button-volumioplay').onclick = function() {emitPlayerCommand('play', '');}
-document.getElementById('button-volumiopause').onclick = function() {emitPlayerCommand('pause', '');}
-document.getElementById('button-volumiostop').onclick = function() {emitPlayerCommand('stop', '');}
-document.getElementById('button-volumioprev').onclick = function() {emitPlayerCommand('previous', '');}
-document.getElementById('button-volumionext').onclick = function() {emitPlayerCommand('next', '');}
-document.getElementById('button-spopupdatetracklist').onclick = function() {emitServiceCommand('updateTracklist', 'spop');}
-document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitPlayerCommand('rebuildLibrary', '');}
+document.getElementById('button-volumioplay').onclick = function() {emitEvent('volumioPlay', '');}
+document.getElementById('button-volumiopause').onclick = function() {emitEvent('volumioPause', '');}
+document.getElementById('button-volumiostop').onclick = function() {emitEvent('volumioStop', '');}
+document.getElementById('button-volumioprev').onclick = function() {emitEvent('volumioPrevious', '');}
+document.getElementById('button-volumionext').onclick = function() {emitEvent('volumioNext', '');}
+document.getElementById('button-spopupdatetracklist').onclick = function() {emitEvent('serviceUpdateTracklist', 'spop');}
+document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitEvent('volumioRebuildLibrary', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
 document.getElementById('button-libraryback').onclick = libraryBack;
 document.getElementById('button-libraryforward').onclick = libraryForward;
 document.getElementById('button-playlistback').onclick = playlistBack;
 document.getElementById('button-playlistforward').onclick = playlistForward;
-document.getElementById('button-volumeup').onclick = function() {emitPlayerCommand('volume', '+');}
-document.getElementById('button-volumedown').onclick = function() {emitPlayerCommand('volume', '-');}
-document.getElementById('button-volumemute').onclick = function() {emitPlayerCommand('volume', 'mute');}
-document.getElementById('button-volumeunmute').onclick = function() {emitPlayerCommand('volume', 'unmute');}
-document.getElementById('button-volumioimportplaylists').onclick = function() {emitPlayerCommand('importServicePlaylists', '');}
+document.getElementById('button-volumeup').onclick = function() {emitEvent('volume', '+');}
+document.getElementById('button-volumedown').onclick = function() {emitEvent('volume', '-');}
+document.getElementById('button-volumemute').onclick = function() {emitEvent('volume', 'mute');}
+document.getElementById('button-volumeunmute').onclick = function() {emitEvent('volume', 'unmute');}
+document.getElementById('button-volumioimportplaylists').onclick = function() {emitEvent('volumioImportServicePlaylists', '');}
 
 // Socket.io form
 var input1 = document.getElementById('form-ws-1');
@@ -46,15 +46,15 @@ socket.on('connect', function() {
 	updateLibraryHistoryButtons();
 
 	// Get the state upon load
-	emitPlayerCommand('getState', '');
+	emitEvent('volumioGetState', '');
 
 	// Get the play queue
-	emitPlayerCommand('getQueue', '');
+	emitEvent('volumioGetQueue', '');
 
 	// Request the music library root
-	emitPlayerCommand('getLibraryIndex', 'root');
+	emitEvent('volumioGetLibraryIndex', 'root');
 
-	emitPlayerCommand('getPlaylistIndex', 'root');
+	emitEvent('volumioGetPlaylistIndex', 'root');
 });
 
 socket.on('disconnect', function() {
@@ -321,13 +321,13 @@ function updateBrowseView(objBrowseData) {
 
 function linkGetLibraryListing(objBrowseParameters) {
 	return function() {
-		emitPlayerCommand('getLibraryListing', objBrowseParameters);
+		emitEvent('volumioGetLibraryListing', objBrowseParameters);
 	}
 }
 
 function linkGetLibraryIndex(sUid) {
 	return function() {
-		emitPlayerCommand('getLibraryIndex', sUid);
+		emitEvent('volumioGetLibraryIndex', sUid);
 	}
 }
 
@@ -368,19 +368,19 @@ function updatePlaylistView(objPlaylistData) {
 
 function linkGetPlaylistIndex(sUid) {
 	return function() {
-		emitPlayerCommand('getPlaylistIndex', sUid);
+		emitEvent('volumioGetPlaylistIndex', sUid);
 	}
 }
 
 function addQueueUids(arrayUids) {
 	return function() {
-		emitPlayerCommand('addQueueUids', arrayUids);
+		emitEvent('volumioAddQueueUids', arrayUids);
 	}
 }
 
 function removeQueueItem(nIndex) {
 	return function() {
-		emitPlayerCommand('removeQueueItem', nIndex);
+		emitEvent('volumioRemoveQueueItem', nIndex);
 	}
 }
 

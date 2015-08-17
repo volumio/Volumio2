@@ -1,4 +1,7 @@
 {
+  "plugin_type": "audio_interface",
+  "plugin_name": "upnp",
+  "plugin_display_name": "UPnP Interface",
   "mpdport":{"modifiable":false,"value":"6600","type":"int"},
   "upnpav":{"modifiable":false,"value":"false","type":"boolean"},
   "openhome":{"modifiable":false,"value":"true","type":"boolean"},

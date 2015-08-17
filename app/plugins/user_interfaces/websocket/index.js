@@ -5,7 +5,7 @@ var libFast = require('fast.js');
  * @type {InterfaceWebUI}
  */
 module.exports = InterfaceWebUI;
-function InterfaceWebUI (server, commandRouter) {
+function InterfaceWebUI (commandRouter, server) {
 	var self = this;
 	self.commandRouter = commandRouter;
 
@@ -39,7 +39,7 @@ function InterfaceWebUI (server, commandRouter) {
 			self.logStart('Client requests Volumio state')
 				.then(libFast.bind(commandRouter.volumioGetState, commandRouter))
 				.then(function (state) {
-					return self.volumioPushState.call(self, state, selfConnWebSocket);
+					return self.pushState.call(self, state, selfConnWebSocket);
 				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
@@ -56,7 +56,7 @@ function InterfaceWebUI (server, commandRouter) {
 			self.logStart('Client requests Volumio queue')
 				.then(libFast.bind(commandRouter.volumioGetQueue, commandRouter))
 				.then(function (queue) {
-					return self.volumioPushQueue.call(self, queue, selfConnWebSocket);
+					return self.pushQueue.call(self, queue, selfConnWebSocket);
 				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
@@ -98,17 +98,59 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('volumioBrowseLibrary', function (objBrowseParameters) {
+		connWebSocket.on('volumioGetLibraryListing', function (objParams) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
-			self.logStart('Client requests browse')
+			self.logStart('Client requests get library listing')
 				.then(function () {
-					return commandRouter.volumioBrowseLibrary.call(commandRouter, objBrowseParameters);
+					return commandRouter.volumioGetLibraryListing.call(commandRouter, objParams.uid, objParams.options);
 				})
 				.then(function (objBrowseData) {
 					if (objBrowseData) {
-						return self.volumioPushBrowseData.call(self, objBrowseData, selfConnWebSocket);
+						return self.pushLibraryListing.call(self, objBrowseData, selfConnWebSocket);
+					}
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('volumioGetLibraryIndex', function (sUid) {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests get library index')
+				.then(function () {
+					return commandRouter.volumioGetLibraryIndex.call(commandRouter, sUid);
+				})
+				.then(function (objBrowseData) {
+					if (objBrowseData) {
+						return self.pushLibraryIndex.call(self, objBrowseData, selfConnWebSocket);
+					}
+				})
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('volumioGetPlaylistIndex', function (sUid) {
+			selfConnWebSocket = this;
+
+			var timeStart = Date.now();
+			self.logStart('Client requests get playlist index')
+				.then(function () {
+					return commandRouter.volumioGetPlaylistIndex.call(commandRouter, sUid);
+				})
+				.then(function (objBrowseData) {
+					if (objBrowseData) {
+						return self.pushPlaylistIndex.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})
 				.fail(function (error) {
@@ -179,10 +221,12 @@ function InterfaceWebUI (server, commandRouter) {
 				});
 		});
 
-		connWebSocket.on('spopUpdateTracklist', function () {
+		connWebSocket.on('serviceUpdateTracklist', function (sService) {
 			var timeStart = Date.now();
-			self.logStart('Client requests Spop Update Tracklist')
-				.then(libFast.bind(commandRouter.spopUpdateTracklist, commandRouter))
+			self.logStart('Client requests Update Tracklist')
+				.then(function() {
+					self.commandRouter.serviceUpdateTracklist.call(commandRouter, sService);
+				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
 				})
@@ -373,4 +417,16 @@ InterfaceWebUI.prototype.pushMultiroomDevices = function(msg) {
 	var self = this;
 
 	self.libSocketIO.emit('pushMultiRoomDevices', msg);
+}
+
+InterfaceWebUI.prototype.logDone = function(timeStart) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+	return libQ.resolve();
+}
+
+InterfaceWebUI.prototype.logStart = function(sCommand) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+	return libQ.resolve();
 }

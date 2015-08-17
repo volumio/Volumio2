@@ -31,11 +31,6 @@ ControllerSystem.prototype.onVolumioStart = function() {
 	//Perform startup tasks here
 }
 
-ControllerSystem.prototype.onStart = function() {
-	var self = this;
-	//Perform startup tasks here
-}
-
 ControllerSystem.prototype.onStop = function() {
 	var self = this;
 	//Perform startup tasks here

@@ -13,9 +13,8 @@ function UpnpInterface(commandRouter) {
 	var self = this;
     // Save a reference to the parent commandRouter
     self.commandRouter = commandRouter;
+
 }
-
-
 
 UpnpInterface.prototype.onVolumioStart = function() {
     var self = this;
@@ -28,11 +27,6 @@ UpnpInterface.prototype.onVolumioStart = function() {
             self.commandRouter.pushConsoleMessage('Upmpdcli Daemon Started');
         }
     });
-}
-
-UpnpInterface.prototype.onStart = function() {
-    var self = this;
-    //Perform startup tasks here
 }
 
 UpnpInterface.prototype.onStop = function() {
