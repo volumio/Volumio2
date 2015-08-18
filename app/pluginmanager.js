@@ -60,6 +60,7 @@ PluginManager.prototype.loadPlugins=function()
 {
     var self = this;
 
+    var priority_array=new HashMap();
 
     for(var ppaths in self.pluginPath)
     {
@@ -84,7 +85,19 @@ PluginManager.prototype.loadPlugins=function()
 
                         //loading plugin package.json
                         var pluginFolder=groupfolder+'/'+subfolder;
-                        self.loadPlugin(pluginFolder);
+
+                        var package_json=self.getPackageJson(pluginFolder);
+
+                        var boot_priority=package_json.volumio_info.boot_priority;
+                        if(boot_priority==undefined)
+                            boot_priority=100;
+
+                        var plugin_array=priority_array.get(boot_priority);
+                        if(plugin_array==undefined)
+                            plugin_array=[];
+
+                        plugin_array.push(pluginFolder);
+                        priority_array.set(boot_priority,plugin_array);
                     }
                 }
 
@@ -93,7 +106,18 @@ PluginManager.prototype.loadPlugins=function()
 
     }
 
+    for (i = 1; i < 101; i++) {
+        var plugin_array=priority_array.get(i);
+        if(plugin_array!=undefined)
+        {
+            for(var j in plugin_array)
+            {
+                var folder=plugin_array[j];
+                self.loadPlugin(folder);
+            }
+        }
 
+    }
 }
 
 PluginManager.prototype.getPackageJson=function(folder)

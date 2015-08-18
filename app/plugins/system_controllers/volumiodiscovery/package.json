@@ -9,6 +9,7 @@
   "author": "Volumio",
   "license": "ISC",
   "volumio_info": {
-    "plugin_type": "system_controller"
+    "plugin_type": "system_controller",
+    "boot_priority":4
   }
 }
