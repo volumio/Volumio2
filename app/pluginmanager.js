@@ -35,12 +35,9 @@ PluginManager.prototype.loadPlugin = function(folder) {
         console.log('[' + Date.now() + '] Loading plugin \"' + name + '\"...');
 
         var pluginInstance = null;
-        if (category=='user_interface') {
-            // TODO this is a hack to get the websocket server to connect. Need a more permanent solution
-            pluginInstance = new (require(folder+'/index.js'))(self.coreCommand, self.websocketServer);
-        } else {
-            pluginInstance = new (require(folder+'/index.js'))(self.coreCommand);
-        }
+        var context=new (require(__dirname+'/pluginContext.js'))(self.coreCommand, self.websocketServer);
+
+        pluginInstance = new (require(folder+'/index.js'))(context);
 
         var pluginData={
             name:name,

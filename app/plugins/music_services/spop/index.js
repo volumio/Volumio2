@@ -7,12 +7,12 @@ var exec = require('child_process').exec;
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
-function ControllerSpop(commandRouter) {
+function ControllerSpop(context) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
-
+	self.context=context;
 	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+	self.commandRouter = self.context.coreCommand;
 
 	//getting configuration
 	var config=fs.readJsonSync(__dirname+'/config.json');

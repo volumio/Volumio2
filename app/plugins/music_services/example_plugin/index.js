@@ -1,6 +1,6 @@
 module.exports = ExamplePlugin;
 
-function ExamplePlugin(commandRouter) {
+function ExamplePlugin(context) {
 	var self = this;
 
 }

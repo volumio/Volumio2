@@ -19,15 +19,15 @@ var wireless = new Wireless({
 // Define the ControllerNetwork class
 module.exports = ControllerNetwork;
 
-function ControllerNetwork(commandRouter) {
+function ControllerNetwork(context) {
 	var self = this;
 
 	//getting configuration
 	config.loadFile(__dirname+'/config.json');
 
 	// Save a reference to the parent commandRouter
-
-	self.commandRouter = commandRouter;
+	self.context=context;
+	self.commandRouter = self.context.coreCommand;
 
 }
 

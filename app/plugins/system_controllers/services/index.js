@@ -6,11 +6,12 @@ var fs=require('fs-extra');
 // Define the ControllerServices class
 module.exports = ControllerServices;
 
-function ControllerServices(commandRouter) {
+function ControllerServices(context) {
 	var self = this;
 
 	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+	self.context=context;
+	self.commandRouter = self.context.coreCommand;
 }
 
 ControllerServices.prototype.onVolumioStart = function() {

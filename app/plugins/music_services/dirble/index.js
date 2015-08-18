@@ -1,6 +1,6 @@
 module.exports = DirBle;
 
-function DirBle(commandRouter) {
+function DirBle(context) {
 	var self = this;
 
 }

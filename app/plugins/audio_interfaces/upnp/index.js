@@ -9,10 +9,10 @@ var exec = require('child_process').exec;
 module.exports = UpnpInterface;
 
 
-function UpnpInterface(commandRouter) {
+function UpnpInterface(context) {
 	var self = this;
     // Save a reference to the parent commandRouter
-    self.commandRouter = commandRouter;
+    self.context = context;
 
 }
 
@@ -21,10 +21,10 @@ UpnpInterface.prototype.onVolumioStart = function() {
     //TODO Launch upmpdcli with name as system wide variable
     exec("upmpdcli -c /volumio/app/plugins/audio_interfaces/upnp_interface/upmpdcli.conf -f 'Volumio'", function (error, stdout, stderr) {
         if (error !== null) {
-            self.commandRouter.pushConsoleMessage('Upmpcli error: ' + error);
+            self.context.coreCommand.pushConsoleMessage('Upmpcli error: ' + error);
         }
         else {
-            self.commandRouter.pushConsoleMessage('Upmpdcli Daemon Started');
+            self.context.coreCommand.pushConsoleMessage('Upmpdcli Daemon Started');
         }
     });
 }

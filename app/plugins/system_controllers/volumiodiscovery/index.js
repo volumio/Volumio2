@@ -8,14 +8,15 @@ var mdns=require('mdns');
 // Define the ControllerVolumioDiscovery class
 module.exports = ControllerVolumioDiscovery;
 
-function ControllerVolumioDiscovery(commandRouter) {
+function ControllerVolumioDiscovery(context) {
 	var self = this;
 
 	//getting configuration
 	config.loadFile(__dirname+'/config.json');
 
 	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+	self.context=context;
+	self.commandRouter = self.context.coreCommand;
 }
 
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {

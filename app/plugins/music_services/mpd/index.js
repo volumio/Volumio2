@@ -7,9 +7,10 @@ var libChokidar = require('chokidar');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
-function ControllerMpd(commandRouter) {
+function ControllerMpd(context) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
+	self.context=context;
 
 	//getting configuration
 	var config=libFsExtra.readJsonSync(__dirname+'/config.json');
@@ -17,7 +18,7 @@ function ControllerMpd(commandRouter) {
 	var nPort=config['nPort'].value;
 
 	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+	self.commandRouter = self.context.coreCommand;
 
 	// Connect to MPD
 	self.clientMpd = libMpd.connect({port: nPort, host: nHost});

@@ -8,7 +8,7 @@ var config=new (require(__dirname+'/../../../lib/config.js'))();
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
 
-function ControllerSystem(commandRouter) {
+function ControllerSystem(context) {
 	var self = this;
 
 	//getting configuration
@@ -23,7 +23,8 @@ function ControllerSystem(commandRouter) {
 	}
 
 	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+	self.context=context;
+	self.commandRouter = self.context.coreCommand;
 }
 
 ControllerSystem.prototype.onVolumioStart = function() {
@@ -139,7 +140,6 @@ ControllerSystem.prototype.saveSoundQuality = function(data)
 
 	var defer = libQ.defer();
 
-	console.log(data);
 	var kernel_profile_value=data['kernel_profile'].value;
 	var kernel_profile_label=data['kernel_profile'].label;
 
