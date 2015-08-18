@@ -37,12 +37,6 @@ git clone https://github.com/volumio/Volumio2.git volumio
 cd volumio
 ```
 
-Now include the [static UI](https://github.com/volumio/Volumio2-UI/) from its repo:
-```
-git submodule init
-git submodule update
-```
-
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
