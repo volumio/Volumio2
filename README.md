@@ -33,23 +33,19 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 Clone the repo in the directory of your choice (default: /volumio)
 
 ```shell
-git clone https://github.com/volumio/Volumio2.git volumio/
+git clone https://github.com/volumio/Volumio2.git volumio
+cd volumio
+```
+
+Now include the [static UI](https://github.com/volumio/Volumio2-UI/) from its repo:
+```
+git submodule init
 ```
 
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell
-cd volumio/
 npm install
-```
-
-Now, download the static UI from its repo (temporary fix, untile we find an automated procedure)
-
-All other dependecies are in the package JSON, from the working directory just run
-
-```shell
-cd /volumio
-svn checkout https://github.com/volumio/Volumio2-UI/trunk/dist http/www
 ```
 
 You can run all the servers in one single step just running with nodejs
