@@ -67,7 +67,7 @@
     "mpdemulation": {
       "enabled": {
         "type": "boolean",
-        "value": true
+        "value": false
       },
       "status": {
         "type": "string",
