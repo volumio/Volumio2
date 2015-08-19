@@ -12,6 +12,10 @@ function ControllerMpd(context) {
 	var self = this;
 	self.context=context;
 
+	// TODO use names from the package.json instead
+	self.servicename = 'mpd';
+	self.displayname = 'MPD';
+
 	//getting configuration
 	var config=libFsExtra.readJsonSync(__dirname+'/config.json');
 	var nHost=config['nHost'].value;
@@ -122,6 +126,8 @@ ControllerMpd.prototype.getTracklist = function() {
 // Parses the info out of the 'listallinfo' MPD command
 // Metadata fields to roughly conform to Ogg Vorbis standards (http://xiph.org/vorbis/doc/v-comment.html)
 ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
+	var self = this;
+
 	var arrayLines = sInput.split('\n');
 	var objReturn = {};
 	var curEntry = {}
@@ -139,7 +145,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 				'name': '',
 				'service': self.servicename,
 				'uri': arrayLineParts[1],
-				'browsepath': arrayLineParts[1].split('/').slice(0, -1).unshift(self.displayname),
+				'browsepath': [self.displayname].concat(arrayLineParts[1].split('/').slice(0, -1)),
 				'artists': [],
 				'album': '',
 				'genres': [],

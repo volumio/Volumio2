@@ -11,6 +11,11 @@ function ControllerSpop(context) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 	self.context=context;
+
+	// TODO use names from the package.json instead
+	self.servicename = 'spop';
+	self.displayname = 'Spotify';
+
 	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
 

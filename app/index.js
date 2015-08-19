@@ -130,9 +130,9 @@ CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 }
 
 // Volumio Get Library Index
-CoreCommandRouter.prototype.volumioGetLibraryIndex = function(sUid) {
+CoreCommandRouter.prototype.volumioGetLibraryFilters = function(sUid) {
 	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryIndex');
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioGetLibraryFilters');
 
 	return self.musicLibrary.getIndex(sUid);
 }
@@ -269,7 +269,7 @@ CoreCommandRouter.prototype.getAllTracklists = function() {
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'music_service'), function(sService) {
 			var thisService = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-			return thisService.getTracklist.call(thisInterface);
+			return thisService.getTracklist.call(thisService);
 		})
 	);
 }
@@ -309,9 +309,9 @@ CoreCommandRouter.prototype.getConfiguration=function(componentCode)
 
 CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 	var self = this;
-
+console.log(sMessage);
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames('user_interface'), function(sInterface) {
+		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
 			if( typeof thisInterface.printConsoleMessage === "function")
 			return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
@@ -323,7 +323,7 @@ CoreCommandRouter.prototype.pushToastMessage = function(type, title, message) {
 	var self = this;
 
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames('user_interface'), function(sInterface) {
+		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
 			if (typeof thisInterface.printToastMessage === "function")
 				return thisInterface.printToastMessage.call(thisInterface, type, title, message);
@@ -336,7 +336,7 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 	var self=this;
 
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames('user_interface'), function(sInterface) {
+		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
 			if (typeof thisInterface.pushMultiroomDevices === "function" )
 				return thisInterface.pushMultiroomDevices.call(thisInterface, data);

@@ -33,7 +33,7 @@ function InterfaceWebUI (context) {
 		 * @mute if true, Volumio is muted
 		 * @service current playback service (mpd, spop...)
 		 */
-		connWebSocket.on('volumioGetState', function () {
+		connWebSocket.on('getState', function () {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -50,7 +50,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioGetQueue', function () {
+		connWebSocket.on('getQueue', function () {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -67,7 +67,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioRemoveQueueItem', function (nIndex) {
+		connWebSocket.on('removeQueueItem', function (nIndex) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -83,7 +83,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioAddQueueUids', function (arrayUids) {
+		connWebSocket.on('addQueueUids', function (arrayUids) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -99,7 +99,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioGetLibraryListing', function (objParams) {
+		connWebSocket.on('getLibraryListing', function (objParams) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -120,17 +120,17 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioGetLibraryIndex', function (sUid) {
+		connWebSocket.on('getLibraryFilters', function (sUid) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
 			self.logStart('Client requests get library index')
 				.then(function () {
-					return self.commandRouter.volumioGetLibraryIndex.call(self.commandRouter, sUid);
+					return self.commandRouter.volumioGetLibraryFilters.call(self.commandRouter, sUid);
 				})
 				.then(function (objBrowseData) {
 					if (objBrowseData) {
-						return self.pushLibraryIndex.call(self, objBrowseData, selfConnWebSocket);
+						return self.pushLibraryFilters.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})
 				.fail(function (error) {
@@ -141,7 +141,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioGetPlaylistIndex', function (sUid) {
+		connWebSocket.on('getPlaylistIndex', function (sUid) {
 			selfConnWebSocket = this;
 
 			var timeStart = Date.now();
@@ -162,7 +162,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioPlay', function () {
+		connWebSocket.on('play', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio play')
 				.then(libFast.bind(self.commandRouter.volumioPlay, self.commandRouter))
@@ -174,7 +174,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioPause', function () {
+		connWebSocket.on('pause', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio pause')
 				.then(libFast.bind(self.commandRouter.volumioPause, self.commandRouter))
@@ -186,7 +186,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioStop', function () {
+		connWebSocket.on('stop', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio stop')
 				.then(libFast.bind(self.commandRouter.volumioStop, self.commandRouter))
@@ -198,7 +198,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioPrevious', function () {
+		connWebSocket.on('previous', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio previous')
 				.then(libFast.bind(self.commandRouter.volumioPrevious, self.commandRouter))
@@ -210,7 +210,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioNext', function () {
+		connWebSocket.on('next', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio next')
 				.then(libFast.bind(self.commandRouter.volumioNext, self.commandRouter))
@@ -226,7 +226,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Update Tracklist')
 				.then(function() {
-					self.commandRouter.serviceUpdateTracklist.call(commandRouter, sService);
+					self.commandRouter.serviceUpdateTracklist.call(self.commandRouter, sService);
 				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
@@ -236,7 +236,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioRebuildLibrary', function () {
+		connWebSocket.on('rebuildLibrary', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio Rebuild Library')
 				.then(libFast.bind(self.commandRouter.volumioRebuildLibrary, self.commandRouter))
@@ -264,7 +264,7 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('volumioImportServicePlaylists', function () {
+		connWebSocket.on('importServicePlaylists', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests import of playlists')
 				.then(libFast.bind(self.commandRouter.volumioImportServicePlaylists, self.commandRouter))
@@ -358,13 +358,13 @@ InterfaceWebUI.prototype.pushQueue = function(queue, connWebSocket) {
 }
 
 // Push the library root
-InterfaceWebUI.prototype.pushLibraryIndex = function(browsedata, connWebSocket) {
+InterfaceWebUI.prototype.pushLibraryFilters = function(browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryIndex');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryFilters');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
-		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushLibraryIndex', browsedata);
+		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushLibraryFilters', browsedata);
 	}
 }
 
