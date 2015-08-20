@@ -39,6 +39,9 @@ PluginManager.prototype.loadPlugin = function(folder) {
 
         pluginInstance = new (require(folder+'/index.js'))(context);
 
+        if(pluginInstance.onVolumioStart !=undefined)
+            pluginInstance.onVolumioStart();
+
         var pluginData={
             name:name,
             category:category,

@@ -22,28 +22,93 @@ function ControllerVolumioDiscovery(context) {
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
 
-	var systemController=self.commandRouter.pluginManager.getPlugin('system_controller','system');
-	var name=systemController.getConf('playerName');
-	var uuid=systemController.getConf('uuid');;
+	self.startMDNSBrowse();
+	setTimeout(function()
+	{
+		self.browser.stop();
+
+		var systemController=self.commandRouter.pluginManager.getPlugin('system_controller','system');
+		var name=systemController.getConf('playerName');
+		var uuid=systemController.getConf('uuid');
+		var serviceName=config.get('service');
+		var servicePort=config.get('port');
+
+		console.log("Checking volumio instances");
+
+		console.log();
+		var newName=self.getNewName(name,0);
+
+		if(newName!=name)
+		{
+			console.log("Changing instance name to "+newName);
+			systemController.setConf('playerName',newName);
+			name=newName;
+		}
+
+		var txt_record={
+			volumioName: name,
+			UUID:uuid
+		};
+
+		console.log("Started advertising...");
+		var ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort,{name:name,txtRecord: txt_record});
+		ad.start();
+
+		self.startMDNSBrowse();
+	},5000);
+
+}
+
+ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
+{
+	var self=this;
+	var keys=foundVolumioInstances.getKeys();
+	var collides=false;
+
+	var nameToCheck;
+	if(i==0)
+		nameToCheck=curName;
+	else nameToCheck=curName+i;
+
+	console.log('Checking name '+nameToCheck);
+	for(var i in keys)
+	{
+		var key=keys[i];
+		if(nameToCheck==key)
+			collides=true;
+	}
+
+	i++;
+	if(collides==true)
+		return self.getNewName(curName,i);
+	else return nameToCheck;
+}
+
+
+ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
+{
+	var self=this;
+	console.log("Browsing for Volumio instances");
+
+
 	var serviceName=config.get('service');
 	var servicePort=config.get('port');
 
-	var txt_record={
-		volumioName: name,
-		UUID:uuid
-	};
+	//if(self.browser==undefined)
+	{
+		console.log("Creating browser");
 
-	var ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort,{txtRecord: txt_record});
-	ad.start();
+		var sequence = [
+			mdns.rst.DNSServiceResolve()
+			, mdns.rst.getaddrinfo({families: [4] })
+		];
+		self.browser = mdns.createBrowser(mdns.tcp(serviceName),{resolverSequence: sequence});
 
+	}
 
-	var sequence = [
-		mdns.rst.DNSServiceResolve()
-		, mdns.rst.getaddrinfo({families: [4] })
-	];
-	var browser = mdns.createBrowser(mdns.tcp(serviceName),{resolverSequence: sequence});
+	self.browser.on('serviceUp', function(service) {
 
-	browser.on('serviceUp', function(service) {
+		//console.log(service);
 		if(foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
 		{
 			console.log("mDNS: Found device "+service.txtRecord.volumioName);
@@ -57,7 +122,8 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 			self.commandRouter.pushMultiroomDevices(toAdvertise);
 		}
 	});
-	browser.on('serviceDown', function(service) {
+	self.browser.on('serviceDown', function(service) {
+		//console.log(service);
 		var keys=foundVolumioInstances.getKeys();
 
 		for(var i in keys)
@@ -73,8 +139,11 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 		self.commandRouter.pushMultiroomDevices(toAdvertise);
 
 	});
-	browser.start();
+	self.browser.start();
 }
+
+
+
 
 ControllerVolumioDiscovery.prototype.getDevices=function()
 {

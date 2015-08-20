@@ -13,7 +13,7 @@ function PluginContext (ccommand, server) {
 
     self.env = new HashMap();
 
-    //TODO: add environment varibles here
+    //TODO: add environment variables here
 }
 
 PluginContext.prototype.getEnvVariable=function(key)

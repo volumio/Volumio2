@@ -11,7 +11,7 @@ function CoreCommandRouter (server) {
 	// Start plugins
 	self.pluginManager = new (require(__dirname+'/pluginmanager.js'))(self, server);
 	self.pluginManager.loadPlugins();
-	self.pluginManager.onVolumioStart();
+	//self.pluginManager.onVolumioStart();
 	//self.pluginManager.startPlugins();
 
 	// Start the state machine
@@ -25,6 +25,9 @@ function CoreCommandRouter (server) {
 
 	// Start the playlist FS
 	self.playlistFS = new (require('./playlistfs.js'))(self);
+
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'BOOT COMPLETED');
+
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
