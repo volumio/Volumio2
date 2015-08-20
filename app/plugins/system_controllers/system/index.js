@@ -3,7 +3,7 @@ var libNet = require('net');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
 var config=new (require(__dirname+'/../../../lib/config.js'))();
-
+var exec = require('child_process').exec;
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -129,7 +129,7 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 	config.set('startupSound',startup_sound);
 
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
-
+	self.setHostname(playerName);
 	defer.resolve({});
 	return defer.promise;
 }
@@ -178,4 +178,30 @@ ControllerSystem.prototype.getData = function(data,key)
 	}
 
 	return null;
+}
+ControllerSystem.prototype.setHostname = function(hostname) {
+	var newhostname = hostname.toLowerCase();
+
+	exec("hostnamectl set-hostname " + newhostname, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log(error);
+		}
+		else {
+			fs.writeFile('/etc/hosts', '127.0.0.1       localhost ' + newhostname, function (err) {
+				if (err) {
+					throw err;
+				}
+				else {
+					exec("hostnamectl set-hostname " + newhostname, function (error, stdout, stderr) {
+						if (error !== null) {
+							console.log(error);
+						}
+						else {
+							console.log('Hostname now is ' + newhostname);
+						}
+					});
+				}
+			});
+		}
+	});
 }
