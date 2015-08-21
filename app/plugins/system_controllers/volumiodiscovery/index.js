@@ -22,40 +22,50 @@ function ControllerVolumioDiscovery(context) {
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
 
-	self.startMDNSBrowse();
-	setTimeout(function()
+
+
+	var systemController=self.commandRouter.pluginManager.getPlugin('system_controller','system');
+	var name=systemController.getConf('playerName');
+	var uuid=systemController.getConf('uuid');
+	var serviceName=config.get('service');
+	var servicePort=config.get('port');
+
+	//self.startMDNSBrowse();
+	/*setTimeout(function()
 	{
 		self.browser.stop();
 
-		var systemController=self.commandRouter.pluginManager.getPlugin('system_controller','system');
-		var name=systemController.getConf('playerName');
-		var uuid=systemController.getConf('uuid');
-		var serviceName=config.get('service');
-		var servicePort=config.get('port');
 
-		console.log("Checking volumio instances");
+		self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Checking volumio instances over network for name collision');
 
-		console.log();
 		var newName=self.getNewName(name,0);
 
 		if(newName!=name)
 		{
-			console.log("Changing instance name to "+newName);
+			self.context.coreCommand.pushConsoleMessage("Changing this instance name to "+newName);
 			systemController.setConf('playerName',newName);
 			name=newName;
-		}
+		}*/
 
 		var txt_record={
 			volumioName: name,
 			UUID:uuid
 		};
 
-		console.log("Started advertising...");
-		var ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort,{name:name,txtRecord: txt_record});
+		self.context.coreCommand.pushConsoleMessage("Started advertising...");
+		var ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort,{txtRecord: txt_record},function(error, service)
+		{
+			if(service.name!=name)
+			{
+				self.context.coreCommand.pushConsoleMessage('Changing my name to '+service.name);
+				systemController.setConf('playerName',service.name);
+			}
+
+		});
 		ad.start();
 
 		self.startMDNSBrowse();
-	},5000);
+	//},5000);
 
 }
 
@@ -70,17 +80,20 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 		nameToCheck=curName;
 	else nameToCheck=curName+i;
 
-	console.log('Checking name '+nameToCheck);
-	for(var i in keys)
+	console.log(keys);
+	for(var k in keys)
 	{
-		var key=keys[i];
-		if(nameToCheck==key)
+		var key=keys[k];
+		var ithName=foundVolumioInstances.get(key+'.name');
+
+		console.log("Checking name "+ithName+' against '+nameToCheck);
+		if(ithName==nameToCheck)
 			collides=true;
 	}
 
-	i++;
+	var newi=parseInt(i+1);
 	if(collides==true)
-		return self.getNewName(curName,i);
+		return self.getNewName(curName,newi);
 	else return nameToCheck;
 }
 
@@ -88,35 +101,26 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 {
 	var self=this;
-	console.log("Browsing for Volumio instances");
-
-
 	var serviceName=config.get('service');
 	var servicePort=config.get('port');
 
-	//if(self.browser==undefined)
-	{
-		console.log("Creating browser");
-
-		var sequence = [
+	var sequence = [
 			mdns.rst.DNSServiceResolve()
 			, mdns.rst.getaddrinfo({families: [4] })
 		];
 		self.browser = mdns.createBrowser(mdns.tcp(serviceName),{resolverSequence: sequence});
 
-	}
 
 	self.browser.on('serviceUp', function(service) {
 
 		//console.log(service);
 		if(foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
 		{
-			console.log("mDNS: Found device "+service.txtRecord.volumioName);
-			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.UUID',"string",service.txtRecord.UUID);
-			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.addresses',"array",service.addresses);
-			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.port',"string",service.port);
-
-			foundVolumioInstances.addConfigValue(service.txtRecord.volumioName+'.osname',"string",service.name);
+			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Found device '+service.txtRecord.volumioName);
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.addresses',"array",service.addresses);
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.port',"string",service.port);
+			//foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.osname',"string",service.name);
 
 			var toAdvertise=self.getDevices();
 			self.commandRouter.pushMultiroomDevices(toAdvertise);
@@ -129,10 +133,13 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 		for(var i in keys)
 		{
 			var key=keys[i];
-			var osname=foundVolumioInstances.get(key+'.osname');
+			var osname=foundVolumioInstances.get(key);
 
 			if(osname==service.name)
+			{
+				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Device '+service.name+' disapperared from network');
 				foundVolumioInstances.delete(key);
+			}
 		}
 
 		var toAdvertise=self.getDevices();
@@ -159,9 +166,9 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 	{
 		var key=keys[i];
 
-		var osname=foundVolumioInstances.get(key+'.osname');
+		var osname=foundVolumioInstances.get(key+'.name');
 		var port=foundVolumioInstances.get(key+'.port');
-		var uuid=foundVolumioInstances.get(key+'.UUID');
+		var uuid=foundVolumioInstances.get(key);
 
 
 		var addresses=foundVolumioInstances.get(key+'.addresses');
