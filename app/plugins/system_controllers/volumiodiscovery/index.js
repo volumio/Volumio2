@@ -59,6 +59,21 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 			{
 				self.context.coreCommand.pushConsoleMessage('Changing my name to '+service.name);
 				systemController.setConf('playerName',service.name);
+
+				ad.stop();
+				txt_record.volumioName=service.name;
+				setTimeout(
+					function()
+					{
+						mdns.createAdvertisement(mdns.tcp(serviceName), servicePort,{txtRecord: txt_record},function(error, service){
+							console.log(error);
+						});
+
+						foundVolumioInstances.print();
+					},
+					5000
+				);
+
 			}
 
 		});
@@ -80,13 +95,13 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 		nameToCheck=curName;
 	else nameToCheck=curName+i;
 
-	console.log(keys);
+	self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] '+keys);
 	for(var k in keys)
 	{
 		var key=keys[k];
 		var ithName=foundVolumioInstances.get(key+'.name');
 
-		console.log("Checking name "+ithName+' against '+nameToCheck);
+		self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Checking name '+ithName+' against '+nameToCheck);
 		if(ithName==nameToCheck)
 			collides=true;
 	}
@@ -113,7 +128,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 
 	self.browser.on('serviceUp', function(service) {
 
-		//console.log(service);
+		console.log(service);
 		if(foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
 		{
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Found device '+service.txtRecord.volumioName);
