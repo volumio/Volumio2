@@ -167,7 +167,9 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 }
 
 
-
+String.prototype.capitalize = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+}
 
 ControllerVolumioDiscovery.prototype.getDevices=function()
 {
@@ -196,7 +198,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 			var device={
 				id:uuid,
 				host:'http://'+address+":"+port,
-				name:key,
+				name:osname.capitalize(),
 				state: {
 					status: 'play',
 					volume: 90,
