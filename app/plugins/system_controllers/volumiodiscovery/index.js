@@ -150,7 +150,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 		for(var i in keys)
 		{
 			var key=keys[i];
-			var osname=foundVolumioInstances.get(key);
+			var osname=foundVolumioInstances.get(key+'.name');
 
 			if(osname==service.name)
 			{
