@@ -69,7 +69,7 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 							console.log(error);
 						});
 
-						foundVolumioInstances.print();
+
 					},
 					5000
 				);
@@ -128,8 +128,8 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 
 	self.browser.on('serviceUp', function(service) {
 
-		console.log(service);
-		if(foundVolumioInstances.findProp(service.txtRecord.volumioName)==null)
+		//console.log(service);
+		//if(foundVolumioInstances.findProp(service.txtRecord.UUID)==null)
 		{
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Found device '+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
@@ -139,6 +139,8 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 
 			var toAdvertise=self.getDevices();
 			self.commandRouter.pushMultiroomDevices(toAdvertise);
+
+			//foundVolumioInstances.print();
 		}
 	});
 	self.browser.on('serviceDown', function(service) {
