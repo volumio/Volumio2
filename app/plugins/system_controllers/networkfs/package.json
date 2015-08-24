@@ -1,0 +1,15 @@
+{
+  "name": "networkFS",
+  "version": "1.0.0",
+  "description": "Network Filesystem plugin for Volumio2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "system_controller",
+    "boot_priority":2
+  }
+}

@@ -85,6 +85,15 @@
         "type": "string",
         "value": "STARTED"
       }
+    },"networkfs": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     },"services": {
       "enabled": {
         "type": "boolean",
