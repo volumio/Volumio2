@@ -152,7 +152,8 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 				'performers': [],
 				'tracknumber': 0,
 				'date': '',
-				'duration': 0
+				'duration': 0,
+				'albumart_uri': arrayLineParts[1]
 			};
 			objReturn.tracks.push(curEntry);
 		} else if (arrayLineParts[0] === 'playlist') {

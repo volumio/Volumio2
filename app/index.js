@@ -26,6 +26,9 @@ function CoreCommandRouter (server) {
 	// Start the playlist FS
 	self.playlistFS = new (require('./playlistfs.js'))(self);
 
+	// Start metadata cache
+	self.metadataCache = new (require('./metadatacache.js'))(self, self.musicLibrary);
+
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'BOOT COMPLETED');
 
 }
@@ -285,6 +288,14 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	return self.stateMachine.addQueueItems(arrayItems);
 }
 
+CoreCommandRouter.prototype.notifyMusicLibraryUpdate = function() {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::notifyMusicLibraryUpdate');
+
+	return self.metadataCache.updateAllItems.call(self.metadataCache);
+}
+
+// Methods for generic plugin function calls --------------------------------------------------------------------------
 CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');

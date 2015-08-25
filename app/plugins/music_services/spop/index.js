@@ -336,6 +336,12 @@ ControllerSpop.prototype.getTracklist = function() {
 	});
 };
 
+ControllerSpop.prototype.getAlbumArt = function(sUri) {
+	var self = this;
+
+	return self.sendSpopCommand('uimage', [sUri, 2]);
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -500,7 +506,8 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput, 
 						'genres': [],
 						'tracknumber': 0,
 						'date': '',
-						'duration': 0
+						'duration': 0,
+						'albumart_uri': curTracklist.tracks[j].uri
 					});
 				}
 			});

@@ -13,31 +13,33 @@ var libFileSystem = require('fs');
 // This module queries external (or internal) source to fetch this metadata in the background as the
 // rest of the Volumio player continues operating. This minimizes music library build/update time.
 module.exports = CoreMetadataCache;
-function CoreMetadataCache(musicLibrary) {
+function CoreMetadataCache(commandRouter, musicLibrary) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 
 	// Save a reference to the parent musicLibrary
 	self.musicLibrary = musicLibrary;
+	self.commandRouter = commandRouter;
 
 	self.metadataCacheReadyDeferred = null;
 	self.metadataCacheReady = libQ.resolve();
 	self.metadataCache = {};
 
-	self.sMetadataCachePath = './db/metadatacache';
+	self.sMetadataCachePath = './app/db/metadatacache';
 	//self.loadMetadataCacheFromDB();
 	self.metadataCache = libLevel(self.sMetadataCachePath, {'valueEncoding': 'json', 'createIfMissing': true});
 
 	self.arrayTaskStack = [];
 	self.promisedTasks = libQ.resolve();
 
+	/*
 	libQ.nfcall(libFast.bind(dbMetadataCache.get, dbMetadataCache), 'taskstack')
 		.then(function(arrayStoredTasks) {
 			self.arrayTaskStack = self.arrayTaskStack.concat(objStoredTasks);
 		});
-
+	*/
 	self.coverArtClient = new libCoverArt({userAgent:'Volumio2'});
-	self.sAlbumArtPath = './db/albumart';
+	self.sAlbumArtPath = './app/db/albumart';
 }
 
 // External Methods --------------------------------------------------------------------------------------------------------
@@ -92,14 +94,25 @@ CoreMetadataCache.prototype.addTask = function(sTable, sKey) {
 	return self.enqueueNextTask();
 }
 
+CoreMetadataCache.prototype.updateAllItems = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMetadataCache::updateAllItems');
+
+	libFast.map(Object.keys(self.musicLibrary.library.album), function(curKey) {
+		self.addTask('album', curKey);
+	});
+
+	return libQ.resolve();
+}
+
 // Internal methods ----------------------------------------------------------------------------------------
 CoreMetadataCache.prototype.enqueueNextTask = function() {
 	var self = this;
 
-	return self.promisedTasks
+	self.promisedTasks = self.promisedTasks
 		.then(function() {
 			// Wait for both metadata cache and music library to become ready
-			return libQ.all([self.metadataCacheReady, self.musicLibrary.libraryReady]);
+			return self.metadataCacheReady;
 		})
 		.then(function() {
 			// Then process the next task
@@ -107,6 +120,7 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 			var sTable = curTask.table;
 			var sKey = curTask.key;
 			var promisedSubTasks = libQ.resolve();
+			var curLibraryObject = self.musicLibrary[sTable][sKey];
 
 			if (!(sTable in self.metadataCache)) {
 				self.metadataCache[sTable] = {};
@@ -116,7 +130,12 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 				self.metadataCache[sTable][sKey] = {};
 			}
 
+			var curObject = self.metadataCache[sTable][sKey];
+			if (!('images' in curObject)) {
+				curObject.images = {};
+			}
 			// All objects will first get their MBID (Musicbrainz ID) stored
+/*
 			var sType = self.musicLibrary.library[sTable][sKey].type;
 			var sName = self.musicLibrary.library[sTable][sKey].name;
 			if (!('mbid' in self.metadataCache[sTable][sKey])) {
@@ -128,33 +147,42 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 						self.metadataCache[sTable][sKey].mbid = sMbid;
 					})
 			}
-
+*/
 			if (sType === 'album') {
-				// Then if the object is an album, also pull album art
-				if (!('albumart' in self.metadataCache[sTable][sKey])) {
-					promisedSubTasks = promisedSubTasks
-						.then(function() {
-							return self.fetchAlbumArt(self.metadataCache[sTable][sKey].mbid, self.sAlbumArtPath);
-						})
-						.then(function(sPath) {
-							self.metadataCache[sTable][sKey].albumart = sPath;
-						});
-				}
+				libFast.map(Object.keys(curLibraryObject.imageuris), function(curService) {
+					if (!(curService in curObject.images)) {
+						var sAlbumArtUri = curLibraryObject.imageuris[curService];
+
+						promisedSubTasks = promisedSubTasks
+							.then(function() {
+								return self.fetchAlbumArt(sService, sAlbumArtUri);
+							})
+							.then(function(sPath) {
+								curObject.images[sService] = sPath;
+							});
+					}
 			}
 			// TODO - store task stack in DB here
 			return promisedSubTasks;
 		});
+
 }
 
 CoreMetadataCache.prototype.fetchMbid = function(sType, sValue) {
 	var self = this;
 
+console.log(sValue);
 	return libQ.resolve()
 		.then(function() {
+			// Remove some special characters - otherwise has been seen to result in malformed xml respose
+			var sCleanedValue = sValue.replace(new RegExp('[!./?]', 'g'), '');
+
 			if (sType === 'album') {
-				return libQ.nfcall(libMusicBrainz.searchReleases, sValue, {});
+				return libQ.nfcall(libMusicBrainz.searchReleases, sCleanedValue, {});
 			} else if (sType === 'artist') {
-				return libQ.nfcall(libMusicBrainz.searchArtists, sValue, {});
+				return libQ.nfcall(libMusicBrainz.searchArtists, sCleanedValue, {});
+			} else {
+				throw new Error('Type \"' + sType + '\" has no metadata cache actions');
 			}
 		})
 		.then(function(arrayResults) {
@@ -163,20 +191,23 @@ console.log(arrayResults[0].id);
 		})
 		.fail(function(error) {
 			// Have this clause to catch errors so the parent promise does not abort
+console.log(error);
 			return '';
 		});
 }
 
-CoreMetadataCache.prototype.fetchAlbumArt = function(sMbid, sBasePath) {
+CoreMetadataCache.prototype.fetchAlbumArt = function(sService, sAlbumArtUri, s) {
 	var self = this;
 	var bufferImage = null;
 	var sPath = '';
 
-console.log('fetching art for ' + sMbid);
-	return libQ.nfcall(libFast.bind(self.coverArtClient.release, self.coverArtClient), sMbid, {piece: 'front'})
-		.then(function(out) {
-			bufferImage = out.image;
-			sPath = sBasePath + '/' + sMbid + out.extension;
+console.log('fetching art for ' + sAlbumArtUri);
+	//return libQ.nfcall(libFast.bind(self.coverArtClient.release, self.coverArtClient), sMbid, {piece: 'front'})
+	return self.commandRouter.fetchAlbumArt.call(self.commandRouter, sService, sAlbumArtUri)
+		.then(function(objReturned) {
+			bufferImage = objReturned.image;
+			sExtension = objReturned.extension;
+			sPath = self.sAlbumArtPath + '/' + convertStringToHashkey(sService + sAlbumArtUri) + sExtension;
 console.log(sPath);
 			return libQ.nfcall(libFileSystem.open, sPath, 'w');
 		})
@@ -184,11 +215,12 @@ console.log(sPath);
 			return libQ.nfcall(libFileSystem.write, file, bufferImage, 0, 'binary');
 		})
 		.then(function(result) {
-			console.log('file written');
+console.log('file written');
 			return sPath;
 		})
 		.fail(function(error) {
 			// Have this clause to catch errors so the parent promise does not abort
+console.log(error);
 			return sPath;
 		});
 }
