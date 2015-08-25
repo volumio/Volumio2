@@ -1,8 +1,3 @@
 {
-  "eth_static":"Manual IP Configuration",
-  "ethip":"IP",
-  "ethnetmask":"Netmask",
-  "ethgateway":"Gateway",
-  "wlanssid":"Network",
-  "wlanpass":"Passphrase"
+
 }
