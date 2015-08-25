@@ -1,5 +1,5 @@
 {
-  "name": "networkFS",
+  "name": "networkfs",
   "version": "1.0.0",
   "description": "Network Filesystem plugin for Volumio2",
   "main": "index.js",

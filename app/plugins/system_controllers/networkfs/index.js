@@ -6,14 +6,15 @@ var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
 var fs=require('fs-extra');
 var config=new (require(__dirname+'/../../../lib/config.js'))();
-var exec = require('child_process').exec;
+var mountutil = require('linux-mountutils');
 
 
 
-// Define the ControllerNetworkFS class
-module.exports = ControllerNetworkFS;
 
-function ControllerNetworkFS(context) {
+// Define the ControllerNetworkfs class
+module.exports = ControllerNetworkfs;
+
+function ControllerNetworkfs(context) {
 	var self = this;
 
 	//getting configuration
@@ -25,66 +26,53 @@ function ControllerNetworkFS(context) {
 
 }
 
-ControllerNetworkFS.prototype.onVolumioStart = function() {
+ControllerNetworkfs.prototype.onVolumioStart = function() {
+	var self = this;
+
+
+
+
+}
+
+ControllerNetworkfs.prototype.onStart = function() {
 	var self = this;
 	//Perform startup tasks here
 }
 
-ControllerNetworkFS.prototype.onStart = function() {
+ControllerNetworkfs.prototype.onStop = function() {
 	var self = this;
 	//Perform startup tasks here
 }
 
-ControllerNetworkFS.prototype.onStop = function() {
+ControllerNetworkfs.prototype.onRestart = function() {
 	var self = this;
 	//Perform startup tasks here
 }
 
-ControllerNetworkFS.prototype.onRestart = function() {
-	var self = this;
-	//Perform startup tasks here
-}
-
-ControllerNetworkFS.prototype.onInstall = function()
+ControllerNetworkfs.prototype.onInstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
 }
 
-ControllerNetworkFS.prototype.onUninstall = function()
+ControllerNetworkfs.prototype.onUninstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
 }
 
-ControllerNetworkFS.prototype.getUIConfig = function()
+ControllerNetworkfs.prototype.getUIConfig = function()
 {
 	var self = this;
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
-	//dhcp
-	uiconf.sections[0].content[0].value=config.get('dhcp');
 
-	//static ip
-	uiconf.sections[0].content[1].value=config.get('ethip');
-
-	//static netmask
-	uiconf.sections[0].content[2].value=config.get('ethnetmask');
-
-	//static gateway
-	uiconf.sections[0].content[3].value=config.get('ethgateway');
-
-	//WLan ssid
-	uiconf.sections[1].content[0].value=config.get('wlanssid');
-
-	//
-	uiconf.sections[1].content[1].value=config.get('wlanpass');
 
 	return uiconf;
 }
 
-ControllerNetworkFS.prototype.setUIConfig = function(data)
+ControllerNetworkfs.prototype.setUIConfig = function(data)
 {
 	var self = this;
 
@@ -92,14 +80,14 @@ ControllerNetworkFS.prototype.setUIConfig = function(data)
 
 }
 
-ControllerNetworkFS.prototype.getConf = function(varName)
+ControllerNetworkfs.prototype.getConf = function(varName)
 {
 	var self = this;
 
 	return self.config.get(varName);
 }
 
-ControllerNetworkFS.prototype.setConf = function(varName, varValue)
+ControllerNetworkfs.prototype.setConf = function(varName, varValue)
 {
 	var self = this;
 
@@ -107,27 +95,47 @@ ControllerNetworkFS.prototype.setConf = function(varName, varValue)
 }
 
 //Optional functions exposed for making development easier and more clear
-ControllerNetworkFS.prototype.getSystemConf = function(pluginName,varName)
+ControllerNetworkfs.prototype.getSystemConf = function(pluginName,varName)
 {
 	var self = this;
 	//Perform your installation tasks here
 }
 
-ControllerNetworkFS.prototype.setSystemConf = function(pluginName,varName)
+ControllerNetworkfs.prototype.setSystemConf = function(pluginName,varName)
 {
 	var self = this;
 	//Perform your installation tasks here
 }
 
-ControllerNetworkFS.prototype.getAdditionalConf = function()
+ControllerNetworkfs.prototype.getAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
 }
 
-ControllerNetworkFS.prototype.setAdditionalConf = function()
+ControllerNetworkfs.prototype.setAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
 }
 
+
+
+ControllerNetworkfs.prototype.mountShare = function (share) {
+
+	var Name = 'Name';
+	var IP = 'IP';
+	var FsType = 'cifs';
+	var Username = '';
+	var Password = '';
+	mountutil.mount("//192.168.1.142/Flac","/mnt/NAS/", { "createDir": true,"fstype": "cifs","fsopts":"guest" }, function(result) {
+		if (result.error) {
+			// Something went wrong!
+			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share: '+result.error);
+		} else {
+			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Share Mounted Successfully');
+			self.context.coreCommand.pushToastMessage('success',"Music Library", 'Successfully added ');
+		}
+	});
+
+}
