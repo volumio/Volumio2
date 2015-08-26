@@ -83,6 +83,32 @@ CoreStateMachine.prototype.play = function(promisedResponse) {
 	}
 };
 
+// Volumio Toggle Command
+CoreStateMachine.prototype.toggle = function (promisedResponse) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::toggle');
+
+    if (self.currentStatus === 'stop') {
+        // Stop -> Play transition
+        self.currentStatus = 'play';
+
+        return self.updateTrackBlock()
+		.then(libFast.bind(self.serviceClearAddPlay, self));
+
+    } else if (self.currentStatus === 'pause') {
+        // Pause -> Play transition
+        self.currentStatus = 'play';
+
+        return self.serviceResume();
+
+    } else if (self.currentStatus === 'play') {
+        // Play -> Pause transition
+        self.currentStatus = 'pause';
+
+        return self.servicePause();
+    }
+};
+
 // Volumio Next Command
 CoreStateMachine.prototype.next = function(promisedResponse) {
 	var self = this;
