@@ -248,6 +248,18 @@ function InterfaceWebUI (context) {
 				});
 		});
 
+		connWebSocket.on('updateAllMetadata', function () {
+			var timeStart = Date.now();
+			self.logStart('Client requests update metadata cache')
+				.then(libFast.bind(self.commandRouter.updateAllMetadata, self.commandRouter))
+				.fail(function (error) {
+					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
+				})
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 		connWebSocket.on('volume', function (VolumeInteger) {
 			selfConnWebSocket = this;
 

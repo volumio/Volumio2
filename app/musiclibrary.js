@@ -15,8 +15,8 @@ function CoreMusicLibrary (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	// Start up a extra metadata handler
-	//self.metadataCache = new (require('./metadatacache.js'))(self);
+	// Start metadata cache
+	self.metadataCache = new (require('./metadatacache.js'))(commandRouter, self);
 
 	// Specify the preference for service when adding tracks to the queue
 	self.servicePriority = ['mpd', 'spop'];
@@ -285,6 +285,12 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 		.fin(libFast.bind(dbLibrary.close, dbLibrary));
 }
 
+CoreMusicLibrary.prototype.updateAllMetadata = function() {
+	var self = this;
+
+	return self.metadataCache.updateAllItems.call(self.metadataCache);
+}
+
 // Internal methods ---------------------------------------------------------------------------
 
 // Given a Uid, pull an object out of the library
@@ -492,7 +498,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 	}
 
 	// Store a link to the album art URI for each service
-	if (!(sService in tableAlbums[curAlbumKey].albumarturis)) {
+	if (!(sService in tableAlbums[curAlbumKey].imageuris)) {
 		tableAlbums[curAlbumKey].imageuris[sService] = sAlbumArtUri;
 	}
 

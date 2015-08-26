@@ -26,9 +26,6 @@ function CoreCommandRouter (server) {
 	// Start the playlist FS
 	self.playlistFS = new (require('./playlistfs.js'))(self);
 
-	// Start metadata cache
-	self.metadataCache = new (require('./metadatacache.js'))(self, self.musicLibrary);
-
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'BOOT COMPLETED');
 
 }
@@ -191,6 +188,13 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
 	return self.playlistFS.importServicePlaylists();
 }
 
+CoreCommandRouter.prototype.updateAllMetadata = function() {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::updateAllMetadata');
+
+	return self.musicLibrary.updateAllMetadata.call(self.musicLibrary);
+}
+
 // Methods usually called by the State Machine --------------------------------------------------------------------
 
 CoreCommandRouter.prototype.volumioPushState = function(state) {
@@ -292,7 +296,18 @@ CoreCommandRouter.prototype.notifyMusicLibraryUpdate = function() {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::notifyMusicLibraryUpdate');
 
-	return self.metadataCache.updateAllItems.call(self.metadataCache);
+	// TODO Also push a notification to all clients.
+	//return self.musicLibrary.updateAllMetadata.call(self.metadataCache);
+	return null;
+}
+
+// Calls a service to fetch album art for a uri, possibly slow
+CoreCommandRouter.prototype.serviceFetchAlbumArt = function(sService, sUri) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::serviceFetchAlbumArt');
+
+	var thisService = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
+	return thisService.fetchAlbumArt.call(thisService, sUri);
 }
 
 // Methods for generic plugin function calls --------------------------------------------------------------------------

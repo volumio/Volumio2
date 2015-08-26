@@ -336,10 +336,17 @@ ControllerSpop.prototype.getTracklist = function() {
 	});
 };
 
-ControllerSpop.prototype.getAlbumArt = function(sUri) {
+// Download album art for a given uri. Possibly slow, so called 'fetch' instead of 'get'
+ControllerSpop.prototype.fetchAlbumArt = function(sUri) {
 	var self = this;
 
-	return self.sendSpopCommand('uimage', [sUri, 2]);
+	return self.sendSpopCommand('uimage', [sUri, 2])
+		.then(function(sImageBase64) {
+			var objReturn = {};
+			objReturn.image = new Buffer(sImageBase64, 'base64');
+			objReturn.extension = 'jpg';
+			return objReturn;
+		});
 }
 
 // Internal methods ---------------------------------------------------------------------------

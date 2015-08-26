@@ -120,6 +120,12 @@ ControllerMpd.prototype.getTracklist = function() {
 		});
 };
 
+// Download album art for a given uri. Possibly slow, so called 'fetch' instead of 'get'
+ControllerMpd.prototype.fetchAlbumArt = function(sUri) {
+	// TODO pull the album art from the file itself or from an image in the folder
+	return libQ.resolve();
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 

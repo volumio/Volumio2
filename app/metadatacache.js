@@ -1,9 +1,11 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libLevel = require('level');
-var libMusicBrainz = require('musicbrainz');
-var libCoverArt = require('coverart');
+//var libMusicBrainz = require('musicbrainz');
+//var libCoverArt = require('coverart');
 var libFileSystem = require('fs');
+var libCrypto = require('crypto');
+var libBase64Url = require('base64-url');
 
 // Define the CoreMetadataCache class
 // This module manages a database of the metadata that is slow to read or not available from the track itself.
@@ -38,7 +40,7 @@ function CoreMetadataCache(commandRouter, musicLibrary) {
 			self.arrayTaskStack = self.arrayTaskStack.concat(objStoredTasks);
 		});
 	*/
-	self.coverArtClient = new libCoverArt({userAgent:'Volumio2'});
+	//self.coverArtClient = new libCoverArt({userAgent:'Volumio2'});
 	self.sAlbumArtPath = './app/db/albumart';
 }
 
@@ -111,16 +113,17 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 
 	self.promisedTasks = self.promisedTasks
 		.then(function() {
-			// Wait for both metadata cache and music library to become ready
+			// Wait for metadata cache to become ready
 			return self.metadataCacheReady;
 		})
 		.then(function() {
 			// Then process the next task
+console.log('process task');
 			var curTask = self.arrayTaskStack.shift();
 			var sTable = curTask.table;
 			var sKey = curTask.key;
 			var promisedSubTasks = libQ.resolve();
-			var curLibraryObject = self.musicLibrary[sTable][sKey];
+			var curLibraryObject = self.musicLibrary.library[sTable][sKey];
 
 			if (!(sTable in self.metadataCache)) {
 				self.metadataCache[sTable] = {};
@@ -148,22 +151,26 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 					})
 			}
 */
-			if (sType === 'album') {
+			if (curLibraryObject.type === 'album') {
 				libFast.map(Object.keys(curLibraryObject.imageuris), function(curService) {
 					if (!(curService in curObject.images)) {
 						var sAlbumArtUri = curLibraryObject.imageuris[curService];
 
 						promisedSubTasks = promisedSubTasks
 							.then(function() {
-								return self.fetchAlbumArt(sService, sAlbumArtUri);
+								return self.fetchAlbumArt(curService, sAlbumArtUri);
 							})
 							.then(function(sPath) {
-								curObject.images[sService] = sPath;
+								curObject.images[curService] = sPath;
 							});
 					}
+				});
 			}
 			// TODO - store task stack in DB here
 			return promisedSubTasks;
+		})
+		.fail(function(error) {
+			console.log(error.stack);
 		});
 
 }
@@ -196,23 +203,24 @@ console.log(error);
 		});
 }
 
-CoreMetadataCache.prototype.fetchAlbumArt = function(sService, sAlbumArtUri, s) {
+CoreMetadataCache.prototype.fetchAlbumArt = function(sService, sAlbumArtUri) {
 	var self = this;
 	var bufferImage = null;
 	var sPath = '';
 
 console.log('fetching art for ' + sAlbumArtUri);
 	//return libQ.nfcall(libFast.bind(self.coverArtClient.release, self.coverArtClient), sMbid, {piece: 'front'})
-	return self.commandRouter.fetchAlbumArt.call(self.commandRouter, sService, sAlbumArtUri)
+	return self.commandRouter.serviceFetchAlbumArt.call(self.commandRouter, sService, sAlbumArtUri)
 		.then(function(objReturned) {
-			bufferImage = objReturned.image;
-			sExtension = objReturned.extension;
-			sPath = self.sAlbumArtPath + '/' + convertStringToHashkey(sService + sAlbumArtUri) + sExtension;
+			if (objReturned) {
+				bufferImage = objReturned.image;
+				sExtension = objReturned.extension;
+				sPath = self.sAlbumArtPath + '/' + convertStringToHashkey(sService + sAlbumArtUri) + '.' + sExtension;
 console.log(sPath);
-			return libQ.nfcall(libFileSystem.open, sPath, 'w');
-		})
-		.then(function(file) {
-			return libQ.nfcall(libFileSystem.write, file, bufferImage, 0, 'binary');
+				return libQ.nfcall(libFileSystem.writeFile, sPath, bufferImage);
+			} else {
+				throw new Error('No album art returned');
+			}
 		})
 		.then(function(result) {
 console.log('file written');
@@ -220,8 +228,18 @@ console.log('file written');
 		})
 		.fail(function(error) {
 			// Have this clause to catch errors so the parent promise does not abort
-console.log(error);
+console.log(error.stack);
 			return sPath;
 		});
 }
 
+// Create a URL safe hashkey for a given string. The result will be a constant length string containing
+// upper and lower case letters, numbers, '-', and '_'.
+function convertStringToHashkey(input) {
+    if (input === null) {
+        input = '';
+
+    }
+
+	return libBase64Url.escape(libCrypto.createHash('sha256').update(input, 'utf8').digest('base64'));
+}
