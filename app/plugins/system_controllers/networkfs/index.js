@@ -29,9 +29,6 @@ function ControllerNetworkfs(context) {
 ControllerNetworkfs.prototype.onVolumioStart = function() {
 	var self = this;
 
-
-
-
 }
 
 ControllerNetworkfs.prototype.onStart = function() {
@@ -120,22 +117,36 @@ ControllerNetworkfs.prototype.setAdditionalConf = function()
 }
 
 
+ControllerNetworkfs.prototype.mountShare = function () {
+	var sharename= config.get('NasMounts.Flac.name');
+	var pointer= '//' + config.get('NasMounts.Flac.ip') + '/' + config.get('NasMounts.Flac.name');
+	var mountpoint= '/mnt/NAS/'+config.get('NasMounts.Flac.name');
 
-ControllerNetworkfs.prototype.mountShare = function (share) {
-
-	var Name = 'Name';
-	var IP = 'IP';
-	var FsType = 'cifs';
-	var Username = '';
-	var Password = '';
-	mountutil.mount("//192.168.1.142/Flac","/mnt/NAS/", { "createDir": true,"fstype": "cifs","fsopts":"guest" }, function(result) {
-		if (result.error) {
-			// Something went wrong!
-			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share: '+result.error);
-		} else {
-			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Share Mounted Successfully');
-			self.context.coreCommand.pushToastMessage('success',"Music Library", 'Successfully added ');
-		}
-	});
+	//Password-protected mount
+	if (( typeof config.get('NasMounts.Flac.user') !== 'undefined' && config.get('NasMounts.Flac.user') ) || ( typeof config.get('NasMounts.Flac.password') !== 'undefined' && config.get('NasMounts.Flac.password') ))
+	{
+		var credentials='username='+config.get('NasMounts.Flac.user')+','+ 'password='+config.get('NasMounts.Flac.password');
+		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":credentials }, function(result) {
+			if (result.error) {
+				// Something went wrong!
+				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
+			} else {
+				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + 'Share Mounted Successfully');
+				self.context.coreCommand.pushToastMessage('success',"Music Library", sharename + 'Successfully added ');
+			}
+		});
+	} else
+	//Access as guest (no password)
+	{
+		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":"guest" }, function(result) {
+			if (result.error) {
+				// Something went wrong!
+				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
+			} else {
+				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + 'Share Mounted Successfully');
+				self.context.coreCommand.pushToastMessage('success',"Music Library", sharename + 'Successfully added ');
+			}
+		});
+	}
 
 }

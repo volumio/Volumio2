@@ -1,12 +1,30 @@
 {
-  "NasMounts":{
-    "a":{
-      "type":"integer",
-      "value":100
-    },
-    "b":{
-      "type":"integer",
-      "value":200
+  "NasMounts": {
+    "Flac": {
+      "name": {
+        "type": "string",
+        "value": "Flac"
+      },
+      "ip": {
+        "type": "ip",
+        "value": ""
+      },
+      "fstype": {
+        "type": "string",
+        "value": "cifs"
+      },
+      "username": {
+        "type": "string",
+        "value": ""
+      },
+      "password": {
+        "type": "string",
+        "value": ""
+      },
+      "options": {
+        "type": "string",
+        "value": ""
+      }
     }
   }
 }
