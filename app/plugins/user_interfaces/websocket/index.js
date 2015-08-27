@@ -1,5 +1,6 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
+var fs=require('fs-extra');
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
  * @type {InterfaceWebUI}
@@ -282,7 +283,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Menu Items')
 				.then(function () {
-					var menuitems = [{"id":"home","name":"Home","type":"static","state":"volumio.playback"},{"id":"components","name":"Components","type":"static","state":"volumio.components"},{"id":"network","name":"Network","type":"dynamic"},{"id":"settings","name":"Settings","type":"dynamic"}]
+					var menuitems =fs.readJsonSync(__dirname+'../../../config.json');
 					self.libSocketIO.emit('printConsoleMessage', menuitems);
 					return self.libSocketIO.emit('pushMenuItems', menuitems);
 				})

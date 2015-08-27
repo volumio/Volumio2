@@ -1,0 +1,6 @@
+[
+  {"id":"home","name":"Home","type":"static","state":"volumio.playback"},
+  {"id":"playbackoptions","name":"Playback options","type":"dynamic"},
+  {"id":"components","name":"Components","type":"static","state":"volumio.components"},
+  {"id":"network","name":"Network","type":"dynamic"},
+  {"id":"settings","name":"Settings","type":"dynamic"}]

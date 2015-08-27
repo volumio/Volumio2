@@ -1,0 +1,142 @@
+{
+  "page": {
+    "label": "Playback options"
+  },
+  "sections": [
+    {
+      "id": "playback_options",
+      "element": "section",
+      "label": "Playback options",
+      "onSave": {"type":"controller", "endpoint":"music_services/mpd", "method":"savePlaybackOptions"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "gapless_mp3_playback",
+          "volume_normalization",
+          "audio_buffer_size",
+          "buffer_before_play",
+          "auto_update"
+        ]
+      },
+      "content": [
+        {
+          "id": "gapless_mp3_playback",
+          "element": "select",
+          "label": "Gapless MP3 playback",
+          "value":  {
+            "value":true,
+            "label": "Yes"
+          },
+          "options": [
+            {
+              "value":true,
+              "label": "Yes"
+            },
+            {
+              "value":false,
+              "label": "No"
+            }
+          ]
+
+        },
+
+
+        {
+          "id": "volume_normalization",
+          "element": "select",
+          "label": "Volume normalization",
+          "value":  {
+            "value":true,
+            "label": "Yes"
+          },
+          "options": [
+            {
+              "value":true,
+              "label": "Yes"
+            },
+            {
+              "value":false,
+              "label": "No"
+            }
+          ]
+
+        },
+
+        {
+          "id": "audio_buffer_size",
+          "element": "select",
+          "label": "Audio buffer size",
+          "value":  {
+            "value":2048,
+            "label": "2048"
+          },
+          "options": [
+            {
+              "value":128,
+              "label": "1128"
+            },
+            {
+              "value":256,
+              "label": "256"
+            },
+            {
+              "value":512,
+              "label": "512"
+            },
+            {
+              "value":1024,
+              "label": "1024"
+            },
+            {
+              "value":2048,
+              "label": "2048"
+            }
+
+          ]
+
+        },
+        {
+          "id": "buffer_before_play",
+          "element": "select",
+          "label": "Buffer before play",
+          "value":  {
+            "value":"10%",
+            "label": "10%"
+          },
+          "options": [
+            {
+              "value":"10%",
+              "label": "10%"
+            },
+            {
+              "value":"10%",
+              "label": "10%"
+            }
+          ]
+
+        }, {
+          "id": "auto_update",
+          "element": "select",
+          "label": "Auto update",
+          "value":  {
+            "value":false,
+            "label": "Yes"
+          },
+          "options": [
+            {
+              "value":true,
+              "label": "Yes"
+            },
+            {
+              "value":false,
+              "label": "No"
+            }
+          ]
+
+        }
+
+      ]
+    }
+
+  ]
+}
