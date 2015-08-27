@@ -1,8 +1,8 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
-var config=new (require(__dirname+'/../../../lib/config.js'))();
-var foundVolumioInstances=new (require(__dirname+'/../../../lib/config.js'))();
+var config= new (require('v-conf'))();
+var foundVolumioInstances= new (require('v-conf'))();
 var mdns=require('mdns');
 
 // Define the ControllerVolumioDiscovery class

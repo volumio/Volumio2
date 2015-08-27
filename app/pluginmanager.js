@@ -10,12 +10,12 @@ function PluginManager (ccommand, server) {
     var self = this;
 
     self.plugins = new HashMap();
-	self.pluginPath = [__dirname+'/plugins/','/plugins'];
+    self.pluginPath = [__dirname+'/plugins/','/plugins'];
 
-    self.config = new (require(__dirname + '/lib/config.js'))();
+    self.config = new (require('v-conf'))();
     self.config.loadFile(__dirname + '/plugins/plugins.json');
     self.coreCommand = ccommand;
-	self.websocketServer = server;
+    self.websocketServer = server;
 }
 
 PluginManager.prototype.loadPlugin = function(folder) {
