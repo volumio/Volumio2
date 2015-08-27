@@ -1,30 +1,33 @@
 {
-  "nHost":{"modifiable":false,"value":"localhost","type":"string"},
-  "nPort":{"modifiable":false,"value":"6600","type":"int"},
-  "music_directory":{"modifiable":false,"value":"/var/lib/mpd/music","type":"string"},
-  "playlist_directory":{"modifiable":false,"value":"/var/lib/mpd/playlists","type":"string"},
-  "db_file":{"modifiable":false,"value":"/var/lib/mpd/tag_cache","type":"string"},
-  "pid_file":{"modifiable":false,"value":"/var/run/mpd/pid","type":"string"},
-  "state_file":{"modifiable":false,"value":"/var/lib/mpd/state","type":"string"},
-  "user":{"modifiable":false,"value":"mpd","type":"string"},
-  "group":{"modifiable":false,"value":"audio","type":"string"},
-  "bind_to_address":{"modifiable":false,"value":"any","type":"string"},
-  "port":{"modifiable":false,"value":"6600","type":"int"},
-  "gapless_mp3_playback":{"modifiable":true,"value":"true","type":"boolean","ui_label_key":"gapless_mp3_playback"},
-  "auto_update":{"modifiable":false,"value":"true","type":"boolean"},
-  "follow_outside_symlinks":{"modifiable":false,"value":"true","type":"boolean"},
-  "follow_inside_symlinks":{"modifiable":false,"value":"true","type":"boolean"},
-  "zeroconf_enabled":{"modifiable":false,"value":"true","type":"boolean"},
-  "zeroconf_name":{"modifiable":false,"value":"Volumio","type":"string"},
-  "input":{"modifiable":false,"value":"{\nplugin \"curl\"\n}","type":"string"},
-  "audio_output":{"modifiable":false,"value":"{\ntype \"alsa\"\nname \"My ALSA Device\"\ndevice \"hw:0,0\"\n}","type":"string"},
-  "max_connections":{"modifiable":false,"value":"30","type":"int"},
-  "max_playlist_length":{"modifiable":false,"value":"106384","type":"int"},
-  "max_command_list_size":{"modifiable":false,"value":"20048","type":"int"},
-  "max_output_buffer_size":{"modifiable":false,"value":"80192","type":"int"},
-  "filesystem_charset":{"modifiable":false,"value":"UTF-8","type":"string"},
-  "id3v1_encoding":{"modifiable":false,"value":"UTF-8","type":"string"},
-  "#audio_output":{"modifiable":false,"value":"{\n# type \"pulse\"\n# name \"My Pulse Output\"\n# server \"remote_server\" # optional\n# sink \"remote_server_sink\" # optional\n#}","type":"string"}
+  "gapless_mp3_playback":{
+    "type": "boolean",
+    "value": true
+  },
+  "volume_normalization":{
+    "type": "boolean",
+    "value": true
+  },
+  "audio_buffer_size":{
+    "type": "number",
+    "value": 2048
+  },
+  "buffer_before_play":{
+    "type": "boolean",
+    "value": true
+  },
+  "auto_update":{
+    "type": "boolean",
+    "value": true
+  },
+  "nHost":{
+    "type": "string",
+    "value": "localhost"
+  },
+  "nPort":{
+    "type": "number",
+    "value": 6600
+  }
+
 }
 
 
