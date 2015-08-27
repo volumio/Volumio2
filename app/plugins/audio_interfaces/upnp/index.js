@@ -20,7 +20,14 @@ function UpnpInterface(context) {
 UpnpInterface.prototype.onVolumioStart = function() {
     var self = this;
 
+    self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Upmpd Daemon');
     self.startUpmpdcli();
+
+}
+
+UpnpInterface.prototype.onStart = function() {
+    var self = this;
+
 }
 
 UpnpInterface.prototype.onStop = function() {
