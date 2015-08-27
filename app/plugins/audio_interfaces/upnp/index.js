@@ -20,17 +20,7 @@ function UpnpInterface(context) {
 UpnpInterface.prototype.onVolumioStart = function() {
     var self = this;
 
-    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-    var name = systemController.getConf('playerName');
-
-    exec("upmpdcli -c "+  __dirname +"/upmpdcli.conf -f '"+ name +"'", function (error, stdout, stderr) {
-        if (error !== null) {
-            self.context.coreCommand.pushConsoleMessage('Upmpcli error: ' + error);
-        }
-        else {
-            self.context.coreCommand.pushConsoleMessage('Upmpdcli Daemon Started');
-        }
-    });
+    self.startUpmpdcli();
 }
 
 UpnpInterface.prototype.onStop = function() {
@@ -103,4 +93,20 @@ UpnpInterface.prototype.setAdditionalConf = function()
 {
     var self = this;
     //Perform your installation tasks here
+}
+
+UpnpInterface.prototype.startUpmpdcli = function() {
+    var self = this;
+
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var name = systemController.getConf('playerName');
+
+    exec("upmpdcli -c "+  __dirname +"/upmpdcli.conf -f '"+ name +"'", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpcli error: ' + error);
+        }
+        else {
+            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpdcli Daemon Started');
+        }
+    });
 }
