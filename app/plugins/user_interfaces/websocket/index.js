@@ -283,7 +283,8 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Menu Items')
 				.then(function () {
-					var menuitems =fs.readJsonSync(__dirname+'../../../config.json');
+					var menuitems =fs.readJsonSync(__dirname+'/../../../config.json');
+
 					self.libSocketIO.emit('printConsoleMessage', menuitems);
 					return self.libSocketIO.emit('pushMenuItems', menuitems);
 				})
