@@ -33,7 +33,8 @@
     "serve-favicon": "~2.1.3",
     "socket.io": "^1.2.0",
     "sort-on": "^1.0.1",
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "v-conf": "0.0.2"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
