@@ -28,7 +28,7 @@ function ControllerNetworkfs(context) {
 
 ControllerNetworkfs.prototype.onVolumioStart = function() {
 	var self = this;
-
+	self.initShares();
 }
 
 ControllerNetworkfs.prototype.onStart = function() {
@@ -117,22 +117,35 @@ ControllerNetworkfs.prototype.setAdditionalConf = function()
 }
 
 
-ControllerNetworkfs.prototype.mountShare = function () {
-	var sharename= config.get('NasMounts.Flac.name');
-	var pointer= '//' + config.get('NasMounts.Flac.ip') + '/' + config.get('NasMounts.Flac.name');
-	var mountpoint= '/mnt/NAS/'+config.get('NasMounts.Flac.name');
+
+ControllerNetworkfs.prototype.initShares = function () {
+	var self = this;
+
+	var keys = config.getKeys('NasMounts');
+	for(var i in keys) {
+		var key=keys[i];
+		self.mountShare(key);
+	}
+}
+
+ControllerNetworkfs.prototype.mountShare = function (shareid) {
+	var self= this;
+
+	var sharename= config.get('NasMounts.'+shareid+'.name');
+	var pointer= '//' + config.get('NasMounts.'+shareid+'.ip') + '/' + config.get('NasMounts.'+shareid+'.name');
+	var mountpoint= '/mnt/NAS/'+config.get('NasMounts.'+shareid+'.name');
 
 	//Password-protected mount
-	if (( typeof config.get('NasMounts.Flac.user') !== 'undefined' && config.get('NasMounts.Flac.user') ) || ( typeof config.get('NasMounts.Flac.password') !== 'undefined' && config.get('NasMounts.Flac.password') ))
+	if (( typeof config.get('NasMounts.'+shareid+'.user') !== 'undefined' && config.get('NasMounts.'+shareid+'.user') ) || ( typeof config.get('NasMounts.'+shareid+'.password') !== 'undefined' && config.get('NasMounts.'+shareid+'.password') ))
 	{
-		var credentials='username='+config.get('NasMounts.Flac.user')+','+ 'password='+config.get('NasMounts.Flac.password');
+		var credentials='username='+config.get('NasMounts.'+shareid+'.user')+','+ 'password='+config.get('NasMounts.'+shareid+'.password');
 		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":credentials }, function(result) {
 			if (result.error) {
 				// Something went wrong!
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
 			} else {
-				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + 'Share Mounted Successfully');
-				self.context.coreCommand.pushToastMessage('success',"Music Library", sharename + 'Successfully added ');
+				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + ' Share Mounted Successfully');
+				self.context.coreCommand.pushToastMessage('success',"Music Library",+ sharename + ' Successfully added ');
 			}
 		});
 	} else
