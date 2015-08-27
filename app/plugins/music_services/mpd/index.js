@@ -3,7 +3,6 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var libUtil = require('util');
 var libFsExtra = require('fs-extra');
-var config=new (require('v-conf'))();
 var libChokidar = require('chokidar');
 
 // Define the ControllerMpd class
@@ -13,7 +12,8 @@ function ControllerMpd(context) {
 	var self = this;
 	self.context=context;
 
-	config.loadFile(__dirname+'/config.json');
+	self.config=new (require('v-conf'))();
+	self.config.loadFile(__dirname+'/config.json');
 
 	// TODO use names from the package.json instead
 	self.servicename = 'mpd';
@@ -21,8 +21,8 @@ function ControllerMpd(context) {
 
 	//getting configuration
 	var config=libFsExtra.readJsonSync(__dirname+'/config.json');
-	var nHost=config.get('nHost');
-	var nPort=config.get('nPort');
+	var nHost=self.config.get('nHost');
+	var nPort=self.config.get('nPort');
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
@@ -419,11 +419,11 @@ ControllerMpd.prototype.getUIConfig = function()
 
 	var uiconf=libFsExtra.readJsonSync(__dirname+'/UIConfig.json');
 
-	uiconf.sections[0].content[0].value.value=config.get('gapless_mp3_playback');
-	uiconf.sections[0].content[1].value.value=config.get('volume_normalization');
-	uiconf.sections[0].content[2].value.value=config.get('audio_buffer_size');
-	uiconf.sections[0].content[3].value.value=config.get('buffer_before_play');
-	uiconf.sections[0].content[4].value.value=config.get('auto_update');
+	uiconf.sections[0].content[0].value.value=self.config.get('gapless_mp3_playback');
+	uiconf.sections[0].content[1].value.value=self.config.get('volume_normalization');
+	uiconf.sections[0].content[2].value.value=self.config.get('audio_buffer_size');
+	uiconf.sections[0].content[3].value.value=self.config.get('buffer_before_play');
+	uiconf.sections[0].content[4].value.value=self.config.get('auto_update');
 
 	return uiconf;
 }
@@ -434,11 +434,11 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 
 	var defer = libQ.defer();
 
-	config.set('gapless_mp3_playback',data['gapless_mp3_playback']);
-	config.set('volume_normalization',data['volume_normalization']);
-	config.set('audio_buffer_size',data['audio_buffer_size']);
-	config.set('buffer_before_play',data['buffer_before_play']);
-	config.set('auto_update',data['auto_update']);
+	self.config.set('gapless_mp3_playback',data['gapless_mp3_playback']);
+	self.config.set('volume_normalization',data['volume_normalization']);
+	self.config.set('audio_buffer_size',data['audio_buffer_size']);
+	self.config.set('buffer_before_play',data['buffer_before_play']);
+	self.config.set('auto_update',data['auto_update']);
 
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The playback configuration has been successfully updated');
 
