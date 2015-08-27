@@ -285,8 +285,10 @@ function InterfaceWebUI (context) {
 				.then(function () {
 					var menuitems =fs.readJsonSync(__dirname+'/../../../config.json');
 
-					self.libSocketIO.emit('printConsoleMessage', menuitems);
-					return self.libSocketIO.emit('pushMenuItems', menuitems);
+					console.log(JSON.stringify(menuitems['menuItems']));
+
+					self.libSocketIO.emit('printConsoleMessage', menuitems['menuItems']);
+					return self.libSocketIO.emit('pushMenuItems', menuitems['menuItems']);
 				})
 				.fail(function (error) {
 					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
@@ -318,7 +320,13 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('getUiConfig', function(data) {
 			selfConnWebSocket = this;
 
-			var response=self.commandRouter.getUIConfigOnPlugin('system_controller',data.page,{});
+			var splitted=data.page.split('/');
+
+			var response;
+
+			if(splitted.length>1)
+				response=self.commandRouter.getUIConfigOnPlugin(splitted[0],splitted[1],{});
+			else response=self.commandRouter.getUIConfigOnPlugin('system_controller',splitted[0],{});
 
 			selfConnWebSocket.emit('pushUiConfig',response);
 		});
