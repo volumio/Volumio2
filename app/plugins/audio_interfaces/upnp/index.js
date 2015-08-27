@@ -12,14 +12,18 @@ module.exports = UpnpInterface;
 function UpnpInterface(context) {
 	var self = this;
     // Save a reference to the parent commandRouter
-    self.context = context;
+    self.context=context;
+    self.commandRouter = self.context.coreCommand;
 
 }
 
 UpnpInterface.prototype.onVolumioStart = function() {
     var self = this;
-    //TODO Launch upmpdcli with name as system wide variable
-    exec("upmpdcli -c "+  __dirname +"/upmpdcli.conf -f 'Volumio'", function (error, stdout, stderr) {
+
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var name = systemController.getConf('playerName');
+
+    exec("upmpdcli -c "+  __dirname +"/upmpdcli.conf -f '"+ name +"'", function (error, stdout, stderr) {
         if (error !== null) {
             self.context.coreCommand.pushConsoleMessage('Upmpcli error: ' + error);
         }
