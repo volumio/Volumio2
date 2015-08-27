@@ -29,14 +29,8 @@ function ControllerSpop(context) {
 	self.connSpopStatus = libNet.createConnection(nPort, nHost); // Socket to listen for status changes
 
 	// Start a listener for receiving errors
-	self.connSpopCommand.on('error', function(err) {
-		console.error('SPOP command error:');
-		console.error(err);
-	});
-	self.connSpopStatus.on('error', function(err) {
-		console.error('SPOP status error:');
-		console.error(err);
-	});
+	self.connSpopCommand.on('error', libFast.bind(self.pushError, self));
+	self.connSpopStatus.on('error', libFast.bind(self.pushError, self));
 
 	// Init some command socket variables
 	self.bSpopCommandGotFirstMessage = false;
@@ -341,11 +335,14 @@ ControllerSpop.prototype.fetchAlbumArt = function(sUri) {
 	var self = this;
 
 	return self.sendSpopCommand('uimage', [sUri, 2])
-		.then(function(sImageBase64) {
-			var objReturn = {};
-			objReturn.image = new Buffer(sImageBase64, 'base64');
-			objReturn.extension = 'jpg';
-			return objReturn;
+		.then(JSON.parse)
+		.then(function(objResponse) {
+			if (objResponse.status === "ok") {
+				var objReturn = {};
+				objReturn.image = new Buffer(objResponse.data, 'base64');
+				objReturn.extension = 'jpg';
+				return objReturn;
+			}
 		});
 }
 
@@ -437,9 +434,14 @@ ControllerSpop.prototype.pushState = function(state) {
 };
 
 // Pass the error if we don't want to handle it
-ControllerSpop.prototype.pushError = function(sReason) {
+ControllerSpop.prototype.pushError = function(error) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pushError(' + sReason + ')');
+
+	if ((typeof error) === 'string') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
+	} else if ((typeof error) === 'object') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
+	}
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();

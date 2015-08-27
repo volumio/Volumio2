@@ -118,7 +118,6 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 		})
 		.then(function() {
 			// Then process the next task
-console.log('process task');
 			var curTask = self.arrayTaskStack.shift();
 			var sTable = curTask.table;
 			var sKey = curTask.key;
@@ -208,30 +207,42 @@ CoreMetadataCache.prototype.fetchAlbumArt = function(sService, sAlbumArtUri) {
 	var bufferImage = null;
 	var sPath = '';
 
-console.log('fetching art for ' + sAlbumArtUri);
-	//return libQ.nfcall(libFast.bind(self.coverArtClient.release, self.coverArtClient), sMbid, {piece: 'front'})
 	return self.commandRouter.serviceFetchAlbumArt.call(self.commandRouter, sService, sAlbumArtUri)
 		.then(function(objReturned) {
 			if (objReturned) {
 				bufferImage = objReturned.image;
 				sExtension = objReturned.extension;
 				sPath = self.sAlbumArtPath + '/' + convertStringToHashkey(sService + sAlbumArtUri) + '.' + sExtension;
-console.log(sPath);
+
 				return libQ.nfcall(libFileSystem.writeFile, sPath, bufferImage);
 			} else {
 				throw new Error('No album art returned');
 			}
 		})
 		.then(function(result) {
-console.log('file written');
+			self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'File written: ' + sPath);
 			return sPath;
 		})
 		.fail(function(error) {
 			// Have this clause to catch errors so the parent promise does not abort
-console.log(error.stack);
-			return sPath;
+			self.pushError(error);
+			return '';
 		});
 }
+
+// Pass the error if we don't want to handle it
+CoreMetadataCache.prototype.pushError = function(error) {
+	var self = this;
+
+	if ((typeof error) === 'string') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
+	} else if ((typeof error) === 'object') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
+	}
+
+	// Return a resolved empty promise to represent completion
+	return libQ.resolve();
+};
 
 // Create a URL safe hashkey for a given string. The result will be a constant length string containing
 // upper and lower case letters, numbers, '-', and '_'.

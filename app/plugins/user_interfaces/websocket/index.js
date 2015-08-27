@@ -42,9 +42,7 @@ function InterfaceWebUI (context) {
 				.then(function (state) {
 					return self.pushState.call(self, state, selfConnWebSocket);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -59,9 +57,7 @@ function InterfaceWebUI (context) {
 				.then(function (queue) {
 					return self.pushQueue.call(self, queue, selfConnWebSocket);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -75,9 +71,7 @@ function InterfaceWebUI (context) {
 				.then(function () {
 					return self.commandRouter.volumioRemoveQueueItem.call(self.commandRouter, nIndex);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -91,9 +85,7 @@ function InterfaceWebUI (context) {
 				.then(function () {
 					return self.commandRouter.volumioAddQueueUids.call(self.commandRouter, arrayUids);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -112,9 +104,7 @@ function InterfaceWebUI (context) {
 						return self.pushLibraryListing.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -133,9 +123,7 @@ function InterfaceWebUI (context) {
 						return self.pushLibraryFilters.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -154,9 +142,7 @@ function InterfaceWebUI (context) {
 						return self.pushPlaylistIndex.call(self, objBrowseData, selfConnWebSocket);
 					}
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -166,9 +152,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio play')
 				.then(libFast.bind(self.commandRouter.volumioPlay, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -178,9 +162,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio pause')
 				.then(libFast.bind(self.commandRouter.volumioPause, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -190,9 +172,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio stop')
 				.then(libFast.bind(self.commandRouter.volumioStop, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -202,9 +182,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio previous')
 				.then(libFast.bind(self.commandRouter.volumioPrevious, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -214,9 +192,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio next')
 				.then(libFast.bind(self.commandRouter.volumioNext, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -228,9 +204,7 @@ function InterfaceWebUI (context) {
 				.then(function() {
 					self.commandRouter.serviceUpdateTracklist.call(self.commandRouter, sService);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -240,9 +214,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio Rebuild Library')
 				.then(libFast.bind(self.commandRouter.volumioRebuildLibrary, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -252,9 +224,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests update metadata cache')
 				.then(libFast.bind(self.commandRouter.updateAllMetadata, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -268,9 +238,7 @@ function InterfaceWebUI (context) {
 				.then(function () {
 					return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -280,9 +248,7 @@ function InterfaceWebUI (context) {
 			var timeStart = Date.now();
 			self.logStart('Client requests import of playlists')
 				.then(libFast.bind(self.commandRouter.volumioImportServicePlaylists, self.commandRouter))
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -298,9 +264,7 @@ function InterfaceWebUI (context) {
 					self.libSocketIO.emit('printConsoleMessage', menuitems);
 					return self.libSocketIO.emit('pushMenuItems', menuitems);
 				})
-				.fail(function (error) {
-					self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-				})
+				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
 					return self.logDone(timeStart);
 				});
@@ -442,3 +406,18 @@ InterfaceWebUI.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 }
+
+// Pass the error if we don't want to handle it
+InterfaceWebUI.prototype.pushError = function(error) {
+	var self = this;
+
+	if ((typeof error) === 'string') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
+	} else if ((typeof error) === 'object') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
+	}
+
+	// Return a resolved empty promise to represent completion
+	return libQ.resolve();
+};
+
