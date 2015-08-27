@@ -19,7 +19,7 @@ function UpnpInterface(context) {
 UpnpInterface.prototype.onVolumioStart = function() {
     var self = this;
     //TODO Launch upmpdcli with name as system wide variable
-    exec("upmpdcli -c /volumio/app/plugins/audio_interfaces/upnp_interface/upmpdcli.conf -f 'Volumio'", function (error, stdout, stderr) {
+    exec("upmpdcli -c "+  __dirname +"/upmpdcli.conf -f 'Volumio'", function (error, stdout, stderr) {
         if (error !== null) {
             self.context.coreCommand.pushConsoleMessage('Upmpcli error: ' + error);
         }
