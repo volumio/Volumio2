@@ -1,0 +1,5 @@
+{
+  "enalbed":{"value":true,"type":"boolean"},
+  "hour":{"value":"8","type":"number"},
+  "minute":{"value":"0","type":"number"}
+}
