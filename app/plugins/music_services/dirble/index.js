@@ -1,8 +1,12 @@
 var libQ = require('kew');
+var unirest=require('unirest');
 
 module.exports = ControllerDirble;
 function ControllerDirble(context) {
 	var self = this;
+
+	self.config=new (require('v-conf'))();
+	self.config.loadFile(__dirname+'/config.json');
 
 }
 
@@ -11,7 +15,11 @@ function ControllerDirble(context) {
  * The Core controller checks if the method is defined and executes it on startup if it exists.
  */
 ControllerDirble.prototype.onVolumioStart = function() {
-	//Perform startup tasks here
+	var self=this;
+
+	self.getPrimariesCategories();
+	self.getCountries();
+	self.getStationsForCountry('',0);
 }
 
 ControllerDirble.prototype.onStop = function() {
@@ -109,3 +117,35 @@ ControllerDirble.prototype.getTracklist = function() {
 	return libQ.resolve([]);
 };
 
+ControllerDirble.prototype.getPrimariesCategories = function() {
+	var Request = unirest.get(config.get('url_categories_primary'));
+	Request.query({
+		token: config.get('api_token')
+	}).end(function (response) {
+		console.log(response.body);
+	});
+
+};
+
+ControllerDirble.prototype.getCountries = function() {
+	var Request = unirest.get(config.get('url_countries'));
+	Request.query({
+		token: config.get('api_token')
+	}).end(function (response) {
+		console.log(response.body);
+	});
+
+};
+
+ControllerDirble.prototype.getStationsForCountry = function(id,page) {
+	var Request = unirest.get(config.get('url_countries'));
+	Request.query({
+		token: config.get('api_token'),
+		page:page,
+		per_page:config.get('per_page'),
+		offset:0
+	}).end(function (response) {
+		console.log(response.body);
+	});
+
+};
