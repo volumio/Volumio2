@@ -33,11 +33,9 @@ function ControllerMpd(context) {
 
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
+
 	// Catch and log errors
-	self.clientMpd.on('error', function(err) {
-		console.error('MPD error: ');
-		console.error(err);
-	});
+	self.clientMpd.on('error', libFast.bind(self.pushError, self));
 
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
@@ -124,6 +122,12 @@ ControllerMpd.prototype.getTracklist = function() {
 		});
 };
 
+// Download album art for a given uri. Possibly slow, so called 'fetch' instead of 'get'
+ControllerMpd.prototype.fetchAlbumArt = function(sUri) {
+	// TODO pull the album art from the file itself or from an image in the folder
+	return libQ.resolve();
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -156,7 +160,8 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 				'performers': [],
 				'tracknumber': 0,
 				'date': '',
-				'duration': 0
+				'duration': 0,
+				'albumart_uri': arrayLineParts[1]
 			};
 			objReturn.tracks.push(curEntry);
 		} else if (arrayLineParts[0] === 'playlist') {
@@ -244,10 +249,14 @@ ControllerMpd.prototype.pushState = function(state) {
 };
 
 // Pass the error if we don't want to handle it
-ControllerMpd.prototype.pushError = function(sReason) {
+ControllerMpd.prototype.pushError = function(error) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushError');
-	self.commandRouter.pushConsoleMessage(sReason);
+
+	if ((typeof error) === 'string') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
+	} else if ((typeof error) === 'object') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
+	}
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
@@ -606,9 +615,7 @@ ControllerMpd.prototype.fswatch = function () {
 			watcher.close();
 			return self.waitupdate();
 		})
-		.on('error', function (error) {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase ERROR');
-		})
+		.on('error', libFast.bind(self.pushError, self));
 }
 
 ControllerMpd.prototype.waitupdate = function () {

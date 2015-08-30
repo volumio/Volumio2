@@ -1,6 +1,6 @@
 {
   "playerName": {
-    "value": "volumio",
+    "value": "rubidium",
     "type": "string"
   },
   "startupSound": {

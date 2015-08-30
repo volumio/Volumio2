@@ -15,6 +15,7 @@ document.getElementById('button-volumioprev').onclick = function() {emitEvent('p
 document.getElementById('button-volumionext').onclick = function() {emitEvent('next', '');}
 document.getElementById('button-spopupdatetracklist').onclick = function() {emitEvent('serviceUpdateTracklist', 'spop');}
 document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitEvent('rebuildLibrary', '');}
+document.getElementById('button-updateallmetadata').onclick = function() {emitEvent('updateAllMetadata', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
 document.getElementById('button-libraryback').onclick = libraryBack;
 document.getElementById('button-libraryforward').onclick = libraryForward;

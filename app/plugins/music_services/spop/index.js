@@ -29,14 +29,8 @@ function ControllerSpop(context) {
 	self.connSpopStatus = libNet.createConnection(nPort, nHost); // Socket to listen for status changes
 
 	// Start a listener for receiving errors
-	self.connSpopCommand.on('error', function(err) {
-		console.error('SPOP command error:');
-		console.error(err);
-	});
-	self.connSpopStatus.on('error', function(err) {
-		console.error('SPOP status error:');
-		console.error(err);
-	});
+	self.connSpopCommand.on('error', libFast.bind(self.pushError, self));
+	self.connSpopStatus.on('error', libFast.bind(self.pushError, self));
 
 	// Init some command socket variables
 	self.bSpopCommandGotFirstMessage = false;
@@ -336,6 +330,22 @@ ControllerSpop.prototype.getTracklist = function() {
 	});
 };
 
+// Download album art for a given uri. Possibly slow, so called 'fetch' instead of 'get'
+ControllerSpop.prototype.fetchAlbumArt = function(sUri) {
+	var self = this;
+
+	return self.sendSpopCommand('uimage', [sUri, 2])
+		.then(JSON.parse)
+		.then(function(objResponse) {
+			if (objResponse.status === "ok") {
+				var objReturn = {};
+				objReturn.image = new Buffer(objResponse.data, 'base64');
+				objReturn.extension = 'jpg';
+				return objReturn;
+			}
+		});
+}
+
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
 
@@ -424,9 +434,14 @@ ControllerSpop.prototype.pushState = function(state) {
 };
 
 // Pass the error if we don't want to handle it
-ControllerSpop.prototype.pushError = function(sReason) {
+ControllerSpop.prototype.pushError = function(error) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pushError(' + sReason + ')');
+
+	if ((typeof error) === 'string') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
+	} else if ((typeof error) === 'object') {
+		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
+	}
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
@@ -500,7 +515,8 @@ ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput, 
 						'genres': [],
 						'tracknumber': 0,
 						'date': '',
-						'duration': 0
+						'duration': 0,
+						'albumart_uri': curTracklist.tracks[j].uri
 					});
 				}
 			});
