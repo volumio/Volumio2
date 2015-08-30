@@ -1,8 +1,9 @@
 {
   "menuItems":[
-{id: "home", name: "Home", state: "volumio.playback"},
-{id: "components", name: "Components", state: "volumio.components"},
-{id: "network", name: "Network", state: "volumio.plugin",params: {pluginName: "network"}},
-{id: "multi-room", name: "Multi Room", state: "volumio.multi-room"},
-{id: "system", name: "System", state: "volumio.plugin", params: {pluginName: "system"}}]
+    {"id": "home", "name": "Home", "state": "volumio.playback"},
+    {"id": "components", "name": "Components", "state": "volumio.components"},
+    {"id": "network", "name": "Network", "state": "volumio.plugin","params": {"pluginName": "system_controller/network"}},
+    {"id": "multi-room", "name": "Multi Room", "state": "volumio.multi-room"},
+    {"id": "system", "name": "System", "state": "volumio.plugin", "params": {"pluginName": "system_controller/system"}}
+  ]
 }
