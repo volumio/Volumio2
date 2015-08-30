@@ -1,8 +1,8 @@
 {
   "menuItems":[
-    {"id":"home","name":"Home","type":"static","state":"volumio.playback"},
-    {"id":"music_services/mpd","name":"Playback options","type":"dynamic"},
-    {"id":"components","name":"Components","type":"static","state":"volumio.components"},
-    {"id":"system_controllers/network","name":"Network","type":"dynamic"},
-    {"id":"system_controllers/system","name":"System","type":"dynamic"}]
+{id: "home", name: "Home", state: "volumio.playback"},
+{id: "components", name: "Components", state: "volumio.components"},
+{id: "network", name: "Network", state: "volumio.plugin",params: {pluginName: "network"}},
+{id: "multi-room", name: "Multi Room", state: "volumio.multi-room"},
+{id: "system", name: "System", state: "volumio.plugin", params: {pluginName: "system"}}]
 }
