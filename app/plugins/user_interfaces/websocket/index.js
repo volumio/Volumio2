@@ -1,6 +1,9 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
+var s=require('string');
+
+
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
  * @type {InterfaceWebUI}
@@ -315,8 +318,77 @@ function InterfaceWebUI (context) {
 
 			selfConnWebSocket.emit('pushMultiRoomDevices',response);
 		});
+
+		connWebSocket.on('getBrowseSources', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=[{name:'Favourites', uri: 'favourites'},
+				{name:'Playlists', uri: 'playlists'},
+				{name:'Music Library', uri: 'music-library'},
+				{name:'Radio', uri: 'radio'},
+				{name:'Radio Favourites', uri: 'radio-favourites'}];
+
+
+			selfConnWebSocket.emit('pushBrowseSources',returnedData);
+		});
+
+		connWebSocket.on('BrowseLibrary', function(data) {
+			selfConnWebSocket = this;
+
+			var curUri=s(data);
+			var response;
+
+			if(curUri.startsWith('favourites'))
+			{
+				response={};
+			}
+			else if(curUri.startsWith('playlists'))
+			{
+				response={};
+			}
+			else if(curUri.startsWith('music-library'))
+			{
+				response=self.processMusicLibrary(curUri);
+			}
+			else if(curUri.startsWith('radio'))
+			{
+				response={};
+			}
+			else if(curUri.startsWith('radio-favourites'))
+			{
+				response={};
+			}
+
+			selfConnWebSocket.emit('pushBrowseLibrary',returnedData);
+		});
 	});
 }
+
+InterfaceWebUI.prototype.processMusicLibrary = function(uri) {
+	var self = this;
+
+	// Push the message all clients
+	if(curUri=='music-library')
+	{
+		return {
+			navigation: {
+				prev: {
+					uri: 'music-library'
+				},
+				list: [
+					{category: 'USB',  uri: 'music-library/USB'},
+					{category: 'NAS',  uri: 'music-library/NAS'}
+				]
+			}
+		};
+	}
+	else
+	{
+		var sections=curUri.split('/');
+		
+	}
+}
+
 
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function(message) {
