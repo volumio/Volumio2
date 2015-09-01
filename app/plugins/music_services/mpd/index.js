@@ -691,6 +691,7 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 	var folder=sections[1];
 	var prev='';
 	var folderToList='';
+	var command='lsinfo';
 	var list=[];
 
 	if(sections.length>1)
@@ -701,29 +702,61 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 		prev=s(prev).chompRight('/');
 
 		for(var j=1;j<sections.length;j++)
-			folderToList+=sections[i]+'/';
+			folderToList+=sections[j]+'/';
 
 		folderToList=s(folderToList).chompRight('/');
 
+		command+=' "'+folderToList+'"';
+
 	}
 
-	var cmd='{echo "lsinfo '+folderToList+'"} | telnet localhost 6600';
-	exec(cmd,
-		function (error, stdout, stderr) {
-			console.log(stdout);
+	var mpd = require('mpd'),
+		cmd = mpd.cmd;
+	var client = mpd.connect({
+		port: 6600,
+		host: 'localhost'
+	});
 
-			defer.resolve({
-				navigation: {
-					prev: {
-						uri: prev.s
-					},
-					list: list
+	console.log(command);
+	client.on('ready', function() {
+	client.sendCommand(cmd(command, []), function(err, msg) {
+		if (msg) {
+			var lines = s(msg).lines();
+			for (var i = 0; i < lines.length; i++) {
+				var line = s(lines[i]);
+				if (line.startsWith('directory:')) {
+					var path=line.chompLeft('directory:').trimLeft().s;
+					var name=path.split('/');
+					var count=name.length;
+
+					list.push({type: 'folder',  title: name[count-1], icon: 'fa-folder', uri: 'music-library/'+path});
 				}
-			});
+				else if (line.startsWith('file:')) {
+					var path=line.chompLeft('file:').trimLeft().s;
+					var name=path.split('/');
+					var count=name.length;
+
+					var artist=s(lines[i+3]).chompLeft('Artist:').trimLeft().s;
+					var album=s(lines[i+5]).chompLeft('Album:').trimLeft().s;
+
+					list.push({type: 'song',  title: name[count-1], artist: artist, album: album, icon: 'fa-song', uri: 'music-library/'+path});
+				}
+
+			}
+		}
+		else console.log(err);
+
+		defer.resolve({
+			navigation: {
+				prev: {
+					uri: prev.s
+				},
+				list: list
+			}
 		});
+	});
 
-
-
+	});
 	return defer.promise;
 }
 

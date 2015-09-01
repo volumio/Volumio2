@@ -14,7 +14,7 @@ socket.on('pushBrowseSources',function(data)
 });
 */
 console.log("GET BrowseLibrary\n\n");
-socket.emit('BrowseLibrary',{uri:'music-library/USB'});
+socket.emit('BrowseLibrary',{uri:'music-library/USB/Audioslave/Out of Exile'});
 
 socket.on('pushBrowseLibrary',function(data)
 {
