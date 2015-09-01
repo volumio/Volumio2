@@ -335,58 +335,44 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('BrowseLibrary', function(data) {
 			selfConnWebSocket = this;
 
-			var curUri=s(data);
+			var curUri=s(data.uri);
+
 			var response;
+
+
 
 			if(curUri.startsWith('favourites'))
 			{
-				response={};
+				response=self.commandRouter.executeOnPlugin('music_service','mpd','listFavourites',curUri);
 			}
 			else if(curUri.startsWith('playlists'))
 			{
-				response={};
+				response=self.commandRouter.executeOnPlugin('music_service','mpd','listPlaylists',curUri);
 			}
 			else if(curUri.startsWith('music-library'))
 			{
-				response=self.processMusicLibrary(curUri);
+				response=self.commandRouter.executeOnPlugin('music_service','mpd','listMusicLibrary',curUri);
 			}
 			else if(curUri.startsWith('radio'))
 			{
-				response={};
+				response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadio',curUri);
 			}
 			else if(curUri.startsWith('radio-favourites'))
 			{
-				response={};
+				response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioFavourites',curUri);
 			}
 
-			selfConnWebSocket.emit('pushBrowseLibrary',returnedData);
+			response.then(function(result)
+			{
+				selfConnWebSocket.emit('pushBrowseLibrary',result);
+			})
+			.fail(function()
+			{
+				self.printToastMessage('error',"Browse error",'An error occurred while browsing the folder.');
+			});
+
 		});
 	});
-}
-
-InterfaceWebUI.prototype.processMusicLibrary = function(uri) {
-	var self = this;
-
-	// Push the message all clients
-	if(curUri=='music-library')
-	{
-		return {
-			navigation: {
-				prev: {
-					uri: 'music-library'
-				},
-				list: [
-					{category: 'USB',  uri: 'music-library/USB'},
-					{category: 'NAS',  uri: 'music-library/NAS'}
-				]
-			}
-		};
-	}
-	else
-	{
-		var sections=curUri.split('/');
-		
-	}
 }
 
 

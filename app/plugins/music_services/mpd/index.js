@@ -5,6 +5,7 @@ var libUtil = require('util');
 var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
+var s=require('string');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -643,3 +644,87 @@ ControllerMpd.prototype.waitupdate = function () {
 
 
 }
+
+
+ControllerMpd.prototype.listFavourites = function (uri) {
+	var self = this;
+
+
+	var defer = libQ.defer();
+
+	defer.resolve({
+		navigation: {
+			prev: {
+				uri: '/'
+			},
+			list: [
+			]
+		}
+	});
+	return defer.promise;
+}
+
+ControllerMpd.prototype.listPlaylists = function (uri) {
+	var self = this;
+
+
+	var defer = libQ.defer();
+
+	defer.resolve({
+		navigation: {
+			prev: {
+				uri: '/'
+			},
+			list: [
+			]
+		}
+	});
+	return defer.promise;
+}
+
+ControllerMpd.prototype.listMusicLibrary = function (uri) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	var sections=uri.split('/');
+	var folder=sections[1];
+	var prev='';
+	var folderToList='';
+	var list=[];
+
+	if(sections.length>1)
+	{
+		for(var i=0;i<sections.length-1;i++)
+			prev+=sections[i]+'/';
+
+		prev=s(prev).chompRight('/');
+
+		for(var j=1;j<sections.length;j++)
+			folderToList+=sections[i]+'/';
+
+		folderToList=s(folderToList).chompRight('/');
+
+	}
+
+	var cmd='{echo "lsinfo '+folderToList+'"} | telnet localhost 6600';
+	exec(cmd,
+		function (error, stdout, stderr) {
+			console.log(stdout);
+
+			defer.resolve({
+				navigation: {
+					prev: {
+						uri: prev.s
+					},
+					list: list
+				}
+			});
+		});
+
+
+
+	return defer.promise;
+}
+
+
