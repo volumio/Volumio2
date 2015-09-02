@@ -736,10 +736,15 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 					var name=path.split('/');
 					var count=name.length;
 
-					var artist=s(lines[i+3]).chompLeft('Artist:').trimLeft().s;
-					var album=s(lines[i+5]).chompLeft('Album:').trimLeft().s;
+					var artist=self.searchFor(lines,i+1,'Artist:');
+					var album=self.searchFor(lines,i+1,'Album:');
+					var title=self.searchFor(lines,i+1,'Title:');
 
-					list.push({type: 'song',  title: name[count-1], artist: artist, album: album, icon: 'music', uri: 'music-library/'+path});
+					if( title == undefined)
+					{
+						title=name[count-1];
+					}
+					list.push({type: 'song',  title: title, artist: artist, album: album, icon: 'music', uri: 'music-library/'+path});
 				}
 
 			}
@@ -758,6 +763,27 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 
 	});
 	return defer.promise;
+}
+
+ControllerMpd.prototype.searchFor = function (lines,startFrom,beginning) {
+	var self=this;
+
+	var count=lines.length;
+	var i=0;
+
+	while(startFrom+i<count)
+	{
+		var line=s(lines[startFrom+i]);
+
+		if(line.startsWith(beginning))
+			return line.chompLeft(beginning).trimLeft().s;
+		else if(line.startsWith('file:'))
+			return '';
+		else if(line.startsWith('directory:'))
+			return '';
+
+		i++;
+	}
 }
 
 
