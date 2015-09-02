@@ -372,6 +372,20 @@ function InterfaceWebUI (context) {
 			});
 
 		});
+
+		connWebSocket.on('GetTrackInfo', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.stateMachine.getState();
+			returnedData.then(function(data)
+			{
+				console.log(data);
+				selfConnWebSocket.emit('pushGetTrackInfo',data);
+			});
+
+
+		});
+
 	});
 }
 
