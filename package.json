@@ -32,9 +32,9 @@
     "random-string": "^0.1.2",
     "serve-favicon": "~2.1.3",
     "socket.io": "^1.2.0",
+    "socket.io-client": "",
     "sort-on": "^1.0.1",
-    "socket.io-client":"",
-    "string":"3.3.1",
+    "string": "^3.3.1",
     "underscore": "~1.7.0",
     "v-conf": "0.0.2"
   },
