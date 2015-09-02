@@ -339,9 +339,9 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	self.commandRouter.volumioretrievevolume();
 	self.timeLastServiceStateUpdate = Date.now();
 
-	if (self.currentTrackBlock.service !== sService) {
+	/*if (self.currentTrackBlock.service !== sService) {
 		return libQ.reject('Error: ' + sService + ' announced a state update when it is not the currently active service');
-	}
+	}*/
 
 	if (stateService.status === 'play') {
 		if (self.currentStatus === 'play') {
@@ -361,6 +361,22 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 
 			return self.startPlaybackTimer(self.currentSeek);
 		}
+		else if (self.currentStatus === 'stop') {
+			self.currentPosition = stateService.position;
+			self.currentSeek = stateService.seek;
+			self.currentDuration = stateService.duration;
+			self.currentDynamicTitle = stateService.dynamictitle;
+			self.currentSampleRate = stateService.samplerate;
+			self.currentBitDepth = stateService.bitdepth;
+			self.currentChannels = stateService.channels;
+
+			self.getState()
+				.then(libFast.bind(self.pushState, self))
+				.fail(libFast.bind(self.pushError, self));
+
+			return self.startPlaybackTimer(self.currentSeek)
+		}
+
 	} else if (stateService.status === 'stop') {
 		if (self.currentStatus === 'play') {
 			// Service has stopped without client request, meaning it is finished playing its track block. Move on to next track block.
