@@ -332,7 +332,7 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket.emit('pushBrowseSources',returnedData);
 		});
 
-		connWebSocket.on('BrowseLibrary', function(data) {
+		connWebSocket.on('browseLibrary', function(data) {
 			selfConnWebSocket = this;
 
 			var curUri=s(data.uri);
