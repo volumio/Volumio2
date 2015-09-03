@@ -744,7 +744,7 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 					{
 						title=name[count-1];
 					}
-					list.push({type: 'song',  title: title, artist: artist, album: album, icon: 'music', uri: 'music-library/'+path});
+					list.push({service: 'mpd', type: 'song',  title: title, artist: artist, album: album, icon: 'music', uri: 'music-library/'+path});
 				}
 
 			}
