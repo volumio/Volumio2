@@ -829,12 +829,12 @@ ControllerMpd.prototype.updateQueue = function () {
 						var artist=self.searchFor(lines,i+1,'Artist:');
 						var album=self.searchFor(lines,i+1,'Album:');
 						var title=self.searchFor(lines,i+1,'Title:');
-
+						var tracknumber=self.searchFor(lines,i+1,'Pos:');
 						if( title == undefined)
 						{
 							title=name[count-1];
 						}
-						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', albumart: 'aieie' });
+						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber, albumart: 'http://img2-ak.lst.fm/i/u/34s/2ce29f74a6f54b8791e5fdacc2ba36f5.png' });
 
 						self.commandRouter.addQueueItems(queue);
 					}
