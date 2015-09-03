@@ -737,7 +737,7 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 					var name=path.split('/');
 					var count=name.length;
 
-					list.push({type: 'folder',  title: name[count-1], icon: 'folder-open-o', uri: 'music-library/'+path});
+					list.push({type: 'folder',  title: name[count-1], icon: 'fa fa-folder-open-o', uri: 'music-library/'+path});
 				}
 				else if (line.startsWith('file:')) {
 					var path=line.chompLeft('file:').trimLeft().s;
@@ -752,7 +752,7 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 					{
 						title=name[count-1];
 					}
-					list.push({service: 'mpd', type: 'song',  title: title, artist: artist, album: album, icon: 'music', uri: 'music-library/'+path});
+					list.push({service: 'mpd', type: 'song',  title: title, artist: artist, album: album, icon: 'fa fa-music', uri: 'music-library/'+path});
 				}
 
 			}
