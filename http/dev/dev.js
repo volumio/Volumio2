@@ -200,23 +200,21 @@ function updatePlayerQueue(arrayQueue) {
 		var sText = curEntry.name;
 		var sSubText = '';
 		if ('service' in curEntry) {
-			sSubText = sSubText.concat(' [Service]: ' + curEntry.service + '');
+			sSubText = sSubText.concat(' Service: ' + curEntry.service + '');
 		}
 		if ('uri' in curEntry) {
-			sSubText = sSubText.concat(' [Uri]: ' + curEntry.uri + '');
+			sSubText = sSubText.concat(' Uri: ' + curEntry.uri + '');
 		}
-		if ('artists' in curEntry) {
-			sSubText = sSubText.concat(' [Artists]: ' + JSON.stringify(curEntry.artists));
+		if ('artist' in curEntry) {
+			sSubText = sSubText.concat(' Artist: ' + curEntry.artist);
 		}
-		if ('albums' in curEntry) {
-			sSubText = sSubText.concat(' [Albums]: ' + JSON.stringify(curEntry.albums) + '');
+		if ('album' in curEntry) {
+			sSubText = sSubText.concat(' Album: ' + curEntry.album + '');
 		}
-		if ('tracknumber' in curEntry) {
-			sSubText = sSubText.concat(' [Tracknumber]: ' + JSON.stringify(curEntry.tracknumber));
+		if ('albumart' in curEntry) {
+			sSubText = sSubText.concat(' Albumart: ' + curEntry.albumart + '');
 		}
-		if ('date' in curEntry) {
-			sSubText = sSubText.concat(' [Date]: ' + JSON.stringify(curEntry.date) + '');
-		}
+
 
 		var buttonRemove = document.createElement('button');
 		buttonRemove.appendChild(document.createTextNode('Remove'));

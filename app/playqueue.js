@@ -15,6 +15,8 @@ function CorePlayQueue(commandRouter, stateMachine) {
 	self.arrayQueue = [];
 
 	self.queueReadyDeferred.resolve();
+
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------

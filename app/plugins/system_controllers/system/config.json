@@ -1,6 +1,6 @@
 {
   "playerName": {
-    "value": "volumio",
+    "value": "Volumio",
     "type": "string"
   },
   "startupSound": {
@@ -17,6 +17,6 @@
   },
   "uuid": {
     "type": "string",
-    "value": "6c1b90b1-f134-446a-9156-76b3161564d7"
+    "value": ""
   }
 }

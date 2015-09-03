@@ -35,7 +35,7 @@ CoreStateMachine.prototype.getState = function() {
 		channels: self.currentChannels,
 		volume: self.currentVolume,
 		mute: self.currentMute,
-		service: sService
+		service: 'mpd'
 	});
 };
 
@@ -339,15 +339,19 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	self.commandRouter.volumioretrievevolume();
 	self.timeLastServiceStateUpdate = Date.now();
 
-	/*if (self.currentTrackBlock.service !== sService) {
-		return libQ.reject('Error: ' + sService + ' announced a state update when it is not the currently active service');
-	}*/
+	//If play is issued by a different entity than Volumio, the system will accept and handle it
+	if (self.currentTrackBlock.service !== sService) {
+		console.log(sService);
+		 self.currentTrackBlock.service = sService;
+		self.currentStatus = stateService.status;
+		self.currentPosition = stateService.position;
+	}
 
 	if (stateService.status === 'play') {
 		if (self.currentStatus === 'play') {
 			// We are waiting for playback to begin, and service has just begun playing
 			// Or we are currently playing, and the playback service has announced an updated play state (next track, etc)
-			self.currentPosition = stateService.position + self.currentTrackBlock.startindex;
+			self.currentPosition = stateService.position;
 			self.currentSeek = stateService.seek;
 			self.currentDuration = stateService.duration;
 			self.currentDynamicTitle = stateService.dynamictitle;

@@ -40,7 +40,7 @@ function ControllerMpd(context) {
 
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
-
+	self.updateQueue();
 	self.fswatch();
 	// When playback status changes
 	self.clientMpd.on('system-player', function() {
@@ -786,4 +786,74 @@ ControllerMpd.prototype.searchFor = function (lines,startFrom,beginning) {
 	}
 }
 
+ControllerMpd.prototype.updateQueue = function () {
+	var self = this;
+
+	var defer = libQ.defer();
+
+
+
+	var prev='';
+	var folderToList='';
+	var command='playlistinfo';
+	var list=[];
+
+
+
+	var mpd = require('mpd'),
+		cmd = mpd.cmd;
+	var client = mpd.connect({
+		port: 6600,
+		host: 'localhost'
+	});
+
+	console.log(command);
+	client.on('ready', function() {
+		client.sendCommand(cmd(command, []), function(err, msg) {
+			if (msg) {
+				var lines = s(msg).lines();
+				for (var i = 0; i < lines.length; i++) {
+					var line = s(lines[i]);
+					if (line.startsWith('directory:')) {
+						var path=line.chompLeft('directory:').trimLeft().s;
+						var name=path.split('/');
+						var count=name.length;
+
+						list.push({type: 'folder',  title: name[count-1], icon: 'folder-open-o', uri: 'music-library/'+path});
+					}
+					else if (line.startsWith('file:')) {
+						var path=line.chompLeft('file:').trimLeft().s;
+						var name=path.split('/');
+						var count=name.length;
+
+						var artist=self.searchFor(lines,i+1,'Artist:');
+						var album=self.searchFor(lines,i+1,'Album:');
+						var title=self.searchFor(lines,i+1,'Title:');
+
+						if( title == undefined)
+						{
+							title=name[count-1];
+						}
+						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', albumart: 'aieie' });
+
+						self.commandRouter.addQueueItems(queue);
+					}
+
+				}
+			}
+			else console.log(err);
+
+			defer.resolve({
+				navigation: {
+					prev: {
+						uri: prev.s
+					},
+					list: list
+				}
+			});
+		});
+
+	});
+	return defer.promise;
+}
 
