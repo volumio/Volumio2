@@ -27,7 +27,10 @@ CoreStateMachine.prototype.getState = function() {
 	return libQ.resolve({
 		status: self.currentStatus,
 		position: self.currentPosition,
-		dynamictitle: self.currentDynamicTitle,
+		title: self.currentTitle,
+		artist: self.currentArtist,
+		album: self.currentAlbum,
+		albumart: self.currentAlbumArt,
 		seek: self.currentSeek,
 		duration: self.currentDuration,
 		samplerate: self.currentSampleRate,
@@ -269,7 +272,10 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentTrackBlock = [];
 		self.timeLastServiceStateUpdate = 0;
 		self.timerPlayback = null;
-		self.currentDynamicTitle = null;
+		self.currentTitle = null;
+		self.currentArtist = null;
+		self.currentAlbum = null;
+		self.currentAlbumArt = null;
 		self.currentSampleRate = null;
 		self.currentBitDepth = null;
 		self.currentChannels = null;
@@ -362,7 +368,10 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentPosition = stateService.position;
 			self.currentSeek = stateService.seek;
 			self.currentDuration = stateService.duration;
-			self.currentDynamicTitle = stateService.dynamictitle;
+			self.currentTitle = stateService.title;
+			self.currentArtist = stateService.artist;
+			self.currentAlbum = stateService.album;
+			self.currentAlbumArt = stateService.albumart;
 			self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;
@@ -377,7 +386,10 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentPosition = stateService.position;
 			self.currentSeek = stateService.seek;
 			self.currentDuration = stateService.duration;
-			self.currentDynamicTitle = stateService.dynamictitle;
+			self.currentTitle = stateService.title;
+			self.currentArtist = stateService.artist;
+			self.currentAlbum = stateService.album;
+			self.currentAlbumArt = stateService.albumart;
 			self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;

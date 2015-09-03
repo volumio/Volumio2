@@ -6,6 +6,7 @@ var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
 var s=require('string');
+var albumArt = require('album-art');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -226,12 +227,18 @@ ControllerMpd.prototype.getState = function() {
 			})
 			.then(libFast.bind(self.parseTrackInfo, self))
 			.then(function(trackinfo) {
-				collectedState.dynamictitle = trackinfo.dynamictitle;
+				collectedState.title = trackinfo.title;
+				collectedState.artist = trackinfo.artist;
+				collectedState.album = trackinfo.album;
+				collectedState.albumart = trackinfo.albumart;
 				return libQ.resolve(collectedState);
 			});
 			// Else return null track info
 		} else {
-			collectedState.dynamictitle = null;
+			collectedState.title = null;
+			collectedState.artist = null;
+			collectedState.album = null;
+			collectedState.albumart = null;
 			return libQ.resolve(collectedState);
 		}
 	});
@@ -309,10 +316,35 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
+	//TODO FIX SILLY IF ELSE STATEMENT
 	if ('Title' in objTrackInfo) {
-		return libQ.resolve({dynamictitle: objTrackInfo.Title});
+		return libQ.resolve({title: objTrackInfo.Title});
 	} else {
-		return libQ.resolve({dynamictitle: null});
+		return libQ.resolve({title: null});
+	}
+
+	if ('Artist' in objTrackInfo) {
+		return libQ.resolve({artist: objTrackInfo.Artist});
+	} else {
+		return libQ.resolve({artist: null});
+	}
+
+	if ('Album' in objTrackInfo) {
+		return libQ.resolve({album: objTrackInfo.Album});
+	} else {
+		return libQ.resolve({album: null});
+	}
+
+	if ('Album' in objTrackInfo) {
+		albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
+
+			return libQ.resolve({albumart: url});
+		});
+	} else {
+		albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
+
+				return libQ.resolve({albumart: url});
+		});
 	}
 };
 
