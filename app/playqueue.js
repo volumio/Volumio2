@@ -29,6 +29,7 @@ CorePlayQueue.prototype.getQueue = function() {
 
 	return self.queueReady
 		.then(function() {
+			self.commandRouter.pushConsoleMessage(self.arrayQueue);
 			return self.arrayQueue;
 		});
 };
@@ -77,5 +78,6 @@ CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
 		.then(function() {
 			self.arrayQueue = self.arrayQueue.concat(arrayItems);
 			return self.commandRouter.volumioPushQueue(self.arrayQueue);
+			self.commandRouter.pushConsoleMessage(self.arrayQueue);
 		});
 };
