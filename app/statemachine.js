@@ -63,6 +63,14 @@ CoreStateMachine.prototype.addQueueItems = function(arrayItems) {
 	return self.playQueue.addQueueItems(arrayItems);
 };
 
+// Add array of items to queue
+CoreStateMachine.prototype.clearQueue = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::ClearQueue');
+
+	return self.playQueue.clearPlayQueue();
+};
+
 // Volumio Play Command
 CoreStateMachine.prototype.play = function(promisedResponse) {
 	var self = this;

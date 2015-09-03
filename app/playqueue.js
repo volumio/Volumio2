@@ -81,3 +81,9 @@ CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
 			self.commandRouter.pushConsoleMessage(self.arrayQueue);
 		});
 };
+
+CorePlayQueue.prototype.clearPlayQueue = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+	return self.arrayQueue = [];
+}

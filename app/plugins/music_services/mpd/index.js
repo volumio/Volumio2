@@ -54,6 +54,14 @@ function ControllerMpd(context) {
 			return self.logDone(timeStart);
 		});
 	});
+
+	self.clientMpd.on('system-playlist', function() {
+		var timeStart = Date.now();
+		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Queue Update');
+		self.updateQueue();
+	});
+
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -807,7 +815,7 @@ ControllerMpd.prototype.updateQueue = function () {
 		host: 'localhost'
 	});
 
-	console.log(command);
+
 	client.on('ready', function() {
 		client.sendCommand(cmd(command, []), function(err, msg) {
 			if (msg) {
@@ -835,7 +843,7 @@ ControllerMpd.prototype.updateQueue = function () {
 							title=name[count-1];
 						}
 						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber, albumart: 'http://img2-ak.lst.fm/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png' });
-
+						self.commandRouter.volumioClearQueue();
 						self.commandRouter.addQueueItems(queue);
 					}
 

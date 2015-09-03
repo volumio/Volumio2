@@ -96,6 +96,14 @@ CoreCommandRouter.prototype.volumioRemoveQueueItem = function(nIndex) {
 	return self.stateMachine.removeQueueItem(nIndex);
 }
 
+// Volumio Clear Queue Item
+CoreCommandRouter.prototype.volumioClearQueue = function() {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioClearQueue');
+
+	return self.stateMachine.clearQueue();
+}
+
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function(VolumeInteger) {
 	var self = this;
