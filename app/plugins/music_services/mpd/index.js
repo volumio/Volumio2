@@ -836,8 +836,6 @@ ControllerMpd.prototype.updateQueue = function () {
 
 	var defer = libQ.defer();
 
-
-
 	var prev='';
 	var folderToList='';
 	var command='playlistinfo';
@@ -857,16 +855,16 @@ ControllerMpd.prototype.updateQueue = function () {
 		client.sendCommand(cmd(command, []), function(err, msg) {
 			if (msg) {
 				var lines = s(msg).lines();
+
+				self.commandRouter.volumioClearQueue();
+
+
+				var promises = [];
+
+				var queue=[];
 				for (var i = 0; i < lines.length; i++) {
 					var line = s(lines[i]);
-					if (line.startsWith('directory:')) {
-						var path=line.chompLeft('directory:').trimLeft().s;
-						var name=path.split('/');
-						var count=name.length;
-
-						list.push({type: 'folder',  title: name[count-1], icon: 'folder-open-o', uri: 'music-library/'+path});
-					}
-					else if (line.startsWith('file:')) {
+					if (line.startsWith('file:')) {
 						var path=line.chompLeft('file:').trimLeft().s;
 						var name=path.split('/');
 						var count=name.length;
@@ -879,12 +877,32 @@ ControllerMpd.prototype.updateQueue = function () {
 						{
 							title=name[count-1];
 						}
-						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber, albumart: 'http://img2-ak.lst.fm/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png' });
-						self.commandRouter.volumioClearQueue();
-						self.commandRouter.addQueueItems(queue);
+
+						var queueItem={uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber };
+						queueItem.promise=self.getAlbumArt(artist,album);
+						promises.push(queueItem.promise);
+						queue.push(queueItem);
+
 					}
 
 				}
+
+
+				libQ.all(promises)
+					.then(function(data){
+						for(var i in queue)
+						{
+							queue[i].albumart=data[i];
+							delete queue[i].promise;
+						}
+
+						self.commandRouter.addQueueItems(queue);
+					})
+					.fail(function (e) {
+						console.log("Failed retrieving a url", e)
+					})
+
+
 			}
 			else console.log(err);
 
@@ -900,5 +918,18 @@ ControllerMpd.prototype.updateQueue = function () {
 
 	});
 	return defer.promise;
+}
+
+
+ControllerMpd.prototype.getAlbumArt = function (artist,album) {
+	var self = this;
+
+	var defer = libQ.defer();
+	albumArt(artist,album, 'extralarge', function (err, url) {
+		defer.resolve(url);
+	});
+
+	return defer.promise;
+
 }
 
