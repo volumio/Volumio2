@@ -448,6 +448,18 @@ function InterfaceWebUI (context) {
 
 
 		});
+
+		connWebSocket.on('addToPlaylist', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.addToPlaylist(data.name,'mpd',data.uri);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushAddToPlaylist',data);
+			});
+
+
+		});
 	});
 }
 

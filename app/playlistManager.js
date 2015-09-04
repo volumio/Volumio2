@@ -65,3 +65,38 @@ PlaylistManager.prototype.deletePlaylist = function(name) {
 
 	return defer.promise;
 }
+
+PlaylistManager.prototype.addToPlaylist = function(name,service,uri) {
+	var self = this;
+
+	var defer=libQ.defer();
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
+
+	var playlist=[];
+	var filePath=self.playlistFolder+name,playlist;
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+			defer.resolve({success:false,reason:'Playlist does not exist'});
+		else
+		{
+			fs.readJson(filePath, function (err, data) {
+				if(err)
+					defer.resolve({success:false});
+				else
+				{
+					data.push({service:service,uri:uri});
+					fs.writeJson(filePath, data, function (err) {
+						if(err)
+							defer.resolve({success:false});
+						else defer.resolve({success:true});
+					})
+				}
+			});
+		}
+
+	});
+
+	return defer.promise;
+}
