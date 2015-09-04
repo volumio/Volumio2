@@ -38,3 +38,30 @@ PlaylistManager.prototype.createPlaylist = function(name) {
 
 	return defer.promise;
 }
+
+PlaylistManager.prototype.deletePlaylist = function(name) {
+	var self = this;
+
+	var defer=libQ.defer();
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Deleting playlist '+name);
+
+	var playlist=[];
+	var filePath=self.playlistFolder+name,playlist;
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+			defer.resolve({success:false,reason:'Playlist does not exist'});
+		else
+		{
+			fs.unlink(filePath, function (err) {
+				if(err)
+					defer.resolve({success:false});
+				else defer.resolve({success:true});
+			});
+		}
+
+	});
+
+	return defer.promise;
+}
