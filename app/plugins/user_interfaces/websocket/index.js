@@ -417,12 +417,26 @@ function InterfaceWebUI (context) {
 			var returnedData=self.commandRouter.stateMachine.getState();
 			returnedData.then(function(data)
 			{
-				console.log(data);
 				selfConnWebSocket.emit('pushGetTrackInfo',data);
 			});
 
 
 		});
+
+
+		// PLAYLIST MANAGEMENT
+		connWebSocket.on('createPlaylist', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.createPlaylist(data.name);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushCreatePlaylist',data);
+			});
+
+
+		});
+
 
 	});
 }
