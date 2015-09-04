@@ -182,6 +182,16 @@ function InterfaceWebUI (context) {
 				});
 		});
 
+		connWebSocket.on('clearQueue', function () {
+			var timeStart = Date.now();
+			self.logStart('Client requests Volumio Clear Queue')
+				.then(libFast.bind(self.commandRouter.volumioClearQueue, self.commandRouter))
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 		connWebSocket.on('previous', function () {
 			var timeStart = Date.now();
 			self.logStart('Client requests Volumio previous')

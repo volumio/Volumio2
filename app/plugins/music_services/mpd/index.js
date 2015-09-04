@@ -117,6 +117,14 @@ ControllerMpd.prototype.resume = function() {
 	return self.sendMpdCommand('play', []);
 };
 
+// MPD clear
+ControllerMpd.prototype.clear = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clear');
+
+	return self.sendMpdCommand('clear', []);
+};
+
 // MPD music library
 ControllerMpd.prototype.getTracklist = function() {
 	var self = this;
@@ -316,41 +324,36 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
-	var defer=libQ.defer();
-
-	var resp={};
-
-	if (objTrackInfo.Title) {
-		resp.title=objTrackInfo.Title;
+	//TODO FIX SILLY IF ELSE STATEMENT
+	if ('Title' in objTrackInfo) {
+		return libQ.resolve({title: objTrackInfo.Title});
 	} else {
-		resp.title=objTrackInfo.null;
+		return libQ.resolve({title: null});
 	}
 
-	if (objTrackInfo.Artist) {
-		resp.artist=objTrackInfo.Artist;
+	if ('Artist' in objTrackInfo) {
+		return libQ.resolve({artist: objTrackInfo.Artist});
 	} else {
-		resp.artist=null;
+		return libQ.resolve({artist: null});
 	}
 
-	if (objTrackInfo.Album) {
-		resp.album=objTrackInfo.Album;
+	if ('Album' in objTrackInfo) {
+		return libQ.resolve({album: objTrackInfo.Album});
 	} else {
-		resp.album=null;
+		return libQ.resolve({album: null});
 	}
 
-	if (objTrackInfo.Album) {
+	if ('Album' in objTrackInfo) {
 		albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
-			resp.albumart=url;
-			defer.resolve(resp);
+
+			return libQ.resolve({albumart: url});
 		});
 	} else {
 		albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
-			resp.albumart=null;
-			defer.resolve(resp);
+
+				return libQ.resolve({albumart: url});
 		});
 	}
-
-	return defer.promise;
 };
 
 // Parse MPD's text playlist into a Volumio recognizable playlist object
@@ -836,6 +839,8 @@ ControllerMpd.prototype.updateQueue = function () {
 
 	var defer = libQ.defer();
 
+
+
 	var prev='';
 	var folderToList='';
 	var command='playlistinfo';
@@ -855,15 +860,16 @@ ControllerMpd.prototype.updateQueue = function () {
 		client.sendCommand(cmd(command, []), function(err, msg) {
 			if (msg) {
 				var lines = s(msg).lines();
-
-				self.commandRouter.volumioClearQueue();
-
-				var promises = [];
-
-				var queue=[];
 				for (var i = 0; i < lines.length; i++) {
 					var line = s(lines[i]);
-					if (line.startsWith('file:')) {
+					if (line.startsWith('directory:')) {
+						var path=line.chompLeft('directory:').trimLeft().s;
+						var name=path.split('/');
+						var count=name.length;
+
+						list.push({type: 'folder',  title: name[count-1], icon: 'folder-open-o', uri: 'music-library/'+path});
+					}
+					else if (line.startsWith('file:')) {
 						var path=line.chompLeft('file:').trimLeft().s;
 						var name=path.split('/');
 						var count=name.length;
@@ -877,33 +883,22 @@ ControllerMpd.prototype.updateQueue = function () {
 							title=name[count-1];
 						}
 
-						var queueItem={uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber };
-						queueItem.promise=self.getAlbumArt(artist,album);
-						promises.push(queueItem.promise);
-						queue.push(queueItem);
 
+						//TODO MAKE IT PROPER
+						albumArt(artist, album , function (err, url) {
+							var self=this;
+							albumart= url;
+							console.log(albumart);
+							return self.albumart;
+						});
+						albumart= 'http://img2-ak.lst.fm/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png';
+						//TO DO FOREACH AND SEND COMPLETE OBJECT
+						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber, albumart: albumart });
+						self.commandRouter.volumioClearQueue();
+						self.commandRouter.addQueueItems(queue);
 					}
 
 				}
-
-				console.log(queue);
-
-
-				libQ.all(promises)
-					.then(function(data){
-						for(var i in queue)
-						{
-							queue[i].albumart=data[i];
-							delete queue[i].promise;
-						}
-
-						self.commandRouter.addQueueItems(queue);
-					})
-					.fail(function (e) {
-						console.log("Failed retrieving a url", e)
-					})
-
-
 			}
 			else console.log(err);
 
@@ -919,18 +914,5 @@ ControllerMpd.prototype.updateQueue = function () {
 
 	});
 	return defer.promise;
-}
-
-
-ControllerMpd.prototype.getAlbumArt = function (artist,album) {
-	var self = this;
-
-	var defer = libQ.defer();
-	albumArt(artist,album, 'extralarge', function (err, url) {
-		defer.resolve(url);
-	});
-
-	return defer.promise;
-
 }
 

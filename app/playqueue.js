@@ -85,5 +85,13 @@ CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
 CorePlayQueue.prototype.clearPlayQueue = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+	self.clearMpdQueue();
 	return self.arrayQueue = [];
+}
+
+CorePlayQueue.prototype.clearMpdQueue = function() {
+
+	var self = this;
+	return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');
+
 }
