@@ -85,7 +85,7 @@ CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
 CorePlayQueue.prototype.clearPlayQueue = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
-	self.clearMpdQueue();
+
 	return self.arrayQueue = [];
 }
 
