@@ -95,8 +95,9 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('addQueueUri', function (uri) {
+		connWebSocket.on('addToQueue', function (data) {
 			selfConnWebSocket = this;
+			var uri = data.uri;
 			//TODO add proper service handler
 			var timeStart = Date.now();
 			self.logStart('Client requests add Volumio queue items')
