@@ -458,6 +458,17 @@ function InterfaceWebUI (context) {
 				selfConnWebSocket.emit('pushAddToPlaylist',data);
 			});
 
+		});
+
+		connWebSocket.on('removeFromPlaylist', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.removeFromPlaylist(data.name,'mpd',data.uri);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushRemoveFromPlaylist',data);
+			});
+
 
 		});
 	});
