@@ -5,8 +5,6 @@ var libUtil = require('util');
 var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
-var s=require('string');
-var albumArt = require('album-art');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -35,13 +33,15 @@ function ControllerMpd(context) {
 
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
-
 	// Catch and log errors
-	self.clientMpd.on('error', libFast.bind(self.pushError, self));
+	self.clientMpd.on('error', function(err) {
+		console.error('MPD error: ');
+		console.error(err);
+	});
 
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
-	self.updateQueue();
+
 	self.fswatch();
 	// When playback status changes
 	self.clientMpd.on('system-player', function() {
@@ -55,14 +55,6 @@ function ControllerMpd(context) {
 			return self.logDone(timeStart);
 		});
 	});
-
-	self.clientMpd.on('system-playlist', function() {
-		var timeStart = Date.now();
-		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Queue Update');
-		self.updateQueue();
-	});
-
-
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -117,14 +109,6 @@ ControllerMpd.prototype.resume = function() {
 	return self.sendMpdCommand('play', []);
 };
 
-// MPD clear
-ControllerMpd.prototype.clear = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clear');
-
-	return self.sendMpdCommand('clear', []);
-};
-
 // MPD music library
 ControllerMpd.prototype.getTracklist = function() {
 	var self = this;
@@ -139,12 +123,6 @@ ControllerMpd.prototype.getTracklist = function() {
 			return objResult.tracks;
 		});
 };
-
-// Download album art for a given uri. Possibly slow, so called 'fetch' instead of 'get'
-ControllerMpd.prototype.fetchAlbumArt = function(sUri) {
-	// TODO pull the album art from the file itself or from an image in the folder
-	return libQ.resolve();
-}
 
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
@@ -178,8 +156,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function(sInput) {
 				'performers': [],
 				'tracknumber': 0,
 				'date': '',
-				'duration': 0,
-				'albumart_uri': arrayLineParts[1]
+				'duration': 0
 			};
 			objReturn.tracks.push(curEntry);
 		} else if (arrayLineParts[0] === 'playlist') {
@@ -235,18 +212,12 @@ ControllerMpd.prototype.getState = function() {
 			})
 			.then(libFast.bind(self.parseTrackInfo, self))
 			.then(function(trackinfo) {
-				collectedState.title = trackinfo.title;
-				collectedState.artist = trackinfo.artist;
-				collectedState.album = trackinfo.album;
-				collectedState.albumart = trackinfo.albumart;
+				collectedState.dynamictitle = trackinfo.dynamictitle;
 				return libQ.resolve(collectedState);
 			});
 			// Else return null track info
 		} else {
-			collectedState.title = null;
-			collectedState.artist = null;
-			collectedState.album = null;
-			collectedState.albumart = null;
+			collectedState.dynamictitle = null;
 			return libQ.resolve(collectedState);
 		}
 	});
@@ -273,14 +244,10 @@ ControllerMpd.prototype.pushState = function(state) {
 };
 
 // Pass the error if we don't want to handle it
-ControllerMpd.prototype.pushError = function(error) {
+ControllerMpd.prototype.pushError = function(sReason) {
 	var self = this;
-
-	if ((typeof error) === 'string') {
-		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error: ' + error);
-	} else if ((typeof error) === 'object') {
-		return self.commandRouter.pushConsoleMessage.call(self.commandRouter, 'Error:\n' + error.stack);
-	}
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushError');
+	self.commandRouter.pushConsoleMessage(sReason);
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
@@ -324,35 +291,10 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
-	//TODO FIX SILLY IF ELSE STATEMENT
 	if ('Title' in objTrackInfo) {
-		return libQ.resolve({title: objTrackInfo.Title});
+		return libQ.resolve({dynamictitle: objTrackInfo.Title});
 	} else {
-		return libQ.resolve({title: null});
-	}
-
-	if ('Artist' in objTrackInfo) {
-		return libQ.resolve({artist: objTrackInfo.Artist});
-	} else {
-		return libQ.resolve({artist: null});
-	}
-
-	if ('Album' in objTrackInfo) {
-		return libQ.resolve({album: objTrackInfo.Album});
-	} else {
-		return libQ.resolve({album: null});
-	}
-
-	if ('Album' in objTrackInfo) {
-		albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
-
-			return libQ.resolve({albumart: url});
-		});
-	} else {
-		albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
-
-				return libQ.resolve({albumart: url});
-		});
+		return libQ.resolve({dynamictitle: null});
 	}
 };
 
@@ -664,7 +606,9 @@ ControllerMpd.prototype.fswatch = function () {
 			watcher.close();
 			return self.waitupdate();
 		})
-		.on('error', libFast.bind(self.pushError, self));
+		.on('error', function (error) {
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase ERROR');
+		})
 }
 
 ControllerMpd.prototype.waitupdate = function () {
@@ -692,227 +636,3 @@ ControllerMpd.prototype.waitupdate = function () {
 
 
 }
-
-
-ControllerMpd.prototype.listFavourites = function (uri) {
-	var self = this;
-
-
-	var defer = libQ.defer();
-
-	defer.resolve({
-		navigation: {
-			prev: {
-				uri: '/'
-			},
-			list: [
-			]
-		}
-	});
-	return defer.promise;
-}
-
-ControllerMpd.prototype.listPlaylists = function (uri) {
-	var self = this;
-
-
-	var defer = libQ.defer();
-
-	defer.resolve({
-		navigation: {
-			prev: {
-				uri: '/'
-			},
-			list: [
-			]
-		}
-	});
-	return defer.promise;
-}
-
-ControllerMpd.prototype.listMusicLibrary = function (uri) {
-	var self = this;
-
-	var defer = libQ.defer();
-
-	var sections=uri.split('/');
-	var folder=sections[1];
-	var prev='';
-	var folderToList='';
-	var command='lsinfo';
-	var list=[];
-
-	if(sections.length>1)
-	{
-		for(var i=0;i<sections.length-1;i++)
-			prev+=sections[i]+'/';
-
-		prev=s(prev).chompRight('/');
-
-		for(var j=1;j<sections.length;j++)
-			folderToList+=sections[j]+'/';
-
-		folderToList=s(folderToList).chompRight('/');
-
-		command+=' "'+folderToList+'"';
-
-	}
-
-	var mpd = require('mpd'),
-		cmd = mpd.cmd;
-	var client = mpd.connect({
-		port: 6600,
-		host: 'localhost'
-	});
-
-	console.log(command);
-	client.on('ready', function() {
-	client.sendCommand(cmd(command, []), function(err, msg) {
-		if (msg) {
-			var lines = s(msg).lines();
-			for (var i = 0; i < lines.length; i++) {
-				var line = s(lines[i]);
-				if (line.startsWith('directory:')) {
-					var path=line.chompLeft('directory:').trimLeft().s;
-					var name=path.split('/');
-					var count=name.length;
-
-					list.push({type: 'folder',  title: name[count-1], icon: 'fa fa-folder-open-o', uri: 'music-library/'+path});
-				}
-				else if (line.startsWith('file:')) {
-					var path=line.chompLeft('file:').trimLeft().s;
-					var name=path.split('/');
-					var count=name.length;
-
-					var artist=self.searchFor(lines,i+1,'Artist:');
-					var album=self.searchFor(lines,i+1,'Album:');
-					var title=self.searchFor(lines,i+1,'Title:');
-
-					if( title == undefined)
-					{
-						title=name[count-1];
-					}
-					list.push({service: 'mpd', type: 'song',  title: title, artist: artist, album: album, icon: 'fa fa-music', uri: 'music-library/'+path});
-				}
-
-			}
-		}
-		else console.log(err);
-
-		defer.resolve({
-			navigation: {
-				prev: {
-					uri: prev.s
-				},
-				list: list
-			}
-		});
-	});
-
-	});
-	return defer.promise;
-}
-
-ControllerMpd.prototype.searchFor = function (lines,startFrom,beginning) {
-	var self=this;
-
-	var count=lines.length;
-	var i=0;
-
-	while(startFrom+i<count)
-	{
-		var line=s(lines[startFrom+i]);
-
-		if(line.startsWith(beginning))
-			return line.chompLeft(beginning).trimLeft().s;
-		else if(line.startsWith('file:'))
-			return '';
-		else if(line.startsWith('directory:'))
-			return '';
-
-		i++;
-	}
-}
-
-ControllerMpd.prototype.updateQueue = function () {
-	var self = this;
-
-	var defer = libQ.defer();
-
-
-
-	var prev='';
-	var folderToList='';
-	var command='playlistinfo';
-	var list=[];
-
-
-
-	var mpd = require('mpd'),
-		cmd = mpd.cmd;
-	var client = mpd.connect({
-		port: 6600,
-		host: 'localhost'
-	});
-
-
-	client.on('ready', function() {
-		client.sendCommand(cmd(command, []), function(err, msg) {
-			if (msg) {
-				var lines = s(msg).lines();
-				for (var i = 0; i < lines.length; i++) {
-					var line = s(lines[i]);
-					if (line.startsWith('directory:')) {
-						var path=line.chompLeft('directory:').trimLeft().s;
-						var name=path.split('/');
-						var count=name.length;
-
-						list.push({type: 'folder',  title: name[count-1], icon: 'folder-open-o', uri: 'music-library/'+path});
-					}
-					else if (line.startsWith('file:')) {
-						var path=line.chompLeft('file:').trimLeft().s;
-						var name=path.split('/');
-						var count=name.length;
-
-						var artist=self.searchFor(lines,i+1,'Artist:');
-						var album=self.searchFor(lines,i+1,'Album:');
-						var title=self.searchFor(lines,i+1,'Title:');
-						var tracknumber=self.searchFor(lines,i+1,'Pos:');
-						if( title == undefined)
-						{
-							title=name[count-1];
-						}
-
-
-						//TODO MAKE IT PROPER
-						albumArt(artist, album , function (err, url) {
-							var self=this;
-							albumart= url;
-							console.log(albumart);
-							return self.albumart;
-						});
-						albumart= 'http://img2-ak.lst.fm/i/u/174s/2ce29f74a6f54b8791e5fdacc2ba36f5.png';
-						//TO DO FOREACH AND SEND COMPLETE OBJECT
-						var queue = ({uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber, albumart: albumart });
-						self.commandRouter.volumioClearQueue();
-						self.commandRouter.addQueueItems(queue);
-					}
-
-				}
-			}
-			else console.log(err);
-
-			defer.resolve({
-				navigation: {
-					prev: {
-						uri: prev.s
-					},
-					list: list
-				}
-			});
-		});
-
-	});
-	return defer.promise;
-}
-
