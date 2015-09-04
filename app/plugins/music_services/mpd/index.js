@@ -858,7 +858,6 @@ ControllerMpd.prototype.updateQueue = function () {
 
 				self.commandRouter.volumioClearQueue();
 
-
 				var promises = [];
 
 				var queue=[];
@@ -886,6 +885,8 @@ ControllerMpd.prototype.updateQueue = function () {
 					}
 
 				}
+
+				console.log(queue);
 
 
 				libQ.all(promises)
