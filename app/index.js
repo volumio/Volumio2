@@ -26,6 +26,8 @@ function CoreCommandRouter (server) {
 	// Start the playlist FS
 	self.playlistFS = new (require('./playlistfs.js'))(self);
 
+	self.playListManager= new (require('./playlistManager.js'))(self);
+
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'BOOT COMPLETED');
 
 }
