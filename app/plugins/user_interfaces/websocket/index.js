@@ -97,7 +97,8 @@ function InterfaceWebUI (context) {
 
 		connWebSocket.on('addToQueue', function (data) {
 			selfConnWebSocket = this;
-			var uri = data.uri;
+			var queuedata = JSON.parse(data);
+			var uri = queuedata.uri;
 			//TODO add proper service handler
 			var timeStart = Date.now();
 			self.logStart('Client requests add Volumio queue items')
