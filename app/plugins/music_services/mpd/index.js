@@ -117,6 +117,14 @@ ControllerMpd.prototype.resume = function() {
 	return self.sendMpdCommand('play', []);
 };
 
+// MPD clear
+ControllerMpd.prototype.clear = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clear');
+
+	return self.sendMpdCommand('clear', []);
+};
+
 // MPD music library
 ControllerMpd.prototype.getTracklist = function() {
 	var self = this;
