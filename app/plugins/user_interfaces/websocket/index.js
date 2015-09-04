@@ -97,14 +97,17 @@ function InterfaceWebUI (context) {
 
 		connWebSocket.on('addToQueue', function (data) {
 			selfConnWebSocket = this;
-			var queuedata = JSON.parse(data);
-			var uri = queuedata.uri;
-			uri = str.replace('music-library/','');
+			//var queuedata = JSON.parse(data);
+			console.log(data);
+			var uri = data.uri;
+			var arr = uri.split("/");
+			arr.shift();
+			str = arr.join('/');
 			//TODO add proper service handler
 			var timeStart = Date.now();
 			self.logStart('Client requests add Volumio queue items')
 				.then(function () {
-					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', uri);
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', str);
 				})
 				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
