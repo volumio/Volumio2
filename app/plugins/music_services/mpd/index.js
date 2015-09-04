@@ -316,36 +316,41 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
-	//TODO FIX SILLY IF ELSE STATEMENT
-	if ('Title' in objTrackInfo) {
-		return libQ.resolve({title: objTrackInfo.Title});
+	var defer=libQ.defer();
+
+	var resp={};
+
+	if (objTrackInfo.Title) {
+		resp.title=objTrackInfo.Title;
 	} else {
-		return libQ.resolve({title: null});
+		resp.title=objTrackInfo.null;
 	}
 
-	if ('Artist' in objTrackInfo) {
-		return libQ.resolve({artist: objTrackInfo.Artist});
+	if (objTrackInfo.Artist) {
+		resp.artist=objTrackInfo.Artist;
 	} else {
-		return libQ.resolve({artist: null});
+		resp.artist=null;
 	}
 
-	if ('Album' in objTrackInfo) {
-		return libQ.resolve({album: objTrackInfo.Album});
+	if (objTrackInfo.Album) {
+		resp.album=objTrackInfo.Album;
 	} else {
-		return libQ.resolve({album: null});
+		resp.album=null;
 	}
 
-	if ('Album' in objTrackInfo) {
+	if (objTrackInfo.Album) {
 		albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
-
-			return libQ.resolve({albumart: url});
+			resp.albumart=url;
+			defer.resolve(resp);
 		});
 	} else {
 		albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
-
-				return libQ.resolve({albumart: url});
+			resp.albumart=null;
+			defer.resolve(resp);
 		});
 	}
+
+	return defer.promise;
 };
 
 // Parse MPD's text playlist into a Volumio recognizable playlist object
