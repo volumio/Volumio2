@@ -95,6 +95,20 @@ function InterfaceWebUI (context) {
 				});
 		});
 
+		connWebSocket.on('addQueueUri', function (uri) {
+			selfConnWebSocket = this;
+			//TODO add proper service handler
+			var timeStart = Date.now();
+			self.logStart('Client requests add Volumio queue items')
+				.then(function () {
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', uri);
+				})
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 		connWebSocket.on('getLibraryListing', function (objParams) {
 			selfConnWebSocket = this;
 

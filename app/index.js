@@ -131,7 +131,18 @@ CoreCommandRouter.prototype.volumioAddQueueUids = function(arrayUids) {
 
 	return self.musicLibrary.addQueueUids(arrayUids);
 }
+/*
 
+TODO: This should become the default entry point for adding music to any service
+// Volumio Add Queue Uri
+CoreCommandRouter.prototype.volumioAddQueueUri = function(data) {
+	var self = this;
+	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::volumioAddQueueUri');
+	var service = data.service;
+	var uri = data.uri;
+		return self.executeOnPlugin('music_service', 'mpd', 'add', uri);
+}
+*/
 // Volumio Rebuild Library
 CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
 	var self = this;

@@ -59,7 +59,7 @@ function ControllerMpd(context) {
 	self.clientMpd.on('system-playlist', function() {
 		var timeStart = Date.now();
 		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Queue Update');
-		self.updateQueue();
+		//self.updateQueue();
 	});
 
 
@@ -91,6 +91,14 @@ ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackUris) {
 			return libQ.resolve();
 		}
 	});
+};
+
+//MPD Add
+ControllerMpd.prototype.add = function(data) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::add' + data);
+
+	return self.sendMpdCommand('add', [data]);
 };
 
 // MPD stop
