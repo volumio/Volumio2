@@ -66,7 +66,7 @@ function InterfaceWebUI (context) {
 					return self.logDone(timeStart);
 				});
 		});
-
+/*
 		connWebSocket.on('removeQueueItem', function (nIndex) {
 			selfConnWebSocket = this;
 
@@ -80,7 +80,7 @@ function InterfaceWebUI (context) {
 					return self.logDone(timeStart);
 				});
 		});
-
+*/
 		connWebSocket.on('addQueueUids', function (arrayUids) {
 			selfConnWebSocket = this;
 
@@ -102,6 +102,20 @@ function InterfaceWebUI (context) {
 			self.logStart('Client requests add Volumio queue items')
 				.then(function () {
 					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', uri);
+				})
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('removeQueueItem', function (position) {
+			selfConnWebSocket = this;
+			//TODO add proper service handler
+			var timeStart = Date.now();
+			self.logStart('Client requests remove Volumio queue items')
+				.then(function () {
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'remove', position);
 				})
 				.fail(libFast.bind(self.pushError, self))
 				.done(function () {

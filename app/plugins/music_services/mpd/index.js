@@ -96,9 +96,16 @@ ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackUris) {
 //MPD Add
 ControllerMpd.prototype.add = function(data) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::add' + data);
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::add ' + data);
 
 	return self.sendMpdCommand('add', [data]);
+};
+//MPD Remove
+ControllerMpd.prototype.remove = function(position) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::remove ' + position);
+
+	return self.sendMpdCommand('delete', [position]);
 };
 
 // MPD stop
