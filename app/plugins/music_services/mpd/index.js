@@ -886,9 +886,6 @@ ControllerMpd.prototype.updateQueue = function () {
 
 				}
 
-				console.log(queue);
-
-
 				libQ.all(promises)
 					.then(function(data){
 						for(var i in queue)
@@ -926,9 +923,14 @@ ControllerMpd.prototype.getAlbumArt = function (artist,album) {
 	var self = this;
 
 	var defer = libQ.defer();
-	albumArt(artist,album, 'extralarge', function (err, url) {
-		defer.resolve(url);
-	});
+
+	if(album!=undefined && artist!=undefined)
+	{
+		albumArt(artist,album, 'extralarge', function (err, url) {
+			defer.resolve(url);
+		});
+	}
+	else defer.resolve('');
 
 	return defer.promise;
 
