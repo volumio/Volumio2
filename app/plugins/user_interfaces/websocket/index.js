@@ -99,6 +99,7 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 			var queuedata = JSON.parse(data);
 			var uri = queuedata.uri;
+			uri = str.replace('music-library/','');
 			//TODO add proper service handler
 			var timeStart = Date.now();
 			self.logStart('Client requests add Volumio queue items')
