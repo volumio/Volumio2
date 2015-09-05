@@ -147,3 +147,41 @@ PlaylistManager.prototype.removeFromPlaylist = function(name,service,uri) {
 
 	return defer.promise;
 }
+
+PlaylistManager.prototype.playPlaylist = function(name,service,uri) {
+	var self = this;
+
+	var defer=libQ.defer();
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Play playlist '+name);
+
+	var filePath=self.playlistFolder+name;
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+			defer.resolve({success:false,reason:'Playlist does not exist'});
+		else
+		{
+			fs.readJson(filePath, function (err, data) {
+				if(err)
+					defer.resolve({success:false});
+				else
+				{
+					self.commandRouter.volumioClearQueue();
+
+					var uids=[];
+					for(var i in data)
+					{
+						uids.push(data.uri);
+					}
+
+					self.commandRouter.volumioAddQueueUids(uids);
+					self.commandRouter.volumioPlay();
+				}
+			});
+		}
+
+	});
+
+	return defer.promise;
+}

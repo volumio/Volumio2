@@ -472,6 +472,18 @@ function InterfaceWebUI (context) {
 
 
 		});
+
+		connWebSocket.on('playPlaylist', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.playPlaylist(data.name);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushPlayPlaylist',data);
+			});
+
+
+		});
 	});
 }
 
