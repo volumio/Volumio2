@@ -124,6 +124,7 @@ ControllerMpd.prototype.pause = function() {
 	return self.sendMpdCommand('pause', []);
 };
 
+//MPD Next
 ControllerMpd.prototype.next = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::next');
@@ -131,12 +132,22 @@ ControllerMpd.prototype.next = function() {
 	return self.sendMpdCommand('next', []);
 };
 
+//MPD Previous
 ControllerMpd.prototype.previous = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::previous');
 
 	return self.sendMpdCommand('previous', []);
 };
+
+//MPD Seek
+ControllerMpd.prototype.seek = function(timepos) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::seek to ' +timepos);
+
+	return self.sendMpdCommand('seekcur', [timepos]);
+};
+
 
 // MPD resume
 ControllerMpd.prototype.resume = function() {

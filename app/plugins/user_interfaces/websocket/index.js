@@ -129,6 +129,20 @@ function InterfaceWebUI (context) {
 				});
 		});
 
+		connWebSocket.on('seek', function (position) {
+			selfConnWebSocket = this;
+			//TODO add proper service handler
+			var timeStart = Date.now();
+			self.logStart('Client requests Seek to ' +position)
+				.then(function () {
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'seek', position);
+				})
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 		connWebSocket.on('getLibraryListing', function (objParams) {
 			selfConnWebSocket = this;
 
@@ -489,20 +503,6 @@ function InterfaceWebUI (context) {
 
 
 		});
-
-		connWebSocket.on('enqueue', function(data) {
-			selfConnWebSocket = this;
-
-			var returnedData=self.commandRouter.playListManager.enqueue(data.name);
-			returnedData.then(function(data)
-			{
-				selfConnWebSocket.emit('pushEnqueue',data);
-			});
-
-
-		});
-
-
 	});
 }
 
