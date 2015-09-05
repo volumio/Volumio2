@@ -1,5 +1,7 @@
+require('newrelic');
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
+
 // Using port 3000 for the debug interface
 expressApp.set('port', 3000);
 
