@@ -124,6 +124,20 @@ ControllerMpd.prototype.pause = function() {
 	return self.sendMpdCommand('pause', []);
 };
 
+ControllerMpd.prototype.next = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::next');
+
+	return self.sendMpdCommand('next', []);
+};
+
+ControllerMpd.prototype.previous = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::previous');
+
+	return self.sendMpdCommand('previous', []);
+};
+
 // MPD resume
 ControllerMpd.prototype.resume = function() {
 	var self = this;

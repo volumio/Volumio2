@@ -95,6 +95,7 @@ CoreStateMachine.prototype.play = function(promisedResponse) {
 };
 
 // Volumio Next Command
+// TODO FIX WITH PREVIOUS MECHANISM, NOW THIS IS ONLY FOR MPD
 CoreStateMachine.prototype.next = function(promisedResponse) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::next');
@@ -105,19 +106,20 @@ CoreStateMachine.prototype.next = function(promisedResponse) {
 			self.currentPosition++;
 
 			return self.updateTrackBlock()
-			.then(libFast.bind(self.getState, self))
-			.then(libFast.bind(self.pushState, self));
+				.then(libFast.bind(self.getState, self))
+				.then(libFast.bind(self.pushState, self));
 		}
 
 	} else if (self.currentStatus === 'play') {
 		// Play -> Next transition
-		if (self.currentPosition < self.playQueue.arrayQueue.length - 1) {
-			self.currentPosition++;
-			self.currentSeek = 0;
+		/*if (self.currentPosition < self.playQueue.arrayQueue.length - 1) {
+		 self.currentPosition++;
+		 self.currentSeek = 0;
 
-			return self.updateTrackBlock()
-			.then(libFast.bind(self.serviceClearAddPlay, self));
-		}
+		 return self.updateTrackBlock()
+		 .then(libFast.bind(self.serviceClearAddPlay, self));
+		 }*/
+		self.commandRouter.executeOnPlugin('music_service', 'mpd', 'next');
 
 	} else if (self.currentStatus === 'pause') {
 		// Pause -> Next transitiom
@@ -129,7 +131,7 @@ CoreStateMachine.prototype.next = function(promisedResponse) {
 		self.currentSeek = 0;
 
 		return self.updateTrackBlock()
-		.then(libFast.bind(self.serviceClearAddPlay, self));
+			.then(libFast.bind(self.serviceClearAddPlay, self));
 	}
 };
 
@@ -144,19 +146,22 @@ CoreStateMachine.prototype.previous = function(promisedResponse) {
 			self.currentPosition--;
 
 			return self.updateTrackBlock()
-			.then(libFast.bind(self.getState, self))
-			.then(libFast.bind(self.pushState, self));
+				.then(libFast.bind(self.getState, self))
+				.then(libFast.bind(self.pushState, self));
 		}
 
 	} else if (self.currentStatus === 'play') {
-		// Play -> Previous transition
-		if (self.currentPosition > 0) {
-			self.currentPosition--;
-			self.currentSeek = 0;
+		/*
+		 // Play -> Previous transition
+		 if (self.currentPosition > 0) {
+		 self.currentPosition--;
+		 self.currentSeek = 0;
 
-			return self.updateTrackBlock()
-			.then(libFast.bind(self.serviceClearAddPlay, self));
-		}
+		 return self.updateTrackBlock()
+		 .then(libFast.bind(self.serviceClearAddPlay, self));
+		 }*/
+		self.commandRouter.executeOnPlugin('music_service', 'mpd', 'next')
+
 
 	} else if (self.currentStatus === 'pause') {
 		// Pause -> Previous transition
@@ -168,7 +173,7 @@ CoreStateMachine.prototype.previous = function(promisedResponse) {
 		self.currentSeek = 0;
 
 		return self.updateTrackBlock()
-		.then(libFast.bind(self.serviceClearAddPlay, self));
+			.then(libFast.bind(self.serviceClearAddPlay, self));
 	}
 };
 
