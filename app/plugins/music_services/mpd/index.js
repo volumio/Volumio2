@@ -780,49 +780,61 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 
 	var cmd = libMpd.cmd;
 
-	self.clientMpd.sendCommand(cmd(command, []), function(err, msg) {
-		if (msg) {
-			console.log(msg);
-			var lines = s(msg).lines();
-			for (var i = 0; i < lines.length; i++) {
-				var line = s(lines[i]);
-				if (line.startsWith('directory:')) {
-					var path=line.chompLeft('directory:').trimLeft().s;
-					var name=path.split('/');
-					var count=name.length;
+	self.mpdReady.then(function() {
+		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+			if (msg) {
+				var lines = s(msg).lines();
+				for (var i = 0; i < lines.length; i++) {
+					var line = s(lines[i]);
+					if (line.startsWith('directory:')) {
+						var path = line.chompLeft('directory:').trimLeft().s;
+						var name = path.split('/');
+						var count = name.length;
 
-					list.push({type: 'folder',  title: name[count-1], icon: 'fa fa-folder-open-o', uri: 'music-library/'+path});
-				}
-				else if (line.startsWith('file:')) {
-					var path=line.chompLeft('file:').trimLeft().s;
-					var name=path.split('/');
-					var count=name.length;
-
-					var artist=self.searchFor(lines,i+1,'Artist:');
-					var album=self.searchFor(lines,i+1,'Album:');
-					var title=self.searchFor(lines,i+1,'Title:');
-
-					if( title == undefined)
-					{
-						title=name[count-1];
+						list.push({
+							type: 'folder',
+							title: name[count - 1],
+							icon: 'fa fa-folder-open-o',
+							uri: 'music-library/' + path
+						});
 					}
-					list.push({service: 'mpd', type: 'song',  title: title, artist: artist, album: album, icon: 'fa fa-music', uri: 'music-library/'+path});
+					else if (line.startsWith('file:')) {
+						var path = line.chompLeft('file:').trimLeft().s;
+						var name = path.split('/');
+						var count = name.length;
+
+						var artist = self.searchFor(lines, i + 1, 'Artist:');
+						var album = self.searchFor(lines, i + 1, 'Album:');
+						var title = self.searchFor(lines, i + 1, 'Title:');
+
+						if (title == undefined) {
+							title = name[count - 1];
+						}
+						list.push({
+							service: 'mpd',
+							type: 'song',
+							title: title,
+							artist: artist,
+							album: album,
+							icon: 'fa fa-music',
+							uri: 'music-library/' + path
+						});
+					}
+
 				}
-
 			}
-		}
-		else console.log(err);
+			else console.log(err);
 
-		defer.resolve({
-			navigation: {
-				prev: {
-					uri: prev.s
-				},
-				list: list
-			}
+			defer.resolve({
+				navigation: {
+					prev: {
+						uri: prev.s
+					},
+					list: list
+				}
+			});
 		});
 	});
-
 	return defer.promise;
 }
 
@@ -858,67 +870,71 @@ ControllerMpd.prototype.updateQueue = function () {
 	var list=[];
 
 	var cmd = libMpd.cmd;
-	self.clientMpd.sendCommand(cmd(command, []), function(err, msg) {
-		if (msg) {
-			var lines = s(msg).lines();
+	self.mpdReady.then(function(){
+		self.clientMpd.sendCommand(cmd(command, []), function(err, msg) {
+			if (msg) {
+				var lines = s(msg).lines();
 
-			self.commandRouter.volumioClearQueue();
+				self.commandRouter.volumioClearQueue();
 
-			var promises = [];
+				var promises = [];
 
-			var queue=[];
-			for (var i = 0; i < lines.length; i++) {
-				var line = s(lines[i]);
-				if (line.startsWith('file:')) {
-					var path=line.chompLeft('file:').trimLeft().s;
-					var name=path.split('/');
-					var count=name.length;
+				var queue=[];
+				for (var i = 0; i < lines.length; i++) {
+					var line = s(lines[i]);
+					if (line.startsWith('file:')) {
+						var path=line.chompLeft('file:').trimLeft().s;
+						var name=path.split('/');
+						var count=name.length;
 
-					var artist=self.searchFor(lines,i+1,'Artist:');
-					var album=self.searchFor(lines,i+1,'Album:');
-					var title=self.searchFor(lines,i+1,'Title:');
-					var tracknumber=self.searchFor(lines,i+1,'Pos:');
-					if( title == undefined)
-					{
-						title=name[count-1];
+						var artist=self.searchFor(lines,i+1,'Artist:');
+						var album=self.searchFor(lines,i+1,'Album:');
+						var title=self.searchFor(lines,i+1,'Title:');
+						var tracknumber=self.searchFor(lines,i+1,'Pos:');
+						if( title == undefined)
+						{
+							title=name[count-1];
+						}
+
+						var queueItem={uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber };
+						queueItem.promise=self.getAlbumArt(artist,album);
+						promises.push(queueItem.promise);
+						queue.push(queueItem);
+
 					}
-
-					var queueItem={uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber };
-					queueItem.promise=self.getAlbumArt(artist,album);
-					promises.push(queueItem.promise);
-					queue.push(queueItem);
 
 				}
 
+				libQ.all(promises)
+					.then(function(data){
+						for(var i in queue)
+						{
+							queue[i].albumart=data[i];
+							delete queue[i].promise;
+						}
+
+						self.commandRouter.addQueueItems(queue);
+					})
+					.fail(function (e) {
+						console.log("Failed retrieving a url", e)
+					})
+
+
 			}
+			else console.log(err);
 
-			libQ.all(promises)
-				.then(function(data){
-					for(var i in queue)
-					{
-						queue[i].albumart=data[i];
-						delete queue[i].promise;
-					}
-
-					self.commandRouter.addQueueItems(queue);
-				})
-				.fail(function (e) {
-					console.log("Failed retrieving a url", e)
-				})
-
-
-		}
-		else console.log(err);
-
-		defer.resolve({
-			navigation: {
-				prev: {
-					uri: prev.s
-				},
-				list: list
-			}
+			defer.resolve({
+				navigation: {
+					prev: {
+						uri: prev.s
+					},
+					list: list
+				}
+			});
 		});
 	});
+
+
 
 	return defer.promise;
 }
