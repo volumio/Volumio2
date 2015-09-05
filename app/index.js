@@ -18,13 +18,13 @@ function CoreCommandRouter (server) {
 	self.stateMachine = new (require('./statemachine.js'))(self);
 
 	// Start the music library
-	self.musicLibrary = new (require('./musiclibrary.js'))(self);
+	//self.musicLibrary = new (require('./musiclibrary.js'))(self);
 
 	// Start the volume controller
 	self.volumeControl = new (require('./volumecontrol.js'))(self);
 
 	// Start the playlist FS
-	self.playlistFS = new (require('./playlistfs.js'))(self);
+	//self.playlistFS = new (require('./playlistfs.js'))(self);
 
 	self.playListManager= new (require('./playlistManager.js'))(self);
 

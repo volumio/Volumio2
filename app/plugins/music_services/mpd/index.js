@@ -59,7 +59,7 @@ function ControllerMpd(context) {
 	self.clientMpd.on('system-playlist', function() {
 		var timeStart = Date.now();
 		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Queue Update');
-		//self.updateQueue();
+		self.updateQueue();
 	});
 
 
