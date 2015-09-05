@@ -149,7 +149,7 @@ PlaylistManager.prototype.removeFromPlaylist = function(name,service,uri) {
 	return defer.promise;
 }
 
-PlaylistManager.prototype.playPlaylist = function(name,service,uri) {
+PlaylistManager.prototype.playPlaylist = function(name) {
 	var self = this;
 
 	var defer=libQ.defer();
@@ -170,7 +170,6 @@ PlaylistManager.prototype.playPlaylist = function(name,service,uri) {
 				{
 					self.commandRouter.volumioClearQueue();
 
-					console.log(JSON.stringify(data));
 					var promises=[];
 					var promise;
 
@@ -178,15 +177,13 @@ PlaylistManager.prototype.playPlaylist = function(name,service,uri) {
 					.then(function(result){
 						for(var i in data)
 						{
-							console.log(data[i].uri);
 							promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', data[i].uri);
 							promises.push(promise);
 						}
 
-						promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'resume');
-
 						libQ.all(promises)
 							.then(function(data){
+								self.commandRouter.executeOnPlugin('music_service', 'mpd', 'resume');
 								defer.resolve({success:true});
 							})
 							.fail(function (e) {
@@ -207,14 +204,49 @@ PlaylistManager.prototype.playPlaylist = function(name,service,uri) {
 	return defer.promise;
 }
 
-PlaylistManager.prototype.enqueue = function(name,service,uri) {
+PlaylistManager.prototype.enqueue = function(name) {
 	var self = this;
 
 	var defer=libQ.defer();
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Enqueue ');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Enqueue '+name);
+
+	var filePath=self.playlistFolder+name;
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+			defer.resolve({success:false,reason:'Playlist does not exist'});
+		else
+		{
+			fs.readJson(filePath, function (err, data) {
+				if(err)
+					defer.resolve({success:false});
+				else
+				{
+					var promises=[];
+					var promise;
+
+					for(var i in data)
+					{
+						promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', data[i].uri);
+						promises.push(promise);
+					}
+
+					libQ.all(promises)
+						.then(function(data){
+							defer.resolve({success:true});
+						})
+						.fail(function (e) {
+							defer.resolve({success:false,reason:e});
+						});
 
 
+
+				}
+			});
+		}
+
+	});
 
 	return defer.promise;
 }
