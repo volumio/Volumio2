@@ -778,16 +778,9 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 
 	}
 
-	var mpd = require('mpd'),
-		cmd = mpd.cmd;
-	var client = mpd.connect({
-		port: 6600,
-		host: 'localhost'
-	});
-
-	console.log(command);
-	client.on('ready', function() {
-	client.sendCommand(cmd(command, []), function(err, msg) {
+	var cmd = libMpd.cmd;
+	self.clientMpd.on('ready', function() {
+		self.clientMpd.sendCommand(cmd(command, []), function(err, msg) {
 		if (msg) {
 			var lines = s(msg).lines();
 			for (var i = 0; i < lines.length; i++) {
@@ -864,18 +857,9 @@ ControllerMpd.prototype.updateQueue = function () {
 	var command='playlistinfo';
 	var list=[];
 
-
-
-	var mpd = require('mpd'),
-		cmd = mpd.cmd;
-	var client = mpd.connect({
-		port: 6600,
-		host: 'localhost'
-	});
-
-
-	client.on('ready', function() {
-		client.sendCommand(cmd(command, []), function(err, msg) {
+	var cmd = libMpd.cmd;
+	self.clientMpd.on('ready', function() {
+		self.clientMpd.sendCommand(cmd(command, []), function(err, msg) {
 			if (msg) {
 				var lines = s(msg).lines();
 

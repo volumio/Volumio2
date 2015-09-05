@@ -489,6 +489,20 @@ function InterfaceWebUI (context) {
 
 
 		});
+
+		connWebSocket.on('enqueue', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.enqueue(data.name);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushEnqueue',data);
+			});
+
+
+		});
+
+
 	});
 }
 

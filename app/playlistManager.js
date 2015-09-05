@@ -10,6 +10,7 @@ function PlaylistManager(commandRouter) {
 	self.commandRouter=commandRouter;
 
 	self.playlistFolder='/data/playlist/';
+	fs.ensureDirSync(self.playlistFolder);
 }
 
 PlaylistManager.prototype.createPlaylist = function(name) {
@@ -169,19 +170,51 @@ PlaylistManager.prototype.playPlaylist = function(name,service,uri) {
 				{
 					self.commandRouter.volumioClearQueue();
 
-					var uids=[];
-					for(var i in data)
-					{
-						uids.push(data.uri);
-					}
+					console.log(JSON.stringify(data));
+					var promises=[];
+					var promise;
 
-					self.commandRouter.volumioAddQueueUids(uids);
-					self.commandRouter.volumioPlay();
+					self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear')
+					.then(function(result){
+						for(var i in data)
+						{
+							console.log(data[i].uri);
+							promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', data[i].uri);
+							promises.push(promise);
+						}
+
+						promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'resume');
+
+						libQ.all(promises)
+							.then(function(data){
+								defer.resolve({success:true});
+							})
+							.fail(function (e) {
+								defer.resolve({success:false,reason:e});
+							});
+					})
+						.fail(function (e) {
+							defer.resolve({success:false,reason:e});
+						});
+
+
 				}
 			});
 		}
 
 	});
+
+	return defer.promise;
+}
+
+PlaylistManager.prototype.enqueue = function(name,service,uri) {
+	var self = this;
+
+	var defer=libQ.defer();
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Enqueue ');
+
+
 
 	return defer.promise;
 }
