@@ -96,7 +96,7 @@ ControllerMpd.prototype.clearAddPlayTracks = function(arrayTrackUris) {
 //MPD Add
 ControllerMpd.prototype.add = function(data) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::add ' + data);
+	self.commandRouter.pushToastMessage('Success','',str + ' Added');
 
 	return self.sendMpdCommand('add', [data]);
 };
@@ -164,6 +164,18 @@ ControllerMpd.prototype.clear = function() {
 
 	return self.sendMpdCommand('clear', []);
 };
+
+ControllerMpd.prototype.addPlay = function(data) {
+	var self = this;
+	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
+	self.commandRouter.pushToastMessage('Success','',str + ' Added');
+	return self.sendMpdCommandArray([
+		{command: 'clear', parameters: []},
+		{command: 'add', parameters: [data]},
+		{command: 'play', parameters: []}
+	]);
+};
+
 
 // MPD music library
 ControllerMpd.prototype.getTracklist = function() {

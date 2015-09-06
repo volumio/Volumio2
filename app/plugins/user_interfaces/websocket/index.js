@@ -111,7 +111,27 @@ function InterfaceWebUI (context) {
 				})
 				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
-					return self.logDone(timeStart);
+					return self.commandRouter.pushToastMessage('success',"Added", str);
+				});
+		});
+
+		connWebSocket.on('addPlay', function (data) {
+			selfConnWebSocket = this;
+			//var queuedata = JSON.parse(data);
+			console.log(data);
+			var uri = data.uri;
+			var arr = uri.split("/");
+			arr.shift();
+			str = arr.join('/');
+			//TODO add proper service handler
+			var timeStart = Date.now();
+			self.logStart('Client requests add and Play Volumio queue items')
+				.then(function () {
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlay', str);
+				})
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.commandRouter.pushToastMessage('success',"Play", str);
 				});
 		});
 
@@ -209,6 +229,7 @@ function InterfaceWebUI (context) {
 					return self.logDone(timeStart);
 				});
 		});
+
 
 		connWebSocket.on('pause', function () {
 			var timeStart = Date.now();
