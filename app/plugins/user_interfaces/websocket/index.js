@@ -371,10 +371,7 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('getMultiRoomDevices', function(data) {
 			selfConnWebSocket = this;
 
-			var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
-			var response=volumiodiscovery.getDevices();
-
-			selfConnWebSocket.emit('pushMultiRoomDevices',response);
+			self.pushMultiroom(selfConnWebSocket);
 		});
 
 		connWebSocket.on('getBrowseSources', function(data) {
@@ -503,6 +500,18 @@ function InterfaceWebUI (context) {
 
 
 		});
+
+		connWebSocket.on('enqueue', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.enqueue(data.name);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushEnqueue',data);
+			});
+
+
+		});
 	});
 }
 
@@ -565,14 +574,28 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket)
 	}
 }
 
+InterfaceWebUI.prototype.pushMultiroom = function(selfConnWebSocket) {
+	var self = this;
+
+	var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
+	var response=volumiodiscovery.getDevices();
+
+	selfConnWebSocket.emit('pushMultiRoomDevices',response);
+}
+
+
+
 // Receive player state updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.pushState = function(state, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushState');
 	if (connWebSocket) {
+		self.pushMultiroom(connWebSocket);
 		return libQ.fcall(libFast.bind(connWebSocket.emit, connWebSocket), 'pushState', state);
+
 	} else {
 		// Push the updated state to all clients
+		self.pushMultiroom(self.libSocketIO);
 		return libQ.fcall(libFast.bind(self.libSocketIO.emit, self.libSocketIO), 'pushState', state);
 	}
 }

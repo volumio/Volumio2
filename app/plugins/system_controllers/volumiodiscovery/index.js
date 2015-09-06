@@ -4,12 +4,16 @@ var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var foundVolumioInstances= new (require('v-conf'))();
 var mdns=require('mdns');
+var HashMap = require('hashmap');
+var io=require('socket.io-client');
 
 // Define the ControllerVolumioDiscovery class
 module.exports = ControllerVolumioDiscovery;
 
 function ControllerVolumioDiscovery(context) {
 	var self = this;
+
+	self.remoteConnections=new HashMap();
 
 	//getting configuration
 	config.loadFile(__dirname+'/config.json');
@@ -132,7 +136,13 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.addresses',"array",service.addresses);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.port',"string",service.port);
-			//foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.osname',"string",service.name);
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.status',"string",'stop');
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.volume',"number",0);
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.mute',"boolean",false);
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.artist',"string",'');
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.track',"string",'');
+
+			self.connectToRemoteVolumio(service.txtRecord.UUID,service.addresses[0]);
 
 			var toAdvertise=self.getDevices();
 			self.commandRouter.pushMultiroomDevices(toAdvertise);
@@ -148,6 +158,8 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 				{
 					self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Device '+service.name+' disapperared from network');
 					foundVolumioInstances.delete(key);
+
+					self.remoteConnections.remove(key);
 				}
 			}
 
@@ -163,6 +175,27 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 	}
 }
 
+
+ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) {
+	var self=this;
+
+	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+	var myuuid = systemController.getConf('uuid');
+
+	if((!self.remoteConnections.has(uuid))&&(myuuid!=uuid))
+	{
+		var socket= io.connect('http://'+ip+':3000');
+		socket.on('pushState',function(data)
+		{
+			console.log("Volumio "+uuid+ " changed its status to "+JSON.stringify(data));
+			var toAdvertise=self.getDevices();
+			self.commandRouter.pushMultiroomDevices(toAdvertise);
+		});
+
+		self.remoteConnections.set(uuid,socket);
+	}
+
+}
 
 String.prototype.capitalize = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1);
@@ -185,7 +218,11 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		var osname=foundVolumioInstances.get(key+'.name');
 		var port=foundVolumioInstances.get(key+'.port');
 		var uuid=foundVolumioInstances.get(key);
-
+		var status=foundVolumioInstances.get(key+'.status');
+		var volume=foundVolumioInstances.get(key+'.volume');
+		var mute=foundVolumioInstances.get(key+'.mute');
+		var artist=foundVolumioInstances.get(key+'.artist');
+		var track=foundVolumioInstances.get(key+'.track');
 
 		var addresses=foundVolumioInstances.get(key+'.addresses');
 
@@ -197,11 +234,11 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 				host:'http://'+address+":"+port,
 				name:osname.capitalize(),
 				state: {
-					status: 'play',
-					volume: 90,
-					mute: false,
-					artist: 'Franz ferdinand',
-					track: 'No you Girls'
+					status: status,
+					volume: volume,
+					mute: mute,
+					artist: artist,
+					track: track
 				}
 			};
 
