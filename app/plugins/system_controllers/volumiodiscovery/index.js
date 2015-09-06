@@ -184,12 +184,24 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 
 	if((!self.remoteConnections.has(uuid))&&(myuuid!=uuid))
 	{
+		console.log("Establishing connection to "+ip);
+
 		var socket= io.connect('http://'+ip+':3000');
-		socket.on('pushState',function(data)
+		socket.on('ready',function(sock)
 		{
-			console.log("Volumio "+uuid+ " changed its status to "+JSON.stringify(data));
-			var toAdvertise=self.getDevices();
-			self.commandRouter.pushMultiroomDevices(toAdvertise);
+			console.log("READY");
+			
+			sock.emit('getState',function(status)
+			{
+				console.log(status);
+			});
+
+			sock.on('pushState',function(data)
+			{
+				console.log("Volumio "+uuid+ " changed its status to "+JSON.stringify(data));
+				var toAdvertise=self.getDevices();
+				self.commandRouter.pushMultiroomDevices(toAdvertise);
+			});
 		});
 
 		self.remoteConnections.set(uuid,socket);
