@@ -199,6 +199,12 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 			socket.on('pushState',function(data)
 			{
 				console.log("Volumio "+uuid+ " changed its status to "+JSON.stringify(data));
+
+				foundVolumioInstances.set(service.txtRecord.UUID+'.status',data.status);
+				foundVolumioInstances.set(service.txtRecord.UUID+'.volume',data.volume);
+				foundVolumioInstances.set(service.txtRecord.UUID+'.mute',data.mute);
+				foundVolumioInstances.set(service.txtRecord.UUID+'.artist',data.artist);
+				foundVolumioInstances.set(service.txtRecord.UUID+'.track',data.title);
 				var toAdvertise=self.getDevices();
 				self.commandRouter.pushMultiroomDevices(toAdvertise);
 			});
