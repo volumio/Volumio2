@@ -184,22 +184,11 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 
 	if((!self.remoteConnections.has(uuid))&&(myuuid!=uuid))
 	{
-		console.log("Establishing connection to "+ip);
-
 		var socket= io.connect('http://'+ip+':3000');
 		socket.on('connect',function()
 		{
-			console.log("CONNECT");
-
-			socket.emit('getState',function(status)
-			{
-				console.log(status);
-			});
-
 			socket.on('pushState',function(data)
 			{
-				console.log("Volumio "+uuid+ " changed its status to "+JSON.stringify(data));
-
 				foundVolumioInstances.set(uuid+'.status',data.status);
 				foundVolumioInstances.set(uuid+'.volume',data.volume);
 				foundVolumioInstances.set(uuid+'.mute',data.mute);
