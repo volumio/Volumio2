@@ -187,10 +187,10 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 		console.log("Establishing connection to "+ip);
 
 		var socket= io.connect('http://'+ip+':3000');
-		socket.on('ready',function(sock)
+		socket.on('connect',function(sock)
 		{
-			console.log("READY");
-			
+			console.log("CONNECT");
+
 			sock.emit('getState',function(status)
 			{
 				console.log(status);
