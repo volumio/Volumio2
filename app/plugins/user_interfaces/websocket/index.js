@@ -438,14 +438,14 @@ function InterfaceWebUI (context) {
 				response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioFavourites',curUri);
 			}
 
-			response.then(function(result)
-			{
-				selfConnWebSocket.emit('pushBrowseLibrary',result);
-			})
-			.fail(function()
-			{
-				self.printToastMessage('error',"Browse error",'An error occurred while browsing the folder.');
-			});
+			if(response!=undefined) {
+				response.then(function (result) {
+					selfConnWebSocket.emit('pushBrowseLibrary', result);
+				})
+					.fail(function () {
+						self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+					});
+			}
 
 		});
 
