@@ -56,6 +56,18 @@ function ControllerMpd(context) {
 		});
 	});
 
+	self.clientMpd.on('system-options', function() {
+		var timeStart = Date.now();
+
+		self.logStart('MPD announces options state update')
+			.then(libFast.bind(self.getState, self))
+			.then(libFast.bind(self.pushState, self))
+			.fail(libFast.bind(self.pushError, self))
+			.done(function() {
+				return self.logDone(timeStart);
+			});
+	});
+
 	self.clientMpd.on('system-playlist', function() {
 		var timeStart = Date.now();
 		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Queue Update');
@@ -146,6 +158,22 @@ ControllerMpd.prototype.seek = function(timepos) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::seek to ' +timepos);
 
 	return self.sendMpdCommand('seekcur', [timepos]);
+};
+
+//MPD Random
+ControllerMpd.prototype.random = function(randomcmd) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Random');
+	var string = randomcmd ? 1 : 0;
+	return self.sendMpdCommand('random', [string]);
+};
+
+//MPD Repeat
+ControllerMpd.prototype.repeat = function(repeatcmd) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Repeat');
+	var string = repeatcmd ? 1 : 0;
+	return self.sendMpdCommand('repeat', [string]);
 };
 
 
@@ -460,6 +488,24 @@ ControllerMpd.prototype.parseState = function(objState) {
 		nChannels = Number(objMetrics[2]);
 	}
 
+	var random = null;
+	if ('random' in objState) {
+		if (objState.random == 1) {
+			random = true;
+		} else {
+			random = false;
+		}
+	}
+
+	var repeat = null;
+	if ('repeat' in objState) {
+		if (objState.repeat == 1) {
+			repeat = true;
+		} else {
+			repeat = false;
+		}
+	}
+
 	var sStatus = null;
 	if ('state' in objState) {
 		sStatus = objState.state;
@@ -472,7 +518,9 @@ ControllerMpd.prototype.parseState = function(objState) {
 		duration: nDuration,
 		samplerate: nSampleRate,
 		bitdepth: nBitDepth,
-		channels: nChannels
+		channels: nChannels,
+		random: random,
+		repeat: repeat
 	});
 };
 

@@ -281,6 +281,34 @@ function InterfaceWebUI (context) {
 				});
 		});
 
+		connWebSocket.on('setRandom', function (data) {
+			selfConnWebSocket = this;
+			//TODO add proper service handler
+			var timeStart = Date.now();
+			self.logStart('Client requests Volumio Random')
+				.then(function () {
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'random', data);
+				})
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
+		connWebSocket.on('setRepeat', function (data) {
+			selfConnWebSocket = this;
+			//TODO add proper service handler
+			var timeStart = Date.now();
+			self.logStart('Client requests Volumio Repeat '+data)
+				.then(function () {
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'repeat', data);
+				})
+				.fail(libFast.bind(self.pushError, self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		});
+
 		connWebSocket.on('serviceUpdateTracklist', function (sService) {
 			var timeStart = Date.now();
 			self.logStart('Client requests Update Tracklist')

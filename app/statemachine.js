@@ -36,6 +36,8 @@ CoreStateMachine.prototype.getState = function() {
 		samplerate: self.currentSampleRate,
 		bitdepth: self.currentBitDepth,
 		channels: self.currentChannels,
+		random: self.currentRandom,
+		repeat: self.currentRepeat,
 		volume: self.currentVolume,
 		mute: self.currentMute,
 		service: 'mpd'
@@ -284,6 +286,8 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentSampleRate = null;
 		self.currentBitDepth = null;
 		self.currentChannels = null;
+		self.currentRandom = null;
+		self.currentRepeat = null;
 		self.currentVolume = null;
 		self.currentMute = null;
 		return self.getcurrentVolume();
@@ -380,6 +384,8 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;
+			self.currentRandom = stateService.random;
+			self.currentRepeat = stateService.repeat;
 
 			self.getState()
 			.then(libFast.bind(self.pushState, self))
@@ -398,6 +404,8 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;
+			self.currentRandom = stateService.random;
+			self.currentRepeat = stateService.repeat;
 
 			self.getState()
 				.then(libFast.bind(self.pushState, self))
@@ -415,6 +423,8 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentSampleRate = null;
 			self.currentBitDepth = null;
 			self.currentChannels = null;
+			self.currentRandom = null;
+			self.currentRepeat = null;
 
 			if (self.currentPosition >= self.playQueue.arrayQueue.length - 1) {
 				// If we have reached the end of the queue
@@ -441,6 +451,8 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentSampleRate = null;
 			self.currentBitDepth = null;
 			self.currentChannels = null;
+			self.currentRandom = null;
+			self.currentRepeat = null;
 
 			self.getState()
 			.then(libFast.bind(self.pushState, self))
