@@ -78,7 +78,6 @@ CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
 		.then(function() {
 			self.arrayQueue = self.arrayQueue.concat(arrayItems);
 			return self.commandRouter.volumioPushQueue(self.arrayQueue);
-			self.commandRouter.pushConsoleMessage(self.arrayQueue);
 		});
 };
 
