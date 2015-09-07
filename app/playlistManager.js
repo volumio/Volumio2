@@ -95,7 +95,7 @@ PlaylistManager.prototype.addToPlaylist = function(name,service,uri) {
 	var self = this;
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
-
+	self.commandRouter.pushToastMessage('success',"Added", +uri+' to playlist '+name);
 	return self.commonAddToPlaylist(self.playlistFolder,name,service,uri);
 }
 
