@@ -415,7 +415,7 @@ function InterfaceWebUI (context) {
 
 			var response;
 
-
+			console.log("CURURI: "+curUri);
 
 			if(curUri.startsWith('favourites'))
 			{
