@@ -545,6 +545,80 @@ function InterfaceWebUI (context) {
 
 
 		});
+
+		//Favourites
+
+		connWebSocket.on('addToFavourites', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.addToFavourites(data.name,'mpd',data.uri);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushAddToFavourites',data);
+			});
+
+		});
+
+		connWebSocket.on('removeFromFavourites', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.removeFromFavourites(data.name,'mpd',data.uri);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushRemoveFromFavourites',data);
+			});
+
+
+		});
+
+		connWebSocket.on('playFavourites', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.playFavourites(data.name);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushPlayFavourites',data);
+			});
+
+
+		});
+
+		// Radio Favourites
+
+		connWebSocket.on('addToRadioFavourites', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.addToRadioFavourites(data.name,'dirble',data.uri);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushAddToRadioFavourites',data);
+			});
+
+		});
+
+		connWebSocket.on('removeFromRadioFavourites', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.removeFromRadioFavourites(data.name,'dirble',data.uri);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushRemoveFromRadioFavourites',data);
+			});
+
+
+		});
+
+		connWebSocket.on('playRadioFavourites', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.playListManager.playRadioFavourites();
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushPlayRadioFavourites',data);
+			});
+
+
+		});
 	});
 }
 
