@@ -180,6 +180,9 @@ ControllerMpd.prototype.repeat = function(repeatcmd) {
 	} else if (string === 0) {
 		self.commandRouter.pushToastMessage('success',"Repeat", 'OFF');
 	}
+
+	self.commandRouter.pushToastMessage('success',"Repeat", +reply);
+
 	return self.sendMpdCommand('repeat', [string]);
 };
 
