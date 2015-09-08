@@ -819,7 +819,7 @@ ControllerMpd.prototype.listFavourites = function (uri) {
 		for(var i in data)
 		{
 			var ithdata=data[i];
-			var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: 'favourites/'+ithdata.uri};
+			var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
 
 			response.navigation.list.push(song);
 		}
