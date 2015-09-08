@@ -158,31 +158,16 @@ ControllerMpd.prototype.seek = function(timepos) {
 //MPD Random
 ControllerMpd.prototype.random = function(randomcmd) {
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Random');
 	var string = randomcmd ? 1 : 0;
-	console.log(string);
-	if (string === 1) {
-		self.commandRouter.pushToastMessage('success',"Random", 'ON');
-	} else if (string === 0) {
-		self.commandRouter.pushToastMessage('success',"Random", 'OFF');
-	}
-
-
-
-	return self.sendMpdCommand('random', [string])
+	return self.sendMpdCommand('random', [string]);
 };
 
 //MPD Repeat
 ControllerMpd.prototype.repeat = function(repeatcmd) {
 	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Repeat');
 	var string = repeatcmd ? 1 : 0;
-	if (string === 1) {
-		self.commandRouter.pushToastMessage('success',"Repeat", 'ON');
-	} else if (string === 0) {
-		self.commandRouter.pushToastMessage('success',"Repeat", 'OFF');
-	}
-
-	self.commandRouter.pushToastMessage('success',"Repeat", +reply);
-
 	return self.sendMpdCommand('repeat', [string]);
 };
 
@@ -819,15 +804,34 @@ ControllerMpd.prototype.listFavourites = function (uri) {
 
 	var defer = libQ.defer();
 
-	defer.resolve({
-		navigation: {
-			prev: {
-				uri: '/'
-			},
-			list: [
-			]
+	var promise=self.commandRouter.playListManager.getFavouritesContent();
+	promise.then(function(data)
+	{
+		var response={
+			navigation: {
+				prev: {
+					uri: '/'
+				},
+				list:[]
+			}
+		};
+
+		for(var i in data)
+		{
+			var ithdata=data[i];
+			var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
+
+			response.navigation.list.push(song);
 		}
+
+		defer.resolve(response);
+
+	})
+	.fail(function()
+	{
+		defer.reject(new Error("Cannot list Favourites"));
 	});
+
 	return defer.promise;
 }
 
@@ -837,7 +841,7 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 
 	var defer = libQ.defer();
 
-	defer.resolve({
+	var response={
 		navigation: {
 			prev: {
 				uri: '/'
@@ -845,11 +849,65 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 			list: [
 			]
 		}
+	};
+	var promise=self.commandRouter.playListManager.listPlaylist();
+	promise.then(function(data)
+	{
+		for(var i in data)
+		{
+			var ithdata=data[i];
+			var song={type: 'playlist',  title: ithdata, icon: 'bars', uri: 'playlists/'+ithdata};
+
+			response.navigation.list.push(song);
+		}
+
+		defer.resolve(response);
 	});
+
+
 	return defer.promise;
 }
 
-ControllerMpd.prototype.listMusicLibrary = function (uri) {
+ControllerMpd.prototype.browsePlaylist = function (uri) {
+	var self = this;
+
+
+	var defer = libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: 'playlists'
+			},
+			list: [
+			]
+		}
+	};
+
+	var name=uri.split('/')[1];
+
+	console.log("GETTING CONTENT FOR PLAYLST "+name);
+	var promise=self.commandRouter.playListManager.getPlaylistContent(name);
+	promise.then(function(data)
+	{
+		console.log("CONTENT: "+JSON.stringify(data));
+		for(var i in data)
+		{
+			var ithdata=data[i];
+			var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
+
+			response.navigation.list.push(song);
+		}
+
+		console.log(JSON.stringify(response));
+		defer.resolve(response);
+	});
+
+
+	return defer.promise;
+}
+
+ControllerMpd.prototype.lsInfo = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -894,7 +952,7 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 							type: 'folder',
 							title: name[count - 1],
 							icon: 'fa fa-folder-open-o',
-							uri: 'music-library/' + path
+							uri: sections[0]+'/' + path
 						});
 					}
 					else if (line.startsWith('file:')) {
@@ -916,7 +974,7 @@ ControllerMpd.prototype.listMusicLibrary = function (uri) {
 							artist: artist,
 							album: album,
 							icon: 'fa fa-music',
-							uri: 'music-library/' + path
+							uri:sections[0]+'/' + path
 						});
 					}
 
@@ -996,7 +1054,7 @@ ControllerMpd.prototype.updateQueue = function () {
 						}
 
 						var queueItem={uri: path, service:'mpd', name: title, artist: artist, album: album, type:'track', tracknumber: tracknumber };
-						queueItem.promise=self.getAlbumArt(artist,album);
+						queueItem.promise=self.getAlbumArt({artist:artist,album:album});
 						promises.push(queueItem.promise);
 						queue.push(queueItem);
 
@@ -1039,14 +1097,14 @@ ControllerMpd.prototype.updateQueue = function () {
 }
 
 
-ControllerMpd.prototype.getAlbumArt = function (artist,album) {
+ControllerMpd.prototype.getAlbumArt = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
 
-	if(album!=undefined && artist!=undefined)
+	if(data.album!=undefined && data.artist!=undefined)
 	{
-		albumArt(artist,album, 'extralarge', function (err, url) {
+		albumArt(data.artist,data.album, 'extralarge', function (err, url) {
 			defer.resolve(url);
 		});
 	}
