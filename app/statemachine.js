@@ -360,7 +360,9 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 	self.timeLastServiceStateUpdate = Date.now();
-
+	self.currentTrackBlock.service = sService;
+	self.currentStatus = stateService.status;
+	self.currentPosition = stateService.position;
 	//If play is issued by a different entity than Volumio, the system will accept and handle it
 	if (self.currentTrackBlock.service !== sService) {
 		console.log(sService);
@@ -468,10 +470,11 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 
 			return self.stopPlaybackTimer();
 		}
-	} else if (stateService.status === 'undefined') {
+	} /*else if (stateService.status === 'undefined') {
 	stateService.status = 'stop';
 }
 
 	return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
+*/
 };
 

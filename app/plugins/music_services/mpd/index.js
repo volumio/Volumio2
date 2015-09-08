@@ -44,7 +44,7 @@ function ControllerMpd(context) {
 	self.updateQueue();
 	self.fswatch();
 	// When playback status changes
-	self.clientMpd.on('system-player', function() {
+	self.clientMpd.on('system', function() {
 		var timeStart = Date.now();
 
 		self.logStart('MPD announces state update')
@@ -56,22 +56,17 @@ function ControllerMpd(context) {
 		});
 	});
 
-	self.clientMpd.on('system-options', function() {
+
+
+	self.clientMpd.on('system-playlist', function() {
 		var timeStart = Date.now();
 
-		self.logStart('MPD announces options state update')
-			.then(libFast.bind(self.getState, self))
-			.then(libFast.bind(self.pushState, self))
+		self.logStart('MPD announces sysyrm state update')
+			.then(libFast.bind(self.updateQueue, self))
 			.fail(libFast.bind(self.pushError, self))
 			.done(function() {
 				return self.logDone(timeStart);
 			});
-	});
-
-	self.clientMpd.on('system-playlist', function() {
-		var timeStart = Date.now();
-		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Queue Update');
-		self.updateQueue();
 	});
 
 
@@ -201,7 +196,11 @@ ControllerMpd.prototype.addPlay = function(data) {
 		{command: 'clear', parameters: []},
 		{command: 'add', parameters: [data]},
 		{command: 'play', parameters: []}
-	]);
+	])
+	/*.then(function() {
+		self.commandRouter.volumioPlay();
+
+	});*/
 };
 
 
@@ -300,9 +299,9 @@ ControllerMpd.prototype.getState = function() {
 	self.timeLatestUpdate = timeCurrentUpdate;
 
 	return self.sendMpdCommand('status', [])
-	.then(function(data) {
+	/*.then(function(data) {
 		return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
-	})
+	})*/
 	.then(libFast.bind(self.parseState, self))
 	.then(function(state) {
 		collectedState = state;
@@ -310,9 +309,9 @@ ControllerMpd.prototype.getState = function() {
 		// If there is a track listed as currently playing, get the track info
 		if (collectedState.position !== null) {
 			return self.sendMpdCommand('playlistinfo', [collectedState.position])
-			.then(function(data) {
+			/*.then(function(data) {
 				return self.haltIfNewerUpdateRunning(data, timeCurrentUpdate);
-			})
+			})*/
 			.then(libFast.bind(self.parseTrackInfo, self))
 			.then(function(trackinfo) {
 				collectedState.title = trackinfo.title;
