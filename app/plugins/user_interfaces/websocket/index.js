@@ -135,10 +135,11 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('removeQueueItem', function (position) {
+		connWebSocket.on('removeFromQueue', function (positionN) {
 			selfConnWebSocket = this;
 			//TODO add proper service handler
 			var timeStart = Date.now();
+			var position = positionN.value;
 			self.logStart('Client requests remove Volumio queue items')
 				.then(function () {
 					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'remove', position);
