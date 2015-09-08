@@ -186,7 +186,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             this.getVolume(function (err, vol) {
                 self.setVolume(vol-1, function (err) {
                     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-                    Volume.vol = vol;
+                    Volume.vol = Math.round(math.log(VolumeInteger, 100)*100);
                     Volume.mute = false;
                     self.commandRouter.volumioupdatevolume(Volume);
                 });
@@ -197,6 +197,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             self.setMuted(false, function (err) {
                 self.setVolume(VolumeInteger, function (err) {
                     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+                    //Log Volume Control
                     Volume.vol = VolumeInteger;
                     Volume.mute = false;
                     self.commandRouter.volumioupdatevolume(Volume);
@@ -210,7 +211,8 @@ CoreVolumeController.prototype.retrievevolume = function() {
     this.getVolume(function (err, vol) {
         self.getMuted(function (err, mute) {
         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController:: Volume=' + vol + ' Mute =' + mute);
-        Volume.vol = vol;
+        //Log Volume Control
+        Volume.vol = Math.round(Math.pow(100, (vol/100)));
         Volume.mute = mute;
         return libQ.resolve(Volume)
             .then(function (Volume) {
