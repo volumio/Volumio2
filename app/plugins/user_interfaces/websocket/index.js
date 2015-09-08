@@ -285,9 +285,9 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 			//TODO add proper service handler
 			var timeStart = Date.now();
-			self.logStart('Client requests Volumio Random')
+			self.logStart('Client requests Volumio Random ' +data.value)
 				.then(function () {
-					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'random', data);
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'random', data.value);
 				})
 				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
@@ -299,9 +299,9 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 			//TODO add proper service handler
 			var timeStart = Date.now();
-			self.logStart('Client requests Volumio Repeat '+data)
+			self.logStart('Client requests Volumio Repeat '+data.value)
 				.then(function () {
-					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'repeat', data);
+					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'repeat', data.value);
 				})
 				.fail(libFast.bind(self.pushError, self))
 				.done(function () {
@@ -457,7 +457,7 @@ function InterfaceWebUI (context) {
 			}
 			else if(curUri.startsWith('music-library'))
 			{
-				response=self.commandRouter.executeOnPlugin('music_service','mpd','lsInfo',curUri,'music-library/');
+				response=self.commandRouter.executeOnPlugin('music_service','mpd','listMusicLibrary',curUri);
 			}
 			else if(curUri.startsWith('radio'))
 			{
