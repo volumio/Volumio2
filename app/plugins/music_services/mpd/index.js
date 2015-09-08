@@ -1007,6 +1007,62 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	return defer.promise;
 }
 
+ControllerMpd.prototype.search = function (query) {
+	var self = this;
+
+	var defer = libQ.defer();
+	var command='search any';
+	command+=' "'+query+'"';
+	var cmd = libMpd.cmd;
+	var list=[];
+
+	self.mpdReady.then(function() {
+		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+			if (msg) {
+				var lines = s(msg).lines();
+				for (var i = 0; i < lines.length; i++) {
+					var line = s(lines[i]);
+
+					if (line.startsWith('file:')) {
+						var path = line.chompLeft('file:').trimLeft().s;
+						var name = path.split('/');
+						var count = name.length;
+
+						var artist = self.searchFor(lines, i + 1, 'Artist:');
+						var album = self.searchFor(lines, i + 1, 'Album:');
+						var title = self.searchFor(lines, i + 1, 'Title:');
+
+						if (title == undefined) {
+							title = name[count - 1];
+						}
+						list.push({
+							service: 'mpd',
+							type: 'song',
+							title: title,
+							artist: artist,
+							album: album,
+							icon: 'fa fa-music',
+							uri:'music-library/' + path
+						});
+					}
+
+				}
+			}
+			else console.log(err);
+
+			defer.resolve({
+				navigation: {
+					prev: {
+						uri: '/'
+					},
+					list: list
+				}
+			});
+		});
+	});
+	return defer.promise;
+}
+
 ControllerMpd.prototype.searchFor = function (lines,startFrom,beginning) {
 	var self=this;
 
