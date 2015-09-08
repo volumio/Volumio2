@@ -9,6 +9,7 @@ var spawn = require('child_process').spawn;
 var Volume = {};
 Volume.vol = null;
 Volume.mute = null;
+var math = require('mathjs');
 
 module.exports = CoreVolumeController;
 function CoreVolumeController (commandRouter) {
@@ -138,7 +139,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
                     self.getVolume(function (err, vol) {
                         self.setMuted(true, function (err) {
                         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Muted ');
-                            Volume.vol = vol;
+                            Volume.vol = 0;
                             Volume.mute = true;
                         self.commandRouter.volumioupdatevolume(Volume);
                     });
@@ -147,7 +148,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
                     self.setMuted(false, function (err) {
                         self.getVolume(function (err, vol) {
                             self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
-                            Volume.vol = vol;
+                            Volume.vol = 0;
                             Volume.mute = false;
                             self.commandRouter.volumioupdatevolume(Volume);
                     });
@@ -161,7 +162,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
                 self.getVolume(function (err, vol) {
 
                     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
-                    Volume.vol = vol;
+                    Volume.vol = Math.round(math.log(VolumeInteger, 100)*100);
                     Volume.mute = false;
                     self.commandRouter.volumioupdatevolume(Volume);
                 });
@@ -172,7 +173,7 @@ CoreVolumeController.prototype.alsavolume = function(VolumeInteger) {
             self.setMuted(false, function (err) {
                 self.getVolume(function (err, vol) {
                     self.setVolume(vol+1, function (err) {
-                        Volume.vol = vol;
+                        Volume.vol = Math.round(math.log(VolumeInteger, 100)*100);
                         Volume.mute = false;
                         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
                         self.commandRouter.volumioupdatevolume(Volume);
