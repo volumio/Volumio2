@@ -29,7 +29,7 @@ CorePlayQueue.prototype.getQueue = function() {
 
 	return self.queueReady
 		.then(function() {
-			self.commandRouter.pushConsoleMessage(self.arrayQueue);
+			//self.commandRouter.pushConsoleMessage(self.arrayQueue);
 			return self.arrayQueue;
 		});
 };
