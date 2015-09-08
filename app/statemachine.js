@@ -359,7 +359,6 @@ CoreStateMachine.prototype.pushError = function(sReason) {
 CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
-	self.commandRouter.volumioretrievevolume();
 	self.timeLastServiceStateUpdate = Date.now();
 
 	//If play is issued by a different entity than Volumio, the system will accept and handle it
