@@ -221,8 +221,11 @@ function InterfaceWebUI (context) {
 				});
 		});
 
-		connWebSocket.on('play', function () {
+		connWebSocket.on('play', function (N) {
 			var timeStart = Date.now();
+			if ( N.value != undefined) {
+				return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'play', N.value);
+			} else
 			self.logStart('Client requests Volumio play')
 				.then(libFast.bind(self.commandRouter.volumioPlay, self.commandRouter))
 				.fail(libFast.bind(self.pushError, self))
