@@ -158,16 +158,28 @@ ControllerMpd.prototype.seek = function(timepos) {
 //MPD Random
 ControllerMpd.prototype.random = function(randomcmd) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Random');
 	var string = randomcmd ? 1 : 0;
-	return self.sendMpdCommand('random', [string]);
+	console.log(string);
+	if (string === 1) {
+		self.commandRouter.pushToastMessage('success',"Random", 'ON');
+	} else if (string === 0) {
+		self.commandRouter.pushToastMessage('success',"Random", 'OFF');
+	}
+
+
+
+	return self.sendMpdCommand('random', [string])
 };
 
 //MPD Repeat
 ControllerMpd.prototype.repeat = function(repeatcmd) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Repeat');
 	var string = repeatcmd ? 1 : 0;
+	if (string === 1) {
+		self.commandRouter.pushToastMessage('success',"Repeat", 'ON');
+	} else if (string === 0) {
+		self.commandRouter.pushToastMessage('success',"Repeat", 'OFF');
+	}
 	return self.sendMpdCommand('repeat', [string]);
 };
 
