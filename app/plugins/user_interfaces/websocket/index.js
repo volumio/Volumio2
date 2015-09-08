@@ -457,7 +457,7 @@ function InterfaceWebUI (context) {
 			}
 			else if(curUri.startsWith('music-library'))
 			{
-				response=self.commandRouter.executeOnPlugin('music_service','mpd','lsInfo',curUri);
+				response=self.commandRouter.executeOnPlugin('music_service','mpd','listMusicLibrary',curUri);
 			}
 			else if(curUri.startsWith('radio'))
 			{
