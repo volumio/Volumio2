@@ -70,7 +70,7 @@ PlaylistManager.prototype.deletePlaylist = function(name) {
 	return defer.promise;
 }
 
-PlaylistManager.prototype.listPlaylist = function(name) {
+PlaylistManager.prototype.listPlaylist = function() {
 	var self = this;
 
 	var defer=libQ.defer();
@@ -94,7 +94,7 @@ PlaylistManager.prototype.listPlaylist = function(name) {
 PlaylistManager.prototype.getPlaylistContent = function(name) {
 	var self = this;
 
-	return self.commonGetPlaylistContent(self.playlistFolder,name,service,uri);
+	return self.commonGetPlaylistContent(self.playlistFolder,name);
 }
 
 PlaylistManager.prototype.addToPlaylist = function(name,service,uri) {
@@ -176,7 +176,7 @@ PlaylistManager.prototype.getFavouritesContent = function(name) {
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'favourites');
 }
 
-PlaylistManager.prototype.addToFavourites = function(name,service,uri) {
+PlaylistManager.prototype.addToFavourites = function(service,uri) {
 	var self = this;
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to favourites');
@@ -208,7 +208,7 @@ PlaylistManager.prototype.getRadioFavouritesContent = function(name) {
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'radio-favourites');
 }
 
-PlaylistManager.prototype.addToRadioFavourites = function(name,service,uri) {
+PlaylistManager.prototype.addToRadioFavourites = function(service,uri) {
 	var self = this;
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to radio-favourites');

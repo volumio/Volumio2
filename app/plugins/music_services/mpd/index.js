@@ -841,7 +841,7 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 
 	var defer = libQ.defer();
 
-	defer.resolve({
+	var response={
 		navigation: {
 			prev: {
 				uri: '/'
@@ -849,7 +849,61 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 			list: [
 			]
 		}
+	};
+	var promise=self.commandRouter.playListManager.listPlaylist();
+	promise.then(function(data)
+	{
+		for(var i in data)
+		{
+			var ithdata=data[i];
+			var song={type: 'playlist',  title: ithdata, icon: 'bars', uri: 'playlists/'+ithdata};
+
+			response.navigation.list.push(song);
+		}
+
+		defer.resolve(response);
 	});
+
+
+	return defer.promise;
+}
+
+ControllerMpd.prototype.browsePlaylist = function (uri) {
+	var self = this;
+
+
+	var defer = libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: 'playlists'
+			},
+			list: [
+			]
+		}
+	};
+
+	var name=uri.split('/')[1];
+
+	console.log("GETTING CONTENT FOR PLAYLST "+name);
+	var promise=self.commandRouter.playListManager.getPlaylistContent(name);
+	promise.then(function(data)
+	{
+		console.log("CONTENT: "+JSON.stringify(data));
+		for(var i in data)
+		{
+			var ithdata=data[i];
+			var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
+
+			response.navigation.list.push(song);
+		}
+
+		console.log(JSON.stringify(response));
+		defer.resolve(response);
+	});
+
+
 	return defer.promise;
 }
 

@@ -451,7 +451,9 @@ function InterfaceWebUI (context) {
 			}
 			else if(curUri.startsWith('playlists'))
 			{
-				response=self.commandRouter.executeOnPlugin('music_service','mpd','listPlaylists',curUri);
+				if(curUri=='playlists')
+					response=self.commandRouter.executeOnPlugin('music_service','mpd','listPlaylists',curUri);
+				else response=self.commandRouter.executeOnPlugin('music_service','mpd','browsePlaylist',curUri);
 			}
 			else if(curUri.startsWith('music-library'))
 			{
@@ -579,7 +581,7 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('addToFavourites', function(data) {
 			selfConnWebSocket = this;
 
-			var returnedData=self.commandRouter.playListManager.addToFavourites(data.name,'mpd',data.uri);
+			var returnedData=self.commandRouter.playListManager.addToFavourites('mpd',data.uri);
 			returnedData.then(function(data)
 			{
 				selfConnWebSocket.emit('pushAddToFavourites',data);
@@ -616,7 +618,7 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('addToRadioFavourites', function(data) {
 			selfConnWebSocket = this;
 
-			var returnedData=self.commandRouter.playListManager.addToRadioFavourites(data.name,'dirble',data.uri);
+			var returnedData=self.commandRouter.playListManager.addToRadioFavourites('dirble',data.uri);
 			returnedData.then(function(data)
 			{
 				selfConnWebSocket.emit('pushAddToRadioFavourites',data);
