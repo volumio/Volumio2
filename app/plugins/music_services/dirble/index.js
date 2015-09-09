@@ -5,6 +5,8 @@ module.exports = ControllerDirble;
 function ControllerDirble(context) {
 	var self = this;
 
+	self.context=context;
+
 	self.config=new (require('v-conf'))();
 	self.config.loadFile(__dirname+'/config.json');
 
@@ -17,9 +19,9 @@ function ControllerDirble(context) {
 ControllerDirble.prototype.onVolumioStart = function() {
 	var self=this;
 
-	self.getPrimariesCategories();
-	self.getCountries();
-	self.getStationsForCountry('',0);
+	//self.getPrimariesCategories();
+	//self.getCountries();
+	//self.getStationsForCountry('',0);
 }
 
 ControllerDirble.prototype.onStop = function() {
@@ -117,20 +119,61 @@ ControllerDirble.prototype.getTracklist = function() {
 	return libQ.resolve([]);
 };
 
-ControllerDirble.prototype.getPrimariesCategories = function() {
-	var Request = unirest.get(config.get('url_categories_primary'));
+ControllerDirble.prototype.listRadioCategories = function() {
+	var self=this;
+
+	var defer=libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: 'radio'
+			},
+			list: []
+		}
+	};
+
+	var dirbleDefer=libQ.defer();
+	self.getPrimariesCategories(dirbleDefer.makeNodeResolver());
+	dirbleDefer.promise.then(function(data)
+	{
+		for(var i in data)
+		{
+			var category={
+				type: 'folder',
+				title: data[i].title,
+				icon: 'fa fa-folder-open-o',
+				uri: 'radio/'+data[i].id
+			};
+
+			response.navigation.list.push(category);
+		}
+
+		defer.resolve(response);
+	});
+
+
+	return defer.promise;
+};
+
+
+
+ControllerDirble.prototype.getPrimariesCategories = function(callback) {
+	var self=this;
+
+	var Request = unirest.get(self.config.get('url_categories_primary'));
 	Request.query({
-		token: config.get('api_token')
+		token: self.config.get('api_token')
 	}).end(function (response) {
-		console.log(response.body);
+		callback(null,response.body);
 	});
 
 };
 
 ControllerDirble.prototype.getCountries = function() {
-	var Request = unirest.get(config.get('url_countries'));
+	var Request = unirest.get(self.config.get('url_countries'));
 	Request.query({
-		token: config.get('api_token')
+		token: self.config.get('api_token')
 	}).end(function (response) {
 		console.log(response.body);
 	});
@@ -138,7 +181,7 @@ ControllerDirble.prototype.getCountries = function() {
 };
 
 ControllerDirble.prototype.getStationsForCountry = function(id,page) {
-	var Request = unirest.get(config.get('url_countries'));
+	var Request = unirest.get(self.config.get('url_countries'));
 	Request.query({
 		token: config.get('api_token'),
 		page:page,

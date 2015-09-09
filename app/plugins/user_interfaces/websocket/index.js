@@ -466,7 +466,8 @@ function InterfaceWebUI (context) {
 			}
 			else if(curUri.startsWith('radio'))
 			{
-				response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadio',curUri);
+				if(curUri=='radio')
+					response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioCategories',curUri);
 			}
 			else if(curUri.startsWith('radio-favourites'))
 			{
