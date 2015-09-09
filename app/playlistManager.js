@@ -179,7 +179,7 @@ PlaylistManager.prototype.getFavouritesContent = function(name) {
 PlaylistManager.prototype.addToFavourites = function(service,uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to favourites');
+	self.commandRouter.pushToastMessage('success',"Added", uri+' to Favourites ');
 
 	return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
 }
