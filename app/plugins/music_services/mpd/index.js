@@ -426,6 +426,8 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	var resp={};
 
+	console.log(objTrackInfo);
+
 	if (objTrackInfo.Title) {
 		resp.title=objTrackInfo.Title;
 	} else {
@@ -444,17 +446,21 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 		resp.album=null;
 	}
 
-	if (objTrackInfo.Album) {
-		albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
-			resp.albumart=url;
-			defer.resolve(resp);
-		});
-	} else {
-		albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
-			resp.albumart=null;
-			defer.resolve(resp);
-		});
+	if(objTrackInfo.Artist)
+	{
+		if (objTrackInfo.Album) {
+			albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
+				resp.albumart=url;
+				defer.resolve(resp);
+			});
+		} else {
+			albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
+				resp.albumart=null;
+				defer.resolve(resp);
+			});
+		}
 	}
+
 
 	return defer.promise;
 };

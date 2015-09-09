@@ -195,7 +195,7 @@ ControllerDirble.prototype.listRadioForCategory = function(uri) {
 				for(var k in pageData)
 				{
 					var category={
-						service: 'mpd',
+						service: 'dirble',
 						type: 'song',
 						title: pageData[k].name,
 						artist: '',
