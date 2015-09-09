@@ -1,3 +1,18 @@
 {
-
+  "api_token":{
+    "type": "string",
+    "value": "51cc13037f15d06e727b34fe02351caea896f357"
+  },
+  "url_categories_primary":{
+    "type": "string",
+    "value": "http://api.dirble.com/v2/categories/primary"
+  },
+  "url_countries":{
+    "type": "string",
+    "value": "http://api.dirble.com/v2/countries"
+  },
+  "per_page":{
+    "type":"number",
+    "value":20
+  }
 }

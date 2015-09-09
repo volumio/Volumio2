@@ -37,6 +37,7 @@
     "sort-on": "^1.0.1",
     "string": "^3.3.1",
     "underscore": "~1.7.0",
+    "unirest":"0.4.2",
     "v-conf": "0.0.2"
   },
   "description": "Audiophile Music Player/Streamer",
