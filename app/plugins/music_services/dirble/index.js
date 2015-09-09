@@ -156,6 +156,64 @@ ControllerDirble.prototype.listRadioCategories = function() {
 	return defer.promise;
 };
 
+ControllerDirble.prototype.listRadioForCategory = function(uri) {
+	var self=this;
+
+	var defer=libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: 'radio'
+			},
+			list: []
+		}
+	};
+
+	var id=uri.split('/')[1];
+
+
+
+	var paginationPromises=[];
+
+	for(var i=0;i<1;i++)
+	{
+		var dirbleDefer=libQ.defer();
+		self.getRadioForCategory(id,30,i,dirbleDefer.makeNodeResolver());
+
+		paginationPromises.push(dirbleDefer);
+	}
+
+	libQ.all(paginationPromises)
+		.then(function(results){
+			console.log(results);
+			for(var j in results)
+			{
+				var pageData=results[j];
+				//console.log(pageData);
+
+				for(var k in pageData)
+				{
+					var category={
+						service: 'mpd',
+						type: 'song',
+						title: pageData[k].name,
+						artist: '',
+						album: '',
+						icon: 'fa fa-music',
+						uri:pageData[k].streams[0].stream
+					};
+
+					response.navigation.list.push(category);
+				}
+			}
+
+			defer.resolve(response);
+		});
+
+	return defer.promise;
+};
+
 
 
 ControllerDirble.prototype.getPrimariesCategories = function(callback) {
@@ -164,6 +222,21 @@ ControllerDirble.prototype.getPrimariesCategories = function(callback) {
 	var Request = unirest.get(self.config.get('url_categories_primary'));
 	Request.query({
 		token: self.config.get('api_token')
+	}).end(function (response) {
+		callback(null,response.body);
+	});
+
+};
+
+ControllerDirble.prototype.getRadioForCategory = function(id,per_page,page,callback) {
+	var self=this;
+
+	var Request = unirest.get(self.config.get('url_category_stations')+id+'/stations');
+	Request.query({
+		token: self.config.get('api_token')
+	}).query({
+		page:page,
+		per_page: per_page
 	}).end(function (response) {
 		callback(null,response.body);
 	});

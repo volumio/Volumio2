@@ -7,6 +7,10 @@
     "type": "string",
     "value": "http://api.dirble.com/v2/categories/primary"
   },
+  "url_category_stations":{
+    "type": "string",
+    "value": "http://api.dirble.com/v2/category/"
+  },
   "url_countries":{
     "type": "string",
     "value": "http://api.dirble.com/v2/countries"
