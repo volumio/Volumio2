@@ -69,6 +69,12 @@ function ControllerMpd(context) {
 			});
 	});
 
+	//Notify that The mpd DB has changed
+	self.clientMpd.on('system-database', function() {
+
+		return self.reportUpdatedLibrary();
+	});
+
 
 }
 
@@ -777,7 +783,7 @@ ControllerMpd.prototype.fswatch = function () {
 	watcher
 		.on('add', function (path) {
 			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
-			self.sendMpdCommand('update', []);
+
 			watcher.close();
 			return self.waitupdate();
 		})
@@ -800,26 +806,14 @@ ControllerMpd.prototype.waitupdate = function () {
 	var self = this;
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::WaitUpdatetoFinish');
-	//self.sendMpdCommand('idle update', []);
-	//self.mpdUpdated = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'update');
-	//return self.mpdUpdated
-	//	.then(function() {
-	//		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::Updated');
-	//		self.fswatch();
-	//	})
-	//	.then (function() {
-    //
-	//	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::aaa');
+	//Delay to ensure any media is properly mounted and accessible
 	setTimeout(function() {
-		//Temporary Fix: wait 30 seconds before restarting indexing service
+		return self.sendMpdCommand('update', []);
+	}, 500);
 
-		self.commandRouter.volumioRebuildLibrary();
+	setTimeout(function() {
 		return self.fswatch()
-	}, 30000);
-
-	//});
-
-
+	}, 5000);
 }
 
 
@@ -1195,3 +1189,9 @@ ControllerMpd.prototype.getAlbumArt = function (data) {
 
 }
 
+ControllerMpd.prototype.reportUpdatedLibrary = function () {
+	var self=this;
+	// TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::DB Update Finished');
+	return self.commandRouter.pushToastMessage('Success','ASF',' Added');
+}
