@@ -2,6 +2,7 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
+var schedule = require('node-schedule');
 
 // Define the AlarmClock class
 module.exports = AlarmClock;
@@ -161,6 +162,36 @@ AlarmClock.prototype.setSleep = function(data)
 	config.set('sleep_hour',splitted[0]);
 	config.set('sleep_minute',splitted[1]);
 
+	if(self.haltSchedule!=undefined)
+	{
+		self.haltSchedule.cancel();
+		delete self.haltSchedule;
+	}
+
+	if(data.enabled)
+	{
+		self.haltSchedule=schedule.scheduleJob('0 '+splitted[1]+' '+splitted[0]+' * * *', function(){
+			config.set('sleep_enabled',false);
+
+			self.haltSchedule.cancel();
+			delete self.haltSchedule;
+
+			console.log("System is shutting down....");
+			setTimeout(function()
+			{
+				var exec = require('child_process').exec;
+
+				exec('halt',
+					function (error, stdout, stderr) {
+						console.log('stdout: ' + stdout);
+						console.log('stderr: ' + stderr);
+						if (error !== null) {
+							console.log('exec error: ' + error);
+						}
+					});
+			},5000);
+		});
+	}
 
 	defer.resolve({});
 	return defer.promise;
