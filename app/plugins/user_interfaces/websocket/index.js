@@ -98,11 +98,13 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('addToQueue', function (data) {
 			selfConnWebSocket = this;
 			//var queuedata = JSON.parse(data);
-			console.log(data);
-			var uri = data.uri;
-			var arr = uri.split("/");
-			arr.shift();
-			str = arr.join('/');
+			if (data.service == 'mpd') {
+				var uri = data.uri;
+				var arr = uri.split("/");
+				arr.shift();
+				str = arr.join('/');
+			}
+			else str=data.uri;
 			//TODO add proper service handler
 			var timeStart = Date.now();
 			self.logStart('Client requests add Volumio queue items')
@@ -128,7 +130,7 @@ function InterfaceWebUI (context) {
 			}
 			else str=data.uri;
 
-			console.log(str);
+			console.log("DATA: "+str);
 			//TODO add proper service handler
 			var timeStart = Date.now();
 			self.logStart('Client requests add and Play Volumio queue items')
