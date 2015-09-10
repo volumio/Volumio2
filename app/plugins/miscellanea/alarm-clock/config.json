@@ -1,5 +1,8 @@
 {
   "enalbed":{"value":true,"type":"boolean"},
   "hour":{"value":"8","type":"number"},
-  "minute":{"value":"0","type":"number"}
+  "minute":{"value":"0","type":"number"},
+  "sleep_enabled":{"type":"boolean","value":false},
+  "sleep_hour":{"value":"8","type":"number"},
+  "sleep_minute":{"value":"0","type":"number"}
 }

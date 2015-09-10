@@ -136,3 +136,32 @@ AlarmClock.prototype.saveAlarm=function(data)
 	defer.resolve({});
 	return defer.promise;
 }
+
+AlarmClock.prototype.getSleep = function()
+{
+	var self = this;
+	var defer = libQ.defer();
+
+
+	defer.resolve({
+		enabled:config.get('sleep_enabled'),
+		time:config.get('sleep_hour')+':'+config.get('sleep_minute')
+	});
+	return defer.promise;
+}
+
+AlarmClock.prototype.setSleep = function(data)
+{
+	var self = this;
+	var defer = libQ.defer();
+
+	var splitted=data.time.split(':');
+
+	config.set('sleep_enabled',data.enabled);
+	config.set('sleep_hour',splitted[0]);
+	config.set('sleep_minute',splitted[1]);
+
+
+	defer.resolve({});
+	return defer.promise;
+}

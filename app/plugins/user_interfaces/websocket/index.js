@@ -472,16 +472,17 @@ function InterfaceWebUI (context) {
 			{
 				response=self.commandRouter.executeOnPlugin('music_service','mpd','lsInfo',curUri);
 			}
+			else if(curUri.startsWith('radio-favourites'))
+			{
+				response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioFavourites');
+			}
 			else if(curUri.startsWith('radio'))
 			{
 				if(curUri=='radio')
 					response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioCategories',curUri);
 				else response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioForCategory',curUri);
 			}
-			else if(curUri.startsWith('radio-favourites'))
-			{
-				response=self.commandRouter.executeOnPlugin('music_service','dirble','listRadioFavourites',curUri);
-			}
+
 
 			if(response!=undefined) {
 				response.then(function (result) {
@@ -679,6 +680,32 @@ function InterfaceWebUI (context) {
 			returnedData.then(function(data)
 			{
 				selfConnWebSocket.emit('pushPlayRadioFavourites',data);
+			});
+
+
+		});
+
+
+		connWebSocket.on('getSleep', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.executeOnPlugin('miscellanea','alarm-clock','getSleep',data);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushSleep',data);
+			});
+
+
+		});
+
+
+		connWebSocket.on('setSleep', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.executeOnPlugin('miscellanea','alarm-clock','setSleep',data);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushSleep',data);
 			});
 
 

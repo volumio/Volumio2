@@ -10,6 +10,7 @@ function ControllerDirble(context) {
 	self.config=new (require('v-conf'))();
 	self.config.loadFile(__dirname+'/config.json');
 
+	self.commandRouter = self.context.coreCommand;
 }
 
 /*
@@ -265,3 +266,40 @@ ControllerDirble.prototype.getStationsForCountry = function(id,page) {
 	});
 
 };
+
+ControllerDirble.prototype.listRadioFavourites = function (uri) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	var promise=self.commandRouter.playListManager.getRadioFavouritesContent();
+	promise.then(function(data)
+	{
+		console.log(data);
+		var response={
+			navigation: {
+				prev: {
+					uri: '/'
+				},
+				list:[]
+			}
+		};
+
+		for(var i in data)
+		{
+			var ithdata=data[i];
+			var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
+
+			response.navigation.list.push(song);
+		}
+
+		defer.resolve(response);
+
+	})
+		.fail(function()
+		{
+			defer.reject(new Error("Cannot list Favourites"));
+		});
+
+	return defer.promise;
+}
