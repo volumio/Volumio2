@@ -213,6 +213,22 @@ ControllerMpd.prototype.clear = function() {
 	return self.sendMpdCommand('clear', []);
 };
 
+// MPD enable output
+ControllerMpd.prototype.enableOutput = function(output) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Enable Output ' +output);
+
+	return self.sendMpdCommand('enableoutput', [output]);
+};
+
+// MPD disable output
+ControllerMpd.prototype.disableOutput = function(output) {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Disable Output ' +output);
+
+	return self.sendMpdCommand('disableoutput', [output]);
+};
+
 ControllerMpd.prototype.addPlay = function(data) {
 	var self = this;
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
