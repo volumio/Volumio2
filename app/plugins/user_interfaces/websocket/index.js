@@ -711,6 +711,18 @@ function InterfaceWebUI (context) {
 
 
 		});
+
+		connWebSocket.on('getMultiroom', function(data) {
+			selfConnWebSocket = this;
+
+			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','getMultiroom',data);
+			returnedData.then(function(data)
+			{
+				selfConnWebSocket.emit('pushMultiroom',data);
+			});
+
+
+		});
 	});
 }
 

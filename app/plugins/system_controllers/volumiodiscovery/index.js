@@ -21,6 +21,8 @@ function ControllerVolumioDiscovery(context) {
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
+
+	self.callbacks=[];
 }
 
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
@@ -146,6 +148,13 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 
 			var toAdvertise=self.getDevices();
 			self.commandRouter.pushMultiroomDevices(toAdvertise);
+
+			for(var i in self.callbacks)
+			{
+				var callback=self.callbacks[i];
+
+				callback(toAdvertise);
+			}
 		});
 		self.browser.on('serviceDown', function(service) {
 			var keys=foundVolumioInstances.getKeys();
@@ -166,6 +175,12 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			var toAdvertise=self.getDevices();
 			self.commandRouter.pushMultiroomDevices(toAdvertise);
 
+			for(var i in self.callbacks)
+			{
+				var callback=self.callbacks[i];
+
+				callback(toAdvertise);
+			}
 		});
 		self.browser.start();
 	}
@@ -358,6 +373,18 @@ ControllerVolumioDiscovery.prototype.setAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
+}
+
+
+/**
+ * Registers a callback that is called when a device appears or disappears
+ * @param callback
+ */
+ControllerVolumioDiscovery.prototype.registerCallback = function(callback)
+{
+	var self = this;
+
+	self.callbacks.push(callback);
 }
 
 
