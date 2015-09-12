@@ -3,6 +3,7 @@ var app = require('./index.js')
 var bodyParser = require('body-parser');
 var ip = require('ip');
 var api = express.Router();
+var ifconfig = require('wireless-tools/ifconfig');
 
 function apiInterface(server, commandRouter) {
 
@@ -37,7 +38,14 @@ api.get('/', function(req, res) {
 
 //Get hosts IP
 api.get('/host', function(req, res) {
-    res.json({ host: ip.address()});
+    var self =this;
+
+    ifconfig.status('wlan0', function(err, status) {
+        if (status.ipv4_address != undefined) {
+        self.host = status.ipv4_address;
+        } else self.host = ip.address();
+    });
+    res.json({ host: self.host});
 });
 
 
