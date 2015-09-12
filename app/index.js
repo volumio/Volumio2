@@ -1,6 +1,7 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
+var exec = require('child_process').exec;
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -29,6 +30,13 @@ function CoreCommandRouter (server) {
 	self.playListManager= new (require('./playlistManager.js'))(self);
 
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'BOOT COMPLETED');
+
+	//Startup Sound
+	exec("/usr/bin/aplay /volumio/app/startup.wav", function (error, stdout, stderr) {
+		if (error !== null) {
+			self.pushConsoleMessage('[' + Date.now() + ']' + error);
+		}
+	});
 
 }
 
