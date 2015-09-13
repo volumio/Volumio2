@@ -98,7 +98,7 @@ function InterfaceWebUI (context) {
 		connWebSocket.on('addToQueue', function (data) {
 			selfConnWebSocket = this;
 			//var queuedata = JSON.parse(data);
-			if (data.service == 'mpd') {
+			if (data.service == undefined || data.service == 'mpd') {
 				var uri = data.uri;
 				var arr = uri.split("/");
 				arr.shift();
@@ -119,10 +119,8 @@ function InterfaceWebUI (context) {
 
 		connWebSocket.on('addPlay', function (data) {
 			selfConnWebSocket = this;
-			//var queuedata = JSON.parse(data);
 
-
-			if (data.service == 'mpd') {
+			if (data.service == undefined || data.service == 'mpd') {
 				var uri = data.uri;
 				var arr = uri.split("/");
 				arr.shift();
