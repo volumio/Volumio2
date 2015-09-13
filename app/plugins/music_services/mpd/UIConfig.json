@@ -7,7 +7,7 @@
       "id": "playback_options",
       "element": "section",
       "label": "Playback options",
-      "onSave": {"type":"controller", "endpoint":"music_services/mpd", "method":"savePlaybackOptions"},
+      "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"savePlaybackOptions"},
       "saveButton": {
         "label": "Save",
         "data": [
@@ -22,6 +22,7 @@
         {
           "id": "gapless_mp3_playback",
           "element": "select",
+          "doc": "If you have a problem with your MP3s ending abruptly it is recommended that you set this argument to NO to attempt to fix the problem.",
           "label": "Gapless MP3 playback",
           "value":  {
             "value":true,
@@ -44,6 +45,7 @@
         {
           "id": "volume_normalization",
           "element": "select",
+          "doc":"If yes, Axiom-Air will normalize the volume of songs as they play. The default is no.",
           "label": "Volume normalization",
           "value":  {
             "value":true,
@@ -65,6 +67,7 @@
         {
           "id": "audio_buffer_size",
           "element": "select",
+          "doc":"This specifies the size of the audio buffer in kilobytes. The default is 2048, large enough for nearly 12 seconds of CD-quality audio.",
           "label": "Audio buffer size",
           "value":  {
             "value":2048,
@@ -98,6 +101,7 @@
         {
           "id": "buffer_before_play",
           "element": "select",
+          "doc": "This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
           "label": "Buffer before play",
           "value":  {
             "value":"10%",
@@ -117,6 +121,7 @@
         }, {
           "id": "auto_update",
           "element": "select",
+          "doc" : "This setting enables automatic update of music database when files in music directory are changed.",
           "label": "Auto update",
           "value":  {
             "value":false,

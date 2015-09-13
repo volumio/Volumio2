@@ -1,9 +1,10 @@
 {
   "menuItems":[
-    {"id": "home", "name": "Home", "state": "volumio.playback"},
+    {"id": "playback_options", "name": "Playback Options", "state": "volumio.plugin","params": {"pluginName": "music_service/mpd"}},
     {"id": "components", "name": "Components", "state": "volumio.components"},
     {"id": "network", "name": "Network", "state": "volumio.plugin","params": {"pluginName": "system_controller/network"}},
     {"id": "multi-room", "name": "Multi Room", "state": "volumio.multi-room"},
-    {"id": "system", "name": "System", "state": "volumio.plugin", "params": {"pluginName": "system_controller/system"}}
+    {"id": "system", "name": "System", "state": "volumio.plugin", "params": {"pluginName": "system_controller/system"}},
+    {"id": "shutdown", "name": "Turn Off", "state": "volumio.components"}
   ]
 }

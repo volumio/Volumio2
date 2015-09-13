@@ -1,6 +1,6 @@
 {
   "playerName": {
-    "value": "volumio",
+    "value": "AxiomAir",
     "type": "string"
   },
   "startupSound": {
@@ -14,9 +14,5 @@
   "kernelSettingLabel": {
     "value": "Default",
     "type": "string"
-  },
-  "uuid": {
-    "type": "string",
-    "value": "6c1b90b1-f134-446a-9156-76b3161564d7"
   }
 }
