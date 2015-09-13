@@ -91,6 +91,7 @@
           "type": "string",
           "doc": "Set the name of the WiFi you want to connect",
           "element": "input",
+          "attributes": {"placeholder":"My network Name"},
           "label": "Network Name",
           "value": ""
         },
@@ -98,6 +99,7 @@
           "id": "network_pass",
           "type": "password",
           "doc": "Set the password of the WiFi you want to connect.",
+          "attributes": {"placeholder":"My network Password"},
           "element": "input",
           "label": "Passphrase",
           "value": ""
