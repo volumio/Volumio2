@@ -14,9 +14,5 @@
   "kernelSettingLabel": {
     "value": "Default",
     "type": "string"
-  },
-  "uuid": {
-    "type": "string",
-    "value": "72184515-c9a8-4768-bb58-d53969bfc819"
   }
 }
