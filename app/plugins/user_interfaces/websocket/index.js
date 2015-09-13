@@ -741,7 +741,6 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 
 			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
-			selfConnWebSocket.emit('pushWriteMultiroom',data);
 
 		});
 
@@ -750,7 +749,7 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 
 			console.log("Setting as multiroomSingle");
-//			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','setSingle',data);
 
 		});
 		connWebSocket.on('setAsMultiroomServer', function(data) {
@@ -758,7 +757,7 @@ function InterfaceWebUI (context) {
 
 
 			console.log("Setting as multiroomServer");
-			//var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','setServer',data);
 			//selfConnWebSocket.emit('pushWriteMultiroom',data);
 
 		});
@@ -766,7 +765,7 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 
 			console.log("Setting as multiroomClient");
-			//var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','setClient',data);
 			//selfConnWebSocket.emit('pushWriteMultiroom',data);
 
 		});
@@ -863,6 +862,17 @@ InterfaceWebUI.prototype.printToastMessage = function(type,title,message) {
 
 	// Push the message all clients
 	self.libSocketIO.emit('pushToastMessage', {
+		type:type,
+		title:title,
+		message:message
+	});
+}
+
+InterfaceWebUI.prototype.broadcastToastMessage = function(type,title,message) {
+	var self = this;
+
+	// Push the message all clients
+	self.libSocketIO.broadcast.emit('pushToastMessage', {
 		type:type,
 		title:title,
 		message:message

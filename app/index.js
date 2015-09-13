@@ -389,6 +389,17 @@ CoreCommandRouter.prototype.pushToastMessage = function(type, title, message) {
 	);
 }
 
+CoreCommandRouter.prototype.broadcastToastMessage = function(type, title, message) {
+	var self = this;
+
+	return libQ.all(
+		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
+			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+			if (typeof thisInterface.broadcastToastMessage === "function")
+				return thisInterface.broadcastToastMessage.call(thisInterface, type, title, message);
+		})
+	);
+}
 CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 {
 	var self=this;
