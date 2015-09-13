@@ -228,7 +228,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 	var self=this;
 
 	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-	var uuid = systemController.getConf('uuid');
+	var myuuid = systemController.getConf('uuid');
 
 	var response={
 		misc: {debug: true},
@@ -242,13 +242,13 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 
 		var osname=foundVolumioInstances.get(key+'.name');
 		var port=foundVolumioInstances.get(key+'.port');
-		var uuid=foundVolumioInstances.get(key);
 		var status=foundVolumioInstances.get(key+'.status');
 		var volume=foundVolumioInstances.get(key+'.volume');
 		var mute=foundVolumioInstances.get(key+'.mute');
 		var artist=foundVolumioInstances.get(key+'.artist');
 		var track=foundVolumioInstances.get(key+'.track');
-		var isSelf=key==uuid;
+
+		var isSelf=key==myuuid;
 
 		var addresses=foundVolumioInstances.get(key+'.addresses');
 
@@ -256,7 +256,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		{
 			var address=addresses[j];
 			var device={
-				id:uuid,
+				id:key,
 				host:'http://'+address+":"+port,
 				name:osname.capitalize(),
 				isSelf:isSelf,
