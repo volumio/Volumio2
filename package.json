@@ -34,7 +34,8 @@
     "socket.io": "^1.2.0",
     "sort-on": "^1.0.1",
     "underscore": "~1.7.0",
-    "v-conf": "0.0.2"
+    "v-conf": "0.0.2",
+    "wireless-tools": "^0.14.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
