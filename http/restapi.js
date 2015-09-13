@@ -39,14 +39,14 @@ api.get('/', function(req, res) {
 //Get hosts IP
 api.get('/host', function(req, res) {
     var self =this;
-    if (ifconfig.status!=undefined){
-    ifconfig.status('wlan0', function(err, status) {
-        if (status.ipv4_address != undefined) {
-        self.host = status.ipv4_address;
-        } else self.host = ip.address();
-    });
-    res.json({ host: self.host});
-    } else  res.json({ host: ip.address()});
+
+        ifconfig.status('wlan0', function(err, status) {
+            if (status != undefined) {
+                if (status.ipv4_address != undefined) {
+                    self.host = status.ipv4_address;
+                } else self.host = ip.address();
+            } }); self.host = ip.address();
+        res.json({ host: self.host});
 });
 
 
