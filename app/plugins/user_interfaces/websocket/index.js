@@ -737,7 +737,39 @@ function InterfaceWebUI (context) {
 
 		});
 
+		connWebSocket.on('writeMultiroom', function(data) {
+			selfConnWebSocket = this;
 
+			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+			selfConnWebSocket.emit('pushWriteMultiroom',data);
+
+		});
+
+
+		connWebSocket.on('setAsMultiroomSingle', function(data) {
+			selfConnWebSocket = this;
+
+			console.log("Setting as multiroomSingle");
+//			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+
+		});
+		connWebSocket.on('setAsMultiroomServer', function(data) {
+			selfConnWebSocket = this;
+
+
+			console.log("Setting as multiroomServer");
+			//var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+			//selfConnWebSocket.emit('pushWriteMultiroom',data);
+
+		});
+		connWebSocket.on('setAsMultiroomClient', function(data) {
+			selfConnWebSocket = this;
+
+			console.log("Setting as multiroomClient");
+			//var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','writeMultiRoom',data);
+			//selfConnWebSocket.emit('pushWriteMultiroom',data);
+
+		});
 	});
 }
 

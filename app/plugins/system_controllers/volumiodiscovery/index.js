@@ -386,5 +386,3 @@ ControllerVolumioDiscovery.prototype.registerCallback = function(callback)
 
 	self.callbacks.push(callback);
 }
-
-
