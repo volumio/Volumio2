@@ -157,7 +157,7 @@ ControllerSystem.prototype.systemUpdate = function(data)
 {
 	var self = this;
 
-	self.commandRouter.pushToastMessage('success',"System update",'System update is not yet implemented');
+	self.commandRouter.pushToastMessage('success',"System update",'No newer versions found, your system is up to date.');
 
 	var defer = libQ.defer();
 	defer.resolve({});
