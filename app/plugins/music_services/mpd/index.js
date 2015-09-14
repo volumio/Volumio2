@@ -1199,7 +1199,7 @@ ControllerMpd.prototype.getAlbumArt = function (data) {
 			defer.resolve(url);
 		});
 	}
-	else defer.resolve('');
+	else defer.resolve('https://volumio.org/wp-content/uploads/coverdefault.png');
 
 	return defer.promise;
 
