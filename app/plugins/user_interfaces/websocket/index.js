@@ -767,6 +767,21 @@ function InterfaceWebUI (context) {
 			//selfConnWebSocket.emit('pushWriteMultiroom',data);
 
 		});
+
+		connWebSocket.on('shutdown', function() {
+			selfConnWebSocket = this;
+			console.log('Received Shutdown Command');
+
+			return self.commandRouter.shutdown();
+
+		});
+
+		connWebSocket.on('reboot', function() {
+			selfConnWebSocket = this;
+			console.log('Received Reboot Command');
+			return self.commandRouter.reboot();
+
+		});
 	});
 }
 

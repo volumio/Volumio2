@@ -412,3 +412,21 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 		})
 	);
 }
+
+CoreCommandRouter.prototype.shutdown = function() {
+	var self = this;
+	exec("sudo /sbin/halt", function (error, stdout, stderr) {
+		if (error !== null) {
+			self.pushConsoleMessage('[' + Date.now() + ']' + error);
+		} else self.pushConsoleMessage('[' + Date.now() + '] Shutting Down');
+	});
+}
+
+CoreCommandRouter.prototype.reboot = function() {
+	var self = this;
+	exec("sudo /sbin/reboot", function (error, stdout, stderr) {
+		if (error !== null) {
+			self.pushConsoleMessage('[' + Date.now() + ']' + error);
+		} else self.pushConsoleMessage('[' + Date.now() + '] Rebooting');
+	});
+}
