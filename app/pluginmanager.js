@@ -16,6 +16,30 @@ function PluginManager (ccommand, server) {
     self.config.loadFile(__dirname + '/plugins/plugins.json');
     self.coreCommand = ccommand;
     self.websocketServer = server;
+
+    self.configurationFolder='/data/configuration/';
+}
+
+PluginManager.prototype.initializeConfiguration = function(package_json,pluginInstance,folder) {
+    var self = this;
+
+    if(pluginInstance.getConfigurationFiles!=undefined)
+    {
+        var configFolder=self.configurationFolder+package_json.volumio_info+"/"+package_json.name+'/';
+
+        var configurationFiles=pluginInstance.getConfigurationFiles();
+        for(var i in configurationFiles)
+        {
+            var configurationFile=configurationFiles[i];
+
+            var destConfigurationFile=configFolder+configurationFile;
+            if(!fs.existsSync(destConfigurationFile))
+            {
+                fs.copySync(folder+'/'+configurationFile,destConfigurationFile);
+            }
+        }
+
+    }
 }
 
 PluginManager.prototype.loadPlugin = function(folder) {
@@ -36,8 +60,13 @@ PluginManager.prototype.loadPlugin = function(folder) {
 
         var pluginInstance = null;
         var context=new (require(__dirname+'/pluginContext.js'))(self.coreCommand, self.websocketServer);
+        context.setEnvVariable('category',category);
+        context.setEnvVariable('name',name);
 
-        pluginInstance = new (require(folder+'/index.js'))(context);
+        pluginInstance = new (require(folder+'/'+package_json.main))(context);
+
+        self.initializeConfiguration(package_json,pluginInstance,folder);
+
 
         if(pluginInstance.onVolumioStart !=undefined)
             pluginInstance.onVolumioStart();
@@ -234,4 +263,19 @@ PluginManager.prototype.getPlugin=function(category,name)
     var self=this;
 
     return self.plugins.get(category+'.'+name).instance;
+}
+
+
+/**
+ * Returns path for a specific configuration file for a plugin (identified by its context)
+ * @param context
+ * @param fileName
+ * @returns {string}
+ */
+PluginManager.prototype.getConfigurationFile=function(context,fileName)
+{
+    return self.configurationFolder+'/'+
+        context.getEnvVariable('category')+'/'+
+        context.getEnvVariable('name')+'/'+
+            fileName;
 }

@@ -90,6 +90,14 @@ ControllerSystem.prototype.setConf = function(varName, varValue)
 	config.set(varName,varValue);
 }
 
+
+ControllerSystem.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
+}
+
 //Optional functions exposed for making development easier and more clear
 ControllerSystem.prototype.getSystemConf = function(pluginName,varName)
 {
