@@ -345,7 +345,10 @@ CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data)
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');
 
 	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, type, name);
-	return thisPlugin[method].call(thisPlugin, data);
+
+	if(thisPlugin!=undefined)
+		return thisPlugin[method].call(thisPlugin, data);
+	else return undefined;
 }
 
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function(type, name, data) {
