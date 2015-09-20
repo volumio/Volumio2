@@ -6,7 +6,6 @@ var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
 var s=require('string');
-var albumArt = require('album-art');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -471,15 +470,10 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	if(objTrackInfo.Artist)
 	{
 		if (objTrackInfo.Album) {
-			albumArt(objTrackInfo.Artist, objTrackInfo.Album, 'extralarge', function (err, url) {
-				resp.albumart=url;
-				defer.resolve(resp);
-			});
+			defer.resolve(self.getAlbumArt({artist:objTrackInfo.Artist,album:objTrackInfo.Album}));
+
 		} else {
-			albumArt(objTrackInfo.Artist, 'extralarge', function (err, url) {
-				resp.albumart=null;
-				defer.resolve(resp);
-			});
+			defer.resolve(self.getAlbumArt({artist:objTrackInfo.Artist}));
 		}
 	}
 
@@ -1195,9 +1189,8 @@ ControllerMpd.prototype.getAlbumArt = function (data) {
 
 	if(data.album!=undefined && data.artist!=undefined)
 	{
-		albumArt(data.artist,data.album, 'extralarge', function (err, url) {
-			defer.resolve(url);
-		});
+		var url=self.commandRouter.executeOnPlugin('miscellanea','albumart','getAlbumart',{artist:data.artist,album:data.album});
+		defer.resolve(url);
 	}
 	else defer.resolve('https://volumio.org/wp-content/uploads/coverdefault.png');
 

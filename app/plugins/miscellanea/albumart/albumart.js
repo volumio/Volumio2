@@ -4,6 +4,7 @@ var download = require('file-download');
 var S=require('string');
 var fs=require('fs-extra');
 var uuid = require('node-uuid');
+var nodetools=require('nodetools');
 
 var albumArtRootFolder='/tmp/';
 
@@ -18,9 +19,9 @@ var setFolder=function(newFolder)
 var processRequest=function (artist, album,resolution) {
  	var defer=Q.defer();
 	
-	var decodedArtist=S(artist).decodeHTMLEntities().s;
-	var decodedAlbum=S(album).decodeHTMLEntities().s;
-	var decodedResolution=S(resolution).decodeHTMLEntities().s;
+	var decodedArtist=nodetools.urlDecode(S(artist).decodeHTMLEntities().s);
+	var decodedAlbum=nodetools.urlDecode(S(album).decodeHTMLEntities().s);
+	var decodedResolution=nodetools.urlDecode(S(resolution).decodeHTMLEntities().s);
 	
 	var folder=albumArtRootFolder+decodedArtist+'/'+decodedAlbum+'/';
 	var fileName=decodedResolution;

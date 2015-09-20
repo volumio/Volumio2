@@ -2,7 +2,8 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
-var exec = require('child_process').exec;
+var exec = require('child_process').exec
+var nodetools=require('nodetools');
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -58,4 +59,24 @@ AlbumArt.prototype.onUninstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
+}
+
+AlbumArt.prototype.getAlbumart=function(data)
+{
+	var self=this;
+
+	var address='localhost';
+
+	var url;
+	var artist,album;
+
+	artist=data.artist;
+	if(data.album!=undefined)
+		album=data.album;
+	else album=data.artist;
+
+	url='http://'+address+':'+config.get('port')+'/'+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge';
+
+	console.log("ALBUMART "+url);
+	return url;
 }

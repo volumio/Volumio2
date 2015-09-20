@@ -714,10 +714,15 @@ function InterfaceWebUI (context) {
 			selfConnWebSocket = this;
 
 			var returnedData=self.commandRouter.executeOnPlugin('audio_interface','multiroom','getMultiroom',data);
-			returnedData.then(function(data)
+
+			if(returnedData!=undefined)
 			{
-				selfConnWebSocket.emit('pushMultiroom',data);
-			});
+				returnedData.then(function(data)
+				{
+					selfConnWebSocket.emit('pushMultiroom',data);
+				});
+			}
+			else console.log("Plugin multiroom or method getMultiroom not found");
 
 
 		});

@@ -31,6 +31,7 @@
     "musicbrainz": "^0.2.5",
     "node-schedule":"0.2.9",
     "node-uuid": "1.4.3",
+    "nodetools":"1.0.0",
     "playmusic": "^2.0.2",
     "random-string": "^0.1.2",
     "serve-favicon": "~2.1.3",
