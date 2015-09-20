@@ -10,18 +10,23 @@ module.exports = AlarmClock;
 function AlarmClock(context) {
 	var self = this;
 
-	//getting configuration
-	config.loadFile(__dirname+'/config.json');
-
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
+}
 
+AlarmClock.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
 }
 
 AlarmClock.prototype.onVolumioStart = function() {
 	var self = this;
 	//Perform startup tasks here
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	config.loadFile(configFile);
 }
 
 AlarmClock.prototype.onStart = function() {

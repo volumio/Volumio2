@@ -25,7 +25,7 @@ PluginManager.prototype.initializeConfiguration = function(package_json,pluginIn
 
     if(pluginInstance.getConfigurationFiles!=undefined)
     {
-        var configFolder=self.configurationFolder+package_json.volumio_info+"/"+package_json.name+'/';
+        var configFolder=self.configurationFolder+package_json.volumio_info.plugin_type+"/"+package_json.name+'/';
 
         var configurationFiles=pluginInstance.getConfigurationFiles();
         for(var i in configurationFiles)
@@ -274,6 +274,7 @@ PluginManager.prototype.getPlugin=function(category,name)
  */
 PluginManager.prototype.getConfigurationFile=function(context,fileName)
 {
+    var self=this;
     return self.configurationFolder+'/'+
         context.getEnvVariable('category')+'/'+
         context.getEnvVariable('name')+'/'+

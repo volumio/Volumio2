@@ -15,9 +15,6 @@ function ControllerVolumioDiscovery(context) {
 
 	self.remoteConnections=new HashMap();
 
-	//getting configuration
-	config.loadFile(__dirname+'/config.json');
-
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
@@ -25,8 +22,19 @@ function ControllerVolumioDiscovery(context) {
 	self.callbacks=[];
 }
 
+
+ControllerVolumioDiscovery.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
+}
+
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
+
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	config.loadFile(configFile);
 
 	self.startAdvertisement();
 	self.startMDNSBrowse();

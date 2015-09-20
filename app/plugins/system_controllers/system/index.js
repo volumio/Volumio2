@@ -11,8 +11,17 @@ module.exports = ControllerSystem;
 function ControllerSystem(context) {
 	var self = this;
 
+	// Save a reference to the parent commandRouter
+	self.context=context;
+	self.commandRouter = self.context.coreCommand;
+}
+
+ControllerSystem.prototype.onVolumioStart = function() {
+	var self = this;
+
 	//getting configuration
-	config.loadFile(__dirname+'/config.json');
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	config.loadFile(configFile);
 
 	var uuid=config.get('uuid');
 	if(uuid==undefined)
@@ -21,15 +30,6 @@ function ControllerSystem(context) {
 		var uuid = require('node-uuid');
 		config.addConfigValue('uuid','string',uuid.v4());
 	}
-
-	// Save a reference to the parent commandRouter
-	self.context=context;
-	self.commandRouter = self.context.coreCommand;
-}
-
-ControllerSystem.prototype.onVolumioStart = function() {
-	var self = this;
-	//Perform startup tasks here
 }
 
 ControllerSystem.prototype.onStop = function() {

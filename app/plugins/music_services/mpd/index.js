@@ -16,7 +16,6 @@ function ControllerMpd(context) {
 	self.context=context;
 
 	self.config=new (require('v-conf'))();
-	self.config.loadFile(__dirname+'/config.json');
 
 	// TODO use names from the package.json instead
 	self.servicename = 'mpd';
@@ -588,7 +587,11 @@ ControllerMpd.prototype.logStart = function(sCommand) {
  */
 ControllerMpd.prototype.onVolumioStart = function() {
 	var self=this;
-	
+
+
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	self.config.loadFile(configFile);
+
 }
 
 /*

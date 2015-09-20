@@ -21,9 +21,6 @@ module.exports = ControllerNetwork;
 function ControllerNetwork(context) {
 	var self = this;
 
-	//getting configuration
-	config.loadFile(__dirname+'/config.json');
-
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
@@ -33,6 +30,10 @@ function ControllerNetwork(context) {
 ControllerNetwork.prototype.onVolumioStart = function() {
 	var self = this;
 	//Perform startup tasks here
+
+	//getting configuration
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	config.loadFile(configFile);
 }
 
 ControllerNetwork.prototype.onStart = function() {
@@ -60,6 +61,13 @@ ControllerNetwork.prototype.onUninstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
+}
+
+ControllerNetwork.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
 }
 
 ControllerNetwork.prototype.getUIConfig = function()
