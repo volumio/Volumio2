@@ -63,6 +63,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "albumart": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "user_interface": {

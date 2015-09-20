@@ -17,6 +17,7 @@
     "ejs": "~0.8.5",
     "express": "~4.9.0",
     "fast.js": "^0.1.1",
+    "file-download":"0.1.2",
     "fs-extra": "0.22.1",
     "hashmap": "2.0.3",
     "ip": "^0.3.3",

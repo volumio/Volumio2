@@ -3,8 +3,14 @@ var Q = require('kew');
 var download = require('file-download');
 var S=require('string');
 var fs=require('fs-extra');
-var uuid=require('uuid');
+var uuid = require('node-uuid');
 
+var albumArtRootFolder='/tmp/';
+
+var setFolder=function(newFolder)
+{
+	albumArtRootFolder=S(newFolder).ensureRight('/').s;
+}
 /**
 *	This method searches for the album art, downloads it if needed
 *	and returns its file path. The return value is a promise 
@@ -16,7 +22,7 @@ var processRequest=function (artist, album,resolution) {
 	var decodedAlbum=S(album).decodeHTMLEntities().s;
 	var decodedResolution=S(resolution).decodeHTMLEntities().s;
 	
-	var folder='/tmp/'+decodedArtist+'/'+decodedAlbum+'/';
+	var folder=albumArtRootFolder+decodedArtist+'/'+decodedAlbum+'/';
 	var fileName=decodedResolution;
 	
 	fs.ensureDirSync(folder);
@@ -90,3 +96,4 @@ var processExpressRequest=function (req, res) {
 
 module.exports.processExpressRequest=processExpressRequest;
 module.exports.processRequest=processRequest;
+module.exports.setFolder=setFolder;
