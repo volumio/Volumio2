@@ -8,7 +8,6 @@ function ControllerDirble(context) {
 	self.context=context;
 
 	self.config=new (require('v-conf'))();
-	self.config.loadFile(__dirname+'/config.json');
 
 	self.commandRouter = self.context.coreCommand;
 }
@@ -20,9 +19,16 @@ function ControllerDirble(context) {
 ControllerDirble.prototype.onVolumioStart = function() {
 	var self=this;
 
-	//self.getPrimariesCategories();
-	//self.getCountries();
-	//self.getStationsForCountry('',0);
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	self.config.loadFile(configFile);
+
+}
+
+ControllerDirble.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
 }
 
 ControllerDirble.prototype.onStop = function() {

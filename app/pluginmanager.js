@@ -10,12 +10,42 @@ function PluginManager (ccommand, server) {
     var self = this;
 
     self.plugins = new HashMap();
-    self.pluginPath = [__dirname+'/plugins/','/plugins'];
+    self.pluginPath = [__dirname+'/plugins/','/data/plugins/'];
 
     self.config = new (require('v-conf'))();
-    self.config.loadFile(__dirname + '/plugins/plugins.json');
+
+    var pluginsDataFile='/data/plugins/plugins.json';
+    if(!fs.existsSync(pluginsDataFile))
+        fs.copySync(__dirname + '/plugins/plugins.json',pluginsDataFile);
+
+    self.config.loadFile(pluginsDataFile);
+
     self.coreCommand = ccommand;
     self.websocketServer = server;
+
+    self.configurationFolder='/data/configuration/';
+}
+
+PluginManager.prototype.initializeConfiguration = function(package_json,pluginInstance,folder) {
+    var self = this;
+
+    if(pluginInstance.getConfigurationFiles!=undefined)
+    {
+        var configFolder=self.configurationFolder+package_json.volumio_info.plugin_type+"/"+package_json.name+'/';
+
+        var configurationFiles=pluginInstance.getConfigurationFiles();
+        for(var i in configurationFiles)
+        {
+            var configurationFile=configurationFiles[i];
+
+            var destConfigurationFile=configFolder+configurationFile;
+            if(!fs.existsSync(destConfigurationFile))
+            {
+                fs.copySync(folder+'/'+configurationFile,destConfigurationFile);
+            }
+        }
+
+    }
 }
 
 PluginManager.prototype.loadPlugin = function(folder) {
@@ -36,8 +66,13 @@ PluginManager.prototype.loadPlugin = function(folder) {
 
         var pluginInstance = null;
         var context=new (require(__dirname+'/pluginContext.js'))(self.coreCommand, self.websocketServer);
+        context.setEnvVariable('category',category);
+        context.setEnvVariable('name',name);
 
-        pluginInstance = new (require(folder+'/index.js'))(context);
+        pluginInstance = new (require(folder+'/'+package_json.main))(context);
+
+        self.initializeConfiguration(package_json,pluginInstance,folder);
+
 
         if(pluginInstance.onVolumioStart !=undefined)
             pluginInstance.onVolumioStart();
@@ -234,4 +269,20 @@ PluginManager.prototype.getPlugin=function(category,name)
     var self=this;
 
     return self.plugins.get(category+'.'+name).instance;
+}
+
+
+/**
+ * Returns path for a specific configuration file for a plugin (identified by its context)
+ * @param context
+ * @param fileName
+ * @returns {string}
+ */
+PluginManager.prototype.getConfigurationFile=function(context,fileName)
+{
+    var self=this;
+    return self.configurationFolder+'/'+
+        context.getEnvVariable('category')+'/'+
+        context.getEnvVariable('name')+'/'+
+            fileName;
 }

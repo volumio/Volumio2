@@ -22,3 +22,10 @@ PluginContext.prototype.getEnvVariable=function(key)
 
     return self.env.get(key);
 }
+
+PluginContext.prototype.setEnvVariable=function(key,value)
+{
+    var self=this;
+
+    return self.env.set(key,value);
+}

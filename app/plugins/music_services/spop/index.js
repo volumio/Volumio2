@@ -10,17 +10,30 @@ module.exports = ControllerSpop;
 function ControllerSpop(context) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
+
 	self.context=context;
+	self.commandRouter = self.context.coreCommand;
+}
+
+
+ControllerSpop.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
+}
+
+// Plugin methods -----------------------------------------------------------------------------
+ControllerSpop.prototype.onVolumioStart = function() {
+	var self = this;
+
+	//var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	//config.loadFile(configFile);
 
 	// TODO use names from the package.json instead
 	self.servicename = 'spop';
 	self.displayname = 'Spotify';
 
-	// Save a reference to the parent commandRouter
-	self.commandRouter = self.context.coreCommand;
-
-	//getting configuration
-	var config=fs.readJsonSync(__dirname+'/config.json');
 
 	// Each core gets its own set of Spop sockets connected
 	var nHost='localhost';
@@ -118,11 +131,8 @@ function ControllerSpop(context) {
 	self.loadTracklistFromDB()
 		.fail(libFast.bind(self.pushError, self));
 
-}
 
-// Plugin methods -----------------------------------------------------------------------------
-ControllerSpop.prototype.onVolumioStart = function() {
-	var self = this;
+
 	exec("spopd -c /etc/spopd.conf", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.commandRouter.pushConsoleMessage('The following error occurred while starting SPOPD: ' + error);
