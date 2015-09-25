@@ -13,68 +13,7 @@ function ControllerMpd(context) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
 	self.context=context;
-
-	self.config=new (require('v-conf'))();
-
-	// TODO use names from the package.json instead
-	self.servicename = 'mpd';
-	self.displayname = 'MPD';
-
-	//getting configuration
-	var config=libFsExtra.readJsonSync(__dirname+'/config.json');
-	var nHost=self.config.get('nHost');
-	var nPort=self.config.get('nPort');
-
-	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
-
-	// Connect to MPD
-	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
-
-	// Make a promise for when the MPD connection is ready to receive events
-	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
-	// Catch and log errors
-	self.clientMpd.on('error', function(err) {
-		console.error('MPD error: ');
-		console.error(err);
-	});
-
-	// This tracks the the timestamp of the newest detected status change
-	self.timeLatestUpdate = 0;
-	self.updateQueue();
-	self.fswatch();
-	// When playback status changes
-	self.clientMpd.on('system', function() {
-		var timeStart = Date.now();
-
-		self.logStart('MPD announces state update')
-		.then(libFast.bind(self.getState, self))
-		.then(libFast.bind(self.pushState, self))
-		.fail(libFast.bind(self.pushError, self))
-		.done(function() {
-			return self.logDone(timeStart);
-		});
-	});
-
-
-
-	self.clientMpd.on('system-playlist', function() {
-		var timeStart = Date.now();
-
-		self.logStart('MPD announces sysyrm state update')
-			.then(libFast.bind(self.updateQueue, self))
-			.fail(libFast.bind(self.pushError, self))
-			.done(function() {
-				return self.logDone(timeStart);
-			});
-	});
-
-	//Notify that The mpd DB has changed
-	self.clientMpd.on('system-database', function() {
-
-		return self.reportUpdatedLibrary();
-	});
-
 
 }
 
@@ -575,7 +514,69 @@ ControllerMpd.prototype.onVolumioStart = function() {
 
 
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+
+	self.config= new (require('v-conf'))();
 	self.config.loadFile(configFile);
+
+	// TODO use names from the package.json instead
+	self.servicename = 'mpd';
+	self.displayname = 'MPD';
+
+	//getting configuration
+	var nHost=self.config.get('nHost');
+	var nPort=self.config.get('nPort');
+
+	// Save a reference to the parent commandRouter
+	self.commandRouter = self.context.coreCommand;
+
+	// Connect to MPD
+	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
+
+	// Make a promise for when the MPD connection is ready to receive events
+	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
+	// Catch and log errors
+	self.clientMpd.on('error', function(err) {
+		console.error('MPD error: ');
+		console.error(err);
+	});
+
+	// This tracks the the timestamp of the newest detected status change
+	self.timeLatestUpdate = 0;
+	self.updateQueue();
+	self.fswatch();
+	// When playback status changes
+	self.clientMpd.on('system', function() {
+		var timeStart = Date.now();
+
+		self.logStart('MPD announces state update')
+			.then(libFast.bind(self.getState, self))
+			.then(libFast.bind(self.pushState, self))
+			.fail(libFast.bind(self.pushError, self))
+			.done(function() {
+				return self.logDone(timeStart);
+			});
+	});
+
+
+
+	self.clientMpd.on('system-playlist', function() {
+		var timeStart = Date.now();
+
+		self.logStart('MPD announces sysyrm state update')
+			.then(libFast.bind(self.updateQueue, self))
+			.fail(libFast.bind(self.pushError, self))
+			.done(function() {
+				return self.logDone(timeStart);
+			});
+	});
+
+	//Notify that The mpd DB has changed
+	self.clientMpd.on('system-database', function() {
+
+		return self.reportUpdatedLibrary();
+	});
+
+
 
 }
 
@@ -1199,4 +1200,11 @@ ControllerMpd.prototype.reportUpdatedLibrary = function () {
 	// TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::DB Update Finished');
 	return self.commandRouter.pushToastMessage('Success','ASF',' Added');
+}
+
+ControllerMpd.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
 }

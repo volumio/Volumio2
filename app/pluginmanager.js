@@ -14,10 +14,10 @@ function PluginManager (ccommand, server) {
 
     self.config = new (require('v-conf'))();
 
-    var pluginsDataFile='/data/plugins/plugins.json';
-    if(!fs.existsSync(pluginsDataFile))
-        fs.copySync(__dirname + '/plugins/plugins.json',pluginsDataFile);
-
+    var pluginsDataFile='/data/configuration/plugins.json';
+    if(!fs.existsSync(pluginsDataFile)) {
+        fs.copySync(__dirname + '/plugins/plugins.json', pluginsDataFile);
+    }
     self.config.loadFile(pluginsDataFile);
 
     self.coreCommand = ccommand;
