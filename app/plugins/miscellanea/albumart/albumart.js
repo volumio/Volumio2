@@ -6,7 +6,7 @@ var fs=require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools=require('nodetools');
 
-var albumArtRootFolder='/tmp/';
+var albumArtRootFolder='/data/albumart';
 
 var setFolder=function(newFolder)
 {
@@ -90,7 +90,7 @@ var processExpressRequest=function (req, res) {
   })
   .fail(function()
   {
-	  res.sendFile('/tmp/error.png');
+	  res.sendFile(albumArtRootFolder+'default.png');
   });
 }
 
