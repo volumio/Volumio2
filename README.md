@@ -37,6 +37,13 @@ git clone https://github.com/volumio/Volumio2.git volumio
 cd volumio
 ```
 
+On Debian, you need to install
+
+```shell
+sudo apt-get install libavahi-compat-libdnssd-dev
+```
+For other systems, see [node_mdns installation](https://github.com/agnat/node_mdns#installation).
+
 All other dependecies are in the package JSON, from the working directory just run
 
 ```shell

@@ -217,13 +217,6 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
 	return self.playlistFS.importServicePlaylists();
 }
 
-CoreCommandRouter.prototype.updateAllMetadata = function() {
-	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::updateAllMetadata');
-
-	return self.musicLibrary.updateAllMetadata.call(self.musicLibrary);
-}
-
 // Methods usually called by the State Machine --------------------------------------------------------------------
 
 CoreCommandRouter.prototype.volumioPushState = function(state) {
@@ -321,25 +314,6 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	return self.stateMachine.addQueueItems(arrayItems);
 }
 
-CoreCommandRouter.prototype.notifyMusicLibraryUpdate = function() {
-	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::notifyMusicLibraryUpdate');
-
-	// TODO Also push a notification to all clients.
-	//return self.musicLibrary.updateAllMetadata.call(self.metadataCache);
-	return null;
-}
-
-// Calls a service to fetch album art for a uri, possibly slow
-CoreCommandRouter.prototype.serviceFetchAlbumArt = function(sService, sUri) {
-	var self = this;
-	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::serviceFetchAlbumArt');
-
-	var thisService = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisService.fetchAlbumArt.call(thisService, sUri);
-}
-
-// Methods for generic plugin function calls --------------------------------------------------------------------------
 CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data) {
 	var self = this;
 	self.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreCommandRouter::executeOnPlugin');

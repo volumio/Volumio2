@@ -66,7 +66,7 @@ function InterfaceWebUI (context) {
 					return self.logDone(timeStart);
 				});
 		});
-/*
+
 		connWebSocket.on('removeQueueItem', function (nIndex) {
 			selfConnWebSocket = this;
 
@@ -80,7 +80,7 @@ function InterfaceWebUI (context) {
 					return self.logDone(timeStart);
 				});
 		});
-*/
+
 		connWebSocket.on('addQueueUids', function (arrayUids) {
 			selfConnWebSocket = this;
 
@@ -240,7 +240,6 @@ function InterfaceWebUI (context) {
 				return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'play', N.value);
 			}
 		});
-
 
 		connWebSocket.on('pause', function () {
 			var timeStart = Date.now();
@@ -789,7 +788,6 @@ function InterfaceWebUI (context) {
 		});
 	});
 }
-
 
 // Receive console messages from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.printConsoleMessage = function(message) {

@@ -15,8 +15,8 @@ function CoreMusicLibrary (commandRouter) {
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
 
-	// Start metadata cache
-	self.metadataCache = new (require('./metadatacache.js'))(commandRouter, self);
+	// Start up a extra metadata handler
+	//self.metadataCache = new (require('./metadatacache.js'))(self);
 
 	// Specify the preference for service when adding tracks to the queue
 	self.servicePriority = ['mpd', 'spop'];
@@ -99,12 +99,15 @@ function CoreMusicLibrary (commandRouter) {
 		}
 	];
 
+	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
+	// This is okay because no part of Volumio requires a populated library to function.
+	self.libraryReadyDeferred = null;
+	self.libraryReady = libQ.reject('Library not yet loaded.');
+
 	// Attempt to load library from database on disk
 	self.sLibraryPath = __dirname + '/db/musiclibrary';
 	self.loadLibraryFromDB()
-		.fail(function(error) {
-			self.commandRouter.pushConsoleMessage.call(self.commandRouter, error.stack);
-		});
+		.fail(libFast.bind(self.pushError, self));
 }
 
 // Public methods -----------------------------------------------------------------------------------
@@ -114,21 +117,24 @@ CoreMusicLibrary.prototype.getListing = function(sUid, objOptions) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getListing');
 
-	//TODO implement use of nEntries and nOffset for paging of results
-	var arrayPath = objOptions.datapath;
-	var sSortBy = objOptions.sortby;
+	return self.libraryReady
+		.then(function() {
+			//TODO implement use of nEntries and nOffset for paging of results
+			var arrayPath = objOptions.datapath;
+			var sSortBy = objOptions.sortby;
 
-	var objRequested = self.getLibraryObject(sUid);
-	if (!sSortBy && arrayPath.length === 0) {
-		return objRequested;
-	} else if (!sSortBy) {
-		return self.getObjectInfo(objRequested, arrayPath);
-	} else if (arrayPath.length === 0) {
-		// TODO - return raw object?
-	} else {
-		// TODO - sort data before returning
-		return self.getObjectInfo(objRequested, arrayPath);
-	}
+			var objRequested = self.getLibraryObject(sUid);
+			if (!sSortBy && arrayPath.length === 0) {
+				return objRequested;
+			} else if (!sSortBy) {
+				return self.getObjectInfo(objRequested, arrayPath);
+			} else if (arrayPath.length === 0) {
+				// TODO - return raw object?
+			} else {
+				// TODO - sort data before returning
+				return self.getObjectInfo(objRequested, arrayPath);
+			}
+		});
 }
 
 CoreMusicLibrary.prototype.getIndex = function(sUid) {
@@ -141,22 +147,24 @@ CoreMusicLibrary.prototype.addQueueUids = function(arrayUids) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::addUidsToQueue');
 
-	var arrayQueueItems = [];
+	return self.libraryReady
+		.then(function () {
+			var arrayQueueItems = [];
 
-	libFast.map(arrayUids, function(sCurrentUid) {
-		var objCurrent = self.getLibraryObject(sCurrentUid);
-		if (objCurrent.type === 'track') {
-			arrayQueueItems.push(self.makeQueueItem(objCurrent));
-		} else {
-			libFast.map(Object.keys(objCurrent.trackuids), function(sCurrentKey) {
-				// TODO - allow adding tracks per a given sort order
-				var objCurrentTrack = self.getLibraryObject(sCurrentKey);
-				arrayQueueItems.push(self.makeQueueItem(objCurrentTrack));
+			libFast.map(arrayUids, function(sCurrentUid) {
+				var objCurrent = self.getLibraryObject(sCurrentUid);
+				if (objCurrent.type === 'track') {
+					arrayQueueItems.push(self.makeQueueItem(objCurrent));
+				} else {
+					libFast.map(Object.keys(objCurrent.trackuids), function(sCurrentKey) {
+						// TODO - allow adding tracks per a given sort order
+						var objCurrentTrack = self.getLibraryObject(sCurrentKey);
+						arrayQueueItems.push(self.makeQueueItem(objCurrentTrack));
+					});
+				}
 			});
-		}
-	});
-
-	self.commandRouter.addQueueItems(arrayQueueItems);
+			self.commandRouter.addQueueItems(arrayQueueItems);
+		});
 }
 
 CoreMusicLibrary.prototype.makeQueueItem = function(objTrack) {
@@ -193,6 +201,9 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 		children: []
 	}
 
+	self.libraryReadyDeferred = libQ.defer();
+	self.libraryReady = self.libraryReadyDeferred.promise;
+
 	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
 	return libQ.resolve()
 		.then(function() {
@@ -208,14 +219,28 @@ CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 			self.libraryIndex = result;
 			self.commandRouter.pushConsoleMessage('Library index loaded from DB.');
 
+			try {
+				self.libraryReadyDeferred.resolve();
+			} catch (error) {
+				self.pushError('Unable to resolve library promise: ' + error);
+			}
+
 			self.commandRouter.pushConsoleMessage('  Genres: ' + Object.keys(self.library['genre']).length);
 			self.commandRouter.pushConsoleMessage('  Artists: ' + Object.keys(self.library['artist']).length);
 			self.commandRouter.pushConsoleMessage('  Albums: ' + Object.keys(self.library['album']).length);
 			self.commandRouter.pushConsoleMessage('  Tracks: ' + Object.keys(self.library['track']).length);
 			self.commandRouter.pushConsoleMessage('  Indexes: ' + (Object.keys(self.libraryIndex).length - 1));
 
-			self.commandRouter.notifyMusicLibraryUpdate.call(self.commandRouter);
 			return libQ.resolve();
+		})
+		.fail(function(sError) {
+			try {
+				self.libraryReadyDeferred.reject(sError);
+			} catch (error) {
+				self.pushError('Unable to reject library promise: ' + error);
+			}
+
+			throw new Error('Error reading DB: ' + sError);
 		})
 		.fin(libFast.bind(dbLibrary.close, dbLibrary));
 }
@@ -238,6 +263,9 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 		type: 'index',
 		children: []
 	}
+
+	self.libraryReadyDeferred = libQ.defer();
+	self.libraryReady = self.libraryReadyDeferred.promise;
 
 	var dbLibrary = libLevel(self.sLibraryPath, {'valueEncoding': 'json', 'createIfMissing': true});
 	return self.commandRouter.getAllTracklists()
@@ -280,15 +308,17 @@ CoreMusicLibrary.prototype.buildLibrary = function() {
 		.then(function() {
 			self.commandRouter.pushConsoleMessage('Library build complete.');
 
-			self.commandRouter.notifyMusicLibraryUpdate.call(self.commandRouter);
+			try {
+				self.libraryReadyDeferred.resolve();
+			} catch (error) {
+				self.pushError('Unable to resolve library promise: ' + error);
+			}
+
+			//self.commandRouter.announceLibraryReset();
+
+			return libQ.resolve();
 		})
 		.fin(libFast.bind(dbLibrary.close, dbLibrary));
-}
-
-CoreMusicLibrary.prototype.updateAllMetadata = function() {
-	var self = this;
-
-	return self.metadataCache.updateAllItems.call(self.metadataCache);
 }
 
 // Internal methods ---------------------------------------------------------------------------
@@ -447,7 +477,6 @@ CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 	var arrayGenres = curTrack.genres;
 	var nTrackNumber = curTrack.tracknumber;
 	var dateTrackDate = curTrack.date;
-	var sAlbumArtUri = curTrack.albumart_uri;
 
 	var tableGenres = self.library.genre;
 	var tableArtists = self.library.artist;
@@ -494,12 +523,6 @@ CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 		tableAlbums[curAlbumKey].type = 'album';
 		tableAlbums[curAlbumKey].trackuids = {};
 		tableAlbums[curAlbumKey].artistuids = {};
-		tableAlbums[curAlbumKey].imageuris = {};
-	}
-
-	// Store a link to the album art URI for each service
-	if (!(sService in tableAlbums[curAlbumKey].imageuris)) {
-		tableAlbums[curAlbumKey].imageuris[sService] = sAlbumArtUri;
 	}
 
 	tableAlbums[curAlbumKey].trackuids['track:' + curTrackKey] = null;
@@ -547,13 +570,6 @@ CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 	}
 
 	return libQ.resolve();
-}
-
-CoreMusicLibrary.prototype.notifyMusicLibraryUpdate = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::notifyMusicLibraryUpdate');
-
-	return self.commandRouter.notifyMusicLibraryUpdate.call(self.commandRouter);
 }
 
 // Pass the error if we don't want to handle it
