@@ -10,10 +10,16 @@ function PluginManager (ccommand, server) {
     var self = this;
 
     self.plugins = new HashMap();
-    self.pluginPath = [__dirname+'/plugins/','/plugins'];
+    self.pluginPath = [__dirname+'/plugins/','/data/plugins/'];
 
     self.config = new (require('v-conf'))();
-    self.config.loadFile(__dirname + '/plugins/plugins.json');
+
+    var pluginsDataFile='/data/plugins/plugins.json';
+    if(!fs.existsSync(pluginsDataFile))
+        fs.copySync(__dirname + '/plugins/plugins.json',pluginsDataFile);
+
+    self.config.loadFile(pluginsDataFile);
+
     self.coreCommand = ccommand;
     self.websocketServer = server;
 
