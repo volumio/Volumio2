@@ -116,6 +116,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	}
 	catch(ecc)
 	{
+		console.log(ecc);
 		self.startAdvertisement();
 	}
 }
@@ -159,8 +160,9 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 
 			for(var i in self.callbacks)
 			{
-				var callback=self.callbacks[i];
+				var c=self.callbacks[i];
 
+				var callback= c.bind(c.this);
 				callback(toAdvertise);
 			}
 		});
@@ -187,7 +189,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			{
 				var callback=self.callbacks[i];
 
-				callback(toAdvertise);
+				callback.call(callback,toAdvertise);
 			}
 		});
 		self.browser.start();

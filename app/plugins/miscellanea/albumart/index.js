@@ -1,7 +1,6 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
-var config= new (require('v-conf'))();
 var exec = require('child_process').exec
 var nodetools=require('nodetools');
 
@@ -10,8 +9,6 @@ module.exports = AlbumArt;
 
 function AlbumArt(context) {
 	var self = this;
-
-	config.loadFile(__dirname+'/config.json');
 
 	// Save a reference to the parent commandRouter
 	self.context=context;
@@ -22,8 +19,12 @@ function AlbumArt(context) {
 AlbumArt.prototype.onVolumioStart = function() {
 	var self = this;
 
+	self.config= new (require('v-conf'))();
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	self.config.loadFile(configFile);
+
 	//Starting server
-	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+config.get('port')+' '+config.get('folder'),
+	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
 		function (error, stdout, stderr) {
 
 			if (error !== null) {
@@ -61,6 +62,13 @@ AlbumArt.prototype.onUninstall = function()
 	//Perform your installation tasks here
 }
 
+AlbumArt.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
+}
+
 AlbumArt.prototype.getAlbumart=function(data)
 {
 	var self=this;
@@ -75,8 +83,7 @@ AlbumArt.prototype.getAlbumart=function(data)
 		album=data.album;
 	else album=data.artist;
 
-	url='http://'+address+':'+config.get('port')+'/'+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge';
+	url='http://'+address+':'+self.config.get('port')+'/'+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge';
 
-	console.log("ALBUMART "+url);
 	return url;
 }
