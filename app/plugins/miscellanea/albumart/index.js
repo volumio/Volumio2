@@ -3,6 +3,8 @@ var libFast = require('fast.js');
 var fs=require('fs-extra');
 var exec = require('child_process').exec
 var nodetools=require('nodetools');
+var ip = require('ip');
+var ifconfig = require('wireless-tools/ifconfig');
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -73,17 +75,32 @@ AlbumArt.prototype.getAlbumart=function(data)
 {
 	var self=this;
 
-	var address='localhost';
+	var defer=libQ.defer();
 
-	var url;
-	var artist,album;
+	ifconfig.status('wlan0', function(err, status) {
+		var address;
 
-	artist=data.artist;
-	if(data.album!=undefined)
-		album=data.album;
-	else album=data.artist;
+		if (status != undefined) {
+			if (status.ipv4_address != undefined) {
+				address = status.ipv4_address;
+			}
+			else address = ip.address();
+		}
+		else address= ip.address();
 
-	url='http://'+address+':'+self.config.get('port')+'/'+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge';
+		var url;
+		var artist,album;
 
-	return url;
+		artist=data.artist;
+		if(data.album!=undefined)
+			album=data.album;
+		else album=data.artist;
+
+		var url='http://'+address+':'+self.config.get('port')+'/'+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge';
+
+		defer.resolve(url);
+	});
+
+
+	return defer.promise;
 }

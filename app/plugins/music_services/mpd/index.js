@@ -1187,7 +1187,14 @@ ControllerMpd.prototype.getAlbumArt = function (data) {
 	if(data.album!=undefined && data.artist!=undefined)
 	{
 		var url=self.commandRouter.executeOnPlugin('miscellanea','albumart','getAlbumart',{artist:data.artist,album:data.album});
-		defer.resolve(url);
+		url.then(function(deferredValue)
+		{
+			defer.resolve(deferredValue);
+		})
+		.fail(function()
+		{
+			defer.resolve('https://volumio.org/wp-content/uploads/coverdefault.png');
+		});
 	}
 	else defer.resolve('https://volumio.org/wp-content/uploads/coverdefault.png');
 
