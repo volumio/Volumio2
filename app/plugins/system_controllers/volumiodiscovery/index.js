@@ -17,6 +17,7 @@ function ControllerVolumioDiscovery(context) {
 
 	// Save a reference to the parent commandRouter
 	self.context=context;
+	self.logger=self.context.logger;
 	self.commandRouter = self.context.coreCommand;
 
 	self.callbacks=[];
@@ -51,13 +52,13 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 		nameToCheck=curName;
 	else nameToCheck=curName+i;
 
-	self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] '+keys);
+	self.context.coreCommand.pushConsoleMessage(keys);
 	for(var k in keys)
 	{
 		var key=keys[k];
 		var ithName=foundVolumioInstances.get(key+'.name');
 
-		self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Checking name '+ithName+' against '+nameToCheck);
+		self.context.coreCommand.pushConsoleMessage('Checking name '+ithName+' against '+nameToCheck);
 		if(ithName==nameToCheck)
 			collides=true;
 	}
@@ -143,7 +144,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 		});
 		self.browser.on('serviceUp', function(service) {
 			//console.log(service);
-			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Found device '+service.txtRecord.volumioName);
+			self.context.coreCommand.pushConsoleMessage('mDNS: Found device '+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.addresses',"array",service.addresses);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.port',"string",service.port);
@@ -167,6 +168,8 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			}
 		});
 		self.browser.on('serviceDown', function(service) {
+			self.context.coreCommand.pushConsoleMessage('mDNS: A device disapperared from network');
+
 			var keys=foundVolumioInstances.getKeys();
 
 			for(var i in keys)
@@ -175,7 +178,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 				var osname=foundVolumioInstances.get(key+'.name');
 				if(osname==service.name)
 				{
-					self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] mDNS: Device '+service.name+' disapperared from network');
+					self.context.coreCommand.pushConsoleMessage('mDNS: Device '+service.name+' disapperared from network');
 					foundVolumioInstances.delete(key);
 
 					self.remoteConnections.remove(key);

@@ -10,6 +10,7 @@ function PluginContext (ccommand, server) {
 
     self.coreCommand = ccommand;
     self.websocketServer = server;
+    self.logger=ccommand.logger;
 
     self.env = new HashMap();
 
