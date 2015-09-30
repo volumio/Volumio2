@@ -341,7 +341,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 		ws.end();
 
 		console.log("Restarting networking layer");
-		exec('systemctl restart networking.service',
+		exec('sudo /bin/systemctl restart networking.service',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
