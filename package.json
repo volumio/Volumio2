@@ -3,8 +3,8 @@
   "version": "2.0.0-alpha4",
   "private": false,
   "scripts": {
-    "preinstall": "git submodule init && git submodule update",
-    "start": "nodejs ./index.js"
+    "preinstall": "svn checkout https://github.com/volumio/Volumio2-UI/trunk/dist http/www",
+    "start": "node ./index.js"
   },
   "dependencies": {
     "album-art": "^1.0.2",
