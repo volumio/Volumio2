@@ -51,6 +51,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "airplay_emulation": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "miscellanea": {
