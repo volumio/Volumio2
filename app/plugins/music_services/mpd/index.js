@@ -376,36 +376,45 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	var resp={};
 
-	console.log(objTrackInfo);
-
-	if (objTrackInfo.Title) {
+	if (objTrackInfo.Title!=undefined) {
+		console.log(objTrackInfo.Title);
 		resp.title=objTrackInfo.Title;
 	} else {
 		resp.title=objTrackInfo.null;
 	}
 
-	if (objTrackInfo.Artist) {
+	if (objTrackInfo.Artist!=undefined) {
+		console.log(objTrackInfo.Artist);
 		resp.artist=objTrackInfo.Artist;
 	} else {
 		resp.artist=null;
 	}
 
-	if (objTrackInfo.Album) {
+	if (objTrackInfo.Album!=undefined) {
+		console.log(objTrackInfo.Album);
 		resp.album=objTrackInfo.Album;
 	} else {
 		resp.album=null;
 	}
 
-	if(objTrackInfo.Artist)
+	var promise;
+	if(objTrackInfo.Artist!=undefined)
 	{
-		if (objTrackInfo.Album) {
-			defer.resolve(self.getAlbumArt({artist:objTrackInfo.Artist,album:objTrackInfo.Album}));
-
+		if (objTrackInfo.Album!=undefined) {
+			promise=self.getAlbumArt({artist:objTrackInfo.Artist,album:objTrackInfo.Album});
 		} else {
-			defer.resolve(self.getAlbumArt({artist:objTrackInfo.Artist}));
+			promise=self.getAlbumArt({artist:objTrackInfo.Artist});
 		}
 	}
 
+	promise.then(function(value){
+		resp.albumart=value;
+		console.log(resp);
+		defer.resolve(resp);
+	})
+	.fail(function(){
+		defer.resolve(resp);
+	});
 
 	return defer.promise;
 };

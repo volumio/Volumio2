@@ -90,7 +90,7 @@ var processExpressRequest=function (req, res) {
   })
   .fail(function()
   {
-	  res.sendFile(__dirname+'default.png');
+	  res.sendFile(__dirname+'/default.png');
   });
 }
 
