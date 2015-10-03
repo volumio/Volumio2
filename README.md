@@ -37,6 +37,19 @@ git clone https://github.com/volumio/Volumio2.git volumio
 cd volumio
 ```
 
+Make sure /volumio folder is owned volumio user 
+
+```shell
+sudo chown -R volumio:volumio /volumio
+```
+
+And that /data folder exists and is owned by volumio user
+
+```shell
+sudo mkdir /data
+sudo chown -R volumio:volumio /data
+```
+
 On Debian, you need to install
 
 ```shell
@@ -44,7 +57,7 @@ sudo apt-get install libavahi-compat-libdnssd-dev
 ```
 For other systems, see [node_mdns installation](https://github.com/agnat/node_mdns#installation).
 
-All other dependecies are in the package JSON, from the working directory just run
+All other dependecies are in the package JSON, from the working directory just run (as user volumio)
 
 ```shell
 npm install
@@ -73,7 +86,7 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
 
     The idea is to allow the installation of different templates and skins. To allow that a template system needs to be created: as general guidelines we'll provide a set of Java functions to hook with the WebSockets connection. The different templates then will be a folder containing just css js and html.
 
-- [ ] Plugin System
+- [X] Plugin System
 
     Every service (input, output, visualization etc) will be treated as a standalone entity. This will allow to add external plugins in the future. The plugins will be composed of a folder, with all the methods, and a "manifest file" which is an executable that sends via nodes js its name, its available methods and other informations. At system startup every manifest in the manifest folder is executed, so the system receives with WS all the available plugins and their capabilities and methods.  Then the core knows what is availbable and how to call them. 
 
@@ -112,17 +125,16 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
  - [X] MPD Service and Library
  - [X] SPOP Service and Library
  - [ ] Shairport Service and Library
- - [ ] UPNP Service and Library
+ - [X] UPNP Service and Library
  - [ ] \(groove?\) Service and Library
- - [ ] Pulse Service and Library
 
 - [ ] System manager worker
- - [ ] Networking
+ - [X] Networking
  - [ ] CIFS\SAMBA
  - [ ] I2S Driver
  - [ ] Hardware Layer
- - [ ] USB Drives
- - [ ] UPNP Service Discovery 
+ - [X] USB Drives
+ - [X] Volumio Service Discovery 
  - 
 ### Frontend
 
@@ -134,10 +146,10 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
  - [ ] Airplay Hooks
 
 - [ ] Volumio 2 WebUI (Configuration)
- - [ ] Playback Option Configuration
- - [ ] Network Option Configuration
+ - [X] Playback Option Configuration
+ - [X] Network Option Configuration
  - [ ] Plug-in System Configuration
- - [ ] System Configuration
+ - [X] System Configuration
 
 ## Development Guidelines
 
