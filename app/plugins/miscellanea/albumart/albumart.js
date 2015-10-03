@@ -34,14 +34,47 @@ var processRequest=function (artist, album,resolution) {
 	if(fs.existsSync(infoPath)==false)
 	{
 		fs.ensureFileSync(infoPath);
+		fs.writeJsonSync(infoPath,infoJson);
 	}
-	else infoJson = fs.readJsonSync(infoPath, {throws: false})
+
+	var stats = fs.statSync(infoPath)
+	var fileSizeInBytes = stats["size"]
+
+	if(fileSizeInBytes>0)
+	    infoJson = fs.readJsonSync(infoPath, {throws: false})
 	
 	if(infoJson[resolution]==undefined)
 	{
 		albumart(artist, album, resolution, function (err, url) {
 			if(err)
-				defer.reject(new Error(err));
+			{
+				console.log("Album art for album not found. Trying getting one for artist");
+				albumart(artist, resolution, function (err, url) {
+					if(err)
+						defer.reject(new Error(err));
+					else
+					{
+						var splitted=url.split('.');
+						var fileExtension=splitted[splitted.length-1];
+						var diskFileName=uuid.v4()+'.'+fileExtension;
+
+						var options = {
+							directory: folder,
+							filename: diskFileName
+						}
+
+						download(url, options, function(err){
+							if (err) defer.reject(new Error(err));
+							else defer.resolve(folder+diskFileName);
+						});
+
+						infoJson[resolution]=diskFileName;
+
+					}
+
+					fs.writeJsonSync(infoPath,infoJson);
+				});
+			}
 			else
 			{
 				var splitted=url.split('.');
@@ -59,8 +92,10 @@ var processRequest=function (artist, album,resolution) {
 				});
 				
 				infoJson[resolution]=diskFileName;
-				fs.writeJsonSync(infoPath,infoJson);
+
 			}
+
+			fs.writeJsonSync(infoPath,infoJson);
 		});
 	}
 	else
