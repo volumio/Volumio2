@@ -377,21 +377,18 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	var resp={};
 
 	if (objTrackInfo.Title!=undefined) {
-		console.log(objTrackInfo.Title);
 		resp.title=objTrackInfo.Title;
 	} else {
 		resp.title=objTrackInfo.null;
 	}
 
 	if (objTrackInfo.Artist!=undefined) {
-		console.log(objTrackInfo.Artist);
 		resp.artist=objTrackInfo.Artist;
 	} else {
 		resp.artist=null;
 	}
 
 	if (objTrackInfo.Album!=undefined) {
-		console.log(objTrackInfo.Album);
 		resp.album=objTrackInfo.Album;
 	} else {
 		resp.album=null;
@@ -409,7 +406,6 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	promise.then(function(value){
 		resp.albumart=value;
-		console.log(resp);
 		defer.resolve(resp);
 	})
 	.fail(function(){
