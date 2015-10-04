@@ -48,10 +48,12 @@ var processRequest=function (artist, album,resolution) {
 		albumart(artist, album, resolution, function (err, url) {
 			if(err)
 			{
-				console.log("Album art for album not found. Trying getting one for artist");
-				albumart(artist, resolution, function (err, url) {
+				albumart(artist, function (err, url) {
 					if(err)
+					{
+						console.log("ERRORE: "+err);
 						defer.reject(new Error(err));
+					}
 					else
 					{
 						var splitted=url.split('.');
