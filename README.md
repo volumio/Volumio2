@@ -73,7 +73,7 @@ Finally, point your browser to http://(ip address):3000 to access the UI.
 
 A DEV Console is available at http://(ip address):3000/dev
 
-To make development more confortable, a samba server is installed. This way the /volumio folder is accessible (and editable) via Network. Just mount it on your dev workstation and it will be available as local filesystem.
+To make development more comfortable, a samba server is installed. This way the /volumio folder is accessible (and editable) via Network. Just mount it on your dev workstation and it will be available as local filesystem.
 Testing on PI is strongly suggested.
 
 Please take a look at the [Developer Info and Guidelines](https://github.com/volumio/Volumio2/wiki/Setting-Up-a-Dev-Environment)
