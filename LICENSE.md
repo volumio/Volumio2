@@ -1,3 +1,11 @@
+**VOLUMIO**
+
+Copyright Michelangelo Guarise – 2013
+
+**Volumio.org**
+
+Copyright Michelangelo Guarise & Daniele Busciantella Ricci – 2013
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
