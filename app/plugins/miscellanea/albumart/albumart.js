@@ -16,15 +16,47 @@ var setFolder=function(newFolder)
 *	This method searches for the album art, downloads it if needed
 *	and returns its file path. The return value is a promise 
 **/
-var processRequest=function (artist, album,resolution) {
+var processRequest=function (web,path) {
  	var defer=Q.defer();
-	
-	var decodedArtist=nodetools.urlDecode(S(artist).decodeHTMLEntities().s);
-	var decodedAlbum=nodetools.urlDecode(S(album).decodeHTMLEntities().s);
-	var decodedResolution=nodetools.urlDecode(S(resolution).decodeHTMLEntities().s);
-	
-	var folder=albumArtRootFolder+decodedArtist+'/'+decodedAlbum+'/';
-	var fileName=decodedResolution;
+
+	if(path!=undefined)
+	{
+		/**
+		 * Trying to read albumart from file
+		 */
+
+		if(fs.existsSync(path))
+		{
+			defer.resolve(path);
+			return defer.promise;
+		}
+	}
+
+	/**
+	 * If we arrive to this point the file albumart has not been passed or doesn't exists
+	 */
+
+	var artist,album,resolution;
+
+	if(web!=undefined)
+	{
+		var splitted=nodetools.urlDecode(web).split('/');
+
+		artist=splitted[0];
+		album=splitted[1];
+		resolution=splitted[2];
+	}
+	else
+	{
+		defer.reject(new Error('No parameters defined'));
+		return defer.promise;
+	}
+
+	/**
+	 * Loading album art from network
+	 */
+	var folder=albumArtRootFolder+artist+'/'+album+'/';
+	var fileName=resolution;
 	
 	fs.ensureDirSync(folder);
 	var infoPath=folder+'info.json';
@@ -120,7 +152,11 @@ var processRequest=function (artist, album,resolution) {
 *	To achieve this assign this function to a path like /:artist/:album/:resolution
 **/
 var processExpressRequest=function (req, res) {
-  var promise=processRequest(req.params.artist,req.params.album,req.params.resolution);
+	var web=req.query.web;
+	var path=req.query.path;
+
+
+  var promise=processRequest(web,path);
   promise.then(function(filePath){
 	  console.log('Sending file '+filePath);
   		res.sendFile(filePath);

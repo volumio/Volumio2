@@ -4,6 +4,7 @@ var fs=require('fs-extra');
 var exec = require('child_process').exec
 var nodetools=require('nodetools');
 var ip = require('ip');
+var S=require('string');
 var ifconfig = require('wireless-tools/ifconfig');
 
 // Define the AlbumArt class
@@ -71,7 +72,7 @@ AlbumArt.prototype.getConfigurationFiles = function()
 	return ['config.json'];
 }
 
-AlbumArt.prototype.getAlbumart=function(data)
+AlbumArt.prototype.getAlbumart=function(data,path)
 {
 	var self=this;
 
@@ -91,12 +92,32 @@ AlbumArt.prototype.getAlbumart=function(data)
 		var url;
 		var artist,album;
 
-		artist=data.artist;
-		if(data.album!=undefined)
-			album=data.album;
-		else album=data.artist;
 
-		var url='http://'+address+':'+self.config.get('port')+'/'+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge';
+
+		var web;
+
+		if(data.artist!=undefined)
+		{
+			artist=data.artist;
+			if(data.album!=undefined)
+				album=data.album;
+			else album=data.artist;
+
+			web='?web='+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge'
+		}
+
+		var url='http://'+address+':'+self.config.get('port')+'/albumart';
+
+		if(web!=undefined)
+			url=url+web;
+
+		if(web!=undefined && path != undefined)
+			url=url+'&';
+		else if(path != undefined)
+			url=url+'?';
+
+		if(path!=undefined)
+			url=url+'path='+nodetools.urlEncode(path);
 
 		defer.resolve(url);
 	});

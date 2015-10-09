@@ -4,5 +4,5 @@ var app = express();
 
 albumart.setFolder(process.argv[3]);
 
-app.get('/:artist/:album/:resolution', albumart.processExpressRequest);
+app.get('/albumart', albumart.processExpressRequest);
 app.listen(process.argv[2]);
