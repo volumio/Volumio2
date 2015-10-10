@@ -19,6 +19,13 @@ var setFolder=function(newFolder)
 var processRequest=function (web,path) {
  	var defer=Q.defer();
 
+	if(web==undefined && path==undefined)
+	{
+		defer.reject(new Error(''));
+		return defer.promise;
+	}
+
+
 	if(path!=undefined)
 	{
 		/**

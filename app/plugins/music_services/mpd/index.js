@@ -6,6 +6,9 @@ var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
 var s=require('string');
+var ifconfig = require('wireless-tools/ifconfig');
+var ip = require('ip');
+var nodetools=require('nodetools');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -172,6 +175,8 @@ ControllerMpd.prototype.addPlay = function(data) {
 	var self = this;
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
 	self.commandRouter.pushToastMessage('Success','',str + ' Added');
+
+	console.log("PALY DATA "+JSON.stringify(data));
 	return self.sendMpdCommandArray([
 		{command: 'clear', parameters: []},
 		{command: 'add', parameters: [data]},
@@ -374,6 +379,7 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	var defer=libQ.defer();
 
+	console.log(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
 	var resp={};
 
 	if (objTrackInfo.Title!=undefined) {
@@ -395,22 +401,62 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	}
 
 	var promise;
-	if(objTrackInfo.Artist!=undefined)
+	var foundFileCover=false;
+
+	if(objTrackInfo.file!=undefined)
 	{
-		if (objTrackInfo.Album!=undefined) {
-			promise=self.getAlbumArt({artist:objTrackInfo.Artist,album:objTrackInfo.Album});
-		} else {
-			promise=self.getAlbumArt({artist:objTrackInfo.Artist});
+		var covers=['cover.jpg' , 'Cover.jpg' , 'folder.jpg','Folder.jpg',
+					'cover.png' , 'Cover.png' , 'folder.png','Folder.png'];
+		var splitted=objTrackInfo.file.split('/');
+		var coverFolder='/mnt';
+
+		for(var k=0;k<splitted.length-1;k++)
+		{
+			coverFolder=coverFolder+'/'+splitted[k];
+		}
+
+		for(var i in covers)
+		{
+
+			var coverFile=coverFolder+'/'+covers[i];
+			console.log("Searching for cover "+coverFile);
+			if(libFsExtra.existsSync(coverFile))
+			{
+				console.log("Cover found in file "+coverFile);
+				promise=self.getAlbumArt({},coverFile);
+				foundFileCover=true;
+				break;
+			}
 		}
 	}
 
-	promise.then(function(value){
-		resp.albumart=value;
-		defer.resolve(resp);
-	})
-	.fail(function(){
-		defer.resolve(resp);
-	});
+
+	if(foundFileCover==false)
+	{
+		if(objTrackInfo.Artist!=undefined)
+		{
+			if (objTrackInfo.Album!=undefined) {
+				promise=self.getAlbumArt({artist:objTrackInfo.Artist,album:objTrackInfo.Album});
+			} else {
+				promise=self.getAlbumArt({artist:objTrackInfo.Artist});
+			}
+		}
+		else promise=self.getAlbumArt();
+	}
+
+	if(promise!=undefined)
+	{
+		promise.then(function(value){
+			console.log("ALBUMART: "+value);
+			resp.albumart=value;
+			defer.resolve(resp);
+		})
+			.fail(function(){
+				defer.resolve(resp);
+			});
+
+	}
+	else defer.resolve(resp);
 
 	return defer.promise;
 };
@@ -1184,28 +1230,70 @@ ControllerMpd.prototype.updateQueue = function () {
 }
 
 
-ControllerMpd.prototype.getAlbumArt = function (data) {
-	var self = this;
+ControllerMpd.prototype.getAlbumArt=function(data,path)
+{
+	var self=this;
 
-	var defer = libQ.defer();
+	var defer=libQ.defer();
 
-	if(data.album!=undefined && data.artist!=undefined)
-	{
-		var url=self.commandRouter.executeOnPlugin('miscellanea','albumart','getAlbumart',{artist:data.artist,album:data.album});
-		url.then(function(deferredValue)
+	ifconfig.status('wlan0', function(err, status) {
+		var address;
+
+		if (status != undefined) {
+			if (status.ipv4_address != undefined) {
+				address = status.ipv4_address;
+			}
+			else address = ip.address();
+		}
+		else address= ip.address();
+
+		var url;
+		var artist,album;
+
+
+
+		var web;
+
+		if(data!= undefined && data.artist!=undefined)
 		{
-			defer.resolve(deferredValue);
-		})
-		.fail(function()
-		{
-			defer.resolve('https://volumio.org/wp-content/uploads/coverdefault.png');
-		});
-	}
-	else defer.resolve('https://volumio.org/wp-content/uploads/coverdefault.png');
+			artist=data.artist;
+			if(data.album!=undefined)
+				album=data.album;
+			else album=data.artist;
+
+			web='?web='+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge'
+		}
+
+		var url='http://'+address+':3001/albumart';
+
+		if(web!=undefined)
+			url=url+web;
+
+		if(web!=undefined && path != undefined)
+			url=url+'&';
+		else if(path != undefined)
+			url=url+'?';
+
+		if(path!=undefined)
+			url=url+'path='+nodetools.urlEncode(path);
+
+		defer.resolve(url);
+	});
+
 
 	return defer.promise;
-
 }
+
+
+
+
+
+
+
+
+
+
+
 
 ControllerMpd.prototype.reportUpdatedLibrary = function () {
 	var self=this;
