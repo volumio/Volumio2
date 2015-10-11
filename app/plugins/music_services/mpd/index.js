@@ -594,7 +594,8 @@ ControllerMpd.prototype.onVolumioStart = function() {
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
 	self.updateQueue();
-	self.fswatch();
+	// TODO remove pertaining function when properly found out we don't need em
+	//self.fswatch();
 	// When playback status changes
 	self.clientMpd.on('system', function() {
 		var timeStart = Date.now();
