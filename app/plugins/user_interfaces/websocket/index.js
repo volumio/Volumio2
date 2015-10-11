@@ -22,6 +22,12 @@ function InterfaceWebUI (context) {
 	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
 		try {
+
+
+
+
+
+
 			/** Request Volumio State
 			 * It returns an array definining the Playback state, Volume and other amenities
 			 * @example {"status":"stop","position":0,"dynamictitle":null,"seek":0,"duration":0,"samplerate":null,"bitdepth":null,"channels":null,"volume":82,"mute":false,"service":null}
@@ -764,6 +770,59 @@ function InterfaceWebUI (context) {
 
 			});
 
+
+			connWebSocket.on('updateCheck', function (data) {
+				selfConnWebSocket = this;
+
+				self.logger.info("Sending updateCheck to server");
+
+				var socketURL = 'http://localhost:3005';
+				var options = {
+					transports: ['websocket'],
+					'force new connection': true
+				}
+
+				var io 	= require('socket.io-client');
+				var client = io.connect(socketURL, options);
+				client.emit('updateCheck',data);
+
+				client.on('updateReady', function(message){
+					self.logger.info("Sending updateReady message back to client");
+					selfConnWebSocket.emit('updateReady',message);
+				});
+
+				client.on('updateCheck-error', function(message){
+					self.logger.info("Sending updateCheck-error message back to client");
+					selfConnWebSocket.emit('updateCheck-error',message);
+				});
+			});
+
+
+			connWebSocket.on('update', function (data) {
+				selfConnWebSocket = this;
+
+				self.logger.info("Sending update to server");
+
+				var socketURL = 'http://localhost:3005';
+				var options = {
+					transports: ['websocket'],
+					'force new connection': true
+				}
+
+				var io 	= require('socket.io-client');
+				var client = io.connect(socketURL, options);
+				client.emit('update',data);
+
+				client.on('updateProgress', function(message){
+					self.logger.info("Sending updateProgress message back to client");
+					selfConnWebSocket.emit('updateProgress',message);
+				});
+
+				client.on('updateDone', function(message){
+					self.logger.info("Sending updateDone message back to client");
+					selfConnWebSocket.emit('updateDone',message);
+				});
+			});
 
 		}
 		catch(ex)
