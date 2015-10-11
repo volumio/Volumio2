@@ -95,22 +95,28 @@ var processRequest=function (web,path) {
 					}
 					else
 					{
-						var splitted=url.split('.');
-						var fileExtension=splitted[splitted.length-1];
-						var diskFileName=uuid.v4()+'.'+fileExtension;
+						if(url!=undefined && url!='')
+						{
+							var splitted=url.split('.');
+							var fileExtension=splitted[splitted.length-1];
+							var diskFileName=uuid.v4()+'.'+fileExtension;
 
-						var options = {
-							directory: folder,
-							filename: diskFileName
+							var options = {
+								directory: folder,
+								filename: diskFileName
+							}
+
+							console.log("URL: "+url);
+							download(url, options, function(err){
+								if (err) defer.reject(new Error(err));
+								else defer.resolve(folder+diskFileName);
+							});
+
+							infoJson[resolution]=diskFileName;
 						}
-
-						download(url, options, function(err){
-							if (err) defer.reject(new Error(err));
-							else defer.resolve(folder+diskFileName);
-						});
-
-						infoJson[resolution]=diskFileName;
-
+						else{
+							defer.reject(new Error('No albumart URL'));
+						}
 					}
 
 					fs.writeJsonSync(infoPath,infoJson);
