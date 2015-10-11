@@ -17,7 +17,7 @@ function ControllerMpd(context) {
 	var self = this;
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
-
+	self.logger=self.context.logger;
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -671,15 +671,55 @@ ControllerMpd.prototype.getUIConfig = function()
 	var self = this;
 
 	var uiconf=libFsExtra.readJsonSync(__dirname+'/UIConfig.json');
+	var value;
 
-	uiconf.sections[0].content[0].value.value=self.config.get('gapless_mp3_playback');
-	uiconf.sections[0].content[1].value.value=self.config.get('volume_normalization');
-	uiconf.sections[0].content[2].value.value=self.config.get('audio_buffer_size');
-	uiconf.sections[0].content[3].value.value=self.config.get('buffer_before_play');
-	uiconf.sections[0].content[4].value.value=self.config.get('auto_update');
+
+	value=self.config.get('gapless_mp3_playback');
+	uiconf.sections[0].content[0].value.value=value;
+	uiconf.sections[0].content[0].value.label=self.getLabelForSelect(uiconf.sections[0].content[0].options,value);
+
+	value=self.config.get('volume_normalization');
+	uiconf.sections[0].content[1].value.value=value;
+	uiconf.sections[0].content[1].value.label=self.getLabelForSelect(uiconf.sections[0].content[1].options,value);
+
+	value=self.config.get('audio_buffer_size');
+	uiconf.sections[0].content[2].value.value=value;
+	uiconf.sections[0].content[2].value.label=self.getLabelForSelect(uiconf.sections[0].content[2].options,value);
+
+	value=self.config.get('buffer_before_play');
+	uiconf.sections[0].content[3].value.value=value;
+	uiconf.sections[0].content[3].value.label=self.getLabelForSelect(uiconf.sections[0].content[3].options,value);
+
+	value=self.config.get('auto_update');
+	uiconf.sections[0].content[4].value.value=value;
+	uiconf.sections[0].content[4].value.label=self.getLabelForSelect(uiconf.sections[0].content[4].options,value);
+
+	value=self.getAdditionalConf('audio_interface','alsa_controller','volumestart');
+	uiconf.sections[1].content[0].value.value=value;
+	uiconf.sections[1].content[0].value.label=self.getLabelForSelect(uiconf.sections[1].content[0].options,value);
+
+	value=self.getAdditionalConf('audio_interface','alsa_controller','volumemax');
+	uiconf.sections[1].content[1].value.value=value;
+	uiconf.sections[1].content[1].value.label=self.getLabelForSelect(uiconf.sections[1].content[1].options,value);
+
+	value=self.getAdditionalConf('audio_interface','alsa_controller','volumecurvemode')
+	uiconf.sections[1].content[2].value.value=value;
+	uiconf.sections[1].content[2].value.label=self.getLabelForSelect(uiconf.sections[1].content[2].options,value);
 
 	return uiconf;
 }
+
+ControllerMpd.prototype.getLabelForSelect = function(options,key)
+{
+	for(var i in options)
+	{
+		if(options[i].value==key)
+			return options[i].label;
+	}
+
+	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
+}
+
 
 ControllerMpd.prototype.savePlaybackOptions = function(data)
 {
@@ -687,16 +727,16 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 
 	var defer = libQ.defer();
 
-	self.config.set('gapless_mp3_playback',data['gapless_mp3_playback']);
-	self.config.set('volume_normalization',data['volume_normalization']);
-	self.config.set('audio_buffer_size',data['audio_buffer_size']);
-	self.config.set('buffer_before_play',data['buffer_before_play']);
-	self.config.set('auto_update',data['auto_update']);
+	self.config.set('gapless_mp3_playback',data['gapless_mp3_playback'].value);
+	self.config.set('volume_normalization',data['volume_normalization'].value);
+	self.config.set('audio_buffer_size',data['audio_buffer_size'].value);
+	self.config.set('buffer_before_play',data['buffer_before_play'].value);
+	self.config.set('auto_update',data['auto_update'].value);
 
 
 	self.createMPDFile(function(error)
 	{
-		if (error !== null) {
+		if (error !== undefined && error !== null) {
 			self.commandRouter.pushToastMessage('error',"Configuration update",'Error while Applying new configuration');
 			defer.resolve({});
 		}
@@ -706,7 +746,8 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 
 			self.restartMpd(function(error)
 			{
-				if (error !== null) {
+				if (error !== null && error !=undefined) {
+					console.log(error);
 					self.commandRouter.pushToastMessage('error',"Player restart",'Error while restarting player');
 				}
 				else self.commandRouter.pushToastMessage('success',"Player restart",'Player successfully restarted');
@@ -720,12 +761,33 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 
 }
 
+ControllerMpd.prototype.saveVolumeOptions = function(data)
+{
+	var self = this;
+
+	var defer = libQ.defer();
+
+	self.setAdditionalConf('audio_interface','alsa_controller',{key:'volumestart',value:data.volumestart.value});
+	self.setAdditionalConf('audio_interface','alsa_controller',{key:'volumemax',value:data.volumemax.value});
+	self.setAdditionalConf('audio_interface','alsa_controller',{key:'volumecurvemode',value:data.volumecurvemode.value});
+
+	self.logger.info('Volume configurations have been set');
+
+
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The volume configuration has been successfully updated');
+
+	defer.resolve({});
+
+	return defer.promise;
+
+}
+
 ControllerMpd.prototype.restartMpd = function(callback)
 {
 	var self = this;
 
 
-	exec('systemctl mpd.service restart',
+	exec('/bin/systemctl restart mpd.service ',
 		function (error, stdout, stderr) {
 			callback(error);
 	});
@@ -816,6 +878,8 @@ ControllerMpd.prototype.createMPDFile = function(callback)
 	}
 	catch(err)
 	{
+
+		console.log("ERRORE QUAAA");
 		if(libFsExtra.existsSync('/etc/mpd.conf.old')) {
 			libFsExtra.copySync('/etc/mpd.conf.old', '/etc/mpd.conf');
 		}
@@ -1308,4 +1372,16 @@ ControllerMpd.prototype.getConfigurationFiles = function()
 	var self = this;
 
 	return ['config.json'];
+}
+
+ControllerMpd.prototype.getAdditionalConf = function(type,controller,data)
+{
+	var self=this;
+	return self.commandRouter.executeOnPlugin(type,controller,'getConfigParam',data);
+}
+
+ControllerMpd.prototype.setAdditionalConf = function(type,controller,data)
+{
+	var self=this;
+	return self.commandRouter.executeOnPlugin(type,controller,'setConfigParam',data);
 }

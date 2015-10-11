@@ -1,0 +1,14 @@
+{
+  "volumestart":{
+    "type": "number",
+    "value": 50
+  },
+  "volumemax":{
+    "type": "number",
+    "value": 100
+  },
+  "volumecurvemode":{
+    "type": "string",
+    "value": "logarithmic"
+  }
+}

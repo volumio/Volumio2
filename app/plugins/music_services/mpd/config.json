@@ -12,8 +12,8 @@
     "value": 2048
   },
   "buffer_before_play":{
-    "type": "boolean",
-    "value": true
+    "type": "string",
+    "value": "10%"
   },
   "auto_update":{
     "type": "boolean",

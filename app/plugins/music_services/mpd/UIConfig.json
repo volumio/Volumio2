@@ -76,7 +76,7 @@
           "options": [
             {
               "value":128,
-              "label": "1128"
+              "label": "128"
             },
             {
               "value":256,
@@ -113,8 +113,12 @@
               "label": "10%"
             },
             {
-              "value":"10%",
-              "label": "10%"
+              "value":"20%",
+              "label": "20%"
+            },
+            {
+              "value":"30%",
+              "label": "30%"
             }
           ]
 
@@ -135,6 +139,152 @@
             {
               "value":false,
               "label": "No"
+            }
+          ]
+
+        }
+
+      ]
+    },
+    {
+      "id": "volume_options",
+      "element": "section",
+      "label": "Volume options",
+      "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveVolumeOptions"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "volumestart",
+          "volumemax",
+          "volumecurvemode"
+        ]
+      },
+      "content": [
+        {
+          "id": "volumestart",
+          "element": "select",
+          "doc" : "This setting provides a default volume that is set at startup.",
+          "label": "Default volume",
+          "value":  {
+            "value":50,
+            "label": "50"
+          },
+          "options": [
+            {
+              "value":10,
+              "label": "10"
+            },
+            {
+              "value":20,
+              "label": "20"
+            },
+            {
+              "value":30,
+              "label": "30"
+            },
+            {
+              "value":40,
+              "label": "40"
+            },
+            {
+              "value":50,
+              "label": "50"
+            },
+            {
+              "value":60,
+              "label": "60"
+            },
+            {
+              "value":70,
+              "label": "70"
+            },
+            {
+              "value":80,
+              "label": "80"
+            },
+            {
+              "value":90,
+              "label": "90"
+            },
+            {
+              "value":100,
+              "label": "100"
+            }
+          ]
+
+        },
+
+        {
+          "id": "volumemax",
+          "element": "select",
+          "doc" : "This setting provides a Maximum volume.",
+          "label": "Max volume level",
+          "value":  {
+            "value":100,
+            "label": "100"
+          },
+          "options": [
+            {
+              "value":10,
+              "label": "10"
+            },
+            {
+              "value":20,
+              "label": "20"
+            },
+            {
+              "value":30,
+              "label": "30"
+            },
+            {
+              "value":40,
+              "label": "40"
+            },
+            {
+              "value":50,
+              "label": "50"
+            },
+            {
+              "value":60,
+              "label": "60"
+            },
+            {
+              "value":70,
+              "label": "70"
+            },
+            {
+              "value":80,
+              "label": "80"
+            },
+            {
+              "value":90,
+              "label": "90"
+            },
+            {
+              "value":100,
+              "label": "100"
+            }
+          ]
+
+        },
+
+        {
+          "id": "volumecurvemode",
+          "element": "select",
+          "doc" : "This setting provides a curve mode.",
+          "label": "Volume curve mode",
+          "value":  {
+            "value":"logarithmic",
+            "label": "Logarithmic"
+          },
+          "options": [
+            {
+              "value":"logarithmic",
+              "label": "Logarithmic"
+            },
+            {
+              "value":"linear",
+              "label": "Linear"
             }
           ]
 
