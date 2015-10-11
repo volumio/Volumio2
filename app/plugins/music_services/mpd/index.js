@@ -736,7 +736,7 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 
 	self.createMPDFile(function(error)
 	{
-		if (error !== null) {
+		if (error !== undefined && error !== null) {
 			self.commandRouter.pushToastMessage('error',"Configuration update",'Error while Applying new configuration');
 			defer.resolve({});
 		}
@@ -746,7 +746,8 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 
 			self.restartMpd(function(error)
 			{
-				if (error !== null) {
+				if (error !== null && error !=undefined) {
+					console.log(error);
 					self.commandRouter.pushToastMessage('error',"Player restart",'Error while restarting player');
 				}
 				else self.commandRouter.pushToastMessage('success',"Player restart",'Player successfully restarted');
@@ -766,7 +767,6 @@ ControllerMpd.prototype.saveVolumeOptions = function(data)
 
 	var defer = libQ.defer();
 
-	console.log(data.volumestart.value);
 	self.setAdditionalConf('audio_interface','alsa_controller',{key:'volumestart',value:data.volumestart.value});
 	self.setAdditionalConf('audio_interface','alsa_controller',{key:'volumemax',value:data.volumemax.value});
 	self.setAdditionalConf('audio_interface','alsa_controller',{key:'volumecurvemode',value:data.volumecurvemode.value});
@@ -787,7 +787,7 @@ ControllerMpd.prototype.restartMpd = function(callback)
 	var self = this;
 
 
-	exec('systemctl mpd.service restart',
+	exec('/bin/systemctl restart mpd.service ',
 		function (error, stdout, stderr) {
 			callback(error);
 	});

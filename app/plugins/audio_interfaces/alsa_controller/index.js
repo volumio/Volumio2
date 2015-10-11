@@ -1,14 +1,5 @@
-var libMpd = require('mpd');
-var libQ = require('kew');
-var libFast = require('fast.js');
-var libUtil = require('util');
-var libFsExtra = require('fs-extra');
-var libChokidar = require('chokidar');
-var exec = require('child_process').exec;
-var s=require('string');
-var ifconfig = require('wireless-tools/ifconfig');
-var ip = require('ip');
-var nodetools=require('nodetools');
+var io 	= require('socket.io-client');
+
 
 // Define the ControllerMpd class
 module.exports = ControllerAlsa;
@@ -29,12 +20,26 @@ ControllerAlsa.prototype.onVolumioStart = function() {
 	self.config= new (require('v-conf'))();
 	self.config.loadFile(configFile);
 
+
+	var volume=self.config.get('volumestart');
+
+	var socketURL = 'http://localhost:3000';
+	var options = {
+		transports: ['websocket'],
+		'force new connection': true
+	};
+
+	var client1 = io.connect(socketURL, options);
+
+	client1.on('connect', function(data){
+		self.logger.info("Setting volume on startup at "+volume);
+		client1.emit('volume', volume);
+	});
+
 }
 
 ControllerAlsa.prototype.getConfigParam = function(key) {
 	var self=this;
-
-	console.log("Reading value "+key+": "+ self.config.get(key));
 
 	return self.config.get(key);
 }
@@ -42,7 +47,6 @@ ControllerAlsa.prototype.getConfigParam = function(key) {
 ControllerAlsa.prototype.setConfigParam = function(data) {
 	var self=this;
 
-	console.log("Setting value "+data.value+" to key "+data.key);
 	self.config.set(data.key,data.value);
 }
 
