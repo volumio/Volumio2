@@ -61,6 +61,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "alsa_controller": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "miscellanea": {
