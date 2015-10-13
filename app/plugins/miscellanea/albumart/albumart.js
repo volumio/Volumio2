@@ -133,11 +133,17 @@ var processRequest=function (web,path) {
 					filename: diskFileName
 				}
 
-				download(url, options, function(err){
-					if (err) defer.reject(new Error(err));
-					else defer.resolve(folder+diskFileName);
-				});
-				
+				if(url!=undefined && url!='')
+				{
+					download(url, options, function(err){
+						if (err) defer.reject(new Error(err));
+						else defer.resolve(folder+diskFileName);
+					});
+				}
+				else{
+					defer.reject(new Error('No albumart URL'));
+				}
+
 				infoJson[resolution]=diskFileName;
 
 			}
