@@ -171,3 +171,18 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	}
 
 }
+
+
+ControllerNetworkfs.prototype.getConfigurationFiles = function()
+{
+	var self = this;
+
+	return ['config.json'];
+}
+
+ControllerNetworkfs.prototype.saveShare = function(data)
+{
+	var self = this;
+
+	return ['config.json'];
+}

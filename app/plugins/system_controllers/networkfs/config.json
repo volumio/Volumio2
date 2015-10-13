@@ -1,3 +1,29 @@
-{
-
+{"NasMounts": {
+    "Flac": {
+      "name": {
+        "type": "string",
+        "value": "Flac"
+      },
+      "ip": {
+        "type": "string",
+        "value": ""
+      },
+      "fstype": {
+        "type": "string",
+        "value": "cifs"
+      },
+      "username": {
+        "type": "string",
+        "value": ""
+      },
+      "password": {
+        "type": "string",
+        "value": ""
+      },
+      "options": {
+        "type": "string",
+        "value": ""
+      }
+    }
+  }
 }
