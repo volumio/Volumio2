@@ -7,7 +7,7 @@
       "id": "section_wired_network",
       "element": "section",
       "label": "Mount point",
-      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveShare"},
+      "onSave": {"type":"controller", "endpoint":"system_controller/networkfs", "method":"saveShare"},
       "saveButton": {
         "label": "Save",
         "data": [

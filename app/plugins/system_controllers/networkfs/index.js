@@ -72,7 +72,26 @@ ControllerNetworkfs.prototype.getUIConfig = function()
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
+	var name=config.get('NasMounts.Flac.name');
+	var ip=config.get('NasMounts.Flac.ip');
+	var fstype=config.get('NasMounts.Flac.fstype');
 
+	uiconf.sections[0].content[0].value=name;
+	uiconf.sections[0].content[1].value=ip;
+	uiconf.sections[0].content[2].value.value=fstype;
+	uiconf.sections[0].content[2].label.value=fstype;
+
+	var user=config.get('NasMounts.Flac.user');
+	if(user!=undefined)
+		uiconf.sections[0].content[3].value=user;
+
+	var password=config.get('NasMounts.Flac.password');
+	if(password!=undefined)
+		uiconf.sections[0].content[4].value=password;
+
+	var options=config.get('NasMounts.Flac.options');
+	if(options!=undefined)
+		uiconf.sections[0].content[5].value=options;
 
 	return uiconf;
 }
@@ -193,16 +212,25 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 	var password=data['Flac.password'];
 	var options=data['Flac.options'];
 
-	config.set('NasMounts.Flac.name',name);
-	config.set('NasMounts.Flac.ip',ip);
-	config.set('NasMounts.Flac.fstype',fstype);
-	config.set('NasMounts.Flac.username',username);
-	config.set('NasMounts.Flac.password',password);
-	config.set('NasMounts.Flac.options',options);
+	if(username==undefined) usenamer='';
+	if(password==undefined) password='';
+	if(options==undefined) options='';
+
+	config.addConfigValue('NasMounts.Flac.name','string',name);
+	config.addConfigValue('NasMounts.Flac.ip','string',ip);
+	config.addConfigValue('NasMounts.Flac.fstype','string',fstype);
+	config.addConfigValue('NasMounts.Flac.user','string',username);
+	config.addConfigValue('NasMounts.Flac.password','string',password);
+	config.addConfigValue('NasMounts.Flac.options','string',options);
 
 	self.initShares();
+	self.scanDatabase();
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 
 	defer.resolve({});
 	return defer.promise;
+}
+
+ControllerNetworkfs.prototype.scanDatabase = function() {
+	var self = this;
 }
