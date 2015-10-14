@@ -133,6 +133,7 @@ var processRequest=function (web,path) {
 					{
 						console.log("ERRORE: "+err);
 						defer.reject(new Error(err));
+						return defer.promise;
 					}
 					else
 					{
@@ -157,6 +158,7 @@ var processRequest=function (web,path) {
 						}
 						else{
 							defer.reject(new Error('No albumart URL'));
+							return defer.promise;
 						}
 					}
 
@@ -165,17 +167,16 @@ var processRequest=function (web,path) {
 			}
 			else
 			{
-				var splitted=url.split('.');
-				var fileExtension=splitted[splitted.length-1];
-				var diskFileName=uuid.v4()+'.'+fileExtension;
-				
-				var options = {
-					directory: folder,
-					filename: diskFileName
-				}
-
 				if(url!=undefined && url!='')
 				{
+					var splitted=url.split('.');
+					var fileExtension=splitted[splitted.length-1];
+					var diskFileName=uuid.v4()+'.'+fileExtension;
+
+					var options = {
+						directory: folder,
+						filename: diskFileName
+					}
 					download(url, options, function(err){
 						if (err) defer.reject(new Error(err));
 						else defer.resolve(folder+diskFileName);
@@ -183,6 +184,7 @@ var processRequest=function (web,path) {
 				}
 				else{
 					defer.reject(new Error('No albumart URL'));
+					return defer.promise;
 				}
 
 				infoJson[resolution]=diskFileName;

@@ -14,8 +14,8 @@ app.use(function(err, req, res, next) {
 
   /**
    * Sending back error code 500
-   **/ 
-  res.status(500).send('An internal error occurred. We are investigating on it.');
+   **/
+  res.sendFile(__dirname+'/default.png');
 });
 
 app.listen(process.argv[2]);
