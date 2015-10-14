@@ -49,9 +49,24 @@ var processRequest=function (web,path) {
 	{
 		var splitted=nodetools.urlDecode(web).split('/');
 
-		artist=splitted[0];
-		album=splitted[1];
-		resolution=splitted[2];
+		if(splitted.length<3)
+		{
+			defer.reject(new Error('The web link '+web+' is malformed' ));
+			return defer.promise;
+		}
+
+		if(splitted.length==3)
+		{
+			artist=splitted[0];
+			album=splitted[1];
+			resolution=splitted[2];
+		}
+		else if(splitted.length==4)
+		{
+			artist=splitted[1];
+			album=splitted[2];
+			resolution=splitted[3];
+		}
 	}
 	else
 	{
