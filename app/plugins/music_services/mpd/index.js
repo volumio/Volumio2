@@ -406,6 +406,8 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	var coverFolder='/mnt';
 
+	var splitted=objTrackInfo.file.split('/');
+
 	for(var k=0;k<splitted.length-1;k++)
 	{
 		coverFolder=coverFolder+'/'+splitted[k];
@@ -420,7 +422,7 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 		}
 	}
 
-	promise=self.getAlbumArt(web,coverFile);
+	promise=self.getAlbumArt(web,coverFolder);
 
 	if(promise!=undefined)
 	{
