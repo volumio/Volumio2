@@ -184,5 +184,25 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 {
 	var self = this;
 
-	return ['config.json'];
+	var defer = libQ.defer();
+
+	var name=data['Flac.name'];
+	var ip=data['Flac.ip'];
+	var fstype=data['Flac.fstype'].value;
+	var username=data['Flac.username'];
+	var password=data['Flac.password'];
+	var options=data['Flac.options'];
+
+	config.set('NasMounts.Flac.name',name);
+	config.set('NasMounts.Flac.ip',ip);
+	config.set('NasMounts.Flac.fstype',fstype);
+	config.set('NasMounts.Flac.username',username);
+	config.set('NasMounts.Flac.password',password);
+	config.set('NasMounts.Flac.options',options);
+
+	self.initShares();
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+
+	defer.resolve({});
+	return defer.promise;
 }
