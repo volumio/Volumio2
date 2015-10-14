@@ -32,8 +32,9 @@ var processRequest=function (web,path) {
 		 * Trying to read albumart from file
 		 */
 
-		var covers=['cover.jpg' , 'Cover.jpg' , 'folder.jpg','Folder.jpg',
-			'cover.png' , 'Cover.png' , 'folder.png','Folder.png'];
+		var covers=['coverart.jpg','albumart.jpg','coverart.png','albumart.png',
+					'cover.jpg' , 'Cover.jpg' , 'folder.jpg','Folder.jpg',
+					'cover.png' , 'Cover.png' , 'folder.png','Folder.png'];
 		var splitted=path.split('/');
 
 
