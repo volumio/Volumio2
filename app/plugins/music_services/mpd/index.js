@@ -171,6 +171,15 @@ ControllerMpd.prototype.disableOutput = function(output) {
 	return self.sendMpdCommand('disableoutput', [output]);
 };
 
+//UpdateDB
+ControllerMpd.prototype.updateMpdDB = function() {
+	var self = this;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Update mpd DB');
+
+	return self.sendMpdCommand('update', []);
+};
+
+
 ControllerMpd.prototype.addPlay = function(data) {
 	var self = this;
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');

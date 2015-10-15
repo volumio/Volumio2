@@ -233,4 +233,7 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 
 ControllerNetworkfs.prototype.scanDatabase = function() {
 	var self = this;
+	self.commandRouter.pushToastMessage('success',"My Music",'Adding new Music to Database');
+	self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateMpdDB', '');
+
 }
