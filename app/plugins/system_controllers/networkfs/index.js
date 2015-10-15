@@ -224,16 +224,27 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 	config.addConfigValue('NasMounts.Flac.options','string',options);
 
 	self.initShares();
-	self.scanDatabase();
-	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+	setTimeout(function () {
+		self.scanDatabase();
+		//Wait for share to be mounted before scanning
+	}, 2000)
 	defer.resolve({});
 	return defer.promise;
 }
 
 ControllerNetworkfs.prototype.scanDatabase = function() {
 	var self = this;
-	self.commandRouter.pushToastMessage('success',"My Music",'Adding new Music to Database');
-	self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateMpdDB', '');
 
+	exec("/usr/bin/mpc update", function (error, stdout, stderr) {
+		if (error !== null) {
+			self.commandRouter.pushToastMessage('warning',"My Music",'Error scanning Database: ' +error);
+			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database scan error: ' + error);
+		}
+		else {
+			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database update started');
+			self.commandRouter.pushToastMessage('success',"My Music",'Adding new Music to Database');
+		}
+	});
 }
