@@ -25,44 +25,19 @@ var processRequest=function (web,path) {
 		return defer.promise;
 	}
 
-	console.log(path);
+
 	if(path!=undefined)
 	{
 		/**
 		 * Trying to read albumart from file
 		 */
 
-		var covers=['cover.jpg' , 'Cover.jpg' , 'folder.jpg','Folder.jpg',
-			'cover.png' , 'Cover.png' , 'folder.png','Folder.png'];
-		var splitted=path.split('/');
-
-
-		for(var i in covers)
+		if(fs.existsSync(path))
 		{
-			var coverFile=path+'/'+covers[i];
-			console.log("Searching for cover "+coverFile);
-			if(fs.existsSync(coverFile))
-			{
-				defer.resolve(coverFile);
-				return defer.promise;
-			}
+			defer.resolve(path);
+			return defer.promise;
 		}
-
-		var files=fs.readdirSync(path);
-		for(var j in files) {
-			var fileName=S(files[j]);
-
-			console.log(fileName.s);
-			if(fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
-				defer.resolve(path+'/'+fileName.s);
-				return defer.promise;
-			}
-
-		}
-
-
 	}
-
 
 	/**
 	 * If we arrive to this point the file albumart has not been passed or doesn't exists

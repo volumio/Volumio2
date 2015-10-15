@@ -402,25 +402,47 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	var promise;
 	var foundFileCover=false;
-	var web;
 
-	var coverFolder='/mnt';
-
-	for(var k=0;k<splitted.length-1;k++)
+	if(objTrackInfo.file!=undefined)
 	{
-		coverFolder=coverFolder+'/'+splitted[k];
-	}
+		var covers=['cover.jpg' , 'Cover.jpg' , 'folder.jpg','Folder.jpg',
+					'cover.png' , 'Cover.png' , 'folder.png','Folder.png'];
+		var splitted=objTrackInfo.file.split('/');
+		var coverFolder='/mnt';
 
-	if(objTrackInfo.Artist!=undefined)
-	{
-		if (objTrackInfo.Album!=undefined) {
-			web={artist:objTrackInfo.Artist,album:objTrackInfo.Album};
-		} else {
-			web={artist:objTrackInfo.Artist};
+		for(var k=0;k<splitted.length-1;k++)
+		{
+			coverFolder=coverFolder+'/'+splitted[k];
+		}
+
+		for(var i in covers)
+		{
+
+			var coverFile=coverFolder+'/'+covers[i];
+			console.log("Searching for cover "+coverFile);
+			if(libFsExtra.existsSync(coverFile))
+			{
+				console.log("Cover found in file "+coverFile);
+				promise=self.getAlbumArt({},coverFile);
+				foundFileCover=true;
+				break;
+			}
 		}
 	}
 
-	promise=self.getAlbumArt(web,coverFile);
+
+	if(foundFileCover==false)
+	{
+		if(objTrackInfo.Artist!=undefined)
+		{
+			if (objTrackInfo.Album!=undefined) {
+				promise=self.getAlbumArt({artist:objTrackInfo.Artist,album:objTrackInfo.Album});
+			} else {
+				promise=self.getAlbumArt({artist:objTrackInfo.Artist});
+			}
+		}
+		else promise=self.getAlbumArt();
+	}
 
 	if(promise!=undefined)
 	{
