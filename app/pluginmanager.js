@@ -4,6 +4,7 @@
 var fs = require('fs-extra');
 var HashMap = require('hashmap');
 var libFast = require('fast.js');
+var S=require('string');
 
 module.exports = PluginManager;
 function PluginManager (ccommand, server) {
@@ -22,6 +23,8 @@ function PluginManager (ccommand, server) {
 
     self.coreCommand = ccommand;
     self.websocketServer = server;
+    self.logger = ccommand.logger;
+
 
     self.configurationFolder='/data/configuration/';
 }
@@ -62,7 +65,7 @@ PluginManager.prototype.loadPlugin = function(folder) {
     var shallStartup=configForPlugin!=undefined && configForPlugin==true;
     if(shallStartup==true)
     {
-        console.log('[' + Date.now() + '] Loading plugin \"' + name + '\"...');
+        self.logger.info('Loading plugin \"' + name + '\"...');
 
         var pluginInstance = null;
         var context=new (require(__dirname+'/pluginContext.js'))(self.coreCommand, self.websocketServer);
@@ -86,7 +89,7 @@ PluginManager.prototype.loadPlugin = function(folder) {
 
         self.plugins.set(key,pluginData);
     }
-    else console.log("Plugin "+name+" is not enabled");
+    else self.logger.info("Plugin "+name+" is not enabled");
 
 }
 
@@ -100,7 +103,7 @@ PluginManager.prototype.loadPlugins=function()
     for(var ppaths in self.pluginPath)
     {
         var folder=self.pluginPath[ppaths];
-        console.log('Loading plugins from folder '+folder);
+        self.logger.info('Loading plugins from folder '+folder);
 
         if(fs.existsSync(folder))
         {
@@ -218,7 +221,6 @@ PluginManager.prototype.getPluginCategories=function()
 {
     var self=this;
 
-    console.log("REQUESTING PLUGIN CATEGORIES");
     var categories=[];
 
     var values=self.plugins.values();
@@ -281,8 +283,8 @@ PluginManager.prototype.getPlugin=function(category,name)
 PluginManager.prototype.getConfigurationFile=function(context,fileName)
 {
     var self=this;
-    return self.configurationFolder+'/'+
-        context.getEnvVariable('category')+'/'+
-        context.getEnvVariable('name')+'/'+
+    return S(self.configurationFolder).ensureRight('/').s+
+        S(context.getEnvVariable('category')).ensureRight('/').s+
+        S(context.getEnvVariable('name')).ensureRight('/').s+
             fileName;
 }
