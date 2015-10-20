@@ -21,6 +21,7 @@
     "fs-extra": "0.22.1",
     "hashmap": "2.0.3",
     "ip": "^0.3.3",
+    "inotify":"1.4.0",
     "kew": "^0.5.0-alpha.1",
     "level": "^0.18.0",
     "linux-mountutils": "^1.0.0",
