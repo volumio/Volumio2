@@ -1,5 +1,15 @@
 {
   "music_service": {
+    "airplay_emulation": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
     "spop": {
       "enabled": {
         "type": "boolean",
@@ -43,16 +53,6 @@
   },
   "audio_interface": {
     "upnp": {
-      "enabled": {
-        "type": "boolean",
-        "value": true
-      },
-      "status": {
-        "type": "string",
-        "value": "STARTED"
-      }
-    },
-    "airplay_emulation": {
       "enabled": {
         "type": "boolean",
         "value": true
