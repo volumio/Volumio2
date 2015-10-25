@@ -771,7 +771,7 @@ function InterfaceWebUI (context) {
 			});
 
 
-			connWebSocket.on('updateCheck', function (data) {
+			connWebSocket.on('updateCheck', function () {
 				selfConnWebSocket = this;
 
 				self.logger.info("Sending updateCheck to server");
@@ -784,15 +784,15 @@ function InterfaceWebUI (context) {
 
 				var io 	= require('socket.io-client');
 				var client = io.connect(socketURL, options);
-				client.emit('updateCheck',data);
+				client.emit('updateCheck','search-for-upgrade');
 
 				client.on('updateReady', function(message){
-					self.logger.info("Sending updateReady message back to client");
+					self.logger.info("Update Ready: "+message);
 					selfConnWebSocket.emit('updateReady',message);
 				});
 
 				client.on('updateCheck-error', function(message){
-					self.logger.info("Sending updateCheck-error message back to client");
+					self.logger.info("Update Check error: "+message);
 					selfConnWebSocket.emit('updateCheck-error',message);
 				});
 			});
@@ -800,8 +800,7 @@ function InterfaceWebUI (context) {
 
 			connWebSocket.on('update', function (data) {
 				selfConnWebSocket = this;
-
-				self.logger.info("Sending update to server");
+				self.logger.info("Update: "+data);
 
 				var socketURL = 'http://localhost:3005';
 				var options = {
@@ -814,12 +813,12 @@ function InterfaceWebUI (context) {
 				client.emit('update',data);
 
 				client.on('updateProgress', function(message){
-					self.logger.info("Sending updateProgress message back to client");
+					self.logger.info("Update Progress: "+message);
 					selfConnWebSocket.emit('updateProgress',message);
 				});
 
 				client.on('updateDone', function(message){
-					self.logger.info("Sending updateDone message back to client");
+					self.logger.info("Update Done: "+message);
 					selfConnWebSocket.emit('updateDone',message);
 				});
 			});
