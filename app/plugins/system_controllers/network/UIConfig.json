@@ -73,36 +73,6 @@
         }
       ]
     },
-    {
-      "id": "section_wireless_network",
-      "element": "section",
-      "label": "Wireless Network",
-      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWirelessNet"},
-      "saveButton": {
-        "label": "Save",
-        "data": [
-          "network_ssid",
-          "network_pass"
-        ]
-      },
-      "content": [
-        {
-          "id": "network_ssid",
-          "type": "string",
-          "doc": "Set the name of the WiFi you want to connect",
-          "element": "input",
-          "label": "Network Name",
-          "value": ""
-        },
-        {
-          "id": "network_pass",
-          "type": "password",
-          "doc": "Set the password of the WiFi you want to connect.",
-          "element": "input",
-          "label": "Passphrase",
-          "value": ""
-        }
-      ]
-    }
+    {"coreSection":"wifi"},{"coreSection":"network-status"}
   ]
 }
