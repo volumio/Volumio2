@@ -90,11 +90,11 @@ ControllerNetwork.prototype.getUIConfig = function()
 	//static gateway
 	uiconf.sections[0].content[3].value=config.get('ethgateway');
 
-	//WLan ssid
-	uiconf.sections[1].content[0].value=config.get('wlanssid');
+
 
 	//
-	uiconf.sections[1].content[1].value=config.get('wlanpass');
+
+	console.log(uiconf);
 
 	return uiconf;
 }
