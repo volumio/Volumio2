@@ -770,7 +770,22 @@ function InterfaceWebUI (context) {
 
 			});
 
+			connWebSocket.on('getWirelessNetworks', function () {
+				selfConnWebSocket = this;
 
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessNetworks', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushWirelessNetworks', data);
+					});
+				}
+				else console.log("Error on Wireless Scan");
+
+
+			});
+
+			//Updater
 			connWebSocket.on('updateCheck', function () {
 				selfConnWebSocket = this;
 

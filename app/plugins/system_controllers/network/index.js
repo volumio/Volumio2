@@ -4,6 +4,8 @@ var libFast = require('fast.js');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
+var iwconfig = require('./lib/iwconfig.js');
+var iwlist = require('./lib/iwlist.js');
 var config= new (require('v-conf'))();
 
 var connected = false;
@@ -145,99 +147,17 @@ ControllerNetwork.prototype.setAdditionalConf = function()
 }
 
 
-var wireless = new Wireless({
-	iface: iface,
-	updateFrequency: 20,
-	vanishThreshold: 7,
-});
-
-ControllerNetwork.prototype.scanWirelessNetworks = function(defer)
+ControllerNetwork.prototype.getWirelessNetworks = function(defer)
 {
 	var self = this;
-	wireless.enable(function(error) {
-		if (error) {
-			console.log("[ FAILURE] Unable to enable wireless card. Quitting...");
-			defer.reject(new Error("[ FAILURE] Unable to enable wireless card. Quitting..."));
-			return;
-		}
-		console.log("[PROGRESS] Starting wireless scan...");
+	var networksarray = [];
 
-		wireless.start();
+	var defer=libQ.defer();
+	iwlist.scan('wlan0', function(err, networks) {
+		var self = this;
+		self.networksarray = networks;
+		defer.resolve(self.networksarray);
 	});
-
-	wireless.on('appear', function(network) {
-		var quality = Math.floor(network.quality / 100 * 100);
-
-
-		if (network.strength >= 65)
-			signalStrength = 5;
-		else if (network.strength >= 50)
-			signalStrength = 4;
-		else if (network.strength >= 40)
-			signalStrength = 3;
-		else if (network.strength >= 30)
-			signalStrength = 2;
-		else if (network.strength >= 20)
-			signalStrength = 1;
-		var ssid = network.ssid || undefined;
-
-		var encryption_type = 'Open';
-		if (network.encryption_wep) {
-			encryption_type = 'WEP';
-		} else if (network.encryption_wpa && network.encryption_wpa2) {
-			encryption_type = 'WPA&WPA2';
-		} else if (network.encryption_wpa) {
-			encryption_type = 'WPA';
-		} else if (network.encryption_wpa2) {
-			encryption_type = 'WPA2';
-		}
-
-
-		if (ssid != undefined) {
-			var self = this;
-			var result = JSON.stringify({
-				networs_ssid: ssid,
-				signal: signalStrength,
-				encryption: encryption_type
-			});
-
-
-
-
-		wireless.disable(function () {
-			wireless.stop(
-				print(result));
-
-		});
-		}
-	});
-
-	var deferDone=false;
-	function print(networkarray) {
-		if(deferDone==false)
-		{
-			defer.resolve(networkarray);
-			deferDone=true;
-		}
-		self.pushWirelessNetworks(networkarray);
-
-	}
-
-
-
-}
-
-ControllerNetwork.prototype.pushWirelessNetworks = function(scanresult) {
-	var self = this;
-
-	return self.commandRouter.volumiopushwirelessnetworks(scanresult);
-}
-
-ControllerNetwork.prototype.wirelessScan = function(scanresult) {
-	var self = this;
-
-	var defer = libQ.defer();
-	self.scanWirelessNetworks(defer);
 	return defer.promise;
 }
 

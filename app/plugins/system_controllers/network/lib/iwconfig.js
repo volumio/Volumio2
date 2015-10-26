@@ -173,7 +173,7 @@ function parse_status_interface(callback) {
  */
 function status(interface, callback) {
   if (callback) {
-    return this.exec('iwconfig ' + interface,
+    return this.exec('sudo /sbin/iwconfig ' + interface,
       parse_status_interface(callback));  
   }
   else {
