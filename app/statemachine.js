@@ -40,7 +40,7 @@ CoreStateMachine.prototype.getState = function() {
 		repeat: self.currentRepeat,
 		volume: self.currentVolume,
 		mute: self.currentMute,
-		service: 'mpd'
+		service: sService
 	});
 };
 

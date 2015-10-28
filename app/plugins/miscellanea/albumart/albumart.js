@@ -28,6 +28,14 @@ var processRequest=function (web,path) {
 	console.log(path);
 	if(path!=undefined)
 	{
+		var stats=fs.statSync(path);
+
+		if(stats.isFile())
+		{
+			defer.resolve(path);
+			return defer.promise;
+		}
+
 		/**
 		 * Trying to read albumart from file
 		 */

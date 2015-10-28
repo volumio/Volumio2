@@ -72,7 +72,7 @@ ControllerNetworkfs.prototype.getUIConfig = function()
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
-	var name=config.get('NasMounts.Flac.name');
+	/*var name=config.get('NasMounts.Flac.name');
 	var ip=config.get('NasMounts.Flac.ip');
 	var fstype=config.get('NasMounts.Flac.fstype');
 
@@ -91,7 +91,7 @@ ControllerNetworkfs.prototype.getUIConfig = function()
 
 	var options=config.get('NasMounts.Flac.options');
 	if(options!=undefined)
-		uiconf.sections[0].content[5].value=options;
+		uiconf.sections[0].content[5].value=options;*/
 
 	return uiconf;
 }
@@ -247,4 +247,10 @@ ControllerNetworkfs.prototype.scanDatabase = function() {
 			self.commandRouter.pushToastMessage('success',"My Music",'Adding new Music to Database');
 		}
 	});
+}
+
+ControllerNetworkfs.prototype.listShares = function() {
+	var mounts=config.getKeys();
+
+
 }
