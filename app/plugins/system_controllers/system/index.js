@@ -14,6 +14,9 @@ function ControllerSystem(context) {
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
+
+	self.logger=self.context.logger;
+	self.callbacks=[];
 }
 
 ControllerSystem.prototype.onVolumioStart = function() {
@@ -139,6 +142,14 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 	self.setHostname(player_name);
 	defer.resolve({});
+
+
+	for(var i in self.callbacks)
+	{
+		var callback=self.callbacks[i];
+
+		callback.call(callback,player_name);
+	}
 	return defer.promise;
 }
 
@@ -212,4 +223,11 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 			});
 		}
 	});
+}
+
+ControllerSystem.prototype.registerCallback = function(callback)
+{
+	var self = this;
+
+	self.callbacks.push(callback);
 }
