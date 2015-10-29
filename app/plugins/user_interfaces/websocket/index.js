@@ -798,6 +798,21 @@ function InterfaceWebUI (context) {
 				else console.log("Error on returning wireless networks");*/
 			});
 
+			connWebSocket.on('getInfoWiredNetwork', function () {
+				selfConnWebSocket = this;
+
+				var defer= self.commandRouter.executeOnPlugin('system_controller', 'network', 'getInfoWiredNetwork', '');
+
+				defer.then(function(data){
+					selfConnWebSocket.emit('pushInfoWiredNetwork', data);
+				})
+				.fail(function(){
+					selfConnWebSocket.emit('pushInfoWiredNetwork', {status:"Not Connected",online:"no"});
+				});
+			});
+
+
+
 			//Updater
 			connWebSocket.on('updateCheck', function () {
 				selfConnWebSocket = this;
