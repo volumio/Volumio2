@@ -431,7 +431,7 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 		}
 	}
 
-	promise=self.getAlbumArt(web,coverFolder);
+	promise=self.getlbumArt(web,coverFolder);
 
 	if(promise!=undefined)
 	{
