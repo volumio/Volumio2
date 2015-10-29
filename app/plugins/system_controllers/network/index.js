@@ -27,6 +27,7 @@ function ControllerNetwork(context) {
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
 
+	self.logger=self.context.logger;
 }
 
 ControllerNetwork.prototype.onVolumioStart = function() {
@@ -221,6 +222,29 @@ ControllerNetwork.prototype.getData = function(data,key)
 	}
 
 	return null;
+}
+
+/**
+ *
+ * @param data {ssid:’miarete’, encryption:wpa,password:’’}
+ * @returns {*}
+ */
+ControllerNetwork.prototype.saveWirelessNetworkSettings = function(data)
+{
+	var self = this;
+
+	self.logger.info("Saving new wireless network");
+
+	var network_ssid=data['ssid'];
+	var network_pass=data['password'];
+	var encryption=data['encryption'];
+
+	config.set('wlanssid',network_ssid);
+	config.set('wlanpass',network_pass);
+	config.addConfigValue('encryption','string',encryption);
+
+	self.rebuildNetworkConfig();
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 }
 
 ControllerNetwork.prototype.rebuildNetworkConfig = function()
