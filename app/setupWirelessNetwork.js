@@ -3,7 +3,7 @@
  */
 var io=require('socket.io-client');
 
-var socket= io.connect('http://192.168.10.102:3000');
+var socket= io.connect('http://localhost:3000');
 
 var data={
     ssid:process.argv[2],
