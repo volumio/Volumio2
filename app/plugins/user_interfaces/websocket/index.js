@@ -838,6 +838,31 @@ function InterfaceWebUI (context) {
 				});
 			});
 
+
+			/**
+			 * Executes the getMyCollectionStats method on the MPD plugin
+			 */
+			connWebSocket.on('getMyCollectionStats', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getMyCollectionStats', '');
+
+				if (returnedData != undefined) {
+					selfConnWebSocket.emit('pushMyCollectionStats', returnedData);
+				}
+				else console.log("Error on Wireless Scan");
+			});
+
+
+			/**
+			 * Executes the rescanDb method on the MPD plugin. No response is foreseen
+			 */
+			connWebSocket.on('rescanDb', function (data) {
+				selfConnWebSocket = this;
+
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
+			});
+
 		}
 		catch(ex)
 		{

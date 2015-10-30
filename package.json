@@ -43,7 +43,7 @@
     "string": "^3.3.1",
     "underscore": "~1.7.0",
     "unirest": "0.4.2",
-    "v-conf": "0.0.2",
+    "v-conf": "0.2.0",
     "winston": "1.0.2",
     "wireless-tools": "0.14.0"
   },

@@ -1374,3 +1374,34 @@ ControllerMpd.prototype.setAdditionalConf = function(type,controller,data)
 	var self=this;
 	return self.commandRouter.executeOnPlugin(type,controller,'setConfigParam',data);
 }
+
+ControllerMpd.prototype.getMyCollectionStats=function()
+{
+	var self=this;
+
+	if(self.config.has("collectionStats")==false)
+	{
+		self.config.addConfigValue("collectionStats.artists","number",0);
+		self.config.addConfigValue("collectionStats.albums","number",0);
+		self.config.addConfigValue("collectionStats.songs","number",0);
+		self.config.addConfigValue("collectionStats.playtime","string","");
+	}
+
+	var response={
+		artists:self.config.get("collectionStats.artists"),
+		albums:self.config.get("collectionStats.albums"),
+		songs:self.config.get("collectionStats.songs"),
+		playtime:self.config.get("collectionStats.playtime")
+	};
+
+	return response;
+
+}
+
+
+ControllerMpd.prototype.rescanDb=function()
+{
+	var self=this;
+
+	self.logger.info("RESCAN DB");
+}
