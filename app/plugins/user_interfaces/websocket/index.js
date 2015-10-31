@@ -863,6 +863,23 @@ function InterfaceWebUI (context) {
 				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
 			});
 
+
+			/**
+			 * New share APIs
+			 */
+			connWebSocket.on('addShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'addShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushAddShare', data);
+					});
+				}
+				else self.logger.error("Error on adding share");
+			});
+
 		}
 		catch(ex)
 		{

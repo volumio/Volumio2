@@ -7,7 +7,7 @@ var Wireless = require('./lib/index.js');
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
-
+var libUUID=require('node-uuid');
 
 
 
@@ -20,6 +20,7 @@ function ControllerNetworkfs(context) {
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
+	self.logger=self.commandRouter.logger;
 
 }
 
@@ -234,6 +235,26 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 	return defer.promise;
 }
 
+
+ControllerNetworkfs.prototype.getShare = function(name,ip) {
+	var self = this;
+
+	var keys = config.getKeys('NasMounts');
+	for(var i in keys) {
+		var subKey='NasMounts.'+keys[i];
+		self.logger.info("Checking key "+subKey);
+
+		if(config.get(subKey+'.name')==name &&
+			config.get(subKey+'.ip')==ip)
+		{
+			self.logger.info("Found correspondence in configuration");
+			return keys[i];
+		}
+
+	}
+}
+
+
 ControllerNetworkfs.prototype.scanDatabase = function() {
 	var self = this;
 
@@ -253,4 +274,94 @@ ControllerNetworkfs.prototype.listShares = function() {
 	var mounts=config.getKeys();
 
 
+}
+
+
+
+/*
+	New APIs
+	###############################
+ */
+
+/**
+ * This method adds a new share into the configuration
+ * @param data {
+  name:’SHARE’,
+  ip:’192.168.10.1’,
+  fstype:’’,
+  username:’’,
+  password:’’,
+  options:’’
+}
+
+ */
+ControllerNetworkfs.prototype.addShare = function(data) {
+	var self=this;
+
+	self.logger.info("Adding a new share");
+
+	var defer = libQ.defer();
+
+	var name=data['name'];
+	var ip=data['ip'];
+	var fstype=data['fstype'].value;
+	var username=data['username'];
+	var password=data['password'];
+	var options=data['options'];
+
+	if(username==undefined) usenamer='';
+	if(password==undefined) password='';
+	if(options==undefined) options='';
+
+	var uuid=self.getShare(name,ip);
+	var response;
+	if(uuid==undefined)
+	{
+		self.logger.info("No correspondence found in configuration for share "+name+" on IP "+ip);
+		uuid = libUUID.v4();
+		var key="NasMounts."+uuid+".";
+		config.addConfigValue(key+'name','string',name);
+		config.addConfigValue(key+'ip','string',ip);
+		config.addConfigValue(key+'fstype','string',fstype);
+		config.addConfigValue(key+'user','string',username);
+		config.addConfigValue(key+'password','string',password);
+		config.addConfigValue(key+'options','string',options);
+
+		setTimeout(function()
+		{
+			try
+			{
+				self.initShares();
+
+				response={
+					success:true,
+					uuid:uuid
+				};
+
+				setTimeout(function () {
+					self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+					self.scanDatabase();
+				}, 2000);
+				defer.resolve(response);
+			}
+			catch(err)
+			{
+				defer.resolve({
+					success:false,
+					reason:'An error occurred mounting your share'
+				});
+			}
+
+
+		},500);
+	}
+	else
+	{
+		defer.resolve({
+			success:false,
+			reason:'This share has already been configured'
+		});
+	}
+
+	return defer.promise;
 }
