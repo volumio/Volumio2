@@ -382,7 +382,14 @@ ControllerNetworkfs.prototype.deleteShare = function(data) {
 		{
 			try
 			{
-				self.initShares();
+				var mountpoint= '/mnt/NAS/'+config.get(key+'.name');
+				mountutil.umount(mountpoint, false, { "removeDir": true }, function(result){
+					if (result.error) {
+						self.logger.error("Mount point cannot be removed, won't appear next boot");
+					} else {
+						self.logger.info("Mount point removed");
+					}
+				});
 
 				setTimeout(function () {
 					self.commandRouter.pushToastMessage('success',"Configuration update",'The share has been deleted');
@@ -411,3 +418,36 @@ ControllerNetworkfs.prototype.deleteShare = function(data) {
 
 	return defer.promise;
 }
+
+
+ControllerNetworkfs.prototype.listShares = function(data) {
+	var self=this;
+
+
+	var defer = libQ.defer();
+
+	var response=[];
+
+	var shares=config.getKeys('NasMounts');
+	for(var i in shares)
+	{
+		var share=shares[i];
+		var key='NasMounts.'+share+'.';
+
+		var mountpoint= '/mnt/NAS/'+config.get(key+'name');
+		var mounted=mountutil.isMounted(mountpoint,false);
+
+		var respShare={
+			name: config.get(key+'name')+' on '+config.get(key+'ip'),
+			id:share,
+			mounted:mounted.mounted,
+			size:'Unknown'
+		};
+
+		response.push(respShare);
+	}
+	defer.resolve(response);
+
+	return defer.promise;
+}
+

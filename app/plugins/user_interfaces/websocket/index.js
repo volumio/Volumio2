@@ -893,6 +893,19 @@ function InterfaceWebUI (context) {
 				else self.logger.error("Error on deleting share");
 			});
 
+			connWebSocket.on('getListShares', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushListShares', data);
+					});
+				}
+				else self.logger.error("Error on deleting share");
+			});
+
 		}
 		catch(ex)
 		{
