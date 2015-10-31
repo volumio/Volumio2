@@ -848,7 +848,9 @@ function InterfaceWebUI (context) {
 				var returnedData = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getMyCollectionStats', '');
 
 				if (returnedData != undefined) {
-					selfConnWebSocket.emit('pushMyCollectionStats', returnedData);
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushMyCollectionStats', data);
+					});
 				}
 				else console.log("Error on Wireless Scan");
 			});
@@ -931,6 +933,22 @@ function InterfaceWebUI (context) {
 				}
 				else self.logger.error("Error on storing on share");
 			});
+
+
+			connWebSocket.on('listUsbDrives', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listUsbDrives', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushListUsbDrives', data);
+					});
+				}
+				else self.logger.error("Error on listing USB devices");
+			});
+
+
 
 
 		}

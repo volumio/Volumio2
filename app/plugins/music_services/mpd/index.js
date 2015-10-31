@@ -9,6 +9,7 @@ var s=require('string');
 var ifconfig = require('wireless-tools/ifconfig');
 var ip = require('ip');
 var nodetools=require('nodetools');
+var convert = require('convert-seconds');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -1379,22 +1380,54 @@ ControllerMpd.prototype.getMyCollectionStats=function()
 {
 	var self=this;
 
-	if(self.config.has("collectionStats")==false)
-	{
-		self.config.addConfigValue("collectionStats.artists","number",0);
-		self.config.addConfigValue("collectionStats.albums","number",0);
-		self.config.addConfigValue("collectionStats.songs","number",0);
-		self.config.addConfigValue("collectionStats.playtime","string","");
-	}
+	var defer=libQ.defer();
 
-	var response={
-		artists:self.config.get("collectionStats.artists"),
-		albums:self.config.get("collectionStats.albums"),
-		songs:self.config.get("collectionStats.songs"),
-		playtime:self.config.get("collectionStats.playtime")
-	};
+	var cmd = libMpd.cmd;
+	self.clientMpd.sendCommand(cmd("count", ["group","artist"]), function(err, msg) {
+		if (err) defer.resolve({
+			artists:0,
+			albums:0,
+			songs:0,
+			playtime:'00:00:00'
+		});
+		else{
+			var artistsCount=0;
+			var songsCount=0;
+			var playtimesCount=0;
 
-	return response;
+			var splitted=msg.split('\n');
+			for(var i=0;i< splitted.length-1;i=i+3)
+			{
+				artistsCount++;
+				songsCount=songsCount+parseInt(splitted[i+1].substring(7));
+				playtimesCount=playtimesCount+parseInt(splitted[i+2].substring(10));
+			}
+
+			var convertedSecs=convert(playtimesCount);
+
+
+
+			self.clientMpd.sendCommand(cmd("count", ["group","album"]), function(err, msg) {
+				if (!err)
+				{
+					var splittedAlbum=msg.split('\n').length;
+					var response={
+						artists:artistsCount,
+						albums:(splittedAlbum-1)/3,
+						songs:songsCount,
+						playtime:convertedSecs.hours+':'+convertedSecs.minutes+':'+convertedSecs.seconds
+					};
+				}
+
+				defer.resolve(response);
+
+			});
+
+		}
+
+
+	});
+	return defer.promise;
 
 }
 
