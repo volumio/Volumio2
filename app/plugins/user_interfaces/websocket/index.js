@@ -919,7 +919,18 @@ function InterfaceWebUI (context) {
 				else self.logger.error("Error on getting information on share");
 			});
 
+			connWebSocket.on('editShare', function (data) {
+				selfConnWebSocket = this;
 
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'editShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushEditShare', data);
+					});
+				}
+				else self.logger.error("Error on storing on share");
+			});
 
 
 		}

@@ -159,6 +159,8 @@ ControllerNetworkfs.prototype.initShares = function () {
 ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	var self= this;
 
+	var defer=libQ.defer();
+
 	var sharename= config.get('NasMounts.'+shareid+'.name');
 	var pointer= '//' + config.get('NasMounts.'+shareid+'.ip') + '/' + config.get('NasMounts.'+shareid+'.name');
 	var mountpoint= '/mnt/NAS/'+config.get('NasMounts.'+shareid+'.name');
@@ -170,10 +172,12 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":credentials + ",dir_mode=0777,file_mode=0666"}, function(result) {
 			if (result.error) {
 				// Something went wrong!
+				defer.reject(new Error("Cannot mount share"));
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
 			} else {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + ' Share Mounted Successfully');
 				self.context.coreCommand.pushToastMessage('success',"Music Library",+ sharename + ' Successfully added ');
+				defer.resolve({});
 			}
 		});
 	} else
@@ -182,14 +186,18 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":"guest,dir_mode=0777,file_mode=0666" }, function(result) {
 			if (result.error) {
 				// Something went wrong!
+
+				defer.reject(new Error("Cannot mount share"));
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
 			} else {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + 'Share Mounted Successfully');
 				self.context.coreCommand.pushToastMessage('success',"Music Library", sharename + 'Successfully added ');
+				defer.resolve({});
 			}
 		});
 	}
 
+	return defer.promise;
 }
 
 
@@ -502,19 +510,108 @@ ControllerNetworkfs.prototype.infoShare = function(data) {
 
 	var defer = libQ.defer();
 
-	var key = 'NasMounts.' + data['id'] + '.';
-	var response={
-		name: config.get(key+'name')+ ' on '+config.get(key+'ip'),
-		path: config.get(key+'name'),
-		id: data['id'],
-		ip: config.get(key+'ip'),
-		fstype: config.get(key+'fstype'),
-		username: config.get(key+'user'),
-		password: config.get(key+'password'),
-		options: config.get(key+'options')
-	};
+	if(config.has('NasMounts.' + data['id']))
+	{
+		var key = 'NasMounts.' + data['id'] + '.';
+		var response={
+			name: config.get(key+'name')+ ' on '+config.get(key+'ip'),
+			path: config.get(key+'name'),
+			id: data['id'],
+			ip: config.get(key+'ip'),
+			fstype: config.get(key+'fstype'),
+			username: config.get(key+'user'),
+			password: config.get(key+'password'),
+			options: config.get(key+'options')
+		};
 
-	defer.resolve(response);
+		defer.resolve(response);
+	}
+	else defer.resolve({});
 
 	return defer.promise;
 }
+
+/**
+ * {
+  id:’fdfdvoeo’,
+  name:’SHARE’,
+  ip:’192.168.10.1’,
+  fstype:’’,
+  username:’’,
+  password:’’,
+  options:’’
+}
+
+ * @param data
+ * @returns {*}
+ */
+ControllerNetworkfs.prototype.editShare = function(data) {
+	var self=this;
+
+	var defer = libQ.defer();
+
+	if(config.has('NasMounts.' + data['id']))
+	{
+		var mountpoint= '/mnt/NAS/'+config.has('NasMounts.' + data['id']+'.name');
+		mountutil.umount(mountpoint, false, { "removeDir": true }, function(result){
+			if (result.error) {
+				defer.resolve({
+					success:false,
+					reason:'Cannot unmount share'
+				});
+			} else {
+				self.logger.info("Share "+config.has('NasMounts.' + data['id']+'.name')+" successfully unmounted");
+				var key = 'NasMounts.' + data['id'] + '.';
+
+				var oldpath=config.get(key+'name');
+				var oldip=config.get(key+'ip');
+				var oldfstype=config.get(key+'fstype');
+				var oldusername=config.get(key+'user');
+				var oldpassword=config.get(key+'password');
+				var oldoptions=config.get(key+'options');
+
+				config.set(key+'name',data['name']);
+				config.set(key+'ip',data['ip']);
+				config.set(key+'fstype',data['fstype']);
+				config.set(key+'username',data['username']);
+				config.set(key+'password',data['password']);
+				config.set(key+'options',data['options']);
+
+				var mountDefer=self.mountShare(data['id']);
+				mountDefer.then(function(value){
+					self.logger.info("New share mounted");
+					defer.resolve({
+						success:true,
+						reason:'Cannot unmount share'
+					});
+				})
+				.fail(function()
+				{
+
+					self.logger.info("An error occurred mounting the new share. Rolling back configuration");
+					config.set(key+'name',oldpath);
+					config.set(key+'ip',oldip);
+					config.set(key+'fstype',oldfstype);
+					config.set(key+'username',oldusername);
+					config.set(key+'password',oldpassword);
+					config.set(key+'options',oldoptions);
+
+					defer.resolve({
+						success:true,
+						reason:'Cannot unmount share'
+					});
+				});
+
+
+			}
+		});
+
+	}
+	else defer.resolve({
+			success:false,
+			reason:'Share not found'
+	});
+
+	return defer.promise;
+}
+
