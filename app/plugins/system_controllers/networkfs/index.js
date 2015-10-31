@@ -304,7 +304,7 @@ ControllerNetworkfs.prototype.addShare = function(data) {
 
 	var name=data['name'];
 	var ip=data['ip'];
-	var fstype=data['fstype'].value;
+	var fstype=data['fstype'];
 	var username=data['username'];
 	var password=data['password'];
 	var options=data['options'];
@@ -481,3 +481,40 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 	return defer.promise;
 }
 
+
+/**
+ * {
+ name:’SHARE su 192.168.10.135’
+  path:’SHARE’,
+  id:’dsdsd’,
+  ip:’192.168.10.1’,
+  fstype:’’,
+  username:’’,
+  password:’’,
+  options:’’
+}
+
+ * @param data
+ * @returns {*}
+ */
+ControllerNetworkfs.prototype.infoShare = function(data) {
+	var self=this;
+
+	var defer = libQ.defer();
+
+	var key = 'NasMounts.' + data['id'] + '.';
+	var response={
+		name: config.get(key+'name')+ ' on '+config.get(key+'ip'),
+		path: config.get(key+'name'),
+		id: data['id'],
+		ip: config.get(key+'ip'),
+		fstype: config.get(key+'fstype'),
+		username: config.get(key+'user'),
+		password: config.get(key+'password'),
+		options: config.get(key+'options')
+	};
+
+	defer.resolve(response);
+
+	return defer.promise;
+}

@@ -906,6 +906,22 @@ function InterfaceWebUI (context) {
 				else self.logger.error("Error on deleting share");
 			});
 
+			connWebSocket.on('infoShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'infoShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushInfoShare', data);
+					});
+				}
+				else self.logger.error("Error on getting information on share");
+			});
+
+
+
+
 		}
 		catch(ex)
 		{
