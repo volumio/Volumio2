@@ -1403,5 +1403,5 @@ ControllerMpd.prototype.rescanDb=function()
 {
 	var self=this;
 
-	self.logger.info("RESCAN DB");
+	return self.sendMpdCommand('rescan', []);
 }

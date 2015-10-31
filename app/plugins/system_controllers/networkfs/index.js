@@ -365,3 +365,49 @@ ControllerNetworkfs.prototype.addShare = function(data) {
 
 	return defer.promise;
 }
+
+ControllerNetworkfs.prototype.deleteShare = function(data) {
+	var self=this;
+
+
+	var defer = libQ.defer();
+	var key="NasMounts."+data['id'];
+
+	var response;
+	if(config.has(key))
+	{
+		config.delete(key);
+
+		setTimeout(function()
+		{
+			try
+			{
+				self.initShares();
+
+				setTimeout(function () {
+					self.commandRouter.pushToastMessage('success',"Configuration update",'The share has been deleted');
+					self.scanDatabase();
+				}, 2000);
+				defer.resolve({success:true});
+			}
+			catch(err)
+			{
+				defer.resolve({
+					success:false,
+					reason:'An error occurred deleting your share'
+				});
+			}
+
+
+		},500);
+	}
+	else
+	{
+		defer.resolve({
+			success:false,
+			reason:'This share is not configured'
+		});
+	}
+
+	return defer.promise;
+}

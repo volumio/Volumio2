@@ -880,6 +880,19 @@ function InterfaceWebUI (context) {
 				else self.logger.error("Error on adding share");
 			});
 
+			connWebSocket.on('deleteShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'deleteShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushDeleteShare', data);
+					});
+				}
+				else self.logger.error("Error on deleting share");
+			});
+
 		}
 		catch(ex)
 		{
