@@ -7,6 +7,10 @@ var Wireless = require('./lib/index.js');
 var iwconfig = require('./lib/iwconfig.js');
 var iwlist = require('./lib/iwlist.js');
 var config= new (require('v-conf'))();
+var ip=require('ip');
+var S=require('string');
+var isOnline = require('is-online');
+
 
 var connected = false;
 var iface = 'wlan0';
@@ -27,6 +31,7 @@ function ControllerNetwork(context) {
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
 
+	self.logger=self.context.logger;
 }
 
 ControllerNetwork.prototype.onVolumioStart = function() {
@@ -223,6 +228,29 @@ ControllerNetwork.prototype.getData = function(data,key)
 	return null;
 }
 
+/**
+ *
+ * @param data {ssid:’miarete’, encryption:wpa,password:’’}
+ * @returns {*}
+ */
+ControllerNetwork.prototype.saveWirelessNetworkSettings = function(data)
+{
+	var self = this;
+
+	self.logger.info("Saving new wireless network");
+
+	var network_ssid=data['ssid'];
+	var network_pass=data['password'];
+	var encryption=data['encryption'];
+
+	config.set('wlanssid',network_ssid);
+	config.set('wlanpass',network_pass);
+	config.addConfigValue('encryption','string',encryption);
+
+	self.rebuildNetworkConfig();
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+}
+
 ControllerNetwork.prototype.rebuildNetworkConfig = function()
 {
 	var self=this;
@@ -276,4 +304,57 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 		self.commandRouter.pushToastMessage('error',"Network setup",'Error while setting network: '+err);
 	}
 
+}
+
+ControllerNetwork.prototype.getInfoWiredNetwork=function()
+{
+	var self=this;
+
+	var defer=libQ.defer();
+	exec("ethtool eth0", function (error, stdout, stderr) {
+		if (error !== null) {
+				defer.resolve({status:"Not Connected",online:"no"});
+			}
+			else
+			{
+				//var lines=stdout.split('\n');
+				self.logger.info(stdout);
+				var connected=false;
+				var speed='';
+				var address='';
+
+				/*for(var i in lines)
+				{
+					self.logger.info("LINE");
+					var line=lines[i];
+
+					self.logger.info(line);
+
+					if(line.contains("Link detected:"))
+						connected=line.trim().endsWith("yes");
+					else if(line.contains("Speed:"))
+						speed=line.strip("Speed:").trim();
+				}*/
+
+				address=ip.address();
+
+				isOnline(function(err, online) {
+					var oll;
+
+					if(online) oll='yes';
+					else oll='no';
+
+					var response={
+						status:"connected",
+						ip:address,
+						speed:speed,
+						online:oll};
+
+					defer.resolve(response);
+			});
+			}
+
+		});
+
+	return defer.promise;
 }

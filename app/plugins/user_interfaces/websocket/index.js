@@ -780,10 +780,38 @@ function InterfaceWebUI (context) {
 						selfConnWebSocket.emit('pushWirelessNetworks', data);
 					});
 				}
-				else console.log("Error on Wireless Scan");
+				else console.log("Error on returning wireless networks");
 
 
 			});
+
+			connWebSocket.on('saveWirelessNetworkSettings', function () {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', '');
+
+				/*if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushSaveWirelessNetworkSettings', data);
+					});
+				}
+				else console.log("Error on returning wireless networks");*/
+			});
+
+			connWebSocket.on('getInfoWiredNetwork', function () {
+				selfConnWebSocket = this;
+
+				var defer= self.commandRouter.executeOnPlugin('system_controller', 'network', 'getInfoWiredNetwork', '');
+
+				defer.then(function(data){
+					selfConnWebSocket.emit('pushInfoWiredNetwork', data);
+				})
+				.fail(function(){
+					selfConnWebSocket.emit('pushInfoWiredNetwork', {status:"Not Connected",online:"no"});
+				});
+			});
+
+
 
 			//Updater
 			connWebSocket.on('updateCheck', function () {

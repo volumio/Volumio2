@@ -22,6 +22,7 @@
     "hashmap": "2.0.3",
     "ip": "^0.3.3",
     "inotify":"1.4.0",
+    "is-online":"5.0.1",
     "kew": "^0.5.0-alpha.1",
     "level": "^0.18.0",
     "linux-mountutils": "^1.0.0",
