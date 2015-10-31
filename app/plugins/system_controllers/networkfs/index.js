@@ -429,24 +429,54 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 	var response=[];
 
 	var shares=config.getKeys('NasMounts');
-	for(var i in shares)
-	{
-		var share=shares[i];
-		var key='NasMounts.'+share+'.';
 
-		var mountpoint= '/mnt/NAS/'+config.get(key+'name');
-		var mounted=mountutil.isMounted(mountpoint,false);
+	if (shares.length > 0) {
+		for (var i in shares) {
+			var share = shares[i];
+			var key = 'NasMounts.' + share + '.';
 
-		var respShare={
-			name: config.get(key+'name')+' on '+config.get(key+'ip'),
-			id:share,
-			mounted:mounted.mounted,
-			size:'Unknown'
-		};
+			var mountpoint = '/mnt/NAS/' + config.get(key + 'name');
+			var mounted = mountutil.isMounted(mountpoint, false);
 
-		response.push(respShare);
+			var cmd="df -BM "+mountpoint+" | awk '{print $2}'";
+			exec(cmd,function(error,stdout,stderr){
+				if (error) {
+					size = 'Unknown';
+				}
+				else {
+					var splitted=stdout.split('\n');
+					var sizeStr=splitted[1];
+
+					var size=parseInt(sizeStr.substring(0,sizeStr.length-1));
+
+					var unity = 'MB';
+					if (size > 1024) {
+						size = size / 1024;
+						unity = 'GB';
+						if (size > 1024) {
+							size = size / 1024;
+							unity = 'TB';
+						}
+					}
+				}
+
+				var respShare = {
+					name: config.get(key + 'name') + ' on ' + config.get(key + 'ip'),
+					id: share,
+					mounted: mounted.mounted,
+					size: size.toFixed(2) + ' ' + unity
+				};
+
+				response.push(respShare);
+				defer.resolve(response);
+
+
+			});
+
+		}
 	}
-	defer.resolve(response);
+	else defer.resolve(response);
+
 
 	return defer.promise;
 }
