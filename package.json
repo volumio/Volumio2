@@ -3,7 +3,6 @@
   "version": "2.0.0-alpha4",
   "private": false,
   "scripts": {
-    "preinstall": "svn checkout https://github.com/volumio/Volumio2-UI/trunk/dist http/www",
     "start": "node ./index.js"
   },
   "dependencies": {
