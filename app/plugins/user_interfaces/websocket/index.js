@@ -866,6 +866,119 @@ function InterfaceWebUI (context) {
 				});
 			});
 
+
+			/**
+			 * Executes the getMyCollectionStats method on the MPD plugin
+			 */
+			connWebSocket.on('getMyCollectionStats', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getMyCollectionStats', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushMyCollectionStats', data);
+					});
+				}
+				else console.log("Error on Wireless Scan");
+			});
+
+
+			/**
+			 * Executes the rescanDb method on the MPD plugin. No response is foreseen
+			 */
+			connWebSocket.on('rescanDb', function (data) {
+				selfConnWebSocket = this;
+
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
+			});
+
+
+			/**
+			 * New share APIs
+			 */
+			connWebSocket.on('addShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'addShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushAddShare', data);
+					});
+				}
+				else self.logger.error("Error on adding share");
+			});
+
+			connWebSocket.on('deleteShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'deleteShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushDeleteShare', data);
+					});
+				}
+				else self.logger.error("Error on deleting share");
+			});
+
+			connWebSocket.on('getListShares', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushListShares', data);
+					});
+				}
+				else self.logger.error("Error on deleting share");
+			});
+
+			connWebSocket.on('infoShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'infoShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushInfoShare', data);
+					});
+				}
+				else self.logger.error("Error on getting information on share");
+			});
+
+			connWebSocket.on('editShare', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'editShare', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushEditShare', data);
+					});
+				}
+				else self.logger.error("Error on storing on share");
+			});
+
+
+			connWebSocket.on('listUsbDrives', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listUsbDrives', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushListUsbDrives', data);
+					});
+				}
+				else self.logger.error("Error on listing USB devices");
+			});
+
+
+
+
 		}
 		catch(ex)
 		{

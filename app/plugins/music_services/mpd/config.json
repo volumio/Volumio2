@@ -26,6 +26,30 @@
   "nPort":{
     "type": "number",
     "value": 6600
+  },
+  "collectionStats":
+  {
+    "artists":
+    {
+      "type": "number",
+      "value": 0
+    },
+    "albums":{
+      "type": "number",
+      "value": 0
+    },
+    "songs":
+    {
+      "type": "number",
+      "value": 0
+    },
+    "playtime":{
+      "type": "string",
+      "value": ""
+    }
+
+
+
   }
 
 }
