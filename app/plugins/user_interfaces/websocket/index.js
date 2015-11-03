@@ -785,10 +785,10 @@ function InterfaceWebUI (context) {
 
 			});
 
-			connWebSocket.on('saveWirelessNetworkSettings', function () {
+			connWebSocket.on('saveWirelessNetworkSettings', function (data) {
 				selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', '');
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', 'data');
 
 				/*if (returnedData != undefined) {
 					returnedData.then(function (data) {
