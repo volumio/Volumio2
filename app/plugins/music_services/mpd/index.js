@@ -564,21 +564,22 @@ ControllerMpd.prototype.onVolumioStart = function() {
 	self.displayname = 'MPD';
 
 	//getting configuration
-	var nHost=self.config.get('nHost');
-	var nPort=self.config.get('nPort');
+
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
 
 	// Connect to MPD
-	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
+	self.mpdConnect();
 
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(libFast.bind(self.clientMpd.on, self.clientMpd), 'ready');
 	// Catch and log errors
 	self.clientMpd.on('error', function(err) {
-		console.error('MPD error: ');
-		console.error(err);
+		console.error('MPD error: ' + err);
+		if (err = "{ [Error: This socket has been ended by the other party] code: 'EPIPE' }") {
+			self.mpdConnect();
+		}
 	});
 
 	// This tracks the the timestamp of the newest detected status change
@@ -622,6 +623,19 @@ ControllerMpd.prototype.onVolumioStart = function() {
 
 }
 
+ControllerMpd.prototype.mpdConnect = function() {
+
+	var self = this;
+
+	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+
+	self.config= new (require('v-conf'))();
+	self.config.loadFile(configFile);
+
+	var nHost=self.config.get('nHost');
+	var nPort=self.config.get('nPort');
+	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
+}
 /*
  * This method shall be defined by every plugin which needs to be configured.
  */
