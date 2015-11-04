@@ -228,27 +228,31 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function(data)
 	config.set('wlanpass',network_pass);
 
 	self.wirelessConnect({ssid:network_ssid, pass:network_pass});
+	console.log(network_ssid);
+	console.log(network_pass);
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 }
 
 ControllerNetwork.prototype.wirelessConnect = function(data) {
 	var self = this;
-	var netstring = 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL + 'proto=WPA' + os.EOL + 'pairwise=TKIP' + os.EOL + 'group=TKIP' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}';
+	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL + 'proto=WPA' + os.EOL + 'pairwise=TKIP' + os.EOL + 'group=TKIP' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}';
 
-	fs.appendFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
+	fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
 		if (err) {
 			console.log(error);
 		}
+
+		exec('sudo /etc/init.d/netplug restart',
+			function (error, stdout, stderr) {
+
+				if (error !== null) {
+					self.commandRouter.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
+				}
+				else self.commandRouter.pushToastMessage('success',"Network restart",'Network successfully restarted');
+
+			});
 	});
-	exec('sudo /etc/init.d/netplug restart',
-		function (error, stdout, stderr) {
 
-			if (error !== null) {
-				self.commandRouter.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
-			}
-			else self.commandRouter.pushToastMessage('success',"Network restart",'Network successfully restarted');
-
-		});
 }
 
 ControllerNetwork.prototype.rebuildNetworkConfig = function()
