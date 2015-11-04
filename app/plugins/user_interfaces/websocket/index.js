@@ -936,7 +936,7 @@ function InterfaceWebUI (context) {
 				else self.logger.error("Error on deleting share");
 			});
 
-			connWebSocket.on('infoShare', function (data) {
+			connWebSocket.on('getInfoShare', function (data) {
 				selfConnWebSocket = this;
 
 				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'infoShare', data);
