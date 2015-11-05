@@ -411,6 +411,20 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 	);
 }
 
+
+CoreCommandRouter.prototype.pushAirplay = function(data)
+{
+	var self=this;
+
+	return libQ.all(
+			libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
+				var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+				if (typeof thisInterface.pushAirplay === "function" )
+					return thisInterface.pushAirplay.call(thisInterface, data);
+			})
+	);
+}
+
 CoreCommandRouter.prototype.shutdown = function() {
 	var self = this;
 	exec("sudo /sbin/halt", function (error, stdout, stderr) {

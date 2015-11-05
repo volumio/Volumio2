@@ -1125,3 +1125,9 @@ InterfaceWebUI.prototype.pushError = function(error) {
 	return libQ.resolve();
 };
 
+InterfaceWebUI.prototype.pushAirplay = function(value) {
+	var self = this;
+
+	self.libSocketIO.emit('pushAirplay', value);
+};
+
