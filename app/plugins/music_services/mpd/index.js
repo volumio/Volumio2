@@ -1333,7 +1333,7 @@ ControllerMpd.prototype.getAlbumArt=function(data,path)
 			web='?web='+nodetools.urlEncode(artist)+'/'+nodetools.urlEncode(album)+'/extralarge'
 		}
 
-		var url='http://'+address+':3001/albumart';
+		var url='/albumart';
 
 		if(web!=undefined)
 			url=url+web;
