@@ -1,8 +1,8 @@
 {
   "page": {
-    "label": "Nas"
+    "label": "My Music"
   },
   "sections": [
-    {coreSection:"my-music"},
-{coreSection:"network-drives"}
+    {"coreSection":"my-music"},
+{"coreSection":"network-drives"}
 ]}
