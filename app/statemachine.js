@@ -282,7 +282,7 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentTitle = null;
 		self.currentArtist = null;
 		self.currentAlbum = null;
-		self.currentAlbumArt = null;
+		self.currentAlbumArt = '/albumart?web=default';
 		self.currentSampleRate = null;
 		self.currentBitDepth = null;
 		self.currentChannels = null;
