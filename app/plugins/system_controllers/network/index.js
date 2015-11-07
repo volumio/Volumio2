@@ -289,12 +289,6 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 
 		ws.write('\n');
 
-		ws.write('auto wlan0\n');
-		ws.write('iface wlan0 inet dhcp\n');
-		ws.write('wireless-power off\n');
-		ws.write('wpa-ssid '+config.get('wlanssid')+'\n');
-		ws.write('wpa-psk '+config.get('wlanpass')+'\n');
-
 		ws.uncork();
 		ws.end();
 
@@ -316,7 +310,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 
 }
 
-ControllerNetwork.prototype.getInfoWiredNetwork=function()
+ControllerNetwork.prototype.getInfoNetwork=function()
 {
 	var self=this;
 
