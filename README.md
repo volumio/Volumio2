@@ -82,7 +82,7 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
 
 ### Current Tasks
 
-- [ ] Templating System
+- [X] Templating System
 
     The idea is to allow the installation of different templates and skins. To allow that a template system needs to be created: as general guidelines we'll provide a set of Java functions to hook with the WebSockets connection. The different templates then will be a folder containing just css js and html.
 
@@ -90,18 +90,20 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
 
     Every service (input, output, visualization etc) will be treated as a standalone entity. This will allow to add external plugins in the future. The plugins will be composed of a folder, with all the methods, and a "manifest file" which is an executable that sends via nodes js its name, its available methods and other informations. At system startup every manifest in the manifest folder is executed, so the system receives with WS all the available plugins and their capabilities and methods.  Then the core knows what is availbable and how to call them. 
 
-- [ ] Music Database System
+- [X] Music Database System
 
-    Every music service available will feature its own LevelDB database, storing its pertaining music file. The Volumio core then needs to query those databases to retrieve available music, so it can route the appropriate request to the right service for a certain song. 
+    Music stored on USB Drives, Device memory or NAS will be handled by MPD, and therefore they'll be stored in its DB. Other services which requires a DB can have their levelDB database in place. For online services, that are meant to be browsed "live" this doesn't apply.
 
 ### Operating System
 
-- [ ] Custom Debian Based Operating System
+- [X] Custom Debian Based Operating System
  - [X] Minimal Jessie Based BSP
  - [X] SystemD migration
- - [ ] Volumio APT repo
+ - [X] Remote Scripted Build system with Recipes
+ - [X] X86 Support
+ - [X] Volumio APT repo
 
-- [ ] Custom Compiled Core Packages
+- [X] Custom Compiled Core Packages
  - [X] MPD
  - [X] SPOP
  - [X] Upmpdcli
@@ -110,10 +112,10 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
 
 ### Node Backend
 
-- [ ] Volumio Core
+- [X] Volumio Core
  - [X] Command Router
  - [X] WebUI Endpoints
- - [ ] Mixer Controls
+ - [X] Mixer Controls
  - [X] Volume Controls
  
 - [ ] Communication Interfaces 
@@ -124,15 +126,15 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
 - [ ] Audio services Controllers
  - [X] MPD Service and Library
  - [X] SPOP Service and Library
- - [ ] Shairport Service and Library
+ - [X] Shairport Service and Library
  - [X] UPNP Service and Library
  - [ ] \(groove?\) Service and Library
 
 - [ ] System manager worker
  - [X] Networking
- - [ ] CIFS\SAMBA
+ - [X] CIFS\SAMBA
  - [ ] I2S Driver
- - [ ] Hardware Layer
+ - [X] Hardware Layer
  - [X] USB Drives
  - [X] Volumio Service Discovery 
  - 
@@ -142,13 +144,13 @@ Please take a look at the [Developer Info and Guidelines](https://github.com/vol
  - [X] Boostrap Based Structure
  - [X] Playback Handling
  - [X] Library retrieval
- - [ ] Library Sorting 
- - [ ] Airplay Hooks
+ - [X] Library Sorting 
+ - [X] Airplay Hooks
 
 - [ ] Volumio 2 WebUI (Configuration)
  - [X] Playback Option Configuration
  - [X] Network Option Configuration
- - [ ] Plug-in System Configuration
+ - [X] Plug-in System Configuration
  - [X] System Configuration
 
 ## Development Guidelines
