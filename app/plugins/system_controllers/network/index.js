@@ -162,7 +162,8 @@ ControllerNetwork.prototype.getWirelessNetworks = function(defer)
 	iwlist.scan('wlan0', function(err, networks) {
 		var self = this;
 		self.networksarray = networks;
-		defer.resolve(self.networksarray);
+		self.networkresults = {"available":self.networksarray}
+		defer.resolve(self.networkresults);
 	});
 	return defer.promise;
 }
