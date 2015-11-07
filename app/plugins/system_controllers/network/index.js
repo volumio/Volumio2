@@ -230,6 +230,10 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function(data)
 	self.wirelessConnect({ssid:network_ssid, pass:network_pass});
 
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+	fs.writeFile('/data/configuration/netconfigured', ' ', function (err) {
+		if (err) {
+			console.log(error);
+		}});
 }
 
 ControllerNetwork.prototype.wirelessConnect = function(data) {
@@ -241,18 +245,16 @@ ControllerNetwork.prototype.wirelessConnect = function(data) {
 			console.log(error);
 		}
 
+
 		exec('sudo /etc/init.d/netplug restart',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
 					self.commandRouter.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
 				} else
-				fs.writeFile('/volumio/netconfigured', ' ', function (err) {
-					if (err) {
-						console.log(error);
-					}
+
 				 self.commandRouter.pushToastMessage('success',"Network restart",'Network successfully restarted');
-				});
+
 			});
 	});
 
