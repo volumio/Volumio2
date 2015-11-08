@@ -1128,6 +1128,7 @@ InterfaceWebUI.prototype.pushError = function(error) {
 InterfaceWebUI.prototype.pushAirplay = function(value) {
 	var self = this;
 
-	self.libSocketIO.emit('pushAirplay', value);
+	self.logger.debug("Pushing airplay mode: s"+value);
+	self.libSocketIO.sockets.emit('pushAirplay', value);
 };
 
