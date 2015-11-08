@@ -90,7 +90,7 @@
             "id":"update",
               "element": "button",
               "label": "System updates",
-              "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. Do you want to continue?"}
+              "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. Do you want to continue?"},
               "description": "Reset your AxiomAir to factory Settings",
               "onClick": {"type":"emit", "message":"resetFactory", "data":" "}
           }
