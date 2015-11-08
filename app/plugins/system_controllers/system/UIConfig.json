@@ -83,7 +83,7 @@
             "id":"update",
               "element": "button",
               "label": "System updates",
-              "text": "You can check?...",
+              "description": "Check if newer versions of the system are available",
               "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
           }
         ]
