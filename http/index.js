@@ -1,4 +1,5 @@
 var express = require('express');
+var compression = require('compression')
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -23,8 +24,9 @@ dev.use(express.static(path.join(__dirname, 'dev')));
 
 dev.use('/', routes);
 
-
+app.use(compression())
 app.use(express.static(path.join(__dirname, 'www')));
+
 app.use('/dev', dev);
 app.use('/api', restapi);
 
