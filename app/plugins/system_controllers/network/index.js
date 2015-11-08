@@ -162,7 +162,8 @@ ControllerNetwork.prototype.getWirelessNetworks = function(defer)
 	iwlist.scan('wlan0', function(err, networks) {
 		var self = this;
 		self.networksarray = networks;
-		defer.resolve(self.networksarray);
+		self.networkresults = {"available":self.networksarray}
+		defer.resolve(self.networkresults);
 	});
 	return defer.promise;
 }
@@ -228,27 +229,32 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function(data)
 	config.set('wlanpass',network_pass);
 
 	self.wirelessConnect({ssid:network_ssid, pass:network_pass});
-	console.log(network_ssid);
-	console.log(network_pass);
+
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+	fs.writeFile('/data/configuration/netconfigured', ' ', function (err) {
+		if (err) {
+			console.log(error);
+		}});
 }
 
 ControllerNetwork.prototype.wirelessConnect = function(data) {
 	var self = this;
-	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL + 'proto=WPA' + os.EOL + 'pairwise=TKIP' + os.EOL + 'group=TKIP' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}';
+	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'scan_ssid=1' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL +'psk="' + data.pass + '"' + os.EOL + '}';
 
 	fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
 		if (err) {
 			console.log(error);
 		}
 
+
 		exec('sudo /etc/init.d/netplug restart',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
 					self.commandRouter.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
-				}
-				else self.commandRouter.pushToastMessage('success',"Network restart",'Network successfully restarted');
+				} else
+
+				 self.commandRouter.pushToastMessage('success',"Network restart",'Network successfully restarted');
 
 			});
 	});
@@ -283,12 +289,6 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 
 		ws.write('\n');
 
-		ws.write('auto wlan0\n');
-		ws.write('iface wlan0 inet dhcp\n');
-		ws.write('wireless-power off\n');
-		ws.write('wpa-ssid '+config.get('wlanssid')+'\n');
-		ws.write('wpa-psk '+config.get('wlanpass')+'\n');
-
 		ws.uncork();
 		ws.end();
 
@@ -310,7 +310,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 
 }
 
-ControllerNetwork.prototype.getInfoWiredNetwork=function()
+ControllerNetwork.prototype.getInfoNetwork=function()
 {
 	var self=this;
 

@@ -2,8 +2,8 @@
   "page": {
     "label": "Network"
   },
-  "sections": [
-    {
+  "sections": [ 
+   {
       "id": "section_wired_network",
       "element": "section",
       "label": "Wired Network",
