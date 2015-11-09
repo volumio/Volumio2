@@ -1,3 +1,7 @@
+var argv = require('yargs').argv;
+if (argv.d) {
+var njstrace = require('njstrace').inject();
+}
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
 // Using port 3000 for the debug interface

@@ -33,6 +33,7 @@
     "morgan": "~1.3.0",
     "mpd": "^1.2.0",
     "musicbrainz": "^0.2.5",
+    "njstrace": "0.0.2",
     "node-schedule": "0.2.9",
     "node-uuid": "1.4.3",
     "nodetools": "1.0.0",
@@ -49,7 +50,8 @@
     "unirest": "0.4.2",
     "v-conf": "0.3.1",
     "winston": "^1.0.2",
-    "wireless-tools": "0.14.0"
+    "wireless-tools": "0.14.0",
+    "yargs": "^3.29.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
