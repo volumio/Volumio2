@@ -30,6 +30,8 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
 
+Volumio works with 12.x version of NodeJS, we're using 0.12.6. Reports of working\not working node version are appreciated!
+
 Clone the repo in the directory of your choice (default: /volumio)
 
 ```shell
