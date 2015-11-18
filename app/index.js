@@ -335,7 +335,7 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 
 CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data) {
 	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::executeOnPlugin');
+	self.pushConsoleMessage( 'CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method );
 
 	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, type, name);
 
