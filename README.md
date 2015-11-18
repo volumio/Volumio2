@@ -1,5 +1,7 @@
 [![Join the chat at https://gitter.im/volumio/Volumio2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/volumio/Volumio2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![dependencies](https://david-dm.org/volumio/Volumio2.svg)](https://david-dm.org/volumio/Volumio2)
+[![bitHound Dependencies](https://www.bithound.io/github/volumio/Volumio2/badges/dependencies.svg)](https://www.bithound.io/github/volumio/Volumio2/master/dependencies/npm)
+[![bitHound Score](https://www.bithound.io/github/volumio/Volumio2/badges/score.svg)](https://www.bithound.io/github/volumio/Volumio2)
 
 # Volumio 2
 
