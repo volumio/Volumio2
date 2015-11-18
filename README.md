@@ -1,4 +1,5 @@
 [![Join the chat at https://gitter.im/volumio/Volumio2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/volumio/Volumio2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![dependencies](https://david-dm.org/volumio/Volumio2.svg)](https://david-dm.org/volumio/Volumio2)
 
 # Volumio 2
 
