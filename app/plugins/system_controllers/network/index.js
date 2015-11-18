@@ -239,8 +239,12 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function(data)
 
 ControllerNetwork.prototype.wirelessConnect = function(data) {
 	var self = this;
-	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'scan_ssid=1' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL +'psk="' + data.pass + '"' + os.EOL + '}';
 
+	if (data.pass){
+	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'scan_ssid=1' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL +'psk="' + data.pass + '"' + os.EOL + '}'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL +'wep_key0="' + data.pass + '"'+ os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
+	} else {
+		var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt = NONE' + os.EOL + '}'
+	}
 	fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
 		if (err) {
 			console.log(error);
