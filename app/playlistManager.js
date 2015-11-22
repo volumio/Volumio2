@@ -1,6 +1,7 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
+var S=require('string');
 
 module.exports = PlaylistManager;
 
@@ -14,6 +15,8 @@ function PlaylistManager(commandRouter) {
 
 	fs.ensureDirSync(self.playlistFolder);
 	fs.ensureDirSync(self.favouritesPlaylistFolder);
+
+	self.logger=self.commandRouter.logger;
 }
 
 PlaylistManager.prototype.createPlaylist = function(name) {
@@ -345,30 +348,22 @@ PlaylistManager.prototype.commonPlayPlaylist = function(folder,name) {
 				{
 					self.commandRouter.volumioClearQueue();
 
-					var promises=[];
-					var promise;
+					var uris=[];
+					for(var i in data)
+					{
+						var uri;
+						var fullUri=S(data[i].uri);
 
-					self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear')
-						.then(function(result){
-							for(var i in data)
-							{
-								promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', data[i].uri);
-								promises.push(promise);
-							}
+						if(fullUri.startsWith('music-library'))
+						{
+							uri=fullUri.chompLeft('music-library/').s;
+						}
+						else uri=data[i].uri;
 
-							libQ.all(promises)
-								.then(function(data){
-									self.commandRouter.executeOnPlugin('music_service', 'mpd', 'resume');
-									defer.resolve({success:true});
-								})
-								.fail(function (e) {
-									defer.resolve({success:false,reason:e});
-								});
-						})
-						.fail(function (e) {
-							defer.resolve({success:false,reason:e});
-						});
+						uris.push(uri);
+					}
 
+					self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clearAddPlayTracks', uris);
 
 				}
 			});
