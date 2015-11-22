@@ -247,7 +247,7 @@ ControllerNetwork.prototype.wirelessConnect = function(data) {
 	}
 	fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
 		if (err) {
-			console.log(error);
+			console.log(err);
 		}
 
 
