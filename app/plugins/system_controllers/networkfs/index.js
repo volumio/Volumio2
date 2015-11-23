@@ -174,6 +174,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 				// Something went wrong!
 				defer.reject(new Error("Cannot mount share"));
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
+				self.context.coreCommand.pushToastMessage('alert',"Music Library", 'Error adding Network Share: '+result.error );
 			} else {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + ' Share Mounted Successfully');
 				self.context.coreCommand.pushToastMessage('success',"Music Library",'Network Share Successfully added ');
@@ -187,8 +188,10 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 			if (result.error) {
 				// Something went wrong!
 
-				defer.reject(new Error("Cannot mount share"));
+//TODO show errorr with toast message, currently it doesn't work
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
+				self.context.coreCommand.pushToastMessage('alert',"Music Library", 'Error adding Network Share: '+result.error );
+				defer.reject(new Error("Cannot mount share"));
 			} else {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + 'Share Mounted Successfully');
 				self.context.coreCommand.pushToastMessage('success',"Music Library", 'Network Share Successfully added ');
@@ -445,25 +448,27 @@ ControllerNetworkfs.prototype.deleteShare = function(data) {
 ControllerNetworkfs.prototype.listShares = function(data) {
 	var self=this;
 
-
-	var defer = libQ.defer();
-
 	var response=[];
-
+	var size = '';
+	var unity = '';
+	var defer = libQ.defer();
+	var realsize = '';
 	var shares=config.getKeys('NasMounts');
 
 	if (shares.length > 0) {
+		var response=[];
+
 		for (var i in shares) {
+
 			var share = shares[i];
 			var key = 'NasMounts.' + share + '.';
-
 			var mountpoint = '/mnt/NAS/' + config.get(key + 'name');
 			var mounted = mountutil.isMounted(mountpoint, false);
-
+			var respshare = {};
 			var cmd="df -BM "+mountpoint+" | awk '{print $2}'";
 			exec(cmd,function(error,stdout,stderr){
 				if (error) {
-					size = 'Unknown';
+					realsize = 'Unknown';
 				}
 				else {
 					var splitted=stdout.split('\n');
@@ -479,27 +484,25 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 							size = size / 1024;
 							unity = 'TB';
 						}
-					}
+					}realsize = size.toFixed(2);
 				}
 
-				var respShare = {
-					name: config.get(key + 'name') + ' on ' + config.get(key + 'ip'),
-					id: share,
-					mounted: mounted.mounted,
-					size: size.toFixed(2) + ' ' + unity
-				};
-
-				response.push(respShare);
-				defer.resolve(response);
-
-
 			});
-
+			var respShare = {
+				name: config.get(key + 'name') + ' on ' + config.get(key + 'ip'),
+				id: share,
+				mounted: mounted.mounted,
+				size: realsize + ' ' + unity
+			};
+			response.push(respShare);
 		}
+		defer.resolve(response);
 	}
-	else defer.resolve(response);
+	else {
+		var response=[];
+		defer.resolve(response);
 
-
+	}
 	return defer.promise;
 }
 
