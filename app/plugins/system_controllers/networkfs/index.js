@@ -176,7 +176,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
 			} else {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + ' Share Mounted Successfully');
-				self.context.coreCommand.pushToastMessage('success',"Music Library",+ sharename + ' Successfully added ');
+				self.context.coreCommand.pushToastMessage('success',"Music Library",'Network Share Successfully added ');
 				defer.resolve({});
 			}
 		});
@@ -191,7 +191,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share'+ sharename +  ': '+result.error);
 			} else {
 				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']'+ sharename + 'Share Mounted Successfully');
-				self.context.coreCommand.pushToastMessage('success',"Music Library", sharename + 'Successfully added ');
+				self.context.coreCommand.pushToastMessage('success',"Music Library", 'Network Share Successfully added ');
 				defer.resolve({});
 			}
 		});
@@ -238,7 +238,7 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 	setTimeout(function () {
 		self.scanDatabase();
 		//Wait for share to be mounted before scanning
-	}, 2000)
+	}, 3000)
 	defer.resolve({});
 	return defer.promise;
 }
@@ -273,7 +273,7 @@ ControllerNetworkfs.prototype.scanDatabase = function() {
 		}
 		else {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database update started');
-			self.commandRouter.pushToastMessage('success',"My Music",'Adding new Music to Database');
+			self.commandRouter.pushToastMessage('success',"My Music",'Music Database Update in Progress');
 		}
 	});
 }
@@ -349,7 +349,7 @@ ControllerNetworkfs.prototype.addShare = function(data) {
 				setTimeout(function () {
 					self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
 					self.scanDatabase();
-				}, 2000);
+				}, 3000);
 				defer.resolve(response);
 			}
 			catch(err)
@@ -377,32 +377,44 @@ ControllerNetworkfs.prototype.addShare = function(data) {
 ControllerNetworkfs.prototype.deleteShare = function(data) {
 	var self=this;
 
-
 	var defer = libQ.defer();
 	var key="NasMounts."+data['id'];
 
 	var response;
 	if(config.has(key))
+
 	{
-		config.delete(key);
+		var mountpoint= '/mnt/NAS/'+config.get(key+'.name');
+		console.log(mountpoint);
 
 		setTimeout(function()
 		{
 			try
 			{
-				var mountpoint= '/mnt/NAS/'+config.get(key+'.name');
-				mountutil.umount(mountpoint, false, { "removeDir": true }, function(result){
-					if (result.error) {
-						self.logger.error("Mount point cannot be removed, won't appear next boot");
-					} else {
-						self.logger.info("Mount point removed");
+				exec('/usr/bin/sudo /bin/umount -l ' + mountpoint + ' ',{ uid: 1000,gid:1000},	 function (error, stdout, stderr) {
+					if (error !== null) {
+						self.commandRouter.pushToastMessage('alert',"Configuration update",'The share cannot be deleted: '+error);
+						self.logger.error("Mount point cannot be removed, won't appear next boot. Error: "+error);
+					}
+					else {
+						exec('rm -rf ' + mountpoint + ' ',{ uid: 1000,gid:1000},	 function (error, stdout, stderr) {
+							if (error !== null) {
+								self.commandRouter.pushToastMessage('alert',"Configuration update",'The folder cannot be deleted: '+error);
+								self.logger.error("Cannot Delete Folder. Error: "+error);
+							}
+							else {
+
+								self.commandRouter.pushToastMessage('success',"Configuration update",'The share has been deleted');
+							}
+						});
 					}
 				});
 
+
 				setTimeout(function () {
-					self.commandRouter.pushToastMessage('success',"Configuration update",'The share has been deleted');
+
 					self.scanDatabase();
-				}, 2000);
+				}, 3000);
 				defer.resolve({success:true});
 			}
 			catch(err)
@@ -415,6 +427,8 @@ ControllerNetworkfs.prototype.deleteShare = function(data) {
 
 
 		},500);
+
+		config.delete(key);
 	}
 	else
 	{
