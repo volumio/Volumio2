@@ -74,25 +74,25 @@ ControllerNetworkfs.prototype.getUIConfig = function()
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
 	/*var name=config.get('NasMounts.Flac.name');
-	var ip=config.get('NasMounts.Flac.ip');
-	var fstype=config.get('NasMounts.Flac.fstype');
+	 var ip=config.get('NasMounts.Flac.ip');
+	 var fstype=config.get('NasMounts.Flac.fstype');
 
-	uiconf.sections[0].content[0].value=name;
-	uiconf.sections[0].content[1].value=ip;
-	uiconf.sections[0].content[2].value.value=fstype;
-	uiconf.sections[0].content[2].label.value=fstype;
+	 uiconf.sections[0].content[0].value=name;
+	 uiconf.sections[0].content[1].value=ip;
+	 uiconf.sections[0].content[2].value.value=fstype;
+	 uiconf.sections[0].content[2].label.value=fstype;
 
-	var user=config.get('NasMounts.Flac.user');
-	if(user!=undefined)
-		uiconf.sections[0].content[3].value=user;
+	 var user=config.get('NasMounts.Flac.user');
+	 if(user!=undefined)
+	 uiconf.sections[0].content[3].value=user;
 
-	var password=config.get('NasMounts.Flac.password');
-	if(password!=undefined)
-		uiconf.sections[0].content[4].value=password;
+	 var password=config.get('NasMounts.Flac.password');
+	 if(password!=undefined)
+	 uiconf.sections[0].content[4].value=password;
 
-	var options=config.get('NasMounts.Flac.options');
-	if(options!=undefined)
-		uiconf.sections[0].content[5].value=options;*/
+	 var options=config.get('NasMounts.Flac.options');
+	 if(options!=undefined)
+	 uiconf.sections[0].content[5].value=options;*/
 
 	return uiconf;
 }
@@ -169,7 +169,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	if (( typeof config.get('NasMounts.'+shareid+'.user') !== 'undefined' && config.get('NasMounts.'+shareid+'.user') ) || ( typeof config.get('NasMounts.'+shareid+'.password') !== 'undefined' && config.get('NasMounts.'+shareid+'.password') ))
 	{
 		var credentials='username='+config.get('NasMounts.'+shareid+'.user')+','+ 'password='+config.get('NasMounts.'+shareid+'.password');
-		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":credentials + ",dir_mode=0777,file_mode=0666"}, function(result) {
+		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":credentials + ",dir_mode=0777,file_mode=0666,iocharset=utf8"}, function(result) {
 			if (result.error) {
 				// Something went wrong!
 				defer.reject(new Error("Cannot mount share"));
@@ -184,7 +184,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	} else
 	//Access as guest (no password)
 	{
-		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":"guest,dir_mode=0777,file_mode=0666" }, function(result) {
+		mountutil.mount(pointer,mountpoint, { "createDir": true,"fstype": "cifs","fsopts":"guest,dir_mode=0777,file_mode=0666,iocharset=utf8" }, function(result) {
 			if (result.error) {
 				// Something went wrong!
 
@@ -290,8 +290,8 @@ ControllerNetworkfs.prototype.listShares = function() {
 
 
 /*
-	New APIs
-	###############################
+ New APIs
+ ###############################
  */
 
 /**
@@ -452,7 +452,7 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 	var size = '';
 	var unity = '';
 	var defer = libQ.defer();
-	var realsize = '';
+
 	var shares=config.getKeys('NasMounts');
 
 	if (shares.length > 0) {
@@ -460,6 +460,7 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 
 		for (var i in shares) {
 
+			var realsize = '';
 			var share = shares[i];
 			var key = 'NasMounts.' + share + '.';
 			var mountpoint = '/mnt/NAS/' + config.get(key + 'name');
@@ -602,22 +603,22 @@ ControllerNetworkfs.prototype.editShare = function(data) {
 						reason:'Cannot unmount share'
 					});
 				})
-				.fail(function()
-				{
+					.fail(function()
+					{
 
-					self.logger.info("An error occurred mounting the new share. Rolling back configuration");
-					config.set(key+'name',oldpath);
-					config.set(key+'ip',oldip);
-					config.set(key+'fstype',oldfstype);
-					config.set(key+'username',oldusername);
-					config.set(key+'password',oldpassword);
-					config.set(key+'options',oldoptions);
+						self.logger.info("An error occurred mounting the new share. Rolling back configuration");
+						config.set(key+'name',oldpath);
+						config.set(key+'ip',oldip);
+						config.set(key+'fstype',oldfstype);
+						config.set(key+'username',oldusername);
+						config.set(key+'password',oldpassword);
+						config.set(key+'options',oldoptions);
 
-					defer.resolve({
-						success:true,
-						reason:'Cannot unmount share'
+						defer.resolve({
+							success:true,
+							reason:'Cannot unmount share'
+						});
 					});
-				});
 
 
 			}
@@ -625,10 +626,9 @@ ControllerNetworkfs.prototype.editShare = function(data) {
 
 	}
 	else defer.resolve({
-			success:false,
-			reason:'Share not found'
+		success:false,
+		reason:'Share not found'
 	});
 
 	return defer.promise;
 }
-
