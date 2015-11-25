@@ -19,7 +19,7 @@ var iface = 'wlan0';
 var wireless = new Wireless({
 	iface: iface,
 	updateFrequency: 13,
-	vanishThreshold: 7,
+	vanishThreshold: 7
 });
 
 // Define the ControllerNetwork class
@@ -241,7 +241,7 @@ ControllerNetwork.prototype.wirelessConnect = function(data) {
 	var self = this;
 
 	if (data.pass){
-	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'scan_ssid=1' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL +'psk="' + data.pass + '"' + os.EOL + '}'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL +'wep_key0="' + data.pass + '"'+ os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
+	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'scan_ssid=1' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL + 'pairwise=TKIP' + os.EOL + 'group=TKIP'+ os.EOL +'psk="' + data.pass + '"' + os.EOL + '}'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL +'wep_key0="' + data.pass + '"'+ os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
 	} else {
 		var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt = NONE' + os.EOL + '}'
 	}

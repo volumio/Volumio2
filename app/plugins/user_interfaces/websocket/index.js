@@ -59,7 +59,14 @@ function InterfaceWebUI (context) {
 						return self.logDone(timeStart);
 					});
 			});
+/* Error handling: causes  Maximum call stack size exceeded
+ connWebSocket.on('error', function () {
+				selfConnWebSocket = this;
 
+				selfConnWebSocket.emit('error', '');
+
+			});
+			*/
 			connWebSocket.on('getQueue', function () {
 				selfConnWebSocket = this;
 
@@ -702,7 +709,9 @@ function InterfaceWebUI (context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (data) {
+						if (data != undefined){
 						selfConnWebSocket.emit('pushMultiroom', data);
+						}
 					});
 				}
 				else console.log("Plugin multiroom or method getMultiroom not found");
