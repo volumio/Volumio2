@@ -9,7 +9,7 @@
 
 LATEST
 
-* [Alpha4 (2015-02-08)](http://repo.volumio.org/Volumio2/VolumioAlpha4-2015-08-02PI.img.zip)
+* [Beta1 (2015-26-11)](http://updates.volumio.org/pi/volumio/0.957/Volumio0.957-2015-11-26PI.img.zip)
 
 
 PREVIOUS VERSIONS
