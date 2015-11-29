@@ -1,4 +1,7 @@
 [![Join the chat at https://gitter.im/volumio/Volumio2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/volumio/Volumio2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![dependencies](https://david-dm.org/volumio/Volumio2.svg)](https://david-dm.org/volumio/Volumio2)
+[![bitHound Dependencies](https://www.bithound.io/github/volumio/Volumio2/badges/dependencies.svg)](https://www.bithound.io/github/volumio/Volumio2/master/dependencies/npm)
+[![bitHound Score](https://www.bithound.io/github/volumio/Volumio2/badges/score.svg)](https://www.bithound.io/github/volumio/Volumio2)
 
 # Volumio 2
 
@@ -6,7 +9,7 @@
 
 LATEST
 
-* [Alpha4 (2015-02-08)](http://repo.volumio.org/Volumio2/VolumioAlpha4-2015-08-02PI.img.zip)
+* [Beta1 (2015-26-11)](http://updates.volumio.org/pi/volumio/0.957/Volumio0.957-2015-11-26PI.img.zip)
 
 
 PREVIOUS VERSIONS
@@ -29,6 +32,8 @@ VMWARE Image is suggested, as Network configuration is tricky with Virtual Box
 System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
+
+Volumio works with 12.x version of NodeJS, we're using 0.12.6. Reports of working\not working node version are appreciated!
 
 Clone the repo in the directory of your choice (default: /volumio)
 

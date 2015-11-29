@@ -32,3 +32,7 @@ expressApp.use(function(err, req, res, next) {
 
 
 var commandRouter = new (require('./app/index.js'))(httpServer);
+
+expressApp.get('/?*', function (req, res) {
+        res.redirect('/');
+});
