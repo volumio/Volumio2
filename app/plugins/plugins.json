@@ -10,6 +10,16 @@
         "value": "STARTED"
       }
     },
+    "updater_comm": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
     "spop": {
       "enabled": {
         "type": "boolean",
