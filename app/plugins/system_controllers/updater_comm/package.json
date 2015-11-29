@@ -1,0 +1,14 @@
+{
+  "name": "updater_comm",
+  "version": "1.0.0",
+  "description": "Updater Communication plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "music_service"
+  }
+}

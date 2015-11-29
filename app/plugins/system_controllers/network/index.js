@@ -242,6 +242,7 @@ ControllerNetwork.prototype.wirelessConnect = function(data) {
 
 	if (data.pass){
 	var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'scan_ssid=1' + os.EOL + 'key_mgmt=WPA-PSK' + os.EOL + 'pairwise=TKIP' + os.EOL + 'group=TKIP'+ os.EOL +'psk="' + data.pass + '"' + os.EOL + '}'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL +'wep_key0="' + data.pass + '"'+ os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
+	netstring = netstring + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}';
 	} else {
 		var netstring = 'ctrl_interface=/var/run/wpa_supplicant'+ os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt = NONE' + os.EOL + '}'
 	}

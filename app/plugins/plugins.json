@@ -118,6 +118,16 @@
     }
   },
   "system_controller":{
+    "updater_comm": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
     "network": {
       "enabled": {
         "type": "boolean",
