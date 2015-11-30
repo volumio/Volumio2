@@ -4,6 +4,7 @@ var libFast = require('fast.js');
 var libLevel = require('level');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
+var spawn =  require('child_process').spawn;
 
 // Define the UpnpInterface class
 module.exports = UpnpInterface;
@@ -108,12 +109,14 @@ UpnpInterface.prototype.startUpmpdcli = function() {
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     var name = systemController.getConf('playerName');
 
-    exec("upmpdcli -c "+  __dirname +"/upmpdcli.conf -f '"+ name +"'", function (error, stdout, stderr) {
-        if (error !== null) {
-            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpcli error: ' + error);
-        }
-        else {
-            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpdcli Daemon Started');
-        }
+    var process = spawn('upmpdcli', ["-c",__dirname +"/upmpdcli.conf","-f",name ]);
+
+    /*
+    process.stderr.on('data', function (data) {
+        self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpcli error: ' + data);
+    });
+    */
+    process.on('close', function (code) {
+        self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpcli ended with code ' + code);
     });
 }
