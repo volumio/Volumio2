@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "volumio_info": {
-    "plugin_type": "music_service"
+    "plugin_type": "system_controller"
   }
 }
