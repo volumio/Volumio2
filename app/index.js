@@ -340,7 +340,11 @@ CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data)
 	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, type, name);
 
 	if(thisPlugin!=undefined)
-		return thisPlugin[method].call(thisPlugin, data);
+		if(thisPlugin[method]){
+			return thisPlugin[method].call(thisPlugin, data);
+		}else{
+			self.pushConsoleMessage( 'Error : CoreCommandRouter::executeOnPlugin: No method [' + method + '] in plugin ' + name  );
+		}
 	else return undefined;
 }
 

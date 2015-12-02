@@ -269,8 +269,11 @@ PluginManager.prototype.onVolumioStart=function()
 PluginManager.prototype.getPlugin=function(category,name)
 {
     var self=this;
-
-    return self.plugins.get(category+'.'+name).instance;
+    if(self.plugins.get(category+'.'+name)){
+      return self.plugins.get(category+'.'+name).instance;
+    }else{
+      self.logger.error("Plugin "+name+" is not loaded. Unable to get an instance");
+    }
 }
 
 
