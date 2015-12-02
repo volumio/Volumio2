@@ -6,6 +6,7 @@ var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
 var iwconfig = require('./lib/iwconfig.js');
 var iwlist = require('./lib/iwlist.js');
+var ifconfig = require('./lib/ifconfig.js');
 var config= new (require('v-conf'))();
 var ip=require('ip');
 var S=require('string');
@@ -319,6 +320,45 @@ ControllerNetwork.prototype.getInfoNetwork=function()
 	var self=this;
 
 	var defer=libQ.defer();
+	var response= [];
+	var oll;
+
+	var ethip = ''
+	var wlanip = ''
+	isOnline(function(err, online) {
+		if(online) oll='yes';
+		else oll='no';
+		});
+
+	ifconfig.status('eth0', function(err, status) {
+  if (status != undefined){
+		if (status.ipv4_address!= undefined){
+		ethip = status.ipv4_address
+		var ethstatus = {type:"Wired", ip:ethip,status:"connected",speed:" ",online:oll}
+		response.push(ethstatus);
+		}
+	}
+});
+
+ifconfig.status('wlan0', function(err, status) {
+if (status != undefined){
+	if (status.ipv4_address!= undefined){
+	wlanip = status.ipv4_address
+	var wlanstatus = {type:"Wireless", ip:wlanip,status:"connected",speed:"",online:oll}
+	response.push(wlanstatus);
+	console.log(wlanstatus);
+	defer.resolve(response);
+}	
+}
+});
+
+
+
+console.log(response);
+		return defer.promise;
+
+/*
+
 	exec("ethtool eth0", function (error, stdout, stderr) {
 		if (error !== null) {
 				defer.resolve({status:"Not Connected",online:"no"});
@@ -342,7 +382,7 @@ ControllerNetwork.prototype.getInfoNetwork=function()
 						connected=line.trim().endsWith("yes");
 					else if(line.contains("Speed:"))
 						speed=line.strip("Speed:").trim();
-				}*/
+				}
 
 				address=ip.address();
 
@@ -352,17 +392,18 @@ ControllerNetwork.prototype.getInfoNetwork=function()
 					if(online) oll='yes';
 					else oll='no';
 
-					var response={
+					var response=[{
+						type:"wired",
 						status:"connected",
 						ip:address,
 						speed:speed,
-						online:oll};
+						online:oll}];
 
 					defer.resolve(response);
 			});
 			}
 
 		});
+*/
 
-	return defer.promise;
 }
