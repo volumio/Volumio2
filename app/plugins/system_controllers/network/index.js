@@ -348,13 +348,13 @@ if (status != undefined){
 	response.push(wlanstatus);
 	console.log(wlanstatus);
 	defer.resolve(response);
-}	
+}
 }
 });
 
 
 
-console.log(response);
+//console.log(response);
 		return defer.promise;
 
 /*
