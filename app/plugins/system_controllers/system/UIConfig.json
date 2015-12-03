@@ -87,7 +87,7 @@
               "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
           },
           {
-            "id":"update",
+            "id":"factory",
               "element": "button",
               "label": "Factory Settings",
               "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. Do you want to continue?"},
