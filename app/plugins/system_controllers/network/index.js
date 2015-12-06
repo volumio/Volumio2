@@ -347,9 +347,10 @@ if (status != undefined){
 	var wlanstatus = {type:"Wireless", ip:wlanip,status:"connected",speed:"",online:oll}
 	response.push(wlanstatus);
 	console.log(wlanstatus);
-	defer.resolve(response);
+
 }
 }
+defer.resolve(response);
 });
 
 
