@@ -199,11 +199,13 @@ ControllerSystem.prototype.getData = function(data,key)
 	return null;
 }
 ControllerSystem.prototype.setHostname = function(hostname) {
+	var self=this;
 	var newhostname = hostname.toLowerCase();
 
-	exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname " + newhostname, function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname " + newhostname,{uid:1000,gid:1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log(error);
+			self.commandRouter.pushToastMessage('alert',"System Name",'Cannot Change System Name');
 		}
 		else {
 			fs.writeFile('/etc/hosts', '127.0.0.1       localhost ' + newhostname, function (err) {
@@ -211,19 +213,22 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 					throw err;
 				}
 				else {
-					exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname" + newhostname, function (error, stdout, stderr) {
-						if (error !== null) {
-							console.log(error);
-						}
-						else {
+							self.commandRouter.pushToastMessage('success',"System Name Changed",'System name is now ' + newhostname);
 							console.log('Hostname now is ' + newhostname);
-						}
+							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service",{uid:1000,gid:1000}, function (error, stdout, stderr) {
+								if (error !== null) {
+									console.log(error);
+									self.commandRouter.pushToastMessage('alert',"System Name",'Cannot Change System Name');
+								} else {
+									console.log('avahi restarted')
+								}
+								});
+					}
 					});
 				}
 			});
 		}
-	});
-}
+
 
 ControllerSystem.prototype.registerCallback = function(callback)
 {
