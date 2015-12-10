@@ -201,7 +201,7 @@ ControllerSystem.prototype.getData = function(data,key)
 ControllerSystem.prototype.setHostname = function(hostname) {
 	var newhostname = hostname.toLowerCase();
 
-	exec("hostnamectl set-hostname " + newhostname, function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname " + newhostname, function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log(error);
 		}
@@ -211,7 +211,7 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 					throw err;
 				}
 				else {
-					exec("hostnamectl set-hostname " + newhostname, function (error, stdout, stderr) {
+					exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname" + newhostname, function (error, stdout, stderr) {
 						if (error !== null) {
 							console.log(error);
 						}
