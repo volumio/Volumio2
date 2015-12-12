@@ -208,9 +208,17 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 			self.commandRouter.pushToastMessage('alert',"System Name",'Cannot Change System Name');
 		}
 		else {
+			exec("/usr/bin/sudo /bin/chmod 777 /etc/hosts",{uid:1000,gid:1000}, function (error, stdout, stderr) {
+				if (error !== null) {
+					console.log('Canot set permissions for /etc/hosts: ' + error);
+
+				} else {
+					self.logger.info('Permissions for /etc/hosts set')
+				}
+				
 			fs.writeFile('/etc/hosts', '127.0.0.1       localhost ' + newhostname, function (err) {
 				if (err) {
-					throw err;
+				console.log(err);
 				}
 				else {
 							self.commandRouter.pushToastMessage('success',"System Name Changed",'System name is now ' + newhostname);
@@ -227,8 +235,11 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 							}, 3000)
 					}
 					});
+					});
 				}
+
 			});
+
 		}
 
 
