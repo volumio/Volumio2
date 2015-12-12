@@ -202,9 +202,9 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 	var self=this;
 	var newhostname = hostname.toLowerCase();
 
-		fs.writeFile('/etc/hostname', newhostname, function (err) {
-		if (err) {
-			console.log(err);
+	exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname " + newhostname,{uid:1000,gid:1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log(error);
 			self.commandRouter.pushToastMessage('alert',"System Name",'Cannot Change System Name');
 		}
 		else {
@@ -215,8 +215,6 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 				else {
 							self.commandRouter.pushToastMessage('success',"System Name Changed",'System name is now ' + newhostname);
 							console.log('Hostname now is ' + newhostname);
-							
-							setTimeout(function () {
 							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service",{uid:1000,gid:1000}, function (error, stdout, stderr) {
 								if (error !== null) {
 									console.log(error);
@@ -225,7 +223,6 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 									console.log('avahi restarted')
 								}
 								});
-								}, 3000)
 					}
 					});
 				}
@@ -238,4 +235,29 @@ ControllerSystem.prototype.registerCallback = function(callback)
 	var self = this;
 
 	self.callbacks.push(callback);
+}
+
+ControllerSystem.prototype.getSystemVersion = function() {
+	var self = this;
+	var defer=libQ.defer();
+	var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+	var releaseinfo = {
+        'systemversion': null,
+        'builddate': null
+    }
+    console.log(file);
+    for (var l in file) {
+        if (file[l].match(/VOLUMIO_VERSION/i)) {
+            str = file[l].split('=');
+            releaseinfo.systemversion = str[1].replace(/\"/gi, "");
+        }
+        if (file[l].match(/VOLUMIO_BUILD_DATE/i)) {
+            str = file[l].split('=');
+            releaseinfo.builddate = str[1].replace(/\"/gi, "");
+        }
+    }
+	defer.resolve(releaseinfo);
+
+
+	return defer.promise;
 }

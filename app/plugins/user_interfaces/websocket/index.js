@@ -900,6 +900,25 @@ function InterfaceWebUI (context) {
 				});
 			});
 
+			//factory reset
+
+			connWebSocket.on('getSystemVersion', function () {
+				selfConnWebSocket = this;
+				self.logger.info("Received Get System Version");
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						if (data != undefined){
+						selfConnWebSocket.emit('pushSystemVersion', data);
+						}
+					});
+				}
+				else console.log("Plugin multiroom or method getMultiroom not found");
+
+
+			});
+
 			/**
 			 * Executes the getMyCollectionStats method on the MPD plugin
 			 */
@@ -1164,4 +1183,3 @@ InterfaceWebUI.prototype.pushAirplay = function(value) {
 	self.logger.debug("Pushing airplay mode: s"+value);
 	self.libSocketIO.sockets.emit('pushAirplay', value);
 };
-

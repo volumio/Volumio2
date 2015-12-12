@@ -34,59 +34,60 @@
     },
     {
       "id": "section_sound_quality",
-        "type": "section",
-        "label": "Sound quality tweaks",
-        "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveSoundQuality"},
-        "saveButton": {
-          "label": "Save",
-          "data": [
-            "kernel_profile"
-          ]
-        },
-        "text": "These profiles??.",
-        "content": [
-          {
-            "id": "kernel_profile",
-            "element": "select",
-            "label": "Kernel profile",
-            "value":  {
-                "value":"1",
-                "label": "Default"
-              },
-              "options": [
-                {
-                  "value":"1",
-                  "label": "Default"
-                },
-                {
-                  "value":"2",
-                  "label": "Less Jitter"
-                }, {
-                  "value":"3",
-                  "label": "Jitter"
-                }, {
-                  "value":"4",
-                  "label": "Focus"
-                }
-              ]
-
-          }
+      "type": "section",
+      "label": "Sound quality tweaks",
+      "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveSoundQuality"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "kernel_profile"
         ]
+      },
+      "text": "These profiles??.",
+      "content": [
+        {
+          "id": "kernel_profile",
+          "element": "select",
+          "label": "Kernel profile",
+          "value":  {
+            "value":"1",
+            "label": "Default"
+          },
+          "options": [
+            {
+              "value":"1",
+              "label": "Default"
+            },
+            {
+              "value":"2",
+              "label": "Less Jitter"
+            }, {
+              "value":"3",
+              "label": "Jitter"
+            }, {
+              "value":"4",
+              "label": "Focus"
+            }
+          ]
+
+        }
+      ]
 
     },
+    {"coreSection": "system-version"},
     {
       "id":"section_updates",
-        "type": "section",
-        "label": "System updates",
-        "content": [
-          {
-            "id":"update",
-              "element": "button",
-              "label": "System updates",
-              "description": "Check if newer versions of the system are available",
-              "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
-          },
-          {
+      "type": "section",
+      "label": "System updates",
+      "content": [
+        {
+          "id":"update",
+          "element": "button",
+          "label": "Check Updates",
+          "text": "Check if newer versions of the system are available",
+          "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
+        },
+         {
             "id":"factory",
               "element": "button",
               "label": "Factory Settings",
@@ -94,7 +95,7 @@
               "description": "Reset your System to factory Settings",
               "onClick": {"type":"emit", "message":"factoryReset", "data":" "}
           }
-        ]
+      ]
 
     }
   ]
