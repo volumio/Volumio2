@@ -202,9 +202,9 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 	var self=this;
 	var newhostname = hostname.toLowerCase();
 
-	exec("/usr/bin/sudo /usr/bin/hostnamectl set-hostname " + newhostname,{uid:1000,gid:1000}, function (error, stdout, stderr) {
-		if (error !== null) {
-			console.log(error);
+	fs.writeFile('/etc/hostname', newhostname, function (err) {
+		if (err) {
+			console.log(err);
 			self.commandRouter.pushToastMessage('alert',"System Name",'Cannot Change System Name');
 		}
 		else {
@@ -214,15 +214,17 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 				}
 				else {
 							self.commandRouter.pushToastMessage('success',"System Name Changed",'System name is now ' + newhostname);
-							console.log('Hostname now is ' + newhostname);
+							self.logger.info('Hostname now is ' + newhostname);
+							setTimeout(function () {
 							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service",{uid:1000,gid:1000}, function (error, stdout, stderr) {
 								if (error !== null) {
 									console.log(error);
 									self.commandRouter.pushToastMessage('alert',"System Name",'Cannot Change System Name');
 								} else {
-									console.log('avahi restarted')
+									self.logger.info('Avahi Daemon Restarted')
 								}
 								});
+							}, 3000)
 					}
 					});
 				}
