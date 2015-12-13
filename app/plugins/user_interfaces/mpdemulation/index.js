@@ -140,6 +140,7 @@ function InterfaceMPD( context) {
 				return; // our buffer has received no full line yet
 			}
 
+			var results;
 			// while we still have a complete line in our buffer (os.EOL == end of line (\r\n))
 			while (results = buffer.split(/\r?\n/)) {
 				// get 1 line from our buffer to process
@@ -194,7 +195,7 @@ InterfaceMPD.prototype.handleMessage = function(message, socket) {
 		handler(sCommand, sParam, socket);
 	else
 		self.commRouter.pushConsoleMessage('default');
-	;
+
 };
 
 InterfaceMPD.prototype.logDone = function(timeStart) {
