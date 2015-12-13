@@ -13,6 +13,8 @@ function AlarmClock(context) {
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
+
+	self.logger=self.context.logger;
 }
 
 AlarmClock.prototype.getConfigurationFiles = function()
@@ -184,18 +186,22 @@ AlarmClock.prototype.setSleep = function(data)
 			console.log("System is shutting down....");
 			setTimeout(function()
 			{
+				self.commandRouter.shutdown();
+				/*
 				var exec = require('child_process').exec;
 
-				exec('halt',
+				exec('/usr/bin/sudo /sbin/halt',
 					function (error, stdout, stderr) {
 						console.log('stdout: ' + stdout);
 						console.log('stderr: ' + stderr);
 						if (error !== null) {
 							console.log('exec error: ' + error);
 						}
-					});
+					});*/
 			},5000);
 		});
+
+		self.commandRouter.pushToastMessage('success',"Sleep mode", 'Successfully set');
 	}
 
 	defer.resolve({});
