@@ -117,6 +117,7 @@ function InterfaceMPD( context) {
 	// helpers
 	self.helper = require('./helper.js');
 	self.idles = [];
+	self.loadCommandHandlers();
 
 	// create server
 	var protocolServer = net.createServer(function(client) {
@@ -139,6 +140,7 @@ function InterfaceMPD( context) {
 				return; // our buffer has received no full line yet
 			}
 
+			var results;
 			// while we still have a complete line in our buffer (os.EOL == end of line (\r\n))
 			while (results = buffer.split(/\r?\n/)) {
 				// get 1 line from our buffer to process
@@ -188,292 +190,12 @@ InterfaceMPD.prototype.handleMessage = function(message, socket) {
 
 	// self.commRouter.pushConsoleMessage('Incoming command: ' + sCommand + '\nParam: '+sParam);
 
-	switch (sCommand) {
-		case command.ADD :
-		self.handleAdd(sCommand, sParam, socket);
-		break;
-		case command.ADDID :
-		self.handleAddid(sCommand, sParam, socket);
-		break;
-		case command.ADDTAGID :
-		self.handleAddtagid(sCommand, sParam, socket);
-		break;
-		case command.CHANNELS :
-		self.handleChannels(sCommand, sParam, socket);
-		break;
-		case command.CLEAR :
-		self.handleClear(sCommand, sParam, socket);
-		break;
-		case command.CLEARERROR :
-		self.handleClearerror(sCommand, sParam, socket);
-		break;
-		case command.CLEARTAGID :
-		self.handleCleartagid(sCommand, sParam, socket);
-		break;
-		case command.CLOSE :
-		self.handleClose(sCommand, sParam, socket);
-		break;
-		case command.COMMANDS :
-		self.handleCommands(sCommand, sParam, socket);
-		break;
-		case command.CONFIG :
-		self.handleConfig(sCommand, sParam, socket);
-		break;
-		case command.CONSUME :
-		self.handleConsume(sCommand, sParam, socket);
-		break;
-		case command.COUNT :
-		self.handleCount(sCommand, sParam, socket);
-		break;
-		case command.CROSSFADE :
-		self.handleCrossfade(sCommand, sParam, socket);
-		break;
-		case command.CURRENTSONG :
-		self.handleCurrentsong(sCommand, sParam, socket);
-		break;
-		case command.DECODERS :
-		self.handleDecoders(sCommand, sParam, socket);
-		break;
-		case command.DELETE :
-		self.handleDelete(sCommand, sParam, socket);
-		break;
-		case command.DELETEID :
-		self.handleDeleteid(sCommand, sParam, socket);
-		break;
-		case command.DISABLEOUTPUT :
-		self.handleDisableoutput(sCommand, sParam, socket);
-		break;
-		case command.ENABLEOUTPUT :
-		self.handleEnableoutput(sCommand, sParam, socket);
-		break;
-		case command.FIND :
-		self.handleFind(sCommand, sParam, socket);
-		break;
-		case command.FINDADD :
-		self.handleFindadd(sCommand, sParam, socket);
-		break;
-		case command.IDLE :
-		self.handleIdle(sCommand, sParam, socket);
-		break;
-		case command.KILL :
-		self.handleKill(sCommand, sParam, socket);
-		break;
-		case command.LIST :
-		self.handleList(sCommand, sParam, socket);
-		break;
-		case command.LISTALL :
-		self.handleListall(sCommand, sParam, socket);
-		break;
-		case command.LISTALLINFO :
-		self.handleListallinfo(sCommand, sParam, socket);
-		break;
-		case command.LISTFILES :
-		self.handleListfiles(sCommand, sParam, socket);
-		break;
-		case command.LISTMOUNTS :
-		self.handleListmounts(sCommand, sParam, socket);
-		break;
-		case command.LISTPLAYLIST :
-		self.handleListplaylist(sCommand, sParam, socket);
-		break;
-		case command.LISTPLAYLISTINFO :
-		self.handleListplaylistinfo(sCommand, sParam, socket);
-		break;
-		case command.LISTPLAYLISTS :
-		self.handleListplaylists(sCommand, sParam, socket);
-		break;
-		case command.LOAD :
-		self.handleLoad(sCommand, sParam, socket);
-		break;
-		case command.LSINFO :
-		self.handleLsinfo(sCommand, sParam, socket);
-		break;
-		case command.MIXRAMPDB :
-		self.handleMixrampdb(sCommand, sParam, socket);
-		break;
-		case command.MIXRAMPDELAY :
-		self.handleMixrampdelay(sCommand, sParam, socket);
-		break;
-		case command.MOUNT :
-		self.handleMount(sCommand, sParam, socket);
-		break;
-		case command.MOVE :
-		self.handleMove(sCommand, sParam, socket);
-		break;
-		case command.MOVEID :
-		self.handleMoveid(sCommand, sParam, socket);
-		break;
-		case command.NEXT :
-		self.handleNext(sCommand, sParam, socket);
-		break;
-		case command.NOTCOMMANDS :
-		self.handleNotcommands(sCommand, sParam, socket);
-		break;
-		case command.OUTPUTS :
-		self.handleOutputs(sCommand, sParam, socket);
-		break;
-		case command.PASSWORD :
-		self.handlePassword(sCommand, sParam, socket);
-		break;
-		case command.PAUSE :
-		self.handlePause(sCommand, sParam, socket);
-		break;
-		case command.PING :
-		self.handlePing(sCommand, sParam, socket);
-		break;
-		case command.PLAY :
-		self.handlePlay(sCommand, sParam, socket);
-		break;
-		case command.PLAYID :
-		self.handlePlayid(sCommand, sParam, socket);
-		break;
-		case command.PLAYLIST :
-		self.handlePlaylist(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTADD :
-		self.handlePlaylistadd(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTCLEAR :
-		self.handlePlaylistclear(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTDELETE :
-		self.handlePlaylistdelete(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTFIND :
-		self.handlePlaylistfind(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTID :
-		self.handlePlaylistid(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTINFO :
-		self.handlePlaylistinfo(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTMOVE :
-		self.handlePlaylistmove(sCommand, sParam, socket);
-		break;
-		case command.PLAYLISTSEARCH :
-		self.handlePlaylistsearch(sCommand, sParam, socket);
-		break;
-		case command.PLCHANGES :
-		self.handlePlchanges(sCommand, sParam, socket);
-		break;
-		case command.PLCHANGESPOSID :
-		self.handlePlchangesposid(sCommand, sParam, socket);
-		break;
-		case command.PREVIOUS :
-		self.handlePrevious(sCommand, sParam, socket);
-		break;
-		case command.PRIO :
-		self.handlePrio(sCommand, sParam, socket);
-		break;
-		case command.PRIOID :
-		self.handlePrioid(sCommand, sParam, socket);
-		break;
-		case command.RANDOM :
-		self.handleRandom(sCommand, sParam, socket);
-		break;
-		case command.RANGEID :
-		self.handleRangeid(sCommand, sParam, socket);
-		break;
-		case command.READCOMMENTS :
-		self.handleReadcomments(sCommand, sParam, socket);
-		break;
-		case command.READMESSAGES :
-		self.handleReadmessages(sCommand, sParam, socket);
-		break;
-		case command.RENAME :
-		self.handleRename(sCommand, sParam, socket);
-		break;
-		case command.REPEAT :
-		self.handleRepeat(sCommand, sParam, socket);
-		break;
-		case command.REPLAY_GAIN_MODE :
-		self.handleReplay_gain_mode(sCommand, sParam, socket);
-		break;
-		case command.REPLAY_GAIN_STATUS :
-		self.handleReplay_gain_status(sCommand, sParam, socket);
-		break;
-		case command.RESCAN :
-		self.handleRescan(sCommand, sParam, socket);
-		break;
-		case command.RM :
-		self.handleRm(sCommand, sParam, socket);
-		break;
-		case command.SAVE :
-		self.handleSave(sCommand, sParam, socket);
-		break;
-		case command.SEARCH :
-		self.handleSearch(sCommand, sParam, socket);
-		break;
-		case command.SEARCHADD :
-		self.handleSearchadd(sCommand, sParam, socket);
-		break;
-		case command.SEARCHADDPL :
-		self.handleSearchaddpl(sCommand, sParam, socket);
-		break;
-		case command.SEEK :
-		self.handleSeek(sCommand, sParam, socket);
-		break;
-		case command.SEEKCUR :
-		self.handleSeekcur(sCommand, sParam, socket);
-		break;
-		case command.SEEKID :
-		self.handleSeekid(sCommand, sParam, socket);
-		break;
-		case command.SENDMESSAGE :
-		self.handleSendmessage(sCommand, sParam, socket);
-		break;
-		case command.SETVOL :
-		self.handleSetvol(sCommand, sParam, socket);
-		break;
-		case command.SHUFFLE :
-		self.handleShuffle(sCommand, sParam, socket);
-		break;
-		case command.SINGLE :
-		self.handleSingle(sCommand, sParam, socket);
-		break;
-		case command.STATS :
-		self.handleStats(sCommand, sParam, socket);
-		break;
-		case command.STATUS :
-		self.handleStatus(sCommand, sParam, socket);
-		break;
-		case command.STOP :
-		self.handleStop(sCommand, sParam, socket);
-		break;
-		case command.SUBSCRIBE :
-		self.handleSubscribe(sCommand, sParam, socket);
-		break;
-		case command.SWAP :
-		self.handleSwap(sCommand, sParam, socket);
-		break;
-		case command.SWAPID :
-		self.handleSwapid(sCommand, sParam, socket);
-		break;
-		case command.TAGTYPES :
-		self.handleTagtypes(sCommand, sParam, socket);
-		break;
-		case command.TOGGLEOUTPUT :
-		self.handleToggleoutput(sCommand, sParam, socket);
-		break;
-		case command.UNMOUNT :
-		self.handleUnmount(sCommand, sParam, socket);
-		break;
-		case command.UNSUBSCRIBE :
-		self.handleUnsubscribe(sCommand, sParam, socket);
-		break;
-		case command.UPDATE :
-		self.handleUpdate(sCommand, sParam, socket);
-		break;
-		case command.URLHANDLERS :
-		self.handleUrlself.handlers(sCommand, sParam, socket);
-		break;
-		case command.VOLUME :
-		self.handleVolume(sCommand, sParam, socket);
-		break;
-		default:
+	var handler = self.commandHandlers[sCommand];
+	if (handler)
+		handler(sCommand, sParam, socket);
+	else
 		self.commRouter.pushConsoleMessage('default');
-	}
+
 };
 
 InterfaceMPD.prototype.logDone = function(timeStart) {
@@ -1268,3 +990,101 @@ InterfaceMPD.prototype.pushState = function(state, socket) {
 };
 // END OF PUBLIC FUNCTIONS
 
+InterfaceMPD.prototype.loadCommandHandlers = function() {
+	var self = this;
+	self.commandHandlers = {};
+	self.commandHandlers[command.ADD] = self.handleAdd;
+	self.commandHandlers[command.ADDID] = self.handleAddid;
+	self.commandHandlers[command.ADDTAGID] = self.handleAddtagid;
+	self.commandHandlers[command.CHANNELS] = self.handleChannels;
+	self.commandHandlers[command.CLEAR] = self.handleClear;
+	self.commandHandlers[command.CLEARERROR] = self.handleClearerror;
+	self.commandHandlers[command.CLEARTAGID] = self.handleCleartagid;
+	self.commandHandlers[command.CLOSE] = self.handleClose;
+	self.commandHandlers[command.COMMANDS] = self.handleCommands;
+	self.commandHandlers[command.CONFIG] = self.handleConfig;
+	self.commandHandlers[command.CONSUME] = self.handleConsume;
+	self.commandHandlers[command.COUNT] = self.handleCount;
+	self.commandHandlers[command.CROSSFADE] = self.handleCrossfade;
+	self.commandHandlers[command.CURRENTSONG] = self.handleCurrentsong;
+	self.commandHandlers[command.DECODERS] = self.handleDecoders;
+	self.commandHandlers[command.DELETE] = self.handleDelete;
+	self.commandHandlers[command.DELETEID] = self.handleDeleteid;
+	self.commandHandlers[command.DISABLEOUTPUT] = self.handleDisableoutput;
+	self.commandHandlers[command.ENABLEOUTPUT] = self.handleEnableoutput;
+	self.commandHandlers[command.FIND] = self.handleFind;
+	self.commandHandlers[command.FINDADD] = self.handleFindadd;
+	self.commandHandlers[command.IDLE] = self.handleIdle;
+	self.commandHandlers[command.KILL] = self.handleKill;
+	self.commandHandlers[command.LIST] = self.handleList;
+	self.commandHandlers[command.LISTALL] = self.handleListall;
+	self.commandHandlers[command.LISTALLINFO] = self.handleListallinfo;
+	self.commandHandlers[command.LISTFILES] = self.handleListfiles;
+	self.commandHandlers[command.LISTMOUNTS] = self.handleListmounts;
+	self.commandHandlers[command.LISTPLAYLIST] = self.handleListplaylist;
+	self.commandHandlers[command.LISTPLAYLISTINFO] = self.handleListplaylistinfo;
+	self.commandHandlers[command.LISTPLAYLISTS] = self.handleListplaylists;
+	self.commandHandlers[command.LOAD] = self.handleLoad;
+	self.commandHandlers[command.LSINFO] = self.handleLsinfo;
+	self.commandHandlers[command.MIXRAMPDB] = self.handleMixrampdb;
+	self.commandHandlers[command.MIXRAMPDELAY] = self.handleMixrampdelay;
+	self.commandHandlers[command.MOUNT] = self.handleMount;
+	self.commandHandlers[command.MOVE] = self.handleMove;
+	self.commandHandlers[command.MOVEID] = self.handleMoveid;
+	self.commandHandlers[command.NEXT] = self.handleNext;
+	self.commandHandlers[command.NOTCOMMANDS] = self.handleNotcommands;
+	self.commandHandlers[command.OUTPUTS] = self.handleOutputs;
+	self.commandHandlers[command.PASSWORD] = self.handlePassword;
+	self.commandHandlers[command.PAUSE] = self.handlePause;
+	self.commandHandlers[command.PING] = self.handlePing;
+	self.commandHandlers[command.PLAY] = self.handlePlay;
+	self.commandHandlers[command.PLAYID] = self.handlePlayid;
+	self.commandHandlers[command.PLAYLIST] = self.handlePlaylist;
+	self.commandHandlers[command.PLAYLISTADD] = self.handlePlaylistadd;
+	self.commandHandlers[command.PLAYLISTCLEAR] = self.handlePlaylistclear;
+	self.commandHandlers[command.PLAYLISTDELETE] = self.handlePlaylistdelete;
+	self.commandHandlers[command.PLAYLISTFIND] = self.handlePlaylistfind;
+	self.commandHandlers[command.PLAYLISTID] = self.handlePlaylistid;
+	self.commandHandlers[command.PLAYLISTINFO] = self.handlePlaylistinfo;
+	self.commandHandlers[command.PLAYLISTMOVE] = self.handlePlaylistmove;
+	self.commandHandlers[command.PLAYLISTSEARCH] = self.handlePlaylistsearch;
+	self.commandHandlers[command.PLCHANGES] = self.handlePlchanges;
+	self.commandHandlers[command.PLCHANGEPOSID] = self.handlePlchangesposid;
+	self.commandHandlers[command.PREVIOUS] = self.handlePrevious;
+	self.commandHandlers[command.PRIO] = self.handlePrio;
+	self.commandHandlers[command.PRIOID] = self.handlePrioid;
+	self.commandHandlers[command.RANDOM] = self.handleRandom;
+	self.commandHandlers[command.RANGEID] = self.handleRangeid;
+	self.commandHandlers[command.READCOMMENTS] = self.handleReadcomments;
+	self.commandHandlers[command.READMESSAGES] = self.handleReadmessages;
+	self.commandHandlers[command.RENAME] = self.handleRename;
+	self.commandHandlers[command.REPEAT] = self.handleRepeat;
+	self.commandHandlers[command.REPLAY_GAIN_MODE] = self.handleReplay_gain_mode;
+	self.commandHandlers[command.REPLAY_GAIN_STATUS] = self.handleReplay_gain_status;
+	self.commandHandlers[command.RESCAN] = self.handleRescan;
+	self.commandHandlers[command.REMOVE] = self.handleRm;
+	self.commandHandlers[command.SAVE] = self.handleSave;
+	self.commandHandlers[command.SEARCH] = self.handleSearch;
+	self.commandHandlers[command.SEARCHADD] = self.handleSearchadd;
+	self.commandHandlers[command.SEARCHADDPL] = self.handleSearchaddpl;
+	self.commandHandlers[command.SEEK] = self.handleSeek;
+	self.commandHandlers[command.SEEKCUR] = self.handleSeekcur;
+	self.commandHandlers[command.SEEKID] = self.handleSeekid;
+	self.commandHandlers[command.SENDMESSAGE] = self.handleSendmessage;
+	self.commandHandlers[command.SETVOL] = self.handleSetvol;
+	self.commandHandlers[command.SHUFFLE] = self.handleShuffle;
+	self.commandHandlers[command.SINGLE] = self.handleSingle;
+	self.commandHandlers[command.STATS] = self.handleStats;
+	self.commandHandlers[command.STATUS] = self.handleStatus;
+	self.commandHandlers[command.STOP] = self.handleStop;
+	self.commandHandlers[command.SUBSCRIBE] = self.handleSubscribe;
+	self.commandHandlers[command.SWAP] = self.handleSwap;
+	self.commandHandlers[command.SWAPID] = self.handleSwapid;
+	self.commandHandlers[command.TAGTYPES] = self.handleTagtypes;
+	self.commandHandlers[command.TOGGLEOUTPUT] = self.handleToggleoutput;
+	self.commandHandlers[command.UNMOUNT] = self.handleUnmount;
+	self.commandHandlers[command.UNSUBSCRIBE] = self.handleUnsubscribe;
+	self.commandHandlers[command.UPDATE] = self.handleUpdate;
+	self.commandHandlers[command.URLHANDLERS] = self.handleUrlhandlers;
+	self.commandHandlers[command.VOLUME] = self.handleVolume;
+};
