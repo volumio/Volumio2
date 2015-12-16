@@ -9,7 +9,7 @@
   "dependencies": {
     "album-art": "^1.0.2",
     "base64-url": "^1.2.1",
-    "body-parser": "^1.14.1",
+    "body-parser": "^1.14.2",
     "chokidar": "^1.4.1",
     "compression": "^1.6.0",
     "convert-seconds": "1.0.0",
