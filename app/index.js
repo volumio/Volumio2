@@ -251,6 +251,13 @@ CoreCommandRouter.prototype.volumioPushState = function(state) {
 	);
 }
 
+CoreCommandRouter.prototype.volumioResetState = function() {
+	var self = this;
+	self.pushConsoleMessage( 'CoreCommandRouter::volumioResetState');
+
+	return self.stateMachine.resetVolumioState();
+}
+
 CoreCommandRouter.prototype.volumioPushQueue = function(queue) {
 	var self = this;
 	self.pushConsoleMessage( 'CoreCommandRouter::volumioPushQueue');
