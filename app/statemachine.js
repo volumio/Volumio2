@@ -40,6 +40,7 @@ CoreStateMachine.prototype.getState = function() {
 		repeat: self.currentRepeat,
 		volume: self.currentVolume,
 		mute: self.currentMute,
+		stream: self.isStreaming,
 		service: sService
 	});
 };
@@ -363,6 +364,15 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	self.currentTrackBlock.service = sService;
 	self.currentStatus = stateService.status;
 	self.currentPosition = stateService.position;
+
+
+	if(stateService.isStreaming!=undefined)
+	{
+		self.isStreaming=stateService.isStreaming;
+	}
+	else self.isStreaming=false;
+
+
 	//If play is issued by a different entity than Volumio, the system will accept and handle it
 	if (self.currentTrackBlock.service !== sService) {
 		console.log(sService);

@@ -302,6 +302,7 @@ ControllerMpd.prototype.getState = function() {
 			})*/
 			.then(libFast.bind(self.parseTrackInfo, self))
 			.then(function(trackinfo) {
+				collectedState.isStreaming=trackinfo.isStreaming!=undefined?trackinfo.isStreaming:false;
 				collectedState.title = trackinfo.title;
 				collectedState.artist = trackinfo.artist;
 				collectedState.album = trackinfo.album;
@@ -310,6 +311,7 @@ ControllerMpd.prototype.getState = function() {
 			});
 			// Else return null track info
 		} else {
+			collectedState.isStreaming=false;
 			collectedState.title = null;
 			collectedState.artist = null;
 			collectedState.album = null;
@@ -391,6 +393,10 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	console.log(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
 	var resp={};
+
+	var file=s(objTrackInfo.file);
+
+	resp.isStreaming=file.startsWith('http://');
 
 	if (objTrackInfo.Title!=undefined) {
 		resp.title=objTrackInfo.Title;
