@@ -150,7 +150,7 @@ ControllerDirble.prototype.listRadioCategories = function() {
 				type: 'folder',
 				title: data[i].title,
 				icon: 'fa fa-folder-open-o',
-				uri: 'radio/'+data[i].id
+				uri: 'radio/byGenre/'+data[i].id
 			};
 
 			response.navigation.list.push(category);
@@ -171,13 +171,13 @@ ControllerDirble.prototype.listRadioForCategory = function(uri) {
 	var response={
 		navigation: {
 			prev: {
-				uri: 'radio'
+				uri: 'radio/byGenre'
 			},
 			list: []
 		}
 	};
 
-	var id=uri.split('/')[1];
+	var id=uri.split('/')[2];
 
 
 
@@ -223,6 +223,63 @@ ControllerDirble.prototype.listRadioForCategory = function(uri) {
 
 
 
+ControllerDirble.prototype.listFirstLevelRadioSections = function(callback) {
+	var self=this;
+
+	var defer=libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: ''
+			},
+			list: [{
+					service: 'dirble',
+					type: 'folder',
+					title: 'My Web Radios',
+					artist: '',
+					album: '',
+					icon: 'fa fa-folder-open-o',
+					uri:'radio/myWebRadio'
+				},
+				{
+					service: 'dirble',
+					type: 'folder',
+					title: 'Favourites',
+					artist: '',
+					album: '',
+					icon: 'fa fa-folder-open-o',
+					uri: 'radio/favourites'
+				},
+				{
+					service: 'dirble',
+					type: 'folder',
+					title: 'By Genre',
+					artist: '',
+					album: '',
+					icon: 'fa fa-folder-open-o',
+					uri:'radio/byGenre'
+				},
+				{
+					service: 'dirble',
+					type: 'folder',
+					title: 'By Country',
+					artist: '',
+					album: '',
+					icon: 'fa fa-folder-open-o',
+					uri:'radio/byCountry'
+				}
+
+			]
+		}
+	};
+
+	defer.resolve(response);
+	return defer.promise;
+};
+
+
+
 ControllerDirble.prototype.getPrimariesCategories = function(callback) {
 	var self=this;
 
@@ -250,25 +307,126 @@ ControllerDirble.prototype.getRadioForCategory = function(id,per_page,page,callb
 
 };
 
-ControllerDirble.prototype.getCountries = function() {
+
+
+
+ControllerDirble.prototype.listRadioCountries = function() {
+	var self=this;
+
+	var defer=libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: 'radio'
+			},
+			list: []
+		}
+	};
+
+	var dirbleDefer=libQ.defer();
+	self.getCountries(dirbleDefer.makeNodeResolver());
+	dirbleDefer.promise.then(function(data)
+	{
+		for(var i in data)
+		{
+			var category={
+				type: 'folder',
+				title: data[i].name,
+				icon: 'fa fa-folder-open-o',
+				uri: 'radio/byCountry/'+data[i].country_code
+			};
+
+			response.navigation.list.push(category);
+		}
+
+		defer.resolve(response);
+	});
+
+
+	return defer.promise;
+};
+
+ControllerDirble.prototype.getCountries = function(callback) {
+	var self=this;
+
 	var Request = unirest.get(self.config.get('url_countries'));
 	Request.query({
 		token: self.config.get('api_token')
 	}).end(function (response) {
-		console.log(response.body);
+		callback(null,response.body);
 	});
 
 };
 
-ControllerDirble.prototype.getStationsForCountry = function(id,page) {
-	var Request = unirest.get(self.config.get('url_countries'));
+ControllerDirble.prototype.listRadioForCountry = function(uri) {
+	var self=this;
+
+	var defer=libQ.defer();
+
+	var response={
+		navigation: {
+			prev: {
+				uri: 'radio/byCountry'
+			},
+			list: []
+		}
+	};
+
+	var id=uri.split('/')[2];
+
+
+
+	var paginationPromises=[];
+
+	for(var i=0;i<1;i++)
+	{
+		var dirbleDefer=libQ.defer();
+		self.getStationsForCountry(id,30,i,dirbleDefer.makeNodeResolver());
+
+		paginationPromises.push(dirbleDefer);
+	}
+
+	libQ.all(paginationPromises)
+		.then(function(results){
+			console.log(results);
+			for(var j in results)
+			{
+				var pageData=results[j];
+				//console.log(pageData);
+
+				for(var k in pageData)
+				{
+					var category={
+						service: 'dirble',
+						type: 'song',
+						title: pageData[k].name,
+						artist: '',
+						album: '',
+						icon: 'fa fa-music',
+						uri:pageData[k].streams[0].stream
+					};
+
+					response.navigation.list.push(category);
+				}
+			}
+
+			defer.resolve(response);
+		});
+
+	return defer.promise;
+};
+
+ControllerDirble.prototype.getStationsForCountry = function(id,per_page,page,callback) {
+	var self=this;
+
+	var Request = unirest.get('http://api.dirble.com/v2/countries/'+id+'/stations');
 	Request.query({
-		token: config.get('api_token'),
+		token: self.config.get('api_token'),
 		page:page,
-		per_page:config.get('per_page'),
-		offset:0
+		per_page:per_page
 	}).end(function (response) {
-		console.log(response.body);
+		callback(null,response.body);
 	});
 
 };
@@ -285,7 +443,7 @@ ControllerDirble.prototype.listRadioFavourites = function (uri) {
 		var response={
 			navigation: {
 				prev: {
-					uri: '/'
+					uri: 'radio'
 				},
 				list:[]
 			}
@@ -302,6 +460,45 @@ ControllerDirble.prototype.listRadioFavourites = function (uri) {
 		defer.resolve(response);
 
 	})
+		.fail(function()
+		{
+			defer.reject(new Error("Cannot list Favourites"));
+		});
+
+	return defer.promise;
+}
+
+
+
+ControllerDirble.prototype.listMyWebRadio = function (uri) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	var promise=self.commandRouter.playListManager.getMyWebRadioContent()
+	promise.then(function(data)
+		{
+			console.log(data);
+			var response={
+				navigation: {
+					prev: {
+						uri: 'radio'
+					},
+					list:[]
+				}
+			};
+
+			for(var i in data)
+			{
+				var ithdata=data[i];
+				var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
+
+				response.navigation.list.push(song);
+			}
+
+			defer.resolve(response);
+
+		})
 		.fail(function()
 		{
 			defer.reject(new Error("Cannot list Favourites"));

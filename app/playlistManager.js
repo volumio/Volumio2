@@ -235,6 +235,38 @@ PlaylistManager.prototype.playRadioFavourites = function() {
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder,'radio-favourites');
 }
 
+// My Web Radio
+
+PlaylistManager.prototype.getMyWebRadioContent = function(name) {
+	var self = this;
+
+	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'my-web-radio');
+}
+
+PlaylistManager.prototype.addToMyWebRadio = function(service,uri) {
+	var self = this;
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to my-web-radio');
+
+	return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'my-web-radio',service,uri);
+}
+
+PlaylistManager.prototype.removeFromMyWebRadio = function(name,service,uri) {
+	var self = this;
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' from my-web-radio');
+
+	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'my-web-radio',service,uri);
+}
+
+PlaylistManager.prototype.playMyWebRadio = function() {
+	var self = this;
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing my-web-radio');
+
+	return self.commonPlayPlaylist(self.favouritesPlaylistFolder,'my-web-radio');
+}
+
 //  COMMON methods
 PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri) {
 	var self = this;
@@ -383,7 +415,7 @@ PlaylistManager.prototype.commonGetPlaylistContent = function(folder,name) {
 
 	fs.exists(filePath, function (exists) {
 		if(!exists)
-			defer.reject(new Error("Playlist does not exist"));
+			defer.resolve([]);
 		else
 		{
 			fs.readJson(filePath, function (err, data) {

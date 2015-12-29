@@ -454,10 +454,11 @@ function InterfaceWebUI (context) {
 				var returnedData = [{name: 'Favourites', uri: 'favourites'},
 					{name: 'Playlists', uri: 'playlists'},
 					{name: 'Music Library', uri: 'music-library'},
-					{name: 'Radio', uri: 'radio'},
-					{name: 'Radio Favourites', uri: 'radio-favourites'}];
+					{name: 'WebRadio', uri: 'radio'}];
 
 
+
+				//{name: 'Radio Favourites', uri: 'radio-favourites'}
 				selfConnWebSocket.emit('pushBrowseSources', returnedData);
 			});
 
@@ -486,8 +487,30 @@ function InterfaceWebUI (context) {
 				}
 				else if (curUri.startsWith('radio')) {
 					if (curUri == 'radio')
-						response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioCategories', curUri);
-					else response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioForCategory', curUri);
+						response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listFirstLevelRadioSections', curUri);
+					else
+					{
+						if(curUri.startsWith('radio/myWebRadio'))
+							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listMyWebRadio', curUri);
+						else if(curUri.startsWith('radio/favourites'))
+							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites', curUri);
+						else if(curUri.startsWith('radio/byGenre'))
+						{
+							if(curUri=='radio/byGenre')
+								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioCategories', curUri);
+							else
+								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioForCategory', curUri);
+
+						}
+						else if(curUri.startsWith('radio/byCountry'))
+						{
+							if(curUri=='radio/byCountry')
+								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioCountries', curUri);
+							else
+								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioForCountry', curUri);
+
+						}
+					}
 				}
 
 
