@@ -33,6 +33,9 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 
 ## Preliminary Setup
 
+IMPORTANT NOTE:
+Volumio is designed to be an highly integrated system. This means that the WebUi is optimized to work along with the custom made Volumio system, and therefore it needs to run in a very tightly controlled environment. IT WON'T WORK on standard Raspbian or other non-volumio OSes. If you want to know what kind of customizations we're using, take a look at the [Volumio Builder](https://github.com/volumio/Build)
+
 Volumio works with 12.x version of NodeJS, we're using 0.12.6. Reports of working\not working node version are appreciated!
 
 Clone the repo in the directory of your choice (default: /volumio)
