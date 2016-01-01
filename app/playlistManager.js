@@ -294,9 +294,41 @@ PlaylistManager.prototype.addToMyWebRadio = function(service,radio_name,uri) {
 PlaylistManager.prototype.removeFromMyWebRadio = function(name,service,uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' from my-web-radio');
+	var defer=libQ.defer();
 
-	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'my-web-radio',service,uri);
+	var playlist=[];
+	var filePath=self.favouritesPlaylistFolder+'my-web-radio';
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+		{
+			fs.writeJsonSync(filePath,playlist);
+		}
+
+		fs.readJson(filePath, function (err, data) {
+			if(err)
+				defer.resolve({success:false});
+			else
+			{
+				//searching for item with same name
+				for(var i in data)
+				{
+					if(data[i].name==name)
+					{
+						data.splice(i,1);
+					}
+				}
+
+				fs.writeJson(filePath, data, function (err) {
+					if(err)
+						defer.resolve({success:false});
+					else defer.resolve({success:true});
+				})
+			}
+		});
+	});
+
+	return defer.promise;
 }
 
 PlaylistManager.prototype.playMyWebRadio = function() {

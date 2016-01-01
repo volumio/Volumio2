@@ -556,7 +556,7 @@ function InterfaceWebUI (context) {
 			});
 
 			//add my web radio
-			connWebSocket.on('addMyWebRadio', function (data) {
+			connWebSocket.on('addWebRadio', function (data) {
 				selfConnWebSocket = this;
 
 				var response;
@@ -565,7 +565,25 @@ function InterfaceWebUI (context) {
 
 				if (response != undefined) {
 					response.then(function (result) {
-							selfConnWebSocket.emit('pushAddMyWebRadio', result);
+							selfConnWebSocket.emit('pushAddWebRadio', result);
+						})
+						.fail(function () {
+							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
+						});
+				}
+			});
+
+
+			connWebSocket.on('removeWebRadio', function (data) {
+				selfConnWebSocket = this;
+
+				var response;
+
+				response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'removeMyWebRadio', data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+							selfConnWebSocket.emit('pushRemoveWebRadio', result);
 						})
 						.fail(function () {
 							self.printToastMessage('error', "Search error", 'An error occurred while Searching');

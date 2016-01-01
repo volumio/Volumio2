@@ -546,6 +546,22 @@ ControllerDirble.prototype.addMyWebRadio = function (data) {
 	return defer.promise;
 }
 
+ControllerDirble.prototype.removeMyWebRadio = function (data) {
+	var self = this;
+
+	var defer = libQ.defer();
+	var name=data.name;
+
+	self.commandRouter.playListManager.removeFromMyWebRadio(name);
+	defer.resolve({});
+
+	return defer.promise;
+}
+
+
+
+
+
 ControllerDirble.prototype.extractFromPls = function (data) {
 	var self = this;
 
