@@ -493,7 +493,7 @@ ControllerDirble.prototype.listMyWebRadio = function (uri) {
 			for(var i in data)
 			{
 				var ithdata=data[i];
-				var song={service: ithdata.service, type: 'song',  title: ithdata.title, artist: ithdata.artist, album: ithdata.album, icon: ithdata.albumart, uri: ithdata.uri};
+				var song={service: ithdata.service, type: 'song',  title: ithdata.name,  uri: ithdata.uri,icon: '/albumart'};
 
 				response.navigation.list.push(song);
 			}

@@ -491,7 +491,9 @@ function InterfaceWebUI (context) {
 					else
 					{
 						if(curUri.startsWith('radio/myWebRadio'))
+						{
 							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listMyWebRadio', curUri);
+						}
 						else if(curUri.startsWith('radio/favourites'))
 							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites', curUri);
 						else if(curUri.startsWith('radio/byGenre'))
