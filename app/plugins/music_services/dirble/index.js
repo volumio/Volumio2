@@ -1,5 +1,7 @@
 var libQ = require('kew');
 var unirest=require('unirest');
+var S=require('string');
+//var internetradio = require('node-internet-radio');
 
 module.exports = ControllerDirble;
 function ControllerDirble(context) {
@@ -505,4 +507,55 @@ ControllerDirble.prototype.listMyWebRadio = function (uri) {
 		});
 
 	return defer.promise;
+}
+
+/*
+	Let the user add a web radio. The given name is a key to the array
+ */
+ControllerDirble.prototype.addMyWebRadio = function (data) {
+	var self = this;
+
+	var defer = libQ.defer();
+	var name=data.name;
+	var uri=S(data.uri);
+	var uriToSave;
+
+	if(uri.endsWith('.m3u') || uri.endsWith('.M3U'))
+	{
+		uriToSave=self.extractFromM3u(uri);
+	}
+	else if(uri.endsWith('.pls') || uri.endsWith('.PLS'))
+	{
+		uriToSave=self.extractFromPls(uri);
+	}
+	else uriToSave=uri.s;
+
+	//check if uri is ok,
+	/*internetradio.getStationInfo(uriToSave, function(error, station) {
+		if(error)
+			defer.reject(new Error('Uri seems not to be a radio station'));
+		else
+		{
+			console.log("RADIO ADDED");
+			defer.resolve(station);
+		}
+	},internetradio.StreamSource.STREAM);*/
+	self.commandRouter.playListManager.addToMyWebRadio('dirble',name,uriToSave);
+	defer.resolve({});
+
+	return defer.promise;
+}
+
+ControllerDirble.prototype.extractFromPls = function (data) {
+	var self = this;
+
+
+
+	return defer.promise;
+}
+
+ControllerDirble.prototype.extractFromM3u = function (uri) {
+	var self = this;
+
+
 }

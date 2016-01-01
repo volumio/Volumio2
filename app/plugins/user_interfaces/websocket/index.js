@@ -555,6 +555,25 @@ function InterfaceWebUI (context) {
 
 			});
 
+			//add my web radio
+			connWebSocket.on('addMyWebRadio', function (data) {
+				selfConnWebSocket = this;
+
+				var response;
+
+				response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'addMyWebRadio', data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+							selfConnWebSocket.emit('pushAddMyWebRadio', result);
+						})
+						.fail(function () {
+							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
+						});
+				}
+			});
+
+
 
 			// PLAYLIST MANAGEMENT
 			connWebSocket.on('createPlaylist', function (data) {
