@@ -491,7 +491,9 @@ function InterfaceWebUI (context) {
 					else
 					{
 						if(curUri.startsWith('radio/myWebRadio'))
+						{
 							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listMyWebRadio', curUri);
+						}
 						else if(curUri.startsWith('radio/favourites'))
 							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites', curUri);
 						else if(curUri.startsWith('radio/byGenre'))
@@ -554,6 +556,43 @@ function InterfaceWebUI (context) {
 
 
 			});
+
+			//add my web radio
+			connWebSocket.on('addWebRadio', function (data) {
+				selfConnWebSocket = this;
+
+				var response;
+
+				response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'addMyWebRadio', data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+							selfConnWebSocket.emit('pushAddWebRadio', result);
+						})
+						.fail(function () {
+							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
+						});
+				}
+			});
+
+
+			connWebSocket.on('removeWebRadio', function (data) {
+				selfConnWebSocket = this;
+
+				var response;
+
+				response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'removeMyWebRadio', data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+							selfConnWebSocket.emit('pushRemoveWebRadio', result);
+						})
+						.fail(function () {
+							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
+						});
+				}
+			});
+
 
 
 			// PLAYLIST MANAGEMENT

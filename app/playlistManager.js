@@ -243,20 +243,92 @@ PlaylistManager.prototype.getMyWebRadioContent = function(name) {
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'my-web-radio');
 }
 
-PlaylistManager.prototype.addToMyWebRadio = function(service,uri) {
+PlaylistManager.prototype.addToMyWebRadio = function(service,radio_name,uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to my-web-radio');
+	var defer=libQ.defer();
 
-	return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'my-web-radio',service,uri);
+	var playlist=[];
+	var filePath=self.favouritesPlaylistFolder+'my-web-radio';
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+		{
+			fs.writeJsonSync(filePath,playlist);
+		}
+
+		fs.readJson(filePath, function (err, data) {
+			if(err)
+				defer.resolve({success:false});
+			else
+			{
+				//searching for item with same name
+				var alreadyExists=false;
+
+				for(var i in data)
+				{
+					if(data[i].name==radio_name)
+					{
+						alreadyExists=true;
+						data[i].uri=uri;
+					}
+				}
+
+				if(alreadyExists==false)
+				{
+					data.push({service:service,name:radio_name,uri:uri});
+				}
+
+				fs.writeJson(filePath, data, function (err) {
+					if(err)
+						defer.resolve({success:false});
+					else defer.resolve({success:true});
+				})
+			}
+		});
+	});
+
+	return defer.promise;
 }
 
 PlaylistManager.prototype.removeFromMyWebRadio = function(name,service,uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' from my-web-radio');
+	var defer=libQ.defer();
 
-	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'my-web-radio',service,uri);
+	var playlist=[];
+	var filePath=self.favouritesPlaylistFolder+'my-web-radio';
+
+	fs.exists(filePath, function (exists) {
+		if(!exists)
+		{
+			fs.writeJsonSync(filePath,playlist);
+		}
+
+		fs.readJson(filePath, function (err, data) {
+			if(err)
+				defer.resolve({success:false});
+			else
+			{
+				//searching for item with same name
+				for(var i in data)
+				{
+					if(data[i].name==name)
+					{
+						data.splice(i,1);
+					}
+				}
+
+				fs.writeJson(filePath, data, function (err) {
+					if(err)
+						defer.resolve({success:false});
+					else defer.resolve({success:true});
+				})
+			}
+		});
+	});
+
+	return defer.promise;
 }
 
 PlaylistManager.prototype.playMyWebRadio = function() {
