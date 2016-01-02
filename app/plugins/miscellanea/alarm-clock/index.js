@@ -3,6 +3,7 @@ var libFast = require('fast.js');
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var schedule = require('node-schedule');
+var moment = require('moment');
 
 // Define the AlarmClock class
 module.exports = AlarmClock;
@@ -164,10 +165,14 @@ AlarmClock.prototype.setSleep = function(data)
 	var defer = libQ.defer();
 
 	var splitted=data.time.split(':');
-
+  var sleephour = moment().hour()+parseFloat(splitted[0]);
+	var sleepminute = moment().minute()+parseFloat(splitted[1]);
 	config.set('sleep_enabled',data.enabled);
 	config.set('sleep_hour',splitted[0]);
 	config.set('sleep_minute',splitted[1]);
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SetSleep: ' + splitted[0] + ' hours ' + splitted[1] + ' minutes');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SetSleep at  ' + sleephour + ':' + sleepminute);
 
 	if(self.haltSchedule!=undefined)
 	{
@@ -177,7 +182,8 @@ AlarmClock.prototype.setSleep = function(data)
 
 	if(data.enabled)
 	{
-		self.haltSchedule=schedule.scheduleJob('0 '+splitted[1]+' '+splitted[0]+' * * *', function(){
+		var date = new Date(moment().year(), moment().month(), moment().date(), sleephour, sleepminute, 0);
+		self.haltSchedule=schedule.scheduleJob(date, function(){
 			config.set('sleep_enabled',false);
 
 			self.haltSchedule.cancel();
@@ -187,21 +193,10 @@ AlarmClock.prototype.setSleep = function(data)
 			setTimeout(function()
 			{
 				self.commandRouter.shutdown();
-				/*
-				var exec = require('child_process').exec;
-
-				exec('/usr/bin/sudo /sbin/halt',
-					function (error, stdout, stderr) {
-						console.log('stdout: ' + stdout);
-						console.log('stderr: ' + stderr);
-						if (error !== null) {
-							console.log('exec error: ' + error);
-						}
-					});*/
 			},5000);
 		});
 
-		self.commandRouter.pushToastMessage('success',"Sleep mode", 'Successfully set');
+		self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off at '+sleephour+':'+sleepminute );
 	}
 
 	defer.resolve({});
