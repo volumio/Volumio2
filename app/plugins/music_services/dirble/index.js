@@ -151,7 +151,7 @@ ControllerDirble.prototype.listRadioCategories = function() {
 		for(var i in data)
 		{
 			var category={
-				type: 'folder',
+				type: 'radio-category',
 				title: data[i].title,
 				icon: 'fa fa-folder-open-o',
 				uri: 'radio/byGenre/'+data[i].id
@@ -207,7 +207,7 @@ ControllerDirble.prototype.listRadioForCategory = function(uri) {
 				{
 					var category={
 						service: 'dirble',
-						type: 'song',
+						type: 'webradio',
 						title: pageData[k].name,
 						artist: '',
 						album: '',
@@ -239,38 +239,38 @@ ControllerDirble.prototype.listFirstLevelRadioSections = function(callback) {
 			},
 			list: [{
 					service: 'dirble',
-					type: 'folder',
+					type: 'mywebradio',
 					title: 'My Web Radios',
 					artist: '',
 					album: '',
-					icon: 'fa fa-folder-open-o',
+					icon: 'fa fa-heartbeat',
 					uri:'radio/myWebRadio'
 				},
 				{
 					service: 'dirble',
-					type: 'folder',
-					title: 'Favourites',
+					type: 'radio-favourites',
+					title: 'Favourite Radios',
 					artist: '',
 					album: '',
-					icon: 'fa fa-folder-open-o',
+					icon: 'fa fa-heart',
 					uri: 'radio/favourites'
 				},
 				{
 					service: 'dirble',
-					type: 'folder',
+					type: 'radio-category',
 					title: 'By Genre',
 					artist: '',
 					album: '',
-					icon: 'fa fa-folder-open-o',
+					icon: 'fa fa-tags',
 					uri:'radio/byGenre'
 				},
 				{
 					service: 'dirble',
-					type: 'folder',
+					type: 'radio-category',
 					title: 'By Country',
 					artist: '',
 					album: '',
-					icon: 'fa fa-folder-open-o',
+					icon: 'fa fa-users',
 					uri:'radio/byCountry'
 				}
 
@@ -335,9 +335,9 @@ ControllerDirble.prototype.listRadioCountries = function() {
 		for(var i in data)
 		{
 			var category={
-				type: 'folder',
+				type: 'radio-category',
 				title: data[i].name,
-				icon: 'fa fa-folder-open-o',
+				icon: 'fa fa-users',
 				uri: 'radio/byCountry/'+data[i].country_code
 			};
 
@@ -403,11 +403,11 @@ ControllerDirble.prototype.listRadioForCountry = function(uri) {
 				{
 					var category={
 						service: 'dirble',
-						type: 'song',
+						type: 'radio-category',
 						title: pageData[k].name,
 						artist: '',
 						album: '',
-						icon: 'fa fa-music',
+						icon: 'fa fa-users',
 						uri:pageData[k].streams[0].stream
 					};
 
@@ -495,7 +495,7 @@ ControllerDirble.prototype.listMyWebRadio = function (uri) {
 			for(var i in data)
 			{
 				var ithdata=data[i];
-				var song={service: ithdata.service, type: 'song',  title: ithdata.name,  uri: ithdata.uri,icon: '/albumart'};
+				var song={service: ithdata.service, type: 'mywebradio',  title: ithdata.name,  uri: ithdata.uri,icon: '/albumart'};
 
 				response.navigation.list.push(song);
 			}
