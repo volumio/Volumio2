@@ -1,6 +1,8 @@
 var libQ = require('kew');
 var unirest=require('unirest');
 var S=require('string');
+var http=require('http');
+var url=require('url');
 //var internetradio = require('node-internet-radio');
 
 module.exports = ControllerDirble;
@@ -518,30 +520,83 @@ ControllerDirble.prototype.addMyWebRadio = function (data) {
 	var defer = libQ.defer();
 	var name=data.name;
 	var uri=S(data.uri);
-	var uriToSave;
 
-	if(uri.endsWith('.m3u') || uri.endsWith('.M3U'))
-	{
-		uriToSave=self.extractFromM3u(uri);
-	}
-	else if(uri.endsWith('.pls') || uri.endsWith('.PLS'))
-	{
-		uriToSave=self.extractFromPls(uri);
-	}
-	else uriToSave=uri.s;
+	var checkDefer = libQ.defer();
+	var parsed=url.parse(uri.s);
 
-	//check if uri is ok,
-	/*internetradio.getStationInfo(uriToSave, function(error, station) {
-		if(error)
-			defer.reject(new Error('Uri seems not to be a radio station'));
-		else
-		{
-			console.log("RADIO ADDED");
-			defer.resolve(station);
-		}
-	},internetradio.StreamSource.STREAM);*/
-	self.commandRouter.playListManager.addToMyWebRadio('dirble',name,uriToSave);
-	defer.resolve({});
+	var options = {
+		hostname: parsed.hostname,
+		port:parsed.port,
+		path:parsed.path,
+		method: 'GET'
+	};
+
+	var req = http.request(options, function(res) {
+
+		res.on('data', function (chunk) {
+			var splitted=chunk.toString('utf-8').split('\n');
+			var hasFound=false;
+			var isPls=false;
+			var isM3u=false;
+
+			for(var i in splitted)
+			{
+				var string=S(splitted[i]);
+
+				if(isPls==false && isM3u==false)
+				{
+					if(string.startsWith('[playlist]'))
+					{
+						isPls=true;
+					}
+					else if(string.startsWith('#EXTM3U'))
+					{
+						isM3u=true;
+					}
+				}
+				else {
+					if(string.startsWith('File1'))
+					{
+						checkDefer.resolve(string.trim().chompLeft('File1=').s);
+						hasFound=true;
+						break;
+					}
+					else if(string.startsWith('http://'))
+					{
+						checkDefer.resolve(string.s);
+						hasFound=true;
+						break;
+					}
+				}
+
+			}
+
+			if(hasFound==false)
+				checkDefer.reject(new Error('Valid information has not been found in pls file'));
+
+			req.abort();
+		});
+
+
+	});
+
+	req.on('error',function()
+	{
+		console.log("Cannot connect to url");
+		defer.reject(new Error('Cannot connect to url'));
+	});
+
+	req.end();
+
+	checkDefer.then(function(plsuri)
+	{
+		self.commandRouter.playListManager.addToMyWebRadio('dirble',name,plsuri);
+		defer.resolve({});
+	}).fail(function()
+	{
+		self.commandRouter.playListManager.addToMyWebRadio('dirble',name,uri.s);
+		defer.resolve({});
+	});
 
 	return defer.promise;
 }
@@ -554,24 +609,5 @@ ControllerDirble.prototype.removeMyWebRadio = function (data) {
 
 	self.commandRouter.playListManager.removeFromMyWebRadio(name);
 	defer.resolve({});
-
 	return defer.promise;
-}
-
-
-
-
-
-ControllerDirble.prototype.extractFromPls = function (data) {
-	var self = this;
-
-
-
-	return defer.promise;
-}
-
-ControllerDirble.prototype.extractFromM3u = function (uri) {
-	var self = this;
-
-
 }
