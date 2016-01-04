@@ -36,6 +36,16 @@ ControllerAlsa.prototype.onVolumioStart = function() {
 		client1.emit('volume', volume);
 	});
 
+
+	self.logger.debug("Creating shared var alsa.outputdevice");
+	self.commandRouter.sharedVars.addConfigValue('alsa.outputdevice','string',self.config.get('outputdevice'));
+	self.commandRouter.sharedVars.registerCallback('alsa.outputdevice',self.outputDeviceCallback.bind(self));
+}
+
+ControllerAlsa.prototype.outputDeviceCallback = function(value) {
+	var self=this;
+
+	self.logger.info('ALSA CONTROLLER OUTPUT DEVICE VALUE: '+value);
 }
 
 ControllerAlsa.prototype.getConfigParam = function(key) {

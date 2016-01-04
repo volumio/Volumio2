@@ -624,9 +624,6 @@ ControllerMpd.prototype.onVolumioStart = function() {
 
 		return self.reportUpdatedLibrary();
 	});
-
-
-
 }
 
 ControllerMpd.prototype.mpdConnect = function() {
@@ -1457,4 +1454,21 @@ ControllerMpd.prototype.rescanDb=function()
 	var self=this;
 
 	return self.sendMpdCommand('rescan', []);
+}
+
+ControllerMpd.prototype.saveAlsaOptions = function(data) {
+
+	var self = this;
+
+	var defer = libQ.defer();
+
+	self.commandRouter.sharedVars.set('alsa.outputdevice',data.output_device.value);
+	self.config.set('outputdevice',data.output_device.value);
+
+	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
+
+	defer.resolve({});
+
+	return defer.promise;
+
 }
