@@ -239,7 +239,7 @@ ControllerDirble.prototype.listFirstLevelRadioSections = function(callback) {
 			},
 			list: [{
 					service: 'dirble',
-					type: 'mywebradio',
+					type: 'mywebradio-category',
 					title: 'My Web Radios',
 					artist: '',
 					album: '',
