@@ -48,7 +48,7 @@ function CoreCommandRouter (server) {
 
 	self.playListManager= new (require('./playlistManager.js'))(self);
 
-
+	self.platformspecific=new (require(__dirname+'/platformSpecific.js'))(self);
 
 	self.pushConsoleMessage( 'BOOT COMPLETED');
 
@@ -442,11 +442,7 @@ CoreCommandRouter.prototype.pushAirplay = function(data)
 
 CoreCommandRouter.prototype.shutdown = function() {
 	var self = this;
-	exec("sudo /sbin/halt", function (error, stdout, stderr) {
-		if (error !== null) {
-			self.pushConsoleMessage( error);
-		} else self.pushConsoleMessage('Shutting Down');
-	});
+	self.platformspecific.shutdown();
 }
 
 CoreCommandRouter.prototype.reboot = function() {
