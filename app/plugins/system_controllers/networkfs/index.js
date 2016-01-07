@@ -4,10 +4,10 @@ var libFast = require('fast.js');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
-var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
 var libUUID=require('node-uuid');
+var S=require('string');
 
 
 
@@ -218,6 +218,18 @@ ControllerNetworkfs.prototype.saveShare = function(data)
 	var defer = libQ.defer();
 
 	var name=data['Flac.name'];
+	var nameStr=S(name);
+
+	/**
+	 * Check special characters
+	 */
+	if(nameStr.contains('/'))
+	{
+		self.commandRouter.pushToastMessage('warning',"Shares",'Share names cannot contain /');
+		defer.reject(new Error('Share names cannot contain /'));
+		return;
+	}
+
 	var ip=data['Flac.ip'];
 	var fstype=data['Flac.fstype'].value;
 	var username=data['Flac.username'];
@@ -314,6 +326,18 @@ ControllerNetworkfs.prototype.addShare = function(data) {
 	var defer = libQ.defer();
 
 	var name=data['name'];
+	var nameStr=S(name);
+
+	/**
+	 * Check special characters
+	 */
+	if(nameStr.contains('/'))
+	{
+		self.commandRouter.pushToastMessage('warning',"Shares",'Share names cannot contain /');
+		defer.reject(new Error('Share names cannot contain /'));
+		return ;
+	}
+
 	var ip=data['ip'];
 	var fstype=data['fstype'];
 	var username=data['username'];
