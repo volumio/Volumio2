@@ -291,7 +291,43 @@
         }
 
       ]
+    },
+    {
+      "id": "alsa_options",
+      "element": "section",
+      "label": "Alsa options",
+      "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveAlsaOptions"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "output_device"
+        ]
+      },
+      "value":  {
+        "value": "0",
+        "label": "Unknown"
+      },
+      "content": [
+        {
+          "id": "output_device",
+          "element": "select",
+          "doc": "Output device",
+          "label": "Output device",
+          "value":  {
+            "value":0,
+            "label": "0"
+          },
+          "options": [
+
+          ]
+
+        }
+
+      ]
     }
+
+
+
 
   ]
 }

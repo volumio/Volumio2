@@ -3,6 +3,7 @@ var libFast = require('fast.js');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
 var winston = require('winston');
+var vconf=require('v-conf');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -19,6 +20,7 @@ function CoreCommandRouter (server) {
 		]
 	});
 
+	self.sharedVars= new vconf();
 
 	self.logger.info("-------------------------------------------");
 	self.logger.info("-----            Volumio2              ----");
@@ -45,6 +47,8 @@ function CoreCommandRouter (server) {
 	//self.playlistFS = new (require('./playlistfs.js'))(self);
 
 	self.playListManager= new (require('./playlistManager.js'))(self);
+
+	self.platformspecific=new (require(__dirname+'/platformSpecific.js'))(self);
 
 	self.pushConsoleMessage( 'BOOT COMPLETED');
 
@@ -438,11 +442,7 @@ CoreCommandRouter.prototype.pushAirplay = function(data)
 
 CoreCommandRouter.prototype.shutdown = function() {
 	var self = this;
-	exec("sudo /sbin/halt", function (error, stdout, stderr) {
-		if (error !== null) {
-			self.pushConsoleMessage( error);
-		} else self.pushConsoleMessage('Shutting Down');
-	});
+	self.platformspecific.shutdown();
 }
 
 CoreCommandRouter.prototype.reboot = function() {
