@@ -65,8 +65,7 @@ ControllerSystem.prototype.getUIConfig = function()
 
 	uiconf.sections[0].content[0].value=config.get('playerName');
 	uiconf.sections[0].content[1].value=config.get('startupSound');
-	uiconf.sections[1].content[0].value.value=config.get('kernelSettingValue');
-	uiconf.sections[1].content[0].value.label=config.get('kernelSettingLabel');
+
 
 	return uiconf;
 }
@@ -215,7 +214,7 @@ ControllerSystem.prototype.setHostname = function(hostname) {
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
 				}
-				
+
 			fs.writeFile('/etc/hosts', '127.0.0.1       localhost ' + newhostname, function (err) {
 				if (err) {
 				console.log(err);
