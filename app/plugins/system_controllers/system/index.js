@@ -273,3 +273,28 @@ ControllerSystem.prototype.getSystemVersion = function() {
 
 	return defer.promise;
 }
+
+ControllerSystem.prototype.setTestSystem = function(data) {
+var self=this;
+
+	if (data == 'true'){
+		fs.writeFile('/data/test', ' ', function (err) {
+			if (err) {
+				self.logger.info('Cannot set as test device:' +err)
+			}
+			self.logger.info('Device is now in test mode')
+	});
+} else if (data == 'false') {
+		fs.exists('/data/test',function(exists){
+			exec('rm /data/test', function (error, stdout, stderr) {
+				if (error !== null) {
+					console.log(error);
+					self.logger.info('Cannot delete test file: '+error);
+				} else {
+					self.logger.info('Test File deleted');
+				}
+	});
+});
+
+}
+}

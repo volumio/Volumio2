@@ -25,6 +25,8 @@ document.getElementById('button-volumedown').onclick = function() {emitEvent('vo
 document.getElementById('button-volumemute').onclick = function() {emitEvent('volume', 'mute');}
 document.getElementById('button-volumeunmute').onclick = function() {emitEvent('volume', 'unmute');}
 document.getElementById('button-volumioimportplaylists').onclick = function() {emitEvent('importServicePlaylists', '');}
+document.getElementById('button-testtrue').onclick = function() {socket.emit('callMethod',  {endpoint:'system_controller/system',method:'setTestSystem',data:'true'})};
+document.getElementById('button-testfalse').onclick = function() {socket.emit('callMethod',  {endpoint:'system_controller/system',method:'setTestSystem',data:'false'})};
 
 // Socket.io form
 var input1 = document.getElementById('form-ws-1');
@@ -512,4 +514,3 @@ function emitEvent(sEvent, sParam1, sParam2) {
 	socket.emit(sEvent, sParam1, sParam2);
 	printConsoleMessage('[Event]: ' + sEvent + ' [Parameters]:' + JSON.stringify(sParam1) + ', ' + JSON.stringify(sParam2));
 }
-
