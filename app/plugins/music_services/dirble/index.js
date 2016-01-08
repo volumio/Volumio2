@@ -401,17 +401,18 @@ ControllerDirble.prototype.listRadioForCountry = function(uri) {
 
 				for(var k in pageData)
 				{
-					var category={
-						service: 'dirble',
-						type: 'radio-category',
-						title: pageData[k].name,
-						artist: '',
-						album: '',
-						icon: 'fa fa-users',
-						uri:pageData[k].streams[0].stream
-					};
-
+					if( pageData[k].streams.length > 0 ){
+						var category={
+							service: 'dirble',
+							type: 'radio-category',
+							title: pageData[k].name,
+							artist: '',
+							album: '',
+							icon: 'fa fa-users',
+							uri: pageData[k].streams[0].stream
+						};
 					response.navigation.list.push(category);
+					}	
 				}
 			}
 
