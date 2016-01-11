@@ -49,9 +49,8 @@
             "id":"factory",
               "element": "button",
               "label": "Factory Settings",
-              "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. Do you want to continue?"},
               "description": "Reset your System to factory Settings",
-              "onClick": {"type":"emit", "message":"factoryReset", "data":" "}
+              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"}}
           }
       ]
 
