@@ -170,7 +170,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	if( fstype=="cifs" ){
 		pointer = '//' + config.get('NasMounts.'+shareid+'.ip') + '/' + config.get('NasMounts.'+shareid+'.path');
 		//Password-protected mount
-		if ( config.get('NasMounts.'+shareid+'.user') !== 'undefined' )
+		if ( config.get('NasMounts.'+shareid+'.user') !== 'undefined' && config.get('NasMounts.'+shareid+'.user') !== '')
 		{
 			credentials='username='+config.get('NasMounts.'+shareid+'.user')+','+ 'password='+config.get('NasMounts.'+shareid+'.password') + ",";
 		}else {
