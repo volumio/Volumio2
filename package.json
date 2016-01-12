@@ -13,7 +13,7 @@
     "chokidar": "^1.4.2",
     "compression": "^1.6.0",
     "convert-seconds": "1.0.0",
-    "cookie-parser": "^1.4.0",
+    "cookie-parser": "^1.4.1",
     "ejs": "^2.3.4",
     "express": "^4.13.3",
     "fast.js": "^0.1.1",
