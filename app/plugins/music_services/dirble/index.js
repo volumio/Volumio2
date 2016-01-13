@@ -404,7 +404,7 @@ ControllerDirble.prototype.listRadioForCountry = function(uri) {
 					if( pageData[k].streams.length > 0 ){
 						var category={
 							service: 'dirble',
-							type: 'radio-category',
+							type: 'webradio',
 							title: pageData[k].name,
 							artist: '',
 							album: '',
@@ -412,7 +412,7 @@ ControllerDirble.prototype.listRadioForCountry = function(uri) {
 							uri: pageData[k].streams[0].stream
 						};
 					response.navigation.list.push(category);
-					}	
+					}
 				}
 			}
 
