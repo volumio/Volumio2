@@ -211,7 +211,7 @@ ControllerDirble.prototype.listRadioForCategory = function(uri) {
 						title: pageData[k].name,
 						artist: '',
 						album: '',
-						icon: 'fa fa-music',
+						icon: 'fa fa-microphone',
 						uri:pageData[k].streams[0].stream
 					};
 
@@ -408,7 +408,7 @@ ControllerDirble.prototype.listRadioForCountry = function(uri) {
 							title: pageData[k].name,
 							artist: '',
 							album: '',
-							icon: 'fa fa-users',
+							icon: 'fa fa-microphone',
 							uri: pageData[k].streams[0].stream
 						};
 					response.navigation.list.push(category);
