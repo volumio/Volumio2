@@ -107,8 +107,23 @@ AirPlayInterface.prototype.startShairportSync = function() {
 
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     var name = systemController.getConf('playerName');
+    var fs = require('fs')
+    fs.readFile("/etc/shairport-sync.conf.tmpl", 'utf8', function (err,data) {
+        if (err) {
+            return console.log(err);
+            }
+        var conf1 = data.replace("${name}", name);
+        var conf2 = conf1.replace("${device}", "hw:1,0");
 
-    exec("shairport-sync -a '"+ name +"' hw:1,0", function (error, stdout, stderr) {
+        fs.writeFile("/etc/shairport-sync.conf", conf2, 'utf8', function (err) {
+            if (err) return console.log(err);
+            startAirPlay(self);
+            });
+        });
+}
+
+function startAirPlay(self) {
+    exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
         if (error !== null) {
             self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-sync error: ' + error);
         }
