@@ -108,7 +108,7 @@ AirPlayInterface.prototype.startShairportSync = function() {
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     var name = systemController.getConf('playerName');
     var fs = require('fs')
-    fs.readFile("/etc/shairport-sync.conf.tmpl", 'utf8', function (err,data) {
+    fs.readFile(__dirname + "/shairport-sync.conf.tmpl", 'utf8', function (err,data) {
         if (err) {
             return console.log(err);
             }

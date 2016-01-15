@@ -9,6 +9,6 @@
   "author": "Volumio",
   "license": "ISC",
   "volumio_info":{
-    "plugin_type": "audio_interface"
+    "plugin_type": "music_service"
   }
 }
