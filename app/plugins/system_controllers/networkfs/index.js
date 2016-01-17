@@ -2,6 +2,7 @@ var libQ = require('kew');
 var libNet = require('net');
 var libFast = require('fast.js');
 var fs=require('fs-extra');
+
 var exec = require('child_process').exec;
 var Wireless = require('./lib/index.js');
 var config= new (require('v-conf'))();
@@ -332,7 +333,7 @@ ControllerNetworkfs.prototype.addShare = function(data) {
 	{
 		self.commandRouter.pushToastMessage('warning',"Shares",'Share names cannot contain /');
 		defer.reject(new Error('Share names cannot contain /'));
-		return ;
+		return defer.promise;
 	}
 
 	var ip=data['ip'];
@@ -481,50 +482,16 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 	if (shares.length > 0) {
 		var response=[];
 
+		var promises = [];
+		
 		for (var i in shares) {
-
-			var realsize = '';
-			var share = shares[i];
-			var key = 'NasMounts.' + share + '.';
-			var name = config.get(key + 'name');
-			var mountpoint = '/mnt/NAS/' + name;
-			var mounted = mountutil.isMounted(mountpoint, false);
-			var respshare = {};
-			var cmd="df -BM "+mountpoint+" | awk '{print $2}'";
-			exec(cmd,function(error,stdout,stderr){
-				if (error) {
-					realsize = 'Unknown';
-				}
-				else {
-					var splitted=stdout.split('\n');
-					var sizeStr=splitted[1];
-
-					var size=parseInt(sizeStr.substring(0,sizeStr.length-1));
-
-					var unity = 'MB';
-					if (size > 1024) {
-						size = size / 1024;
-						unity = 'GB';
-						if (size > 1024) {
-							size = size / 1024;
-							unity = 'TB';
-						}
-					}realsize = size.toFixed(2);
-				}
-
-			});
-			var respShare = {
-				path: config.get(key + 'path'),
-				ip: config.get(key + 'ip'),
-				id: share,
-				name: name,
-				fstype: config.get(key + 'fstype'),
-				mounted: mounted.mounted,
-				size: realsize + ' ' + unity
-			};
-			response.push(respShare);
+			promises.push(getMountSize(shares[i]));
 		}
-		defer.resolve(response);
+		libQ.all(promises).then( function (d){
+			defer.resolve(d);
+		}).fail(function (e) {
+    	console.log("Failed getting mounts size", e)
+  	});
 	}
 	else {
 		var response=[];
@@ -532,6 +499,51 @@ ControllerNetworkfs.prototype.listShares = function(data) {
 
 	}
 	return defer.promise;
+}
+
+function getMountSize(share){
+	return new Promise(function (resolve, reject) {
+			var realsize = '';
+			var key = 'NasMounts.' + share + '.';
+			var name = config.get(key + 'name');
+			var mountpoint = '/mnt/NAS/' + name;
+			var mounted = mountutil.isMounted(mountpoint, false);
+			var respShare = {
+				path: config.get(key + 'path'),
+				ip: config.get(key + 'ip'),
+				id: share,
+				name: name,
+				fstype: config.get(key + 'fstype'),
+				mounted: mounted.mounted,
+				size: realsize
+			};
+			var cmd="df -BM "+mountpoint+" | awk '{print $2}'";
+			var promise = libQ.ncall(exec,respShare,cmd).then(function (stdout){
+	
+				
+						var splitted=stdout.split('\n');
+						var sizeStr=splitted[1];
+	
+						var size=parseInt(sizeStr.substring(0,sizeStr.length-1));
+	
+						var unity = 'MB';
+						if (size > 1024) {
+							size = size / 1024;
+							unity = 'GB';
+							if (size > 1024) {
+								size = size / 1024;
+								unity = 'TB';
+							}
+						}
+						realsize = size.toFixed(2);
+						respShare.size = realsize + " " + unity ;
+						resolve(respShare);
+	
+				}).fail(function (e){
+					console.log("fail...." + e);
+					reject(respShare);
+				});
+	});
 }
 
 
