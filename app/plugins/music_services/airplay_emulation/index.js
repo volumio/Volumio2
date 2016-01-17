@@ -113,7 +113,7 @@ AirPlayInterface.prototype.startShairportSync = function() {
             return console.log(err);
             }
         var conf1 = data.replace("${name}", name);
-        var conf2 = conf1.replace("${device}", "hw:1,0");
+        var conf2 = conf1.replace("${device}", "hw:0,0");
 
         fs.writeFile("/etc/shairport-sync.conf", conf2, 'utf8', function (err) {
             if (err) return console.log(err);
