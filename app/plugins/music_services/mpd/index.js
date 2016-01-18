@@ -116,7 +116,6 @@ ControllerMpd.prototype.seek = function(timepos) {
 ControllerMpd.prototype.random = function(randomcmd) {
 	var self = this;
 	var string = randomcmd ? 1 : 0;
-	console.log(string);
 	if (string === 1) {
 		self.commandRouter.pushToastMessage('success',"Random", 'ON');
 	} else if (string === 0) {
@@ -393,7 +392,7 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 
 	var defer=libQ.defer();
 
-	console.log(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
+	//console.log(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
 	var resp={};
 
 	var file=s(objTrackInfo.file);
@@ -445,7 +444,7 @@ ControllerMpd.prototype.parseTrackInfo = function(objTrackInfo) {
 	if(promise!=undefined)
 	{
 		promise.then(function(value){
-			console.log("ALBUMART: "+value);
+			//console.log("ALBUMART: "+value);
 			resp.albumart=value;
 			defer.resolve(resp);
 		})
@@ -802,7 +801,7 @@ ControllerMpd.prototype.savePlaybackOptions = function(data)
 			self.restartMpd(function(error)
 			{
 				if (error !== null && error !=undefined) {
-					console.log(error);
+					self.logger.info('Cannot restart MPD: '+error);
 					self.commandRouter.pushToastMessage('error',"Player restart",'Error while restarting player');
 				}
 				else self.commandRouter.pushToastMessage('success',"Player restart",'Player successfully restarted');
@@ -934,7 +933,6 @@ ControllerMpd.prototype.createMPDFile = function(callback)
 	catch(err)
 	{
 
-		console.log("ERRORE QUAAA");
 		if(libFsExtra.existsSync('/etc/mpd.conf.old')) {
 			libFsExtra.copySync('/etc/mpd.conf.old', '/etc/mpd.conf');
 		}
@@ -1083,11 +1081,10 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var name=uri.split('/')[1];
 
-	console.log("GETTING CONTENT FOR PLAYLST "+name);
 	var promise=self.commandRouter.playListManager.getPlaylistContent(name);
 	promise.then(function(data)
 	{
-		console.log("CONTENT: "+JSON.stringify(data));
+		//console.log("CONTENT: "+JSON.stringify(data));
 		for(var i in data)
 		{
 			var ithdata=data[i];
@@ -1096,7 +1093,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 			response.navigation.list.push(song);
 		}
 
-		console.log(JSON.stringify(response));
+		//console.log(JSON.stringify(response));
 		defer.resolve(response);
 	});
 
@@ -1190,7 +1187,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 				}
 			}
-			else console.log(err);
+			else self.logger.info(err);
 
 			defer.resolve({
 				navigation: {
@@ -1246,7 +1243,7 @@ ControllerMpd.prototype.search = function (query) {
 
 				}
 			}
-			else console.log(err);
+			else self.logger.info(err);
 
 			defer.resolve({
 				navigation: {
@@ -1339,12 +1336,13 @@ ControllerMpd.prototype.updateQueue = function () {
 						self.commandRouter.addQueueItems(queue);
 					})
 					.fail(function (e) {
-						console.log("Failed retrieving a url", e)
+						self.logger.info("Failed retrieving a url", e);
+
 					})
 
 
 			}
-			else console.log(err);
+			else self.logger.info(err);
 
 			defer.resolve({
 				navigation: {
@@ -1371,14 +1369,6 @@ ControllerMpd.prototype.getAlbumArt=function(data,path)
 
 	ifconfig.status('wlan0', function(err, status) {
 		var address;
-
-		if (status != undefined) {
-			if (status.ipv4_address != undefined) {
-				address = status.ipv4_address;
-			}
-			else address = ip.address();
-		}
-		else address= ip.address();
 
 		var url;
 		var artist,album;
