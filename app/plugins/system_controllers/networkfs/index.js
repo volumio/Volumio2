@@ -517,28 +517,10 @@ function getMountSize(share){
 				mounted: mounted.mounted,
 				size: realsize
 			};
-			var cmd="df -BM "+mountpoint+" | awk '{print $2}'";
+			var cmd="du -hs "+mountpoint+" | cut -f 1";
 			var promise = libQ.ncall(exec,respShare,cmd).then(function (stdout){
-	
-				
-						var splitted=stdout.split('\n');
-						var sizeStr=splitted[1];
-	
-						var size=parseInt(sizeStr.substring(0,sizeStr.length-1));
-	
-						var unity = 'MB';
-						if (size > 1024) {
-							size = size / 1024;
-							unity = 'GB';
-							if (size > 1024) {
-								size = size / 1024;
-								unity = 'TB';
-							}
-						}
-						realsize = size.toFixed(2);
-						respShare.size = realsize + " " + unity ;
+						respShare.size = stdout ;
 						resolve(respShare);
-	
 				}).fail(function (e){
 					console.log("fail...." + e);
 					reject(respShare);
