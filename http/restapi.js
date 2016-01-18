@@ -46,10 +46,9 @@ api.get('/host', function(req, res) {
                     self.host = status.ipv4_address;
                 } else self.host = ip.address();
             } }); self.host = ip.address();
-        res.json({ host: self.host});
+        res.json({ host: 'http://'+self.host});
 });
 
 
 
 module.exports = api;
-
