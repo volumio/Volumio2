@@ -10,6 +10,7 @@ var ifconfig = require('wireless-tools/ifconfig');
 var ip = require('ip');
 var nodetools=require('nodetools');
 var convert = require('convert-seconds');
+var pidof = require('pidof');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -559,7 +560,24 @@ ControllerMpd.prototype.logStart = function(sCommand) {
 ControllerMpd.prototype.onVolumioStart = function() {
 	var self=this;
 
+	// Connect to MPD only if process MPD is running
+	pidof('mpd', function (err, pid) {
+    if (err) {
+      self.logger.info('Cannot initialize  MPD Connection: MPD is not running');
+    } else {
+        if (pid) {
+          self.logger.info('MPD running with PID' +pid+' ,establishing connection');
+					self.mpdEstablish();
 
+        } else {
+          self.logger.info('Cannot initialize  MPD Connection: MPD is not running');
+        }
+    }
+});
+}
+
+ControllerMpd.prototype.mpdEstablish = function() {
+	var self = this;
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 
 	self.config= new (require('v-conf'))();
@@ -574,7 +592,6 @@ ControllerMpd.prototype.onVolumioStart = function() {
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
-
 	// Connect to MPD
 	self.mpdConnect();
 
@@ -584,7 +601,10 @@ ControllerMpd.prototype.onVolumioStart = function() {
 	self.clientMpd.on('error', function(err) {
 		console.error('MPD error: ' + err);
 		if (err = "{ [Error: This socket has been ended by the other party] code: 'EPIPE' }") {
-			self.mpdConnect();
+			// Wait 5 seconds before trying to reconnect
+			setTimeout(function(){
+			self.mpdEstablish();
+			},5000);
 		}
 	});
 
