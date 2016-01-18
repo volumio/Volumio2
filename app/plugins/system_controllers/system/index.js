@@ -231,3 +231,12 @@ ControllerSystem.prototype.registerCallback = function(callback)
 
 	self.callbacks.push(callback);
 }
+
+ControllerSystem.prototype.sendBugReport = function(message) 
+{
+	for (var key in message) {
+        console.log("BUG: " + key + " - " + message[key]);
+        fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
+	}	
+	exec('sudo systemctl start logondemand');
+}
