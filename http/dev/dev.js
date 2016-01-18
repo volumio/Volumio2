@@ -13,18 +13,11 @@ document.getElementById('button-volumiopause').onclick = function() {emitEvent('
 document.getElementById('button-volumiostop').onclick = function() {emitEvent('stop', '');}
 document.getElementById('button-volumioprev').onclick = function() {emitEvent('previous', '');}
 document.getElementById('button-volumionext').onclick = function() {emitEvent('next', '');}
-document.getElementById('button-spopupdatetracklist').onclick = function() {emitEvent('serviceUpdateTracklist', 'spop');}
-document.getElementById('button-volumiorebuildlibrary').onclick = function() {emitEvent('rebuildLibrary', '');}
 document.getElementById('button-clearconsole').onclick = clearConsole;
-document.getElementById('button-libraryback').onclick = libraryBack;
-document.getElementById('button-libraryforward').onclick = libraryForward;
-document.getElementById('button-playlistback').onclick = playlistBack;
-document.getElementById('button-playlistforward').onclick = playlistForward;
 document.getElementById('button-volumeup').onclick = function() {emitEvent('volume', '+');}
 document.getElementById('button-volumedown').onclick = function() {emitEvent('volume', '-');}
 document.getElementById('button-volumemute').onclick = function() {emitEvent('volume', 'mute');}
 document.getElementById('button-volumeunmute').onclick = function() {emitEvent('volume', 'unmute');}
-document.getElementById('button-volumioimportplaylists').onclick = function() {emitEvent('importServicePlaylists', '');}
 document.getElementById('button-testtrue').onclick = function() {socket.emit('callMethod',  {endpoint:'system_controller/system',method:'setTestSystem',data:'true'})};
 document.getElementById('button-testfalse').onclick = function() {socket.emit('callMethod',  {endpoint:'system_controller/system',method:'setTestSystem',data:'false'})};
 
@@ -45,7 +38,7 @@ document.querySelector('form.pure-form').addEventListener('submit', function (e)
 socket.on('connect', function() {
 	printConsoleMessage('Websocket connected.');
 	enableControls();
-	updateLibraryHistoryButtons();
+	//updateLibraryHistoryButtons();
 
 	// Get the state upon load
 	emitEvent('getState', '');
@@ -54,9 +47,9 @@ socket.on('connect', function() {
 	emitEvent('getQueue', '');
 
 	// Request the music library root
-	emitEvent('getLibraryFilters', 'root');
+	//emitEvent('getLibraryFilters', 'root');
 
-	emitEvent('getPlaylistIndex', 'root');
+	//emitEvent('getPlaylistIndex', 'root');
 });
 
 socket.on('disconnect', function() {
