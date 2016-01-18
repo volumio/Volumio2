@@ -187,7 +187,8 @@ ControllerMpd.prototype.addPlay = function(data) {
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
 	self.commandRouter.pushToastMessage('Success','',str + ' Added');
 
-	console.log("PALY DATA "+JSON.stringify(data));
+	//console.log("PALY DATA "+JSON.stringify(data));
+
 	return self.sendMpdCommandArray([
 		{command: 'clear', parameters: []},
 		{command: 'add', parameters: [data]},
@@ -1148,6 +1149,19 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							type: 'folder',
 							title: name[count - 1],
 							icon: 'fa fa-folder-open-o',
+							uri: sections[0]+'/' + path
+						});
+					}
+					else if (line.startsWith('playlist:')) {
+						var path = line.chompLeft('playlist:').trimLeft().s;
+						var name = path.split('/');
+						var count = name.length;
+
+						list.push({
+							service: 'mpd',
+							type: 'song',
+							title: name[count - 1],
+							icon: 'fa fa-list-ol',
 							uri: sections[0]+'/' + path
 						});
 					}
