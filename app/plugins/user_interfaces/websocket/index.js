@@ -143,12 +143,36 @@ function InterfaceWebUI (context) {
 				}
 				else str = data.uri;
 
-				console.log("DATA: " + str);
+
 				//TODO add proper service handler
 				var timeStart = Date.now();
 				self.logStart('Client requests add and Play Volumio queue items')
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlay', str);
+					})
+					.fail(libFast.bind(self.pushError, self))
+					.done(function () {
+						return self.commandRouter.pushToastMessage('success', "Play", str);
+					});
+			});
+
+			connWebSocket.on('addPlayCue', function (data) {
+				selfConnWebSocket = this;
+
+				if (data.service == undefined || data.service == 'mpd') {
+					var uri = data.uri;
+					var arr = uri.split("/");
+					arr.shift();
+					str = arr.join('/');
+				}
+				else str = data.uri;
+
+
+				//TODO add proper service handler
+				var timeStart = Date.now();
+				self.logStart('Client requests add and Play Volumio CUE entry')
+					.then(function () {
+						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {'uri':str,'number':data.number});
 					})
 					.fail(libFast.bind(self.pushError, self))
 					.done(function () {

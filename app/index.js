@@ -388,6 +388,7 @@ CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 			return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
 		})
 	);
+
 }
 
 CoreCommandRouter.prototype.pushToastMessage = function(type, title, message) {

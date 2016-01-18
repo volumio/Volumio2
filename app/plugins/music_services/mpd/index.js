@@ -11,6 +11,8 @@ var ip = require('ip');
 var nodetools=require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
+var S=require('string');
+var parser = require('cue-parser');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -183,21 +185,45 @@ ControllerMpd.prototype.updateMpdDB = function() {
 
 ControllerMpd.prototype.addPlay = function(data) {
 	var self = this;
-	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
 	self.commandRouter.pushToastMessage('Success','',str + ' Added');
+	var fileName=S(data);
 
-	//console.log("PALY DATA "+JSON.stringify(data));
-
+	//Add playlists and cue with load command
+if (fileName.endsWith('.cue') || fileName.endsWith('.pls') || fileName.endsWith('.m3u')) {
+	self.logger.info('Adding Playlist: '+data)
+	return self.sendMpdCommandArray([
+		{command: 'clear', parameters: []},
+		{command: 'load', parameters: [data]},
+		{command: 'play', parameters: []}
+	])
+} else {
 	return self.sendMpdCommandArray([
 		{command: 'clear', parameters: []},
 		{command: 'add', parameters: [data]},
 		{command: 'play', parameters: []}
 	])
+}
 	/*.then(function() {
 		self.commandRouter.volumioPlay();
 
 	});*/
 };
+
+ControllerMpd.prototype.addPlayCue = function(data) {
+	var self = this;
+	self.commandRouter.pushToastMessage('Success','',str + ' Added');
+	var fileName=S(data.uri);
+
+	//Add playlists and cue with load command
+	self.logger.info('Adding CUE individual entry: '+data.number+' '+data.uri)
+	return self.sendMpdCommandArray([
+		{command: 'clear', parameters: []},
+		{command: 'load', parameters: [data.uri]},
+		{command: 'play', parameters: [data.number]}
+	])
+}
+
 
 
 // MPD music library
@@ -1150,10 +1176,35 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						});
 					}
 					else if (line.startsWith('playlist:')) {
+
 						var path = line.chompLeft('playlist:').trimLeft().s;
 						var name = path.split('/');
 						var count = name.length;
+						var playlistName=S(path);
+						if (playlistName.endsWith('.cue')){
+							var cuesheet = parser.parse('/mnt/'+path);
+							console.log(cuesheet.files[0].tracks);
+							list.push({
+								service: 'mpd',
+								type: 'song',
+								title: name[count - 1],
+								icon: 'fa fa-list-ol',
+								uri: sections[0]+'/' + path
+							});
+							for (var i in cuesheet.files[0].tracks){
 
+							list.push({
+								service: 'mpd',
+								type: 'cuesong',
+								title: cuesheet.files[0].tracks[i].title,
+								artist: cuesheet.files[0].tracks[i].performer,
+								album: path.substring(path.lastIndexOf("/")+1),
+								number: cuesheet.files[0].tracks[i].number-1,
+								icon: 'fa fa-music',
+								uri: sections[0]+'/' + path
+							});
+						}
+						} else {
 						list.push({
 							service: 'mpd',
 							type: 'song',
@@ -1161,6 +1212,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							icon: 'fa fa-list-ol',
 							uri: sections[0]+'/' + path
 						});
+					}
 					}
 					else if (line.startsWith('file:')) {
 						var path = line.chompLeft('file:').trimLeft().s;
