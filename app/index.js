@@ -53,7 +53,7 @@ function CoreCommandRouter (server) {
 	self.pushConsoleMessage( 'BOOT COMPLETED');
 
 	//Startup Sound
-	exec("/usr/bin/aplay /volumio/app/startup.wav", function (error, stdout, stderr) {
+	exec("/usr/bin/aplay --device=plughw:0,0 /volumio/app/startup.wav", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.pushConsoleMessage(error);
 		}
