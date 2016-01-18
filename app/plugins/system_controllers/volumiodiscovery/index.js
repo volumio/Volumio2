@@ -270,7 +270,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 			var address=addresses[j];
 			var device={
 				id:key,
-				host:'http://'+address+":"+port,
+				host:'http://'+address,
 				name:osname.capitalize(),
 				isSelf:isSelf,
 				state: {
