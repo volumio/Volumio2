@@ -426,6 +426,13 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 	);
 }
 
+CoreCommandRouter.prototype.pushMultiroom = function(data)
+{
+	var self=this;
+
+	//var promise=self.executeOnPlugin('user_interface', 'websocket', 'pushMultiroom', data);
+}
+
 
 CoreCommandRouter.prototype.pushAirplay = function(data)
 {

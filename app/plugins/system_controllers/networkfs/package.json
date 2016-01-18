@@ -10,6 +10,7 @@
   "license": "ISC",
   "volumio_info": {
     "plugin_type": "system_controller",
-    "boot_priority":2
+    "boot_priority":2,
+    "versionInt":2
   }
 }
