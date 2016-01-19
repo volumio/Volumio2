@@ -1182,8 +1182,9 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						var count = name.length;
 						var playlistName=S(path);
 						if (playlistName.endsWith('.cue')){
+							try {
 							var cuesheet = parser.parse('/mnt/'+path);
-							console.log(cuesheet.files[0].tracks);
+
 							list.push({
 								service: 'mpd',
 								type: 'song',
@@ -1204,6 +1205,9 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 								uri: sections[0]+'/' + path
 							});
 						}
+					} catch(err) {
+self.logger.info('Cue Parser - Cannot parse '+path);
+};
 						} else {
 						list.push({
 							service: 'mpd',
