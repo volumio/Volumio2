@@ -332,6 +332,16 @@ ControllerDirble.prototype.listRadioCountries = function() {
 	self.getCountries(dirbleDefer.makeNodeResolver());
 	dirbleDefer.promise.then(function(data)
 	{
+	  //we sort datas alphabetically by name of country
+	  data.sort(
+			function(a, b){
+				if ( a.name < b.name )
+					return -1;
+				if ( a.name > b.name )
+					return 1;
+				return 0;
+			}
+		);
 		for(var i in data)
 		{
 			var category={
@@ -394,10 +404,20 @@ ControllerDirble.prototype.listRadioForCountry = function(uri) {
 	libQ.all(paginationPromises)
 		.then(function(results){
 			console.log(results);
+			
 			for(var j in results)
 			{
 				var pageData=results[j];
-				//console.log(pageData);
+				//we sort datas alphabetically by name of station
+				pageData.sort(
+					function(a, b){
+						if ( a.name < b.name )
+							return -1;
+						if ( a.name > b.name )
+							return 1;
+						return 0;
+					}
+				);
 
 				for(var k in pageData)
 				{
