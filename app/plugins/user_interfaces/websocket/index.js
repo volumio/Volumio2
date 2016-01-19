@@ -824,6 +824,16 @@ function InterfaceWebUI (context) {
 
 			});
 
+			connWebSocket.on('receiveMultiroomDeviceUpdate', function (data) {
+				selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'receiveMultiroomDeviceUpdate', data);
+
+			});
+
+
+
+
 
 			connWebSocket.on('setAsMultiroomSingle', function (data) {
 				selfConnWebSocket = this;
@@ -1183,13 +1193,11 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket)
 	}
 }
 
-InterfaceWebUI.prototype.pushMultiroom = function(selfConnWebSocket) {
+InterfaceWebUI.prototype.pushMultiroom = function(data) {
 	var self = this;
 
-	var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
-	var response=volumiodiscovery.getDevices();
-
-	selfConnWebSocket.emit('pushMultiRoomDevices',response);
+	//console.log("ZZZZZZZZZ");
+	self.libSocketIO.emit('pushMultiRoom',{data:true});
 }
 
 
@@ -1269,3 +1277,6 @@ InterfaceWebUI.prototype.pushAirplay = function(value) {
 	self.logger.debug("Pushing airplay mode: s"+value);
 	self.libSocketIO.sockets.emit('pushAirplay', value);
 };
+
+
+

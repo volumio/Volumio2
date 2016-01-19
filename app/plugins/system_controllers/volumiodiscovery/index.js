@@ -153,6 +153,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.mute',"boolean",false);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.artist',"string",'');
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.track',"string",'');
+			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.albumart',"string",'');
 
 			self.connectToRemoteVolumio(service.txtRecord.UUID,service.addresses[0]);
 
@@ -222,6 +223,7 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 				foundVolumioInstances.set(uuid+'.mute',data.mute);
 				foundVolumioInstances.set(uuid+'.artist',data.artist);
 				foundVolumioInstances.set(uuid+'.track',data.title);
+				foundVolumioInstances.set(uuid+'.albumart',data.albumart);
 				var toAdvertise=self.getDevices();
 				self.commandRouter.pushMultiroomDevices(toAdvertise);
 			});
@@ -235,6 +237,19 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 String.prototype.capitalize = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1);
 }
+
+ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
+{
+	var self=this;
+	var volume=foundVolumioInstances.set(data.uuid+'.volume',data.volume);
+	var artist=foundVolumioInstances.set(data.uuid+'.artist',data.artist);
+	var track=foundVolumioInstances.set(data.uuid+'.track',data.track);
+	var track=foundVolumioInstances.set(data.uuid+'.albumart',data.albumart);
+
+	var toAdvertise=self.getDevices();
+	self.commandRouter.pushMultiroomDevices(toAdvertise);
+}
+
 
 ControllerVolumioDiscovery.prototype.getDevices=function()
 {
@@ -260,6 +275,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		var mute=foundVolumioInstances.get(key+'.mute');
 		var artist=foundVolumioInstances.get(key+'.artist');
 		var track=foundVolumioInstances.get(key+'.track');
+		var albumart=foundVolumioInstances.get(key+'.albumart');
 
 		var isSelf=key==myuuid;
 
@@ -278,7 +294,8 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					volume: volume,
 					mute: mute,
 					artist: artist,
-					track: track
+					track: track,
+					albumart:albumart
 				}
 			};
 
@@ -398,4 +415,16 @@ ControllerVolumioDiscovery.prototype.registerCallback = function(callback)
 	var self = this;
 
 	self.callbacks.push(callback);
+}
+
+
+/**
+ * Receives updates for an host about its only information
+ * @param info
+ */
+ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(info)
+{
+	var self = this;
+
+	console.log("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
 }
