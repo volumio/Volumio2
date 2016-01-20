@@ -241,6 +241,9 @@ String.prototype.capitalize = function() {
 ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 {
 	var self=this;
+
+
+	self.logger.info("PIPPO");
 	var volume=foundVolumioInstances.set(data.uuid+'.volume',data.volume);
 	var artist=foundVolumioInstances.set(data.uuid+'.artist',data.artist);
 	var track=foundVolumioInstances.set(data.uuid+'.track',data.track);
@@ -426,5 +429,7 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 {
 	var self = this;
 
-	console.log("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
+	self.logger.info("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
+
+
 }
