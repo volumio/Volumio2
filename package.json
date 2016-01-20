@@ -11,7 +11,7 @@
     "base64-url": "^1.2.1",
     "body-parser": "^1.14.2",
     "chokidar": "^1.4.2",
-    "compression": "^1.6.0",
+    "compression": "^1.6.1",
     "convert-seconds": "1.0.0",
     "cookie-parser": "^1.4.1",
     "cue-parser": "0.0.3",
