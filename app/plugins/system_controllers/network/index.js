@@ -298,7 +298,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function()
 		ws.end();
 
 		console.log("Restarting networking layer");
-		exec('sudo /bin/systemctl restart networking.service',
+		exec('sudo /bin/systemctl restart volumio-network.service',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
