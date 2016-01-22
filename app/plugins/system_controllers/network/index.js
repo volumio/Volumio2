@@ -252,7 +252,7 @@ ControllerNetwork.prototype.wirelessConnect = function(data) {
 		}
 
 
-		exec('sudo /etc/init.d/netplug restart',
+		exec('sudo /bin/systemctl restart volumio-network.service',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
