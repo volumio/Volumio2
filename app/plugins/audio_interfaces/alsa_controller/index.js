@@ -1,30 +1,22 @@
-var io 	= require('socket.io-client');
-var libQ = require('kew');
-var exec = require('child_process').exec;
+var io = require('socket.io-client');
 var fs = require('fs-extra');
-var S=require('string');
 
 // Define the ControllerMpd class
 module.exports = ControllerAlsa;
 function ControllerAlsa(context) {
-	// This fixed variable will let us refer to 'this' object at deeper scopes
-	var self = this;
-	self.context=context;
-	self.commandRouter = self.context.coreCommand;
-	self.logger=self.context.logger;
-
+	this.context = context;
+	this.commandRouter = this.context.coreCommand;
+	this.logger = this.context.logger;
 }
 
-ControllerAlsa.prototype.onVolumioStart = function() {
-	var self=this;
+ControllerAlsa.prototype.onVolumioStart = function () {
 
-	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
 
-	self.config= new (require('v-conf'))();
-	self.config.loadFile(configFile);
+	this.config = new (require('v-conf'))();
+	this.config.loadFile(configFile);
 
-
-	var volume=self.config.get('volumestart');
+	var volume = this.config.get('volumestart');
 
 	var socketURL = 'http://localhost:3000';
 	var options = {
@@ -34,72 +26,57 @@ ControllerAlsa.prototype.onVolumioStart = function() {
 
 	var client1 = io.connect(socketURL, options);
 
-	client1.on('connect', function(data){
-		self.logger.info("Setting volume on startup at "+volume);
+	var self = this;
+	client1.on('connect', function (data) {
+		self.logger.info("Setting volume on startup at " + volume);
 		client1.emit('volume', volume);
 	});
 
-	if(self.config.has('outputdevice')==false)
-		self.config.addConfigValue('outputdevice','string','0');
+	if (this.config.has('outputdevice') == false)
+		this.config.addConfigValue('outputdevice', 'string', '0');
 
-	self.logger.debug("Creating shared var alsa.outputdevice");
-	self.commandRouter.sharedVars.addConfigValue('alsa.outputdevice','string',self.config.get('outputdevice'));
-	self.commandRouter.sharedVars.registerCallback('alsa.outputdevice',self.outputDeviceCallback.bind(self));
-}
+	this.logger.debug("Creating shared var alsa.outputdevice");
+	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
+	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+};
 
-ControllerAlsa.prototype.outputDeviceCallback = function(value) {
-	var self=this;
+ControllerAlsa.prototype.outputDeviceCallback = function (value) {
+	this.config.set('outputdevice', value);
+};
 
-	self.config.set('outputdevice',value);
-}
+ControllerAlsa.prototype.getConfigParam = function (key) {
+	return this.config.get(key);
+};
 
-ControllerAlsa.prototype.getConfigParam = function(key) {
-	var self=this;
-
-	return self.config.get(key);
-}
-
-ControllerAlsa.prototype.setConfigParam = function(data) {
-	var self=this;
-
-	self.config.set(data.key,data.value);
-}
+ControllerAlsa.prototype.setConfigParam = function (data) {
+	this.config.set(data.key, data.value);
+};
 
 
-ControllerAlsa.prototype.getConfigurationFiles = function()
-{
-	var self = this;
-
+ControllerAlsa.prototype.getConfigurationFiles = function () {
 	return ['config.json'];
-}
+};
 
-ControllerAlsa.prototype.getAlsaCards = function()
-{
-	var self = this;
-	var cards=[];
-	var index=0;
+ControllerAlsa.prototype.getAlsaCards = function () {
+	var cards = [];
 
-	while(fs.existsSync('/proc/asound/card'+index+'/pcm0p/info'))
-	{
-		var content=fs.readFileSync('/proc/asound/card'+index+'/pcm0p/info');
+	var soundCardDir = '/proc/asound/';
+	var idFile = '/id';
+	var regex = /card(\d+)/;
 
-		var splitted=content.toString().split('\n');
-		for(var i in splitted)
-		{
-			var line=S(splitted[i]);
-			if(line.startsWith('id:'))
-			{
-				cards.push({id:index, name:line.chompLeft('id:').trim().s});
-				break;
-			}
+	var soundFiles = fs.readdirSync(soundCardDir);
 
+	for (var i = 0; i < soundFiles.length; i++) {
+		var fileName = soundFiles[i];
+		var matches = regex.exec(fileName);
+		var idFileName = soundCardDir + fileName + idFile;
+		if (matches && fs.existsSync(idFileName)) {
+			var id = matches[1];
+			var content = fs.readFileSync(idFileName);
+			var name = content.toString().trim();
+			cards.push({id: id, name: name});
 		}
-
-		index++;
-
 	}
 
 	return cards;
-
-
-}
+};
