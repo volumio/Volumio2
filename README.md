@@ -3,7 +3,12 @@
 [![bitHound Dependencies](https://www.bithound.io/github/volumio/Volumio2/badges/dependencies.svg)](https://www.bithound.io/github/volumio/Volumio2/master/dependencies/npm)
 [![bitHound Score](https://www.bithound.io/github/volumio/Volumio2/badges/score.svg)](https://www.bithound.io/github/volumio/Volumio2)
 
+
 # Volumio 2
+Login
+* user : *volumio*
+
+* Password : *volumio*
 
 ## Volumio 2 System Images
 
