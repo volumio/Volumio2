@@ -1193,11 +1193,12 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket)
 	}
 }
 
-InterfaceWebUI.prototype.pushMultiroom = function(data) {
+InterfaceWebUI.prototype.pushMultiroom = function(multiroomData) {
 	var self = this;
 
-	//console.log("ZZZZZZZZZ");
-	self.libSocketIO.emit('pushMultiRoom',{data:true});
+	self.logger.info("TRYING PUSHING MULTIROOM");
+	//self.logger.info(multiroomData);
+	//self.libSocketIO.emit('pushMultiRoom',multiroomData);
 }
 
 

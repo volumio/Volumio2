@@ -431,7 +431,13 @@ CoreCommandRouter.prototype.pushMultiroom = function(data)
 {
 	var self=this;
 
-	//var promise=self.executeOnPlugin('user_interface', 'websocket', 'pushMultiroom', data);
+	return libQ.all(
+		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
+			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+			if (typeof thisInterface.pushMultiroom === "function" )
+				return thisInterface.pushMultiroom.call(thisInterface, data);
+		})
+	);
 }
 
 
