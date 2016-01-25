@@ -5,13 +5,12 @@ var libUtil = require('util');
 var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
-var s = require('string');
 var ifconfig = require('wireless-tools/ifconfig');
 var ip = require('ip');
 var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
-var S = require('string');
+var s = require('string');
 var parser = require('cue-parser');
 
 // Define the ControllerMpd class
@@ -185,11 +184,11 @@ ControllerMpd.prototype.addPlay = function (data) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
 	self.commandRouter.pushToastMessage('Success', '', str + ' Added');
-	var fileName = S(data);
+	var fileName = data;
 
 	//Add playlists and cue with load command
 	if (fileName.endsWith('.cue') || fileName.endsWith('.pls') || fileName.endsWith('.m3u')) {
-		self.logger.info('Adding Playlist: ' + data)
+		self.logger.info('Adding Playlist: ' + data);
 		return self.sendMpdCommandArray([
 			{command: 'clear', parameters: []},
 			{command: 'load', parameters: [data]},
@@ -211,7 +210,6 @@ ControllerMpd.prototype.addPlay = function (data) {
 ControllerMpd.prototype.addPlayCue = function (data) {
 	var self = this;
 	self.commandRouter.pushToastMessage('Success', '', str + ' Added');
-	var fileName = S(data.uri);
 
 	//Add playlists and cue with load command
 	self.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri)
@@ -418,14 +416,14 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	//console.log(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
 	var resp = {};
 
-	var file = s(objTrackInfo.file);
+	var file = objTrackInfo.file;
 
-	resp.isStreaming = file.startsWith('http://');
+	resp.isStreaming = file.indexOf('http://') === 0;
 
 	if (objTrackInfo.Title != undefined) {
 		resp.title = objTrackInfo.Title;
 	} else {
-		resp.title = objTrackInfo.null;
+		resp.title = null;
 	}
 
 	if (objTrackInfo.Artist != undefined) {
@@ -446,7 +444,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	var coverFolder = '/mnt';
 
-	var splitted = objTrackInfo.file.split('/');
+	var splitted = file.split('/');
 
 	for (var k = 0; k < splitted.length - 1; k++) {
 		coverFolder = coverFolder + '/' + splitted[k];
@@ -1070,7 +1068,6 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 ControllerMpd.prototype.browsePlaylist = function (uri) {
 	var self = this;
 
-
 	var defer = libQ.defer();
 
 	var response = {
@@ -1126,12 +1123,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 		for (var i = 0; i < sections.length - 1; i++)
 			prev += sections[i] + '/';
 
-		prev = s(prev).chompRight('/');
+		prev = s(prev).chompRight('/').s;
 
 		for (var j = 1; j < sections.length; j++)
 			folderToList += sections[j] + '/';
 
-		folderToList = s(folderToList).chompRight('/');
+		folderToList = s(folderToList).chompRight('/').s;
 
 		command += ' "' + folderToList + '"';
 
@@ -1142,11 +1139,11 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			if (msg) {
-				var lines = s(msg).lines();
+				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
-					var line = s(lines[i]);
-					if (line.startsWith('directory:')) {
-						var path = line.chompLeft('directory:').trimLeft().s;
+					var line = lines[i];
+					if (line.indexOf('directory:') === 0) {
+						var path = line.slice(10).trimLeft();
 						var name = path.split('/');
 						var count = name.length;
 
@@ -1157,12 +1154,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							uri: sections[0] + '/' + path
 						});
 					}
-					else if (line.startsWith('playlist:')) {
+					else if (line.indexOf('playlist:') === 0) {
 
-						var path = line.chompLeft('playlist:').trimLeft().s;
+						var path = line.slice(9).trimLeft();
 						var name = path.split('/');
 						var count = name.length;
-						var playlistName = S(path);
+						var playlistName = path;
 						if (playlistName.endsWith('.cue')) {
 							try {
 								var cuesheet = parser.parse('/mnt/' + path);
@@ -1174,15 +1171,16 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 									icon: 'fa fa-list-ol',
 									uri: sections[0] + '/' + path
 								});
-								for (var i in cuesheet.files[0].tracks) {
+								var tracks = cuesheet.files[0].tracks;
+								for (var j in tracks) {
 
 									list.push({
 										service: 'mpd',
 										type: 'cuesong',
-										title: cuesheet.files[0].tracks[i].title,
-										artist: cuesheet.files[0].tracks[i].performer,
+										title: tracks[j].title,
+										artist: tracks[j].performer,
 										album: path.substring(path.lastIndexOf("/") + 1),
-										number: cuesheet.files[0].tracks[i].number - 1,
+										number: tracks[j].number - 1,
 										icon: 'fa fa-music',
 										uri: sections[0] + '/' + path
 									});
@@ -1200,8 +1198,8 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							});
 						}
 					}
-					else if (line.startsWith('file:')) {
-						var path = line.chompLeft('file:').trimLeft().s;
+					else if (line.indexOf('file:') === 0) {
+						var path = line.slice(5).trimLeft();
 						var name = path.split('/');
 						var count = name.length;
 
@@ -1230,7 +1228,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 			defer.resolve({
 				navigation: {
 					prev: {
-						uri: prev.s
+						uri: prev
 					},
 					list: list
 				}
@@ -1252,12 +1250,12 @@ ControllerMpd.prototype.search = function (query) {
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			if (msg) {
-				var lines = s(msg).lines();
+				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
-					var line = s(lines[i]);
+					var line = lines[i];
 
 					if (line.startsWith('file:')) {
-						var path = line.chompLeft('file:').trimLeft().s;
+						var path = line.slice(5).trimLeft();
 						var name = path.split('/');
 						var count = name.length;
 
@@ -1297,19 +1295,18 @@ ControllerMpd.prototype.search = function (query) {
 };
 
 ControllerMpd.prototype.searchFor = function (lines, startFrom, beginning) {
-	var self = this;
 
 	var count = lines.length;
-	var i = 0;
+	var i = startFrom;
 
-	while (startFrom + i < count) {
-		var line = s(lines[startFrom + i]);
+	while (i < count) {
+		var line = lines[i];
 
-		if (line.startsWith(beginning))
-			return line.chompLeft(beginning).trimLeft().s;
-		else if (line.startsWith('file:'))
+		if (line.indexOf(beginning) === 0)
+			return line.slice(beginning.length).trimLeft();
+		else if (line.indexOf('file:') === 0)
 			return '';
-		else if (line.startsWith('directory:'))
+		else if (line.indexOf('directory:') === 0)
 			return '';
 
 		i++;
@@ -1330,7 +1327,7 @@ ControllerMpd.prototype.updateQueue = function () {
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			if (msg) {
-				var lines = s(msg).lines();
+				var lines = msg.split('\n');
 
 				self.commandRouter.volumioClearQueue();
 
@@ -1338,9 +1335,9 @@ ControllerMpd.prototype.updateQueue = function () {
 
 				var queue = [];
 				for (var i = 0; i < lines.length; i++) {
-					var line = s(lines[i]);
-					if (line.startsWith('file:')) {
-						var path = line.chompLeft('file:').trimLeft().s;
+					var line = lines[i];
+					if (line.indexOf('file:') === 0) {
+						var path = line.slice(5).trimLeft();
 						var name = path.split('/');
 						var count = name.length;
 
@@ -1390,7 +1387,7 @@ ControllerMpd.prototype.updateQueue = function () {
 			defer.resolve({
 				navigation: {
 					prev: {
-						uri: prev.s
+						uri: prev
 					},
 					list: list
 				}
