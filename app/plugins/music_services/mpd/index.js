@@ -1132,31 +1132,34 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 	var cmd = libMpd.cmd;
 
+
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			if (msg) {
+				var s0=sections[0]+'/';
+				var path;
+				var name;
+				var count;
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 					if (line.indexOf('directory:') === 0) {
-						var path = line.slice(10).trimLeft();
-						var name = path.split('/');
-						var count = name.length;
+						path = line.slice(11);
+						name = path.split('/');
+						count = name.length;
 
 						list.push({
 							type: 'folder',
 							title: name[count - 1],
 							icon: 'fa fa-folder-open-o',
-							uri: sections[0] + '/' + path
+							uri: s0 + path
 						});
 					}
 					else if (line.indexOf('playlist:') === 0) {
-
-						var path = line.slice(9).trimLeft();
-						var name = path.split('/');
-						var count = name.length;
-						var playlistName = path;
-						if (playlistName.endsWith('.cue')) {
+						path = line.slice(10);
+						name = path.split('/');
+						count = name.length;
+						if (path.endsWith('.cue')) {
 							try {
 								var cuesheet = parser.parse('/mnt/' + path);
 
@@ -1165,7 +1168,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 									type: 'song',
 									title: name[count - 1],
 									icon: 'fa fa-list-ol',
-									uri: sections[0] + '/' + path
+									uri: s0 + path
 								});
 								var tracks = cuesheet.files[0].tracks;
 								for (var j in tracks) {
@@ -1178,7 +1181,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 										album: path.substring(path.lastIndexOf("/") + 1),
 										number: tracks[j].number - 1,
 										icon: 'fa fa-music',
-										uri: sections[0] + '/' + path
+										uri: s0 + path
 									});
 								}
 							} catch (err) {
@@ -1190,14 +1193,14 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 								type: 'song',
 								title: name[count - 1],
 								icon: 'fa fa-list-ol',
-								uri: sections[0] + '/' + path
+								uri: s0 + path
 							});
 						}
 					}
 					else if (line.indexOf('file:') === 0) {
-						var path = line.slice(5).trimLeft();
-						var name = path.split('/');
-						var count = name.length;
+						path = line.slice(6);
+						name = path.split('/');
+						count = name.length;
 
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
@@ -1213,7 +1216,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							artist: artist,
 							album: album,
 							icon: 'fa fa-music',
-							uri: sections[0] + '/' + path
+							uri: s0 + path
 						});
 					}
 
