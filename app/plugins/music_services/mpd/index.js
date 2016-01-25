@@ -1,7 +1,6 @@
 var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
-var libUtil = require('util');
 var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
@@ -10,7 +9,6 @@ var ip = require('ip');
 var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
-var s = require('string');
 var parser = require('cue-parser');
 
 // Define the ControllerMpd class
@@ -828,7 +826,10 @@ ControllerMpd.prototype.saveVolumeOptions = function (data) {
 
 	self.setAdditionalConf('audio_interface', 'alsa_controller', {key: 'volumestart', value: data.volumestart.value});
 	self.setAdditionalConf('audio_interface', 'alsa_controller', {key: 'volumemax', value: data.volumemax.value});
-	self.setAdditionalConf('audio_interface', 'alsa_controller', {key: 'volumecurvemode', value:data.volumecurvemode.value});
+	self.setAdditionalConf('audio_interface', 'alsa_controller', {
+		key: 'volumecurvemode',
+		value: data.volumecurvemode.value
+	});
 
 	self.logger.info('Volume configurations have been set');
 
@@ -1120,15 +1121,10 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	var list = [];
 
 	if (sections.length > 1) {
-		for (var i = 0; i < sections.length - 1; i++)
-			prev += sections[i] + '/';
 
-		prev = s(prev).chompRight('/').s;
+		prev = sections.slice(0, sections.length - 1).join('/');
 
-		for (var j = 1; j < sections.length; j++)
-			folderToList += sections[j] + '/';
-
-		folderToList = s(folderToList).chompRight('/').s;
+		folderToList = sections.slice(1).join('/');
 
 		command += ' "' + folderToList + '"';
 
