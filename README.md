@@ -13,7 +13,7 @@ Login
 ## Volumio 2 System Images
 
 LATEST
-* [Alpha5 (2016-17-01)](http://updates.volumio.org/pi/volumio/0.814/Volumio0.814-2016-01-17PI.img.zip)
+* [Alpha6 (2016-25-01)](http://updates.volumio.org/pi/volumio/0.824/Volumio0.824-2016-01-25PI.img.zip)
 
 PREVIOUS VERSIONS
 * [Alpha4 (2016-15-01)](http://updates.volumio.org/pi/volumio/0.809/Volumio0.809-2016-01-15PI.img.zip)
