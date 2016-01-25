@@ -1,3 +1,5 @@
+'use strict';
+
 var io = require('socket.io-client');
 var fs = require('fs-extra');
 
