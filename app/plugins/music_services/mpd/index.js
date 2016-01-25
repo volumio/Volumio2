@@ -518,7 +518,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 	var nChannels = null;
 	if ('audio' in objState) {
 		var objMetrics = objState.audio.split(':');
-		nSampleRate = Number(objMetrics[0]);
+		nSampleRate = Number(objMetrics[0])/1000;
 		nBitDepth = Number(objMetrics[1]);
 		nChannels = Number(objMetrics[2]);
 	}
