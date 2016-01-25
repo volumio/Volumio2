@@ -14,7 +14,7 @@ var commandArray = [
     "sudo journalctl -p 7"
     ];
 
-var logFile = "/tmp/log";
+var logFile = "/tmp/logondemand";
 
 // Let's start fresh!
 exec.execSync("date >" + logFile);
