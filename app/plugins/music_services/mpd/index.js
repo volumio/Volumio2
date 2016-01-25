@@ -1116,11 +1116,9 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	var defer = libQ.defer();
 
 	var sections = uri.split('/');
-	var folder = sections[1];
 	var prev = '';
 	var folderToList = '';
 	var command = 'lsinfo';
-	var list = [];
 
 	if (sections.length > 1) {
 
@@ -1136,6 +1134,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+			var list = [];
 			if (msg) {
 				var s0=sections[0]+'/';
 				var path;
@@ -1188,7 +1187,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							list.push({
 								service: 'mpd',
 								type: 'song',
-								title: name[count - 1],
+								title: name,
 								icon: 'fa fa-list-ol',
 								uri: s0 + path
 							});
