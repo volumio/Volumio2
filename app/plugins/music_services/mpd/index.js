@@ -1,3 +1,5 @@
+'use strict';
+
 var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
@@ -1132,33 +1134,28 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 	var cmd = libMpd.cmd;
 
-
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			if (msg) {
 				var s0=sections[0]+'/';
 				var path;
 				var name;
-				var count;
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 					if (line.indexOf('directory:') === 0) {
 						path = line.slice(11);
-						name = path.split('/');
-						count = name.length;
-
+						name = path.split('/').pop();
 						list.push({
 							type: 'folder',
-							title: name[count - 1],
+							title: name,
 							icon: 'fa fa-folder-open-o',
 							uri: s0 + path
 						});
 					}
 					else if (line.indexOf('playlist:') === 0) {
 						path = line.slice(10);
-						name = path.split('/');
-						count = name.length;
+						name = path.split('/').pop();
 						if (path.endsWith('.cue')) {
 							try {
 								var cuesheet = parser.parse('/mnt/' + path);
@@ -1166,7 +1163,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 								list.push({
 									service: 'mpd',
 									type: 'song',
-									title: name[count - 1],
+									title: name,
 									icon: 'fa fa-list-ol',
 									uri: s0 + path
 								});
@@ -1199,15 +1196,14 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					}
 					else if (line.indexOf('file:') === 0) {
 						path = line.slice(6);
-						name = path.split('/');
-						count = name.length;
+						name = path.split('/').pop();
 
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
 						var title = self.searchFor(lines, i + 1, 'Title:');
 
 						if (title == undefined) {
-							title = name[count - 1];
+							title = name;
 						}
 						list.push({
 							service: 'mpd',
