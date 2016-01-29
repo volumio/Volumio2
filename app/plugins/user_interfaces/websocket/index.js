@@ -496,7 +496,7 @@ function InterfaceWebUI (context) {
 				console.log("CURURI: " + curUri);
 
 				if (curUri.startsWith('favourites')) {
-					response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'listFavourites', curUri);
+					response = self.commandRouter.playListManager.listFavourites(curUri);
 				}
 				else if (curUri.startsWith('playlists')) {
 					if (curUri == 'playlists')
@@ -1277,6 +1277,13 @@ InterfaceWebUI.prototype.pushAirplay = function(value) {
 
 	self.logger.debug("Pushing airplay mode: s"+value);
 	self.libSocketIO.sockets.emit('pushAirplay', value);
+};
+
+InterfaceWebUI.prototype.emitFavourites = function(value) {
+    var self = this;
+
+    self.logger.info("Pushing Favourites "+JSON.stringify(value));
+    self.libSocketIO.broadcast.emit('urifavourites', value);
 };
 
 
