@@ -996,47 +996,7 @@ ControllerMpd.prototype.waitupdate = function () {
 };
 
 
-ControllerMpd.prototype.listFavourites = function (uri) {
-	var self = this;
 
-
-	var defer = libQ.defer();
-
-	var promise = self.commandRouter.playListManager.getFavouritesContent();
-	promise.then(function (data) {
-			var response = {
-				navigation: {
-					prev: {
-						uri: '/'
-					},
-					list: []
-				}
-			};
-
-			for (var i in data) {
-				var ithdata = data[i];
-				var song = {
-					service: ithdata.service,
-					type: 'song',
-					title: ithdata.title,
-					artist: ithdata.artist,
-					album: ithdata.album,
-					icon: ithdata.albumart,
-					uri: ithdata.uri
-				};
-
-				response.navigation.list.push(song);
-			}
-
-			defer.resolve(response);
-
-		})
-		.fail(function () {
-			defer.reject(new Error("Cannot list Favourites"));
-		});
-
-	return defer.promise;
-};
 
 ControllerMpd.prototype.listPlaylists = function (uri) {
 	var self = this;

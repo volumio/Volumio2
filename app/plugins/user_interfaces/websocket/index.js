@@ -496,7 +496,7 @@ function InterfaceWebUI (context) {
 				console.log("CURURI: " + curUri);
 
 				if (curUri.startsWith('favourites')) {
-					response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'listFavourites', curUri);
+					response = self.commandRouter.playListManager.listFavourites(curUri);
 				}
 				else if (curUri.startsWith('playlists')) {
 					if (curUri == 'playlists')
