@@ -1,7 +1,5 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
-var s = require('string');
-
 
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
