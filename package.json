@@ -37,7 +37,7 @@
     "node-schedule": "0.6.0",
     "node-uuid": "^1.4.7",
     "nodetools": "1.0.0",
-    "onoff": "^1.0.3",
+    "onoff": "^1.0.4",
     "pidof": "^1.0.2",
     "playmusic": "^2.1.1",
     "random-string": "^0.1.2",
