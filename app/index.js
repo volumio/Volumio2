@@ -467,3 +467,12 @@ CoreCommandRouter.prototype.reboot = function() {
 		} else self.pushConsoleMessage('Rebooting');
 	});
 }
+
+CoreCommandRouter.prototype.emitFavourites = function(msg) {
+    var self = this;
+
+    var plugin=self.pluginManager.getPlugin('user_interface','websocket');
+    plugin.emitFavourites(msg);
+}
+
+
