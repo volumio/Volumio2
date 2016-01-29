@@ -1,11 +1,11 @@
 {
   "volumestart":{
-    "type": "number",
-    "value": 50
+    "type": "string",
+    "value": "disabled"
   },
   "volumemax":{
-    "type": "number",
-    "value": 100
+    "type": "string",
+    "value": "100"
   },
   "volumecurvemode":{
     "type": "string",

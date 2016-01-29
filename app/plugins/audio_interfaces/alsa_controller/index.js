@@ -18,7 +18,10 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
 
-	var volume = this.config.get('volumestart');
+	var volumeval = this.config.get('volumestart');
+
+	if (volumeval != "disabled"){
+	var volume = Number(volumeval);
 
 	var socketURL = 'http://localhost:3000';
 	var options = {
@@ -33,6 +36,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 		self.logger.info("Setting volume on startup at " + volume);
 		client1.emit('volume', volume);
 	});
+	}
 
 	if (this.config.has('outputdevice') == false)
 		this.config.addConfigValue('outputdevice', 'string', '0');
