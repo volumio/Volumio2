@@ -31,6 +31,7 @@ CoreStateMachine.prototype.getState = function() {
 		artist: self.currentArtist,
 		album: self.currentAlbum,
 		albumart: self.currentAlbumArt,
+        uri: self.currentUri,
 		seek: self.currentSeek,
 		duration: self.currentDuration,
 		samplerate: self.currentSampleRate,
@@ -283,6 +284,7 @@ CoreStateMachine.prototype.resetVolumioState = function() {
 		self.currentTitle = null;
 		self.currentArtist = null;
 		self.currentAlbum = null;
+        self.currentUri = null;
 		self.currentAlbumArt = '/albumart?web=default';
 		self.currentSampleRate = null;
 		self.currentBitDepth = null;
@@ -345,7 +347,19 @@ CoreStateMachine.prototype.pushState = function(state) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushState');
 
-	return self.commandRouter.volumioPushState(state);
+    var promise=libQ.defer();
+
+    self.commandRouter.volumioPushState(state)
+        .then(function(data)
+        {
+            self.checkFavourites(state)
+                .then(function(a)
+                {
+                    promise.resolve({});
+                })
+        });
+
+	return promise.promise;
 };
 
 // Pass the error if we don't want to handle it
@@ -365,8 +379,7 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	self.currentStatus = stateService.status;
 	self.currentPosition = stateService.position;
 
-
-	if(stateService.isStreaming!=undefined)
+    if(stateService.isStreaming!=undefined)
 	{
 		self.isStreaming=stateService.isStreaming;
 	}
@@ -392,6 +405,7 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentArtist = stateService.artist;
 			self.currentAlbum = stateService.album;
 			self.currentAlbumArt = stateService.albumart;
+            self.currentUri= stateService.uri;
 			self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;
@@ -401,6 +415,8 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.getState()
 			.then(libFast.bind(self.pushState, self))
 			.fail(libFast.bind(self.pushError, self));
+
+
 
 			return self.startPlaybackTimer(self.currentSeek);
 		}
@@ -412,7 +428,8 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentArtist = stateService.artist;
 			self.currentAlbum = stateService.album;
 			self.currentAlbumArt = stateService.albumart;
-			self.currentSampleRate = stateService.samplerate;
+            self.currentUri= stateService.uri;
+            self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;
 			self.currentRandom = stateService.random;
@@ -486,5 +503,49 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 
 	return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
 */
+};
+
+CoreStateMachine.prototype.checkFavourites = function(state) {
+    var self=this;
+
+    var defer=libQ.defer();
+    var response={service:state.service,
+        uri:state.uri,
+        favourite:false};
+
+    if(state.uri!=undefined && state.uri!=null)
+    {
+        var promise=self.commandRouter.playListManager.listFavourites();
+        promise.then(function(favList){
+            /**
+             * WARNING: The favourites section uses music-library/ to start each uri
+             * This is not used in mpd uris, so we are adding it at the beginning of each uri
+             */
+            for(var i in favList.navigation.list)
+            {
+                var match='music-library/'+state.uri;
+                if(match==favList.navigation.list[i].uri)
+                {
+                    response.favourite=true;
+                }
+            }
+
+            self.emitFavourites(response);
+        });
+    }
+    else
+    {
+        self.emitFavourites(response);
+        defer.resolve({});
+    }
+
+    return defer.promise;
+};
+
+
+CoreStateMachine.prototype.emitFavourites = function(msg) {
+    var self=this;
+
+    self.commandRouter.emitFavourites(msg);
 };
 

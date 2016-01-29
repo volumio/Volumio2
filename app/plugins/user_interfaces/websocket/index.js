@@ -1279,5 +1279,12 @@ InterfaceWebUI.prototype.pushAirplay = function(value) {
 	self.libSocketIO.sockets.emit('pushAirplay', value);
 };
 
+InterfaceWebUI.prototype.emitFavourites = function(value) {
+    var self = this;
+
+    self.logger.info("Pushing Favourites "+JSON.stringify(value));
+    self.libSocketIO.broadcast.emit('urifavourites', value);
+};
+
 
 
