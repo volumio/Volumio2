@@ -6,8 +6,6 @@ var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
-var ifconfig = require('wireless-tools/ifconfig');
-var ip = require('ip');
 var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
@@ -1367,7 +1365,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 
 	var defer = libQ.defer();
 
-	ifconfig.status('wlan0', function (err, status) {
+
 		var address;
 
 		var url;
@@ -1399,7 +1397,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 			url = url + 'path=' + nodetools.urlEncode(path);
 
 		defer.resolve(url);
-	});
+
 
 
 	return defer.promise;
