@@ -104,6 +104,10 @@ AirPlayInterface.prototype.setAdditionalConf = function()
 
 AirPlayInterface.prototype.startShairportSync = function() {
     var self = this;
+    // Loading Configured output device
+    var outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
+    var hwdev = 'hw:'+ outdev + ',0';
+    console.log(hwdev);
 
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     var name = systemController.getConf('playerName');
@@ -113,7 +117,7 @@ AirPlayInterface.prototype.startShairportSync = function() {
             return console.log(err);
             }
         var conf1 = data.replace("${name}", name);
-        var conf2 = conf1.replace("${device}", "hw:0,0");
+        var conf2 = conf1.replace("${device}", hwdev);
 
         fs.writeFile("/etc/shairport-sync.conf", conf2, 'utf8', function (err) {
             if (err) return console.log(err);
