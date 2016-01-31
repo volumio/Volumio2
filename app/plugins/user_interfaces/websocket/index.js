@@ -819,6 +819,7 @@ function InterfaceWebUI (context) {
 
 			connWebSocket.on('writeMultiroom', function (data) {
 				selfConnWebSocket = this;
+				console.log("AV: get write To Multiroom request " + JSON.stringify(data));
 
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'writeMultiRoom', data);
 
@@ -1193,12 +1194,14 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket)
 	}
 }
 
-InterfaceWebUI.prototype.pushMultiroom = function(multiroomData) {
+
+InterfaceWebUI.prototype.pushMultiroom = function(selfConnWebSocket) {
 	var self = this;
 
-	self.logger.info("TRYING PUSHING MULTIROOM");
-	//self.logger.info(multiroomData);
-	//self.libSocketIO.emit('pushMultiRoom',multiroomData);
+	var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
+	var response=volumiodiscovery.getDevices();
+
+	selfConnWebSocket.emit('pushMultiRoomDevices',response);
 }
 
 
@@ -1278,6 +1281,3 @@ InterfaceWebUI.prototype.pushAirplay = function(value) {
 	self.logger.debug("Pushing airplay mode: s"+value);
 	self.libSocketIO.sockets.emit('pushAirplay', value);
 };
-
-
-
