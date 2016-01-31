@@ -380,7 +380,7 @@ CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 	var self = this;
 
 	self.logger.info(sMessage);
-
+	/*
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
@@ -388,7 +388,7 @@ CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
 			return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
 		})
 	);
-
+	 */
 }
 
 CoreCommandRouter.prototype.pushToastMessage = function(type, title, message) {
@@ -467,3 +467,12 @@ CoreCommandRouter.prototype.reboot = function() {
 		} else self.pushConsoleMessage('Rebooting');
 	});
 }
+
+CoreCommandRouter.prototype.emitFavourites = function(msg) {
+    var self = this;
+
+    var plugin=self.pluginManager.getPlugin('user_interface','websocket');
+    plugin.emitFavourites(msg);
+}
+
+

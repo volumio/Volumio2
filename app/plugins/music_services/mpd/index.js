@@ -6,8 +6,6 @@ var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
 var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
-var ifconfig = require('wireless-tools/ifconfig');
-var ip = require('ip');
 var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
@@ -329,6 +327,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.artist = trackinfo.artist;
 						collectedState.album = trackinfo.album;
 						collectedState.albumart = trackinfo.albumart;
+                        collectedState.uri=trackinfo.uri;
 						return libQ.resolve(collectedState);
 					});
 				// Else return null track info
@@ -338,6 +337,7 @@ ControllerMpd.prototype.getState = function () {
 				collectedState.artist = null;
 				collectedState.album = null;
 				collectedState.albumart = null;
+                collectedState.uri=null;
 				return libQ.resolve(collectedState);
 			}
 		});
@@ -413,12 +413,18 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	var defer = libQ.defer();
 
-	//console.log(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
+	//self.commandRouter.logger.info(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
 	var resp = {};
 
 	var file = objTrackInfo.file;
 
 	resp.isStreaming = file.indexOf('http://') === 0;
+
+    if (objTrackInfo.file != undefined) {
+        resp.uri = objTrackInfo.file;
+    } else {
+        resp.uri = null;
+    }
 
 	if (objTrackInfo.Title != undefined) {
 		resp.title = objTrackInfo.Title;
@@ -996,47 +1002,7 @@ ControllerMpd.prototype.waitupdate = function () {
 };
 
 
-ControllerMpd.prototype.listFavourites = function (uri) {
-	var self = this;
 
-
-	var defer = libQ.defer();
-
-	var promise = self.commandRouter.playListManager.getFavouritesContent();
-	promise.then(function (data) {
-			var response = {
-				navigation: {
-					prev: {
-						uri: '/'
-					},
-					list: []
-				}
-			};
-
-			for (var i in data) {
-				var ithdata = data[i];
-				var song = {
-					service: ithdata.service,
-					type: 'song',
-					title: ithdata.title,
-					artist: ithdata.artist,
-					album: ithdata.album,
-					icon: ithdata.albumart,
-					uri: ithdata.uri
-				};
-
-				response.navigation.list.push(song);
-			}
-
-			defer.resolve(response);
-
-		})
-		.fail(function () {
-			defer.reject(new Error("Cannot list Favourites"));
-		});
-
-	return defer.promise;
-};
 
 ControllerMpd.prototype.listPlaylists = function (uri) {
 	var self = this;
@@ -1399,7 +1365,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 
 	var defer = libQ.defer();
 
-	ifconfig.status('wlan0', function (err, status) {
+
 		var address;
 
 		var url;
@@ -1431,7 +1397,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 			url = url + 'path=' + nodetools.urlEncode(path);
 
 		defer.resolve(url);
-	});
+
 
 
 	return defer.promise;
