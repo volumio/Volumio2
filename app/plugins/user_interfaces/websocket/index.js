@@ -789,12 +789,10 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('writeMultiroom', function (data) {
-<<<<<<< HEAD
 				selfConnWebSocket = this;
 				console.log("AV: get write To Multiroom request " + JSON.stringify(data));
 
-=======
->>>>>>> b9a571e1a0d42f0be4f3319040f3188cc842e4ad
+
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'writeMultiRoom', data);
 
 			});
@@ -1145,27 +1143,16 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function (browsedata, connWebSocket
 	}
 };
 
-<<<<<<< HEAD
-
 InterfaceWebUI.prototype.pushMultiroom = function(selfConnWebSocket) {
-=======
-InterfaceWebUI.prototype.pushMultiroom = function (multiroomData) {
->>>>>>> b9a571e1a0d42f0be4f3319040f3188cc842e4ad
 	var self = this;
 	console.log("pushMultiroom 2");
 	var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
 	var response=volumiodiscovery.getDevices();
 
-<<<<<<< HEAD
 	selfConnWebSocket.emit('pushMultiRoomDevices',response);
 }
 
-=======
-	self.logger.info("TRYING PUSHING MULTIROOM");
-	//self.logger.info(multiroomData);
-	//self.libSocketIO.emit('pushMultiRoom',multiroomData);
-};
->>>>>>> b9a571e1a0d42f0be4f3319040f3188cc842e4ad
+
 
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
