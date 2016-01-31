@@ -1197,7 +1197,7 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function(browsedata, connWebSocket)
 
 InterfaceWebUI.prototype.pushMultiroom = function(selfConnWebSocket) {
 	var self = this;
-
+	console.log("pushMultiroom 2");
 	var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
 	var response=volumiodiscovery.getDevices();
 
