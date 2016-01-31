@@ -8,6 +8,9 @@ var HashMap = require('hashmap');
 var io=require('socket.io-client');
 
 // Define the ControllerVolumioDiscovery class
+
+var registeredUUIDs = [];
+
 module.exports = ControllerVolumioDiscovery;
 
 function ControllerVolumioDiscovery(context) {
@@ -143,6 +146,15 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			self.startMDNSBrowse();
 		});
 		self.browser.on('serviceUp', function(service) {
+			if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
+				console.log("AV: this is already registered,  " + service.txtRecord.UUID);
+				foundVolumioInstances.delete(service.txtRecord.UUID+'.name');
+				self.remoteConnections.remove(service.txtRecord.UUID+'.name');
+			} else {
+				registeredUUIDs.push(service.txtRecord.UUID);
+				console.log("AV: adding " + service.txtRecord.UUID);
+			}	
+			
 			//console.log(service);
 			self.context.coreCommand.pushConsoleMessage('mDNS: Found device '+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
@@ -176,6 +188,12 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			for(var i in keys)
 			{
 				var key=keys[i];
+				var uuidindex = registeredUUIDs.indexOf(key);
+				if (uuidindex !== -1) {
+				    registeredUUIDs.splice(uuidindex, 1);
+				}
+				
+				console.log("AV: removing " + key);
 				var osname=foundVolumioInstances.get(key+'.name');
 				if(osname==service.name)
 				{
@@ -307,7 +325,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		}
 
 	}
-
+	console.log("AV: " + JSON.stringify(response));
 	return response;
 
 }
