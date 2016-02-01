@@ -1,56 +1,41 @@
+'use strict';
+
 var libQ = require('kew');
 var libFast = require('fast.js');
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
 function CorePlayQueue(commandRouter, stateMachine) {
-	var self = this;
-
-	self.commandRouter = commandRouter;
-	self.stateMachine = stateMachine;
-
-	self.queueReadyDeferred = libQ.defer();
-	self.queueReady = self.queueReadyDeferred.promise;
-
-	self.arrayQueue = [];
-
-	self.queueReadyDeferred.resolve();
-
-
+	this.commandRouter = commandRouter;
+	this.stateMachine = stateMachine;
+	this.arrayQueue = [];
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
 
 // Get a promise for contents of play queue
-CorePlayQueue.prototype.getQueue = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
-
-	return self.queueReady
-		.then(function() {
-			//self.commandRouter.pushConsoleMessage(self.arrayQueue);
-			return self.arrayQueue;
-		});
+CorePlayQueue.prototype.getQueue = function () {
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
+	return this.arrayQueue;
 };
 
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
-CorePlayQueue.prototype.getTrackBlock = function(nStartIndex) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
+CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
 
-	var sTargetService = self.arrayQueue[nStartIndex].service;
+	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
+	var nToCheck = this.arrayQueue.length - 1;
 
-	while (nEndIndex < self.arrayQueue.length - 1) {
-		if (self.arrayQueue[nEndIndex + 1].service !== sTargetService) {
+	while (nEndIndex < nToCheck) {
+		if (this.arrayQueue[nEndIndex + 1].service !== sTargetService) {
 			break;
 		}
-
 		nEndIndex++;
 	}
 
-	var arrayUris = libFast.map(self.arrayQueue.slice(nStartIndex, nEndIndex + 1), function(curTrack) {
+	var arrayUris = libFast.map(this.arrayQueue.slice(nStartIndex, nEndIndex + 1), function (curTrack) {
 		return curTrack.uri;
 	});
 
@@ -58,39 +43,24 @@ CorePlayQueue.prototype.getTrackBlock = function(nStartIndex) {
 };
 
 // Removes one item from the queue
-CorePlayQueue.prototype.removeQueueItem = function(nIndex) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem');
-
-	return self.queueReady
-		.then(function() {
-			self.arrayQueue.splice(nIndex, 1);
-			return self.commandRouter.volumioPushQueue(self.arrayQueue);
-		});
+CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem');
+	this.arrayQueue.splice(nIndex, 1);
+	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
 // Add one item to the queue
-CorePlayQueue.prototype.addQueueItems = function(arrayItems) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
-
-	return self.queueReady
-		.then(function() {
-			self.arrayQueue = self.arrayQueue.concat(arrayItems);
-			return self.commandRouter.volumioPushQueue(self.arrayQueue);
-		});
+CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
+	this.arrayQueue = this.arrayQueue.concat(arrayItems);
+	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
-CorePlayQueue.prototype.clearPlayQueue = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+CorePlayQueue.prototype.clearPlayQueue = function () {
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+	return this.arrayQueue = [];
+};
 
-	return self.arrayQueue = [];
-}
-
-CorePlayQueue.prototype.clearMpdQueue = function() {
-
-	var self = this;
-	return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');
-
-}
+CorePlayQueue.prototype.clearMpdQueue = function () {
+	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');
+};
