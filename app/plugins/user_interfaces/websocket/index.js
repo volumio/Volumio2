@@ -64,11 +64,9 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var timeStart = Date.now();
+				var queue = self.commandRouter.volumioGetQueue();
 				self.logStart('Client requests Volumio queue')
-					.then(self.commandRouter.volumioGetQueue.bind(self.commandRouter))
-					.then(function (queue) {
-						return self.pushQueue.call(self, queue, selfConnWebSocket);
-					})
+					.then(self.pushQueue.bind(self, queue, selfConnWebSocket))
 					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
