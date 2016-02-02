@@ -270,7 +270,7 @@ ControllerDirble.prototype.listFirstLevelRadioSections = function(callback) {
 					title: 'By Country',
 					artist: '',
 					album: '',
-					icon: 'fa fa-users',
+					icon: 'fa fa-globe',
 					uri:'radio/byCountry'
 				}
 
@@ -347,7 +347,7 @@ ControllerDirble.prototype.listRadioCountries = function() {
 			var category={
 				type: 'radio-category',
 				title: data[i].name,
-				icon: 'fa fa-users',
+				icon: 'fa fa-globe',
 				uri: 'radio/byCountry/'+data[i].country_code
 			};
 
