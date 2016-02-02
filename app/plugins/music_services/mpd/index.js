@@ -448,13 +448,6 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	var foundFileCover = false;
 	var web;
 
-	var coverFolder = '/mnt';
-
-	var splitted = file.split('/');
-
-	for (var k = 0; k < splitted.length - 1; k++) {
-		coverFolder = coverFolder + '/' + splitted[k];
-	}
 
 	if (objTrackInfo.Artist != undefined) {
 		if (objTrackInfo.Album != undefined) {
@@ -464,7 +457,8 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		}
 	}
 
-	promise = self.getAlbumArt(web, coverFolder);
+    self.logger.info("ALBUMARTFILE: "+file);
+	promise = self.getAlbumArt(web, file);
 
 	if (promise != undefined) {
 		promise.then(function (value) {
