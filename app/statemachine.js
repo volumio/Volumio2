@@ -385,6 +385,12 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 	}
 	else self.isStreaming=false;
 
+	if (self.isStreaming) {
+		self.uri = stateService.uri;
+	} else {
+		self.uri = '/'+stateService.uri;
+	}
+
 
 	//If play is issued by a different entity than Volumio, the system will accept and handle it
 	if (self.currentTrackBlock.service !== sService) {
@@ -405,7 +411,7 @@ CoreStateMachine.prototype.syncState = function(stateService, sService) {
 			self.currentArtist = stateService.artist;
 			self.currentAlbum = stateService.album;
 			self.currentAlbumArt = stateService.albumart;
-            self.currentUri= stateService.uri;
+      self.currentUri= self.uri;
 			self.currentSampleRate = stateService.samplerate;
 			self.currentBitDepth = stateService.bitdepth;
 			self.currentChannels = stateService.channels;
@@ -523,7 +529,7 @@ CoreStateMachine.prototype.checkFavourites = function(state) {
              */
             for(var i in favList.navigation.list)
             {
-                var match='music-library/'+state.uri;
+                var match='music-library'+state.uri;
                 if(match==favList.navigation.list[i].uri)
                 {
                     response.favourite=true;
@@ -548,4 +554,3 @@ CoreStateMachine.prototype.emitFavourites = function(msg) {
 
     self.commandRouter.emitFavourites(msg);
 };
-

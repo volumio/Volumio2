@@ -327,7 +327,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.artist = trackinfo.artist;
 						collectedState.album = trackinfo.album;
 						collectedState.albumart = trackinfo.albumart;
-                        collectedState.uri=trackinfo.uri;
+            collectedState.uri=trackinfo.uri;
 						return libQ.resolve(collectedState);
 					});
 				// Else return null track info
@@ -458,7 +458,12 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	}
 
     self.logger.info("ALBUMARTFILE: "+file);
-	promise = self.getAlbumArt(web, file);
+	if (resp.isStreaming){
+		promise = self.getAlbumArt(web);
+	}	else {
+		promise = self.getAlbumArt(web, file);
+	}
+
 
 	if (promise != undefined) {
 		promise.then(function (value) {
