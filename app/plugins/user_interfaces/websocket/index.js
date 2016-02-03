@@ -1226,5 +1226,5 @@ InterfaceWebUI.prototype.emitFavourites = function(value) {
     var self = this;
 
     self.logger.info("Pushing Favourites "+JSON.stringify(value));
-    self.libSocketIO.broadcast.emit('urifavourites', value);
+    self.libSocketIO.sockets.emit('urifavourites', value);
 };
