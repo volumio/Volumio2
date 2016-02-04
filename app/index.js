@@ -38,7 +38,7 @@ function CoreCommandRouter (server) {
 	self.stateMachine = new (require('./statemachine.js'))(self);
 
 	// Start the music library
-	//self.musicLibrary = new (require('./musiclibrary.js'))(self);
+	self.musicLibrary = new (require('./musiclibrary.js'))(self);
 
 	// Start the volume controller
 	self.volumeControl = new (require('./volumecontrol.js'))(self);
@@ -198,6 +198,14 @@ CoreCommandRouter.prototype.volumioGetLibraryListing = function(sUid, objOptions
 	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetLibraryListing');
 
 	return self.musicLibrary.getListing(sUid, objOptions);
+}
+
+// Volumio Browse Sources
+CoreCommandRouter.prototype.volumioGetBrowseSources = function() {
+	var self = this;
+	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetBrowseSources');
+
+	return self.musicLibrary.getBrowseSources();
 }
 
 // Volumio Get Playlist Index

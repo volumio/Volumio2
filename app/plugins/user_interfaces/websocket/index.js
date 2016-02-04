@@ -447,17 +447,13 @@ function InterfaceWebUI(context) {
 				self.pushMultiroom(selfConnWebSocket);
 			});
 
-			connWebSocket.on('getBrowseSources', function (data) {
+			connWebSocket.on('getBrowseSources', function (date) {
 				var selfConnWebSocket = this;
+				var response;
 
-				var returnedData = [{name: 'Favourites', uri: 'favourites'},
-					{name: 'Playlists', uri: 'playlists'},
-					{name: 'Music Library', uri: 'music-library'},
-					{name: 'WebRadio', uri: 'radio'}];
+				response = self.commandRouter.volumioGetBrowseSources();
 
-
-				//{name: 'Radio Favourites', uri: 'radio-favourites'}
-				selfConnWebSocket.emit('pushBrowseSources', returnedData);
+				selfConnWebSocket.emit('pushBrowseSources', response);
 			});
 
 			connWebSocket.on('browseLibrary', function (data) {

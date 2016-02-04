@@ -99,15 +99,21 @@ function CoreMusicLibrary (commandRouter) {
 		}
 	];
 
+	// The Browse Sources Array is the list showed on Browse Page
+	self.browseSources = [{name: 'Favourites', uri: 'favourites'},
+		{name: 'Playlists', uri: 'playlists'},
+		{name: 'Music Library', uri: 'music-library'},
+		{name: 'WebRadio', uri: 'radio'}];
+
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
 	// This is okay because no part of Volumio requires a populated library to function.
-	self.libraryReadyDeferred = null;
-	self.libraryReady = libQ.reject('Library not yet loaded.');
+	//self.libraryReadyDeferred = null;
+	//self.libraryReady = libQ.reject('Library not yet loaded.');
 
 	// Attempt to load library from database on disk
-	self.sLibraryPath = __dirname + '/db/musiclibrary';
-	self.loadLibraryFromDB()
-		.fail(libFast.bind(self.pushError, self));
+	//self.sLibraryPath = __dirname + '/db/musiclibrary';
+	//self.loadLibraryFromDB()
+	//	.fail(libFast.bind(self.pushError, self));
 }
 
 // Public methods -----------------------------------------------------------------------------------
@@ -185,7 +191,7 @@ CoreMusicLibrary.prototype.makeQueueItem = function(objTrack) {
 	}
 	return {};
 }
-
+/*
 // Load a LevelDB from disk containing the music library and indexes
 CoreMusicLibrary.prototype.loadLibraryFromDB = function() {
 	var self = this;
@@ -444,9 +450,9 @@ CoreMusicLibrary.prototype.buildSingleIndex = function(objIndexDefinition) {
 			var objSource = self.library[sTableName][curKey];
 			return self.getObjectInfo(objSource, arrayPath);
 		}))
-		/*.then(function(arrayUnsorted) {
+		.then(function(arrayUnsorted) {
 			return self.sortDataArray(arrayUnsorted, sSortBy);
-		})*/
+		})
 		.then(function(arraySorted) {
 			self.libraryIndex[sIndexUid] = {
 				name: sIndexName,
@@ -571,6 +577,7 @@ CoreMusicLibrary.prototype.addLibraryItem = function(curTrack) {
 
 	return libQ.resolve();
 }
+*/
 
 // Pass the error if we don't want to handle it
 // TODO calls to this function should instead be replaced by 'throw new Error()', which would be caught by
@@ -581,6 +588,17 @@ CoreMusicLibrary.prototype.pushError = function(sReason) {
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
+}
+
+//Retrieve Browse Sources
+
+
+CoreMusicLibrary.prototype.getBrowseSources = function() {
+	var self = this;
+
+
+	return self.browseSources;
+
 }
 
 // Helper functions ------------------------------------------------------------------------------------
@@ -611,4 +629,6 @@ function flattenArrayToCSV(arrayInput) {
 		return arrayInput;
 	}
 }
+
+
 
