@@ -25,6 +25,7 @@ ControllerDirble.prototype.onVolumioStart = function() {
 
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 	self.config.loadFile(configFile);
+	self.addToBrowseSources();
 
 }
 
@@ -33,6 +34,14 @@ ControllerDirble.prototype.getConfigurationFiles = function()
 	var self = this;
 
 	return ['config.json'];
+}
+
+//Registering into Browse Sources
+ControllerDirble.prototype.addToBrowseSources = function() {
+	var self = this;
+	var data = {name: 'WebRadio', uri: 'radio'};
+
+	self.commandRouter.volumioAddToBrowseSources(data);
 }
 
 ControllerDirble.prototype.onStop = function() {

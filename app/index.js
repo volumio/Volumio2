@@ -28,6 +28,9 @@ function CoreCommandRouter (server) {
 	self.logger.info("-----          System startup          ----");
 	self.logger.info("-------------------------------------------");
 
+	// Start the music library
+	self.musicLibrary = new (require('./musiclibrary.js'))(self);
+
 	// Start plugins
 	self.pluginManager = new (require(__dirname+'/pluginmanager.js'))(self, server);
 	self.pluginManager.loadPlugins();
@@ -37,8 +40,7 @@ function CoreCommandRouter (server) {
 	// Start the state machine
 	self.stateMachine = new (require('./statemachine.js'))(self);
 
-	// Start the music library
-	self.musicLibrary = new (require('./musiclibrary.js'))(self);
+
 
 	// Start the volume controller
 	self.volumeControl = new (require('./volumecontrol.js'))(self);
@@ -206,6 +208,13 @@ CoreCommandRouter.prototype.volumioGetBrowseSources = function() {
 	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetBrowseSources');
 
 	return self.musicLibrary.getBrowseSources();
+}
+
+CoreCommandRouter.prototype.volumioAddToBrowseSources = function(data) {
+	var self = this;
+	self.pushConsoleMessage( 'CoreCommandRouter::volumioAddToBrowseSources' +data);
+
+	return self.musicLibrary.addToBrowseSources(data);
 }
 
 // Volumio Get Playlist Index

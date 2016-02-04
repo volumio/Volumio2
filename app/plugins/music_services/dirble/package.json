@@ -9,6 +9,7 @@
   "author": "Volumio2",
   "license": "ISC",
   "volumio_info": {
-    "plugin_type": "music_service"
+    "plugin_type": "music_service",
+    "boot_priority":9
   }
 }

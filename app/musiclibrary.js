@@ -102,8 +102,8 @@ function CoreMusicLibrary (commandRouter) {
 	// The Browse Sources Array is the list showed on Browse Page
 	self.browseSources = [{name: 'Favourites', uri: 'favourites'},
 		{name: 'Playlists', uri: 'playlists'},
-		{name: 'Music Library', uri: 'music-library'},
-		{name: 'WebRadio', uri: 'radio'}];
+		{name: 'Music Library', uri: 'music-library'}
+		];
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
 	// This is okay because no part of Volumio requires a populated library to function.
@@ -599,6 +599,16 @@ CoreMusicLibrary.prototype.getBrowseSources = function() {
 
 	return self.browseSources;
 
+}
+
+CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
+	var self = this;
+
+	if(data.name!= undefined) {
+
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
+	self.browseSources.push(data);
+	}
 }
 
 // Helper functions ------------------------------------------------------------------------------------
