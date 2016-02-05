@@ -152,7 +152,7 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 	config.set('startupSound',startup_sound);
 
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
-	self.setHostname(player_name);
+	//self.setHostname(player_name);
 	defer.resolve({});
 
 
