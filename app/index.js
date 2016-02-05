@@ -262,7 +262,7 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
 CoreCommandRouter.prototype.volumioPushState = function(state) {
 	var self = this;
 	self.pushConsoleMessage( 'CoreCommandRouter::volumioPushState');
-
+	self.executeOnPlugin('system_controller','volumiodiscovery','saveDeviceInfo',state);
 	// Announce new player state to each client interface
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
@@ -434,7 +434,6 @@ CoreCommandRouter.prototype.broadcastToastMessage = function(type, title, messag
 CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
 {
 	var self=this;
-
 	return libQ.all(
 		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
