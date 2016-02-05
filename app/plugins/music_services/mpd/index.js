@@ -1515,3 +1515,26 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 	return defer.promise;
 
 };
+
+ControllerMpd.prototype.getGroupVolume = function () {
+	var self = this;
+	return self.sendMpdCommand('status', [])
+		.then(libFast.bind(self.parseState, self))
+		.then(function (state) {
+			if (state.volume != undefined){
+				state.volume = groupvolume;
+				console.log(groupvolume)
+			return libQ.resolve(groupvolume);
+			}
+		});
+};
+
+ControllerMpd.prototype.setGroupVolume = function (data) {
+	var self = this;
+	return self.sendMpdCommand('setvol', [data]);
+};
+
+ControllerMpd.prototype.syncGroupVolume = function (data) {
+	var self = this;
+
+};
