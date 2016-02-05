@@ -261,7 +261,6 @@ ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 	var self=this;
 
 
-	self.logger.info("PIPPO");
 	var volume=foundVolumioInstances.set(data.uuid+'.volume',data.volume);
 	var artist=foundVolumioInstances.set(data.uuid+'.artist',data.artist);
 	var track=foundVolumioInstances.set(data.uuid+'.track',data.track);
@@ -275,7 +274,6 @@ ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 ControllerVolumioDiscovery.prototype.getDevices=function()
 {
 	var self=this;
-
 	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 	var myuuid = systemController.getConf('uuid');
 
@@ -449,5 +447,18 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 
 	self.logger.info("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
 
+}
 
+ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
+{
+	var self=this;
+
+	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+	var uuid = systemController.getConf('uuid');
+	foundVolumioInstances.set(uuid+'.status',data.status);
+	foundVolumioInstances.set(uuid+'.volume',data.volume > -1 ? data.volume : 0);
+	foundVolumioInstances.set(uuid+'.mute',data.mute);
+	foundVolumioInstances.set(uuid+'.artist',data.artist);
+	foundVolumioInstances.set(uuid+'.track',data.title);
+	foundVolumioInstances.set(uuid+'.albumart',data.albumart);
 }
