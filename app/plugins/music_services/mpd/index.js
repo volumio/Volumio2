@@ -429,7 +429,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.Title != undefined) {
 		resp.title = objTrackInfo.Title;
 	} else {
-		resp.title = null;
+		resp.title = file;
 	}
 
 	if (objTrackInfo.Artist != undefined) {
