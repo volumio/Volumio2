@@ -1179,7 +1179,7 @@ InterfaceWebUI.prototype.broadcastToastMessage = function (type, title, message)
 	var self = this;
 
 	// Push the message all clients
-	self.libSocketIO.broadcast.emit('pushToastMessage', {
+	self.libSocketIO.sockets.emit('pushToastMessage', {
 		type: type,
 		title: title,
 		message: message
@@ -1225,18 +1225,11 @@ InterfaceWebUI.prototype.emitFavourites = function(value) {
     self.libSocketIO.sockets.emit('urifavourites', value);
 };
 
-InterfaceWebUI.prototype.localEmit = function(data) {
+InterfaceWebUI.prototype.broadcastMessage = function(data) {
     var self = this;
     var msg = data.msg;
     var value = data.value;
-    self.logger.info("WebSocket Emit  " + msg + " -  "  +JSON.stringify(value));
+    self.logger.info("WebSocket broadcastMessage  " + msg + " -  "  +JSON.stringify(value));
     self.libSocketIO.sockets.emit(msg, value);
 };
 
-InterfaceWebUI.prototype.broadcastMessage = function(data) {
-    var self = this;
-	var msg = data.msg;
-    var value = data.value;
-    self.logger.info("WebSocket Broadcast  " + msg + " -  "  +JSON.stringify(value));
-    self.libSocketIO.broadcast.emit(msg, value);
-};
