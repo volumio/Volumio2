@@ -1225,16 +1225,18 @@ InterfaceWebUI.prototype.emitFavourites = function(value) {
     self.libSocketIO.sockets.emit('urifavourites', value);
 };
 
-InterfaceWebUI.prototype.localEmit = function(msg,value) {
+InterfaceWebUI.prototype.localEmit = function(data) {
     var self = this;
-
+    var msg = data.msg;
+    var value = data.value;
     self.logger.info("WebSocket Emit  " + msg + " -  "  +JSON.stringify(value));
     self.libSocketIO.sockets.emit(msg, value);
 };
 
-InterfaceWebUI.prototype.broadcastMessage = function(msg,value) {
+InterfaceWebUI.prototype.broadcastMessage = function(data) {
     var self = this;
-
+	var msg = data.msg;
+    var value = data.value;
     self.logger.info("WebSocket Broadcast  " + msg + " -  "  +JSON.stringify(value));
     self.libSocketIO.broadcast.emit(msg, value);
 };
