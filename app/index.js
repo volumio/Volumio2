@@ -361,7 +361,7 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	return self.stateMachine.addQueueItems(arrayItems);
 }
 
-CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data) {
+CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, arg1,arg2,arg3) {
 	var self = this;
 	self.pushConsoleMessage( 'CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method );
 
@@ -369,7 +369,7 @@ CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data)
 
 	if(thisPlugin!=undefined)
 		if(thisPlugin[method]){
-			return thisPlugin[method].call(thisPlugin, data);
+			return thisPlugin[method].call(thisPlugin, arg1,arg2,arg3);
 		}else{
 			self.pushConsoleMessage( 'Error : CoreCommandRouter::executeOnPlugin: No method [' + method + '] in plugin ' + name  );
 		}
