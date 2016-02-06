@@ -31,4 +31,4 @@ node_modules
 *.swp
 spotify-login.txt
 .idea
-.iml
+*.iml
