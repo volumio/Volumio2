@@ -142,12 +142,14 @@ CoreCommandRouter.prototype.volumioClearQueue = function() {
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function(VolumeInteger) {
 	var self = this;
+	self.callCallback("volumiosetvolume",VolumeInteger);
 	return self.volumeControl.alsavolume(VolumeInteger);
 }
 
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function(vol) {
 	var self = this;
+	self.callCallback("volumioupdatevolume",vol);
 	return self.stateMachine.updateVolume(vol);
 }
 
@@ -158,6 +160,34 @@ CoreCommandRouter.prototype.volumioretrievevolume = function(vol) {
 
 	return self.volumeControl.retrievevolume();
 }
+
+var callbacks = [];
+CoreCommandRouter.prototype.addCallback = function (name,callback) {
+	var self = this;
+	if (callbacks[name] == undefined) {
+		callbacks[name] = [];
+	}
+	callbacks[name].push(callback);
+	self.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
+}
+
+CoreCommandRouter.prototype.callCallback = function (name,data) {
+	var self = this;
+	if (callbacks[name] != undefined ) {
+		for (var i in callbacks[name]) {
+			func = callbacks[name][i]
+			try {
+				func(data);
+			} catch(e) {
+				self.logger.error("Help! Some callbacks for " + name + " are crashing!");
+				self.logger.error(e);
+			}
+		}
+	} else {
+		self.logger.debug("No callbacks for " + name );
+	}
+}
+
 
 // Volumio Add Queue Uids
 CoreCommandRouter.prototype.volumioAddQueueUids = function(arrayUids) {
@@ -263,13 +293,16 @@ CoreCommandRouter.prototype.volumioPushState = function(state) {
 	var self = this;
 	self.pushConsoleMessage( 'CoreCommandRouter::volumioPushState');
 	self.executeOnPlugin('system_controller','volumiodiscovery','saveDeviceInfo',state);
-	// Announce new player state to each client interface
-	return libQ.all(
+	// Announce new player state to each client interfac
+
+	var res = libQ.all(
 		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
 			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
 			return thisInterface.pushState.call(thisInterface, state);
 		})
 	);
+	self.callCallback("volumioPushState",state);
+	return res;
 }
 
 CoreCommandRouter.prototype.volumioResetState = function() {
