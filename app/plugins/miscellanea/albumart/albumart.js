@@ -170,57 +170,55 @@ var searchInFolder=function(defer,path,web)
         coverFolder = coverFolder + '/' + splitted[k];
     }
 
-    logger.info("Searching in folder "+coverFolder);
-    var stats=fs.statSync(coverFolder);
+    if (fs.existsSync(coverFolder)) {
+        logger.info("Searching in folder " + coverFolder);
+        var stats = fs.statSync(coverFolder);
 
-    if(stats.isFile())
-    {
-        var fileSizeInBytes = stats["size"];
-        if(fileSizeInBytes>0)
-        {
-            defer.resolve(coverFolder);
-            return defer.promise;
+        if (stats.isFile()) {
+            var fileSizeInBytes = stats["size"];
+            if (fileSizeInBytes > 0) {
+                defer.resolve(coverFolder);
+                return defer.promise;
+            }
+            else {
+                defer.reject(new Error('Filesize is zero'));
+                return defer.promise;
+            }
         }
-        else
-        {
-            defer.reject(new Error('Filesize is zero'));
-            return defer.promise;
+
+        /**
+         * Trying to read albumart from file
+         */
+
+        var covers = ['coverart.jpg', 'albumart.jpg', 'coverart.png', 'albumart.png',
+            'cover.jpg', 'Cover.jpg', 'folder.jpg', 'Folder.jpg',
+            'cover.png', 'Cover.png', 'folder.png', 'Folder.png'];
+        var splitted = path.split('/');
+
+
+        for (var i in covers) {
+            var coverFile = coverFolder + '/' + covers[i];
+            console.log("Searching for cover " + coverFile);
+            if (fs.existsSync(coverFile)) {
+                defer.resolve(coverFile);
+                return defer.promise;
+            }
         }
+
+        var files = fs.readdirSync(coverFolder);
+        for (var j in files) {
+            var fileName = S(files[j]);
+
+            console.log(fileName.s);
+            if (fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
+                defer.resolve(coverFolder + '/' + fileName.s);
+                return defer.promise;
+            }
+
+        }
+    } else {
+        logger.info('Folder ' + coverFolder + ' does not exist');
     }
-
-    /**
-     * Trying to read albumart from file
-     */
-
-    var covers=['coverart.jpg','albumart.jpg','coverart.png','albumart.png',
-        'cover.jpg' , 'Cover.jpg' , 'folder.jpg','Folder.jpg',
-        'cover.png' , 'Cover.png' , 'folder.png','Folder.png'];
-    var splitted=path.split('/');
-
-
-    for(var i in covers)
-    {
-        var coverFile=coverFolder+'/'+covers[i];
-        console.log("Searching for cover "+coverFile);
-        if(fs.existsSync(coverFile))
-        {
-            defer.resolve(coverFile);
-            return defer.promise;
-        }
-    }
-
-    var files=fs.readdirSync(coverFolder);
-    for(var j in files) {
-        var fileName=S(files[j]);
-
-        console.log(fileName.s);
-        if(fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
-            defer.resolve(coverFolder+'/'+fileName.s);
-            return defer.promise;
-        }
-
-    }
-
     searchOnline(defer,web);
 
 }
@@ -242,9 +240,10 @@ var processRequest=function (web,path) {
 	{
         path='/mnt/'+path;
         logger.info(path);
+            if (fs.existsSync(path)) {
 
         var parser = mm(fs.createReadStream(path), function (err, metadata) {
-            if (err!=undefined)
+            if (err)
             {
                 logger.info(err);
                 searchInFolder(defer,path,web);
@@ -273,6 +272,10 @@ var processRequest=function (web,path) {
 
             }
         });
+        } else {
+            logger.info('File' + path + ' doesnt exist');
+            searchInFolder(defer,path,web);
+        }
 
 	}
   return defer.promise; 
