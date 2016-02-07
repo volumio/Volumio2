@@ -42,11 +42,9 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var timeStart = Date.now();
+				var state = self.commandRouter.volumioGetState();
 				self.logStart('Client requests Volumio state')
-					.then(self.commandRouter.volumioGetState.bind(self.commandRouter))
-					.then(function (state) {
-						return self.pushState.call(self, state, selfConnWebSocket);
-					})
+					.then(self.pushState.bind(self, state, selfConnWebSocket))
 					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
@@ -538,13 +536,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('GetTrackInfo', function (data) {
 				var selfConnWebSocket = this;
-
-				var returnedData = self.commandRouter.stateMachine.getState();
-				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushGetTrackInfo', data);
-				});
-
-
+				selfConnWebSocket.emit('pushGetTrackInfo', data);
 			});
 
 			//add my web radio
@@ -1137,16 +1129,14 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function (browsedata, connWebSocket
 	}
 };
 
-InterfaceWebUI.prototype.pushMultiroom = function(selfConnWebSocket) {
+InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 	var self = this;
 	console.log("pushMultiroom 2");
-	var volumiodiscovery=self.commandRouter.pluginManager.getPlugin('system_controller','volumiodiscovery');
-	var response=volumiodiscovery.getDevices();
+	var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
+	var response = volumiodiscovery.getDevices();
 
-	selfConnWebSocket.emit('pushMultiRoomDevices',response);
+	selfConnWebSocket.emit('pushMultiRoomDevices', response);
 }
-
-
 
 
 // Receive player state updates from commandRouter and broadcast to all connected clients
@@ -1218,11 +1208,11 @@ InterfaceWebUI.prototype.pushAirplay = function (value) {
 	this.libSocketIO.sockets.emit('pushAirplay', value);
 };
 
-InterfaceWebUI.prototype.emitFavourites = function(value) {
-    var self = this;
+InterfaceWebUI.prototype.emitFavourites = function (value) {
+	var self = this;
 
-    self.logger.info("Pushing Favourites "+JSON.stringify(value));
-    self.libSocketIO.sockets.emit('urifavourites', value);
+	self.logger.info("Pushing Favourites " + JSON.stringify(value));
+	self.libSocketIO.sockets.emit('urifavourites', value);
 };
 
 InterfaceWebUI.prototype.broadcastMessage = function(data) {
