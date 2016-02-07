@@ -1,8 +1,5 @@
 'use strict';
 
-var libQ = require('kew');
-var libFast = require('fast.js');
-
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
 function CorePlayQueue(commandRouter, stateMachine) {
@@ -35,11 +32,11 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 		nEndIndex++;
 	}
 
-	var arrayUris = libFast.map(this.arrayQueue.slice(nStartIndex, nEndIndex + 1), function (curTrack) {
+	var arrayUris = this.arrayQueue.slice(nStartIndex, nEndIndex + 1).map(function (curTrack) {
 		return curTrack.uri;
 	});
 
-	return libQ.resolve({service: sTargetService, uris: arrayUris, startindex: nStartIndex});
+	return {service: sTargetService, uris: arrayUris, startindex: nStartIndex};
 };
 
 // Removes one item from the queue
