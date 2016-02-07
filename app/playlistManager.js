@@ -346,6 +346,11 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 
 	var playlist=[];
 	var filePath=folder+name;
+	var path = uri;
+
+	if (uri.indexOf('music-library/') >= 0) {
+		path = uri.replace('music-library/', '');
+	}
 
 	fs.exists(filePath, function (exists) {
 		if(!exists)
@@ -357,7 +362,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 		prms.then(function(info){
 			var itemInfo=info.navigation.list[0];
 
-			var albumartPromise=self.commandRouter.executeOnPlugin('music_service','mpd','getAlbumArt',{artist:itemInfo.artist,album:itemInfo.album});
+			var albumartPromise=self.commandRouter.executeOnPlugin('music_service','mpd','getAlbumArt',{artist:itemInfo.artist,album:itemInfo.album,path:path});
 			albumartPromise.then(function(art){
 				fs.readJson(filePath, function (err, data) {
 					if(err)
@@ -532,7 +537,7 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					title: ithdata.title,
 					artist: ithdata.artist,
 					album: ithdata.album,
-					icon: ithdata.albumart,
+					image: ithdata.albumart,
 					uri: ithdata.uri
 				};
 

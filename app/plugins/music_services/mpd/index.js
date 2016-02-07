@@ -429,7 +429,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.Title != undefined) {
 		resp.title = objTrackInfo.Title;
 	} else {
-		resp.title = null;
+		resp.title = file;
 	}
 
 	if (objTrackInfo.Artist != undefined) {
@@ -1021,7 +1021,7 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 	promise.then(function (data) {
 		for (var i in data) {
 			var ithdata = data[i];
-			var song = {type: 'playlist', title: ithdata, icon: 'bars', uri: 'playlists/' + ithdata};
+			var song = {type: 'playlist', title: ithdata, icon: 'fa fa-list-ol', uri: 'playlists/' + ithdata};
 
 			response.navigation.list.push(song);
 		}
@@ -1060,7 +1060,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 				title: ithdata.title,
 				artist: ithdata.artist,
 				album: ithdata.album,
-				icon: ithdata.albumart,
+				image: ithdata.albumart,
 				uri: ithdata.uri
 			};
 
@@ -1317,7 +1317,7 @@ ControllerMpd.prototype.updateQueue = function () {
 							type: 'track',
 							tracknumber: tracknumber
 						};
-						queueItem.promise = self.getAlbumArt({artist: artist, album: album});
+						queueItem.promise = self.getAlbumArt({artist: artist, album: album}, path);
 						promises.push(queueItem.promise);
 						queue.push(queueItem);
 
@@ -1363,12 +1363,16 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 	var self = this;
 
 	var defer = libQ.defer();
-
+		
 
 		var address;
 
 		var url;
 		var artist, album;
+
+		if (data.path != undefined) {
+			path = data.path;
+		}
 
 
 		var web;
@@ -1379,7 +1383,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 				album = data.album;
 			else album = data.artist;
 
-			web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/extralarge'
+			web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
 		}
 
 		var url = '/albumart';

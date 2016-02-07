@@ -89,7 +89,20 @@ ControllerSystem.prototype.setConf = function(varName, varValue)
 {
 	var self = this;
 
+	var defer = libQ.defer();
+
 	config.set(varName,varValue);
+	if (varName = 'player_name') {
+	var player_name=varValue;
+
+	for(var i in self.callbacks)
+	{
+		var callback=self.callbacks[i];
+
+		callback.call(callback,player_name);
+	}
+	return defer.promise;
+	}
 }
 
 
@@ -139,7 +152,7 @@ ControllerSystem.prototype.saveGeneralSettings = function(data)
 	config.set('startupSound',startup_sound);
 
 	self.commandRouter.pushToastMessage('success',"Configuration update",'The configuration has been successfully updated');
-	self.setHostname(player_name);
+	//self.setHostname(player_name);
 	defer.resolve({});
 
 
