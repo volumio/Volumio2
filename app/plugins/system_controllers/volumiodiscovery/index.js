@@ -146,13 +146,14 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			self.startMDNSBrowse();
 		});
 		self.browser.on('serviceUp', function(service) {
+			console.log("AVAPI: WE GOT  "+ service.txtRecord.UUID);
 			if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
-				console.log("AV: this is already registered,  " + service.txtRecord.UUID);
+				console.log("AVAPI: this is already registered,  " + service.txtRecord.UUID);
 				foundVolumioInstances.delete(service.txtRecord.UUID+'.name');
 				self.remoteConnections.remove(service.txtRecord.UUID+'.name');
 			} else {
 				registeredUUIDs.push(service.txtRecord.UUID);
-				console.log("AV: adding " + service.txtRecord.UUID);
+				console.log("AVAPI: adding " + service.txtRecord.UUID);
 			}	
 			
 			//console.log(service);
@@ -193,7 +194,6 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 				    registeredUUIDs.splice(uuidindex, 1);
 				}
 				
-				console.log("AV: removing " + key);
 				var osname=foundVolumioInstances.get(key+'.name');
 				if(osname==service.name)
 				{
@@ -259,15 +259,28 @@ String.prototype.capitalize = function() {
 ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 {
 	var self=this;
+	console.log("AV: Got saveDeviceInfo: " + JSON.stringify(data,null,4));
+	if (data.volume == undefined) data.volume = 0;
+	if (data.status == undefined) data.status = '';
+	if (data.artist == undefined) data.artist = '';
+	if (data.title == undefined) data.title = '';
+	if (data.albumart == undefined) data.albumart = '';
+
+	var uuid = data.uuid;
+	
+	if (uuid == undefined) {
+		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+		uuid = systemController.getConf('uuid');
+		console.log("Using self UUID");
+	}
+	foundVolumioInstances.set(uuid+'.status',data.status);
+	foundVolumioInstances.set(uuid+'.volume',data.volume > -1 ? data.volume : 0);
+	foundVolumioInstances.set(uuid+'.mute',data.mute);
+	foundVolumioInstances.set(uuid+'.artist',data.artist);
+	foundVolumioInstances.set(uuid+'.track',data.title);
+	foundVolumioInstances.set(uuid+'.albumart',data.albumart);
 
 
-	var volume=foundVolumioInstances.set(data.uuid+'.volume',data.volume);
-	var artist=foundVolumioInstances.set(data.uuid+'.artist',data.artist);
-	var track=foundVolumioInstances.set(data.uuid+'.track',data.track);
-	var track=foundVolumioInstances.set(data.uuid+'.albumart',data.albumart);
-
-	var toAdvertise=self.getDevices();
-	self.commandRouter.pushMultiroomDevices(toAdvertise);
 }
 
 
@@ -323,7 +336,6 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		}
 
 	}
-	console.log("AV: " + JSON.stringify(response));
 	return response;
 
 }
@@ -449,16 +461,23 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 
 }
 
-ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
-{
-	var self=this;
+// ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
+// {
+// 	var self=this;
 
-	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-	var uuid = systemController.getConf('uuid');
-	foundVolumioInstances.set(uuid+'.status',data.status);
-	foundVolumioInstances.set(uuid+'.volume',data.volume > -1 ? data.volume : 0);
-	foundVolumioInstances.set(uuid+'.mute',data.mute);
-	foundVolumioInstances.set(uuid+'.artist',data.artist);
-	foundVolumioInstances.set(uuid+'.track',data.title);
-	foundVolumioInstances.set(uuid+'.albumart',data.albumart);
-}
+// 	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+// 	var uuid = systemController.getConf('uuid');
+// 	foundVolumioInstances.set(uuid+'.status',data.status);
+// 	foundVolumioInstances.set(uuid+'.volume',data.volume > -1 ? data.volume : 0);
+// 	foundVolumioInstances.set(uuid+'.mute',data.mute);
+// 	foundVolumioInstances.set(uuid+'.artist',data.artist);
+// 	foundVolumioInstances.set(uuid+'.track',data.title);
+// 	foundVolumioInstances.set(uuid+'.albumart',data.albumart);
+// 	for(var i in self.callbacks)
+// 			{
+// 				var c=self.callbacks[i];
+
+// 				var callback= c.bind(c.this);
+// 				callback(toAdvertise);
+// 			}
+// }

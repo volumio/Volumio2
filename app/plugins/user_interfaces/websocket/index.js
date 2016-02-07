@@ -421,7 +421,7 @@ function InterfaceWebUI(context) {
 							connWebSocket.emit("pushMethod", result);
 						})
 						.fail(function () {
-							connWebSocket.emit("pushMethod", {"ERRORE": "MESSAGGIO DI ERRRORE"});
+							connWebSocket.emit("pushMethod", {"ERRORE": "MESSAGGIO DI ERRORE"});
 						});
 				} else {
 				}
@@ -784,8 +784,6 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('writeMultiroom', function (data) {
 				selfConnWebSocket = this;
-				console.log("AV: get write To Multiroom request " + JSON.stringify(data));
-
 
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'writeMultiRoom', data);
 
