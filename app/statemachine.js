@@ -72,7 +72,8 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 	if (this.currentStatus === 'stop') {
 		// Stop -> Play transition
 		this.currentStatus = 'play';
-		return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+		this.updateTrackBlock();
+		return this.serviceClearAddPlay();
 
 	} else if (this.currentStatus === 'pause') {
 		// Pause -> Play transition
@@ -90,7 +91,8 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 		// Stop -> Next transition
 		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
 			this.currentPosition++;
-			return this.updateTrackBlock().then(this.pushState.bind(this));
+			this.updateTrackBlock();
+			return this.pushState();
 		}
 
 	} else if (this.currentStatus === 'play') {
@@ -107,11 +109,10 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
 			this.currentPosition++;
 		}
-
 		this.currentStatus = 'play';
 		this.currentSeek = 0;
-
-		return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+		this.updateTrackBlock();
+		return this.serviceClearAddPlay();
 	}
 };
 
@@ -123,8 +124,8 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		// Stop -> Previous transition
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
-
-			return this.updateTrackBlock().then(this.pushState.bind(this));
+			this.updateTrackBlock();
+			return this.pushState();
 		}
 
 	} else if (this.currentStatus === 'play') {
@@ -133,8 +134,9 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		 if (this.currentPosition > 0) {
 		 this.currentPosition--;
 		 this.currentSeek = 0;
+		 this.updateTrackBlock()
 
-		 return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+		 return this.serviceClearAddPlay());
 		 }*/
 		this.commandRouter.executeOnPlugin('music_service', 'mpd', 'next')
 
@@ -144,11 +146,10 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
 		}
-
 		this.currentStatus = 'play';
 		this.currentSeek = 0;
-
-		return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+		this.updateTrackBlock();
+		return this.serviceClearAddPlay();
 	}
 };
 
@@ -160,15 +161,15 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		// Play -> Stop transition
 		this.currentStatus = 'stop';
 		this.currentSeek = 0;
-
-		return this.updateTrackBlock().then(this.serviceStop.bind(this));
+		this.updateTrackBlock();
+		return this.serviceStop();
 
 	} else if (this.currentStatus === 'pause') {
 		// Pause -> Stop transition
 		this.currentStatus = 'stop';
 		this.currentSeek = 0;
-
-		return this.updateTrackBlock().then(this.serviceStop.bind(this));
+		this.updateTrackBlock();
+		return this.serviceStop();
 	}
 };
 
@@ -190,12 +191,7 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 // Update the currently active track block
 CoreStateMachine.prototype.updateTrackBlock = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateTrackBlock');
-
-	var self = this;
-	return this.playQueue.getTrackBlock(this.currentPosition)
-		.then(function (trackBlock) {
-			self.currentTrackBlock = trackBlock;
-		});
+	this.currentTrackBlock = this.playQueue.getTrackBlock(this.currentPosition);
 };
 
 // Perform a clear-add-play action on the current track block
@@ -283,7 +279,8 @@ CoreStateMachine.prototype.updateVolume = function (Volume) {
 CoreStateMachine.prototype.getcurrentVolume = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getcurrentVolume');
 	this.commandRouter.volumioretrievevolume();
-	return this.updateTrackBlock();
+	this.updateTrackBlock();
+	return libQ.resolve();
 };
 
 // Stop playback timer
