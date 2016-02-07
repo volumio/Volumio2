@@ -529,7 +529,7 @@ CoreStateMachine.prototype.checkFavourites = function(state) {
              */
             for(var i in favList.navigation.list)
             {
-                var match='music-library'+state.uri;
+                var match=state.uri;
                 if(match==favList.navigation.list[i].uri)
                 {
                     response.favourite=true;

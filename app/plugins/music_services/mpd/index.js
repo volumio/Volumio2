@@ -1084,6 +1084,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	var prev = '';
 	var folderToList = '';
 	var command = 'lsinfo';
+	console.log(uri);
 
 	if (sections.length > 1) {
 
@@ -1363,7 +1364,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 	var self = this;
 
 	var defer = libQ.defer();
-		
+
 
 		var address;
 

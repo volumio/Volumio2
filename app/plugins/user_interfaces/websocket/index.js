@@ -668,7 +668,7 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.addToFavourites('mpd', data.uri);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushAddToFavourites', data);
+					selfConnWebSocket.emit('urifavourites', data);
 				});
 
 			});

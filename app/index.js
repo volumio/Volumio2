@@ -361,6 +361,14 @@ CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
 	return self.stateMachine.addQueueItems(arrayItems);
 }
 
+// Volumio Check Favourites
+CoreCommandRouter.prototype.checkFavourites = function(data) {
+	var self = this;
+	//self.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
+
+	return self.stateMachine.checkFavourites(data);
+}
+
 CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data) {
 	var self = this;
 	self.pushConsoleMessage( 'CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method );

@@ -346,7 +346,8 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 
 	var playlist=[];
 	var filePath=folder+name;
-	var path = uri;
+	var path=uri;
+
 
 	if (uri.indexOf('music-library/') >= 0) {
 		path = uri.replace('music-library/', '');
@@ -368,7 +369,10 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 					if(err)
 						defer.resolve({success:false});
 					else
-					{
+					if (uri.indexOf('music-library/') >= 0) {
+						uri = uri.replace('music-library', '');
+					}
+					{console.log('uriiiiiiiiiiiiiiiiiiiiiii'+uri)
 						data.push({service:service,uri:uri,title: itemInfo.title,
 							artist: itemInfo.artist,
 							album: itemInfo.album,albumart:art});
@@ -376,7 +380,9 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 						fs.writeJson(filePath, data, function (err) {
 							if(err)
 								defer.resolve({success:false});
-							else defer.resolve({success:true});
+							else
+								var favourites = self.commandRouter.checkFavourites({uri:uri});
+								defer.resolve(favourites);
 						})
 					}
 				});
