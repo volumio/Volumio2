@@ -536,13 +536,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('GetTrackInfo', function (data) {
 				var selfConnWebSocket = this;
-
-				var returnedData = self.commandRouter.stateMachine.getState();
-				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushGetTrackInfo', data);
-				});
-
-
+				selfConnWebSocket.emit('pushGetTrackInfo', data);
 			});
 
 			//add my web radio
