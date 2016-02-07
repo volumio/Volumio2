@@ -20,21 +20,6 @@ function InterfaceWebUI(context) {
 	self.libSocketIO.on('connection', function (connWebSocket) {
 		try {
 
-			/**
-			 * 	Caching some bindings to prevent them being created every time an event is handled
-			 */
-			var pushError = self.pushError.bind(self);
-			var pushQueue = self.pushQueue.bind(self, queue, connWebSocket);
-			var getState = self.commandRouter.volumioGetState.bind(self.commandRouter);
-			var play = self.commandRouter.volumioPlay.bind(self.commandRouter);
-			var pause = self.commandRouter.volumioPause.bind(self.commandRouter);
-			var stop = self.commandRouter.volumioStop.bind(self.commandRouter);
-			var clearQueue = self.commandRouter.volumioClearQueue.bind(self.commandRouter);
-			var previous = self.commandRouter.volumioPrevious.bind(self.commandRouter);
-			var next = self.commandRouter.volumioNext.bind(self.commandRouter);
-			var rebuildLibrary = self.commandRouter.volumioRebuildLibrary.bind(self.commandRouter);
-			var updateAllMetadata = self.commandRouter.updateAllMetadata.bind(self.commandRouter);
-			var importServicePlaylists = self.commandRouter.volumioImportServicePlaylists.bind(self.commandRouter);
 
 			/** Request Volumio State
 			 * It returns an array definining the Playback state, Volume and other amenities
@@ -57,13 +42,10 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var timeStart = Date.now();
-
+				var state = self.commandRouter.volumioGetState();
 				self.logStart('Client requests Volumio state')
-					.then(getState)
-					.then(function (state) {
-						return self.pushState.call(self, state, selfConnWebSocket);
-					})
-					.fail(pushError)
+					.then(self.pushState.bind(self, state, selfConnWebSocket))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -77,11 +59,13 @@ function InterfaceWebUI(context) {
 			 });
 			 */
 			connWebSocket.on('getQueue', function () {
+				var selfConnWebSocket = this;
+
 				var timeStart = Date.now();
 				var queue = self.commandRouter.volumioGetQueue();
 				self.logStart('Client requests Volumio queue')
-					.then(pushQueue)
-					.fail(pushError)
+					.then(self.pushQueue.bind(self, queue, selfConnWebSocket))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -93,7 +77,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.volumioRemoveQueueItem.call(self.commandRouter, nIndex);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -105,7 +89,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.volumioAddQueueUids.call(self.commandRouter, arrayUids);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -125,7 +109,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', str);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.commandRouter.pushToastMessage('success', "Added", str);
 					});
@@ -147,7 +131,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlay', str);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.commandRouter.pushToastMessage('success', "Play", str);
 					});
@@ -173,7 +157,7 @@ function InterfaceWebUI(context) {
 							'number': data.number
 						});
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.commandRouter.pushToastMessage('success', "Play", str);
 					});
@@ -187,7 +171,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'remove', position);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -200,7 +184,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'seek', position);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -219,7 +203,7 @@ function InterfaceWebUI(context) {
 							return self.pushLibraryListing.call(self, objBrowseData, selfConnWebSocket);
 						}
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -238,7 +222,7 @@ function InterfaceWebUI(context) {
 							return self.pushLibraryFilters.call(self, objBrowseData, selfConnWebSocket);
 						}
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -257,7 +241,7 @@ function InterfaceWebUI(context) {
 							return self.pushPlaylistIndex.call(self, objBrowseData, selfConnWebSocket);
 						}
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -267,8 +251,8 @@ function InterfaceWebUI(context) {
 				var timeStart = Date.now();
 				if (N == null) {
 					self.logStart('Client requests Volumio play')
-						.then(play)
-						.fail(pushError)
+						.then(self.commandRouter.volumioPlay.bind(self.commandRouter))
+						.fail(self.pushError.bind(self))
 						.done(function () {
 							return self.logDone(timeStart);
 						});
@@ -280,8 +264,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('pause', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio pause')
-					.then(pause)
-					.fail(pushError)
+					.then(self.commandRouter.volumioPause.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -290,8 +274,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('stop', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio stop')
-					.then(stop)
-					.fail(pushError)
+					.then(self.commandRouter.volumioStop.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -300,8 +284,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('clearQueue', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio Clear Queue')
-					.then(clearQueue)
-					.fail(pushError)
+					.then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -310,8 +294,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('previous', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio previous')
-					.then(previous)
-					.fail(pushError)
+					.then(self.commandRouter.volumioPrevious.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -320,8 +304,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('next', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio next')
-					.then(next)
-					.fail(pushError)
+					.then(self.commandRouter.volumioNext.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -334,7 +318,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'random', data.value);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -347,7 +331,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'repeat', data.value);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -359,7 +343,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						self.commandRouter.serviceUpdateTracklist.call(self.commandRouter, sService);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -368,8 +352,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('rebuildLibrary', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio Rebuild Library')
-					.then(rebuildLibrary)
-					.fail(pushError)
+					.then(self.commandRouter.volumioRebuildLibrary.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -378,8 +362,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('updateAllMetadata', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests update metadata cache')
-					.then(updateAllMetadata)
-					.fail(pushError)
+					.then(self.commandRouter.updateAllMetadata.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -391,7 +375,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -400,8 +384,8 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('importServicePlaylists', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests import of playlists')
-					.then(importServicePlaylists)
-					.fail(pushError)
+					.then(self.commandRouter.volumioImportServicePlaylists.bind(self.commandRouter))
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
@@ -418,7 +402,7 @@ function InterfaceWebUI(context) {
 						self.libSocketIO.emit('printConsoleMessage', menuitems['menuItems']);
 						return self.libSocketIO.emit('pushMenuItems', menuitems['menuItems']);
 					})
-					.fail(pushError)
+					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.logDone(timeStart);
 					});
