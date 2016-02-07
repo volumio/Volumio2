@@ -1021,7 +1021,7 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 	promise.then(function (data) {
 		for (var i in data) {
 			var ithdata = data[i];
-			var song = {type: 'playlist', title: ithdata, icon: 'bars', uri: 'playlists/' + ithdata};
+			var song = {type: 'playlist', title: ithdata, icon: 'fa fa-list-ol', uri: 'playlists/' + ithdata};
 
 			response.navigation.list.push(song);
 		}
@@ -1060,7 +1060,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 				title: ithdata.title,
 				artist: ithdata.artist,
 				album: ithdata.album,
-				icon: ithdata.albumart,
+				image: ithdata.albumart,
 				uri: ithdata.uri
 			};
 
@@ -1363,12 +1363,16 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 	var self = this;
 
 	var defer = libQ.defer();
-
+		
 
 		var address;
 
 		var url;
 		var artist, album;
+
+		if (data.path != undefined) {
+			path = data.path;
+		}
 
 
 		var web;
