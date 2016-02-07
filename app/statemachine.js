@@ -6,7 +6,7 @@ var libQ = require('kew');
 module.exports = CoreStateMachine;
 function CoreStateMachine(commandRouter) {
 	this.commandRouter = commandRouter;
-	this.playQueue = new (require('./playqueue.js'))(commandRouter, self);
+	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
 }
 
