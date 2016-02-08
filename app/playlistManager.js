@@ -543,7 +543,7 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					title: ithdata.title,
 					artist: ithdata.artist,
 					album: ithdata.album,
-					image: ithdata.albumart,
+					albumart: ithdata.albumart,
 					uri: ithdata.uri
 				};
 

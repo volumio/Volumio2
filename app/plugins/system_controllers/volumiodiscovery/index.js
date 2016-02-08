@@ -327,7 +327,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					mute: mute,
 					artist: artist,
 					track: track,
-					albumart:albumart
+					albumart:'http://'+address+albumart
 				}
 			};
 
