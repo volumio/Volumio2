@@ -463,8 +463,8 @@ CoreStateMachine.prototype.checkFavourites = function (state) {
 			var list = favList.navigation.list;
 			var nFavs = list.length;
 			for (var i = 0; i < nFavs; i++) {
-				var match = 'music-library' + state.uri;
-				if (match == list[i].uri) {
+				var match = state.uri;
+				if (match == favList.navigation.list[i].uri) {
 					response.favourite = true;
 				}
 			}
@@ -475,7 +475,6 @@ CoreStateMachine.prototype.checkFavourites = function (state) {
 		this.emitFavourites(response);
 		defer.resolve({});
 	}
-
 	return defer.promise;
 };
 

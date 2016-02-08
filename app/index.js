@@ -22,6 +22,7 @@ function CoreCommandRouter(server) {
 		]
 	});
 
+	this.callbacks = [];
 	this.sharedVars = new vconf();
 
 	this.logger.info("-------------------------------------------");
@@ -123,11 +124,13 @@ CoreCommandRouter.prototype.volumioClearQueue = function () {
 
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
+	this.callCallback("volumiosetvolume", VolumeInteger);
 	return this.volumeControl.alsavolume(VolumeInteger);
 };
 
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
+	this.callCallback("volumioupdatevolume", vol);
 	return this.stateMachine.updateVolume(vol);
 };
 
@@ -135,6 +138,33 @@ CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
 CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRetrievevolume');
 	return this.volumeControl.retrievevolume();
+};
+
+CoreCommandRouter.prototype.addCallback = function (name, callback) {
+	if (this.callbacks[name] == undefined) {
+		this.callbacks[name] = [];
+	}
+	this.callbacks[name].push(callback);
+	this.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
+};
+
+CoreCommandRouter.prototype.callCallback = function (name, data) {
+	var self = this;
+	var calls = this.callbacks[name];
+	if (calls != undefined) {
+		var nCalls = calls.length;
+		for (var i = 0; i < nCalls; i++) {
+			var func = this.callbacks[name][i];
+			try {
+				func(data);
+			} catch (e) {
+				self.logger.error("Help! Some callbacks for " + name + " are crashing!");
+				self.logger.error(e);
+			}
+		}
+	} else {
+		self.logger.debug("No callbacks for " + name);
+	}
 };
 
 // Volumio Add Queue Uids
@@ -221,12 +251,14 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 	this.executeOnPlugin('system_controller', 'volumiodiscovery', 'saveDeviceInfo', state);
 	// Announce new player state to each client interface
 	var self = this;
-	return libQ.all(
+	var res = libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
 			return thisInterface.pushState(state);
 		})
 	);
+	self.callCallback("volumioPushState", state);
+	return res;
 };
 
 CoreCommandRouter.prototype.volumioResetState = function () {
@@ -302,6 +334,14 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
 	return this.stateMachine.addQueueItems(arrayItems);
+};
+
+// Volumio Check Favourites
+CoreCommandRouter.prototype.checkFavourites = function (data) {
+	var self = this;
+	//self.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
+
+	return self.stateMachine.checkFavourites(data);
 };
 
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {
