@@ -1,535 +1,462 @@
+'use strict';
+
 var libQ = require('kew');
 var libFast = require('fast.js');
-var fs=require('fs-extra');
+var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var winston = require('winston');
-var vconf=require('v-conf');
+var vconf = require('v-conf');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
-function CoreCommandRouter (server) {
-	// This fixed variable will let us refer to 'this' object at deeper scopes
-	var self = this;
+function CoreCommandRouter(server) {
 
 	fs.ensureFileSync('/var/log/volumio.log');
-	self.logger = new (winston.Logger)({
+	this.logger = new (winston.Logger)({
 		transports: [
 			new (winston.transports.Console)(),
-			new (winston.transports.File)({ filename: '/var/log/volumio.log',
-											json: false})
+			new (winston.transports.File)({
+				filename: '/var/log/volumio.log',
+				json: false
+			})
 		]
 	});
 
-	self.sharedVars= new vconf();
+	this.callbacks = [];
+	this.sharedVars = new vconf();
 
-	self.logger.info("-------------------------------------------");
-	self.logger.info("-----            Volumio2              ----");
-	self.logger.info("-------------------------------------------");
-	self.logger.info("-----          System startup          ----");
-	self.logger.info("-------------------------------------------");
+	this.logger.info("-------------------------------------------");
+	this.logger.info("-----            Volumio2              ----");
+	this.logger.info("-------------------------------------------");
+	this.logger.info("-----          System startup          ----");
+	this.logger.info("-------------------------------------------");
 
 	// Start the music library
-	self.musicLibrary = new (require('./musiclibrary.js'))(self);
+	this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
 	// Start plugins
-	self.pluginManager = new (require(__dirname+'/pluginmanager.js'))(self, server);
-	self.pluginManager.loadPlugins();
+	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+	this.pluginManager.loadPlugins();
 	//self.pluginManager.onVolumioStart();
 	//self.pluginManager.startPlugins();
 
 	// Start the state machine
-	self.stateMachine = new (require('./statemachine.js'))(self);
-
+	this.stateMachine = new (require('./statemachine.js'))(this);
 
 
 	// Start the volume controller
-	self.volumeControl = new (require('./volumecontrol.js'))(self);
+	this.volumeControl = new (require('./volumecontrol.js'))(this);
 
 	// Start the playlist FS
 	//self.playlistFS = new (require('./playlistfs.js'))(self);
 
-	self.playListManager= new (require('./playlistManager.js'))(self);
+	this.playListManager = new (require('./playlistManager.js'))(this);
 
-	self.platformspecific=new (require(__dirname+'/platformSpecific.js'))(self);
+	this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
-	self.pushConsoleMessage( 'BOOT COMPLETED');
+	this.pushConsoleMessage('BOOT COMPLETED');
 
 	//Startup Sound
+	var self = this;
 	exec("/usr/bin/aplay --device=plughw:0,0 /volumio/app/startup.wav", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.pushConsoleMessage(error);
 		}
 	});
 
-
-
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
 // Volumio Play
-CoreCommandRouter.prototype.volumioPlay = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioPlay');
-
-	return self.stateMachine.play();
-}
+CoreCommandRouter.prototype.volumioPlay = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
+	return this.stateMachine.play();
+};
 
 // Volumio Pause
-CoreCommandRouter.prototype.volumioPause = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioPause');
-
-	return self.stateMachine.pause();
-}
+CoreCommandRouter.prototype.volumioPause = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioPause');
+	return this.stateMachine.pause();
+};
 
 // Volumio Stop
-CoreCommandRouter.prototype.volumioStop = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioStop');
-
-	return self.stateMachine.stop();
-}
+CoreCommandRouter.prototype.volumioStop = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioStop');
+	return this.stateMachine.stop();
+};
 
 // Volumio Previous
-CoreCommandRouter.prototype.volumioPrevious = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioPrevious');
-
-	return self.stateMachine.previous();
-}
+CoreCommandRouter.prototype.volumioPrevious = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioPrevious');
+	return this.stateMachine.previous();
+};
 
 // Volumio Next
-CoreCommandRouter.prototype.volumioNext = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioNext');
-
-	return self.stateMachine.next();
-}
+CoreCommandRouter.prototype.volumioNext = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioNext');
+	return this.stateMachine.next();
+};
 
 // Volumio Get State
-CoreCommandRouter.prototype.volumioGetState = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetState');
-
-	return self.stateMachine.getState();
-}
+CoreCommandRouter.prototype.volumioGetState = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioGetState');
+	return this.stateMachine.getState();
+};
 
 // Volumio Get Queue
-CoreCommandRouter.prototype.volumioGetQueue = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetQueue');
-
-	return self.stateMachine.getQueue();
-}
+CoreCommandRouter.prototype.volumioGetQueue = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioGetQueue');
+	return this.stateMachine.getQueue();
+};
 
 // Volumio Remove Queue Item
-CoreCommandRouter.prototype.volumioRemoveQueueItem = function(nIndex) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioRemoveQueueItem');
-
-	return self.stateMachine.removeQueueItem(nIndex);
-}
+CoreCommandRouter.prototype.volumioRemoveQueueItem = function (nIndex) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioRemoveQueueItem');
+	return this.stateMachine.removeQueueItem(nIndex);
+};
 
 // Volumio Clear Queue Item
-CoreCommandRouter.prototype.volumioClearQueue = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioClearQueue');
-
-	return self.stateMachine.clearQueue();
-}
+CoreCommandRouter.prototype.volumioClearQueue = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioClearQueue');
+	return this.stateMachine.clearQueue();
+};
 
 // Volumio Set Volume
-CoreCommandRouter.prototype.volumiosetvolume = function(VolumeInteger) {
-	var self = this;
-	self.callCallback("volumiosetvolume",VolumeInteger);
-	return self.volumeControl.alsavolume(VolumeInteger);
-}
+CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
+	this.callCallback("volumiosetvolume", VolumeInteger);
+	return this.volumeControl.alsavolume(VolumeInteger);
+};
 
 // Volumio Update Volume
-CoreCommandRouter.prototype.volumioupdatevolume = function(vol) {
-	var self = this;
-	self.callCallback("volumioupdatevolume",vol);
-	return self.stateMachine.updateVolume(vol);
-}
+CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
+	this.callCallback("volumioupdatevolume", vol);
+	return this.stateMachine.updateVolume(vol);
+};
 
 // Volumio Retrieve Volume
-CoreCommandRouter.prototype.volumioretrievevolume = function(vol) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioRetrievevolume');
+CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioRetrievevolume');
+	return this.volumeControl.retrievevolume();
+};
 
-	return self.volumeControl.retrievevolume();
-}
-
-var callbacks = [];
-CoreCommandRouter.prototype.addCallback = function (name,callback) {
-	var self = this;
-	if (callbacks[name] == undefined) {
-		callbacks[name] = [];
+CoreCommandRouter.prototype.addCallback = function (name, callback) {
+	if (this.callbacks[name] == undefined) {
+		this.callbacks[name] = [];
 	}
-	callbacks[name].push(callback);
-	self.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
-}
+	this.callbacks[name].push(callback);
+	this.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
+};
 
-CoreCommandRouter.prototype.callCallback = function (name,data) {
+CoreCommandRouter.prototype.callCallback = function (name, data) {
 	var self = this;
-	if (callbacks[name] != undefined ) {
-		for (var i in callbacks[name]) {
-			func = callbacks[name][i]
+	var calls = this.callbacks[name];
+	if (calls != undefined) {
+		var nCalls = calls.length;
+		for (var i = 0; i < nCalls; i++) {
+			var func = this.callbacks[name][i];
 			try {
 				func(data);
-			} catch(e) {
+			} catch (e) {
 				self.logger.error("Help! Some callbacks for " + name + " are crashing!");
 				self.logger.error(e);
 			}
 		}
 	} else {
-		self.logger.debug("No callbacks for " + name );
+		self.logger.debug("No callbacks for " + name);
 	}
-}
-
+};
 
 // Volumio Add Queue Uids
-CoreCommandRouter.prototype.volumioAddQueueUids = function(arrayUids) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioAddQueueUids');
-
-	return self.musicLibrary.addQueueUids(arrayUids);
-}
+CoreCommandRouter.prototype.volumioAddQueueUids = function (arrayUids) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueUids');
+	return this.musicLibrary.addQueueUids(arrayUids);
+};
 /*
 
-TODO: This should become the default entry point for adding music to any service
-// Volumio Add Queue Uri
-CoreCommandRouter.prototype.volumioAddQueueUri = function(data) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioAddQueueUri');
-	var service = data.service;
-	var uri = data.uri;
-		return self.executeOnPlugin('music_service', 'mpd', 'add', uri);
-}
-*/
+ TODO: This should become the default entry point for adding music to any service
+ // Volumio Add Queue Uri
+ CoreCommandRouter.prototype.volumioAddQueueUri = function(data) {
+ var self = this;
+ self.pushConsoleMessage( 'CoreCommandRouter::volumioAddQueueUri');
+ var service = data.service;
+ var uri = data.uri;
+ return self.executeOnPlugin('music_service', 'mpd', 'add', uri);
+ }
+ */
 // Volumio Rebuild Library
-CoreCommandRouter.prototype.volumioRebuildLibrary = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioRebuildLibrary');
-
-	return self.musicLibrary.buildLibrary();
-}
+CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioRebuildLibrary');
+	return this.musicLibrary.buildLibrary();
+};
 
 // Volumio Get Library Index
-CoreCommandRouter.prototype.volumioGetLibraryFilters = function(sUid) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetLibraryFilters');
-
-	return self.musicLibrary.getIndex(sUid);
-}
+CoreCommandRouter.prototype.volumioGetLibraryFilters = function (sUid) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioGetLibraryFilters');
+	return this.musicLibrary.getIndex(sUid);
+};
 
 // Volumio Browse Library
-CoreCommandRouter.prototype.volumioGetLibraryListing = function(sUid, objOptions) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetLibraryListing');
-
-	return self.musicLibrary.getListing(sUid, objOptions);
-}
+CoreCommandRouter.prototype.volumioGetLibraryListing = function (sUid, objOptions) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioGetLibraryListing');
+	return this.musicLibrary.getListing(sUid, objOptions);
+};
 
 // Volumio Browse Sources
-CoreCommandRouter.prototype.volumioGetBrowseSources = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetBrowseSources');
+CoreCommandRouter.prototype.volumioGetBrowseSources = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioGetBrowseSources');
+	return this.musicLibrary.getBrowseSources();
+};
 
-	return self.musicLibrary.getBrowseSources();
-}
-
-CoreCommandRouter.prototype.volumioAddToBrowseSources = function(data) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioAddToBrowseSources' +data);
-
-	return self.musicLibrary.addToBrowseSources(data);
-}
+CoreCommandRouter.prototype.volumioAddToBrowseSources = function (data) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioAddToBrowseSources' + data);
+	return this.musicLibrary.addToBrowseSources(data);
+};
 
 // Volumio Get Playlist Index
-CoreCommandRouter.prototype.volumioGetPlaylistIndex = function(sUid) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioGetPlaylistIndex');
-
-	return self.playlistFS.getIndex(sUid);
-}
+CoreCommandRouter.prototype.volumioGetPlaylistIndex = function (sUid) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioGetPlaylistIndex');
+	return this.playlistFS.getIndex(sUid);
+};
 
 // Service Update Tracklist
-CoreCommandRouter.prototype.serviceUpdateTracklist = function(sService) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::serviceUpdateTracklist');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisPlugin.rebuildTracklist.call(thisPlugin);
-}
+CoreCommandRouter.prototype.serviceUpdateTracklist = function (sService) {
+	this.pushConsoleMessage('CoreCommandRouter::serviceUpdateTracklist');
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	return thisPlugin.rebuildTracklist();
+};
 
 // Start WirelessScan
-CoreCommandRouter.prototype.volumiowirelessscan = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::StartWirelessScan');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisPlugin.scanWirelessNetworks.call(thisPlugin);
-}
+CoreCommandRouter.prototype.volumiowirelessscan = function () {
+	this.pushConsoleMessage('CoreCommandRouter::StartWirelessScan');
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	return thisPlugin.scanWirelessNetworks();
+};
 
 // Push WirelessScan Results (TODO SEND VIA WS)
-CoreCommandRouter.prototype.volumiopushwirelessnetworks = function(results) {
-	var self = this;
-	self.pushConsoleMessage( results);
-}
+CoreCommandRouter.prototype.volumiopushwirelessnetworks = function (results) {
+	this.pushConsoleMessage(results);
+};
 
 // Volumio Import Playlists
-CoreCommandRouter.prototype.volumioImportServicePlaylists = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioImportServicePlaylists');
-
-	return self.playlistFS.importServicePlaylists();
-}
+CoreCommandRouter.prototype.volumioImportServicePlaylists = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioImportServicePlaylists');
+	return this.playlistFS.importServicePlaylists();
+};
 
 // Methods usually called by the State Machine --------------------------------------------------------------------
 
-CoreCommandRouter.prototype.volumioPushState = function(state) {
+CoreCommandRouter.prototype.volumioPushState = function (state) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioPushState');
+	this.executeOnPlugin('system_controller', 'volumiodiscovery', 'saveDeviceInfo', state);
+	// Announce new player state to each client interface
 	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioPushState');
-	self.executeOnPlugin('system_controller','volumiodiscovery','saveDeviceInfo',state);
-	// Announce new player state to each client interfac
-
 	var res = libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			return thisInterface.pushState.call(thisInterface, state);
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			return thisInterface.pushState(state);
 		})
 	);
-	self.callCallback("volumioPushState",state);
+	self.callCallback("volumioPushState", state);
 	return res;
-}
+};
 
-CoreCommandRouter.prototype.volumioResetState = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioResetState');
+CoreCommandRouter.prototype.volumioResetState = function () {
+	this.pushConsoleMessage('CoreCommandRouter::volumioResetState');
+	return this.stateMachine.resetVolumioState();
+};
 
-	return self.stateMachine.resetVolumioState();
-}
-
-CoreCommandRouter.prototype.volumioPushQueue = function(queue) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::volumioPushQueue');
+CoreCommandRouter.prototype.volumioPushQueue = function (queue) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioPushQueue');
 
 	// Announce new player queue to each client interface
+	var self = this;
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			return thisInterface.pushQueue.call(thisInterface, queue);
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			return thisInterface.pushQueue(queue);
 		})
 	);
-}
+};
 
 // MPD Clear-Add-Play
-CoreCommandRouter.prototype.serviceClearAddPlayTracks = function(arrayTrackIds, sService) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::serviceClearAddPlayTracks');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisPlugin.clearAddPlayTracks.call(thisPlugin, arrayTrackIds);
-}
+CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds, sService) {
+	this.pushConsoleMessage('CoreCommandRouter::serviceClearAddPlayTracks');
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	return thisPlugin.clearAddPlayTracks(arrayTrackIds);
+};
 
 // MPD Stop
-CoreCommandRouter.prototype.serviceStop = function(sService) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::serviceStop');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisPlugin.stop.call(thisPlugin);
-}
+CoreCommandRouter.prototype.serviceStop = function (sService) {
+	this.pushConsoleMessage('CoreCommandRouter::serviceStop');
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	return thisPlugin.stop();
+};
 
 // MPD Pause
-CoreCommandRouter.prototype.servicePause = function(sService) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::servicePause');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisPlugin.pause.call(thisPlugin);
-}
+CoreCommandRouter.prototype.servicePause = function (sService) {
+	this.pushConsoleMessage('CoreCommandRouter::servicePause');
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	return thisPlugin.pause();
+};
 
 // MPD Resume
-CoreCommandRouter.prototype.serviceResume = function(sService) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::serviceResume');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-	return thisPlugin.resume.call(thisPlugin);
-}
+CoreCommandRouter.prototype.serviceResume = function (sService) {
+	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	return thisPlugin.resume();
+};
 
 // Methods usually called by the service controllers --------------------------------------------------------------
 
-CoreCommandRouter.prototype.servicePushState = function(state, sService) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::servicePushState');
-
-	return self.stateMachine.syncState(state, sService);
-}
+CoreCommandRouter.prototype.servicePushState = function (state, sService) {
+	this.pushConsoleMessage('CoreCommandRouter::servicePushState');
+	return this.stateMachine.syncState(state, sService);
+};
 
 // Methods usually called by the music library ---------------------------------------------------------------------
 
 // Get tracklists from all services and return them as an array
-CoreCommandRouter.prototype.getAllTracklists = function() {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::getAllTracklists');
+CoreCommandRouter.prototype.getAllTracklists = function () {
+	this.pushConsoleMessage('CoreCommandRouter::getAllTracklists');
 
 	// This is the synchronous way to get libraries, which waits for each controller to return its tracklist before continuing
+	var self = this;
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'music_service'), function(sService) {
-			var thisService = self.pluginManager.getPlugin.call(self.pluginManager, 'music_service', sService);
-			return thisService.getTracklist.call(thisService);
+		libFast.map(this.pluginManager.getPluginNames('music_service'), function (sService) {
+			var thisService = self.pluginManager.getPlugin('music_service', sService);
+			return thisService.getTracklist();
 		})
 	);
-}
+};
 
 // Volumio Add Queue Items
-CoreCommandRouter.prototype.addQueueItems = function(arrayItems) {
-	var self = this;
-	self.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
-
-	return self.stateMachine.addQueueItems(arrayItems);
-}
+CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
+	return this.stateMachine.addQueueItems(arrayItems);
+};
 
 // Volumio Check Favourites
-CoreCommandRouter.prototype.checkFavourites = function(data) {
+CoreCommandRouter.prototype.checkFavourites = function (data) {
 	var self = this;
 	//self.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
 
 	return self.stateMachine.checkFavourites(data);
-}
+};
 
-CoreCommandRouter.prototype.executeOnPlugin = function(type, name, method, data) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method );
+CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {
+	this.pushConsoleMessage('CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method);
 
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, type, name);
+	var thisPlugin = this.pluginManager.getPlugin(type, name);
 
-	if(thisPlugin!=undefined)
-		if(thisPlugin[method]){
-			return thisPlugin[method].call(thisPlugin, data);
-		}else{
-			self.pushConsoleMessage( 'Error : CoreCommandRouter::executeOnPlugin: No method [' + method + '] in plugin ' + name  );
+	if (thisPlugin != undefined)
+		if (thisPlugin[method]) {
+			return thisPlugin[method](data);
+		} else {
+			this.pushConsoleMessage('Error : CoreCommandRouter::executeOnPlugin: No method [' + method + '] in plugin ' + name);
 		}
 	else return undefined;
-}
+};
 
-CoreCommandRouter.prototype.getUIConfigOnPlugin = function(type, name, data) {
-	var self = this;
-	self.pushConsoleMessage( 'CoreCommandRouter::getUIConfigOnPlugin');
-
-	var thisPlugin = self.pluginManager.getPlugin.call(self.pluginManager, type, name);
-	return thisPlugin.getUIConfig.call(thisPlugin, data);
-}
+CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
+	this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+	var thisPlugin = this.pluginManager.getPlugin(type, name);
+	return thisPlugin.getUIConfig(data);
+};
 
 /* what is this?
-CoreCommandRouter.prototype.getConfiguration=function(componentCode)
-{
-	console.log("_________ "+componentCode);
-}
-*/
+ CoreCommandRouter.prototype.getConfiguration=function(componentCode)
+ {
+ console.log("_________ "+componentCode);
+ }
+ */
 
 // Utility functions ---------------------------------------------------------------------------------------------
 
-CoreCommandRouter.prototype.pushConsoleMessage = function(sMessage) {
-	var self = this;
-
-	self.logger.info(sMessage);
+CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
+	this.logger.info(sMessage);
 	/*
-	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			if( typeof thisInterface.printConsoleMessage === "function")
-			return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
-		})
-	);
+	 var self = this;
+	 return libQ.all(
+	 libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
+	 var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+	 if( typeof thisInterface.printConsoleMessage === "function")
+	 return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
+	 })
+	 );
 	 */
-}
+};
 
-CoreCommandRouter.prototype.pushToastMessage = function(type, title, message) {
+CoreCommandRouter.prototype.pushToastMessage = function (type, title, message) {
 	var self = this;
-
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
 			if (typeof thisInterface.printToastMessage === "function")
-				return thisInterface.printToastMessage.call(thisInterface, type, title, message);
+				return thisInterface.printToastMessage(type, title, message);
 		})
 	);
-}
+};
 
-CoreCommandRouter.prototype.broadcastToastMessage = function(type, title, message) {
+CoreCommandRouter.prototype.broadcastToastMessage = function (type, title, message) {
 	var self = this;
-
 	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
 			if (typeof thisInterface.broadcastToastMessage === "function")
-				return thisInterface.broadcastToastMessage.call(thisInterface, type, title, message);
+				return thisInterface.broadcastToastMessage(type, title, message);
 		})
 	);
-}
-CoreCommandRouter.prototype.pushMultiroomDevices = function(data)
-{
-	var self=this;
-	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			if (typeof thisInterface.pushMultiroomDevices === "function" )
-				return thisInterface.pushMultiroomDevices.call(thisInterface, data);
-		})
-	);
-}
+};
 
-CoreCommandRouter.prototype.pushMultiroom = function(data)
-{
-	var self=this;
-
-	return libQ.all(
-		libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-			var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-			if (typeof thisInterface.pushMultiroom === "function" )
-				return thisInterface.pushMultiroom.call(thisInterface, data);
-		})
-	);
-}
-
-
-CoreCommandRouter.prototype.pushAirplay = function(data)
-{
-	var self=this;
-
-	return libQ.all(
-			libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-				var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-				if (typeof thisInterface.pushAirplay === "function" )
-					return thisInterface.pushAirplay.call(thisInterface, data);
-			})
-	);
-}
-
-CoreCommandRouter.prototype.shutdown = function() {
+CoreCommandRouter.prototype.pushMultiroomDevices = function (data) {
 	var self = this;
-	self.platformspecific.shutdown();
-}
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			if (typeof thisInterface.pushMultiroomDevices === "function")
+				return thisInterface.pushMultiroomDevices(data);
+		})
+	);
+};
 
-CoreCommandRouter.prototype.reboot = function() {
+CoreCommandRouter.prototype.pushMultiroom = function (data) {
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			if (typeof thisInterface.pushMultiroom === "function")
+				return thisInterface.pushMultiroom(data);
+		})
+	);
+};
+
+
+CoreCommandRouter.prototype.pushAirplay = function (data) {
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			if (typeof thisInterface.pushAirplay === "function")
+				return thisInterface.pushAirplay(data);
+		})
+	);
+};
+
+CoreCommandRouter.prototype.shutdown = function () {
+	this.platformspecific.shutdown();
+};
+
+CoreCommandRouter.prototype.reboot = function () {
 	var self = this;
 	exec("sudo /sbin/reboot", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.pushConsoleMessage(error);
 		} else self.pushConsoleMessage('Rebooting');
 	});
-}
+};
 
-CoreCommandRouter.prototype.emitFavourites = function(msg) {
-    var self = this;
-
-    var plugin=self.pluginManager.getPlugin('user_interface','websocket');
-    plugin.emitFavourites(msg);
-}
-
-
+CoreCommandRouter.prototype.emitFavourites = function (msg) {
+	var plugin = this.pluginManager.getPlugin('user_interface', 'websocket');
+	plugin.emitFavourites(msg);
+};
