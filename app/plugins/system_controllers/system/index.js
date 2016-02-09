@@ -14,8 +14,9 @@ function ControllerSystem(context) {
 	// Save a reference to the parent commandRouter
 	self.context = context;
 	self.commandRouter = self.context.coreCommand;
+    self.configManager=self.context.configManager;
 
-	self.logger = self.context.logger;
+    self.logger = self.context.logger;
 	self.callbacks = [];
 }
 
@@ -59,9 +60,8 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
-	uiconf.sections[0].content[0].value = config.get('playerName');
-	uiconf.sections[0].content[1].value = config.get('startupSound');
-
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',config.get('playerName'));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',config.get('startupSound'));
 
 	return uiconf;
 };
