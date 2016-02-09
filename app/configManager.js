@@ -90,3 +90,42 @@ ConfigManager.prototype.pushUIConfigParam=function(data,path,value)
     }
 
 }
+
+ConfigManager.prototype.getValue=function(data,path)
+{
+
+    if(data!=undefined && path!=undefined)
+    {
+        var splitted=path.split('.');
+        var current= data;
+
+        for(var i in splitted)
+        {
+            var field=splitted[i];
+
+            var squareIndex=field.indexOf('[');
+            if(squareIndex>-1)
+            {
+                var squareSplitted=field.split('[');
+
+                var arrayIndex=parseInt(squareSplitted[1].slice(0,squareSplitted[1].indexOf(']')));
+
+                if(current[squareSplitted[0]]!=undefined &&
+                    current[squareSplitted[0]][arrayIndex]!=undefined)
+                {
+                        current=current[squareSplitted[0]][arrayIndex];
+                }
+            }
+            else{
+                if(current[field]!=undefined)
+                {
+                    current=current[field];
+                }
+            }
+
+        }
+
+        return current;
+    }
+
+}

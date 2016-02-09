@@ -725,35 +725,35 @@ ControllerMpd.prototype.getUIConfig = function () {
 
     value=self.config.get('gapless_mp3_playback');
 	self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.label',self.getLabelForSelect(uiconf.sections[0].content[0].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[0].options'), value));
 
     value=self.config.get('volume_normalization');
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.label',self.getLabelForSelect(uiconf.sections[0].content[1].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[1].options'), value));
 
     value=self.config.get('audio_buffer_size');
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.label',self.getLabelForSelect(uiconf.sections[0].content[2].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[2].options'), value));
 
     value=self.config.get('buffer_before_play');
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.label',self.getLabelForSelect(uiconf.sections[0].content[3].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[3].options'), value));
 
     value=self.config.get('auto_update')
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.label',self.getLabelForSelect(uiconf.sections[0].content[4].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[4].options'), value));
 
     value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
     self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.label',self.getLabelForSelect(uiconf.sections[1].content[0].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[0].options'), value));
 
     value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
     self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.label',self.getLabelForSelect(uiconf.sections[1].content[1].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[1].options'), value));
 
     value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
     self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.value',value);
-    self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.label',self.getLabelForSelect(uiconf.sections[1].content[2].options, value));
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[2].options'), value));
 
     var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
 
