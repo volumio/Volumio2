@@ -59,7 +59,7 @@ ControllerMpd.prototype.play = function (N) {
 //MPD Add
 ControllerMpd.prototype.add = function (data) {
 	var self = this;
-	self.commandRouter.pushToastMessage('Success', '', str + ' Added');
+	self.commandRouter.pushToastMessage('Success', '', data + ' Added');
 
 	return self.sendMpdCommand('add', [data]);
 };
@@ -208,7 +208,7 @@ ControllerMpd.prototype.addPlay = function (data) {
 
 ControllerMpd.prototype.addPlayCue = function (data) {
 	var self = this;
-	self.commandRouter.pushToastMessage('Success', '', str + ' Added');
+	self.commandRouter.pushToastMessage('Success', '', data.uri + ' Added');
 
 	//Add playlists and cue with load command
 	self.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri)
@@ -1369,11 +1369,9 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 		var url;
 		var artist, album;
 
-
 		if (data != undefined && data.path != undefined) {
 				var path = data.path;
 		}
-
 
 		var web;
 
