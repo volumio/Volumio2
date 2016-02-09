@@ -1,3 +1,5 @@
+'use strict';
+
 var libQ = require('kew');
 var fs = require('fs-extra');
 
@@ -100,7 +102,7 @@ function InterfaceWebUI(context) {
 					var uri = data.uri;
 					var arr = uri.split("/");
 					arr.shift();
-					str = arr.join('/');
+					var str = arr.join('/');
 				}
 				else str = data.uri;
 				//TODO add proper service handler
@@ -120,7 +122,7 @@ function InterfaceWebUI(context) {
 					var uri = data.uri;
 					var arr = uri.split("/");
 					arr.shift();
-					str = arr.join('/');
+					var str = arr.join('/');
 				}
 				else str = data.uri;
 
@@ -143,7 +145,7 @@ function InterfaceWebUI(context) {
 					var uri = data.uri;
 					var arr = uri.split("/");
 					arr.shift();
-					str = arr.join('/');
+					var str = arr.join('/');
 				}
 				else str = data.uri;
 
@@ -775,7 +777,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('writeMultiroom', function (data) {
-				selfConnWebSocket = this;
+				var selfConnWebSocket = this;
 
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'writeMultiRoom', data);
 
@@ -1217,7 +1219,7 @@ InterfaceWebUI.prototype.broadcastMessage = function(data) {
     var self = this;
     var msg = data.msg;
     var value = data.value;
-    self.logger.info("WebSocket broadcastMessage  " + msg + " -  "  +JSON.stringify(value));
+    //self.logger.info("WebSocket broadcastMessage  " + msg + " -  "  +JSON.stringify(value));
     self.libSocketIO.sockets.emit(msg, value);
 };
 

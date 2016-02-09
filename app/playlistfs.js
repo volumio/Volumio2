@@ -1,9 +1,10 @@
+'use strict';
+
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
 var libLevel = require('level');
-var libUtil = require('util');
 
 // Define the CorePlaylistFS class
 module.exports = CorePlaylistFS;
@@ -35,7 +36,7 @@ CorePlaylistFS.prototype.getIndex = function(sUid) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlaylistFS::getIndex');
 
 	return libQ.resolve(self.playlistIndex[sUid].children);
-}
+};
 
 // Load a LevelDB from disk containing the music library and indexes
 CorePlaylistFS.prototype.loadPlaylistsFromDB = function() {
@@ -66,7 +67,7 @@ CorePlaylistFS.prototype.loadPlaylistsFromDB = function() {
 			throw new Error('Error reading DB: ' + sError);
 		})
 		.fin(libFast.bind(dbPlaylists.close, dbPlaylists));
-}
+};
 
 // Import existing playlists and folders from the various services
 CorePlaylistFS.prototype.importServicePlaylists = function() {
@@ -91,7 +92,7 @@ CorePlaylistFS.prototype.importServicePlaylists = function() {
 			self.commandRouter.pushConsoleMessage('Playlists imported.');
 		})
 		.fin(libFast.bind(dbPlaylists.close, dbPlaylists));
-}
+};
 
 // Add an track into the playlist filesystem
 CorePlaylistFS.prototype.addPlaylistItem = function(curTrack) {
@@ -155,7 +156,7 @@ CorePlaylistFS.prototype.addPlaylistItem = function(curTrack) {
 	});
 	self.playlistIndex[curFolderKey].childuids[curTrackKey] = null;
 
-}
+};
 
 // Create a URL safe hashkey for a given string. The result will be a constant length string containing
 // upper and lower case letters, numbers, '-', and '_'.
@@ -167,4 +168,3 @@ function convertStringToHashkey(input) {
 
 	return libBase64Url.escape(libCrypto.createHash('sha256').update(input, 'utf8').digest('base64'));
 }
-

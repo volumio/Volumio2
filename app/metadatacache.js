@@ -1,3 +1,5 @@
+'use strict';
+
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libLevel = require('level');
@@ -83,14 +85,14 @@ CoreMetadataCache.prototype.loadMetadataCacheFromDB = function() {
 			throw new Error('Error reading DB: ' + sError);
 		})
 		.fin(libFast.bind(dbMetadataCache.close, dbMetadataCache));
-}
+};
 
 CoreMetadataCache.prototype.addTask = function(sTable, sKey) {
 	var self = this;
 	self.arrayTaskStack.push({'table': sTable, 'key': sKey});
 
 	return self.enqueueNextTask();
-}
+};
 
 // Internal methods ----------------------------------------------------------------------------------------
 CoreMetadataCache.prototype.enqueueNextTask = function() {
@@ -144,7 +146,7 @@ CoreMetadataCache.prototype.enqueueNextTask = function() {
 			// TODO - store task stack in DB here
 			return promisedSubTasks;
 		});
-}
+};
 
 CoreMetadataCache.prototype.fetchMbid = function(sType, sValue) {
 	var self = this;
@@ -165,7 +167,7 @@ console.log(arrayResults[0].id);
 			// Have this clause to catch errors so the parent promise does not abort
 			return '';
 		});
-}
+};
 
 CoreMetadataCache.prototype.fetchAlbumArt = function(sMbid, sBasePath) {
 	var self = this;
@@ -191,5 +193,4 @@ console.log(sPath);
 			// Have this clause to catch errors so the parent promise does not abort
 			return sPath;
 		});
-}
-
+};

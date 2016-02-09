@@ -1,3 +1,5 @@
+'use strict';
+
 // Helper for interface-mpd.
 // Contains tools to print commands in MPD format.
 // Contains setters to set data in MPD format.

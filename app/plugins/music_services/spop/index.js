@@ -1,3 +1,5 @@
+'use strict';
+
 var libQ = require('kew');
 var libNet = require('net');
 var libFast = require('fast.js');
@@ -147,50 +149,50 @@ ControllerSpop.prototype.onVolumioStart = function() {
 			self.commandRouter.pushConsoleMessage('SpopD Daemon Started');
 		}
 	});
-}
+};
 
 ControllerSpop.prototype.onStop = function() {
 	var self = this;
 	exec("killall spopd", function (error, stdout, stderr) {
 
 	});
-}
+};
 
 ControllerSpop.prototype.onRestart = function() {
 	var self = this;
 	//
-}
+};
 
 ControllerSpop.prototype.onInstall = function() {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerSpop.prototype.onUninstall = function() {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerSpop.prototype.getUIConfig = function() {
 	var self = this;
 
 	return {success:true,plugin:"spop"};
-}
+};
 
 ControllerSpop.prototype.setUIConfig = function(data) {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerSpop.prototype.getConf = function(varName) {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerSpop.prototype.setConf = function(varName, varValue) {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 // Public Methods ---------------------------------------------------------------------------------------
 // These are 'this' aware, and return a promise
@@ -531,6 +533,3 @@ ControllerSpop.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
-
-
-

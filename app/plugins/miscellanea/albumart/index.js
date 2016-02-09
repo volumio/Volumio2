@@ -1,10 +1,6 @@
-var libQ = require('kew');
-var libFast = require('fast.js');
-var fs=require('fs-extra');
+'use strict';
+
 var exec = require('child_process').exec;
-var nodetools=require('nodetools');
-var ip = require('ip');
-var S=require('string');
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -35,38 +31,38 @@ AlbumArt.prototype.onVolumioStart = function() {
 			else console.log('Album art server started up');
 
 		});
-}
+};
 
 AlbumArt.prototype.onStart = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 AlbumArt.prototype.onStop = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 AlbumArt.prototype.onRestart = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 AlbumArt.prototype.onInstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlbumArt.prototype.onUninstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlbumArt.prototype.getConfigurationFiles = function()
 {
 	var self = this;
 
 	return ['config.json'];
-}
+};

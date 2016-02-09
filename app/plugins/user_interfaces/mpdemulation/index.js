@@ -1,3 +1,5 @@
+'use strict';
+
 var net = require('net');
 var libQ = require('kew');
 var libFast = require('fast.js');

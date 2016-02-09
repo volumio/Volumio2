@@ -1,3 +1,5 @@
+'use strict';
+
 var libQ = require('kew');
 var fs=require('fs-extra');
 var S=require('string');
@@ -43,7 +45,7 @@ PlaylistManager.prototype.createPlaylist = function(name) {
 	});
 
 	return self.listPlaylist();
-}
+};
 
 PlaylistManager.prototype.deletePlaylist = function(name) {
 	var self = this;
@@ -70,7 +72,7 @@ PlaylistManager.prototype.deletePlaylist = function(name) {
 	});
 
 	return defer.promise;
-}
+};
 
 PlaylistManager.prototype.listPlaylist = function() {
 	var self = this;
@@ -91,13 +93,13 @@ PlaylistManager.prototype.listPlaylist = function() {
 	defer.resolve(playlists);
 
 	return defer.promise;
-}
+};
 
 PlaylistManager.prototype.getPlaylistContent = function(name) {
 	var self = this;
 
 	return self.commonGetPlaylistContent(self.playlistFolder,name);
-}
+};
 
 PlaylistManager.prototype.addToPlaylist = function(name,service,uri) {
 	var self = this;
@@ -105,8 +107,7 @@ PlaylistManager.prototype.addToPlaylist = function(name,service,uri) {
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
 	self.commandRouter.pushToastMessage('success',"Added", uri+' to playlist '+name);
 	return self.commonAddToPlaylist(self.playlistFolder,name,service,uri);
-}
-
+};
 
 PlaylistManager.prototype.removeFromPlaylist = function(name,service,uri) {
 	var self = this;
@@ -114,7 +115,7 @@ PlaylistManager.prototype.removeFromPlaylist = function(name,service,uri) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' to playlist '+name);
 
 	return self.commonRemoveFromPlaylist(self.playlistFolder,name,service,uri);
-}
+};
 
 PlaylistManager.prototype.playPlaylist = function(name) {
 	var self = this;
@@ -122,7 +123,7 @@ PlaylistManager.prototype.playPlaylist = function(name) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Play playlist '+name);
 
 	return self.commonPlayPlaylist(self.playlistFolder,name);
-}
+};
 
 PlaylistManager.prototype.enqueue = function(name) {
 	var self = this;
@@ -169,14 +170,14 @@ PlaylistManager.prototype.enqueue = function(name) {
 	});
 
 	return defer.promise;
-}
+};
 
 // Favourites
 PlaylistManager.prototype.getFavouritesContent = function(name) {
 	var self = this;
 
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'favourites');
-}
+};
 
 PlaylistManager.prototype.addToFavourites = function(service,uri) {
 	var self = this;
@@ -184,7 +185,7 @@ PlaylistManager.prototype.addToFavourites = function(service,uri) {
 	self.commandRouter.pushToastMessage('success',"Added", uri+' to Favourites ');
 
 	return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
-}
+};
 
 PlaylistManager.prototype.removeFromFavourites = function(name,service,uri) {
 	var self = this;
@@ -192,7 +193,7 @@ PlaylistManager.prototype.removeFromFavourites = function(name,service,uri) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' from favourites');
 
 	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
-}
+};
 
 PlaylistManager.prototype.playFavourites = function() {
 	var self = this;
@@ -200,7 +201,7 @@ PlaylistManager.prototype.playFavourites = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing favourites');
 
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder,'favourites');
-}
+};
 
 // Radio Favourites
 
@@ -208,7 +209,7 @@ PlaylistManager.prototype.getRadioFavouritesContent = function(name) {
 	var self = this;
 
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'radio-favourites');
-}
+};
 
 PlaylistManager.prototype.addToRadioFavourites = function(service,uri) {
 	var self = this;
@@ -216,7 +217,7 @@ PlaylistManager.prototype.addToRadioFavourites = function(service,uri) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to radio-favourites');
 
 	return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
-}
+};
 
 PlaylistManager.prototype.removeFromRadioFavourites = function(name,service,uri) {
 	var self = this;
@@ -224,7 +225,7 @@ PlaylistManager.prototype.removeFromRadioFavourites = function(name,service,uri)
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' from radio-favourites');
 
 	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
-}
+};
 
 PlaylistManager.prototype.playRadioFavourites = function() {
 	var self = this;
@@ -232,7 +233,7 @@ PlaylistManager.prototype.playRadioFavourites = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing radio-favourites');
 
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder,'radio-favourites');
-}
+};
 
 // My Web Radio
 
@@ -240,7 +241,7 @@ PlaylistManager.prototype.getMyWebRadioContent = function(name) {
 	var self = this;
 
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder,'my-web-radio');
-}
+};
 
 PlaylistManager.prototype.addToMyWebRadio = function(service,radio_name,uri) {
 	var self = this;
@@ -288,7 +289,7 @@ PlaylistManager.prototype.addToMyWebRadio = function(service,radio_name,uri) {
 	});
 
 	return defer.promise;
-}
+};
 
 PlaylistManager.prototype.removeFromMyWebRadio = function(name,service,uri) {
 	var self = this;
@@ -328,7 +329,7 @@ PlaylistManager.prototype.removeFromMyWebRadio = function(name,service,uri) {
 	});
 
 	return defer.promise;
-}
+};
 
 PlaylistManager.prototype.playMyWebRadio = function() {
 	var self = this;
@@ -336,7 +337,7 @@ PlaylistManager.prototype.playMyWebRadio = function() {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing my-web-radio');
 
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder,'my-web-radio');
-}
+};
 
 //  COMMON methods
 PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri) {
@@ -396,7 +397,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 	});
 
 	return defer.promise;
-}
+};
 
 
 PlaylistManager.prototype.commonRemoveFromPlaylist = function(folder,name,service,uri) {
@@ -441,7 +442,7 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function(folder,name,servic
 	});
 
 	return defer.promise;
-}
+};
 
 PlaylistManager.prototype.commonPlayPlaylist = function(folder,name) {
 	var self = this;
@@ -486,7 +487,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function(folder,name) {
 	});
 
 	return defer.promise;
-}
+};
 
 PlaylistManager.prototype.commonGetPlaylistContent = function(folder,name) {
 	var self = this;
@@ -513,7 +514,7 @@ PlaylistManager.prototype.commonGetPlaylistContent = function(folder,name) {
 	});
 
 	return defer.promise;
-}
+};
 
 
 /**

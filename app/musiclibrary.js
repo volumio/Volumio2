@@ -1,10 +1,9 @@
+'use strict';
+
 var libQ = require('kew');
 var libFast = require('fast.js');
-var libSortOn = require('sort-on');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
-var libLevel = require('level');
-var libUtil = require('util');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
@@ -180,7 +179,7 @@ CoreMusicLibrary.prototype.makeQueueItem = function(objTrack) {
 		if (self.servicePriority[i] in objTrack.uris) {
 			var objQueueItem = objTrack.uris[self.servicePriority[i]];
 			objQueueItem.service = self.servicePriority[i];
-			objTrackInfo = self.getObjectInfo(objTrack, self.queueItemDataPath);
+			var objTrackInfo = self.getObjectInfo(objTrack, self.queueItemDataPath);
 
 			libFast.map(Object.keys(objTrackInfo), function(sCurField) {
 				objQueueItem[sCurField] = objTrackInfo[sCurField];

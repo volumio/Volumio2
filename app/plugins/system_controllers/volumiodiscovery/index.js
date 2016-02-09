@@ -1,5 +1,5 @@
-var libQ = require('kew');
-var libFast = require('fast.js');
+'use strict';
+
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var foundVolumioInstances= new (require('v-conf'))();
@@ -32,7 +32,7 @@ ControllerVolumioDiscovery.prototype.getConfigurationFiles = function()
 	var self = this;
 
 	return ['config.json'];
-}
+};
 
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
@@ -42,7 +42,7 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 
 	self.startAdvertisement();
 	self.startMDNSBrowse();
-}
+};
 
 ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 {
@@ -70,7 +70,7 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 	if(collides==true)
 		return self.getNewName(curName,newi);
 	else return nameToCheck;
-}
+};
 
 ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 {
@@ -120,10 +120,10 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	}
 	catch(ecc)
 	{
-		console.log(ecc);
+		//console.log(ecc);
 		self.startAdvertisement();
 	}
-}
+};
 
 ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 {
@@ -154,8 +154,8 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			} else {
 				registeredUUIDs.push(service.txtRecord.UUID);
 				console.log("AVAPI: adding " + service.txtRecord.UUID);
-			}	
-			
+			}
+
 			//console.log(service);
 			self.context.coreCommand.pushConsoleMessage('mDNS: Found device '+service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
@@ -193,7 +193,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 				if (uuidindex !== -1) {
 				    registeredUUIDs.splice(uuidindex, 1);
 				}
-				
+
 				var osname=foundVolumioInstances.get(key+'.name');
 				if(osname==service.name)
 				{
@@ -220,7 +220,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 	{
 		self.startMDNSBrowse();
 	}
-}
+};
 
 
 ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) {
@@ -250,16 +250,16 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 		self.remoteConnections.set(uuid,socket);
 	}
 
-}
+};
 
 String.prototype.capitalize = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1);
-}
+};
 
 ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 {
 	var self=this;
-	console.log("AV: Got saveDeviceInfo: " + JSON.stringify(data,null,4));
+	//console.log("AV: Got saveDeviceInfo: " + JSON.stringify(data,null,4));
 	if (data.volume == undefined) data.volume = 0;
 	if (data.status == undefined) data.status = '';
 	if (data.artist == undefined) data.artist = '';
@@ -267,11 +267,11 @@ ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 	if (data.albumart == undefined) data.albumart = '';
 
 	var uuid = data.uuid;
-	
+
 	if (uuid == undefined) {
 		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 		uuid = systemController.getConf('uuid');
-		console.log("Using self UUID");
+		//console.log("Using self UUID");
 	}
 	foundVolumioInstances.set(uuid+'.status',data.status);
 	foundVolumioInstances.set(uuid+'.volume',data.volume > -1 ? data.volume : 0);
@@ -281,7 +281,7 @@ ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 	foundVolumioInstances.set(uuid+'.albumart',data.albumart);
 
 
-}
+};
 
 
 ControllerVolumioDiscovery.prototype.getDevices=function()
@@ -338,56 +338,37 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 	}
 	return response;
 
-}
+};
 
 ControllerVolumioDiscovery.prototype.onStop = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.onRestart = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.onInstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.onUninstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.getUIConfig = function()
 {
 	var self = this;
 
-	/*var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
-
-	//dhcp
-	uiconf.sections[0].content[0].value=config.get('dhcp');
-
-	//static ip
-	uiconf.sections[0].content[1].value=config.get('ethip');
-
-	//static netmask
-	uiconf.sections[0].content[2].value=config.get('ethnetmask');
-
-	//static gateway
-	uiconf.sections[0].content[3].value=config.get('ethgateway');
-
-	//WLan ssid
-	uiconf.sections[1].content[0].value=config.get('wlanssid');
-
-	//
-	uiconf.sections[1].content[1].value=config.get('wlanpass');*/
 
 	return uiconf;
-}
+};
 
 ControllerVolumioDiscovery.prototype.setUIConfig = function(data)
 {
@@ -395,46 +376,46 @@ ControllerVolumioDiscovery.prototype.setUIConfig = function(data)
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
-}
+};
 
 ControllerVolumioDiscovery.prototype.getConf = function(varName)
 {
 	var self = this;
 
 	return self.config.get(varName);
-}
+};
 
 ControllerVolumioDiscovery.prototype.setConf = function(varName, varValue)
 {
 	var self = this;
 
 	self.config.set(varName,varValue);
-}
+};
 
 //Optional functions exposed for making development easier and more clear
 ControllerVolumioDiscovery.prototype.getSystemConf = function(pluginName,varName)
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.setSystemConf = function(pluginName,varName)
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.getAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 ControllerVolumioDiscovery.prototype.setAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 
 /**
@@ -446,7 +427,7 @@ ControllerVolumioDiscovery.prototype.registerCallback = function(callback)
 	var self = this;
 
 	self.callbacks.push(callback);
-}
+};
 
 
 /**
@@ -457,9 +438,9 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 {
 	var self = this;
 
-	self.logger.info("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
+	//self.logger.info("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
 
-}
+};
 
 // ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 // {
