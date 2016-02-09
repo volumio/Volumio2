@@ -74,7 +74,7 @@ updater_comm.prototype.onVolumioStart = function () {
 				watch_for: Inotify.IN_CLOSE_WRITE,
 				callback: callback
 			};
-			self.ilFileDescriptor = inotify.addWatch(ilFile);
+			var ilFileDescriptor = inotify.addWatch(ilFile);
 		});
 	});
 };
