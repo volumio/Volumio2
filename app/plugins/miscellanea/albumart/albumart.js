@@ -23,7 +23,7 @@ var logger = new (winston.Logger)({
 var albumArtRootFolder = '/data/albumart';
 
 var setFolder = function (newFolder) {
-	logger.info("Setting folder " + newFolder);
+	//logger.info("Setting folder " + newFolder);
 	albumArtRootFolder = S(newFolder).ensureRight('/').s;
 };
 
@@ -100,7 +100,7 @@ var searchOnline = function (defer, web) {
 								filename: diskFileName
 							}
 
-							console.log("URL: " + url);
+							//console.log("URL: " + url);
 							download(url, options, function (err) {
 								if (err) defer.reject(new Error(err));
 								else defer.resolve(folder + diskFileName);
@@ -185,7 +185,7 @@ var searchInFolder = function (defer, path, web) {
 
 		for (var i in covers) {
 			var coverFile = coverFolder + '/' + covers[i];
-			console.log("Searching for cover " + coverFile);
+			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
 				defer.resolve(coverFile);
 				return defer.promise;
@@ -196,7 +196,7 @@ var searchInFolder = function (defer, path, web) {
 		for (var j in files) {
 			var fileName = S(files[j]);
 
-			console.log(fileName.s);
+			//console.log(fileName.s);
 			if (fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
 				defer.resolve(coverFolder + '/' + fileName.s);
 				return defer.promise;
@@ -239,7 +239,7 @@ var processRequest = function (web, path) {
 							logger.info("Found art in file " + path);
 
 							fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
-								console.log('file has been written');
+								//console.log('file has been written');
 								defer.resolve('/tmp/albumart');
 							});
 
