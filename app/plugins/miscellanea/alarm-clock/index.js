@@ -1,5 +1,6 @@
+'use strict';
+
 var libQ = require('kew');
-var libFast = require('fast.js');
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var schedule = require('node-schedule');
@@ -23,41 +24,41 @@ AlarmClock.prototype.getConfigurationFiles = function()
 	var self = this;
 
 	return ['config.json'];
-}
+};
 
 AlarmClock.prototype.onVolumioStart = function() {
 	var self = this;
 	//Perform startup tasks here
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 	config.loadFile(configFile);
-}
+};
 
 AlarmClock.prototype.onStart = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 AlarmClock.prototype.onStop = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 AlarmClock.prototype.onRestart = function() {
 	var self = this;
 	//Perform startup tasks here
-}
+};
 
 AlarmClock.prototype.onInstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlarmClock.prototype.onUninstall = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlarmClock.prototype.getUIConfig = function()
 {
@@ -75,7 +76,7 @@ AlarmClock.prototype.getUIConfig = function()
 	uiconf.sections[0].content[2].value.value=config.get('minute');
 
 	return uiconf;
-}
+};
 
 AlarmClock.prototype.setUIConfig = function(data)
 {
@@ -83,46 +84,46 @@ AlarmClock.prototype.setUIConfig = function(data)
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
-}
+};
 
 AlarmClock.prototype.getConf = function(varName)
 {
 	var self = this;
 
 	return self.config.get(varName);
-}
+};
 
 AlarmClock.prototype.setConf = function(varName, varValue)
 {
 	var self = this;
 
 	self.config.set(varName,varValue);
-}
+};
 
 //Optional functions exposed for making development easier and more clear
 AlarmClock.prototype.getSystemConf = function(pluginName,varName)
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlarmClock.prototype.setSystemConf = function(pluginName,varName)
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlarmClock.prototype.getAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 AlarmClock.prototype.setAdditionalConf = function()
 {
 	var self = this;
 	//Perform your installation tasks here
-}
+};
 
 
 AlarmClock.prototype.saveAlarm=function(data)
@@ -144,7 +145,7 @@ AlarmClock.prototype.saveAlarm=function(data)
 
 	defer.resolve({});
 	return defer.promise;
-}
+};
 
 AlarmClock.prototype.getSleep = function()
 {
@@ -157,7 +158,7 @@ AlarmClock.prototype.getSleep = function()
 		time:config.get('sleep_hour')+':'+config.get('sleep_minute')
 	});
 	return defer.promise;
-}
+};
 
 AlarmClock.prototype.setSleep = function(data)
 {
@@ -201,4 +202,4 @@ AlarmClock.prototype.setSleep = function(data)
 
 	defer.resolve({});
 	return defer.promise;
-}
+};
