@@ -3,11 +3,12 @@
 var HashMap = require('hashmap');
 
 module.exports = PluginContext;
-function PluginContext(ccommand, server) {
+function PluginContext (ccommand, server,configManager) {
 	var self = this;
 
 	self.coreCommand = ccommand;
 	self.websocketServer = server;
+    self.configManager=configManager;
 	self.logger = ccommand.logger;
 
 	self.env = new HashMap();

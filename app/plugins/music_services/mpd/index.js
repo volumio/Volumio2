@@ -19,6 +19,8 @@ function ControllerMpd(context) {
 	self.context = context;
 	self.commandRouter = self.context.coreCommand;
 	self.logger = self.context.logger;
+
+    self.configManager=self.context.configManager;
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -721,55 +723,52 @@ ControllerMpd.prototype.getUIConfig = function () {
 	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
 	var value;
 
+    value=self.config.get('gapless_mp3_playback');
+	self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[0].options'), value));
 
-	value = self.config.get('gapless_mp3_playback');
-	uiconf.sections[0].content[0].value.value = value;
-	uiconf.sections[0].content[0].value.label = self.getLabelForSelect(uiconf.sections[0].content[0].options, value);
+    value=self.config.get('volume_normalization');
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[1].options'), value));
 
-	value = self.config.get('volume_normalization');
-	uiconf.sections[0].content[1].value.value = value;
-	uiconf.sections[0].content[1].value.label = self.getLabelForSelect(uiconf.sections[0].content[1].options, value);
+    value=self.config.get('audio_buffer_size');
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[2].options'), value));
 
-	value = self.config.get('audio_buffer_size');
-	uiconf.sections[0].content[2].value.value = value;
-	uiconf.sections[0].content[2].value.label = self.getLabelForSelect(uiconf.sections[0].content[2].options, value);
+    value=self.config.get('buffer_before_play');
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[3].options'), value));
 
-	value = self.config.get('buffer_before_play');
-	uiconf.sections[0].content[3].value.value = value;
-	uiconf.sections[0].content[3].value.label = self.getLabelForSelect(uiconf.sections[0].content[3].options, value);
+    value=self.config.get('auto_update')
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[4].options'), value));
 
-	value = self.config.get('auto_update');
-	uiconf.sections[0].content[4].value.value = value;
-	uiconf.sections[0].content[4].value.label = self.getLabelForSelect(uiconf.sections[0].content[4].options, value);
+    value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[0].options'), value));
 
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
-	uiconf.sections[1].content[0].value.value = value;
-	uiconf.sections[1].content[0].value.label = self.getLabelForSelect(uiconf.sections[1].content[0].options, value);
+    value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[1].options'), value));
 
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
-	uiconf.sections[1].content[1].value.value = value;
-	uiconf.sections[1].content[1].value.label = self.getLabelForSelect(uiconf.sections[1].content[1].options, value);
+    value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[2].options'), value));
 
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode')
-	uiconf.sections[1].content[2].value.value = value;
-	uiconf.sections[1].content[2].value.label = self.getLabelForSelect(uiconf.sections[1].content[2].options, value);
-
-
-	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
+    var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
 
 	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
 	if (value == undefined)
 		value = 0;
 
-	uiconf.sections[2].content[0].value.value = value;
-	uiconf.sections[2].content[0].value.label = self.getLabelForSelectedCard(cards, value);
+    self.configManager.setUIConfigParam(uiconf,'sections[2].content[0].value.value',value);
+    self.configManager.setUIConfigParam(uiconf,'sections[2].content[0].value.label',self.getLabelForSelectedCard(cards, value));
 
 	for (var i in cards) {
-		uiconf.sections[2].content[0].options.push({value: cards[i].id, label: cards[i].name});
+        self.configManager.pushUIConfigParam(uiconf,'sections[2].content[0].options',{value: cards[i].id, label: cards[i].name});
 	}
 
-
-	return uiconf;
+    return uiconf;
 };
 
 ControllerMpd.prototype.getLabelForSelectedCard = function (cards, key) {

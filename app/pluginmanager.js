@@ -24,8 +24,9 @@ function PluginManager(ccommand, server) {
 	self.websocketServer = server;
 	self.logger = ccommand.logger;
 
+    self.configManager=new(require(__dirname+'/configManager.js'))(self.logger);
 
-	self.configurationFolder = '/data/configuration/';
+    self.configurationFolder = '/data/configuration/';
 }
 
 PluginManager.prototype.initializeConfiguration = function (package_json, pluginInstance, folder) {
@@ -63,8 +64,8 @@ PluginManager.prototype.loadPlugin = function (folder) {
 		self.logger.info('Loading plugin \"' + name + '\"...');
 
 		var pluginInstance = null;
-		var context = new (require(__dirname + '/pluginContext.js'))(self.coreCommand, self.websocketServer);
-		context.setEnvVariable('category', category);
+        var context=new (require(__dirname+'/pluginContext.js'))(self.coreCommand, self.websocketServer,self.configManager);
+        context.setEnvVariable('category', category);
 		context.setEnvVariable('name', name);
 
 		pluginInstance = new (require(folder + '/' + package_json.main))(context);

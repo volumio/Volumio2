@@ -136,7 +136,7 @@ UpnpInterface.prototype.startUpmpdcli = function() {
 	function upmpdcliexec() {
 		exec('/usr/bin/sudo /bin/systemctl start upmpdcli.service', function (error, stdout, stderr) {
 			if (error) {
-				self.logger.error('Cannot start Upmpdcli: '+err);
+				self.logger.error('Cannot start Upmpdcli: '+error);
 			} else {
 				self.logger.info('Upmpdcli Daemon Started');
 			}
