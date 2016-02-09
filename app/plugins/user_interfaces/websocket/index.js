@@ -624,10 +624,19 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('removeFromPlaylist', function (data) {
 				var selfConnWebSocket = this;
-
+				var playlistname = data.name;
 				var returnedData = self.commandRouter.playListManager.removeFromPlaylist(data.name, 'mpd', data.uri);
-				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushRemoveFromPlaylist', data);
+				returnedData.then(function (name) {
+						var response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'browsePlaylist', 'playlists/'+name);
+					console.log('wsssssssssssssssssss'+name);
+						if (response != undefined) {
+							response.then(function (result) {
+									selfConnWebSocket.emit('pushBrowseLibrary', result);
+								})
+								.fail(function () {
+									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+								});
+						}
 				});
 
 
@@ -669,10 +678,17 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('removeFromFavourites', function (data) {
 				var selfConnWebSocket = this;
-
 				var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, 'mpd', data.uri);
-				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushRemoveFromFavourites', data);
+				returnedData.then(function () {
+					var response = self.commandRouter.playListManager.listFavourites();
+					if (response != undefined) {
+						response.then(function (result) {
+								selfConnWebSocket.emit('pushBrowseLibrary', result);
+							})
+							.fail(function () {
+								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							});
+					}
 				});
 
 

@@ -1037,6 +1037,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
+	console.log(uri);
 
 	var response = {
 		navigation: {

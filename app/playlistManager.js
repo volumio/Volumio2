@@ -439,9 +439,14 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function(folder,name,servic
 					}
 
 					fs.writeJson(filePath, newData, function (err) {
-						if(err)
-							defer.resolve({success:false});
-						else defer.resolve({success:true});
+						if(err){
+							 self.commandRouter.pushToastMessage('error', "Cannot Remove", uri);
+						defer.resolve(name);
+						}
+						else {
+							self.commandRouter.pushToastMessage('success', "Removed", uri);
+							defer.resolve(name);
+						}
 					})
 				}
 			});
