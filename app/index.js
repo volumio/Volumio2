@@ -145,7 +145,7 @@ CoreCommandRouter.prototype.addCallback = function (name, callback) {
 		this.callbacks[name] = [];
 	}
 	this.callbacks[name].push(callback);
-	this.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
+	//this.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
 };
 
 CoreCommandRouter.prototype.callCallback = function (name, data) {
