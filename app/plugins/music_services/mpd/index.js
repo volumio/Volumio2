@@ -180,9 +180,10 @@ ControllerMpd.prototype.updateMpdDB = function () {
 
 ControllerMpd.prototype.addPlay = function (data) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
-	self.commandRouter.pushToastMessage('Success', '', str + ' Added');
 	var fileName = data;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
+	self.commandRouter.pushToastMessage('Success', '', fileName + ' Added');
+
 
 	//Add playlists and cue with load command
 	if (fileName.endsWith('.cue') || fileName.endsWith('.pls') || fileName.endsWith('.m3u')) {
@@ -457,7 +458,6 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		}
 	}
 
-    self.logger.info("ALBUMARTFILE: "+file);
 	if (resp.isStreaming){
 		promise = self.getAlbumArt(web);
 	}	else {
@@ -1365,14 +1365,13 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 
 	var defer = libQ.defer();
 
-
 		var address;
-
 		var url;
 		var artist, album;
 
-		if (data.path != undefined) {
-			path = data.path;
+
+		if (data != undefined && data.path != undefined) {
+				var path = data.path;
 		}
 
 
