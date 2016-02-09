@@ -36,9 +36,10 @@ UpnpInterface.prototype.onPlayerNameChanged=function(playerName) {
 
     exec('/usr/bin/sudo /usr/bin/killall upmpdcli', function (error, stdout, stderr) {
         if (error) {
-            self.logger.error(error);
-        }
+            self.logger.info(error);
+        } else {
         self.startUpmpdcli();
+        }
     });
 }
 
