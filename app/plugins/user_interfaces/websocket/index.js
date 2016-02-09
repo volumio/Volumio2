@@ -635,8 +635,8 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('playPlaylist', function (data) {
 				var selfConnWebSocket = this;
+				var returnedData = self.commandRouter.playPlaylist(data.name);
 
-				var returnedData = self.commandRouter.playListManager.playPlaylist(data.name);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushPlayPlaylist', data);
 				});

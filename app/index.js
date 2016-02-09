@@ -47,7 +47,7 @@ function CoreCommandRouter(server) {
 	// Start the volume controller
 	this.volumeControl = new (require('./volumecontrol.js'))(this);
 
-	// Start the playlist FS
+	// Start the playListManager.playPlaylistlist FS
 	//self.playlistFS = new (require('./playlistfs.js'))(self);
 
 	this.playListManager = new (require('./playlistManager.js'))(this);
@@ -344,6 +344,20 @@ CoreCommandRouter.prototype.checkFavourites = function (data) {
 	return self.stateMachine.checkFavourites(data);
 };
 
+// Volumio Emit Favourites
+CoreCommandRouter.prototype.emitFavourites = function (msg) {
+	var plugin = this.pluginManager.getPlugin('user_interface', 'websocket');
+	plugin.emitFavourites(msg);
+};
+
+// Volumio Play Playlist
+CoreCommandRouter.prototype.playPlaylist = function (data) {
+	var self = this;
+	return self.playListManager.playPlaylist(data);
+};
+
+// Utility functions ---------------------------------------------------------------------------------------------
+
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {
 	this.pushConsoleMessage('CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method);
 
@@ -370,8 +384,6 @@ CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
  console.log("_________ "+componentCode);
  }
  */
-
-// Utility functions ---------------------------------------------------------------------------------------------
 
 CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
 	this.logger.info(sMessage);
@@ -456,7 +468,4 @@ CoreCommandRouter.prototype.reboot = function () {
 	});
 };
 
-CoreCommandRouter.prototype.emitFavourites = function (msg) {
-	var plugin = this.pluginManager.getPlugin('user_interface', 'websocket');
-	plugin.emitFavourites(msg);
-};
+

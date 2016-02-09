@@ -149,7 +149,15 @@ PlaylistManager.prototype.enqueue = function(name) {
 
 					for(var i in data)
 					{
-						promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', data[i].uri);
+						var fullUri=S(data[i].uri);
+						if(fullUri.startsWith('music-library'))
+						{
+							var uri=fullUri.chompLeft('music-library/').s;
+						} else if (fullUri.startsWith('/'))
+						{
+							var uri=fullUri.chompLeft('/').s;
+						} else var uri=data[i].uri;
+						promise=self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', uri);
 						promises.push(promise);
 					}
 
@@ -383,7 +391,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 								defer.resolve({success:false});
 							else
 								var favourites = self.commandRouter.checkFavourites({uri:uri});
-								defer.resolve(favourites);
+							defer.resolve(favourites);
 						})
 					}
 				});
@@ -469,12 +477,13 @@ PlaylistManager.prototype.commonPlayPlaylist = function(folder,name) {
 						var uri;
 						var fullUri=S(data[i].uri);
 
-						if(fullUri.startsWith('music-library'))
+						  if(fullUri.startsWith('music-library'))
 						{
 							uri=fullUri.chompLeft('music-library/').s;
-						}
-						else uri=data[i].uri;
-
+						} else if (fullUri.startsWith('/'))
+						{
+							uri=fullUri.chompLeft('/').s;
+						} else uri=data[i].uri;
 						uris.push(uri);
 					}
 
