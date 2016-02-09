@@ -19,7 +19,7 @@ updater_comm.prototype.onVolumioStart = function () {
 		socket.on("update", function (msg, data) {
 
 			if (msg.value == "now") {
-				console.log("---" + msg.value);
+				//console.log("---" + msg.value);
 				var there = require("socket.io-client")("http://localhost:3006");
 				there.emit("update", msg);
 				//exec("/usr/bin/sudo /bin/systemctl restart volumio-remote-updater@update", function(error, stdout, stderr) {
@@ -57,7 +57,7 @@ updater_comm.prototype.onVolumioStart = function () {
 				fs = require('fs')
 				fs.readFile('/tmp/updater', function (err, dota) {
 					var data = dota.toString()
-					console.log("Got " + data);
+					//console.log("Got " + data);
 					var arr = data.split("\n")
 					if (arr.length > 1) {
 						var message = arr[0];
