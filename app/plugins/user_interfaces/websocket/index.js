@@ -1219,7 +1219,7 @@ InterfaceWebUI.prototype.broadcastMessage = function(data) {
     var self = this;
     var msg = data.msg;
     var value = data.value;
-    self.logger.info("WebSocket broadcastMessage  " + msg + " -  "  +JSON.stringify(value));
+    //self.logger.info("WebSocket broadcastMessage  " + msg + " -  "  +JSON.stringify(value));
     self.libSocketIO.sockets.emit(msg, value);
 };
 

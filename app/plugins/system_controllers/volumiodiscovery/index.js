@@ -120,7 +120,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	}
 	catch(ecc)
 	{
-		console.log(ecc);
+		//console.log(ecc);
 		self.startAdvertisement();
 	}
 };
@@ -259,7 +259,7 @@ String.prototype.capitalize = function() {
 ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 {
 	var self=this;
-	console.log("AV: Got saveDeviceInfo: " + JSON.stringify(data,null,4));
+	//console.log("AV: Got saveDeviceInfo: " + JSON.stringify(data,null,4));
 	if (data.volume == undefined) data.volume = 0;
 	if (data.status == undefined) data.status = '';
 	if (data.artist == undefined) data.artist = '';
@@ -271,7 +271,7 @@ ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 	if (uuid == undefined) {
 		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 		uuid = systemController.getConf('uuid');
-		console.log("Using self UUID");
+		//console.log("Using self UUID");
 	}
 	foundVolumioInstances.set(uuid+'.status',data.status);
 	foundVolumioInstances.set(uuid+'.volume',data.volume > -1 ? data.volume : 0);
@@ -366,25 +366,6 @@ ControllerVolumioDiscovery.prototype.getUIConfig = function()
 {
 	var self = this;
 
-	/*var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
-
-	//dhcp
-	uiconf.sections[0].content[0].value=config.get('dhcp');
-
-	//static ip
-	uiconf.sections[0].content[1].value=config.get('ethip');
-
-	//static netmask
-	uiconf.sections[0].content[2].value=config.get('ethnetmask');
-
-	//static gateway
-	uiconf.sections[0].content[3].value=config.get('ethgateway');
-
-	//WLan ssid
-	uiconf.sections[1].content[0].value=config.get('wlanssid');
-
-	//
-	uiconf.sections[1].content[1].value=config.get('wlanpass');*/
 
 	return uiconf;
 };
@@ -457,7 +438,7 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 {
 	var self = this;
 
-	self.logger.info("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
+	//self.logger.info("receiveMultiroomDeviceUpdate: "+JSON.stringify(info));
 
 };
 
