@@ -13,6 +13,7 @@ function UpnpInterface(context) {
 	// Save a reference to the parent commandRouter
 	self.context = context;
 	self.commandRouter = self.context.coreCommand;
+	self.logger=self.commandRouter.logger;
 
 }
 
@@ -33,7 +34,7 @@ UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
 
 	exec('/usr/bin/sudo /usr/bin/killall upmpdcli', function (error, stdout, stderr) {
 		if (error) {
-			self.logger.info(error);
+			self.logger.error('Cannot kill upmpdcli '+error);
 		} else {
 			self.startUpmpdcli();
 		}
@@ -107,7 +108,7 @@ UpnpInterface.prototype.setAdditionalConf = function () {
 	//Perform your installation tasks here
 };
 
-UpnpInterface.prototype.startUpmpdcli = function () {
+UpnpInterface.prototype.startUpmpdcli = function() {
 	var self = this;
 
 	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
@@ -117,27 +118,28 @@ UpnpInterface.prototype.startUpmpdcli = function () {
 	var upmpdcliconftmpl = __dirname + "/upmpdcli.conf.tmpl";
 	var namestring = 'friendlyname = ' + name + os.EOL;
 
-	fs.outputFile(upmpdcliconf, namestring, function (err) {
+	fs.outputFile(upmpdcliconf, namestring , function (err) {
 
 		if (err) {
-			console.log(err)
+			self.logger.error('Cannot write upnp conf file: '+err);
 		} else {
-
+			fs.appendFile(upmpdcliconf, fs.readFileSync(upmpdcliconftmpl), function (err) {
+				if (err){
+					self.logger.error('Cannot write upnp conf file: '+err);
+				}
+				upmpdcliexec();
+			});
 		}
-		fs.appendFile(upmpdcliconf, fs.readFileSync(upmpdcliconftmpl), function (err) {
-			if (err) throw err;
-			upmpdcliexec();
-		});
-	});
+	})
 
 
 	function upmpdcliexec() {
 		exec('/usr/bin/sudo /bin/systemctl start upmpdcli.service', function (error, stdout, stderr) {
 			if (error) {
-				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Cannot Start Upmpd Daemon' + error);
+				self.logger.error('Cannot start Upmpdcli: '+err);
 			} else {
-				self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Upmpd Daemon Started');
+				self.logger.info('Upmpdcli Daemon Started');
 			}
 		});
 	}
-};
+}

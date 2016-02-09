@@ -452,7 +452,7 @@ ControllerNetworkfs.prototype.listShares = function (data) {
 
 		var promises = [];
 
-		for (var i = 0; i < nSgares; i++) {
+		for (var i = 0; i < nShares; i++) {
 			promises.push(this.getMountSize(shares[i]));
 		}
 		libQ.all(promises).then(function (d) {
