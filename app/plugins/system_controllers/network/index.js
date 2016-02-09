@@ -3,7 +3,6 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
-var Wireless = require('./lib/index.js');
 var iwlist = require('./lib/iwlist.js');
 var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
@@ -11,15 +10,6 @@ var ip = require('ip');
 var isOnline = require('is-online');
 var os = require('os');
 
-
-var connected = false;
-var iface = 'wlan0';
-
-var wireless = new Wireless({
-	iface: iface,
-	updateFrequency: 13,
-	vanishThreshold: 7
-});
 
 // Define the ControllerNetwork class
 module.exports = ControllerNetwork;
@@ -94,7 +84,7 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 	//
 
-	console.log(uiconf);
+	//console.log(uiconf);
 
 	return uiconf;
 };
@@ -147,9 +137,9 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 	var defer = libQ.defer();
 	iwlist.scan('wlan0', function (err, networks) {
 		var self = this;
-		self.networksarray = networks;
-		self.networkresults = {"available": self.networksarray}
-		defer.resolve(self.networkresults);
+		var networksarray = networks;
+		var networkresults = {"available": networksarray}
+		defer.resolve(networkresults);
 	});
 	return defer.promise;
 };
@@ -215,7 +205,7 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
 	fs.writeFile('/data/configuration/netconfigured', ' ', function (err) {
 		if (err) {
-			console.log(error);
+			self.logger.error('Cannot write netconfigured '+error);
 		}
 	});
 };
@@ -231,7 +221,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 	}
 	fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
 		if (err) {
-			console.log(err);
+			self.logger.error('Cannot write wpasupplicant.conf '+error);
 		}
 
 
@@ -277,7 +267,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		ws.uncork();
 		ws.end();
 
-		console.log("Restarting networking layer");
+		//console.log("Restarting networking layer");
 		exec('sudo /bin/systemctl restart volumio-network.service',
 			function (error, stdout, stderr) {
 
@@ -324,64 +314,12 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 				wlanip = status.ipv4_address
 				var wlanstatus = {type: "Wireless", ip: wlanip, status: "connected", speed: "", online: oll}
 				response.push(wlanstatus);
-				console.log(wlanstatus);
+				//console.log(wlanstatus);
 
 			}
 		}
 		defer.resolve(response);
 	});
-
-
 //console.log(response);
 	return defer.promise;
-
-	/*
-
-	 exec("ethtool eth0", function (error, stdout, stderr) {
-	 if (error !== null) {
-	 defer.resolve({status:"Not Connected",online:"no"});
-	 }
-	 else
-	 {
-	 //var lines=stdout.split('\n');
-	 self.logger.info(stdout);
-	 var connected=false;
-	 var speed='';
-	 var address='';
-
-	 /*for(var i in lines)
-	 {
-	 self.logger.info("LINE");
-	 var line=lines[i];
-
-	 self.logger.info(line);
-
-	 if(line.contains("Link detected:"))
-	 connected=line.trim().endsWith("yes");
-	 else if(line.contains("Speed:"))
-	 speed=line.strip("Speed:").trim();
-	 }
-
-	 address=ip.address();
-
-	 isOnline(function(err, online) {
-	 var oll;
-
-	 if(online) oll='yes';
-	 else oll='no';
-
-	 var response=[{
-	 type:"wired",
-	 status:"connected",
-	 ip:address,
-	 speed:speed,
-	 online:oll}];
-
-	 defer.resolve(response);
-	 });
-	 }
-
-	 });
-	 */
-
 };
