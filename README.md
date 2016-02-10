@@ -3,12 +3,15 @@
 [![bitHound Dependencies](https://www.bithound.io/github/volumio/Volumio2/badges/dependencies.svg)](https://www.bithound.io/github/volumio/Volumio2/master/dependencies/npm)
 [![bitHound Score](https://www.bithound.io/github/volumio/Volumio2/badges/score.svg)](https://www.bithound.io/github/volumio/Volumio2)
 
+[![Volumio](https://volumio.org/wp-content/uploads/2016/02/Volumio_logo_HD2000.jpg)](https://volumio.org)
 
-# Volumio 2
-Login
-* user : *volumio*
+Volumio is an headless audiophile music player, designed to play music with the highest possible fidelity. Volumio runs on most embedded devices (Raspberry Pi, UDOO, Odroid, Cubieboard, Beaglebone...) and on any ordinary PC (x86).
 
-* Password : *volumio*
+Volumio is obtained with 3 main components:
+
+* [Node.js Backend (this repository)](https://github.com/volumio/Volumio2/wiki)
+* [Angular.JS Frontend](https://github.com/volumio/Volumio2-UI)
+* [Debian based minimal OS ](https://github.com/volumio/Build) 
 
 ## Volumio 2 System Images
 
@@ -21,7 +24,12 @@ PREVIOUS VERSIONS
 * [Alpha2 (2015-31-05)](https://volumio.org/wp-content/uploads/Volumio2/VolumioAlpha2-2015-05-31PI.img.zip)
 * [Alpha1 (2015-02-04)](http://volumio.org/wp-content/uploads/Volumio2/Volumioalpha1-2015-02-04PI.img.zip)
 
+Logins
+* user : *volumio*
 
+* Password : *volumio*
+
+Root login has been disabled by default, however user volumio can become root.
 
 ## Volumio 2 Virtual Machines 
 
