@@ -193,7 +193,7 @@ ControllerDirble.prototype.listRadioForCategory = function (uri) {
 
 	libQ.all(paginationPromises)
 		.then(function (results) {
-			console.log(results);
+			//console.log(results);
 			for (var j in results) {
 				var pageData = results[j];
 				//console.log(pageData);
@@ -389,7 +389,7 @@ ControllerDirble.prototype.listRadioForCountry = function (uri) {
 
 	libQ.all(paginationPromises)
 		.then(function (results) {
-			console.log(results);
+			//console.log(results);
 
 			for (var j in results) {
 				var pageData = results[j];
@@ -447,7 +447,7 @@ ControllerDirble.prototype.listRadioFavourites = function (uri) {
 
 	var promise = self.commandRouter.playListManager.getRadioFavouritesContent();
 	promise.then(function (data) {
-			console.log(data);
+			//console.log(data);
 			var response = {
 				navigation: {
 					prev: {
@@ -461,11 +461,11 @@ ControllerDirble.prototype.listRadioFavourites = function (uri) {
 				var ithdata = data[i];
 				var song = {
 					service: ithdata.service,
-					type: 'song',
+					type: 'webradio',
 					title: ithdata.title,
-					artist: ithdata.artist,
-					album: ithdata.album,
-					icon: ithdata.albumart,
+					//artist: ithdata.artist,
+					//album: ithdata.album,
+					icon: 'fa fa-microphone',
 					uri: ithdata.uri
 				};
 
@@ -490,7 +490,7 @@ ControllerDirble.prototype.listMyWebRadio = function (uri) {
 
 	var promise = self.commandRouter.playListManager.getMyWebRadioContent()
 	promise.then(function (data) {
-			console.log(data);
+			//console.log(data);
 			var response = {
 				navigation: {
 					prev: {
@@ -587,7 +587,7 @@ ControllerDirble.prototype.addMyWebRadio = function (data) {
 	});
 
 	req.on('error', function () {
-		console.log("Cannot connect to url");
+		//console.log("Cannot connect to url");
 		defer.reject(new Error('Cannot connect to url'));
 	});
 

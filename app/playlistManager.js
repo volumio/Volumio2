@@ -192,7 +192,11 @@ PlaylistManager.prototype.addToFavourites = function(service,uri) {
 
 	self.commandRouter.pushToastMessage('success',"Added", uri+' to Favourites ');
 
-	return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+	if (service === 'dirble') {
+		return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
+	} else {
+		return self.commonAddToPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+	}
 };
 
 PlaylistManager.prototype.removeFromFavourites = function(name,service,uri) {
@@ -367,7 +371,8 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 		{
 			fs.writeJsonSync(filePath,playlist);
 		}
-
+		console.log(service);
+		if (service === 'mpd') {
 		var prms=self.commandRouter.executeOnPlugin('music_service','mpd','lsInfo',uri);
 		prms.then(function(info){
 			var itemInfo=info.navigation.list[0];
@@ -402,6 +407,28 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 
 
 		});
+		} else if (service === 'dirble')
+
+			{
+				fs.readJson(filePath, function (err, data) {
+					if(err)
+						defer.resolve({success:false});
+					else
+
+					{
+				data.push({service:service,uri:uri,title: uri,
+					icon:'fa-microphone'});
+
+				fs.writeJson(filePath, data, function (err) {
+					if(err)
+						defer.resolve({success:false});
+					else
+						var favourites = self.commandRouter.checkFavourites({uri:uri});
+					defer.resolve(favourites);
+				})
+			}
+				});
+		}
 	});
 
 	return defer.promise;

@@ -668,8 +668,9 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('addToFavourites', function (data) {
 				var selfConnWebSocket = this;
+				//console.log(data);
 
-				var returnedData = self.commandRouter.playListManager.addToFavourites('mpd', data.uri);
+				var returnedData = self.commandRouter.playListManager.addToFavourites(data.service, data.uri);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('urifavourites', data);
 				});
@@ -678,8 +679,19 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('removeFromFavourites', function (data) {
 				var selfConnWebSocket = this;
-				var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, 'mpd', data.uri);
+				var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, data.service, data.uri);
 				returnedData.then(function () {
+					if (data.service === 'dirble') {
+						response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites');
+						if (response != undefined) {
+							response.then(function (result) {
+									selfConnWebSocket.emit('pushBrowseLibrary', result);
+								})
+								.fail(function () {
+									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+								});
+						}
+					} else {
 					var response = self.commandRouter.playListManager.listFavourites();
 					if (response != undefined) {
 						response.then(function (result) {
@@ -688,6 +700,7 @@ function InterfaceWebUI(context) {
 							.fail(function () {
 								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
 							});
+					}
 					}
 				});
 
