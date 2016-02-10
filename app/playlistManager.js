@@ -381,7 +381,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 					if (uri.indexOf('music-library/') >= 0) {
 						uri = uri.replace('music-library', '');
 					}
-					{console.log('uriiiiiiiiiiiiiiiiiiiiiii'+uri)
+					{
 						data.push({service:service,uri:uri,title: itemInfo.title,
 							artist: itemInfo.artist,
 							album: itemInfo.album,albumart:art});
@@ -544,7 +544,7 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 			var response = {
 				navigation: {
 					prev: {
-						uri: '/'
+						uri: ''
 					},
 					list: []
 				}

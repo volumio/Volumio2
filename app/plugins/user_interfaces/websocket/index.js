@@ -1008,6 +1008,14 @@ function InterfaceWebUI(context) {
 				if (returnedData != undefined) {
 					returnedData.then(function (data) {
 						selfConnWebSocket.emit('pushAddShare', data);
+						setTimeout(function () {
+						var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
+						if (returnedData != undefined) {
+							returnedData.then(function (data) {
+								selfConnWebSocket.emit('pushListShares', data);
+							});
+						}
+						}, 1000)
 					});
 				}
 				else self.logger.error("Error on adding share");
