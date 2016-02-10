@@ -399,7 +399,7 @@ function InterfaceWebUI(context) {
 					.then(function () {
 						var menuitems = fs.readJsonSync(__dirname + '/../../../config.json');
 
-						console.log(JSON.stringify(menuitems['menuItems']));
+						//console.log(JSON.stringify(menuitems['menuItems']));
 
 						self.libSocketIO.emit('printConsoleMessage', menuitems['menuItems']);
 						return self.libSocketIO.emit('pushMenuItems', menuitems['menuItems']);
@@ -463,7 +463,7 @@ function InterfaceWebUI(context) {
 
 				var response;
 
-				console.log("CURURI: " + curUri);
+				//console.log("CURURI: " + curUri);
 
 				if (curUri.startsWith('favourites')) {
 					response = self.commandRouter.playListManager.listFavourites(curUri);
@@ -628,7 +628,6 @@ function InterfaceWebUI(context) {
 				var returnedData = self.commandRouter.playListManager.removeFromPlaylist(data.name, 'mpd', data.uri);
 				returnedData.then(function (name) {
 						var response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'browsePlaylist', 'playlists/'+name);
-					console.log('wsssssssssssssssssss'+name);
 						if (response != undefined) {
 							response.then(function (result) {
 									selfConnWebSocket.emit('pushBrowseLibrary', result);
@@ -818,32 +817,32 @@ function InterfaceWebUI(context) {
 
 
 			connWebSocket.on('setAsMultiroomSingle', function (data) {
-				console.log("Setting as multiroomSingle");
+				//console.log("Setting as multiroomSingle");
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'setSingle', data);
 
 			});
 			connWebSocket.on('setAsMultiroomServer', function (data) {
-				console.log("Setting as multiroomServer");
+				//console.log("Setting as multiroomServer");
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'setServer', data);
 				//selfConnWebSocket.emit('pushWriteMultiroom',data);
 
 			});
 			connWebSocket.on('setAsMultiroomClient', function (data) {
-				console.log("Setting as multiroomClient");
+				//console.log("Setting as multiroomClient");
 				var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'setClient', data);
 				//selfConnWebSocket.emit('pushWriteMultiroom',data);
 
 			});
 
 			connWebSocket.on('shutdown', function () {
-				console.log('Received Shutdown Command');
+				//console.log('Received Shutdown Command');
 
 				return self.commandRouter.shutdown();
 
 			});
 
 			connWebSocket.on('reboot', function () {
-				console.log('Received Reboot Command');
+				//console.log('Received Reboot Command');
 				return self.commandRouter.reboot();
 
 			});
@@ -1168,7 +1167,7 @@ InterfaceWebUI.prototype.pushPlaylistIndex = function (browsedata, connWebSocket
 
 InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 	var self = this;
-	console.log("pushMultiroom 2");
+	//console.log("pushMultiroom 2");
 	var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
 	var response = volumiodiscovery.getDevices();
 

@@ -204,7 +204,11 @@ PlaylistManager.prototype.removeFromFavourites = function(name,service,uri) {
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri '+uri+' from favourites');
 
-	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+	if (service === 'dirble') {
+		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
+	} else {
+		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+	}
 };
 
 PlaylistManager.prototype.playFavourites = function() {
@@ -371,7 +375,6 @@ PlaylistManager.prototype.commonAddToPlaylist = function(folder,name,service,uri
 		{
 			fs.writeJsonSync(filePath,playlist);
 		}
-		console.log(service);
 		if (service === 'mpd') {
 		var prms=self.commandRouter.executeOnPlugin('music_service','mpd','lsInfo',uri);
 		prms.then(function(info){
