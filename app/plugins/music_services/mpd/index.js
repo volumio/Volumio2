@@ -20,7 +20,7 @@ function ControllerMpd(context) {
 	self.commandRouter = self.context.coreCommand;
 	self.logger = self.context.logger;
 
-	self.configManager=self.context.configManager;
+	self.configManager = self.context.configManager;
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -330,7 +330,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.artist = trackinfo.artist;
 						collectedState.album = trackinfo.album;
 						collectedState.albumart = trackinfo.albumart;
-						collectedState.uri=trackinfo.uri;
+						collectedState.uri = trackinfo.uri;
 						return libQ.resolve(collectedState);
 					});
 				// Else return null track info
@@ -340,7 +340,7 @@ ControllerMpd.prototype.getState = function () {
 				collectedState.artist = null;
 				collectedState.album = null;
 				collectedState.albumart = null;
-				collectedState.uri=null;
+				collectedState.uri = null;
 				return libQ.resolve(collectedState);
 			}
 		});
@@ -447,10 +447,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		resp.album = null;
 	}
 
-	var promise;
-	var foundFileCover = false;
 	var web;
-
 
 	if (objTrackInfo.Artist != undefined) {
 		if (objTrackInfo.Album != undefined) {
@@ -460,25 +457,17 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		}
 	}
 
-	if (resp.isStreaming){
-		promise = self.getAlbumArt(web);
-	}	else {
-		promise = self.getAlbumArt(web, file);
+	var artUrl;
+
+	if (resp.isStreaming) {
+		artUrl = self.getAlbumArt(web);
+	} else {
+		artUrl = self.getAlbumArt(web, file);
 	}
 
+	resp.albumart = artUrl;
 
-	if (promise != undefined) {
-		promise.then(function (value) {
-				//console.log("ALBUMART: "+value);
-				resp.albumart = value;
-				defer.resolve(resp);
-			})
-			.fail(function () {
-				defer.resolve(resp);
-			});
-
-	}
-	else defer.resolve(resp);
+	defer.resolve(resp);
 
 	return defer.promise;
 };
@@ -525,7 +514,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 	var nChannels = null;
 	if ('audio' in objState) {
 		var objMetrics = objState.audio.split(':');
-		nSampleRate = Number(objMetrics[0])/1000;
+		nSampleRate = Number(objMetrics[0]) / 1000;
 		nBitDepth = Number(objMetrics[1]);
 		nChannels = Number(objMetrics[2]);
 	}
@@ -723,37 +712,37 @@ ControllerMpd.prototype.getUIConfig = function () {
 	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
 	var value;
 
-	value=self.config.get('gapless_mp3_playback');
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[0].options'), value));
+	value = self.config.get('gapless_mp3_playback');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[0].options'), value));
 
-	value=self.config.get('volume_normalization');
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[1].options'), value));
+	value = self.config.get('volume_normalization');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[1].options'), value));
 
-	value=self.config.get('audio_buffer_size');
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[2].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[2].options'), value));
+	value = self.config.get('audio_buffer_size');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[2].options'), value));
 
-	value=self.config.get('buffer_before_play');
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[3].options'), value));
+	value = self.config.get('buffer_before_play');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[3].options'), value));
 
-	value=self.config.get('auto_update')
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[0].content[4].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[0].content[4].options'), value));
+	value = self.config.get('auto_update')
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[4].options'), value));
 
-	value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
-	self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[0].options'), value));
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
 
-	value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
-	self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[1].content[1].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[1].options'), value));
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
 
-	value=self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
-	self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[1].content[2].value.label',self.getLabelForSelect(self.configManager.getValue(uiconf,'sections[1].content[2].options'), value));
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
 
 	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
 
@@ -761,11 +750,14 @@ ControllerMpd.prototype.getUIConfig = function () {
 	if (value == undefined)
 		value = 0;
 
-	self.configManager.setUIConfigParam(uiconf,'sections[2].content[0].value.value',value);
-	self.configManager.setUIConfigParam(uiconf,'sections[2].content[0].value.label',self.getLabelForSelectedCard(cards, value));
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelectedCard(cards, value));
 
 	for (var i in cards) {
-		self.configManager.pushUIConfigParam(uiconf,'sections[2].content[0].options',{value: cards[i].id, label: cards[i].name});
+		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+			value: cards[i].id,
+			label: cards[i].name
+		});
 	}
 
 	return uiconf;
@@ -1000,8 +992,6 @@ ControllerMpd.prototype.waitupdate = function () {
 };
 
 
-
-
 ControllerMpd.prototype.listPlaylists = function (uri) {
 	var self = this;
 
@@ -1036,7 +1026,6 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
-	console.log(uri);
 
 	var response = {
 		navigation: {
@@ -1051,8 +1040,8 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var promise = self.commandRouter.playListManager.getPlaylistContent(name);
 	promise.then(function (data) {
-		//console.log("CONTENT: "+JSON.stringify(data));
-		for (var i in data) {
+		var n = data.length;
+		for (var i = 0; i < n; i++) {
 			var ithdata = data[i];
 			var song = {
 				service: ithdata.service,
@@ -1070,7 +1059,6 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 		//console.log(JSON.stringify(response));
 		defer.resolve(response);
 	});
-
 
 	return defer.promise;
 };
@@ -1102,7 +1090,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			var list = [];
 			if (msg) {
-				var s0=sections[0]+'/';
+				var s0 = sections[0] + '/';
 				var path;
 				var name;
 				var lines = msg.split('\n');
@@ -1291,8 +1279,6 @@ ControllerMpd.prototype.updateQueue = function () {
 
 				self.commandRouter.volumioClearQueue();
 
-				var promises = [];
-
 				var queue = [];
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
@@ -1316,31 +1302,14 @@ ControllerMpd.prototype.updateQueue = function () {
 							artist: artist,
 							album: album,
 							type: 'track',
-							tracknumber: tracknumber
+							tracknumber: tracknumber,
+							albumart: self.getAlbumArt({artist: artist, album: album}, path)
 						};
-						queueItem.promise = self.getAlbumArt({artist: artist, album: album}, path);
-						promises.push(queueItem.promise);
 						queue.push(queueItem);
-
 					}
 
 				}
-
-				libQ.all(promises)
-					.then(function (data) {
-						for (var i in queue) {
-							queue[i].albumart = data[i];
-							delete queue[i].promise;
-						}
-
-						self.commandRouter.addQueueItems(queue);
-					})
-					.fail(function (e) {
-						self.logger.info("Failed retrieving a url", e);
-
-					})
-
-
+				self.commandRouter.addQueueItems(queue);
 			}
 			else self.logger.info(err);
 
@@ -1361,16 +1330,11 @@ ControllerMpd.prototype.updateQueue = function () {
 
 
 ControllerMpd.prototype.getAlbumArt = function (data, path) {
-	var self = this;
 
-	var defer = libQ.defer();
-
-	var address;
-	var url;
 	var artist, album;
 
 	if (data != undefined && data.path != undefined) {
-		var path = data.path;
+		path = data.path;
 	}
 
 	var web;
@@ -1397,11 +1361,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 	if (path != undefined)
 		url = url + 'path=' + nodetools.urlEncode(path);
 
-	defer.resolve(url);
-
-
-
-	return defer.promise;
+	return url;
 };
 
 
@@ -1523,7 +1483,7 @@ ControllerMpd.prototype.getGroupVolume = function () {
 	return self.sendMpdCommand('status', [])
 		.then(libFast.bind(self.parseState, self))
 		.then(function (state) {
-			if (state.volume != undefined){
+			if (state.volume != undefined) {
 				state.volume = groupvolume;
 				console.log(groupvolume)
 				return libQ.resolve(groupvolume);
