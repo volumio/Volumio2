@@ -73,21 +73,14 @@ PlaylistManager.prototype.deletePlaylist = function (name) {
 };
 
 PlaylistManager.prototype.listPlaylist = function () {
-	var self = this;
 
 	var defer = libQ.defer();
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Listing playlists');
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Listing playlists');
 
-	var playlists = [];
-
-	var folderContents = fs.readdirSync(self.playlistFolder);
-	for (var j in folderContents) {
-		var fileName = folderContents[j];
-		playlists.push(fileName);
-	}
-
-	defer.resolve(playlists);
+	fs.readdir(this.playlistFolder, function(err,folderContents) {
+		defer.resolve(folderContents);
+	});
 
 	return defer.promise;
 };
