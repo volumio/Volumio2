@@ -9,11 +9,11 @@
   },
   "audio_buffer_size":{
     "type": "number",
-    "value": 2048
+    "value": 8192
   },
   "buffer_before_play":{
     "type": "string",
-    "value": "10%"
+    "value": "20%"
   },
   "auto_update":{
     "type": "boolean",

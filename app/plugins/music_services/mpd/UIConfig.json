@@ -70,29 +70,29 @@
           "doc":"This specifies the size of the audio buffer in kilobytes. The default is 2048, large enough for nearly 12 seconds of CD-quality audio.",
           "label": "Audio buffer size",
           "value":  {
-            "value":2048,
-            "label": "2048"
+            "value":8192,
+            "label": "8192"
           },
           "options": [
             {
-              "value":128,
-              "label": "128"
-            },
-            {
-              "value":256,
-              "label": "256"
-            },
-            {
-              "value":512,
-              "label": "512"
-            },
-            {
               "value":1024,
-              "label": "1024"
+              "label": "128"
             },
             {
               "value":2048,
               "label": "2048"
+            },
+            {
+              "value":4096,
+              "label": "4096"
+            },
+            {
+              "value":8192,
+              "label": "8192"
+            },
+            {
+              "value":12288,
+              "label": "12288"
             }
 
           ]
@@ -104,8 +104,8 @@
           "doc": "This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
           "label": "Buffer before play",
           "value":  {
-            "value":"10%",
-            "label": "10%"
+            "value":"20%",
+            "label": "20%"
           },
           "options": [
             {
@@ -119,6 +119,10 @@
             {
               "value":"30%",
               "label": "30%"
+            },
+            {
+              "value":"40%",
+              "label": "40%"
             }
           ]
 
