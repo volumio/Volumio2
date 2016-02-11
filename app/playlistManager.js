@@ -195,7 +195,13 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri ' + uri + ' from favourites');
 
+	if (service === 'dirble') {
+		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
+	} else {
+		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+	}
 
+	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
 };
 
 PlaylistManager.prototype.playFavourites = function () {
