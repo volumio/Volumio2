@@ -226,34 +226,34 @@ var processRequest = function (web, path) {
 		path = '/mnt/' + path;
 		logger.info(path);
 		if (fs.existsSync(path)) {
+			var stats = fs.statSync(path);
+			if (stats.isDirectory()) {
+				searchInFolder(defer, path, web);
+			} else {
+				var parser = mm(fs.createReadStream(path), function (err, metadata) {
+					if (err) {
+						logger.info(err);
+						searchInFolder(defer, path, web);
+					}
+					else {
+						try {
+							//logger.info(JSON.stringify(metadata));
+							if (metadata.picture != undefined && metadata.picture.length > 0) {
+								logger.info("Found art in file " + path);
 
-			var parser = mm(fs.createReadStream(path), function (err, metadata) {
-				if (err) {
-					logger.info(err);
-					searchInFolder(defer, path, web);
-				}
-				else {
-					try {
-						//logger.info(JSON.stringify(metadata));
-						if (metadata.picture != undefined && metadata.picture.length > 0) {
-							logger.info("Found art in file " + path);
-
-							fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
-								//console.log('file has been written');
-								defer.resolve('/tmp/albumart');
-							});
-
-
+								fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
+									//console.log('file has been written');
+									defer.resolve('/tmp/albumart');
+								});
+							}
+							else searchInFolder(defer, path, web);
 						}
-						else searchInFolder(defer, path, web);
+						catch (ecc) {
+							logger.info(ecc);
+						}
 					}
-					catch (ecc) {
-						logger.info(ecc);
-					}
-
-
-				}
-			});
+				});
+			}
 		} else {
 			logger.info('File' + path + ' doesnt exist');
 			searchInFolder(defer, path, web);
