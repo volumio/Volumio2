@@ -709,7 +709,8 @@ ControllerMpd.prototype.getUIConfig = function () {
 };
 
 ControllerMpd.prototype.getLabelForSelectedCard = function (cards, key) {
-	for (var i in cards) {
+	var n = cards.length;
+	for (var i = 0; i < n; i++) {
 		if (cards[i].id == key)
 			return cards[i].name;
 	}
@@ -718,7 +719,8 @@ ControllerMpd.prototype.getLabelForSelectedCard = function (cards, key) {
 };
 
 ControllerMpd.prototype.getLabelForSelect = function (options, key) {
-	for (var i in options) {
+	var n = options.length;
+	for (var i = 0; i < n; i++) {
 		if (options[i].value == key)
 			return options[i].label;
 	}
