@@ -224,17 +224,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 			self.logger.error('Cannot write wpasupplicant.conf '+error);
 		}
 
-
-		exec('sudo /bin/systemctl restart volumio-network.service',
-			function (error, stdout, stderr) {
-
-				if (error !== null) {
-					self.commandRouter.pushToastMessage('error', "Network restart", 'Error while restarting network: ' + error);
-				} else
-
-					self.commandRouter.pushToastMessage('success', "Network restart", 'Network successfully restarted');
-
-			});
+		self.commandRouter.networRestart();
 	});
 
 };

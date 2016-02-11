@@ -455,17 +455,19 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 	);
 };
 
+
+// Platform specific & Hardware related options, they can be found in platformSpecific.js
+// This allows to change system commands across different devices\environments
 CoreCommandRouter.prototype.shutdown = function () {
 	this.platformspecific.shutdown();
 };
 
 CoreCommandRouter.prototype.reboot = function () {
-	var self = this;
-	exec("sudo /sbin/reboot", function (error, stdout, stderr) {
-		if (error !== null) {
-			self.pushConsoleMessage(error);
-		} else self.pushConsoleMessage('Rebooting');
-	});
+	this.platformspecific.reboot();
+};
+
+CoreCommandRouter.prototype.networRestart = function () {
+	this.platformspecific.networkRestart();
 };
 
 
