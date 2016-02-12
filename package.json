@@ -52,7 +52,7 @@
     "unirest": "0.4.2",
     "v-conf": "0.9.0",
     "winston": "^2.1.1",
-    "wireless-tools": "0.14.1",
+    "wireless-tools": "0.15.0",
     "yargs": "^3.32.0"
   },
   "description": "Audiophile Music Player/Streamer",
