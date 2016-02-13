@@ -300,6 +300,8 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 	{
 		var key=keys[i];
 
+
+
 		var osname=foundVolumioInstances.get(key+'.name');
 		var port=foundVolumioInstances.get(key+'.port');
 		var status=foundVolumioInstances.get(key+'.status');
@@ -316,6 +318,11 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		for(var j in addresses)
 		{
 			var address=addresses[j];
+			if (albumart){
+				var albumartstring = 'http://'+address+albumart;
+			} else {
+				var albumartstring = 'http://'+address+'/albumart';
+			}
 			var device={
 				id:key,
 				host:'http://'+address,
@@ -327,7 +334,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					mute: mute,
 					artist: artist,
 					track: track,
-					albumart:'http://'+address+albumart
+					albumart: albumartstring
 				}
 			};
 
