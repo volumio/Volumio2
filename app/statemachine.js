@@ -69,17 +69,10 @@ CoreStateMachine.prototype.clearQueue = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
-	if (this.currentStatus === 'stop') {
-		// Stop -> Play transition
-		this.currentStatus = 'play';
-		this.updateTrackBlock();
-		return this.serviceClearAddPlay();
 
-	} else if (this.currentStatus === 'pause') {
-		// Pause -> Play transition
 		this.currentStatus = 'play';
 		return this.serviceResume();
-	}
+	
 };
 
 // Volumio Next Command
@@ -370,14 +363,14 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
-			this.currentTitle = stateService.title;
-			this.currentArtist = stateService.artist;
-			this.currentAlbum = stateService.album;
-			this.currentAlbumArt = stateService.albumart;
+			this.currentTitle = null;
+			this.currentArtist = null;
+			this.currentAlbum = null;
+			this.currentAlbumArt = '/albumart';
 			this.currentUri = stateService.uri;
-			this.currentSampleRate = stateService.samplerate;
-			this.currentBitDepth = stateService.bitdepth;
-			this.currentChannels = stateService.channels;
+			this.currentSampleRate = null;
+			this.currentBitDepth = null;
+			this.currentChannels = null;
 			this.currentRandom = stateService.random;
 			this.currentRepeat = stateService.repeat;
 
@@ -389,14 +382,19 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	} else if (stateService.status === 'stop') {
 		if (this.currentStatus === 'play') {
 			// Service has stopped without client request, meaning it is finished playing its track block. Move on to next track block.
-			this.currentSeek = 0;
-			this.currentDuration = 0;
-			this.currentDynamicTitle = null;
+			this.currentPosition = stateService.position;
+			this.currentSeek = stateService.seek;
+			this.currentDuration = stateService.duration;
+			this.currentTitle = null;
+			this.currentArtist = null;
+			this.currentAlbum = null;
+			this.currentAlbumArt = '/albumart';
+			this.currentUri = stateService.uri;
 			this.currentSampleRate = null;
 			this.currentBitDepth = null;
 			this.currentChannels = null;
-			this.currentRandom = null;
-			this.currentRepeat = null;
+			this.currentRandom = stateService.random;
+			this.currentRepeat = stateService.repeat;
 
 			if (this.currentPosition >= this.playQueue.arrayQueue.length - 1) {
 				// If we have reached the end of the queue
@@ -414,14 +412,19 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 		} else if (this.currentStatus === 'stop') {
 			// Client has requested stop, so stop the timer
-			this.currentSeek = 0;
-			this.currentDuration = 0;
-			this.currentDynamicTitle = null;
+			this.currentPosition = stateService.position;
+			this.currentSeek = stateService.seek;
+			this.currentDuration = stateService.duration;
+			this.currentTitle = null;
+			this.currentArtist = null;
+			this.currentAlbum = null;
+			this.currentAlbumArt = '/albumart';
+			this.currentUri = stateService.uri;
 			this.currentSampleRate = null;
 			this.currentBitDepth = null;
 			this.currentChannels = null;
-			this.currentRandom = null;
-			this.currentRepeat = null;
+			this.currentRandom = stateService.random;
+			this.currentRepeat = stateService.repeat;
 
 			this.pushState().fail(this.pushError.bind(this));
 
