@@ -92,11 +92,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
 			if (service.name != name) {
-				self.context.coreCommand.pushConsoleMessage('Changing my name to ' + service.name);
-				systemController.setConf('playerName', service.name);
+				self.context.coreCommand.pushConsoleMessage('Changing my name to ' + name);
+				systemController.setConf('playerName', name);
 
 				self.ad.stop();
-				txt_record.volumioName = service.name;
+				txt_record.volumioName = name;
 				setTimeout(
 					function () {
 						mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
