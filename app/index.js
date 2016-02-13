@@ -22,6 +22,7 @@ function CoreCommandRouter(server) {
 		]
 	});
 
+	this.outputDeviceChangeListeners = [];
 	this.callbacks = [];
 	this.sharedVars = new vconf();
 
@@ -65,6 +66,22 @@ function CoreCommandRouter(server) {
 	});
 
 }
+
+CoreCommandRouter.prototype.addOutputDeviceChangeListener = function (listener) {
+	this.pushConsoleMessage('CoreCommandRouter::addOutputDeviceChangeListener');
+	if (this.outputDeviceChangeListeners.indexOf(listener) == -1) {
+		this.outputDeviceChangeListeners.push(listener);
+	}
+};
+
+CoreCommandRouter.prototype.changeOutputDevice = function (device) {
+	this.pushConsoleMessage('CoreCommandRouter::changeOutputDevice');
+	this.sharedVars.set('alsa.outputdevice', device);
+	var nListeners = this.outputDeviceChangeListeners.length;
+	for (var i = 0; i < nListeners; i++) {
+		this.outputDeviceChangeListeners[i].onOutputDeviceChanged();
+	}
+};
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
