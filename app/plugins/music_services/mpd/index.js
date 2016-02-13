@@ -14,11 +14,11 @@ var parser = require('cue-parser');
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
 function ControllerMpd(context) {
-	// This fixed variable will let us refer to 'this' object at deeper scopes
 	this.context = context;
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
+	this.commandRouter.addOutputDeviceChangeListener(this);
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -788,13 +788,10 @@ ControllerMpd.prototype.saveVolumeOptions = function (data) {
 };
 
 ControllerMpd.prototype.restartMpd = function (callback) {
-	var self = this;
-
 	exec('sudo /bin/systemctl restart mpd.service ',
 		function (error, stdout, stderr) {
 			callback(error);
 		});
-
 };
 
 ControllerMpd.prototype.createMPDFile = function (callback) {
@@ -1394,17 +1391,14 @@ ControllerMpd.prototype.rescanDb = function () {
 };
 
 ControllerMpd.prototype.saveAlsaOptions = function (data) {
+	this.commandRouter.changeOutputDevice(data.output_device.value);
+};
 
+ControllerMpd.prototype.onOutputDeviceChanged = function () {
 	var self = this;
-
-	var defer = libQ.defer();
-
-	self.commandRouter.sharedVars.set('alsa.outputdevice', data.output_device.value);
-
-	self.createMPDFile(function (error) {
+	this.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
 			self.commandRouter.pushToastMessage('error', "Configuration update", 'Error while Applying new configuration');
-			defer.resolve({});
 		}
 		else {
 			self.commandRouter.pushToastMessage('success', "Configuration update", 'The output device has been successfully updated');
@@ -1415,14 +1409,9 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 					self.commandRouter.pushToastMessage('error', "Player restart", 'Error while restarting player');
 				}
 				else self.commandRouter.pushToastMessage('success', "Player restart", 'Player successfully restarted');
-
-				defer.resolve({});
 			});
 		}
 	});
-
-	return defer.promise;
-
 };
 
 ControllerMpd.prototype.getGroupVolume = function () {
