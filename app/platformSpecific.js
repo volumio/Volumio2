@@ -34,5 +34,7 @@ PlatformSpecific.prototype.networkRestart = function () {
 			self.coreCommand.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
 		} else
 			self.coreCommand.pushToastMessage('success',"Network restart",'Network successfully restarted');
+			// Restart Upmpdcli
+			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
 	});
 };

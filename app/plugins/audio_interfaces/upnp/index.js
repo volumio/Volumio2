@@ -31,14 +31,7 @@ UpnpInterface.prototype.onVolumioStart = function () {
 UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
 	var self = this;
 
-
-	exec('/usr/bin/sudo /usr/bin/killall upmpdcli', function (error, stdout, stderr) {
-		if (error) {
-			self.logger.error('Cannot kill upmpdcli '+error);
-		} else {
-			self.startUpmpdcli();
-		}
-	});
+	self.onRestart();
 };
 
 UpnpInterface.prototype.onStart = function () {
@@ -53,7 +46,12 @@ UpnpInterface.prototype.onStop = function () {
 
 UpnpInterface.prototype.onRestart = function () {
 	var self = this;
-	//Perform startup tasks here
+
+	exec('/usr/bin/sudo /usr/bin/killall upmpdcli', function (error, stdout, stderr) {
+		if (error) {
+			self.logger.error('Cannot kill upmpdcli '+error);
+		} self.startUpmpdcli();
+	});
 };
 
 UpnpInterface.prototype.onInstall = function () {

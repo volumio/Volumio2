@@ -50,7 +50,7 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 IMPORTANT NOTE:
 Volumio is designed to be an highly integrated system. This means that the WebUi is optimized to work along with the custom made Volumio system, and therefore it needs to run in a very tightly controlled environment. IT WON'T WORK on standard Raspbian or other non-volumio OSes. If you want to know what kind of customizations we're using, take a look at the [Volumio Builder](https://github.com/volumio/Build)
 
-Volumio works with 12.x version of NodeJS, we're using 0.12.6. Reports of working\not working node version are appreciated!
+Volumio works with 5.5.0 version of NodeJS. Reports of working\not working node version are appreciated!
 
 Clone the repo in the directory of your choice (default: /volumio)
 
@@ -71,13 +71,6 @@ And that /data folder exists and is owned by volumio user
 sudo mkdir /data
 sudo chown -R volumio:volumio /data
 ```
-
-On Debian, you need to install
-
-```shell
-sudo apt-get install libavahi-compat-libdnssd-dev
-```
-For other systems, see [node_mdns installation](https://github.com/agnat/node_mdns#installation).
 
 All other dependecies are in the package JSON, from the working directory just run (as user volumio)
 
