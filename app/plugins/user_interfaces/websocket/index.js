@@ -775,6 +775,31 @@ function InterfaceWebUI(context) {
 
 			});
 
+			connWebSocket.on('getAlarm', function (data) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'alarm-clock', 'getAlarm', '');
+				returnedData.then(function (data) {
+					selfConnWebSocket.emit('pushAlarm', data);
+				});
+
+
+			});
+
+
+			connWebSocket.on('saveAlarm', function (data) {
+				var selfConnWebSocket = this;
+				//console.log(data);
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'alarm-clock', 'saveAlarm', data);
+				returnedData.then(function (data) {
+					selfConnWebSocket.emit('pushSleep', data);
+				});
+
+
+
+			});
+
 			connWebSocket.on('getMultiroom', function (data) {
 				var selfConnWebSocket = this;
 

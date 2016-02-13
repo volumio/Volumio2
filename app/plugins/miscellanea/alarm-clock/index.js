@@ -125,6 +125,15 @@ AlarmClock.prototype.setAdditionalConf = function()
 	//Perform your installation tasks here
 };
 
+AlarmClock.prototype.getAlarm=function()
+{
+	var self = this;
+
+	var defer = libQ.defer();
+//TODO GET ALARM
+	defer.resolve({});
+	return defer.promise;
+};
 
 AlarmClock.prototype.saveAlarm=function(data)
 {
