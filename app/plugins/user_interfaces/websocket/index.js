@@ -293,7 +293,7 @@ function InterfaceWebUI(context) {
 					});
 			});
 
-			connWebSocket.on('previous', function () {
+			connWebSocket.on('prev', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio previous')
 					.then(self.commandRouter.volumioPrevious.bind(self.commandRouter))

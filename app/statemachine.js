@@ -138,7 +138,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 		 return this.serviceClearAddPlay());
 		 }*/
-		this.commandRouter.executeOnPlugin('music_service', 'mpd', 'next')
+		this.commandRouter.executeOnPlugin('music_service', 'mpd', 'previous')
 
 
 	} else if (this.currentStatus === 'pause') {
