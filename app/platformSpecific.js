@@ -35,6 +35,8 @@ PlatformSpecific.prototype.networkRestart = function () {
 		} else
 			self.coreCommand.pushToastMessage('success',"Network restart",'Network successfully restarted');
 			// Restart Upmpdcli
+		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
+		}, 10000);
 	});
 };
