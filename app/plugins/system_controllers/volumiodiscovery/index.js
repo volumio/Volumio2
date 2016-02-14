@@ -92,11 +92,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
 			if (service.name != name) {
-				self.context.coreCommand.pushConsoleMessage('Changing my name to ' + service.name);
-				systemController.setConf('playerName', service.name);
+				self.context.coreCommand.pushConsoleMessage('Changing my name to ' + name);
+				systemController.setConf('playerName', name);
 
 				self.ad.stop();
-				txt_record.volumioName = service.name;
+				txt_record.volumioName = name;
 				setTimeout(
 					function () {
 						mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
@@ -300,6 +300,8 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 	{
 		var key=keys[i];
 
+
+
 		var osname=foundVolumioInstances.get(key+'.name');
 		var port=foundVolumioInstances.get(key+'.port');
 		var status=foundVolumioInstances.get(key+'.status');
@@ -316,6 +318,11 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		for(var j in addresses)
 		{
 			var address=addresses[j];
+			if (albumart){
+				var albumartstring = 'http://'+address+albumart;
+			} else {
+				var albumartstring = 'http://'+address+'/albumart';
+			}
 			var device={
 				id:key,
 				host:'http://'+address,
@@ -327,7 +334,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					mute: mute,
 					artist: artist,
 					track: track,
-					albumart:'http://'+address+albumart
+					albumart: albumartstring
 				}
 			};
 

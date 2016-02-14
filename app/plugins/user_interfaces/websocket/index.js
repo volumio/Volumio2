@@ -293,7 +293,7 @@ function InterfaceWebUI(context) {
 					});
 			});
 
-			connWebSocket.on('previous', function () {
+			connWebSocket.on('prev', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio previous')
 					.then(self.commandRouter.volumioPrevious.bind(self.commandRouter))
@@ -771,6 +771,31 @@ function InterfaceWebUI(context) {
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushSleep', data);
 				});
+
+
+			});
+
+			connWebSocket.on('getAlarms', function (data) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'alarm-clock', 'getAlarms', '');
+				returnedData.then(function (data) {
+					selfConnWebSocket.emit('pushAlarm', data);
+				});
+
+
+			});
+
+
+			connWebSocket.on('saveAlarm', function (data) {
+				var selfConnWebSocket = this;
+				//console.log(data);
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'alarm-clock', 'saveAlarm', data);
+				returnedData.then(function (data) {
+					selfConnWebSocket.emit('pushSleep', data);
+				});
+
 
 
 			});
