@@ -775,10 +775,10 @@ function InterfaceWebUI(context) {
 
 			});
 
-			connWebSocket.on('getAlarm', function (data) {
+			connWebSocket.on('getAlarms', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'alarm-clock', 'getAlarm', '');
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'alarm-clock', 'getAlarms', '');
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushAlarm', data);
 				});
