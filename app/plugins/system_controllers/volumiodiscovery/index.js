@@ -129,7 +129,6 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 			if (!namecollide) {
 				self.context.coreCommand.pushConsoleMessage("Discovery: Adv seems fine");
 			}
-			
 			// if (sname != name) {
 			// 	txt_record.volumioName =  sname;
 			// 	self.context.coreCommand.pushConsoleMessage('Discovery: name collision!');
