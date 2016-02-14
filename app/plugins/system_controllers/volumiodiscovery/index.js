@@ -110,7 +110,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 		self.context.coreCommand.pushConsoleMessage("Discovery: Started advertising..." + name);
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
+<<<<<<< HEAD
 			var sname = service.name.replace(serviceName.toLowerCase(),serviceName);
+=======
+			var sname = service.name.replace("axiomair","AxiomAir");
+>>>>>>> efe87187bb6676e631a188aec3fc54aff66f8ca0
 			self.context.coreCommand.pushConsoleMessage("Discovery: virginName is " + virginName + " name is " + name  + " service.name is " + service.name + " serviceName is "+ serviceName + " sname is " + sname);
 			var namecollide = false;
 			if (virginName == serviceName) {
@@ -129,7 +133,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 			if (!namecollide) {
 				self.context.coreCommand.pushConsoleMessage("Discovery: Adv seems fine");
 			}
+<<<<<<< HEAD
 			
+=======
+			//var sname = service.name.replace("axiomair","AxiomAir");
+>>>>>>> efe87187bb6676e631a188aec3fc54aff66f8ca0
 			// if (sname != name) {
 			// 	txt_record.volumioName =  sname;
 			// 	self.context.coreCommand.pushConsoleMessage('Discovery: name collision!');
@@ -169,7 +177,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	catch(ecc)
 	{
 		console.log("Discovery: Exception " + ecc);
+<<<<<<< HEAD
 		systemController.setConf('playerName', serviceName);
+=======
+		systemController.setConf('playerName', "AxiomAir");
+>>>>>>> efe87187bb6676e631a188aec3fc54aff66f8ca0
 		var bound = self.startAdvertisement.bind(self);
 		setTimeout(bound,5000);
 	}
