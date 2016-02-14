@@ -6,6 +6,7 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var winston = require('winston');
 var vconf = require('v-conf');
+var events = require('./volumioEvents');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -22,8 +23,7 @@ function CoreCommandRouter(server) {
 		]
 	});
 
-	this.outputDeviceChangeListeners = [];
-	this.callbacks = [];
+	this.eventListeners = [];
 	this.sharedVars = new vconf();
 
 	this.logger.info("-------------------------------------------");
@@ -67,20 +67,10 @@ function CoreCommandRouter(server) {
 
 }
 
-CoreCommandRouter.prototype.addOutputDeviceChangeListener = function (listener) {
-	this.pushConsoleMessage('CoreCommandRouter::addOutputDeviceChangeListener');
-	if (this.outputDeviceChangeListeners.indexOf(listener) == -1) {
-		this.outputDeviceChangeListeners.push(listener);
-	}
-};
-
 CoreCommandRouter.prototype.changeOutputDevice = function (device) {
 	this.pushConsoleMessage('CoreCommandRouter::changeOutputDevice');
 	this.sharedVars.set('alsa.outputdevice', device);
-	var nListeners = this.outputDeviceChangeListeners.length;
-	for (var i = 0; i < nListeners; i++) {
-		this.outputDeviceChangeListeners[i].onOutputDeviceChanged();
-	}
+	this.fireEvent(events.OUTPUT_DEVICE_CHANGED);
 };
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -157,30 +147,36 @@ CoreCommandRouter.prototype.volumioretrievevolume = function () {
 	return this.volumeControl.retrievevolume();
 };
 
-CoreCommandRouter.prototype.addCallback = function (name, callback) {
-	if (this.callbacks[name] == undefined) {
-		this.callbacks[name] = [];
+CoreCommandRouter.prototype.addEventListener = function (event, listener) {
+	var type = event.type;
+	if (!type) {
+		throw new Error("Event must have a type");
 	}
-	this.callbacks[name].push(callback);
-	//this.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
+	if (this.eventListeners[type] == undefined) {
+		this.eventListeners[type] = [];
+	}
+	this.eventListeners[type].push(listener);
 };
 
-CoreCommandRouter.prototype.callCallback = function (name, data) {
-	var self = this;
-	var calls = this.callbacks[name];
-	if (calls != undefined) {
-		var nCalls = calls.length;
-		for (var i = 0; i < nCalls; i++) {
-			var func = this.callbacks[name][i];
+CoreCommandRouter.prototype.fireEvent = function (event, data) {
+	var type=event.type;
+	if (!type) {
+		throw new Error("Event must have a type");
+	}
+	var listeners = this.eventListeners[type];
+	if (listeners != undefined) {
+		var nListeners = listeners.length;
+		for (var i = 0; i < nListeners; i++) {
+			var func = this.eventListeners[type][i];
 			try {
 				func(data);
 			} catch (e) {
-				self.logger.error("Help! Some callbacks for " + name + " are crashing!");
-				self.logger.error(e);
+				this.logger.error("Help! Some callbacks for " + name + " are crashing!");
+				this.logger.error(e);
 			}
 		}
 	} else {
-		self.logger.debug("No callbacks for " + name);
+		this.logger.debug("No callbacks for " + name);
 	}
 };
 

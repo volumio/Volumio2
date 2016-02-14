@@ -2,6 +2,7 @@
 
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var events = require('../../../volumioEvents');
 
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;
@@ -9,7 +10,7 @@ module.exports = AirPlayInterface;
 function AirPlayInterface(context) {
 	this.context = context;
 	this.commandRouter = this.context.coreCommand;
-	this.commandRouter.addOutputDeviceChangeListener(this);
+	this.commandRouter.addEventListener(events.OUTPUT_DEVICE_CHANGED, this.onOutputDeviceChanged.bind(this));
 }
 
 AirPlayInterface.prototype.onVolumioStart = function () {

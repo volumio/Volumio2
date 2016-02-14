@@ -10,6 +10,7 @@ var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
 var parser = require('cue-parser');
+var events = require('../../../volumioEvents');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -18,7 +19,7 @@ function ControllerMpd(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
-	this.commandRouter.addOutputDeviceChangeListener(this);
+	this.commandRouter.addEventListener(events.OUTPUT_DEVICE_CHANGED, this.onOutputDeviceChanged.bind(this));
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
