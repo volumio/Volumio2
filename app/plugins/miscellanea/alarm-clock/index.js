@@ -2,7 +2,6 @@
 
 var libQ = require('kew');
 var fs=require('fs-extra');
-var config= new (require('v-conf'))();
 var schedule = require('node-schedule');
 var moment = require('moment');
 
@@ -17,6 +16,7 @@ function AlarmClock(context) {
 	self.commandRouter = self.context.coreCommand;
 
 	self.logger=self.context.logger;
+	self.jobs = [];
 }
 
 AlarmClock.prototype.getConfigurationFiles = function()
@@ -29,8 +29,8 @@ AlarmClock.prototype.getConfigurationFiles = function()
 AlarmClock.prototype.onVolumioStart = function() {
 	var self = this;
 	//Perform startup tasks here
-	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
-	config.loadFile(configFile);
+	self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	self.applyConf(self.getConf());
 };
 
 AlarmClock.prototype.onStart = function() {
@@ -86,18 +86,63 @@ AlarmClock.prototype.setUIConfig = function(data)
 
 };
 
-AlarmClock.prototype.getConf = function(varName)
+AlarmClock.prototype.getConf = function()
 {
 	var self = this;
+	var conf = [];
+	try {
+		var conf = JSON.parse(fs.readJsonSync(self.configFile));
+	} catch (e) {}
 
-	return self.config.get(varName);
+	return  conf;
 };
 
-AlarmClock.prototype.setConf = function(varName, varValue)
+AlarmClock.prototype.fireAlarm = function(alarm) {
+	var self = this;
+	self.commandRouter.playPlaylist(alarm.playlist);
+
+}
+
+AlarmClock.prototype.clearJobs = function () {
+	var self = this;
+	for (var i in self.jobs) {
+		var job = self.jobs[i];
+		self.logger.info("Alarm: Cancelling " + job.name);
+		job.cancel();
+	}
+	self.jobs = [];
+}
+
+AlarmClock.prototype.applyConf = function(conf) {
+	var self = this;
+	for (var i in conf) {
+		var item = conf[i];
+		var d = new Date(item.time);
+		var n = d.getHours();
+
+		var schedule = require('node-schedule');
+		var rule = new schedule.RecurrenceRule();
+		rule.minute = d.getMinutes();
+		rule.hours = d.getHours();
+		var func = self.fireAlarm.bind(self);
+		var j = schedule.scheduleJob(rule, function(){
+		  func(item);
+		});
+		self.logger.info("Alarm: Scheduling " + j.name + " at " +rule.hours + ":" + rule.minute) ;
+		self.jobs.push(j);
+	}
+}
+
+AlarmClock.prototype.setConf = function(conf)
 {
 	var self = this;
-
-	self.config.set(varName,varValue);
+	self.clearJobs();
+	self.applyConf(conf);
+	for (var i in conf) {
+		var item = conf[i];
+		item.id = i;
+	}
+	fs.writeJsonSync(self.configFile,JSON.stringify(conf));
 };
 
 //Optional functions exposed for making development easier and more clear
@@ -125,13 +170,23 @@ AlarmClock.prototype.setAdditionalConf = function()
 	//Perform your installation tasks here
 };
 
-AlarmClock.prototype.getAlarm=function()
+AlarmClock.prototype.getAlarms=function()
 {
 	var self = this;
 
 	var defer = libQ.defer();
+	var alarms;
+	console.log("ALAPI: getAlarms " + JSON.stringify( self.getConf()));
+	try {
+		alarms = self.getConf();
+	} catch (e) {
+
+	}
+	if (alarms == undefined) {
+		alarms = [];
+	}
 //TODO GET ALARM
-	defer.resolve({});
+	defer.resolve(alarms);
 	return defer.promise;
 };
 
@@ -141,14 +196,8 @@ AlarmClock.prototype.saveAlarm=function(data)
 
 	var defer = libQ.defer();
 
-	var enabled=data['enabled'];
-	var hour=data['hour'];
-	var minute=data['minute'];
-
-	config.set('enabled', enabled);
-	config.set('hour', hour);
-	config.set('minute', minute);
-
+	self.setConf(data);
+	console.log("ALAPI: getAlarms " + JSON.stringify(data) + " - " + self.getConf());
 	self.commandRouter.pushToastMessage('success',"Alarm clock", 'Your alarm clock has been set');
 
 
