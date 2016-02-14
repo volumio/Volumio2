@@ -6,6 +6,7 @@ var foundVolumioInstances= new (require('v-conf'))();
 var mdns=require('mdns');
 var HashMap = require('hashmap');
 var io=require('socket.io-client');
+var exec = require('child_process').exec;
 
 // Define the ControllerVolumioDiscovery class
 
@@ -34,26 +35,43 @@ ControllerVolumioDiscovery.prototype.getConfigurationFiles = function()
 	return ['config.json'];
 };
 
+ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function()
+{
+	var self = this;
+
+	var bound = self.startAdvertisement.bind(self);
+	exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
+								uid: 1000,
+								gid: 1000
+							});
+	setTimeout(bound,5000);
+};
+
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
 
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 	config.loadFile(configFile);
 
-	self.startAdvertisement();
 	self.startMDNSBrowse();
+	self.startAdvertisement();
+	
+	var boundMethod = self.onPlayerNameChanged.bind(self);
+	self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 };
 
-ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
+ControllerVolumioDiscovery.prototype.getNewName=function(curHname,i)
 {
 	var self=this;
+	var nameArray = curHname.split("-");
+	var curName = nameArray[0];
 	var keys=foundVolumioInstances.getKeys();
 	var collides=false;
 
 	var nameToCheck;
-	if(i==0)
+	if(i<2)
 		nameToCheck=curName;
-	else nameToCheck=curName+i;
+	else nameToCheck=curName + "-" + i;
 
 	self.context.coreCommand.pushConsoleMessage(keys);
 	for(var k in keys)
@@ -78,6 +96,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 
 	try {
 		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+		var virginName = systemController.getConf('playerName').split("-")[0];
 		var name = systemController.getConf('playerName');
 		var uuid = systemController.getConf('uuid');
 		var serviceName = config.get('service');
@@ -87,41 +106,72 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 			volumioName: name,
 			UUID: uuid
 		};
-
-		self.context.coreCommand.pushConsoleMessage("Started advertising...");
+		
+		self.context.coreCommand.pushConsoleMessage("Discovery: Started advertising..." + name);
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-			if (service.name != name) {
-				self.context.coreCommand.pushConsoleMessage('Changing my name to ' + name);
-				systemController.setConf('playerName', name);
-
-				self.ad.stop();
-				txt_record.volumioName = name;
-				setTimeout(
-					function () {
-						mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-							console.log(error);
-						});
-
-
-					},
-					5000
-				);
-
+			var sname = service.name.replace("axiomair","AxiomAir");
+			self.context.coreCommand.pushConsoleMessage("Discovery: virginName is " + virginName + " name is " + name  + " service.name is " + service.name + " serviceName is "+ serviceName + " sname is " + sname);
+			var namecollide = false;
+			if (virginName == serviceName) {
+				if (name != sname) {
+					namecollide = true;
+					self.context.coreCommand.pushConsoleMessage("Discovery: Restarting Adv...");
+					txt_record.volumioName = sname;	
+					self.ad.stop();
+					setTimeout(function () {
+			 			mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
+			 				console.log("Discovery: Inner Adv error: " + error);
+			 			});
+			 		},5000);
+				}
 			}
+			if (!namecollide) {
+				self.context.coreCommand.pushConsoleMessage("Discovery: Adv seems fine");
+			}
+			//var sname = service.name.replace("axiomair","AxiomAir");
+			// if (sname != name) {
+			// 	txt_record.volumioName =  sname;
+			// 	self.context.coreCommand.pushConsoleMessage('Discovery: name collision!');
+			// 	if (name == virginName ) {
+			// 		self.context.coreCommand.pushConsoleMessage('Discovery: will advertise with name ' + sname );
+			// 		systemController.setConf('playerName', sname);
+			// 		setTimeout(
+			// 		function () {
+			// 			mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
+			// 				console.log(error);
+			// 			});
+
+
+			// 		},
+			// 		5000
+			// 	);
+			// 	} else {
+					// self.context.coreCommand.pushConsoleMessage('Discovery: will restart with name ' + virginName );
+					// systemController.setConf('playerName', virginName);
+					// self.ad.stop();
+					// setTimeout(func,5000);
+					// 	func,
+					// 	5000
+					// );
+			//	}
+			//}
 
 		});
 		self.ad.on('error', function(error)
 		{
-			self.context.coreCommand.pushConsoleMessage('mDNS Advertisement raised the following error ' + error);
-			self.startAdvertisement();
+			self.context.coreCommand.pushConsoleMessage('Discovery: mDNS Advertisement raised the following error ' + error);
+			var bound = self.startAdvertisement.bind(self);
+			setTimeout(bound,5000);
 		});
 		self.ad.start();
 	}
 	catch(ecc)
 	{
-		//console.log(ecc);
-		self.startAdvertisement();
+		console.log("Discovery: Exception " + ecc);
+		systemController.setConf('playerName', "AxiomAir");
+		var bound = self.startAdvertisement.bind(self);
+		setTimeout(bound,5000);
 	}
 };
 
@@ -398,6 +448,8 @@ ControllerVolumioDiscovery.prototype.setConf = function(varName, varValue)
 
 	self.config.set(varName,varValue);
 };
+
+
 
 //Optional functions exposed for making development easier and more clear
 ControllerVolumioDiscovery.prototype.getSystemConf = function(pluginName,varName)
