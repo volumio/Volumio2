@@ -4,6 +4,7 @@ var libQ = require('kew');
 var fs=require('fs-extra');
 var schedule = require('node-schedule');
 var moment = require('moment');
+var config= new (require('v-conf'))();
 
 // Define the AlarmClock class
 module.exports = AlarmClock;
@@ -17,6 +18,11 @@ function AlarmClock(context) {
 
 	self.logger=self.context.logger;
 	self.jobs = [];
+	self.sleep = {
+		sleep_enabled: false,
+		sleep_hour: 7,
+		sleep_minute: 0
+	};
 }
 
 AlarmClock.prototype.getConfigurationFiles = function()
@@ -30,6 +36,7 @@ AlarmClock.prototype.onVolumioStart = function() {
 	var self = this;
 	//Perform startup tasks here
 	self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	config.loadFile(self.configFile);
 	self.applyConf(self.getConf());
 };
 
@@ -208,14 +215,37 @@ AlarmClock.prototype.getSleep = function()
 {
 	var self = this;
 	var defer = libQ.defer();
+	var sleepTask = self.getSleepConf();
+	var sleep_hour = sleepTask.sleep_hour;
+	var sleep_minute = sleepTask.sleep_minute;
+	var when = new Date(sleepTask.sleep_requestedat);
+	var now = moment(new Date());
 
+	var thisMoment = moment(when);
+	thisMoment.add(sleep_hour,"h");
+	thisMoment.add(sleep_minute,"m");
+	var diff = moment.duration(thisMoment.diff(now));
+
+	sleep_hour =  diff.get("hours");
+	sleep_minute = diff.get("minutes");
 
 	defer.resolve({
-		enabled:config.get('sleep_enabled'),
-		time:config.get('sleep_hour')+':'+config.get('sleep_minute')
+		enabled:sleepTask.sleep_enabled,
+		time:sleep_hour+':'+sleep_minute
 	});
 	return defer.promise;
 };
+
+AlarmClock.prototype.setSleepConf = function (conf) {
+	var self = this;
+	self.sleep = conf;
+}
+
+AlarmClock.prototype.getSleepConf = function () {	
+
+	var self = this;
+	return self.sleep;
+}
 
 AlarmClock.prototype.setSleep = function(data)
 {
@@ -223,14 +253,23 @@ AlarmClock.prototype.setSleep = function(data)
 	var defer = libQ.defer();
 
 	var splitted=data.time.split(':');
-  var sleephour = moment().hour()+parseFloat(splitted[0]);
-	var sleepminute = moment().minute()+parseFloat(splitted[1]);
-	config.set('sleep_enabled',data.enabled);
-	config.set('sleep_hour',splitted[0]);
-	config.set('sleep_minute',splitted[1]);
+
+	var thisMoment = moment();
+	thisMoment.add(parseFloat(splitted[0]),"h");
+	thisMoment.add(parseFloat(splitted[1]),"m");
+
+  	var sleephour = thisMoment.hour()
+	var sleepminute = thisMoment.minute()
+	var sleepTask = {
+		sleep_enabled: data.enabled,
+		sleep_hour: splitted[0],
+		sleep_minute: splitted[1],
+		sleep_requestedat: new Date().toISOString()
+	};
+	self.setSleepConf(sleepTask);
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SetSleep: ' + splitted[0] + ' hours ' + splitted[1] + ' minutes');
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SetSleep at  ' + sleephour + ':' + sleepminute);
+
 
 	if(self.haltSchedule!=undefined)
 	{
@@ -240,9 +279,10 @@ AlarmClock.prototype.setSleep = function(data)
 
 	if(data.enabled)
 	{
-		var date = new Date(moment().year(), moment().month(), moment().date(), sleephour, sleepminute, 0);
+		var date = new Date(thisMoment.year(), thisMoment.month(), thisMoment.date(), sleephour, sleepminute, 0);
+		self.commandRouter.pushConsoleMessage("Set Sleep at " + date);
 		self.haltSchedule=schedule.scheduleJob(date, function(){
-			config.set('sleep_enabled',false);
+//			config.set('sleep_enabled',false);
 
 			self.haltSchedule.cancel();
 			delete self.haltSchedule;
@@ -253,8 +293,21 @@ AlarmClock.prototype.setSleep = function(data)
 				self.commandRouter.shutdown();
 			},5000);
 		});
+		// if (sleepminute >= 60 ) {
+		// 	sleephour += 1;
+		// 	sleepminute -= 60;
+		// }
+		// if (sleephour > 23) {
+		// 	sleephour = 0;
+		// }
+		if (sleephour < 10) {
+			sleephour = "0" + sleephour;
+		}
+		if (sleepminute < 10) {
+			sleepminute = "0" + sleepminute;
+		}
 
-		self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off at '+sleephour+':'+sleepminute );
+		self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off at '+sleephour+':'+sleepminute);
 	}
 
 	defer.resolve({});
