@@ -12,7 +12,7 @@
     "body-parser": "^1.15.0",
     "chokidar": "^1.4.2",
     "compression": "^1.6.1",
-    "convert-seconds": "1.0.0",
+    "convert-seconds": "1.0.1",
     "cookie-parser": "^1.4.1",
     "cue-parser": "0.0.3",
     "ejs": "^2.3.4",
