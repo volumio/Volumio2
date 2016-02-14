@@ -176,6 +176,7 @@ AlarmClock.prototype.getAlarms=function()
 
 	var defer = libQ.defer();
 	var alarms;
+
 	try {
 		alarms = self.getConf();
 	} catch (e) {
