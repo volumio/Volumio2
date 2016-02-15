@@ -203,17 +203,17 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 
 CoreVolumeController.prototype.retrievevolume = function () {
 	var self = this;
-
-	var defer = libQ.defer();
-
 	this.getVolume(function (err, vol) {
 		self.getMuted(function (err, mute) {
 			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController:: Volume=' + vol + ' Mute =' + mute);
 			//Log Volume Control
 			Volume.vol = Math.round(Math.pow(100, (vol / 100)));
 			Volume.mute = mute;
+			return libQ.resolve(Volume)
+				.then(function (Volume) {
+					self.commandRouter.volumioupdatevolume(Volume);
+				});
+
 		});
 	});
-	defer.resolve({});
-	return defer.promise;
 };
