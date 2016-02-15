@@ -40,3 +40,15 @@ PlatformSpecific.prototype.networkRestart = function () {
 		}, 10000);
 	});
 };
+
+
+PlatformSpecific.prototype.startupSound = function () {
+	var self = this;
+	var outdev = self.coreCommand.sharedVars.get('alsa.outputdevice');
+	var hwdev = 'hw:' + outdev + ',0';
+	exec('/usr/bin/aplay --device=plug'+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log(error);
+		}
+	});
+}

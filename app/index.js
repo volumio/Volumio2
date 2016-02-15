@@ -57,13 +57,9 @@ function CoreCommandRouter(server) {
 
 	this.pushConsoleMessage('BOOT COMPLETED');
 
-	//Startup Sound
-	var self = this;
-	exec("/usr/bin/aplay --device=plughw:0,0 /volumio/app/startup.wav", function (error, stdout, stderr) {
-		if (error !== null) {
-			self.pushConsoleMessage(error);
-		}
-	});
+	this.startupSound();
+
+
 
 }
 
@@ -481,6 +477,10 @@ CoreCommandRouter.prototype.reboot = function () {
 
 CoreCommandRouter.prototype.networRestart = function () {
 	this.platformspecific.networkRestart();
+};
+
+CoreCommandRouter.prototype.startupSound = function () {
+	this.platformspecific.startupSound();
 };
 
 
