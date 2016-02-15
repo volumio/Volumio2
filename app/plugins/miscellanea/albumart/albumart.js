@@ -20,11 +20,16 @@ var logger = new (winston.Logger)({
 	]
 });
 
-var albumArtRootFolder = '/data/albumart';
+var albumArtRootFolder = '/data/albumart/web';
+var mountAlbumartFolder= '/data/albumart/folder';
 
 var setFolder = function (newFolder) {
 	//logger.info("Setting folder " + newFolder);
-	albumArtRootFolder = S(newFolder).ensureRight('/').s;
+	albumArtRootFolder = S(newFolder).ensureRight('/').s+'web';
+    fs.ensureDirSync(albumArtRootFolder);
+
+    mountAlbumartFolder= S(newFolder).ensureRight('/').s+'folder';
+    fs.ensureDirSync(mountAlbumartFolder);
 };
 
 var searchOnline = function (defer, web) {
@@ -187,7 +192,11 @@ var searchInFolder = function (defer, path, web) {
 			var coverFile = coverFolder + '/' + covers[i];
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
-				defer.resolve(coverFile);
+                var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
+                logger.info('Copying file to cache ['+cacheFile+']');
+                fs.ensureFileSync(cacheFile);
+                fs.copySync(coverFile,cacheFile);
+				defer.resolve(cacheFile);
 				return defer.promise;
 			}
 		}
@@ -223,37 +232,74 @@ var processRequest = function (web, path) {
 	}
 
 	if (path != undefined) {
-		path = '/mnt/' + path;
+        path = '/mnt/' + path;
 		logger.info(path);
 		if (fs.existsSync(path)) {
-			var stats = fs.statSync(path);
-			if (stats.isDirectory()) {
-				searchInFolder(defer, path, web);
-			} else {
-				var parser = mm(fs.createReadStream(path), function (err, metadata) {
-					if (err) {
-						logger.info(err);
-						searchInFolder(defer, path, web);
-					}
-					else {
-						try {
-							//logger.info(JSON.stringify(metadata));
-							if (metadata.picture != undefined && metadata.picture.length > 0) {
-								logger.info("Found art in file " + path);
+            var stats = fs.statSync(path);
+            var isFolder=false;
+            var imageSize='extralarge';
 
-								fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
-									//console.log('file has been written');
-									defer.resolve('/tmp/albumart');
-								});
-							}
-							else searchInFolder(defer, path, web);
-						}
-						catch (ecc) {
-							logger.info(ecc);
-						}
-					}
-				});
-			}
+            /**
+             * Trying to hit the disk cache
+             *
+             */
+            var coverFolder = '';
+
+            if (stats.isDirectory()) {
+                coverFolder=path;
+                isFolder=true;
+            }
+            else {
+                var splitted = path.split('/');
+
+                for (var k = 0; k < splitted.length - 1; k++) {
+                    coverFolder = coverFolder + '/' + splitted[k];
+                }
+            }
+
+            fs.ensureDirSync(coverFolder);
+            var cacheFilePath=mountAlbumartFolder+coverFolder+'/'+imageSize+'.jpeg';
+            logger.info(cacheFilePath);
+
+
+            if(fs.existsSync(cacheFilePath))
+            {
+                defer.resolve(cacheFilePath);
+            }
+            else {
+                if (isFolder) {
+                    searchInFolder(defer, path, web);
+                } else {
+                    var starttime=Date.now();
+                    searchInFolder(defer, path, web);
+                    /*var parser = mm(fs.createReadStream(path), function (err, metadata) {
+                     if (err) {
+                     logger.info(err);
+                     searchInFolder(defer, path, web);
+                     }
+                     else {
+                     try {
+                     var stoptime=Date.now();
+                     logger.info("Parsing took "+(stoptime-starttime)+" milliseconds");
+                     if (metadata.picture != undefined && metadata.picture.length > 0) {
+                     logger.info("Found art in file " + path);
+
+                     fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
+                     //console.log('file has been written');
+                     defer.resolve('/tmp/albumart');
+                     });
+                     }
+                     else searchInFolder(defer, path, web);
+                     }
+                     catch (ecc) {
+                     logger.info(ecc);
+                     }
+                     }
+                     });*/
+                }
+            }
+
+
 		} else {
 			logger.info('File' + path + ' doesnt exist');
 			searchInFolder(defer, path, web);
@@ -277,10 +323,13 @@ var processExpressRequest = function (req, res) {
 	var web = req.query.web;
 	var path = req.query.path;
 
-
+    var starttime=Date.now();
 	var promise = processRequest(web, path);
 	promise.then(function (filePath) {
 			logger.info('Sending file ' + filePath);
+
+            var stoptime=Date.now();
+            logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
 			res.sendFile(filePath);
 		})
 		.fail(function () {
