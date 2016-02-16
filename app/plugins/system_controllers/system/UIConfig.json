@@ -42,13 +42,20 @@
           "id":"update",
           "element": "button",
           "label": "Check Updates",
-          "text": "Check if newer versions of the system are available",
+          "description": "Check if newer versions of the system are available",
           "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
+        },
+        {
+          "id":"user",
+          "element": "button",
+          "label": "Delete User Data",
+          "description": "Delete all your settings and data",
+          "onClick": {"type":"emit", "message":"deleteUserData", "data":" ", "askForConfirm": {"title": "Confirm Delete user Data", "message": "This will delete all your personal settings, favourites and playlists (USB and NAS music won't be deleted). The system will automatically restart once data has been deleted. Do you want to continue?"}}
         },
          {
             "id":"factory",
               "element": "button",
-              "label": "Factory Settings",
+              "label": "Factory Reset",
               "description": "Reset your System to factory Settings",
               "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"}}
           }

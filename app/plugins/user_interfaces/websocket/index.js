@@ -965,6 +965,31 @@ function InterfaceWebUI(context) {
 				});
 			});
 
+			connWebSocket.on('deleteUserData', function () {
+				var selfConnWebSocket = this;
+				self.logger.info("Command Delete User Data Received");
+
+				var socketURL = 'http://localhost:3005';
+				var options = {
+					transports: ['websocket'],
+					'force new connection': true
+				}
+
+				var io = require('socket.io-client');
+				var client = io.connect(socketURL, options);
+				client.emit('deleteUserData', '');
+
+				client.on('updateProgress', function (message) {
+					self.logger.info("Update Progress: " + message);
+					selfConnWebSocket.emit('updateProgress', message);
+				});
+
+				client.on('updateDone', function (message) {
+					self.logger.info("Update Done: " + message);
+					selfConnWebSocket.emit('updateDone', message);
+				});
+			});
+
 			connWebSocket.on('factoryReset', function () {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
