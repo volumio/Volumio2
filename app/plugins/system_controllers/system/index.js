@@ -306,3 +306,17 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 	}
 	exec('sudo systemctl start logondemand');
 };
+
+ControllerSystem.prototype.deleteUserData = function () {
+	var self = this;
+
+	fs.writeFile('/boot/user_data', ' ', function (err) {
+		if (err) {
+			self.logger.info('Cannot User Data delete file');
+		} else {
+			self.logger.info('Created User Data delete file, rebooting');
+			self.commandRouter.reboot();
+		}
+
+	});
+};
