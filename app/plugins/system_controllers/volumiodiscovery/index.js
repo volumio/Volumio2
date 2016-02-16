@@ -40,6 +40,9 @@ ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function()
 	var self = this;
 
 	var bound = self.startAdvertisement.bind(self);
+	try {
+		self.ad.stop();
+	} catch (e) {}	
 	exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
 								uid: 1000,
 								gid: 1000
@@ -159,6 +162,9 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 		});
 		self.ad.on('error', function(error)
 		{
+			try {
+			self.ad.stop();
+				} catch (e) {}	
 			self.context.coreCommand.pushConsoleMessage('Discovery: mDNS Advertisement raised the following error ' + error);
 			var bound = self.startAdvertisement.bind(self);
 			setTimeout(bound,5000);
@@ -168,6 +174,9 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	catch(ecc)
 	{
 		console.log("Discovery: Exception " + ecc);
+		try {
+			self.ad.stop();
+		} catch (e) {}	
 		systemController.setConf('playerName', serviceName);
 		var bound = self.startAdvertisement.bind(self);
 		setTimeout(bound,5000);
