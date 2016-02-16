@@ -7,7 +7,6 @@ module.exports = CoreStateMachine;
 function CoreStateMachine(commandRouter) {
 	this.commandRouter = commandRouter;
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
-	this.VolumeControl = new (require('./volumecontrol.js'))(commandRouter, this);
 	this.resetVolumioState();
 }
 
@@ -70,8 +69,10 @@ CoreStateMachine.prototype.clearQueue = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
+
 		this.currentStatus = 'play';
 		return this.serviceResume();
+	
 };
 
 // Volumio Next Command
@@ -218,12 +219,6 @@ CoreStateMachine.prototype.serviceResume = function () {
 CoreStateMachine.prototype.resetVolumioState = function () {
 	var self = this;
 
-	var volumeData =  this.VolumeControl.retrievevolume();
-	volumeData.then(function (data) {
-		self.currentVolume = volumeData.volume;
-		self.currentMute = volumeData.mute;
-	});
-
 	return libQ.resolve()
 		.then(function () {
 			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::resetVolumioState');
@@ -244,6 +239,9 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentChannels = null;
 			self.currentRandom = null;
 			self.currentRepeat = null;
+			self.currentVolume = null;
+			self.currentMute = null;
+			return self.getcurrentVolume();
 		});
 };
 
