@@ -53,7 +53,7 @@
     "v-conf": "0.10.0",
     "winston": "^2.1.1",
     "wireless-tools": "0.15.0",
-    "yargs": "^3.32.0"
+    "yargs": "^4.1.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
