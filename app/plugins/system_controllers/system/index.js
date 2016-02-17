@@ -131,7 +131,7 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
 	var defer = libQ.defer();
 
-	var player_name = data['player_name'];
+	var player_name = data['player_name'].split(" ").join("-");
 	var startup_sound = data['startup_sound'];
 
 	config.set('playerName', player_name);
