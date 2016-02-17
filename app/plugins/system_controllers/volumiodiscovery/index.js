@@ -34,16 +34,42 @@ ControllerVolumioDiscovery.prototype.getConfigurationFiles = function()
 	var self = this;
 
 	return ['config.json'];
-}
+
+};
+
+ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function(name)
+{
+	var self = this;
+	if (self.callbackTracer < 1) {
+		self.callbackTracer = 1
+		return
+	}
+    console.log("Discovery: Restarting stuff");
+	var bound = self.startAdvertisement.bind(self);
+	try {
+		console.log("Discovery: Stopped ads, if present");
+		self.ad.stop();
+
+	} catch (e) {
+	console.log("Discovery: Stopped ads, if present ----> exception!");
+
+	}	
+	self.forceRename = true;
+	setTimeout(bound,5000);
+};
+
 
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
-
+	self.callbackTracer = 0;
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 	config.loadFile(configFile);
 
 	self.startAdvertisement();
 	self.startMDNSBrowse();
+
+	var boundMethod = self.onPlayerNameChanged.bind(self);
+	self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 }
 
 ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
@@ -77,7 +103,9 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 {
 	var self = this;
-
+	var forceRename = self.forceRename;
+	self.forceRename = undefined;
+	console.log("Discovery: StartAdv! " + forceRename);
 	try {
 		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 		var name = systemController.getConf('playerName');
@@ -90,19 +118,20 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 			UUID: uuid
 		};
 
-		self.context.coreCommand.pushConsoleMessage("Started advertising...");
+		console.log("Discovery: Started advertising... " + name + " - "  + forceRename);
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-			if (service.name != name) {
-				self.context.coreCommand.pushConsoleMessage('Changing my name to ' + service.name);
+			if ((service.name != name) && (!forceRename)) {
+				console.log("Discovery: Changing my name to " + service.name + " CINGHIALE is " + forceRename);
 				systemController.setConf('playerName', service.name);
 
 				self.ad.stop();
 				txt_record.volumioName = service.name;
 				setTimeout(
 					function () {
-						mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-							console.log(error);
+						self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
+							console.log("Discovery: INT " + error);
+							
 						});
 
 
@@ -110,19 +139,23 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 					5000
 				);
 
-			}
+			} 
 
 		});
 		self.ad.on('error', function(error)
 		{
+			console.log("Discovery: ERROR" + error);
 			self.context.coreCommand.pushConsoleMessage('mDNS Advertisement raised the following error ' + error);
 			self.startAdvertisement();
+
 		});
 		self.ad.start();
 	}
 	catch(ecc)
 	{
-		console.log(ecc);
+		console.log("Discovery: ecc "+  ecc);
+		self.forceRename = false;
+		self.callbackTracer = 0;
 		self.startAdvertisement();
 	}
 }
@@ -149,14 +182,14 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			self.startMDNSBrowse();
 		});
 		self.browser.on('serviceUp', function(service) {
-			console.log("AVAPI: WE GOT  "+ service.txtRecord.UUID);
+			
 			if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
-				console.log("AVAPI: this is already registered,  " + service.txtRecord.UUID);
+				console.log("Discovery: this is already registered,  " + service.txtRecord.UUID);
 				foundVolumioInstances.delete(service.txtRecord.UUID+'.name');
 				self.remoteConnections.remove(service.txtRecord.UUID+'.name');
 			} else {
 				registeredUUIDs.push(service.txtRecord.UUID);
-				console.log("AVAPI: adding " + service.txtRecord.UUID);
+				console.log("Discovery: adding " + service.txtRecord.UUID);
 			}
 
 			//console.log(service);
