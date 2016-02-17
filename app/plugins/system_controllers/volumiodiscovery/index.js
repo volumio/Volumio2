@@ -121,12 +121,14 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 		console.log("Discovery: Started advertising... " + name + " - "  + forceRename);
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-			if ((service.name != name) && (!forceRename)) {
+			var lowerServer = serviceName.toLowerCase()
+			var theName = service.name.replace(lowerServer,serviceName)
+			if ((theName != name) && (!forceRename)) {
 				console.log("Discovery: Changing my name to " + service.name + " CINGHIALE is " + forceRename);
-				systemController.setConf('playerName', service.name);
+				systemController.setConf('playerName', theName);
 
 				self.ad.stop();
-				txt_record.volumioName = service.name;
+				txt_record.volumioName = theName;
 				setTimeout(
 					function () {
 						self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
