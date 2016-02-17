@@ -48,7 +48,7 @@ PluginManager.prototype.initializeConfiguration = function (package_json, plugin
 			}
             else
             {
-                var requiredConfigParametersFile=folder+'/requiredConfigurationParameters.json';
+                var requiredConfigParametersFile=folder+'/requiredConf.json';
                 if (fs.existsSync(requiredConfigParametersFile)) {
                     self.logger.info("Applying required configuration parameters for plugin "+package_json.name);
                     self.checkRequiredConfigurationParameters(requiredConfigParametersFile,destConfigurationFile);
