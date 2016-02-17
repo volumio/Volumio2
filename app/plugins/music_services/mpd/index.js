@@ -345,7 +345,13 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 		})
 		.then(function (response) {
 			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'parsing response...');
-			return libQ.resolve(libMpd.parseKeyValueMessage.call(libMpd, response));
+			var respobject = libMpd.parseKeyValueMessage.call(libMpd, response);
+			// If there's an error show an alert on UI
+			if ('error' in respobject) {
+				self.commandRouter.broadcastToastMessage('error', 'Error', respobject.error)
+				//console.log(respobject.error);
+			}
+			return libQ.resolve(respobject);
 		});
 };
 
@@ -487,6 +493,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 		sStatus = objState.state;
 	}
 
+
 	return {
 		status: sStatus,
 		position: nPosition,
@@ -558,12 +565,14 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.mpdReady = libQ.nfcall(self.clientMpd.on.bind(self.clientMpd), 'ready');
 	// Catch and log errors
 	self.clientMpd.on('error', function (err) {
-		console.error('MPD error: ' + err);
+		console.log('MPD error: ' + err);
 		if (err = "{ [Error: This socket has been ended by the other party] code: 'EPIPE' }") {
 			// Wait 5 seconds before trying to reconnect
 			setTimeout(function () {
 				self.mpdEstablish();
 			}, 5000);
+		} else {
+			console.log(err);
 		}
 	});
 
