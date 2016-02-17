@@ -131,14 +131,14 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
 	var defer = libQ.defer();
 
-	var player_name = data['player_name'];
+	var player_name = data['player_name'].split(" ").join("-");
 	var startup_sound = data['startup_sound'];
 
 	config.set('playerName', player_name);
 	config.set('startupSound', startup_sound);
 
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
-	//self.setHostname(player_name);
+	self.setHostname(player_name);
 	defer.resolve({});
 
 
@@ -305,4 +305,18 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 		fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
 	}
 	exec('sudo systemctl start logondemand');
+};
+
+ControllerSystem.prototype.deleteUserData = function () {
+	var self = this;
+
+	fs.writeFile('/boot/user_data', ' ', function (err) {
+		if (err) {
+			self.logger.info('Cannot User Data delete file');
+		} else {
+			self.logger.info('Created User Data delete file, rebooting');
+			self.commandRouter.reboot();
+		}
+
+	});
 };

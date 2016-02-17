@@ -12,6 +12,7 @@ var exec = require('child_process').exec;
 
 var registeredUUIDs = [];
 
+// Define the ControllerVolumioDiscovery class
 module.exports = ControllerVolumioDiscovery;
 
 function ControllerVolumioDiscovery(context) {
@@ -33,45 +34,54 @@ ControllerVolumioDiscovery.prototype.getConfigurationFiles = function()
 	var self = this;
 
 	return ['config.json'];
+
 };
 
-ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function()
+ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function(name)
 {
 	var self = this;
-
+	if (self.callbackTracer < 1) {
+		self.callbackTracer = 1
+		return
+	}
+    console.log("Discovery: Restarting stuff");
 	var bound = self.startAdvertisement.bind(self);
-	exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-								uid: 1000,
-								gid: 1000
-							});
+	try {
+		console.log("Discovery: Stopped ads, if present");
+		self.ad.stop();
+
+	} catch (e) {
+	console.log("Discovery: Stopped ads, if present ----> exception!");
+
+	}	
+	self.forceRename = true;
 	setTimeout(bound,5000);
 };
 
+
 ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 	var self = this;
-
+	self.callbackTracer = 0;
 	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 	config.loadFile(configFile);
 
-	self.startMDNSBrowse();
 	self.startAdvertisement();
-	
+	self.startMDNSBrowse();
+
 	var boundMethod = self.onPlayerNameChanged.bind(self);
 	self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
-};
+}
 
-ControllerVolumioDiscovery.prototype.getNewName=function(curHname,i)
+ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)
 {
 	var self=this;
-	var nameArray = curHname.split("-");
-	var curName = nameArray[0];
 	var keys=foundVolumioInstances.getKeys();
 	var collides=false;
 
 	var nameToCheck;
-	if(i<2)
+	if(i==0)
 		nameToCheck=curName;
-	else nameToCheck=curName + "-" + i;
+	else nameToCheck=curName+i;
 
 	self.context.coreCommand.pushConsoleMessage(keys);
 	for(var k in keys)
@@ -88,15 +98,16 @@ ControllerVolumioDiscovery.prototype.getNewName=function(curHname,i)
 	if(collides==true)
 		return self.getNewName(curName,newi);
 	else return nameToCheck;
-};
+}
 
 ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 {
 	var self = this;
-
+	var forceRename = self.forceRename;
+	self.forceRename = undefined;
+	console.log("Discovery: StartAdv! " + forceRename);
 	try {
 		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-		var virginName = systemController.getConf('playerName').split("-")[0];
 		var name = systemController.getConf('playerName');
 		var uuid = systemController.getConf('uuid');
 		var serviceName = config.get('service');
@@ -106,73 +117,49 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 			volumioName: name,
 			UUID: uuid
 		};
-		
-		self.context.coreCommand.pushConsoleMessage("Discovery: Started advertising..." + name);
+
+		console.log("Discovery: Started advertising... " + name + " - "  + forceRename);
 
 		self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-			var sname = service.name.replace(serviceName.toLowerCase(),serviceName);
-			self.context.coreCommand.pushConsoleMessage("Discovery: virginName is " + virginName + " name is " + name  + " service.name is " + service.name + " serviceName is "+ serviceName + " sname is " + sname);
-			var namecollide = false;
-			if (virginName == serviceName) {
-				if (name != sname) {
-					namecollide = true;
-					self.context.coreCommand.pushConsoleMessage("Discovery: Restarting Adv...");
-					txt_record.volumioName = sname;	
-					self.ad.stop();
-					setTimeout(function () {
-			 			mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-			 				console.log("Discovery: Inner Adv error: " + error);
-			 			});
-			 		},5000);
-				}
-			}
-			if (!namecollide) {
-				self.context.coreCommand.pushConsoleMessage("Discovery: Adv seems fine");
-			}
-			// if (sname != name) {
-			// 	txt_record.volumioName =  sname;
-			// 	self.context.coreCommand.pushConsoleMessage('Discovery: name collision!');
-			// 	if (name == virginName ) {
-			// 		self.context.coreCommand.pushConsoleMessage('Discovery: will advertise with name ' + sname );
-			// 		systemController.setConf('playerName', sname);
-			// 		setTimeout(
-			// 		function () {
-			// 			mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-			// 				console.log(error);
-			// 			});
+			if ((service.name != name) && (!forceRename)) {
+				console.log("Discovery: Changing my name to " + service.name + " CINGHIALE is " + forceRename);
+				systemController.setConf('playerName', service.name);
+
+				self.ad.stop();
+				txt_record.volumioName = service.name;
+				setTimeout(
+					function () {
+						self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
+							console.log("Discovery: INT " + error);
+							
+						});
 
 
-			// 		},
-			// 		5000
-			// 	);
-			// 	} else {
-					// self.context.coreCommand.pushConsoleMessage('Discovery: will restart with name ' + virginName );
-					// systemController.setConf('playerName', virginName);
-					// self.ad.stop();
-					// setTimeout(func,5000);
-					// 	func,
-					// 	5000
-					// );
-			//	}
-			//}
+					},
+					5000
+				);
+
+			} 
 
 		});
 		self.ad.on('error', function(error)
 		{
-			self.context.coreCommand.pushConsoleMessage('Discovery: mDNS Advertisement raised the following error ' + error);
-			var bound = self.startAdvertisement.bind(self);
-			setTimeout(bound,5000);
+			console.log("Discovery: ERROR" + error);
+			self.context.coreCommand.pushConsoleMessage('mDNS Advertisement raised the following error ' + error);
+			self.startAdvertisement();
+
 		});
 		self.ad.start();
 	}
 	catch(ecc)
 	{
-		console.log("Discovery: Exception " + ecc);
-		systemController.setConf('playerName', serviceName);
-		var bound = self.startAdvertisement.bind(self);
-		setTimeout(bound,5000);
+		console.log("Discovery: ecc "+  ecc);
+		self.forceRename = false;
+		self.callbackTracer = 0;
+		self.startAdvertisement();
 	}
-};
+}
+
 
 ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 {
@@ -195,14 +182,14 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			self.startMDNSBrowse();
 		});
 		self.browser.on('serviceUp', function(service) {
-			console.log("AVAPI: WE GOT  "+ service.txtRecord.UUID);
+			
 			if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
-				console.log("AVAPI: this is already registered,  " + service.txtRecord.UUID);
+				console.log("Discovery: this is already registered,  " + service.txtRecord.UUID);
 				foundVolumioInstances.delete(service.txtRecord.UUID+'.name');
 				self.remoteConnections.remove(service.txtRecord.UUID+'.name');
 			} else {
 				registeredUUIDs.push(service.txtRecord.UUID);
-				console.log("AVAPI: adding " + service.txtRecord.UUID);
+				console.log("Discovery: adding " + service.txtRecord.UUID);
 			}
 
 			//console.log(service);

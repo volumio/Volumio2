@@ -965,6 +965,13 @@ function InterfaceWebUI(context) {
 				});
 			});
 
+			connWebSocket.on('deleteUserData', function () {
+				var selfConnWebSocket = this;
+				self.logger.info("Command Delete User Data Received");
+				self.commandRouter.executeOnPlugin('system_controller', 'system', 'deleteUserData', '');
+
+			});
+
 			connWebSocket.on('factoryReset', function () {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
