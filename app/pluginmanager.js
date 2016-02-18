@@ -5,6 +5,8 @@ var HashMap = require('hashmap');
 var libFast = require('fast.js');
 var S = require('string');
 
+var vconf=require('v-conf');
+
 module.exports = PluginManager;
 function PluginManager(ccommand, server) {
 	var self = this;
@@ -18,6 +20,7 @@ function PluginManager(ccommand, server) {
 	if (!fs.existsSync(pluginsDataFile)) {
 		fs.copySync(__dirname + '/plugins/plugins.json', pluginsDataFile);
 	}
+
 	self.config.loadFile(pluginsDataFile);
 
 	self.coreCommand = ccommand;
@@ -43,6 +46,15 @@ PluginManager.prototype.initializeConfiguration = function (package_json, plugin
 			if (!fs.existsSync(destConfigurationFile)) {
 				fs.copySync(folder + '/' + configurationFile, destConfigurationFile);
 			}
+            else
+            {
+                var requiredConfigParametersFile=folder+'/requiredConf.json';
+                if (fs.existsSync(requiredConfigParametersFile)) {
+                    self.logger.info("Applying required configuration parameters for plugin "+package_json.name);
+                    self.checkRequiredConfigurationParameters(requiredConfigParametersFile,destConfigurationFile);
+                }
+
+            }
 		}
 
 	}
@@ -264,3 +276,24 @@ PluginManager.prototype.getConfigurationFile = function (context, fileName) {
 		S(context.getEnvVariable('name')).ensureRight('/').s +
 		fileName;
 };
+
+
+PluginManager.prototype.checkRequiredConfigurationParameters = function (requiredFile, configFile) {
+    var self = this;
+
+    //loading config file
+    var configJson = new (vconf)();
+    configJson.loadFile(configFile);
+
+    //loading required configuration parameters
+    var requireConfig = fs.readJsonSync(requiredFile);
+
+    for(var key in requireConfig)
+    {
+        configJson.set(key,requireConfig[key]);
+    }
+
+    configJson.save();
+};
+
+

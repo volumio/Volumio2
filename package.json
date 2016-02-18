@@ -23,7 +23,7 @@
     "hashmap": "^2.0.4",
     "inotify": "1.4.0",
     "ip": "^1.1.0",
-    "is-online": "^5.1.0",
+    "is-online": "^5.1.1",
     "kew": "^0.7.0",
     "level": "^1.4.0",
     "linux-mountutils": "^1.0.0",
@@ -50,10 +50,10 @@
     "string": "^3.3.1",
     "underscore": "^1.8.3",
     "unirest": "0.4.2",
-    "v-conf": "0.9.0",
+    "v-conf": "0.10.0",
     "winston": "^2.1.1",
     "wireless-tools": "0.15.0",
-    "yargs": "^3.32.0"
+    "yargs": "^4.1.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
