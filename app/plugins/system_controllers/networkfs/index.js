@@ -485,7 +485,7 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 			mounted: mounted.mounted,
 			size: realsize
 		};
-		var cmd="df -BM "+mountpoint+" | awk '{print $2}'";
+		var cmd="df -BM "+mountpoint+" | awk '{print $3}'";
 		var promise = libQ.ncall(exec,respShare,cmd).then(function (stdout){
 
 
