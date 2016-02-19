@@ -87,6 +87,7 @@ ControllerSystem.prototype.setConf = function (varName, varValue) {
 	config.set(varName, varValue);
 	if (varName = 'player_name') {
 		var player_name = varValue;
+		self.setHostname(player_name);
 
 		for (var i in self.callbacks) {
 			var callback = self.callbacks[i];
