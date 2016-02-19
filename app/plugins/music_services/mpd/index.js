@@ -445,6 +445,7 @@ ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 
 // Parse MPD's text status into a Volumio recognizable status object
 ControllerMpd.prototype.parseState = function (objState) {
+	var self = this;
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseState');
 
@@ -473,7 +474,16 @@ ControllerMpd.prototype.parseState = function (objState) {
 	var nChannels = null;
 	if ('audio' in objState) {
 		var objMetrics = objState.audio.split(':');
-		nSampleRate = Number(objMetrics[0]) / 1000;
+		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
+
+			if (nSampleRateRaw === 352.8){
+				var nSampleRateRaw = 2.82+' MHz';
+			} else if (nSampleRateRaw === 705.6) {
+				var nSampleRateRaw = 5.64+' MHz';
+			} else {
+				var nSampleRateRaw = nSampleRateRaw+' KHz';
+			}
+		nSampleRate = nSampleRateRaw;
 		nBitDepth = Number(objMetrics[1]);
 		nChannels = Number(objMetrics[2]);
 	}
