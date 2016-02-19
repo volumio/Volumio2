@@ -1117,14 +1117,16 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						}
 					}
 					else if (line.indexOf('file:') === 0) {
-						path = line.slice(6);
-						name = path.split('/').pop();
-
+						var path = line.slice(6);
+						var name = path.split('/').pop();
+						
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
 						var title = self.searchFor(lines, i + 1, 'Title:');
 
-						if (title == undefined) {
+						if (title) {
+							title = title;
+						} else {
 							title = name;
 						}
 						list.push({
