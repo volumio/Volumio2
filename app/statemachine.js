@@ -18,6 +18,9 @@ CoreStateMachine.prototype.getState = function () {
 	if ('service' in this.currentTrackBlock) {
 		sService = this.currentTrackBlock.service;
 	}
+	if (this.currentDuration === 0) {
+		this.Streaming = true;
+	} else this.Streaming = false;
 
 	return {
 		status: this.currentStatus,
@@ -37,7 +40,7 @@ CoreStateMachine.prototype.getState = function () {
 		repeat: this.currentRepeat,
 		volume: this.currentVolume,
 		mute: this.currentMute,
-		stream: this.isStreaming,
+		stream: this.Streaming,
 		service: sService
 	};
 };
