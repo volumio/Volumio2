@@ -13,6 +13,8 @@ function InterfaceWebUI(context) {
 
 	self.context = context;
 	self.commandRouter = self.context.coreCommand;
+    self.musicLibrary=self.commandRouter.musicLibrary;
+
 	self.logger = self.commandRouter.logger;
 
 	/** Init SocketIO listener */
@@ -463,48 +465,7 @@ function InterfaceWebUI(context) {
 
 				var response;
 
-				//console.log("CURURI: " + curUri);
-
-				if (curUri.startsWith('favourites')) {
-					response = self.commandRouter.playListManager.listFavourites(curUri);
-				}
-				else if (curUri.startsWith('playlists')) {
-					if (curUri == 'playlists')
-						response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'listPlaylists', curUri);
-					else response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'browsePlaylist', curUri);
-				}
-				else if (curUri.startsWith('music-library')) {
-					response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', curUri);
-				}
-				else if (curUri.startsWith('radio-favourites')) {
-					response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites');
-				}
-				else if (curUri.startsWith('radio')) {
-					if (curUri == 'radio')
-						response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listFirstLevelRadioSections', curUri);
-					else {
-						if (curUri.startsWith('radio/myWebRadio')) {
-							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listMyWebRadio', curUri);
-						}
-						else if (curUri.startsWith('radio/favourites'))
-							response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites', curUri);
-						else if (curUri.startsWith('radio/byGenre')) {
-							if (curUri == 'radio/byGenre')
-								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioCategories', curUri);
-							else
-								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioForCategory', curUri);
-
-						}
-						else if (curUri.startsWith('radio/byCountry')) {
-							if (curUri == 'radio/byCountry')
-								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioCountries', curUri);
-							else
-								response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioForCountry', curUri);
-
-						}
-					}
-				}
-
+				response=self.musicLibrary.executeBrowseSource(curUri);
 
 				if (response != undefined) {
 					response.then(function (result) {

@@ -99,9 +99,9 @@ function CoreMusicLibrary (commandRouter) {
 	];
 
 	// The Browse Sources Array is the list showed on Browse Page
-	self.browseSources = [{name: 'Favourites', uri: 'favourites'},
-		{name: 'Playlists', uri: 'playlists'},
-		{name: 'Music Library', uri: 'music-library'}
+	self.browseSources = [{name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
+		{name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
+		{name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'}
 		];
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
@@ -604,11 +604,38 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 	var self = this;
 
 	if(data.name!= undefined) {
-
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
-	self.browseSources.push(data);
+	    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
+	    self.browseSources.push(data);
 	}
 }
+
+CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
+    var self = this;
+
+    var response;
+
+    if (curUri.startsWith('favourites')) {
+        return self.commandRouter.playListManager.listFavourites(curUri);
+    }
+    else {
+        for(var i in self.browseSources)
+        {
+            var source=self.browseSources[i];
+
+            if(curUri.startsWith(source.uri))
+            {
+                return self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'handleBrowseUri',curUri);
+            }
+        }
+
+        var promise=libQ.defer();
+        promise.resolve({});
+        return promise.promise;
+    }
+
+}
+
+
 
 // Helper functions ------------------------------------------------------------------------------------
 

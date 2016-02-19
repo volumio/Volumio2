@@ -1456,3 +1456,23 @@ ControllerMpd.prototype.syncGroupVolume = function (data) {
 	var self = this;
 
 };
+
+
+ControllerMpd.prototype.handleBrowseUri = function (curUri) {
+    var self = this;
+
+    var response;
+
+    if (curUri.startsWith('music-library')) {
+        response = self.lsInfo(curUri);
+    }else if (curUri.startsWith('playlists')) {
+        if (curUri == 'playlists')
+            response = self.listPlaylists(curUri);
+        else response = self.browsePlaylist(curUri);
+    }
+
+    return response;
+};
+
+
+
