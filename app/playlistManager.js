@@ -171,13 +171,13 @@ PlaylistManager.prototype.getFavouritesContent = function (name) {
 	return self.commonGetPlaylistContent(self.favouritesPlaylistFolder, 'favourites');
 };
 
-PlaylistManager.prototype.addToFavourites = function (service, uri) {
+PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	var self = this;
 
 	self.commandRouter.pushToastMessage('success', "Added", uri + ' to Favourites ');
 
 	if (service === 'dirble') {
-		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri);
+		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
 	}
@@ -331,7 +331,7 @@ PlaylistManager.prototype.playMyWebRadio = function () {
 };
 
 //  COMMON methods
-PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service, uri) {
+PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service, uri, title) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -405,7 +405,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 					defer.resolve({success: false});
 				else {
 					data.push({
-						service: service, uri: uri, title: uri,
+						service: service, uri: uri, title: title,
 						icon: 'fa-microphone'
 					});
 
