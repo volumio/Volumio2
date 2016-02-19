@@ -41,7 +41,7 @@ ControllerDirble.prototype.getConfigurationFiles = function () {
 //Registering into Browse Sources
 ControllerDirble.prototype.addToBrowseSources = function () {
 	var self = this;
-	var data = {name: 'WebRadio', uri: 'radio'};
+	var data = {name: 'WebRadio', uri: 'radio',plugin_type:'music_service',plugin_name:'dirble'};
 
 	self.commandRouter.volumioAddToBrowseSources(data);
 };
@@ -617,3 +617,37 @@ ControllerDirble.prototype.removeMyWebRadio = function (data) {
 	defer.resolve({});
 	return defer.promise;
 };
+
+ControllerDirble.prototype.handleBrowseUri=function(curUri)
+{
+    var self=this;
+
+    var response;
+    if (curUri.startsWith('radio')) {
+        if (curUri == 'radio')
+            response = self.listFirstLevelRadioSections(curUri);
+        else {
+            if (curUri.startsWith('radio/myWebRadio')) {
+                response = self.listMyWebRadio(curUri);
+            }
+            else if (curUri.startsWith('radio/favourites'))
+                response = self.listRadioFavourites(curUri);
+            else if (curUri.startsWith('radio/byGenre')) {
+                if (curUri == 'radio/byGenre')
+                    response = self.listRadioCategories(curUri);
+                else
+                    response = self.listRadioForCategory(curUri);
+
+            }
+            else if (curUri.startsWith('radio/byCountry')) {
+                if (curUri == 'radio/byCountry')
+                    response = self.listRadioCountries(curUri);
+                else
+                    response = self.listRadioForCountry(curUri);
+
+            }
+        }
+    }
+
+    return response;
+}

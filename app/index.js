@@ -209,6 +209,15 @@ CoreCommandRouter.prototype.volumioAddToBrowseSources = function (data) {
 	return this.musicLibrary.addToBrowseSources(data);
 };
 
+CoreCommandRouter.prototype.volumioRemoveToBrowseSources = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioRemoveToBrowseSources' + data);
+    return this.musicLibrary.removeBrowseSource(data);
+};
+
+CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
+    return this.musicLibrary.updateBrowseSources(name,data);
+};
 // Volumio Get Playlist Index
 CoreCommandRouter.prototype.volumioGetPlaylistIndex = function (sUid) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioGetPlaylistIndex');
