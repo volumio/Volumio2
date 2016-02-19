@@ -609,6 +609,35 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 	}
 }
 
+CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
+    var self = this;
+
+    if(name!= undefined) {
+        self.browseSources=self.browseSources.filter(function(x){
+            if(x.name!==name)
+                return true;
+        });
+    }
+}
+
+CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
+    var self = this;
+
+    if(data.name!= undefined) {
+        for(var i in self.browseSources)
+        {
+            var source=self.browseSources[i];
+            if(source.name==name)
+            {
+                source.name=data.name;
+                source.uri=data.uri;
+                source.plugin_type=data.plugin_type;
+                source.plugin_name=data.plugin_name;
+            }
+        }
+    }
+}
+
 CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
     var self = this;
 
