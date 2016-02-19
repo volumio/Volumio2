@@ -288,6 +288,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.album = trackinfo.album;
 						collectedState.albumart = trackinfo.albumart;
 						collectedState.uri = trackinfo.uri;
+						collectedState.trackType = trackinfo.trackType;
 						return collectedState;
 					});
 				// Else return null track info
@@ -381,11 +382,13 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	var resp = {};
 
 	var file = objTrackInfo.file;
+	var filetitle = file.replace(/^.*\/(?=[^\/]*$)/, '');
 
 	resp.isStreaming = file.indexOf('http://') === 0;
 
 	if (objTrackInfo.file != undefined) {
 		resp.uri = objTrackInfo.file;
+		resp.trackType = objTrackInfo.file.split('.').pop();
 	} else {
 		resp.uri = null;
 	}
@@ -393,7 +396,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.Title != undefined) {
 		resp.title = objTrackInfo.Title;
 	} else {
-		resp.title = file;
+		resp.title = filetitle;
 	}
 
 	if (objTrackInfo.Artist != undefined) {

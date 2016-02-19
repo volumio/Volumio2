@@ -27,6 +27,7 @@ CoreStateMachine.prototype.getState = function () {
 		album: this.currentAlbum,
 		albumart: this.currentAlbumArt,
 		uri: this.currentUri,
+		trackType: this.currentTrackType,
 		seek: this.currentSeek,
 		duration: this.currentDuration,
 		samplerate: this.currentSampleRate,
@@ -349,6 +350,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentAlbum = stateService.album;
 			this.currentAlbumArt = stateService.albumart;
 			this.currentUri = this.uri;
+			this.currentTrackType = stateService.trackType;
 			this.currentSampleRate = stateService.samplerate;
 			this.currentBitDepth = stateService.bitdepth;
 			this.currentChannels = stateService.channels;
