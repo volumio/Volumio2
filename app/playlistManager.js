@@ -174,7 +174,9 @@ PlaylistManager.prototype.getFavouritesContent = function (name) {
 PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	var self = this;
 
-	self.commandRouter.pushToastMessage('success', "Added", uri + ' to Favourites ');
+	if (title){
+		self.commandRouter.pushToastMessage('success', "Added", title + ' to Favourites ');
+	} else self.commandRouter.pushToastMessage('success', "Added", uri + ' to Favourites ');
 
 	if (service === 'dirble') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
