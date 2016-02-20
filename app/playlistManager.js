@@ -371,7 +371,10 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 							album: item.album,
 							path: path
 						});
-						var itemUri = item.uri.startsWith('music-library/') ? item.uri.slice(14) : item.uri;
+						if (item.uri.indexOf('music-library/') >= 0) {
+							var itemUri = item.uri.replace('music-library', '');
+						} else var itemUri = item.uri;
+
 						entries.push({
 							service: service,
 							uri: itemUri,
