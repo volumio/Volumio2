@@ -18,8 +18,9 @@ CoreStateMachine.prototype.getState = function () {
 	if ('service' in this.currentTrackBlock) {
 		sService = this.currentTrackBlock.service;
 	}
-	if (this.currentDuration === 0) {
+	if (this.currentDuration === 0 && this.currentStatus != 'stop') {
 		this.Streaming = true;
+		this.currentTrackType = 'webradio'
 	} else this.Streaming = false;
 
 	return {
