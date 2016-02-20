@@ -383,7 +383,10 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	var file = objTrackInfo.file;
 	var filetitle = file.replace(/^.*\/(?=[^\/]*$)/, '');
-	resp.isStreaming = file.indexOf('http://') === 0;
+	
+	if (objTrackInfo.Time === 0){
+		resp.isStreaming = true;
+	}
 
 	if (objTrackInfo.file != undefined) {
 		resp.uri = objTrackInfo.file;
