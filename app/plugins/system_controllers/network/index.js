@@ -224,7 +224,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 			self.logger.error('Cannot write wpasupplicant.conf '+error);
 		}
 
-		self.commandRouter.networRestart();
+		self.commandRouter.wirelessRestart();
 	});
 
 };

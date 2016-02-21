@@ -471,8 +471,12 @@ CoreCommandRouter.prototype.reboot = function () {
 	this.platformspecific.reboot();
 };
 
-CoreCommandRouter.prototype.networRestart = function () {
+CoreCommandRouter.prototype.networkRestart = function () {
 	this.platformspecific.networkRestart();
+};
+
+CoreCommandRouter.prototype.wirelessRestart = function () {
+	this.platformspecific.wirelessRestart();
 };
 
 CoreCommandRouter.prototype.startupSound = function () {
