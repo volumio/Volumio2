@@ -41,6 +41,20 @@ PlatformSpecific.prototype.networkRestart = function () {
 	});
 };
 
+PlatformSpecific.prototype.wirelessRestart = function () {
+	var self = this;
+	exec("sudo /bin/systemctl restart wireless.service", function (error, stdout, stderr) {
+		if (error !== null) {
+			self.coreCommand.pushToastMessage('error',"Wireless restart",'Error while restarting wireless: '+error);
+		} else
+			self.coreCommand.pushToastMessage('success',"Wiress restart",'Wireless successfully restarted');
+			// Restart Upmpdcli
+		setTimeout(function () {
+			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
+		}, 10000);
+	});
+};
+
 
 PlatformSpecific.prototype.startupSound = function () {
 	var self = this;
