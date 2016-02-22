@@ -485,7 +485,9 @@ ControllerMpd.prototype.parseState = function (objState) {
 				var nSampleRateRaw = 2.82+' MHz';
 			} else if (nSampleRateRaw === 705.6) {
 				var nSampleRateRaw = 5.64+' MHz';
-			} else {
+			} else if (nSampleRateRaw === 1411.2) {
+				var nSampleRateRaw = 11.2+' MHz';
+			}else {
 				var nSampleRateRaw = nSampleRateRaw+' KHz';
 			}
 		nSampleRate = nSampleRateRaw;
