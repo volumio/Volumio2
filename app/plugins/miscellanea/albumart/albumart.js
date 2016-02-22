@@ -183,6 +183,8 @@ var searchInFolder = function (defer, path, web) {
 		 */
 
 		var covers = ['coverart.jpg', 'albumart.jpg', 'coverart.png', 'albumart.png',
+			'cover.JPG' , 'Cover.JPG' , 'folder.JPG','Folder.JPG',
+			'cover.PNG' , 'Cover.PNG' , 'folder.PNG','Folder.PNG',
 			'cover.jpg', 'Cover.jpg', 'folder.jpg', 'Folder.jpg',
 			'cover.png', 'Cover.png', 'folder.png', 'Folder.png'];
 		splitted = path.split('/');
@@ -206,7 +208,7 @@ var searchInFolder = function (defer, path, web) {
 			var fileName = S(files[j]);
 
 			//console.log(fileName.s);
-			if (fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
+			if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG')|| fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
 				defer.resolve(coverFolder + '/' + fileName.s);
 				return defer.promise;
 			}
