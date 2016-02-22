@@ -607,6 +607,8 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 	    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
 	    self.browseSources.push(data);
 	}
+	var response = self.getBrowseSources();
+	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
 }
 
 CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
@@ -618,6 +620,8 @@ CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
                 return true;
         });
     }
+	var response = self.getBrowseSources();
+	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
 }
 
 CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
@@ -636,6 +640,8 @@ CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
             }
         }
     }
+	var response = self.getBrowseSources();
+	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
 }
 
 CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {

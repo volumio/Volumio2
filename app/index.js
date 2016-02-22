@@ -426,6 +426,21 @@ CoreCommandRouter.prototype.broadcastToastMessage = function (type, title, messa
 	);
 };
 
+CoreCommandRouter.prototype.broadcastMessage = function (msg, value) {
+	var self = this;
+	this.pushConsoleMessage('CoreCommandRouter::BroadCastMessage '+msg);
+
+	return libQ.all(
+
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var emit = {msg:msg,value:value};
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			if (typeof thisInterface.broadcastMessage === "function")
+				return thisInterface.broadcastMessage(emit);
+		})
+	);
+};
+
 CoreCommandRouter.prototype.pushMultiroomDevices = function (data) {
 	var self = this;
 	return libQ.all(
