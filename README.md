@@ -48,6 +48,7 @@ System Images built with [Volumio Builder](https://github.com/volumio/Build)
 IMPORTANT NOTE:
 Volumio is designed to be an highly integrated system. This means that the WebUi is optimized to work along with the custom made Volumio system, and therefore it needs to run in a very tightly controlled environment. IT WON'T WORK on standard Raspbian or other non-volumio OSes. If you want to know what kind of customizations we're using, take a look at the [Volumio Builder](https://github.com/volumio/Build)
 
+
 Volumio works with 5.5.0 version of NodeJS. Reports of working\not working node version are appreciated!
 
 Clone the repo in the directory of your choice (default: /volumio)
@@ -89,7 +90,19 @@ A DEV Console is available at http://(ip address):3000/dev
 To make development more comfortable, a samba server is installed. This way the /volumio folder is accessible (and editable) via Network. Just mount it on your dev workstation and it will be available as local filesystem.
 Testing on PI is strongly suggested.
 
-Please take a look at the [Developer Info and Guidelines](https://github.com/volumio/Volumio2/wiki/Setting-Up-a-Dev-Environment)
+Please take a look at the 
+
+## Development 101
+
+To maximize efficiency and reduce code regression we're using [Git Workflow](https://guides.github.com/introduction/flow/). For example, to create a new feature you'll:
+* Create a new branch, named after the feature
+* Do your things on the branch
+* Test if everything is fine and we don't have regressions
+* Submit a Pull Request for branch dev
+
+
+All new improvements and developments are meant to be done on the dev branch, once it's declared stable it will be merged to master and deployed to happy Volumio users.
+
 
 ## Development tasks and milestones
 
