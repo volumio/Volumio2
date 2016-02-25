@@ -7,6 +7,7 @@
       "id": "playback_options",
       "element": "section",
       "label": "Playback options",
+	  "icon": "fa-sliders",
       "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"savePlaybackOptions"},
       "saveButton": {
         "label": "Save",
@@ -154,6 +155,7 @@
       "id": "volume_options",
       "element": "section",
       "label": "Volume options",
+	  "icon": "fa-volume-up",
       "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveVolumeOptions"},
       "saveButton": {
         "label": "Save",
@@ -304,6 +306,7 @@
       "id": "alsa_options",
       "element": "section",
       "label": "Alsa options",
+	  "icon": "fa-volume-up",
       "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveAlsaOptions"},
       "saveButton": {
         "label": "Save",
