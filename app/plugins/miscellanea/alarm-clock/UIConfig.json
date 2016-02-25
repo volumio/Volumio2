@@ -7,6 +7,7 @@
       "id": "alarm_setup",
       "element": "section",
       "label": "Setup your alarm",
+      "icon": "fa-clock-o",
       "onSave": {"type":"controller", "endpoint":"miscellanea/alarm-clock", "method":"saveAlarm"},
       "saveButton": {
         "label": "Save",
