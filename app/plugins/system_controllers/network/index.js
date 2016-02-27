@@ -215,7 +215,11 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 	var self = this;
 
 	if (data.pass) {
-		var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
+		if (data.pass.length <= 13) {
+			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
+		} else {
+		 var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL ;
+		}
 	} else {
 		var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt = NONE' + os.EOL + '}'
 	}
