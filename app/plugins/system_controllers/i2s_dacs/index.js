@@ -4,6 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var exec = require('child_process').exec;
+var jsonQuery = require('json-query')
 
 // Define the ControllerSystem class
 module.exports = ControllerI2s;
@@ -160,5 +161,6 @@ ControllerI2s.prototype.i2sDetect = function () {
 
 ControllerI2s.prototype.i2sMatch = function (i2cAddr) {
 	var self = this;
-
+	var dacfile = __dirname +'dacs.json';
+	var data = fs.readJsonSync(dacfile, {throws: false});
 }
