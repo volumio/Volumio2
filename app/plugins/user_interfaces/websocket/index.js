@@ -91,6 +91,8 @@ function InterfaceWebUI(context) {
 				var timeStart = Date.now();
 				self.logStart('Client requests add Volumio queue items')
 					.then(function () {
+
+                        self.logger.info("POST");
 						return self.commandRouter.volumioAddQueueUids.call(self.commandRouter, arrayUids);
 					})
 					.fail(self.pushError.bind(self))
@@ -100,7 +102,24 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addToQueue', function (data) {
-				if (data.service == undefined || data.service == 'mpd') {
+                var timeStart = Date.now();
+
+                 self.commandRouter.addQueueItems(data);
+
+
+                /*
+                self.logStart('Client requests add Volumio queue items')
+                    .then(function () {
+
+                        self.logger.info("PRE");
+                        return self.commandRouter.addQueueItems(data);
+                    })
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.commandRouter.pushToastMessage('success', "Added", str);
+                    });
+
+				/*if (data.service == undefined || data.service == 'mpd') {
 					var uri = data.uri;
 					var arr = uri.split("/");
 					arr.shift();
@@ -115,12 +134,24 @@ function InterfaceWebUI(context) {
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
-						return self.commandRouter.pushToastMessage('success', "Added", str);
-					});
+
+					});*/
 			});
 
 			connWebSocket.on('addPlay', function (data) {
-				if (data.service == undefined || data.service == 'mpd') {
+                var timeStart = Date.now();
+                self.logStart('Client requests add and Play Volumio queue item')
+                    .then(function () {
+                        return self.commandRouter.addQueueItem.call(self.commandRouter, data);
+                    })
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+
+
+
+                if (data.service == undefined || data.service == 'mpd') {
 					var uri = data.uri;
 					var arr = uri.split("/");
 					arr.shift();
@@ -1116,6 +1147,7 @@ InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
 
+    self.logger.info(JSON.stringify(queue));
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushQueue', queue);

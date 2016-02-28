@@ -1495,3 +1495,19 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri) {
 
 
 
+
+
+
+
+
+
+
+ControllerMpd.prototype.explodeUri = function (uri) {
+    var self = this;
+
+    var defer=libQ.defer();
+
+    defer.resolve([{service:'mpd',uri:'/a.mp3'},{service:'mpd',uri:'/b.mp3'},{service:'mpd',uri:'/c.mp3'}]);
+    return defer.promise;
+};
+
