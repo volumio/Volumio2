@@ -34,7 +34,7 @@ for (var itemN in commandArray) {
     exec.execSync(itemWithoutput);
 }
 
-var command = "curl -X POST -T " + logFile + " " + logglyUrl;
+var command = "cat logFile";
 console.log(command);
 exec.execSync(command);
 exec.execSync("rm " + logFile);
