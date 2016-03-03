@@ -77,7 +77,7 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
 
 		this.currentStatus = 'play';
 		return this.serviceResume();
-	
+
 };
 
 // Volumio Next Command

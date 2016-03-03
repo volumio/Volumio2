@@ -10,6 +10,7 @@ var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
 var parser = require('cue-parser');
+var mm = require('musicmetadata');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -1500,14 +1501,120 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri) {
 
 
 
+// --------------------------------- music services interface ---------------------------------------
 
-
-ControllerMpd.prototype.explodeUri = function (uri) {
+ControllerMpd.prototype.explodeUri = function(uri) {
     var self = this;
 
     var defer=libQ.defer();
 
-    defer.resolve([{service:'mpd',uri:'/a.mp3'},{service:'mpd',uri:'/b.mp3'},{service:'mpd',uri:'/c.mp3'}]);
+    var items = [];
+    var uriPath='/mnt/'+self.fromUriToPath(uri);
+
+     var uris=self.scanFolder(uriPath);
+    var response=[];
+
+    libQ.all(uris)
+        .then(function(result)
+        {
+           for(var j in result)
+            {
+                if(result[j].uri!=undefined)
+                {
+                    self.logger.info(JSON.stringify(result[j]));
+
+                    response.push({
+                        uri: 'music-library/'+self.fromPathToUri(result[j].uri),
+                        service: 'mpd',
+                        name: result[j].name,
+                        artist: result[j].artist,
+                        album: result[j].album,
+                        type: 'track',
+                        tracknumber: result[j].tracknumber,
+                        albumart: result[j].albumart
+                    });
+                }
+
+            }
+
+            defer.resolve(response);
+        }).fail(function()
+    {
+        defer.resolve({});
+    });
+
     return defer.promise;
 };
+
+ControllerMpd.prototype.fromUriToPath = function (uri) {
+    var sections = uri.split('/');
+    var prev = '';
+
+    if (sections.length > 1) {
+
+        prev = sections.slice(1, sections.length).join('/');
+    }
+    return prev;
+
+};
+
+ControllerMpd.prototype.fromPathToUri = function (uri) {
+    var sections = uri.split('/');
+    var prev = '';
+
+    if (sections.length > 1) {
+
+        prev = sections.slice(1, sections.length).join('/');
+    }
+    return prev;
+
+};
+
+
+ControllerMpd.prototype.scanFolder=function(uri)
+{
+    var self=this;
+    var uris=[];
+
+    var stat=libFsExtra.statSync(uri);
+
+    if(stat.isDirectory())
+    {
+        var files=libFsExtra.readdirSync(uri);
+
+        for(var i in files)
+            uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+    }
+    else {
+        //getting file extension
+        var ext= uri.substr((~-uri.lastIndexOf(".") >>> 0) + 2);
+        if(ext=='mp3' || ext=='m4a')
+        {
+            var defer=libQ.defer();
+
+            var parser = mm(libFsExtra.createReadStream(uri), function (err, metadata) {
+                if (err) defer.resolve({});
+                else {
+                   defer.resolve({
+                        uri: 'music-library/'+self.fromPathToUri(uri),
+                        service: 'mpd',
+                        name: metadata.title,
+                        artist: metadata.artist[0],
+                        album: metadata.album,
+                        type: 'track',
+                        tracknumber: metadata.track.no,
+                        albumart: self.getAlbumArt(
+                            {artist:metadata.artist,
+                             album: metadata.album},uri)
+                    });
+                }
+
+            });
+
+            return defer.promise;
+        }
+    }
+
+    return uris;
+}
 
