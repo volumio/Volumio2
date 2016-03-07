@@ -417,14 +417,9 @@ function InterfaceWebUI(context) {
 
 				var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
 				var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
-				promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
+				var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
 				if (promise != undefined) {
-					promise.then(function (result) {
-							connWebSocket.emit("pushMethod", result);
-						})
-						.fail(function () {
-							connWebSocket.emit("pushMethod", {"ERRORE": "MESSAGGIO DI ERRORE"});
-						});
+							connWebSocket.emit(promise.message, promise.payload);
 				} else {
 				}
 			});
