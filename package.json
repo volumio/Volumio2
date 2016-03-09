@@ -35,7 +35,7 @@
     "musicbrainz": "^0.2.6",
     "musicmetadata": "2.0.2",
     "njstrace": "0.0.2",
-    "node-schedule": "1.0.0",
+    "node-schedule": "1.1.0",
     "node-uuid": "^1.4.7",
     "nodetools": "1.0.0",
     "onoff": "^1.0.4",
