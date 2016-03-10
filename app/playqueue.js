@@ -53,6 +53,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     var self=this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
 
+    self.commandRouter.logger.info(arrayItems);
     var array = [].concat( arrayItems );
 
     // We need to ask the service if the uri corresponds to something bigger, like a playlist
@@ -66,6 +67,11 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         if(item.hasOwnProperty('service'))
         {
             service=item.service;
+        }
+
+        if(item.uri.startsWith('spotify:'))
+        {
+            service='spop';
         }
 
         promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));

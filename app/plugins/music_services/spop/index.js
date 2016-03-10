@@ -6,6 +6,8 @@ var libFast = require('fast.js');
 var libLevel = require('level');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
+var SpotifyWebApi = require('spotify-web-api-node');
+var nodetools = require('nodetools');
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
@@ -38,8 +40,10 @@ ControllerSpop.prototype.getConfigurationFiles = function()
 ControllerSpop.prototype.onVolumioStart = function() {
 	var self = this;
 
-	//var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
-	//config.loadFile(configFile);
+    var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+    self.config = new (require('v-conf'))();
+    self.config.loadFile(configFile);
+
 
 	// TODO use names from the package.json instead
 	self.servicename = 'spop';
@@ -157,6 +161,12 @@ ControllerSpop.prototype.onVolumioStart = function() {
 
 
     self.addToBrowseSources();
+
+
+    self.spotifyApi= new SpotifyWebApi({
+        clientId : self.config.get('spotify_api_client_id'),
+        clientSecret : self.config.get('spotify_api_client_secret')
+    });
 };
 
 
@@ -442,4 +452,80 @@ ControllerSpop.prototype.pushError = function(sReason) {
 
 	// Return a resolved empty promise to represent completion
 	return libQ.resolve();
+};
+
+
+
+
+ControllerSpop.prototype.explodeUri = function(uri) {
+    var self = this;
+
+    var defer=libQ.defer();
+
+    var splitted=uri.split(':');
+
+    self.spotifyApi.getTrack(splitted[2])
+        .then(function(data) {
+            var artist='';
+            var album='';
+
+            if(data.body.artists.length>0)
+                artist=data.body.artists[0].name;
+
+            if(data.body.album!==undefined)
+                album=data.body.album.name;
+
+            var albumart=self.getAlbumArt({artist:artist,album:album});
+
+            defer.resolve({
+                uri: uri,
+                service: 'spop',
+                name: data.body.name,
+                artist: artist,
+                album: album,
+                type: 'track',
+                tracknumber: data.body.track_number,
+                albumart: albumart
+            });
+
+        })
+
+
+
+    return defer.promise;
+};
+
+ControllerSpop.prototype.getAlbumArt = function (data, path) {
+
+    var artist, album;
+
+    if (data != undefined && data.path != undefined) {
+        path = data.path;
+    }
+
+    var web;
+
+    if (data != undefined && data.artist != undefined) {
+        artist = data.artist;
+        if (data.album != undefined)
+            album = data.album;
+        else album = data.artist;
+
+        web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
+    }
+
+    var url = '/albumart';
+
+    if (web != undefined)
+        url = url + web;
+
+    if (web != undefined && path != undefined)
+        url = url + '&';
+    else if (path != undefined)
+        url = url + '?';
+
+    if (path != undefined)
+        url = url + 'path=' + nodetools.urlEncode(path);
+
+    return url;
 };
