@@ -6,6 +6,7 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var winston = require('winston');
 var vconf = require('v-conf');
+var events = require('./volumioEvents');
 
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
@@ -22,7 +23,7 @@ function CoreCommandRouter(server) {
 		]
 	});
 
-	this.callbacks = [];
+	this.eventListeners = [];
 	this.sharedVars = new vconf();
 
 	this.logger.info("-------------------------------------------");
@@ -61,6 +62,12 @@ function CoreCommandRouter(server) {
 
 
 }
+
+CoreCommandRouter.prototype.changeOutputDevice = function (device) {
+	this.pushConsoleMessage('CoreCommandRouter::changeOutputDevice');
+	this.sharedVars.set('alsa.outputdevice', device);
+	this.fireEvent(events.OUTPUT_DEVICE_CHANGED);
+};
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
@@ -120,13 +127,13 @@ CoreCommandRouter.prototype.volumioClearQueue = function () {
 
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
-	this.callCallback("volumiosetvolume", VolumeInteger);
+	this.fireEvent(events.SET_VOLUME, VolumeInteger);
 	return this.volumeControl.alsavolume(VolumeInteger);
 };
 
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
-	this.callCallback("volumioupdatevolume", vol);
+	this.fireEvent(events.UPDATE_VOLUME, vol);
 	return this.stateMachine.updateVolume(vol);
 };
 
@@ -136,30 +143,36 @@ CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
 	return this.volumeControl.retrievevolume();
 };
 
-CoreCommandRouter.prototype.addCallback = function (name, callback) {
-	if (this.callbacks[name] == undefined) {
-		this.callbacks[name] = [];
+CoreCommandRouter.prototype.addEventListener = function (event, listener) {
+	var type = event.type;
+	if (!type) {
+		throw new Error("Event must have a type");
 	}
-	this.callbacks[name].push(callback);
-	//this.logger.debug("Total " + callbacks[name].length + " callbacks for " + name);
+	if (this.eventListeners[type] == undefined) {
+		this.eventListeners[type] = [];
+	}
+	this.eventListeners[type].push(listener);
 };
 
-CoreCommandRouter.prototype.callCallback = function (name, data) {
-	var self = this;
-	var calls = this.callbacks[name];
-	if (calls != undefined) {
-		var nCalls = calls.length;
-		for (var i = 0; i < nCalls; i++) {
-			var func = this.callbacks[name][i];
+CoreCommandRouter.prototype.fireEvent = function (event, data) {
+	var type = event.type;
+	if (!type) {
+		throw new Error("Event must have a type");
+	}
+	var listeners = this.eventListeners[type];
+	if (listeners != undefined) {
+		var nListeners = listeners.length;
+		for (var i = 0; i < nListeners; i++) {
+			var func = this.eventListeners[type][i];
 			try {
 				func(data);
 			} catch (e) {
-				self.logger.error("Help! Some callbacks for " + name + " are crashing!");
-				self.logger.error(e);
+				this.logger.error("Help! Some event listeners for " + type + " are crashing!");
+				this.logger.error(e);
 			}
 		}
 	} else {
-		self.logger.debug("No callbacks for " + name);
+		this.logger.debug("No events listeners for " + type);
 	}
 };
 
@@ -262,7 +275,7 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 			return thisInterface.pushState(state);
 		})
 	);
-	self.callCallback("volumioPushState", state);
+	self.fireEvent(events.PUSH_STATE, state);
 	return res;
 };
 

@@ -2,104 +2,77 @@
 
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var events = require('../../../volumioEvents');
 
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;
 
-
 function AirPlayInterface(context) {
-	var self = this;
-	// Save a reference to the parent commandRouter
-	self.context = context;
-	self.commandRouter = self.context.coreCommand;
-
+	this.context = context;
+	this.commandRouter = this.context.coreCommand;
+	this.commandRouter.addEventListener(events.OUTPUT_DEVICE_CHANGED, this.onOutputDeviceChanged.bind(this));
 }
 
 AirPlayInterface.prototype.onVolumioStart = function () {
-	var self = this;
-
-	self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
-	self.startShairportSync();
-
+	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
+	this.startShairportSync();
 };
 
 AirPlayInterface.prototype.onStart = function () {
-	var self = this;
-
 };
 
 AirPlayInterface.prototype.onStop = function () {
-	var self = this;
-	//Perform startup tasks here
 };
 
 AirPlayInterface.prototype.onRestart = function () {
-	var self = this;
-	//Perform startup tasks here
 };
 
 AirPlayInterface.prototype.onInstall = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.onUninstall = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.getUIConfig = function () {
-	var self = this;
-
-
 };
 
 AirPlayInterface.prototype.setUIConfig = function (data) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.getConf = function (varName) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.setConf = function (varName, varValue) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 //Optional functions exposed for making development easier and more clear
 AirPlayInterface.prototype.getSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.setSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.setAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
+};
+
+AirPlayInterface.prototype.onOutputDeviceChanged = function () {
+	this.startShairportSync();
 };
 
 AirPlayInterface.prototype.startShairportSync = function () {
-	var self = this;
 	// Loading Configured output device
-	var outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
+	var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
 	var hwdev = 'hw:' + outdev + ',0';
 	console.log(hwdev);
 
-	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+	var systemController = this.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 	var name = systemController.getConf('playerName');
-	var fs = require('fs')
+	var fs = require('fs');
+
+	var self = this;
 	fs.readFile(__dirname + "/shairport-sync.conf.tmpl", 'utf8', function (err, data) {
 		if (err) {
 			return console.log(err);
@@ -109,12 +82,13 @@ AirPlayInterface.prototype.startShairportSync = function () {
 
 		fs.writeFile("/etc/shairport-sync.conf", conf2, 'utf8', function (err) {
 			if (err) return console.log(err);
-			startAirPlay(self);
+			self.startAirPlay();
 		});
 	});
 };
 
-function startAirPlay(self) {
+AirPlayInterface.prototype.startAirPlay = function () {
+	var self = this;
 	exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-sync error: ' + error);
@@ -123,4 +97,4 @@ function startAirPlay(self) {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
 		}
 	});
-}
+};
