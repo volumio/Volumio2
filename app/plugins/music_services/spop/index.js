@@ -399,6 +399,7 @@ ControllerSpop.prototype.parseState = function(sState) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::parseState');
 
 	var objState = JSON.parse(sState);
+    self.commandRouter.logger.info('STATE: '+JSON.stringify(objState));
 
 	var nSeek = null;
 	if ('position' in objState) {
@@ -528,4 +529,17 @@ ControllerSpop.prototype.getAlbumArt = function (data, path) {
         url = url + 'path=' + nodetools.urlEncode(path);
 
     return url;
+};
+
+
+ControllerSpop.prototype.logDone = function (timeStart) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+    return libQ.resolve();
+};
+
+ControllerSpop.prototype.logStart = function (sCommand) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+    return libQ.resolve();
 };

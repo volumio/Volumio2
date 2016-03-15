@@ -22,6 +22,8 @@ CorePlayQueue.prototype.getQueue = function () {
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
+    this.commandRouter.pushConsoleMessage('----------> '+nStartIndex);
+
 
 	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
@@ -85,6 +87,10 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             }
 
             self.commandRouter.volumioPushQueue(self.arrayQueue);
+        })
+        .then(function(){
+            self.stateMachine.updateTrackBlock();
+
         }).fail(function (e) {
         self.commandRouter.logger.info("An error occurred while exploding URI");
     });
@@ -102,6 +108,18 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
 	return this.arrayQueue = [];
 };
+
+CorePlayQueue.prototype.getTrack = function (index) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrack '+index);
+
+    if(this.arrayQueue.length>index)
+    {
+        this.commandRouter.pushConsoleMessage('RETURNING ' +  JSON.stringify(this.arrayQueue[index]));
+        return this.arrayQueue[index];
+    }
+    else return;
+};
+
 
 /*CorePlayQueue.prototype.clearMpdQueue = function () {
 	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');

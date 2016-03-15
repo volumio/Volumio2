@@ -301,6 +301,7 @@ CoreCommandRouter.prototype.serviceStop = function (sService) {
 // MPD Pause
 CoreCommandRouter.prototype.servicePause = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::servicePause');
+
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 	return thisPlugin.pause();
 };
@@ -308,7 +309,16 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+    var state=this.stateMachine.getState();
+
+    if(state==='stop')
+    {
+        thisPlugin.clearAddPlayTracks();
+    }
+
 	return thisPlugin.resume();
 };
 

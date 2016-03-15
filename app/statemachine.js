@@ -74,10 +74,17 @@ CoreStateMachine.prototype.clearQueue = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
+    var trackBlock = this.getTrack(this.currentPosition);
+    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
-		this.currentStatus = 'play';
-		return this.serviceResume();
+    if(this.currentStatus==='stop')
+    {
+        //queuing
+        thisPlugin.clearAddPlayTracks([].concat(trackBlock));
+    }
+    this.currentStatus = 'play';
 
+    return thisPlugin.resume();
 };
 
 // Volumio Next Command
@@ -214,10 +221,10 @@ CoreStateMachine.prototype.servicePause = function () {
 };
 
 // Resume the current track block playback
-CoreStateMachine.prototype.serviceResume = function () {
+CoreStateMachine.prototype.serviceResume = function (trackBlock) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceResume');
-	var trackBlock = this.currentTrackBlock;
-	return this.commandRouter.serviceResume(trackBlock.service);
+
+    return this.commandRouter.serviceResume(trackBlock.service);
 };
 
 // Reset the properties of the state machine
@@ -319,8 +326,18 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 	this.timeLastServiceStateUpdate = Date.now();
 	this.currentTrackBlock.service = sService;
+
+    this.commandRouter.logger.info("STATE SERVICE "+JSON.stringify(stateService));
+
 	this.currentStatus = stateService.status;
-	this.currentPosition = stateService.position;
+
+    if(stateService.currentPosition===null || stateService.currentPosition===undefined)
+        this.currentPosition=0;
+    else
+        this.currentPosition = stateService.position;
+
+    this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
+
 
 	if (stateService.isStreaming != undefined) {
 		this.isStreaming = stateService.isStreaming;
@@ -339,6 +356,12 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		console.log(sService);
 		this.currentTrackBlock.service = sService;
 		this.currentStatus = stateService.status;
+
+        if(stateService.currentPosition===null || stateService.currentPosition===undefined)
+            this.currentPosition=0;
+        else
+            this.currentPosition = stateService.position;
+
 		this.currentPosition = stateService.position;
 	}
 
@@ -491,3 +514,11 @@ CoreStateMachine.prototype.checkFavourites = function (state) {
 CoreStateMachine.prototype.emitFavourites = function (msg) {
 	this.commandRouter.emitFavourites(msg);
 };
+
+CoreStateMachine.prototype.getTrack = function () {
+
+    var track=this.playQueue.getTrack(0);
+
+    return track;
+};
+
