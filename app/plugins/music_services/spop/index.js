@@ -313,26 +313,7 @@ ControllerSpop.prototype.onStop = function() {
 
 
 
-// Define a method to clear, add, and play an array of tracks
-ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackUris) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
 
-	// Clear the queue, add the first track, and start playback
-	var firstTrack = arrayTrackUris.shift();
-	var promisedActions = self.sendSpopCommand('uplay', [firstTrack]);
-
-	// If there are more tracks in the array, add those also
-	if (arrayTrackUris.length > 0) {
-		promisedActions = libFast.reduce(arrayTrackUris, function(previousPromise, curTrackUri) {
-			return previousPromise
-			.then(function() {
-				return self.sendSpopCommand('uadd', [curTrackUri]);
-			});
-		}, promisedActions);
-	}
-	return promisedActions;
-};
 
 // Spop stop
 ControllerSpop.prototype.stop = function() {
@@ -361,29 +342,7 @@ ControllerSpop.prototype.resume = function() {
 };
 
 
-// Send command to Spop
-ControllerSpop.prototype.sendSpopCommand = function(sCommand, arrayParameters) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
 
-	// Convert the array of parameters to a string
-	var sParameters = libFast.reduce(arrayParameters, function(sCollected, sCurrent) {
-		return sCollected + ' ' + sCurrent;
-	}, '');
-
-	// Pass the command to Spop when the command socket is ready
-	self.spopCommandReady
-	.then(function() {
-		return libQ.nfcall(libFast.bind(self.connSpopCommand.write, self.connSpopCommand), sCommand + sParameters + '\n', 'utf-8');
-	});
-
-	var spopResponseDeferred = libQ.defer();
-	var spopResponse = spopResponseDeferred.promise;
-	self.arrayResponseStack.push(spopResponseDeferred);
-
-	// Return a promise for the command response
-	return spopResponse;
-};
 
 // Spop get state
 ControllerSpop.prototype.getState = function() {
@@ -542,4 +501,91 @@ ControllerSpop.prototype.logStart = function (sCommand) {
     var self = this;
     self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
     return libQ.resolve();
+};
+
+
+
+
+
+// New play mechanism. used method
+
+ControllerSpop.prototype.play = function() {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::play');
+
+    return self.sendSpopCommand('play', []);
+};
+
+
+
+
+// Define a method to clear, add, and play an array of tracks
+ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackUris) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
+
+    var methodPromise=libQ.defer();
+
+    // Clear the queue, add the first track, and start playback
+    var clearPromise=self.sendSpopCommand('qclear', []);
+    clearPromise.then(function(){
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Queue cleared');
+
+        if (arrayTrackUris.length > 0) {
+            var arrayPromise=[];
+
+            for(var i in arrayTrackUris)
+            {
+                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Adding track '+JSON.stringify(arrayTrackUris[i]));
+                arrayPromise.push(self.sendSpopCommand('uadd', [arrayTrackUris[i].uri]));
+            }
+
+            libQ.all(arrayPromise).then(function(){
+                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Going to play');
+
+                self.sendSpopCommand('play', []).then(function()
+                {
+                    methodPromise.resolve();
+                })
+                .fail(function(){
+                    methodPromise.reject(new Error("Cannot play queue for plugin SPOP"));
+                });
+            })
+            .fail(function(){
+                methodPromise.reject(new Error('Error while adding track to SPOP'));
+            });
+        }
+
+    })
+    .fail(function(){
+        methodPromise.reject(new Error("Cannot clear queue for plugin SPOP"));
+    });
+
+    return methodPromise.promise;
+};
+
+
+// Send command to Spop
+ControllerSpop.prototype.sendSpopCommand = function(sCommand, arrayParameters) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
+
+    // Convert the array of parameters to a string
+    var sParameters = libFast.reduce(arrayParameters, function(sCollected, sCurrent) {
+        return sCollected + ' ' + sCurrent;
+    }, '');
+
+    // Pass the command to Spop when the command socket is ready
+    self.spopCommandReady
+        .then(function() {
+            self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + sCommand + sParameters);
+            return libQ.nfcall(libFast.bind(self.connSpopCommand.write, self.connSpopCommand), sCommand + sParameters + '\n', 'utf-8');
+        });
+
+    var spopResponseDeferred = libQ.defer();
+    var spopResponse = spopResponseDeferred.promise;
+    self.arrayResponseStack.push(spopResponseDeferred);
+
+    // Return a promise for the command response
+    return spopResponse;
 };

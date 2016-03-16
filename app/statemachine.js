@@ -70,22 +70,7 @@ CoreStateMachine.prototype.clearQueue = function () {
 	return this.playQueue.clearPlayQueue();
 };
 
-// Volumio Play Command
-CoreStateMachine.prototype.play = function (promisedResponse) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
-    var trackBlock = this.getTrack(this.currentPosition);
-    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
-
-    if(this.currentStatus==='stop')
-    {
-        //queuing
-        thisPlugin.clearAddPlayTracks([].concat(trackBlock));
-    }
-    this.currentStatus = 'play';
-
-    return thisPlugin.resume();
-};
 
 // Volumio Next Command
 // TODO FIX WITH PREVIOUS MECHANISM, NOW THIS IS ONLY FOR MPD
@@ -520,5 +505,30 @@ CoreStateMachine.prototype.getTrack = function () {
     var track=this.playQueue.getTrack(0);
 
     return track;
+};
+
+
+
+
+
+
+// new play mechanism USED METHODS
+
+// Volumio Play Command
+CoreStateMachine.prototype.play = function (promisedResponse) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
+
+    var trackBlock = this.getTrack(this.currentPosition);
+    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+
+    if(this.currentStatus==='stop')
+    {
+        //queuing
+        thisPlugin.clearAddPlayTracks([].concat(trackBlock));
+        this.currentStatus = 'play';
+    }
+
+
+    //return thisPlugin.resume();
 };
 

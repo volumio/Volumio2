@@ -64,11 +64,7 @@ function CoreCommandRouter(server) {
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
-// Volumio Play
-CoreCommandRouter.prototype.volumioPlay = function () {
-	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
-	return this.stateMachine.play();
-};
+
 
 // Volumio Pause
 CoreCommandRouter.prototype.volumioPause = function () {
@@ -525,6 +521,21 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
         return promise.promise;
     }
 };
+
+
+
+
+
+
+
+//------------------------ Used in new play system -------------------------------
+
+// Volumio Play
+CoreCommandRouter.prototype.volumioPlay = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
+    return this.stateMachine.play();
+};
+
 
 
 
