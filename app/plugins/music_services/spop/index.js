@@ -510,13 +510,16 @@ ControllerSpop.prototype.logStart = function (sCommand) {
 // New play mechanism. used method
 
 ControllerSpop.prototype.play = function() {
-    var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::play');
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::play');
 
-    return self.sendSpopCommand('play', []);
+    return this.sendSpopCommand('play', []);
 };
 
+ControllerSpop.prototype.seek = function(position) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::seek');
 
+    return this.sendSpopCommand('seek', [position]);
+};
 
 
 // Define a method to clear, add, and play an array of tracks
@@ -536,8 +539,8 @@ ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackUris) {
 
             for(var i in arrayTrackUris)
             {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Adding track '+JSON.stringify(arrayTrackUris[i]));
-                arrayPromise.push(self.sendSpopCommand('uadd', [arrayTrackUris[i].uri]));
+                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Adding track '+arrayTrackUris[i]);
+                arrayPromise.push(self.sendSpopCommand('uadd', [arrayTrackUris[i]]));
             }
 
             libQ.all(arrayPromise).then(function(){

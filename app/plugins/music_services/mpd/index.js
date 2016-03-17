@@ -28,12 +28,22 @@ function ControllerMpd(context) {
 // Define a method to clear, add, and play an array of tracks
 ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackUris) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks');
+
+    var sections = arrayTrackUris[0].split('/');
+    var prev = '';
+
+    var uri;
+
+    if (sections.length > 2) {
+        uri ='/'+ sections.slice(2, sections.length).join('/');
+    }
+
+   self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
 
 	// Clear the queue, add the first track, and start playback
 	return self.sendMpdCommandArray([
 			{command: 'clear', parameters: []},
-			{command: 'add', parameters: [arrayTrackUris.shift()]},
+			{command: 'add', parameters: [uri]},
 			{command: 'play', parameters: []}
 		])
 		.then(function () {

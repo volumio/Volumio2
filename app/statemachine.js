@@ -309,19 +309,20 @@ CoreStateMachine.prototype.pushError = function (sReason) {
 // Input state object has the form {status: sStatus, position: nPosition, seek: nSeek, duration: nDuration, samplerate: nSampleRate, bitdepth: nBitDepth, channels: nChannels, dynamictitle: sTitle}
 CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
-	this.timeLastServiceStateUpdate = Date.now();
-	this.currentTrackBlock.service = sService;
+	//this.currentTrackBlock.service = sService;
+
+    var trackBlock = this.getTrack(this.currentPosition);
+    if(trackBlock!=undefined && trackBlock.service!==sService)
+    {
+        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skiiping notification.');
+        return;
+    }
+
+    this.timeLastServiceStateUpdate = Date.now();
 
     this.commandRouter.logger.info("STATE SERVICE "+JSON.stringify(stateService));
 
-	this.currentStatus = stateService.status;
-
-    if(stateService.currentPosition===null || stateService.currentPosition===undefined)
-        this.currentPosition=0;
-    else
-        this.currentPosition = stateService.position;
-
-    this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
+	this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
 
 	if (stateService.isStreaming != undefined) {
@@ -337,7 +338,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
 	//If play is issued by a different entity than Volumio, the system will accept and handle it
-	if (this.currentTrackBlock.service !== sService) {
+	/*if (this.currentTrackBlock.service !== sService) {
 		console.log(sService);
 		this.currentTrackBlock.service = sService;
 		this.currentStatus = stateService.status;
@@ -348,9 +349,13 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             this.currentPosition = stateService.position;
 
 		this.currentPosition = stateService.position;
-	}
+	}*/
 
-	if (stateService.status === 'play') {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   stateService '+stateService.status);
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   currentStatus '+this.currentStatus);
+
+
+    if (stateService.status === 'play') {
 		if (this.currentStatus === 'play') {
 			// We are waiting for playback to begin, and service has just begun playing
 			// Or we are currently playing, and the playback service has announced an updated play state (next track, etc)
@@ -374,7 +379,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			return this.startPlaybackTimer(this.currentSeek);
 		}
 		else if (this.currentStatus === 'stop') {
-			this.currentPosition = stateService.position;
+			/*this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
 			this.currentTitle = null;
@@ -390,39 +395,47 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 			this.pushState().fail(this.pushError.bind(this));
 
-			return this.startPlaybackTimer(this.currentSeek)
+			return this.startPlaybackTimer(this.currentSeek)*/
+
+            this.currentStatus = 'play';
+
+            if (this.currentPosition >= this.playQueue.arrayQueue.length) {
+                this.commandRouter.logger.info("END OF QUEUE ");
+
+                this.pushState().fail(this.pushError.bind(this));
+
+                return this.stopPlaybackTimer();
+
+            } else {
+                this.play();
+            }
 		}
 
 	} else if (stateService.status === 'stop') {
 		if (this.currentStatus === 'play') {
-			// Service has stopped without client request, meaning it is finished playing its track block. Move on to next track block.
-			this.currentPosition = stateService.position;
-			this.currentSeek = stateService.seek;
-			this.currentDuration = stateService.duration;
-			this.currentTitle = null;
-			this.currentArtist = null;
-			this.currentAlbum = null;
-			this.currentAlbumArt = '/albumart';
-			this.currentUri = stateService.uri;
-			this.currentSampleRate = null;
-			this.currentBitDepth = null;
-			this.currentChannels = null;
-			this.currentRandom = stateService.random;
-			this.currentRepeat = stateService.repeat;
 
-			if (this.currentPosition >= this.playQueue.arrayQueue.length - 1) {
-				// If we have reached the end of the queue
-				this.currentStatus = 'stop';
+            //Queuing following track;
 
-				this.pushState().fail(this.pushError.bind(this));
 
-				return this.stopPlaybackTimer();
+            if(this.currentPosition ==null || this.currentPosition===undefined)
+                this.currentPosition=0;
+            else this.currentPosition++;
 
-			} else {
-				// Else move to next track
-				// Don't need to pushState here, since it will be called later during the next operation
-				return this.stopPlaybackTimer().then(this.next.bind(this));
-			}
+            this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
+
+            this.currentStatus = 'stop';
+
+            if (this.currentPosition >= this.playQueue.arrayQueue.length) {
+                this.commandRouter.logger.info("END OF QUEUE ");
+
+                this.pushState().fail(this.pushError.bind(this));
+
+                return this.stopPlaybackTimer();
+
+            } else {
+                this.play();
+            }
+
 
 		} else if (this.currentStatus === 'stop') {
 			// Client has requested stop, so stop the timer
@@ -500,9 +513,9 @@ CoreStateMachine.prototype.emitFavourites = function (msg) {
 	this.commandRouter.emitFavourites(msg);
 };
 
-CoreStateMachine.prototype.getTrack = function () {
+CoreStateMachine.prototype.getTrack = function (position) {
 
-    var track=this.playQueue.getTrack(0);
+    var track=this.playQueue.getTrack(position);
 
     return track;
 };
@@ -518,17 +531,29 @@ CoreStateMachine.prototype.getTrack = function () {
 CoreStateMachine.prototype.play = function (promisedResponse) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
+    if(this.currentPosition ==null || this.currentPosition===undefined)
+        this.currentPosition=0;
+
+
     var trackBlock = this.getTrack(this.currentPosition);
     var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
     if(this.currentStatus==='stop')
     {
         //queuing
-        thisPlugin.clearAddPlayTracks([].concat(trackBlock));
-        this.currentStatus = 'play';
+        thisPlugin.clearAddPlayTracks([].concat(trackBlock.uri));
     }
-
-
-    //return thisPlugin.resume();
 };
 
+// Volumio Play Command
+CoreStateMachine.prototype.seek = function (position) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::seek');
+
+    var trackBlock = this.getTrack(this.currentPosition);
+    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+
+    this.currentSeek=position;
+    this.startPlaybackTimer(position);
+
+    thisPlugin.seek(position);
+};

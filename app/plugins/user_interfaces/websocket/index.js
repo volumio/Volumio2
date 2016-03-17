@@ -217,7 +217,7 @@ function InterfaceWebUI(context) {
 				var timeStart = Date.now();
 				self.logStart('Client requests Seek to ' + position)
 					.then(function () {
-						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'seek', position);
+						return self.commandRouter.volumioSeek(position);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
