@@ -513,6 +513,9 @@ CoreStateMachine.prototype.emitFavourites = function (msg) {
 	this.commandRouter.emitFavourites(msg);
 };
 
+
+//------------------------- new play mechanism USED METHODS ------------------
+
 CoreStateMachine.prototype.getTrack = function (position) {
 
     var track=this.playQueue.getTrack(position);
@@ -520,12 +523,6 @@ CoreStateMachine.prototype.getTrack = function (position) {
     return track;
 };
 
-
-
-
-
-
-// new play mechanism USED METHODS
 
 // Volumio Play Command
 CoreStateMachine.prototype.play = function (promisedResponse) {
@@ -550,6 +547,8 @@ CoreStateMachine.prototype.seek = function (position) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::seek');
 
     var trackBlock = this.getTrack(this.currentPosition);
+    this.commandRouter.pushConsoleMessage('TRACKBLOCK '+JSON.stringify(trackBlock));
+
     var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
     this.currentSeek=position;

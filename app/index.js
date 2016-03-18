@@ -344,6 +344,8 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 // Volumio Add Queue Items
 CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
+
+    this.pushConsoleMessage(JSON.stringify(arrayItems));
 	return this.stateMachine.addQueueItems(arrayItems);
 };
 

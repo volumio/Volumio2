@@ -435,7 +435,7 @@ ControllerSpop.prototype.explodeUri = function(uri) {
             if(data.body.album!==undefined)
                 album=data.body.album.name;
 
-            var albumart=self.getAlbumArt({artist:artist,album:album});
+            var albumart=self.getAlbumArt({artist:artist,album:album},"");
 
             defer.resolve({
                 uri: uri,

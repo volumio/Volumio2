@@ -26,39 +26,7 @@ function ControllerMpd(context) {
 // These are 'this' aware, and return a promise
 
 // Define a method to clear, add, and play an array of tracks
-ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackUris) {
-	var self = this;
 
-    var sections = arrayTrackUris[0].split('/');
-    var prev = '';
-
-    var uri;
-
-    if (sections.length > 2) {
-        uri ='/'+ sections.slice(2, sections.length).join('/');
-    }
-
-   self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
-
-	// Clear the queue, add the first track, and start playback
-	return self.sendMpdCommandArray([
-			{command: 'clear', parameters: []},
-			{command: 'add', parameters: [uri]},
-			{command: 'play', parameters: []}
-		])
-		.then(function () {
-			// If there are more tracks in the array, add those also
-			if (arrayTrackUris.length > 0) {
-				return self.sendMpdCommandArray(
-					libFast.map(arrayTrackUris, function (currentTrack) {
-						return {command: 'add', parameters: [currentTrack]};
-					})
-				);
-			} else {
-				return libQ.resolve();
-			}
-		});
-};
 //MPD Play
 ControllerMpd.prototype.play = function (N) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::play ' + N);
@@ -377,6 +345,7 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 		.then(function () {
 			return libQ.nfcall(self.clientMpd.sendCommands.bind(self.clientMpd),
 				libFast.map(arrayCommands, function (currentCommand) {
+                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'COMMAND '+currentCommand);
 					return libMpd.cmd(currentCommand.command, currentCommand.parameters);
 				})
 			);
@@ -610,9 +579,10 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	// TODO remove pertaining function when properly found out we don't need em
 	//self.fswatch();
 	// When playback status changes
-	self.clientMpd.on('system', function () {
+	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
+        self.logger.info(status);
 		self.logStart('MPD announces state update')
 			.then(self.getState.bind(self))
 			.then(self.pushState.bind(self))
@@ -1263,7 +1233,7 @@ ControllerMpd.prototype.updateQueue = function () {
 			if (msg) {
 				var lines = msg.split('\n');
 
-				self.commandRouter.volumioClearQueue();
+				//self.commandRouter.volumioClearQueue();
 
 				var queue = [];
 				for (var i = 0; i < lines.length; i++) {
@@ -1295,7 +1265,7 @@ ControllerMpd.prototype.updateQueue = function () {
 					}
 
 				}
-				self.commandRouter.addQueueItems(queue);
+				//self.commandRouter.addQueueItems(queue);
 			}
 			else self.logger.info(err);
 
@@ -1627,4 +1597,58 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
     return uris;
 }
+
+
+
+
+//----------------------- new play system ----------------------------
+ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackUris) {
+    var self = this;
+
+    var sections = arrayTrackUris[0].split('/');
+    var prev = '';
+
+    var uri;
+
+    if (sections.length > 2) {
+        uri ='"'+ sections.slice(2, sections.length).join('/')+'"';
+    }
+
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
+
+    // Clear the queue, add the first track, and start playback
+    var defer = libQ.defer();
+    var cmd = libMpd.cmd;
+
+    return self.sendMpdCommand('clear',[])
+        .then(function()
+        {
+            return self.sendMpdCommand('add '+uri,[])
+        })
+        .then(function()
+        {
+            return self.sendMpdCommand('play',[]);
+        });
+};
+
+
+ControllerMpd.prototype.seek = function(position) {
+    var self=this;
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::seek');
+
+    var defer = libQ.defer();
+    var command = 'seek ';
+    var cmd = libMpd.cmd;
+
+        self.clientMpd.sendCommand(cmd(command, ['0',position]), function (err, msg) {
+            if (msg) {
+                self.logger.info(msg);
+            }
+            else self.logger.info(err);
+
+            defer.resolve();
+        });
+
+    return defer.promise;
+};
 

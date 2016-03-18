@@ -114,7 +114,6 @@ CorePlayQueue.prototype.getTrack = function (index) {
 
     if(this.arrayQueue.length>index)
     {
-        this.commandRouter.pushConsoleMessage('RETURNING ' +  JSON.stringify(this.arrayQueue[index]));
         return this.arrayQueue[index];
     }
     else return;
