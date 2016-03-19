@@ -8,98 +8,68 @@ module.exports = AirPlayInterface;
 
 
 function AirPlayInterface(context) {
-	var self = this;
 	// Save a reference to the parent commandRouter
-	self.context = context;
-	self.commandRouter = self.context.coreCommand;
+	this.context = context;
+	this.commandRouter = this.context.coreCommand;
 
 }
 
 AirPlayInterface.prototype.onVolumioStart = function () {
-	var self = this;
-
-	self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
-	self.startShairportSync();
-
+	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
+	this.startShairportSync();
 };
 
 AirPlayInterface.prototype.onStart = function () {
-	var self = this;
-
 };
 
 AirPlayInterface.prototype.onStop = function () {
-	var self = this;
-	//Perform startup tasks here
 };
 
 AirPlayInterface.prototype.onRestart = function () {
-	var self = this;
-	//Perform startup tasks here
 };
 
 AirPlayInterface.prototype.onInstall = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.onUninstall = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.getUIConfig = function () {
-	var self = this;
-
-
 };
 
 AirPlayInterface.prototype.setUIConfig = function (data) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.getConf = function (varName) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.setConf = function (varName, varValue) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 //Optional functions exposed for making development easier and more clear
 AirPlayInterface.prototype.getSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.setSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.setAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
 };
 
 AirPlayInterface.prototype.startShairportSync = function () {
-	var self = this;
 	// Loading Configured output device
-	var outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
-	var hwdev = 'hw:' + outdev + ',0';
+	var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
+	var hwdev = 'plughw:' + outdev + ',0';
 	console.log(hwdev);
 
-	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+	var systemController = this.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 	var name = systemController.getConf('playerName');
-	var fs = require('fs')
+	var fs = require('fs');
+
+	var self = this;
 	fs.readFile(__dirname + "/shairport-sync.conf.tmpl", 'utf8', function (err, data) {
 		if (err) {
 			return console.log(err);

@@ -7,6 +7,7 @@
       "id": "section_general_settings",
       "element": "section",
       "label": "General Settings",
+      "icon": "fa-wrench",
       "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
@@ -37,6 +38,7 @@
       "id":"section_updates",
       "type": "section",
       "label": "System updates",
+      "icon": "fa-refresh",
       "content": [
         {
           "id":"update",
