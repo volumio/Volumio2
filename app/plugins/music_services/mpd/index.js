@@ -1501,8 +1501,6 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             {
                 if(result[j].uri!=undefined)
                 {
-                    self.logger.info(JSON.stringify(result[j]));
-
                     response.push({
                         uri: 'music-library/'+self.fromPathToUri(result[j].uri),
                         service: 'mpd',
@@ -1511,7 +1509,8 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                         album: result[j].album,
                         type: 'track',
                         tracknumber: result[j].tracknumber,
-                        albumart: result[j].albumart
+                        albumart: result[j].albumart,
+                        duration: result[j].duration
                     });
                 }
 
@@ -1571,11 +1570,11 @@ ControllerMpd.prototype.scanFolder=function(uri)
         if(ext=='mp3' || ext=='m4a')
         {
             var defer=libQ.defer();
-
+/*
             var parser = mm(libFsExtra.createReadStream(uri), function (err, metadata) {
                 if (err) defer.resolve({});
                 else {
-                   defer.resolve({
+                    defer.resolve({
                         uri: 'music-library/'+self.fromPathToUri(uri),
                         service: 'mpd',
                         name: metadata.title,
@@ -1585,11 +1584,75 @@ ControllerMpd.prototype.scanFolder=function(uri)
                         tracknumber: metadata.track.no,
                         albumart: self.getAlbumArt(
                             {artist:metadata.artist,
-                             album: metadata.album},uri)
+                             album: metadata.album},uri),
+                        duration: metadata.duration
                     });
                 }
 
-            });
+            });*/
+
+            self.commandRouter.logger.info("----->>>>> "+uri);
+            var sections = uri.split('/');
+            var folderToList = '';
+            var command = 'lsinfo';
+
+            if (sections.length > 1) {
+                folderToList = sections.slice(2).join('/');
+
+                command += ' "' + folderToList + '"';
+
+            }
+
+            self.commandRouter.logger.info("----->>>>> "+command);
+
+            var cmd = libMpd.cmd;
+
+            self.mpdReady.then(function () {
+                self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+                    var list = [];
+                    if (msg) {
+
+
+                        self.commandRouter.logger.info("----->>>>> "+msg);
+                        var s0 = sections[0] + '/';
+                        var path;
+                        var name;
+                        var lines = msg.split('\n');
+                        for (var i = 0; i < lines.length; i++) {
+                            var line = lines[i];
+
+                            if (line.indexOf('file:') === 0) {
+                                var path = line.slice(6);
+                                var name = path.split('/').pop();
+
+                                var artist = self.searchFor(lines, i + 1, 'Artist:');
+                                var album = self.searchFor(lines, i + 1, 'Album:');
+                                var title = self.searchFor(lines, i + 1, 'Title:');
+                                var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+
+                                if (title) {
+                                    title = title;
+                                } else {
+                                    title = name;
+                                }
+
+                                defer.resolve({
+                                    uri: 'music-library/'+self.fromPathToUri(uri),
+                                    service: 'mpd',
+                                    name: title,
+                                    artist: artist,
+                                    album: album,
+                                    type: 'track',
+                                    tracknumber: 0,
+                                    albumart: self.getAlbumArt({artist:artist,album: album},uri),
+                                    duration: time
+                                });
+                            }
+
+                        }
+                    }
+                    });
+                });
 
             return defer.promise;
         }
@@ -1602,10 +1665,10 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
 
 //----------------------- new play system ----------------------------
-ControllerMpd.prototype.clearAddPlayTracks = function (arrayTrackUris) {
+ControllerMpd.prototype.clearAddPlayTrack = function (track) {
     var self = this;
 
-    var sections = arrayTrackUris[0].split('/');
+    var sections = track.uri.split('/');
     var prev = '';
 
     var uri;

@@ -123,6 +123,9 @@ ControllerSpop.prototype.onVolumioStart = function() {
 				var sStatus = self.sStatusBuffer;
 
 				self.logStart('Spop announces state update')
+                    /*.then(function(){
+                        return self.getState.call(self);
+                    })*/
 					.then(function() {
 						return self.parseState.call(self, sStatus);
 					})
@@ -349,7 +352,7 @@ ControllerSpop.prototype.getState = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::getState');
 
-	return self.sendSpopCommand('status', []);
+    return self.sendSpopCommand('status', []);
 };
 
 // Spop parse state
@@ -393,7 +396,10 @@ ControllerSpop.prototype.parseState = function(sState) {
 		duration: nDuration,
 		samplerate: null, // Pull these values from somwhere else since they are not provided in the Spop state
 		bitdepth: null,
-		channels: null
+		channels: null,
+        artist: objState.artist,
+        title: objState.title,
+        album: objState.album
 	});
 };
 
@@ -448,7 +454,7 @@ ControllerSpop.prototype.explodeUri = function(uri) {
                 albumart: albumart
             });
 
-        })
+        });
 
 
 
@@ -523,45 +529,70 @@ ControllerSpop.prototype.seek = function(position) {
 
 
 // Define a method to clear, add, and play an array of tracks
-ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackUris) {
+ControllerSpop.prototype.clearAddPlayTrack = function(track) {
     var self = this;
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
 
     var methodPromise=libQ.defer();
 
     // Clear the queue, add the first track, and start playback
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Clearing Queue');
+
     var clearPromise=self.sendSpopCommand('qclear', []);
     clearPromise.then(function(){
-        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Queue cleared');
-
-        if (arrayTrackUris.length > 0) {
-            var arrayPromise=[];
-
-            for(var i in arrayTrackUris)
-            {
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Adding track '+arrayTrackUris[i]);
-                arrayPromise.push(self.sendSpopCommand('uadd', [arrayTrackUris[i]]));
-            }
-
-            libQ.all(arrayPromise).then(function(){
-                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Going to play');
-
-                self.sendSpopCommand('play', []).then(function()
-                {
-                    methodPromise.resolve();
-                })
-                .fail(function(){
-                    methodPromise.reject(new Error("Cannot play queue for plugin SPOP"));
-                });
-            })
-            .fail(function(){
-                methodPromise.reject(new Error('Error while adding track to SPOP'));
-            });
-        }
-
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Adding track '+track.uri);
+        return self.sendSpopCommand('uadd', [track.uri]);
     })
+    .then(function(){
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Going to play');
+        return self.sendSpopCommand('play', [])
+    })
+    .then(function()
+    {
+        methodPromise.resolve();
+    })
+    /*.then(function(){
+        var splitted=track.uri.split(':');
+
+        self.spotifyApi.getTrack(splitted[2])
+            .then(function(data) {
+                var artist='';
+                var album='';
+
+                if(data.body.artists.length>0)
+                    artist=data.body.artists[0].name;
+
+                if(data.body.album!==undefined)
+                    album=data.body.album.name;
+
+                var albumart=self.getAlbumArt({artist:artist,album:album},"");
+
+                var defer=libQ.defer();
+
+                var state={
+                    uri: uri,
+                    service: 'spop',
+                    name: data.body.name,
+                    artist: artist,
+                    album: album,
+                    type: 'track',
+                    tracknumber: data.body.track_number,
+                    albumart: albumart
+                };
+
+                defer.resolve(state);
+                return defer.promise;
+            })
+            .then(function(state){
+                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SpopD pushes status '+JSON.stringify(state));
+
+                self.pushState(state);
+            });
+
+        return libQ.resolve();
+    })*/
     .fail(function(){
-        methodPromise.reject(new Error("Cannot clear queue for plugin SPOP"));
+        methodPromise.reject(new Error("Cannot play with plugin SPOP"));
     });
 
     return methodPromise.promise;

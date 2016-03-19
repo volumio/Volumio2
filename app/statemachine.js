@@ -14,7 +14,7 @@ function CoreStateMachine(commandRouter) {
 // Get the current state of the player
 CoreStateMachine.prototype.getState = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
-	var sService = null;
+	/*var sService = null;
 	if ('service' in this.currentTrackBlock) {
 		sService = this.currentTrackBlock.service;
 	}
@@ -23,27 +23,52 @@ CoreStateMachine.prototype.getState = function () {
 		this.currentTrackType = 'webradio'
 	} else this.Streaming = false;
 
-	return {
-		status: this.currentStatus,
-		position: this.currentPosition,
-		title: this.currentTitle,
-		artist: this.currentArtist,
-		album: this.currentAlbum,
-		albumart: this.currentAlbumArt,
-		uri: this.currentUri,
-		trackType: this.currentTrackType,
-		seek: this.currentSeek,
-		duration: this.currentDuration,
-		samplerate: this.currentSampleRate,
-		bitdepth: this.currentBitDepth,
-		channels: this.currentChannels,
-		random: this.currentRandom,
-		repeat: this.currentRepeat,
-		volume: this.currentVolume,
-		mute: this.currentMute,
-		stream: this.Streaming,
-		service: sService
-	};
+	*/
+
+
+    var trackBlock = this.getTrack(this.currentPosition);
+    if(trackBlock===undefined)
+    {
+        return {
+            status: 'stop',
+            position: 0,
+            title: '',
+            artist: '',
+            album: '',
+            albumart: '/albumart',
+            duration:0,
+            uri: '',
+            seek: 0,
+            samplerate: '',
+            channels: '',
+            bitdepth: 0,
+            Streaming: false,
+            service: 'mpd'
+        };
+    }
+    else {
+        return {
+            status: this.currentStatus,
+            position: this.currentPosition,
+            title: trackBlock.title,
+            artist: trackBlock.artist,
+            album: trackBlock.album,
+            albumart: trackBlock.albumart,
+            uri: trackBlock.uri,
+            trackType: this.currentTrackType,
+            seek: this.currentSeek,
+            duration: trackBlock.duration,
+            samplerate: trackBlock.samplerate,
+            bitdepth: trackBlock.bitdepth,
+            channels: trackBlock.channels,
+            random: this.currentRandom,
+            repeat: this.currentRepeat,
+            volume: this.currentVolume,
+            mute: this.currentMute,
+            stream: false,
+            service: trackBlock.service
+        };
+    }
 };
 
 // Get the current contents of the play queue
@@ -314,7 +339,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
     var trackBlock = this.getTrack(this.currentPosition);
     if(trackBlock!=undefined && trackBlock.service!==sService)
     {
-        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skiiping notification.');
+        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.');
         return;
     }
 
@@ -359,7 +384,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if (this.currentStatus === 'play') {
 			// We are waiting for playback to begin, and service has just begun playing
 			// Or we are currently playing, and the playback service has announced an updated play state (next track, etc)
-			this.currentPosition = stateService.position;
+			/*this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
 			this.currentTitle = stateService.title;
@@ -376,8 +401,11 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 			this.pushState().fail(this.pushError.bind(this));
 
-			return this.startPlaybackTimer(this.currentSeek);
-		}
+			return this.startPlaybackTimer(this.currentSeek);*/
+            this.pushState().fail(this.pushError.bind(this));
+            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'No code');
+
+        }
 		else if (this.currentStatus === 'stop') {
 			/*this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
@@ -408,6 +436,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
             } else {
                 this.play();
+                this.pushState().fail(this.pushError.bind(this));
             }
 		}
 
@@ -439,7 +468,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 		} else if (this.currentStatus === 'stop') {
 			// Client has requested stop, so stop the timer
-			this.currentPosition = stateService.position;
+			/*this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
 			this.currentTitle = null;
@@ -455,7 +484,10 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 			this.pushState().fail(this.pushError.bind(this));
 
-			return this.stopPlaybackTimer();
+			return this.stopPlaybackTimer();*/
+
+            this.pushState().fail(this.pushError.bind(this));
+            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'No code');
 		}
 	} else if (stateService.status === 'pause') {
 		if (this.currentStatus === 'pause') {
@@ -538,7 +570,8 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
     if(this.currentStatus==='stop')
     {
         //queuing
-        thisPlugin.clearAddPlayTracks([].concat(trackBlock.uri));
+        this.currentSeek=0;
+        thisPlugin.clearAddPlayTrack(trackBlock);
     }
 };
 
@@ -547,12 +580,17 @@ CoreStateMachine.prototype.seek = function (position) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::seek');
 
     var trackBlock = this.getTrack(this.currentPosition);
-    this.commandRouter.pushConsoleMessage('TRACKBLOCK '+JSON.stringify(trackBlock));
+    if (trackBlock !== undefined) 
+    {
+        this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
+    
+        var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+    
+        this.currentSeek = position;
+        this.startPlaybackTimer(position);
+    
+        thisPlugin.seek(position);
 
-    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
-
-    this.currentSeek=position;
-    this.startPlaybackTimer(position);
-
-    thisPlugin.seek(position);
+        this.pushState().fail(this.pushError.bind(this));
+    }
 };
