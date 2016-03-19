@@ -4,6 +4,65 @@
   },
   "sections": [
     {
+      "id": "alsa_options",
+      "element": "section",
+      "label": "Audio Output",
+      "icon": "fa-volume-up",
+      "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveAlsaOptions"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "output_device"
+        ]
+      },
+      "value":  {
+        "value": "0",
+        "label": "Unknown"
+      },
+      "content": [
+        {
+          "id": "output_device",
+          "element": "select",
+          "doc": "Output device",
+          "label": "Output device",
+          "value":  {
+            "value":0,
+            "label": "0"
+          },
+          "options": [
+
+          ]
+
+        },
+        {
+          "id": "",
+          "element": "",
+          "doc" : "Enable I2S DACs",
+          "label": "",
+          "value": false
+        },
+        {
+          "id": "",
+          "element": "",
+          "doc": "",
+          "label": "",
+          "value":  {
+            "value":0,
+            "label": "0"
+          },
+          "visibleIf": {
+            "field": "i2s",
+            "value": true
+          },
+          "options": [
+
+          ]
+
+        }
+
+      ]
+    },
+    {
       "id": "playback_options",
       "element": "section",
       "label": "Playback options",
@@ -301,44 +360,6 @@
         }
 
       ]
-    },
-    {
-      "id": "alsa_options",
-      "element": "section",
-      "label": "Alsa options",
-      "icon": "fa-volume-up",
-      "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveAlsaOptions"},
-      "saveButton": {
-        "label": "Save",
-        "data": [
-          "output_device"
-        ]
-      },
-      "value":  {
-        "value": "0",
-        "label": "Unknown"
-      },
-      "content": [
-        {
-          "id": "output_device",
-          "element": "select",
-          "doc": "Output device",
-          "label": "Output device",
-          "value":  {
-            "value":0,
-            "label": "0"
-          },
-          "options": [
-
-          ]
-
-        }
-
-      ]
     }
-
-
-
-
   ]
 }

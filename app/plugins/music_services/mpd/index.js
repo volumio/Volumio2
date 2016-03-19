@@ -677,59 +677,122 @@ ControllerMpd.prototype.mpdConnect = function () {
  return uiConfig;
  }*/
 
+ControllerMpd.prototype.getUIConfig2 = function () {
+	var self = this;
+
+	var uiconfig;
+	var device
+	var defer = libQ.defer();
+
+	var promise;
+
+	promise = self.commandRouter.executeOnPlugin('system_controller', 'system', 'deviceDetect', '');
+
+	if (promise != undefined) {
+		promise.then(function (result) {
+				if(result == 'Raspberry PI 3')
+				{	console.log('pi3')
+					uiconfig = self.getUIConfig2();
+					console.log(uiconfig);
+					}
+				defer.resolve({});
+			})
+			.fail(function () {
+
+			});
+	} else {
+	}
+	console.log(uiconfig);
+	return defer.promise;
+}
+
+
+
 ControllerMpd.prototype.getUIConfig = function () {
 	var self = this;
 
 	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
 	var value;
 
-	value = self.config.get('gapless_mp3_playback');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[0].options'), value));
 
-	value = self.config.get('volume_normalization');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[1].options'), value));
-
-	value = self.config.get('audio_buffer_size');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[2].options'), value));
-
-	value = self.config.get('buffer_before_play');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[3].options'), value));
-
-	value = self.config.get('auto_update')
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[4].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
-
+	var platform = self.commandRouter.executeOnPlugin('system_controller', 'system', 'deviceDetect');
 	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
 
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
-	if (value == undefined)
-		value = 0;
 
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelectedCard(cards, value));
+
+		platform.then(function (result) {
+				if(platform == 'Raspberry PI 3')
+				{	console.log('pi3');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'asd');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', 'asd');
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', 'asd');
+
+				}
+			})
+			.fail(function () {
+
+			});
+
+
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
+	if (value == undefined){
+		value = 0;}
+
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelectedCard(cards, value));
 
 	for (var i in cards) {
-		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+		self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
 			value: cards[i].id,
 			label: cards[i].name
 		});
 	}
+
+	if(platform == 'Raspberry PI 3')
+	{	console.log('pi3');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'asd');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', 'asd');
+	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', 'asd');}
+
+	value = self.config.get('gapless_mp3_playback');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
+
+	value = self.config.get('volume_normalization');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
+
+	value = self.config.get('audio_buffer_size');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
+
+	value = self.config.get('buffer_before_play');
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[3].options'), value));
+
+	value = self.config.get('auto_update')
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[4].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[4].options'), value));
+
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
+
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
+
+	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
 	return uiconf;
 };
