@@ -1301,7 +1301,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 			album = data.album;
 		else album = data.artist;
 
-		web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
+		web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/extralarge'
 	}
 
 	var url = '/albumart';
