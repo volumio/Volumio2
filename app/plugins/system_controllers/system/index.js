@@ -320,3 +320,29 @@ ControllerSystem.prototype.deleteUserData = function () {
 
 	});
 };
+
+ControllerSystem.prototype.deviceDetect = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			self.logger.info('Canot read proc/cpuinfo: ' + error);
+		} else {
+			var hardwareLine = stdout.split(":");
+			var cpuidparam = hardwareLine[1].replace(/\s/g, '');
+			var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controllers/system/devices.json'),  'utf8', {throws: false});
+			//self.logger.info('CPU ID ::'+cpuidparam+'::');
+			for(var i = 0; i < deviceslist.devices.length; i++)
+			{
+				if(deviceslist.devices[i].cpuid == cpuidparam)
+				{
+					defer.resolve(deviceslist.devices[i].name);
+				}
+			}
+
+		}
+	});
+
+	return defer.promise;
+};

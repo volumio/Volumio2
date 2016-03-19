@@ -27,7 +27,7 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	//getting configuration
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 	config.loadFile(configFile);
-	self.i2sDetect();
+	self.deviceDetect();
 
 
 };
@@ -119,6 +119,29 @@ ControllerI2s.prototype.registerCallback = function (callback) {
 
 	self.callbacks.push(callback);
 };
+
+ControllerI2s.prototype.deviceDetect = function() {
+	var self = this;
+
+
+	var promise;
+	self.logger.info('Detecting Device');
+
+	self.logger.info('---------------devvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv');
+
+	promise = self.commandRouter.executeOnPlugin('system_controller', 'system', 'deviceDetect', '');
+
+
+	if (promise != undefined) {
+		promise.then(function (result) {
+				self.logger.info('asssssssssssssssssssssssssssssssssssssssssssssssssssssssss'+result);
+			})
+			.fail(function () {
+
+			});
+	} else {
+	}
+}
 
 ControllerI2s.prototype.i2sDetect = function () {
 	var self = this;
