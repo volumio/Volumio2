@@ -4,7 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var exec = require('child_process').exec;
-var jsonQuery = require('json-query')
+var os = require('os');
 
 // Define the ControllerSystem class
 module.exports = ControllerI2s;
@@ -27,7 +27,7 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	//getting configuration
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 	config.loadFile(configFile);
-	self.deviceDetect();
+	//self.deviceDetect();
 
 
 };
@@ -101,9 +101,9 @@ ControllerI2s.prototype.setSystemConf = function (pluginName, varName) {
 	//Perform your installation tasks here
 };
 
-ControllerI2s.prototype.getAdditionalConf = function () {
+ControllerI2s.prototype.getAdditionalConf = function (type, controller, data) {
 	var self = this;
-	//Perform your installation tasks here
+	return self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
 };
 
 ControllerI2s.prototype.setAdditionalConf = function () {
@@ -123,24 +123,6 @@ ControllerI2s.prototype.registerCallback = function (callback) {
 ControllerI2s.prototype.deviceDetect = function() {
 	var self = this;
 
-
-	var promise;
-	self.logger.info('Detecting Device');
-
-	self.logger.info('---------------devvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv');
-
-	promise = self.commandRouter.executeOnPlugin('system_controller', 'system', 'deviceDetect', '');
-
-
-	if (promise != undefined) {
-		promise.then(function (result) {
-				self.logger.info('asssssssssssssssssssssssssssssssssssssssssssssssssssssssss'+result);
-			})
-			.fail(function () {
-
-			});
-	} else {
-	}
 }
 
 ControllerI2s.prototype.i2sDetect = function () {
@@ -182,8 +164,60 @@ ControllerI2s.prototype.i2sDetect = function () {
 	}
 };
 
-ControllerI2s.prototype.i2sMatch = function (i2cAddr) {
+
+ControllerI2s.prototype.getI2sOptions = function () {
 	var self = this;
-	var dacfile = __dirname +'dacs.json';
-	var data = fs.readJsonSync(dacfile, {throws: false});
+
+	var options = [];
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+					var valuedata = dacdata.devices[num].data[i].id
+					var labeldata = dacdata.devices[num].data[i].name
+				options.push({value: valuedata, label: labeldata});
+
+			}
+		}
+	}
+
+	return options;
+};
+
+ControllerI2s.prototype.enableI2SDAC = function (data) {
+	var self = this;
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+				if(dacdata.devices[num].data[i].name == data) {
+					self.writeI2SDAC(dacdata.devices[num].data[i].overlay);
+				}
+
+			}
+		}
+	}
+}
+
+ControllerI2s.prototype.writeI2SDAC = function (data) {
+	var self = this;
+
+	var netstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL +  'dtoverlay='+data;
+
+	fs.writeFile('/boot/config.txt', netstring, function (err) {
+		if (err) {
+			self.logger.error('Cannot write config.txt file: '+error);
+		}
+
+	});
+
 }

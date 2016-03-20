@@ -677,66 +677,20 @@ ControllerMpd.prototype.mpdConnect = function () {
  return uiConfig;
  }*/
 
-ControllerMpd.prototype.getUIConfig2 = function () {
-	var self = this;
 
-	var uiconfig;
-	var device
-	var defer = libQ.defer();
-
-	var promise;
-
-	promise = self.commandRouter.executeOnPlugin('system_controller', 'system', 'deviceDetect', '');
-
-	if (promise != undefined) {
-		promise.then(function (result) {
-				if(result == 'Raspberry PI 3')
-				{	console.log('pi3')
-					uiconfig = self.getUIConfig2();
-					console.log(uiconfig);
-					}
-				defer.resolve({});
-			})
-			.fail(function () {
-
-			});
-	} else {
-	}
-	console.log(uiconfig);
-	return defer.promise;
-}
 
 
 
 ControllerMpd.prototype.getUIConfig = function () {
 	var self = this;
 
+	var defer = libQ.defer();
+
 	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
 	var value;
+	var devicevalue;
 
-
-	var platform = self.commandRouter.executeOnPlugin('system_controller', 'system', 'deviceDetect');
 	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
-
-
-
-		platform.then(function (result) {
-				if(platform == 'Raspberry PI 3')
-				{	console.log('pi3');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'asd');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', 'asd');
-					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', 'asd');
-
-				}
-			})
-			.fail(function () {
-
-			});
-
 
 	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
 	if (value == undefined){
@@ -752,15 +706,28 @@ ControllerMpd.prototype.getUIConfig = function () {
 		});
 	}
 
-	if(platform == 'Raspberry PI 3')
-	{	console.log('pi3');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'asd');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', 'asd');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', 'asd');}
+	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+	if(i2soptions.length > 0){
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
+		self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2s');
+		self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2sid');
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].id', 'i2sid');
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'DAC Model');
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
+			value: i2soptions[0].value,
+			label: i2soptions[0].label
+		});
+	for(var i in i2soptions) {
+		console.log(i2soptions[i].value)
+		self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[2].options', {
+			value: i2soptions[i].value,
+			label: i2soptions[i].label
+		});
+	}
+	}
 
 	value = self.config.get('gapless_mp3_playback');
 	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.value', value);
@@ -1489,6 +1456,12 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
+
+	if (data.i2s){
+		self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
+		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+
+	}
 
 	self.commandRouter.sharedVars.set('alsa.outputdevice', data.output_device.value);
 

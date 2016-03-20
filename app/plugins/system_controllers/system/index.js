@@ -11,6 +11,7 @@ module.exports = ControllerSystem;
 function ControllerSystem(context) {
 	var self = this;
 
+
 	// Save a reference to the parent commandRouter
 	self.context = context;
 	self.commandRouter = self.context.coreCommand;
@@ -24,8 +25,10 @@ ControllerSystem.prototype.onVolumioStart = function () {
 	var self = this;
 
 	//getting configuration
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
-	config.loadFile(configFile);
+	var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+
+	this.config = new (require('v-conf'))();
+	this.config.loadFile(configFile);
 
 	var uuid = config.get('uuid');
 	if (uuid == undefined) {
@@ -33,6 +36,8 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		var uuid = require('node-uuid');
 		config.addConfigValue('uuid', 'string', uuid.v4());
 	}
+
+	self.deviceDetect();
 };
 
 ControllerSystem.prototype.onStop = function () {
@@ -125,6 +130,9 @@ ControllerSystem.prototype.setAdditionalConf = function () {
 	//Perform your installation tasks here
 };
 
+ControllerSystem.prototype.getConfigParam = function (key) {
+	return this.config.get(key);
+};
 
 ControllerSystem.prototype.saveGeneralSettings = function (data) {
 	var self = this;
@@ -321,9 +329,10 @@ ControllerSystem.prototype.deleteUserData = function () {
 	});
 };
 
-ControllerSystem.prototype.deviceDetect = function () {
+ControllerSystem.prototype.deviceDetect = function (data) {
 	var self = this;
 	var defer = libQ.defer();
+	var device = '';
 
 	exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
@@ -338,6 +347,8 @@ ControllerSystem.prototype.deviceDetect = function () {
 				if(deviceslist.devices[i].cpuid == cpuidparam)
 				{
 					defer.resolve(deviceslist.devices[i].name);
+					device = deviceslist.devices[i].name;
+					self.deviceCheck(device);
 				}
 			}
 
@@ -346,3 +357,21 @@ ControllerSystem.prototype.deviceDetect = function () {
 
 	return defer.promise;
 };
+
+ControllerSystem.prototype.deviceCheck = function (data) {
+	var self = this;
+
+
+	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
+	config.loadFile(configFile);
+
+	var device = config.get('device');
+
+	if (device == undefined) {
+		self.logger.info ('Setting Device type: ' + data)
+		config.addConfigValue('device', 'string', data);
+	} else if (device != data) {
+		self.logger.info ('Device has changed, setting Device type: ' + data)
+		config.set('device', data);
+	}
+}
