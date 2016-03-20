@@ -29,7 +29,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
-
+	
 	var uuid = config.get('uuid');
 	if (uuid == undefined) {
 		console.log("No id defined. Creating one");
@@ -369,7 +369,7 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 
 	if (device == undefined) {
 		self.logger.info ('Setting Device type: ' + data)
-		config.addConfigValue('device', 'string', data);
+		config.set('device', data);
 	} else if (device != data) {
 		self.logger.info ('Device has changed, setting Device type: ' + data)
 		config.set('device', data);

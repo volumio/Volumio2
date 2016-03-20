@@ -24,10 +24,10 @@ function ControllerI2s(context) {
 ControllerI2s.prototype.onVolumioStart = function () {
 	var self = this;
 
-	//getting configuration
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
-	config.loadFile(configFile);
-	//self.deviceDetect();
+	var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+
+	this.config = new (require('v-conf'))();
+	this.config.loadFile(configFile);
 
 
 };
@@ -81,6 +81,9 @@ ControllerI2s.prototype.setConf = function (varName, varValue) {
 	var defer = libQ.defer();
 
 
+};
+ControllerI2s.prototype.getConfigParam = function (key) {
+	return this.config.get(key);
 };
 
 
@@ -185,8 +188,25 @@ ControllerI2s.prototype.getI2sOptions = function () {
 		}
 	}
 
+
 	return options;
 };
+
+ControllerI2s.prototype.getI2sStatus = function () {
+	var self = this;
+	var status = {enabled: false, name: null, id: null};
+	var i2senabled = self.getConfigParam('i2s_enabled');
+	var i2sdac = self.getConfigParam('i2s_dac');
+	var i2sid = self.getConfigParam('i2s_id');
+
+	if (i2senabled){
+			status.enabled = true;
+			status.name = i2sdac;
+			status.id = i2sid;
+	}
+
+	return status
+}
 
 ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var self = this;
@@ -200,7 +220,11 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 		{ var num = i;
 			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
 				if(dacdata.devices[num].data[i].name == data) {
-					self.writeI2SDAC(dacdata.devices[num].data[i].overlay);
+					var overlay = dacdata.devices[num].data[i].overlay
+					self.writeI2SDAC(overlay);
+					this.config.set("i2s_enabled", true);
+					this.config.set("i2s_dac", data);
+					this.config.set("i2s_id", overlay);
 				}
 
 			}

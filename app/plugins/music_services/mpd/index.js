@@ -707,7 +707,24 @@ ControllerMpd.prototype.getUIConfig = function () {
 	}
 
 	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
+	
 	if(i2soptions.length > 0){
+		if(i2sstatus.enabled){
+			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value', i2sstatus.enabled);
+			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
+				value: i2sstatus.id,
+				label: i2sstatus.name
+			});
+
+		} else {
+			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value', false);
+			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
+				value: i2soptions[0].value,
+				label: i2soptions[0].label
+			});
+		}
+
 		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
 		self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2s');
 		self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2sid');
@@ -716,12 +733,8 @@ ControllerMpd.prototype.getUIConfig = function () {
 		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].id', 'i2sid');
 		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
 		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'DAC Model');
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
-			value: i2soptions[0].value,
-			label: i2soptions[0].label
-		});
+
 	for(var i in i2soptions) {
-		console.log(i2soptions[i].value)
 		self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[2].options', {
 			value: i2soptions[i].value,
 			label: i2soptions[i].label
