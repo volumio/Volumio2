@@ -21,12 +21,14 @@
           "id": "player_name",
           "type":"text",
           "element": "input",
+		  "doc": "This is the name of your system as it will appear on your network.",
           "label": "Player Name",
           "value": "volumio"
         },
         {
           "id":"startup_sound",
           "element": "switch",
+		  "doc": "By default Volumio will play a short startup sound after it has finished booting",
           "label": "Startup Sound",
           "value": true
         }
