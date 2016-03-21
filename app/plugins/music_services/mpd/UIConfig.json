@@ -22,47 +22,19 @@
       "content": [
         {
           "id": "gapless_mp3_playback",
-          "element": "select",
+          "element": "switch",
           "doc": "If you have a problem with your MP3s ending abruptly it is recommended that you set this argument to NO to attempt to fix the problem.",
           "label": "Gapless MP3 playback",
-          "value":  {
-            "value":true,
-            "label": "Yes"
-          },
-          "options": [
-            {
-              "value":true,
-              "label": "Yes"
-            },
-            {
-              "value":false,
-              "label": "No"
-            }
-          ]
-
+          "value":false
         },
 
 
         {
           "id": "volume_normalization",
-          "element": "select",
+          "element": "switch",
           "doc":"If yes, Axiom-Air will normalize the volume of songs as they play. The default is no.",
           "label": "Volume normalization",
-          "value":  {
-            "value":true,
-            "label": "Yes"
-          },
-          "options": [
-            {
-              "value":true,
-              "label": "Yes"
-            },
-            {
-              "value":false,
-              "label": "No"
-            }
-          ]
-
+          "value":true
         },
 
         {
@@ -77,23 +49,23 @@
           "options": [
             {
               "value":1024,
-              "label": "128"
+              "label": "128 KB"
             },
             {
               "value":2048,
-              "label": "2048"
+              "label": "2 MB"
             },
             {
               "value":4096,
-              "label": "4096"
+              "label": "4 MB"
             },
             {
               "value":8192,
-              "label": "8192"
+              "label": "8 MB"
             },
             {
               "value":12288,
-              "label": "12288"
+              "label": "12 MB"
             }
 
           ]
@@ -129,23 +101,10 @@
 
         }, {
           "id": "auto_update",
-          "element": "select",
+          "element": "switch",
           "doc" : "This setting enables automatic update of music database when files in music directory are changed.",
           "label": "Auto update",
-          "value":  {
-            "value":false,
-            "label": "Yes"
-          },
-          "options": [
-            {
-              "value":true,
-              "label": "Yes"
-            },
-            {
-              "value":false,
-              "label": "No"
-            }
-          ]
+          "value":true
 
         }
 
@@ -336,9 +295,6 @@
 
       ]
     }
-
-
-
 
   ]
 }
