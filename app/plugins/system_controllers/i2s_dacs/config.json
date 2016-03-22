@@ -1,0 +1,14 @@
+{
+  "i2s_enabled": {
+    "type": "boolean",
+    "value": false
+  },
+  "i2s_dac": {
+    "type": "string",
+    "value": ""
+  },
+  "i2s_id": {
+    "type": "string",
+    "value": ""
+  }
+}

@@ -164,6 +164,15 @@
         "type": "string",
         "value": "STARTED"
       }
+    },"i2s_dacs": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     },"volumiodiscovery": {
       "enabled": {
         "type": "boolean",

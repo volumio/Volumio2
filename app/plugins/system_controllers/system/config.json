@@ -14,5 +14,9 @@
   "kernelSettingLabel": {
     "value": "Default",
     "type": "string"
+  },
+  "device": {
+    "value": "",
+    "type": "string"
   }
 }
