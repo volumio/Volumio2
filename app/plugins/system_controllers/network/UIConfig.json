@@ -22,7 +22,7 @@
         {
           "id": "dhcp",
           "element": "switch",
-          "doc" : "Choose between DHCP and Static configuration.",
+          "doc" : "Choose between DHCP and Static IP configuration.",
           "label": "Automatic IP",
           "value": true
         },
