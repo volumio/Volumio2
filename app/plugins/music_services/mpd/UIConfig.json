@@ -22,53 +22,25 @@
       "content": [
         {
           "id": "gapless_mp3_playback",
-          "element": "select",
-          "doc": "If you have a problem with your MP3s ending abruptly it is recommended that you set this argument to NO to attempt to fix the problem.",
+          "element": "switch",
+          "doc": "If you have a problem with your MP3s ending abruptly it is recommended that you turn this On to attempt to fix the problem. Default is Off.",
           "label": "Gapless MP3 playback",
-          "value":  {
-            "value":true,
-            "label": "Yes"
-          },
-          "options": [
-            {
-              "value":true,
-              "label": "Yes"
-            },
-            {
-              "value":false,
-              "label": "No"
-            }
-          ]
-
+          "value":false
         },
 
 
         {
           "id": "volume_normalization",
-          "element": "select",
-          "doc":"If yes, Axiom-Air will normalize the volume of songs as they play. The default is no.",
+          "element": "switch",
+          "doc":"If turned On Volumio will normalize the volume of tracks as they play. Default is Off.",
           "label": "Volume normalization",
-          "value":  {
-            "value":true,
-            "label": "Yes"
-          },
-          "options": [
-            {
-              "value":true,
-              "label": "Yes"
-            },
-            {
-              "value":false,
-              "label": "No"
-            }
-          ]
-
+          "value":false
         },
 
         {
           "id": "audio_buffer_size",
           "element": "select",
-          "doc":"This specifies the size of the audio buffer in kilobytes. The default is 2048, large enough for nearly 12 seconds of CD-quality audio.",
+          "doc":"This specifies the size of the audio buffer. The default is 2 MB, large enough for nearly 12 seconds of CD-quality audio.",
           "label": "Audio buffer size",
           "value":  {
             "value":8192,
@@ -77,23 +49,23 @@
           "options": [
             {
               "value":1024,
-              "label": "128"
+              "label": "128 KB"
             },
             {
               "value":2048,
-              "label": "2048"
+              "label": "2 MB"
             },
             {
               "value":4096,
-              "label": "4096"
+              "label": "4 MB"
             },
             {
               "value":8192,
-              "label": "8192"
+              "label": "8 MB"
             },
             {
               "value":12288,
-              "label": "12288"
+              "label": "12 MB"
             }
 
           ]
@@ -102,7 +74,7 @@
         {
           "id": "buffer_before_play",
           "element": "select",
-          "doc": "This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
+          "doc": "This specifies how much of the audio buffer should be filled before playing a track. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
           "label": "Buffer before play",
           "value":  {
             "value":"20%",
@@ -129,23 +101,10 @@
 
         }, {
           "id": "auto_update",
-          "element": "select",
-          "doc" : "This setting enables automatic update of music database when files in music directory are changed.",
+          "element": "switch",
+          "doc" : "This enables automatic updates of the music database when files in the music directory are changed.",
           "label": "Auto update",
-          "value":  {
-            "value":false,
-            "label": "Yes"
-          },
-          "options": [
-            {
-              "value":true,
-              "label": "Yes"
-            },
-            {
-              "value":false,
-              "label": "No"
-            }
-          ]
+          "value":true
 
         }
 
@@ -169,7 +128,7 @@
         {
           "id": "volumestart",
           "element": "select",
-          "doc" : "This setting provides a default volume that is set at startup.",
+          "doc" : "This is the default volume that is set at system startup.",
           "label": "Default Startup Volume",
           "value":  {
             "value":"disabled",
@@ -227,7 +186,7 @@
         {
           "id": "volumemax",
           "element": "select",
-          "doc" : "This setting provides a Maximum volume.",
+          "doc" : "This is the maximum volume of the system.",
           "label": "Max volume level",
           "value":  {
             "value":"100",
@@ -281,7 +240,7 @@
         {
           "id": "volumecurvemode",
           "element": "select",
-          "doc" : "This setting provides a curve mode.",
+          "doc" : "This is the volume curve used by the system, most DACs will use a logarithmic curve.",
           "label": "Volume curve mode",
           "value":  {
             "value":"logarithmic",
@@ -336,9 +295,6 @@
 
       ]
     }
-
-
-
 
   ]
 }
