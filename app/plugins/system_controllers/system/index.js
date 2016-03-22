@@ -34,7 +34,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 	if (uuid == undefined) {
 		console.log("No id defined. Creating one");
 		var uuid = require('node-uuid');
-		config.addConfigValue('uuid', 'string', uuid.v4());
+		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
 
 	self.deviceDetect();
@@ -89,7 +89,7 @@ ControllerSystem.prototype.setConf = function (varName, varValue) {
 
 	var defer = libQ.defer();
 
-	config.set(varName, varValue);
+	self.config.set(varName, varValue);
 	if (varName = 'player_name') {
 		var player_name = varValue;
 
@@ -142,8 +142,8 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 	var player_name = data['player_name'].split(" ").join("-");
 	var startup_sound = data['startup_sound'];
 
-	config.set('playerName', player_name);
-	config.set('startupSound', startup_sound);
+	self.config.set('playerName', player_name);
+	self.config.set('startupSound', startup_sound);
 
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
 	self.setHostname(player_name);
@@ -166,8 +166,8 @@ ControllerSystem.prototype.saveSoundQuality = function (data) {
 	var kernel_profile_value = data['kernel_profile'].value;
 	var kernel_profile_label = data['kernel_profile'].label;
 
-	config.set('kernelSettingValue', kernel_profile_value);
-	config.set('kernelSettingLabel', kernel_profile_label);
+	self.config.set('kernelSettingValue', kernel_profile_value);
+	self.config.set('kernelSettingLabel', kernel_profile_label);
 
 
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
@@ -361,17 +361,13 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 ControllerSystem.prototype.deviceCheck = function (data) {
 	var self = this;
 
-
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
-	config.loadFile(configFile);
-
 	var device = config.get('device');
 
 	if (device == undefined) {
 		self.logger.info ('Setting Device type: ' + data)
-		config.set('device', data);
+		self.config.set('device', data);
 	} else if (device != data) {
 		self.logger.info ('Device has changed, setting Device type: ' + data)
-		config.set('device', data);
+		self.config.set('device', data);
 	}
 }
