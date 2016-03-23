@@ -1,10 +1,8 @@
 { "devices":[
-  {"name":"Raspberry PI 3","data":[
+  {"name":"Raspberry PI 2/3","data":[
     {"id":"hifiberry-dacplus","name":"Hifiberry DAC Plus","overlay":"hifiberry-dacplus","mixer":"","modules":"","script":""},
-    {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","mixer":"","modules":"","script":""}
-  ]},
-  {"name":"Raspberry PI +","data":[
-    {"id":"hifiberry-dacplus","name":"Hifiberry DAC Plus","overlay":"hifiberry-dacplus","mixer":"","modules":"","script":""},
+    {"id":"hifiberry-amp","name":"Hifiberry Amp","overlay":"hifiberry-amp","mixer":"","modules":"","script":""},
+    {"id":"hifiberry-digi","name":"Hifiberry DIGI","overlay":"hifiberry-digi","mixer":"","modules":"","script":""},
     {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","mixer":"","modules":"","script":""}
   ]},
   {"name":"Raspberry PI","data":[
@@ -14,6 +12,6 @@
     {"id":"iqaudio-dac","name":"IQaudIO DAC","overlay":"iqaudio-dac","mixer":"","modules":"","script":""}
   ]},
   {"name":"Odroid C1+","data":[
-    {"id":"hifiberry-dacplus","name":"Hifiberry DAC Plus","overlay":"hifiberry-dacplus","mixer":"","modules":"","script":""}
+    {"id":"odroid-hifi-shield","name":"HiFi Shield","overlay":"","mixer":"","modules":"","script":""}
   ]}
   ]}
