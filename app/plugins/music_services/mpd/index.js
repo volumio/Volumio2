@@ -1472,22 +1472,21 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
+	var OutputDeviceNumber = data.output_device.value;
+
 	if (data.i2s){
+		var I2SNumber = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SNumber', data.i2sid.label);
 		if (i2sstatus.name != data.i2sid.label) {
 		self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+		OutputDeviceNumber = I2SNumber;
+			console.log('asdddddddddddddddddddddddddddddddddddddd '+I2SNumber)
 
 		var responseData = {
 			title: 'I2S DAC Activated',
 			message: data.i2sid.label+ ' has been activated, restart the system for changes to take effect',
 			size: 'lg',
 			buttons: [
-				{
-					name: 'Close',
-					class: 'btn btn-warning',
-					emit:'',
-					payload:''
-				},
 				{
 					name: 'Restart',
 					class: 'btn btn-info',
@@ -1502,17 +1501,12 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 	} else if (i2sstatus.enabled){
 		self.logger.info('Disabling I2S DAC: ');
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
+		OutputDeviceNumber = "0";
 		var responseData = {
 			title: 'I2S DAC Dectivated',
 			message: data.i2sid.label+ ' has been deactivated, restart the system for changes to take effect',
 			size: 'lg',
 			buttons: [
-				{
-					name: 'Close',
-					class: 'btn btn-warning',
-					emit:'',
-					payload:''
-				},
 				{
 					name: 'Restart',
 					class: 'btn btn-info',
@@ -1525,7 +1519,7 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 		self.commandRouter.broadcastMessage("openModal", responseData);
 	}
 
-	self.commandRouter.sharedVars.set('alsa.outputdevice', data.output_device.value);
+	self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {

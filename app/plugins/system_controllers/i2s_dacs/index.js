@@ -208,6 +208,29 @@ ControllerI2s.prototype.getI2sStatus = function () {
 	return status
 }
 
+ControllerI2s.prototype.getI2SNumber = function (data) {
+	var self = this;
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+	var number = '';
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+				if(dacdata.devices[num].data[i].name == data) {
+					var number = dacdata.devices[num].data[i].alsanum;
+				}
+
+			}
+		}
+	}
+
+	return number
+}
+
 ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var self = this;
 
@@ -220,11 +243,13 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 		{ var num = i;
 			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
 				if(dacdata.devices[num].data[i].name == data) {
-					var overlay = dacdata.devices[num].data[i].overlay
+					var overlay = dacdata.devices[num].data[i].overlay;
+					var num = dacdata.devices[num].data[i].alsanum;
 					self.writeI2SDAC(overlay);
 					this.config.set("i2s_enabled", true);
 					this.config.set("i2s_dac", data);
 					this.config.set("i2s_id", overlay);
+					self.commandRouter.sharedVars.set('alsa.outputdevice', num);
 				}
 
 			}
