@@ -1470,13 +1470,59 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 
 	var defer = libQ.defer();
 
+	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
+
 	if (data.i2s){
+		if (i2sstatus.name != data.i2sid.label) {
 		self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
 
-	} else {
+		var responseData = {
+			title: 'I2S DAC Activated',
+			message: data.i2sid.label+ ' has been activated, restart the system for changes to take effect',
+			size: 'lg',
+			buttons: [
+				{
+					name: 'Close',
+					class: 'btn btn-warning',
+					emit:'',
+					payload:''
+				},
+				{
+					name: 'Restart',
+					class: 'btn btn-info',
+					emit:'reboot',
+					payload:''
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
+		}
+	} else if (i2sstatus.enabled){
 		self.logger.info('Disabling I2S DAC: ');
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
+		var responseData = {
+			title: 'I2S DAC Dectivated',
+			message: data.i2sid.label+ ' has been deactivated, restart the system for changes to take effect',
+			size: 'lg',
+			buttons: [
+				{
+					name: 'Close',
+					class: 'btn btn-warning',
+					emit:'',
+					payload:''
+				},
+				{
+					name: 'Restart',
+					class: 'btn btn-info',
+					emit:'reboot',
+					payload:''
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
 	}
 
 	self.commandRouter.sharedVars.set('alsa.outputdevice', data.output_device.value);
