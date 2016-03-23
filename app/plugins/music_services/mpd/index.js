@@ -1474,6 +1474,9 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 		self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
 
+	} else {
+		self.logger.info('Disabling I2S DAC: ');
+		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
 	}
 
 	self.commandRouter.sharedVars.set('alsa.outputdevice', data.output_device.value);

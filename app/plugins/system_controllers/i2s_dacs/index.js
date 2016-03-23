@@ -235,9 +235,25 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
 
-	var netstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL +  'dtoverlay='+data;
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL +  'dtoverlay='+data;
 
-	fs.writeFile('/boot/config.txt', netstring, function (err) {
+	fs.writeFile('/boot/config.txt', bootstring, function (err) {
+		if (err) {
+			self.logger.error('Cannot write config.txt file: '+error);
+		}
+
+	});
+
+}
+
+ControllerI2s.prototype.disableI2SDAC = function () {
+	var self = this;
+
+	this.config.set("i2s_enabled", false);
+
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1';
+
+	fs.writeFile('/boot/config.txt', bootstring, function (err) {
 		if (err) {
 			self.logger.error('Cannot write config.txt file: '+error);
 		}
