@@ -450,6 +450,7 @@ ControllerSpop.prototype.explodeUri = function(uri) {
                 artist: artist,
                 album: album,
                 type: 'track',
+                duration: data.body.duration_ms/1000,
                 tracknumber: data.body.track_number,
                 albumart: albumart
             });

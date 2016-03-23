@@ -586,10 +586,10 @@ CoreStateMachine.prototype.seek = function (position) {
     
         var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
     
-        this.currentSeek = position;
-        this.startPlaybackTimer(position);
+        this.currentSeek = position*1000;
+        this.startPlaybackTimer(position*1000);
     
-        thisPlugin.seek(position);
+        thisPlugin.seek(position*1000);
 
         this.pushState().fail(this.pushError.bind(this));
     }

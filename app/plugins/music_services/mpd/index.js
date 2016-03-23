@@ -1703,7 +1703,8 @@ ControllerMpd.prototype.seek = function(position) {
     var command = 'seek ';
     var cmd = libMpd.cmd;
 
-        self.clientMpd.sendCommand(cmd(command, ['0',position]), function (err, msg) {
+
+        self.clientMpd.sendCommand(cmd(command, ['0',position/1000]), function (err, msg) {
             if (msg) {
                 self.logger.info(msg);
             }
