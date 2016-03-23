@@ -326,23 +326,9 @@ ControllerSpop.prototype.stop = function() {
 	return self.sendSpopCommand('stop', []);
 };
 
-// Spop pause
-ControllerSpop.prototype.pause = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pause');
 
-	// TODO don't send 'toggle' if already paused
-	return self.sendSpopCommand('toggle', []);
-};
 
-// Spop resume
-ControllerSpop.prototype.resume = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::resume');
 
-	// TODO don't send 'toggle' if already playing
-	return self.sendSpopCommand('toggle', []);
-};
 
 
 
@@ -623,4 +609,21 @@ ControllerSpop.prototype.sendSpopCommand = function(sCommand, arrayParameters) {
 
     // Return a promise for the command response
     return spopResponse;
+};
+
+// Spop pause
+ControllerSpop.prototype.pause = function() {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pause');
+
+    return self.sendSpopCommand('toggle', []);
+};
+
+// Spop resume
+ControllerSpop.prototype.resume = function() {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::resume');
+
+    // TODO don't send 'toggle' if already playing
+    return self.sendSpopCommand('toggle', []);
 };

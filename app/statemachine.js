@@ -27,6 +27,7 @@ CoreStateMachine.prototype.getState = function () {
 
 
     var trackBlock = this.getTrack(this.currentPosition);
+    this.commandRouter.logger.info(JSON.stringify(trackBlock));
     if(trackBlock===undefined)
     {
         return {
@@ -78,10 +79,7 @@ CoreStateMachine.prototype.getQueue = function () {
 };
 
 // Remove one item from the queue
-CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
-	return this.playQueue.removeQueueItem(nIndex);
-};
+
 
 // Add array of items to queue
 CoreStateMachine.prototype.addQueueItems = function (arrayItems) {
@@ -97,108 +95,13 @@ CoreStateMachine.prototype.clearQueue = function () {
 
 
 
-// Volumio Next Command
-// TODO FIX WITH PREVIOUS MECHANISM, NOW THIS IS ONLY FOR MPD
-CoreStateMachine.prototype.next = function (promisedResponse) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::next');
-
-	if (this.currentStatus === 'stop') {
-		// Stop -> Next transition
-		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
-			this.currentPosition++;
-			this.updateTrackBlock();
-			return this.pushState();
-		}
-
-	} else if (this.currentStatus === 'play') {
-		// Play -> Next transition
-		/*if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
-		 this.currentPosition++;
-		 this.currentSeek = 0;
-		 return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
-		 }*/
-		this.commandRouter.executeOnPlugin('music_service', 'mpd', 'next');
-
-	} else if (this.currentStatus === 'pause') {
-		// Pause -> Next transitiom
-		if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
-			this.currentPosition++;
-		}
-		this.currentStatus = 'play';
-		this.currentSeek = 0;
-		this.updateTrackBlock();
-		return this.serviceClearAddPlay();
-	}
-};
-
-// Volumio Previous Command
-CoreStateMachine.prototype.previous = function (promisedResponse) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::previous');
-
-	if (this.currentStatus === 'stop') {
-		// Stop -> Previous transition
-		if (this.currentPosition > 0) {
-			this.currentPosition--;
-			this.updateTrackBlock();
-			return this.pushState();
-		}
-
-	} else if (this.currentStatus === 'play') {
-		/*
-		 // Play -> Previous transition
-		 if (this.currentPosition > 0) {
-		 this.currentPosition--;
-		 this.currentSeek = 0;
-		 this.updateTrackBlock()
-
-		 return this.serviceClearAddPlay());
-		 }*/
-		this.commandRouter.executeOnPlugin('music_service', 'mpd', 'previous')
 
 
-	} else if (this.currentStatus === 'pause') {
-		// Pause -> Previous transition
-		if (this.currentPosition > 0) {
-			this.currentPosition--;
-		}
-		this.currentStatus = 'play';
-		this.currentSeek = 0;
-		this.updateTrackBlock();
-		return this.serviceClearAddPlay();
-	}
-};
 
-// Volumio Stop Command
-CoreStateMachine.prototype.stop = function (promisedResponse) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
 
-	if (this.currentStatus === 'play') {
-		// Play -> Stop transition
-		this.currentStatus = 'stop';
-		this.currentSeek = 0;
-		this.updateTrackBlock();
-		return this.serviceStop();
 
-	} else if (this.currentStatus === 'pause') {
-		// Pause -> Stop transition
-		this.currentStatus = 'stop';
-		this.currentSeek = 0;
-		this.updateTrackBlock();
-		return this.serviceStop();
-	}
-};
 
-// Volumio Pause Command
-CoreStateMachine.prototype.pause = function (promisedResponse) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pause');
 
-	if (this.currentStatus === 'play') {
-		// Play -> Pause transition
-		this.currentStatus = 'pause';
-
-		return this.servicePause();
-	}
-};
 
 // Internal methods ---------------------------------------------------------------------------
 // These are 'this' aware, and may or may not return a promise
@@ -216,19 +119,9 @@ CoreStateMachine.prototype.serviceClearAddPlay = function () {
 	return this.commandRouter.serviceClearAddPlayTracks(trackBlock.uris, trackBlock.service);
 };
 
-// Stop the current track block playback
-CoreStateMachine.prototype.serviceStop = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceStop');
-	var trackBlock = this.currentTrackBlock;
-	return this.commandRouter.serviceStop(trackBlock.service);
-};
 
-// Pause the current track block playback
-CoreStateMachine.prototype.servicePause = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::servicePause');
-	var trackBlock = this.currentTrackBlock;
-	return this.commandRouter.servicePause(trackBlock.service);
-};
+
+
 
 // Resume the current track block playback
 CoreStateMachine.prototype.serviceResume = function (trackBlock) {
@@ -382,50 +275,12 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
     if (stateService.status === 'play') {
 		if (this.currentStatus === 'play') {
-			// We are waiting for playback to begin, and service has just begun playing
-			// Or we are currently playing, and the playback service has announced an updated play state (next track, etc)
-			/*this.currentPosition = stateService.position;
-			this.currentSeek = stateService.seek;
-			this.currentDuration = stateService.duration;
-			this.currentTitle = stateService.title;
-			this.currentArtist = stateService.artist;
-			this.currentAlbum = stateService.album;
-			this.currentAlbumArt = stateService.albumart;
-			this.currentUri = this.uri;
-			this.currentTrackType = stateService.trackType;
-			this.currentSampleRate = stateService.samplerate;
-			this.currentBitDepth = stateService.bitdepth;
-			this.currentChannels = stateService.channels;
-			this.currentRandom = stateService.random;
-			this.currentRepeat = stateService.repeat;
-
 			this.pushState().fail(this.pushError.bind(this));
-
-			return this.startPlaybackTimer(this.currentSeek);*/
-            this.pushState().fail(this.pushError.bind(this));
             this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'No code');
 
         }
 		else if (this.currentStatus === 'stop') {
-			/*this.currentPosition = stateService.position;
-			this.currentSeek = stateService.seek;
-			this.currentDuration = stateService.duration;
-			this.currentTitle = null;
-			this.currentArtist = null;
-			this.currentAlbum = null;
-			this.currentAlbumArt = '/albumart';
-			this.currentUri = stateService.uri;
-			this.currentSampleRate = null;
-			this.currentBitDepth = null;
-			this.currentChannels = null;
-			this.currentRandom = stateService.random;
-			this.currentRepeat = stateService.repeat;
-
-			this.pushState().fail(this.pushError.bind(this));
-
-			return this.startPlaybackTimer(this.currentSeek)*/
-
-            this.currentStatus = 'play';
+			this.currentStatus = 'play';
 
             if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
@@ -439,6 +294,10 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                 this.pushState().fail(this.pushError.bind(this));
             }
 		}
+        else if (this.currentStatus === 'pause') {
+            this.currentStatus='play';
+            this.pushState().fail(this.pushError.bind(this));
+        }
 
 	} else if (stateService.status === 'stop') {
 		if (this.currentStatus === 'play') {
@@ -491,7 +350,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		}
 	} else if (stateService.status === 'pause') {
 		if (this.currentStatus === 'pause') {
-			// Client has requested pause, and service has just paused
 			this.pushState().fail(this.pushError.bind(this));
 
 			return this.stopPlaybackTimer();
@@ -573,6 +431,10 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
         this.currentSeek=0;
         thisPlugin.clearAddPlayTrack(trackBlock);
     }
+    else  if(this.currentStatus==='pause')
+    {
+        thisPlugin.resume();
+    }
 };
 
 // Volumio Play Command
@@ -593,4 +455,133 @@ CoreStateMachine.prototype.seek = function (position) {
 
         this.pushState().fail(this.pushError.bind(this));
     }
+};
+
+
+CoreStateMachine.prototype.next = function (promisedResponse) {
+    var self=this;
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::next');
+
+    if (this.currentStatus === 'stop') {
+        // Stop -> Next transition
+        if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
+            this.currentPosition++;
+            this.currentSeek = 0;
+
+            return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+        }
+
+    } else if (this.currentStatus === 'play') {
+        // Play -> Next transition
+        if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
+
+            this.stop();
+            setTimeout(function() {
+                self.currentPosition++;
+                self.play();
+            },500);
+        }
+    } else if (this.currentStatus === 'pause') {
+        // Pause -> Next transitiom
+        if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
+            this.currentPosition++;
+        }
+        this.play();
+        this.updateTrackBlock();
+        return this.serviceClearAddPlay();
+    }
+};
+
+
+// Volumio Pause Command
+CoreStateMachine.prototype.pause = function (promisedResponse) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pause');
+
+    if (this.currentStatus === 'play') {
+        this.currentStatus = 'pause';
+
+        return this.servicePause();
+    }
+};
+
+// Pause the current track block playback
+CoreStateMachine.prototype.servicePause = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::servicePause');
+    var trackBlock = this.getTrack(this.currentPosition);
+
+    return this.commandRouter.servicePause(trackBlock.service);
+};
+
+// Volumio Stop Command
+CoreStateMachine.prototype.stop = function (promisedResponse) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
+
+    if (this.currentStatus === 'play') {
+        // Play -> Stop transition
+        this.currentStatus = 'stop';
+        this.currentSeek = 0;
+        this.updateTrackBlock();
+        return this.serviceStop();
+
+    } else if (this.currentStatus === 'pause') {
+        // Pause -> Stop transition
+        this.currentStatus = 'stop';
+        this.currentSeek = 0;
+        this.updateTrackBlock();
+        return this.serviceStop();
+    }
+};
+
+// Stop the current track block playback
+CoreStateMachine.prototype.serviceStop = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceStop');
+    var trackBlock = this.getTrack(this.currentPosition);
+    return this.commandRouter.serviceStop(trackBlock.service);
+};
+
+
+// Volumio Previous Command
+CoreStateMachine.prototype.previous = function (promisedResponse) {
+    var self=this;
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::previous');
+
+    if (this.currentStatus === 'stop') {
+        // Stop -> Previous transition
+        if (this.currentPosition > 0) {
+            this.currentPosition--;
+            this.updateTrackBlock();
+            return this.pushState();
+        }
+
+    } else if (this.currentStatus === 'play') {
+         if (this.currentPosition > 0) {
+            this.stop();
+             setTimeout(function()
+             {
+                 self.currentPosition--;
+                 self.play();
+             },500);
+
+         }
+    } else if (this.currentStatus === 'pause') {
+        // Pause -> Previous transition
+        if (this.currentPosition > 0) {
+            this.currentPosition--;
+        }
+        this.currentSeek = 0;
+        this.updateTrackBlock();
+        return this.serviceClearAddPlay();
+    }
+};
+
+CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
+    
+    if(this.currentPosition==nIndex)
+    {
+        this.next();
+        this.currentPosition--;
+    }
+        
+    return this.playQueue.removeQueueItem(nIndex);
 };

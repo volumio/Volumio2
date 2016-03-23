@@ -44,17 +44,9 @@ ControllerMpd.prototype.remove = function (position) {
 	return this.sendMpdCommand('delete', [position]);
 };
 
-// MPD stop
-ControllerMpd.prototype.stop = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::stop');
-	return this.sendMpdCommand('stop', []);
-};
 
-// MPD pause
-ControllerMpd.prototype.pause = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pause');
-	return this.sendMpdCommand('pause', []);
-};
+
+
 
 //MPD Next
 ControllerMpd.prototype.next = function () {
@@ -89,11 +81,7 @@ ControllerMpd.prototype.repeat = function (repeatcmd) {
 };
 
 
-// MPD resume
-ControllerMpd.prototype.resume = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::resume');
-	return this.sendMpdCommand('play', []);
-};
+
 
 // MPD clear
 ControllerMpd.prototype.clear = function () {
@@ -1716,3 +1704,22 @@ ControllerMpd.prototype.seek = function(position) {
     return defer.promise;
 };
 
+
+// MPD pause
+ControllerMpd.prototype.pause = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pause');
+    return this.sendMpdCommand('pause', []);
+};
+
+// MPD resume
+ControllerMpd.prototype.resume = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::resume');
+    return this.sendMpdCommand('play', []);
+};
+
+
+// MPD stop
+ControllerMpd.prototype.stop = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::stop');
+    return this.sendMpdCommand('stop', []);
+};
