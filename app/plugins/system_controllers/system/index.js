@@ -36,7 +36,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		var uuid = require('node-uuid');
 		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
-
+	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 	self.deviceDetect();
 };
 
@@ -65,8 +65,8 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',config.get('playerName'));
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',config.get('startupSound'));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName'));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
 	return uiconf;
 };
@@ -81,7 +81,7 @@ ControllerSystem.prototype.setUIConfig = function (data) {
 ControllerSystem.prototype.getConf = function (varName) {
 	var self = this;
 
-	return config.get(varName);
+	return self.config.get(varName);
 };
 
 ControllerSystem.prototype.setConf = function (varName, varValue) {

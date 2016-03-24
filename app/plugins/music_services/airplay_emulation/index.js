@@ -16,6 +16,7 @@ function AirPlayInterface(context) {
 
 AirPlayInterface.prototype.onVolumioStart = function () {
 	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
+	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 	this.startShairportSync();
 };
 
@@ -93,4 +94,11 @@ function startAirPlay(self) {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
 		}
 	});
+}
+
+AirPlayInterface.prototype.outputDeviceCallback = function () {
+	var self = this;
+
+	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting Shairport Sync');
+	self.startShairportSync()
 }
