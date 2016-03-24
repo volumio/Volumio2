@@ -1587,7 +1587,16 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri) {
 
 ControllerMpd.prototype.getMixerControls = function () {
 	var self = this;
+
 	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getMixerControls', '1');
-	console.log(cards)
+
+	cards.then(function (data) {
+			console.log(data);
+		})
+		.fail(function () {
+			console.log(data);
+		});
+
+	//console.log(cards)
 
 };

@@ -1,0 +1,7 @@
+{
+  "cards": [
+    {"name": "ALSA", "prettyname": "Audio Jack", "defaultmixer": "PCM","type":"integrated"},
+    {"name": "x20", "prettyname": "XMOS USB DAC", "defaultmixer": "XMOS Clock Selector 0","type":"usb"},
+    {"name": "sndrpihifiberry", "prettyname": "Hifiberry", "defaultmixer": "PCM","type":"i2S"}
+  ]
+}

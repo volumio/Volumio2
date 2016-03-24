@@ -66,12 +66,14 @@ ControllerAlsa.prototype.getConfigurationFiles = function () {
 	return ['config.json'];
 };
 
+
 ControllerAlsa.prototype.getAlsaCards = function () {
 	var cards = [];
 
 	var soundCardDir = '/proc/asound/';
 	var idFile = '/id';
 	var regex = /card(\d+)/;
+	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interfaces/alsa_controller/cards.json'),  'utf8', {throws: false});
 
 	var soundFiles = fs.readdirSync(soundCardDir);
 
@@ -82,21 +84,29 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 		if (matches && fs.existsSync(idFileName)) {
 			var id = matches[1];
 			var content = fs.readFileSync(idFileName);
-			var name = content.toString().trim();
-			cards.push({id: id, name: name});
+			var rawname = content.toString().trim();
+			var name = rawname;
+			for (var n = 0; n < carddata.cards.length; n++){
+				var cardname = carddata.cards[n].name.toString().trim();
+				if (cardname === rawname){
+					 var name = carddata.cards[n].prettyname;
+				}
+			} cards.push({id: id, name: name});
+
 		}
 	}
 
 	return cards;
 };
 
+
 ControllerAlsa.prototype.getMixerControls = function (device) {
 	var self = this;
 
 	var defer = libQ.defer();
-	var mixers = []
+	var mixers = [];
 	var cmd = 'amixer -c '+device+' scontrols';
-
+	var dirbleDefer = libQ.defer();
 	exec(cmd, function(err, stdout, stderr) {
 		if (err) {
 			self.logger.info('Cannot execute amixer ' + err);
@@ -111,10 +121,11 @@ ControllerAlsa.prototype.getMixerControls = function (device) {
 			var mixer = mixerraw.replace(",", " ");
 				mixers.push(mixer);
 				}
-			}console.log(mixers);
-		}
+			}
+		} defer.resolve(mixers);
 	});
-	
+
+
 	return defer.promise;
 
 }
