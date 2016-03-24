@@ -2,6 +2,9 @@
 
 var io = require('socket.io-client');
 var fs = require('fs-extra');
+var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
+var libQ = require('kew');
 
 // Define the ControllerMpd class
 module.exports = ControllerAlsa;
@@ -86,3 +89,32 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 
 	return cards;
 };
+
+ControllerAlsa.prototype.getMixerControls = function (device) {
+	var self = this;
+
+	var defer = libQ.defer();
+	var mixers = []
+	var cmd = 'amixer -c '+device+' scontrols';
+
+	exec(cmd, function(err, stdout, stderr) {
+		if (err) {
+			self.logger.info('Cannot execute amixer ' + err);
+		} else {
+			var array = stdout.toString().split("\n");
+			for (i in array) {
+			var line = array[i].split("'");
+			var control = line[1];
+			var number = line[2];
+			var mixerraw = control + number;
+				if (control && number){
+			var mixer = mixerraw.replace(",", " ");
+				mixers.push(mixer);
+				}
+			}console.log(mixers);
+		}
+	});
+	
+	return defer.promise;
+
+}

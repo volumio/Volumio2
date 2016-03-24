@@ -1480,7 +1480,6 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 		self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
 		OutputDeviceNumber = I2SNumber;
-			console.log('asdddddddddddddddddddddddddddddddddddddd '+I2SNumber)
 
 		var responseData = {
 			title: 'I2S DAC Activated',
@@ -1586,4 +1585,9 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri) {
 };
 
 
+ControllerMpd.prototype.getMixerControls = function () {
+	var self = this;
+	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getMixerControls', '1');
+	console.log(cards)
 
+};
