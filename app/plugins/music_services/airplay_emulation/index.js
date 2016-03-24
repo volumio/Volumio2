@@ -2,6 +2,7 @@
 
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var config = new (require('v-conf'))();
 
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;

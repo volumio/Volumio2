@@ -73,8 +73,7 @@
           "gapless_mp3_playback",
           "volume_normalization",
           "audio_buffer_size",
-          "buffer_before_play",
-          "auto_update"
+          "buffer_before_play"
         ]
       },
       "content": [
@@ -157,15 +156,7 @@
             }
           ]
 
-        }, {
-          "id": "auto_update",
-          "element": "switch",
-          "doc" : "This enables automatic updates of the music database when files in the music directory are changed.",
-          "label": "Auto update",
-          "value":true
-
         }
-
       ]
     },
     {
