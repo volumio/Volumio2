@@ -6,6 +6,7 @@ var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var libQ = require('kew');
 var libFsExtra = require('fs-extra');
+var spawn = require('child_process').spawn;
 
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
@@ -43,12 +44,18 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	});
 	}
 
-	if (this.config.has('outputdevice') == false)
+	if (this.config.has('outputdevice') == false) {
 		this.config.addConfigValue('outputdevice', 'string', '0');
+	}
+	if (this.config.has('mixer') == false) {
+		var value = this.config.get('outputdevice');
+		this.setDefaultMixer(value)
+	}
 
 	this.logger.debug("Creating shared var alsa.outputdevice");
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+
 };
 
 
@@ -113,6 +120,49 @@ ControllerAlsa.prototype.getUIConfig = function () {
 		}
 	}
 
+	var mixers = self.getMixerControls(value);
+	var activemixer = self.config.get('mixer');
+
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].id', 'mixer');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
+
+	console.log(mixers)
+	if (typeof mixers != "undefined" && mixers != null && mixers.length > 0) {
+		self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
+		if (activemixer){
+		self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+			value: activemixer,
+			label: activemixer
+		});
+		} else {
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+				value: mixers[0],
+				label: mixers[0]
+			});
+		}
+
+	for(var i in mixers) {
+		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+			value: mixers[i],
+			label: mixers[i]
+		});
+	}
+
+	} else {
+		self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+			value: "no",
+			label: "No Hardware Mixer Available"
+		});
+		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+			value: "no",
+			label: "No Hardware Mixer Available"
+		});
+
+	}
+
+
+
 	value = self.getAdditionalConf('music_service', 'mpd', 'gapless_mp3_playback');
 	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
@@ -130,16 +180,16 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[3].options'), value));
 
 	value = self.config.get('volumestart');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
-
-	value = self.config.get('volumemax');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
 
-	value = self.config.get('volumecurvemode');
+	value = self.config.get('volumemax');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
+
+	value = self.config.get('volumecurvemode');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
 	return uiconf;
 };
@@ -199,6 +249,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 	}
 
 	self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
+	self.setDefaultMixer(OutputDeviceNumber);
 
 
 	return defer.promise;
@@ -212,8 +263,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
-	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value
-	});
+	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
+	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 
 	self.logger.info('Volume configurations have been set');
 
@@ -305,33 +356,73 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 	return cards;
 };
 
+ControllerAlsa.prototype.getMixerControls  = function (device) {
 
-ControllerAlsa.prototype.getMixerControls = function (device) {
+	var mixers = [];
+	try {
+	var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' }).toString().split("\n");
+
+	for (i in array) {
+		var line = array[i].split("'");
+		var control = line[1];
+		//var number = line[2];
+		var mixerraw = control;
+		if (control){
+			var mixer = mixerraw.replace(",", " ");
+			mixers.push(mixer);
+		}
+	}
+	} catch (e) {}
+	return mixers
+}
+
+ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var self = this;
 
-	var defer = libQ.defer();
 	var mixers = [];
-	var cmd = 'amixer -c '+device+' scontrols';
-	var dirbleDefer = libQ.defer();
-	exec(cmd, function(err, stdout, stderr) {
-		if (err) {
-			self.logger.info('Cannot execute amixer ' + err);
-		} else {
-			var array = stdout.toString().split("\n");
-			for (i in array) {
-			var line = array[i].split("'");
-			var control = line[1];
-			var number = line[2];
-			var mixerraw = control + number;
-				if (control && number){
-			var mixer = mixerraw.replace(",", " ");
-				mixers.push(mixer);
-				}
-			}
-		} defer.resolve(mixers);
-	});
+	var currentcardname = '';
+	var defaultmixer = '';
+	var match = '';
+	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interfaces/alsa_controller/cards.json'),  'utf8', {throws: false});
+	var cards = self.getAlsaCards();
 
 
-	return defer.promise;
+	for (var i in cards) {
+		var devnum = device.toString();
+		if ( devnum == cards[i].id) {
+			currentcardname = cards[i].name;
+		}
+	}
+
+	for (var n = 0; n < carddata.cards.length; n++){
+		var cardname = carddata.cards[n].prettyname.toString().trim();
+
+		if (cardname == currentcardname){
+			var defaultmixer = carddata.cards[n].defaultmixer;
+			self.logger.info('Find match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+		}
+	}
+	if (defaultmixer) {
+
+	} else {
+	try {
+		var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' }).toString().split("\n");
+
+		var line = array[0].split("'");
+		var control = line[1];
+		//var number = line[2];
+		var mixerraw = control;
+		if (control){
+			var defaultmixer = mixerraw.replace(",", " ");
+			self.logger.info('Setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+		}
+
+	} catch (e) {}
+	}
+	if (this.config.has('mixer') == false) {
+		return this.config.addConfigValue('mixer', 'string', defaultmixer);
+	} else {
+		return self.setConfigParam({key: 'mixer', value: defaultmixer});
+	}
 
 }

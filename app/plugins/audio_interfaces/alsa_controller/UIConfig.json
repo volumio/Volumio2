@@ -168,12 +168,27 @@
       "saveButton": {
         "label": "Save",
         "data": [
+          "mixer",
           "volumestart",
           "volumemax",
           "volumecurvemode"
         ]
       },
       "content": [
+        {
+          "id": "",
+          "element": "select",
+          "doc" : "Mixer Selector ",
+          "label": "",
+          "value":  {
+            "value":"",
+            "label": ""
+          },
+          "options": [
+           
+          ]
+
+        },
         {
           "id": "volumestart",
           "element": "select",
