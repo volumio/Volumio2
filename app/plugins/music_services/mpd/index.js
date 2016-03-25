@@ -730,9 +730,11 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 		if (err) {
 			return console.log(err);
 		}
-		var conf1 = data.replace("${gapless_mp3_playback}", self.config.get('gapless_mp3_playback'));
+
+
+		var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
 		var conf2 = conf1.replace("${device}", self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice'));
-		var conf3 = conf2.replace("${volume_normalization}", self.config.get('volume_normalization'));
+		var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
 		var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
 		var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
 
@@ -744,10 +746,23 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 		callback();
 	}
 	catch (err) {
-		
+
 		callback(err);
 	}
 
+};
+
+ControllerMpd.prototype.checkTrue = function (config) {
+	var self = this;
+	var out = "no";
+	var value = self.config.get(config);
+
+	if(value){
+		out = "yes";
+		return out
+	} else {
+		return out
+	}
 };
 
 

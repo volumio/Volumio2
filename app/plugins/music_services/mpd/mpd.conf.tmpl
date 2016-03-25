@@ -19,7 +19,7 @@ bind_to_address		"any"
 gapless_mp3_playback			"${gapless_mp3_playback}"
 #save_absolute_paths_in_playlists	"no"
 #metadata_to_use	"artist,album,title,track,name,genre,date,composer,performer,disc"
-auto_update    "true"
+auto_update    "yes"
 #auto_update_depth "3"
 ###############################################################################
 # Symbolic link behavior ######################################################
@@ -42,6 +42,16 @@ audio_output {
 		name		"alsa"
 		device		"hw:${device},0"
 }
+
+audio_output {
+    type            "fifo"
+    enabled         "no"
+    name            "multiroom"
+    path            "/tmp/snapfifo"
+    format          "44100:16:2"
+}
+
+
 samplerate_converter "soxr very high"
 #replaygain			"album"
 #replaygain_preamp		"0"
