@@ -5,7 +5,7 @@ var spawn = require('child_process').spawn;
 var Volume = {};
 Volume.vol = null;
 Volume.mute = null;
-var math = require('mathjs');
+
 
 var device = '';
 var mixer = '';
@@ -48,7 +48,7 @@ function CoreVolumeController(commandRouter) {
 		});
 
 	};
-	
+
 	var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
 	var getInfo = function (cb) {
 		if (volumecurve === 'logarithmic'){
@@ -175,7 +175,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 				self.getVolume(function (err, vol) {
 
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
-					Volume.vol = Math.round(math.log(VolumeInteger, 100) * 100);
+					Volume.vol = VolumeInteger;
 					Volume.mute = false;
 					self.commandRouter.volumioupdatevolume(Volume);
 				});
@@ -186,7 +186,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			self.setMuted(false, function (err) {
 				self.getVolume(function (err, vol) {
 					self.setVolume(vol + 1, function (err) {
-						Volume.vol = Math.round(math.log(VolumeInteger, 100) * 100);
+						Volume.vol = VolumeInteger
 						Volume.mute = false;
 						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
 						self.commandRouter.volumioupdatevolume(Volume);
@@ -200,7 +200,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			this.getVolume(function (err, vol) {
 				self.setVolume(vol - 1, function (err) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-					Volume.vol = Math.round(math.log(VolumeInteger, 100) * 100);
+					Volume.vol = VolumeInteger
 					Volume.mute = false;
 					self.commandRouter.volumioupdatevolume(Volume);
 				});
@@ -230,7 +230,7 @@ CoreVolumeController.prototype.retrievevolume = function () {
 		self.getMuted(function (err, mute) {
 			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController:: Volume=' + vol + ' Mute =' + mute);
 			//Log Volume Control
-			Volume.vol = Math.round(Math.pow(100, (vol / 100)));
+			Volume.vol = vol;
 			Volume.mute = mute;
 			return libQ.resolve(Volume)
 				.then(function (Volume) {
