@@ -139,7 +139,9 @@ CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
 
 CoreCommandRouter.prototype.volumioUpdateVolumeSettings = function (vol) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateVolumeSettings');
+	if (this.volumeControl){
 	return this.volumeControl.updateVolumeSettings(vol);
+	} 
 };
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
