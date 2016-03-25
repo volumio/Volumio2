@@ -37,7 +37,9 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		config.addConfigValue('uuid', 'string', uuid.v4());
 	}
 
+
 	self.deviceDetect();
+	self.checkTestSystem();
 };
 
 ControllerSystem.prototype.onStop = function () {
@@ -306,6 +308,16 @@ ControllerSystem.prototype.setTestSystem = function (data) {
 	}
 };
 
+ControllerSystem.prototype.checkTestSystem = function () {
+	var self = this;
+
+	fs.exists('/data/test', function (exists) {
+		self.logger.info('------------ TEST ENVIRONMENT DETECTED ---------------');
+		self.StartDebugConsole();
+	});
+
+}
+
 
 ControllerSystem.prototype.sendBugReport = function (message) {
 	for (var key in message) {
@@ -328,6 +340,7 @@ ControllerSystem.prototype.deleteUserData = function () {
 
 	});
 };
+
 
 ControllerSystem.prototype.deviceDetect = function (data) {
 	var self = this;
@@ -375,3 +388,27 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 		config.set('device', data);
 	}
 }
+
+ControllerSystem.prototype.StartDebugConsole = function () {
+	var self = this;
+		// Starts a debug telnet interface on port 2023 
+		fs.writeFile('/tmp/logtail', ' ', function (err) {
+			if (err) {
+				self.logger.info('Cannot write logtail file' + err)
+			}
+
+			exec('/usr/local/bin/node '+__dirname+'/telnetServer.js ',
+				function (error, stdout, stderr) {
+
+					if (error !== null) {
+						self.logger.info('Cannot Start Telnet Log Server: '+error);
+					}
+					else self.logger.info('Telnet Log Server Started');
+
+				});
+
+		});
+
+
+};
+>>>>>>> aae08b987e2b66a17073a42ae1b16c2f556dd8fd
