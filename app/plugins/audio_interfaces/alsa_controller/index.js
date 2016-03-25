@@ -363,18 +363,15 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 //TODO: FINISH THIS PARSING
 	var mixers = [];
 	try {
-	var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' });
-	var arraysplit = array.split("\n")
-	console.log(array);
-		console.log(arraysplit)
-	for (i in array) {
-		console.log(array[i])
-		var line = array[i].split(",");
-		console.log(line);
-		var control = line[1];
+	var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' })
+		var line = array.toString().split("\n");
+
+	for (var i in line) {
+		console.log(line[i])
+		var lineraw = line[i].split("'")
+		var control = lineraw[1];
 		//var number = line[2];
 		var mixerraw = control;
-		console.log('---------ASDASDASDASDASDASDASDASDASDASD'+mixerraw)
 		if (mixerraw){
 			var mixer = mixerraw.replace(",", " ");
 			mixers.push(mixer);
@@ -414,11 +411,11 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 	} else {
 	try {
-		var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' }).toString().split("\n");
-
-		var line = array[0].split("'");
-		var control = line[1];
-		//var number = line[2];
+		var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' })
+		var line = array.toString().split("\n");
+		var lineraw = line[0].split("'")
+		var control = lineraw[1];
+		var mixerraw = control;
 		var mixerraw = control;
 		if (control){
 			var defaultmixer = mixerraw.replace(",", " ");
