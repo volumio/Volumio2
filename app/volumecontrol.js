@@ -7,6 +7,11 @@ Volume.vol = null;
 Volume.mute = null;
 var math = require('mathjs');
 
+var device = '';
+var mixer = '';
+var maxvolume = '';
+var volumecurve = '';
+
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
@@ -14,6 +19,17 @@ function CoreVolumeController(commandRouter) {
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
+
+
+	device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
+	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
+	mixer = '"'+mixerdev+'"';
+	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
+	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
+
+
+	console.log(device);
+	console.log(mixer);
 
 	var amixer = function (args, cb) {
 
@@ -59,11 +75,7 @@ function CoreVolumeController(commandRouter) {
 
 	var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
 	var getInfo = function (cb) {
-		defaultDevice(function (err, dev) {
-			if (err) {
-				cb(err);
-			} else {
-				amixer(['get', dev], function (err, data) {
+				amixer(['get', '-c', device , mixer], function (err, data) {
 					if (err) {
 						cb(err);
 					} else {
@@ -78,11 +90,11 @@ function CoreVolumeController(commandRouter) {
 						}
 					}
 				});
-			}
-		});
 	};
 
 	self.getVolume = function (cb) {
+		console.log('------------------------------------------'+device);
+		console.log('------------------------------------------'+mixer);
 		getInfo(function (err, obj) {
 			if (err) {
 				cb(err);
@@ -93,15 +105,10 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setVolume = function (val, cb) {
-		defaultDevice(function (err, dev) {
-			if (err) {
-				cb(err);
-			} else {
-				amixer(['set', dev, val + '%'], function (err) {
+		console.log('------------------------------------------'+mixer);
+				amixer(['set', '-c', device, mixer , val + '%'], function (err) {
 					cb(err);
 				});
-			}
-		});
 	};
 
 	self.getMuted = function (cb) {
@@ -115,11 +122,26 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setMuted = function (val, cb) {
-		amixer(['set', 'PCM', (val ? 'mute' : 'unmute')], function (err) {
+		amixer(['set', '-c', device, mixer , (val ? 'mute' : 'unmute')], function (err) {
 			cb(err);
 		});
 	};
 }
+
+
+CoreVolumeController.prototype.updateVolumeSettings = function (data) {
+	var self = this;
+
+	console.log(data);
+	console.log(data.mixer)
+
+	device = data.device;
+	mixer = '"'+data.mixer+'"';
+	maxvolume = data.maxvolume;
+	volumecurve = data.volumecurve;
+}
+
+
 // Public methods -----------------------------------------------------------------------------------
 CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 	var self = this;
@@ -217,3 +239,4 @@ CoreVolumeController.prototype.retrievevolume = function () {
 		});
 	});
 };
+

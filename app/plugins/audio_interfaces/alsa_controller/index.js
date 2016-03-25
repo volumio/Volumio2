@@ -46,10 +46,12 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	if (this.config.has('outputdevice') == false) {
 		this.config.addConfigValue('outputdevice', 'string', '0');
+		this.updateVolumeSettings();
 	}
 	if (this.config.has('mixer') == false) {
 		var value = this.config.get('outputdevice');
-		this.setDefaultMixer(value)
+		this.setDefaultMixer(value);
+		this.updateVolumeSettings();
 	}
 
 	this.logger.debug("Creating shared var alsa.outputdevice");
@@ -122,12 +124,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 	var mixers = self.getMixerControls(value);
 	var activemixer = self.config.get('mixer');
+	console.log(mixers);
 
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].id', 'mixer');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
 
-	console.log(mixers)
+
 	if (typeof mixers != "undefined" && mixers != null && mixers.length > 0) {
 		self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
 		if (activemixer){
@@ -251,7 +254,6 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 	self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
 	self.setDefaultMixer(OutputDeviceNumber);
 
-
 	return defer.promise;
 
 };
@@ -272,6 +274,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The volume configuration has been successfully updated');
 
 	defer.resolve({});
+	this.updateVolumeSettings();
 
 	return defer.promise;
 
@@ -357,17 +360,22 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 };
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
-
+//TODO: FINISH THIS PARSING
 	var mixers = [];
 	try {
-	var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' }).toString().split("\n");
-
+	var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' });
+	var arraysplit = array.split("\n")
+	console.log(array);
+		console.log(arraysplit)
 	for (i in array) {
-		var line = array[i].split("'");
+		console.log(array[i])
+		var line = array[i].split(",");
+		console.log(line);
 		var control = line[1];
 		//var number = line[2];
 		var mixerraw = control;
-		if (control){
+		console.log('---------ASDASDASDASDASDASDASDASDASDASD'+mixerraw)
+		if (mixerraw){
 			var mixer = mixerraw.replace(",", " ");
 			mixers.push(mixer);
 		}
@@ -420,9 +428,33 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	} catch (e) {}
 	}
 	if (this.config.has('mixer') == false) {
-		return this.config.addConfigValue('mixer', 'string', defaultmixer);
+		this.config.addConfigValue('mixer', 'string', defaultmixer);
+		this.updateVolumeSettings();
 	} else {
-		return self.setConfigParam({key: 'mixer', value: defaultmixer});
+		self.setConfigParam({key: 'mixer', value: defaultmixer});
+		this.updateVolumeSettings();
 	}
 
+}
+
+
+ControllerAlsa.prototype.updateVolumeSettings  = function () {
+	var self = this;
+
+
+	var valvolumecurvemode = self.config.get('volumecurvemode');
+	var valdevice = self.config.get('outputdevice');
+	var valvolumemax = self.config.get('volumemax');
+	var valmixer = self.config.get('mixer');
+	var valvolumestart = self.config.get('volumestart');
+
+	var settings = {
+		device : valdevice,
+		mixer : valmixer,
+		maxvolume : valvolumemax,
+		volumecurve : valvolumecurvemode,
+		volumestart : valvolumestart
+	}
+
+	return self.commandRouter.volumioUpdateVolumeSettings(settings)
 }
