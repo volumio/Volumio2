@@ -7,6 +7,7 @@
       "id": "section_wired_network",
       "element": "section",
       "label": "Wired Network",
+      "icon": "fa-plug",
       "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWiredNet"},
       "saveButton": {
         "label": "Save",
@@ -21,7 +22,7 @@
         {
           "id": "dhcp",
           "element": "switch",
-          "doc" : "Choose between DHCP and Static configuration.",
+          "doc" : "Choose between DHCP and Static IP configuration.",
           "label": "Automatic IP",
           "value": true
         },

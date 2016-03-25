@@ -54,9 +54,11 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 };
 
 CorePlayQueue.prototype.clearPlayQueue = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
-	return this.arrayQueue = [];
+        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+        this.arrayQueue = [];
+        return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
+
 
 CorePlayQueue.prototype.clearMpdQueue = function () {
 	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');

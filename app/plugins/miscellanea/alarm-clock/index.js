@@ -255,6 +255,10 @@ AlarmClock.prototype.setSleep = function(data)
 	var splitted=data.time.split(':');
 
 	var thisMoment = moment();
+
+	var addedHours = parseFloat(splitted[0]);
+	var addedMinutes = parseFloat(splitted[1]);
+
 	thisMoment.add(parseFloat(splitted[0]),"h");
 	thisMoment.add(parseFloat(splitted[1]),"m");
 
@@ -306,8 +310,11 @@ AlarmClock.prototype.setSleep = function(data)
 		if (sleepminute < 10) {
 			sleepminute = "0" + sleepminute;
 		}
-
-		self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off at '+sleephour+':'+sleepminute);
+		if (addedHours == 0)  {
+			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off in ' + addedMinutes + " minute(s)");
+		} else {
+			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off in ' + addedHours + ' hour(s) and ' + addedMinutes + ' minute(s)');
+		}
 	}
 
 	defer.resolve({});

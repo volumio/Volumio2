@@ -1,7 +1,7 @@
 {
    "service": {
         "type": "string",
-        "value": "volumio"
+        "value": "Volumio"
       },
       "port": {
         "type": "number",

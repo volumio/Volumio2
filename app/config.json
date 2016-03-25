@@ -1,9 +1,10 @@
 {
   "menuItems":[
     {"id": "networkfs", "name": "My Music", "state": "volumio.plugin","params": {"pluginName": "system_controller/networkfs"}},
-    {"id": "playback_options", "name": "Playback Options", "state": "volumio.plugin","params": {"pluginName": "music_service/mpd"}},
+    {"id": "playback_options", "name": "Playback Options", "state": "volumio.plugin","params": {"pluginName": "audio_interface/alsa_controller"}},
     {"id": "network", "name": "Network", "state": "volumio.plugin","params": {"pluginName": "system_controller/network"}},
     {"id": "system", "name": "System", "state": "volumio.plugin", "params": {"pluginName": "system_controller/system"}},
+    {"id": "static-page","name": "Credits","pageName": "credits"},
     {"id": "modal", "name": "Shutdown", "params": {"modalName": "modal-power-off"}}
   ]
 }

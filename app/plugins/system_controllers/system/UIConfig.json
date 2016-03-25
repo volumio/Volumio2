@@ -7,6 +7,7 @@
       "id": "section_general_settings",
       "element": "section",
       "label": "General Settings",
+      "icon": "fa-wrench",
       "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveGeneralSettings"},
       "saveButton": {
         "label": "Save",
@@ -20,12 +21,14 @@
           "id": "player_name",
           "type":"text",
           "element": "input",
+          "doc": "This is the name of your system as it will appear on your network.",
           "label": "Player Name",
           "value": "volumio"
         },
         {
           "id":"startup_sound",
           "element": "switch",
+          "doc": "By default Volumio will play a short startup sound after it has finished booting",
           "label": "Startup Sound",
           "value": true
         }
@@ -37,6 +40,7 @@
       "id":"section_updates",
       "type": "section",
       "label": "System updates",
+      "icon": "fa-refresh",
       "content": [
         {
           "id":"update",
