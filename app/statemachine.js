@@ -51,7 +51,7 @@ CoreStateMachine.prototype.getState = function () {
         return {
             status: this.currentStatus,
             position: this.currentPosition,
-            title: trackBlock.title,
+            title: trackBlock.name,
             artist: trackBlock.artist,
             album: trackBlock.album,
             albumart: trackBlock.albumart,
@@ -182,7 +182,7 @@ CoreStateMachine.prototype.stopPlaybackTimer = function () {
 
 // Stop playback timer
 CoreStateMachine.prototype.increasePlaybackTimer = function () {
-    
+
     var now=Date.now();
     this.currentSeek+=(now-this.playbackStart);
     
