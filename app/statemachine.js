@@ -164,20 +164,41 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::startPlaybackTimer');
 
-	clearInterval(this.timerPlayback);
+    this.runPlaybackTimer=true;
+    this.playbackStart=Date.now();
 
-	var self = this;
-	this.timerPlayback = setInterval(function () {
-		self.currentSeek = nStartTime + Date.now() - self.timeLastServiceStateUpdate;
-	}, 500);
+    setTimeout(this.increasePlaybackTimer.bind(this),250);
 
-	return libQ.resolve();
+    return libQ.resolve();
 };
+
+// Stop playback timer
+CoreStateMachine.prototype.stopPlaybackTimer = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stPlaybackTimer');
+    
+    this.runPlaybackTimer=false;
+    return libQ.resolve();
+};
+
+// Stop playback timer
+CoreStateMachine.prototype.increasePlaybackTimer = function () {
+    
+    var now=Date.now();
+    this.currentSeek+=(now-this.playbackStart);
+    
+    if(this.runPlaybackTimer==true)
+    {
+        this.playbackStart=Date.now();
+        setTimeout(this.increasePlaybackTimer.bind(this),250);
+    }
+};
+
+
 
 
 //Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateVolume' + Volume.vol);
+
 	this.currentVolume = Volume.vol;
 	this.currentMute = Volume.mute;
 	this.pushState().fail(this.pushError.bind(this));
@@ -191,12 +212,7 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
 	return libQ.resolve();
 };
 
-// Stop playback timer
-CoreStateMachine.prototype.stopPlaybackTimer = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stopPlaybackTimer');
-	clearInterval(this.timerPlayback);
-	return libQ.resolve();
-};
+
 
 // Announce updated Volumio state
 CoreStateMachine.prototype.pushState = function () {
@@ -429,10 +445,12 @@ CoreStateMachine.prototype.play = function (promisedResponse) {
     {
         //queuing
         this.currentSeek=0;
+        this.startPlaybackTimer();
         thisPlugin.clearAddPlayTrack(trackBlock);
     }
     else  if(this.currentStatus==='pause')
     {
+        this.startPlaybackTimer();
         thisPlugin.resume();
     }
 };
@@ -499,7 +517,7 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 
     if (this.currentStatus === 'play') {
         this.currentStatus = 'pause';
-
+        this.stopPlaybackTimer();
         return this.servicePause();
     }
 };
@@ -520,6 +538,8 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
         // Play -> Stop transition
         this.currentStatus = 'stop';
         this.currentSeek = 0;
+
+        this.stopPlaybackTimer();
         this.updateTrackBlock();
         return this.serviceStop();
 
@@ -528,6 +548,8 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
         this.currentStatus = 'stop';
         this.currentSeek = 0;
         this.updateTrackBlock();
+
+        this.stopPlaybackTimer();
         return this.serviceStop();
     }
 };

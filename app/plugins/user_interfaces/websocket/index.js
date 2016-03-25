@@ -204,7 +204,7 @@ function InterfaceWebUI(context) {
 				var position = positionN.value;
 				self.logStart('Client requests remove Volumio queue items')
 					.then(function () {
-						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'remove', position);
+						return self.commandRouter.volumioRemoveQueueItem(positionN);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
