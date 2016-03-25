@@ -420,6 +420,7 @@ ControllerSpop.prototype.explodeUri = function(uri) {
         .then(function(data) {
             var artist='';
             var album='';
+            var title='';
 
             if(data.body.artists.length>0)
                 artist=data.body.artists[0].name;
