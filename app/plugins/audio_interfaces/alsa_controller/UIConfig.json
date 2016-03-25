@@ -185,7 +185,7 @@
             "label": ""
           },
           "options": [
-           
+
           ]
 
         },
@@ -308,12 +308,12 @@
           "label": "Volume curve mode",
           "value":  {
             "value":"logarithmic",
-            "label": "Logarithmic"
+            "label": "Natural"
           },
           "options": [
             {
               "value":"logarithmic",
-              "label": "Logarithmic"
+              "label": "Natural"
             },
             {
               "value":"linear",

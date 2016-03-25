@@ -48,31 +48,27 @@ function CoreVolumeController(commandRouter) {
 		});
 
 	};
-
-	var reDefaultDevice = /Simple mixer control \'([a-z0-9 -]+)\',[0-9]+/i;
-	var defaultDeviceCache = null;
-	var defaultDevice = function (cb) {
-		if (defaultDeviceCache === null) {
-			amixer([], function (err, data) {
+	
+	var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
+	var getInfo = function (cb) {
+		if (volumecurve === 'logarithmic'){
+			amixer(['-M', 'get', '-c', device , mixer], function (err, data) {
 				if (err) {
 					cb(err);
 				} else {
-					var res = reDefaultDevice.exec(data);
+					var res = reInfo.exec(data);
 					if (res === null) {
 						cb(new Error('Alsa Mixer Error: failed to parse output'));
 					} else {
-						defaultDeviceCache = res[1];
-						cb(null, defaultDeviceCache);
+						cb(null, {
+							volume: parseInt(res[1], 10),
+							muted: (res[2] == 'off')
+						});
 					}
 				}
 			});
-		} else {
-			cb(null, defaultDeviceCache);
-		}
-	};
 
-	var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
-	var getInfo = function (cb) {
+		} else {
 				amixer(['get', '-c', device , mixer], function (err, data) {
 					if (err) {
 						cb(err);
@@ -88,11 +84,10 @@ function CoreVolumeController(commandRouter) {
 						}
 					}
 				});
+		}
 	};
 
 	self.getVolume = function (cb) {
-		console.log('------------------------------------------'+device);
-		console.log('------------------------------------------'+mixer);
 		getInfo(function (err, obj) {
 			if (err) {
 				cb(err);
@@ -103,10 +98,15 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setVolume = function (val, cb) {
-		console.log('------------------------------------------'+mixer);
-				amixer(['set', '-c', device, mixer , val + '%'], function (err) {
-					cb(err);
-				});
+		if (volumecurve === 'logarithmic') {
+			amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
+				cb(err);
+			});
+		} else {
+			amixer(['set', '-c', device, mixer, val + '%'], function (err) {
+				cb(err);
+			});
+		}
 	};
 
 	self.getMuted = function (cb) {
@@ -208,6 +208,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			break;
 		default:
 			// Set the Volume with numeric value 0-100
+			if (VolumeInteger > maxvolume){
+				VolumeInteger = maxvolume;
+			}
 			self.setMuted(false, function (err) {
 				self.setVolume(VolumeInteger, function (err) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
@@ -215,6 +218,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					Volume.vol = VolumeInteger;
 					Volume.mute = false;
 					self.commandRouter.volumioupdatevolume(Volume);
+
 				});
 			});
 	}
