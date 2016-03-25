@@ -1,15 +1,15 @@
 {
-  "name": "airplay_emulation",
+  "name": "i2s_dacs",
   "version": "1.0.0",
-  "description": "Airplay Emulation Interface for Volumio 2",
+  "description": "I2S DACs controller plugin for Volumio2",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Volumio",
   "license": "ISC",
-  "volumio_info":{
-    "plugin_type": "music_service",
-    "boot_priority":9
+  "volumio_info": {
+    "plugin_type": "system_controller",
+    "boot_priority":2
   }
 }

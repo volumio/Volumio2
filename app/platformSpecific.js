@@ -34,7 +34,7 @@ PlatformSpecific.prototype.networkRestart = function () {
 			self.coreCommand.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
 		} else
 			self.coreCommand.pushToastMessage('success',"Network restart",'Network successfully restarted');
-			// Restart Upmpdcli
+		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
 		}, 10000);
@@ -48,7 +48,7 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 			self.coreCommand.pushToastMessage('error',"Wireless restart",'Error while restarting wireless: '+error);
 		} else
 			self.coreCommand.pushToastMessage('success',"Wiress restart",'Wireless successfully restarted');
-			// Restart Upmpdcli
+		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
 		}, 10000);
