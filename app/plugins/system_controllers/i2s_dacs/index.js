@@ -231,6 +231,31 @@ ControllerI2s.prototype.getI2SNumber = function (data) {
 	return number
 }
 
+ControllerI2s.prototype.getI2SMixer = function (data) {
+	var self = this;
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+	var mixer = '';
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+				if(dacdata.devices[num].data[i].name == data) {
+					if (dacdata.devices[num].data[i].mixer){
+					var mixer = dacdata.devices[num].data[i].mixer;
+					}
+				}
+
+			}
+		}
+	}
+
+	return mixer
+}
+
 ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var self = this;
 

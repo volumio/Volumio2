@@ -124,7 +124,6 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 	var mixers = self.getMixerControls(value);
 	var activemixer = self.config.get('mixer');
-	console.log(mixers);
 
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].id', 'mixer');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
@@ -367,7 +366,6 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 		var line = array.toString().split("\n");
 
 	for (var i in line) {
-		console.log(line[i])
 		var lineraw = line[i].split("'")
 		var control = lineraw[1];
 		//var number = line[2];
@@ -390,6 +388,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var match = '';
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interfaces/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
+	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
 
 	for (var i in cards) {
@@ -399,19 +398,35 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		}
 	}
 
+	if (i2sstatus && i2sstatus.enabled){
+		var cardname = i2sstatus.name;
+		var mixer = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SMixer', cardname);
+		if (mixer){
+			var defaultmixer = mixer;
+			self.logger.info('Found match in i2s Card Database: setting mixer '+ defaultmixer + ' for card ' + cardname);
+		}
+
+	} else {
 	for (var n = 0; n < carddata.cards.length; n++){
 		var cardname = carddata.cards[n].prettyname.toString().trim();
 
 		if (cardname == currentcardname){
 			var defaultmixer = carddata.cards[n].defaultmixer;
-			self.logger.info('Find match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+			self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
 		}
+	}
 	}
 	if (defaultmixer) {
 
 	} else {
 	try {
-		var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' })
+		if (this.config.has('outputdevice') == false) {
+			var audiodevice = "0";
+		} else {
+			var audiodevice = this.config.get('outputdevice')
+		}
+
+		var array = execSync('amixer -c '+audiodevice+' scontrols', { encoding: 'utf8' })
 		var line = array.toString().split("\n");
 		var lineraw = line[0].split("'")
 		var control = lineraw[1];

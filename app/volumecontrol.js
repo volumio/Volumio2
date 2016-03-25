@@ -19,6 +19,7 @@ function CoreVolumeController(commandRouter) {
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
+	self.logger = self.commandRouter.logger;
 
 
 	device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
@@ -27,9 +28,6 @@ function CoreVolumeController(commandRouter) {
 	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
 	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
 
-
-	console.log(device);
-	console.log(mixer);
 
 	var amixer = function (args, cb) {
 
@@ -132,9 +130,8 @@ function CoreVolumeController(commandRouter) {
 CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	var self = this;
 
-	console.log(data);
-	console.log(data.mixer)
 
+	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Mixer: '+ data.mixer)
 	device = data.device;
 	mixer = '"'+data.mixer+'"';
 	maxvolume = data.maxvolume;
