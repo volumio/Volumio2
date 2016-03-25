@@ -1,0 +1,78 @@
+# Volumio MPD Configuration File
+
+# Files and directories #######################################################
+music_directory		"/var/lib/mpd/music"
+playlist_directory		"/var/lib/mpd/playlists"
+db_file			"/var/lib/mpd/tag_cache"
+#log_file			"/var/log/mpd/mpd.log"
+pid_file			"/var/run/mpd/pid"
+#state_file			"/var/lib/mpd/state"
+#sticker_file                   "/var/lib/mpd/sticker.sql"
+###############################################################################
+
+# General music daemon options ################################################
+user				"mpd"
+group                          "audio"
+bind_to_address		"any"
+#port				"6600"
+#log_level			"default"
+gapless_mp3_playback			"${gapless_mp3_playback}"
+#save_absolute_paths_in_playlists	"no"
+#metadata_to_use	"artist,album,title,track,name,genre,date,composer,performer,disc"
+auto_update    "yes"
+#auto_update_depth "3"
+###############################################################################
+# Symbolic link behavior ######################################################
+follow_outside_symlinks	"yes"
+follow_inside_symlinks		"yes"
+###############################################################################
+# Input #######################################################################
+#
+input {
+        plugin "curl"
+#       proxy "proxy.isp.com:8080"
+#       proxy_user "user"
+#       proxy_password "password"
+}
+###############################################################################
+
+	# Audio Output ################################################################
+audio_output {
+		type		"alsa"
+		name		"alsa"
+		device		"hw:${device},0"
+}
+
+audio_output {
+    type            "fifo"
+    enabled         "no"
+    name            "multiroom"
+    path            "/tmp/snapfifo"
+    format          "44100:16:2"
+}
+
+
+samplerate_converter "soxr very high"
+#replaygain			"album"
+#replaygain_preamp		"0"
+volume_normalization		"${volume_normalization}"
+###############################################################################
+
+# MPD Internal Buffering ######################################################
+audio_buffer_size		"${audio_buffer_size}"
+buffer_before_play		"${buffer_before_play}"
+###############################################################################
+
+
+# Resource Limitations ########################################################
+#connection_timeout		"60"
+max_connections			"20"
+#max_playlist_length		"16384"
+#max_command_list_size		"2048"
+#max_output_buffer_size		"8192"
+###############################################################################
+
+# Character Encoding ##########################################################
+filesystem_charset		"UTF-8"
+id3v1_encoding			"UTF-8"
+###############################################################################

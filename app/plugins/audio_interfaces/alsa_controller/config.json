@@ -10,10 +10,5 @@
   "volumecurvemode":{
     "type": "string",
     "value": "logarithmic"
-  },
-  "outputdevice":
-  {
-    "type": "string",
-    "value": "0"
   }
 }

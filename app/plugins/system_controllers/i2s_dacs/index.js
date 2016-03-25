@@ -208,6 +208,54 @@ ControllerI2s.prototype.getI2sStatus = function () {
 	return status
 }
 
+ControllerI2s.prototype.getI2SNumber = function (data) {
+	var self = this;
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+	var number = '';
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+				if(dacdata.devices[num].data[i].name == data) {
+					var number = dacdata.devices[num].data[i].alsanum;
+				}
+
+			}
+		}
+	}
+
+	return number
+}
+
+ControllerI2s.prototype.getI2SMixer = function (data) {
+	var self = this;
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+	var mixer = '';
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+				if(dacdata.devices[num].data[i].name == data) {
+					if (dacdata.devices[num].data[i].mixer){
+					var mixer = dacdata.devices[num].data[i].mixer;
+					}
+				}
+
+			}
+		}
+	}
+
+	return mixer
+}
+
 ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var self = this;
 
@@ -220,11 +268,13 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 		{ var num = i;
 			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
 				if(dacdata.devices[num].data[i].name == data) {
-					var overlay = dacdata.devices[num].data[i].overlay
+					var overlay = dacdata.devices[num].data[i].overlay;
+					var num = dacdata.devices[num].data[i].alsanum;
 					self.writeI2SDAC(overlay);
 					this.config.set("i2s_enabled", true);
 					this.config.set("i2s_dac", data);
 					this.config.set("i2s_id", overlay);
+					self.commandRouter.sharedVars.set('alsa.outputdevice', num);
 				}
 
 			}
@@ -235,9 +285,25 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
 
-	var netstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL +  'dtoverlay='+data;
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL +  'dtoverlay='+data;
 
-	fs.writeFile('/boot/config.txt', netstring, function (err) {
+	fs.writeFile('/boot/config.txt', bootstring, function (err) {
+		if (err) {
+			self.logger.error('Cannot write config.txt file: '+error);
+		}
+
+	});
+
+}
+
+ControllerI2s.prototype.disableI2SDAC = function () {
+	var self = this;
+
+	this.config.set("i2s_enabled", false);
+
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1';
+
+	fs.writeFile('/boot/config.txt', bootstring, function (err) {
 		if (err) {
 			self.logger.error('Cannot write config.txt file: '+error);
 		}

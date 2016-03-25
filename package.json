@@ -28,7 +28,6 @@
     "kew": "^0.7.0",
     "level": "^1.4.0",
     "linux-mountutils": "^1.0.0",
-    "mathjs": "^3.1.0",
     "mdns": "^2.3.1",
     "moment": "^2.12.0",
     "morgan": "^1.7.0",
