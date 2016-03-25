@@ -1367,7 +1367,7 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
 						artists: artistsCount,
 						albums: (splittedAlbum - 1) / 3,
 						songs: songsCount,
-						playtime: convertedSecs.hours + ':' + convertedSecs.minutes + ':' + convertedSecs.seconds
+						playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
 					};
 				}
 
