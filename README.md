@@ -16,9 +16,10 @@ Volumio is obtained with 3 main components:
 ## Volumio 2 System Images
 
 LATEST
-* [Beta4 (2016-03-03)](http://updates.volumio.org/pi/volumio/0.839/volumio-0.839-2016-03-03-pi.img.zip)
+* [RC1 (2016-03-25)](http://updates.volumio.org/pi/volumio/0.861/volumio-0.861-2016-03-25-pi.img.zip)
 
 PREVIOUS VERSIONS
+* [Beta4 (2016-03-03)](http://updates.volumio.org/pi/volumio/0.839/volumio-0.839-2016-03-03-pi.img.zip)
 * [Beta3 (2016-02-23)](http://updates.volumio.org/pi/volumio/0.836/volumio-0.836-2016-02-23-pi.img.zip)
 * [Beta2 (2016-02-20)](http://updates.volumio.org/pi/volumio/0.833/volumio-0.833-2016-02-20-pi.img.zip)
 * [Beta1 (2016-02-11)](http://updates.volumio.org/pi/volumio/0.830/Volumio0.830-2016-02-11PI.img.zip)
