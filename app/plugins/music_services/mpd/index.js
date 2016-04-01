@@ -1671,7 +1671,11 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
     var defer = libQ.defer();
     var cmd = libMpd.cmd;
 
-    return self.sendMpdCommand('clear',[])
+    return self.sendMpdCommand('stop',[])
+        .then(function()
+        {
+            return self.sendMpdCommand('clear',[])
+        })
         .then(function()
         {
             return self.sendMpdCommand('add '+uri,[])

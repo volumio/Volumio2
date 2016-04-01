@@ -292,7 +292,11 @@ function InterfaceWebUI(context) {
 							return self.logDone(timeStart);
 						});
 				} else if (N.value != undefined) {
-					return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'play', N.value);
+                    self.logStart('Client requests Volumio play at index '+N.value)
+                        .then(self.commandRouter.volumioPlay.bind(self.commandRouter,N.value))
+                        .done(function () {
+                            return self.logDone(timeStart);
+                        });
 				}
 			});
 

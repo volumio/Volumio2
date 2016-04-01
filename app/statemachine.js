@@ -110,6 +110,8 @@ CoreStateMachine.prototype.clearQueue = function () {
 CoreStateMachine.prototype.updateTrackBlock = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::updateTrackBlock');
 	this.currentTrackBlock = this.playQueue.getTrackBlock(this.currentPosition);
+
+    return libQ.resolve();
 };
 
 // Perform a clear-add-play action on the current track block
@@ -431,28 +433,66 @@ CoreStateMachine.prototype.getTrack = function (position) {
 
 
 // Volumio Play Command
-CoreStateMachine.prototype.play = function (promisedResponse) {
+CoreStateMachine.prototype.play = function (index) {
+    var self=this;
+
+    var currentPos=0;
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
     if(this.currentPosition ==null || this.currentPosition===undefined)
         this.currentPosition=0;
 
 
-    var trackBlock = this.getTrack(this.currentPosition);
-    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+    if(index!==undefined)
+    {
+        this.stop();
+        setTimeout(function() {
+            self.currentPosition=index;
+            self.play();
+        },500);
+    }
+    else
+    {
+        var trackBlock = this.getTrack(this.currentPosition);
+        var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
-    if(this.currentStatus==='stop')
+        if(this.currentStatus==='stop')
+        {
+            //queuing
+            this.currentSeek=0;
+            this.startPlaybackTimer();
+            thisPlugin.clearAddPlayTrack(trackBlock);
+        }
+        else  if(this.currentStatus==='pause')
+        {
+            this.startPlaybackTimer();
+            thisPlugin.resume();
+        }
+    }
+
+
+    /*else if(this.currentStatus==='play')
     {
-        //queuing
+        if(oldService!==undefined && newService !==undefined && oldService!==newService)
+        {
+            this.commandRouter.pushConsoleMessage('##############################' + 'Asking '+oldService+' to stop');
+            this.commandRouter.pushConsoleMessage('##############################' + 'Asking '+newService+' to stop');
+            oldPlugin.stop();
+        }
+
         this.currentSeek=0;
-        this.startPlaybackTimer();
         thisPlugin.clearAddPlayTrack(trackBlock);
-    }
-    else  if(this.currentStatus==='pause')
-    {
         this.startPlaybackTimer();
-        thisPlugin.resume();
-    }
+    }*/
+
+
+
+
+
+
+
+
+
 };
 
 // Volumio Play Command

@@ -541,9 +541,14 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
 //------------------------ Used in new play system -------------------------------
 
 // Volumio Play
-CoreCommandRouter.prototype.volumioPlay = function () {
+CoreCommandRouter.prototype.volumioPlay = function (N) {
     this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
-    return this.stateMachine.play();
+    if(N===undefined)
+        return this.stateMachine.play();
+    else 
+    {
+        return this.stateMachine.play(N);
+    }
 };
 
 // Volumio Play
