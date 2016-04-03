@@ -621,7 +621,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system-playlist', function () {
 		var timeStart = Date.now();
 
-		self.logStart('MPD announces sysyrm state update')
+		self.logStart('MPD announces system state update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
@@ -631,7 +631,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 	//Notify that The mpd DB has changed
 	self.clientMpd.on('system-database', function () {
-
+		self.commandRouter.fileUpdate();
 		return self.reportUpdatedLibrary();
 	});
 };
