@@ -220,8 +220,14 @@ AlarmClock.prototype.getSleep = function()
 	var sleep_minute = sleepTask.sleep_minute;
 	if (sleepTask.sleep_action){
 	var sleep_action = sleepTask.sleep_action;
+		if (sleepTask.sleep_action == "stop") {
+			var sleep_actionText = 'Stop Music';
+		} else if (sleepTask.sleep_action == "poweroff"){
+			var sleep_actionText = 'Power Off';
+		}
 	} else {
 		var sleep_action = "stop"
+		var sleep_actionText = 'Stop Music';
 	}
 	var when = new Date(sleepTask.sleep_requestedat);
 	var now = moment(new Date());
@@ -237,7 +243,7 @@ AlarmClock.prototype.getSleep = function()
 	defer.resolve({
 		enabled:sleepTask.sleep_enabled,
 		time:sleep_hour+':'+sleep_minute,
-		action: sleep_action
+		action: {val: sleep_action, text: sleep_actionText}
 	});
 	return defer.promise;
 };
@@ -321,10 +327,15 @@ AlarmClock.prototype.setSleep = function(data)
 		if (sleepminute < 10) {
 			sleepminute = "0" + sleepminute;
 		}
-		if (addedHours == 0)  {
-			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off in ' + addedMinutes + " minute(s)");
+		if (data.action == 'stop'){
+			var actionText = 'Stop Music'
 		} else {
-			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will turn off in ' + addedHours + ' hour(s) and ' + addedMinutes + ' minute(s)');
+			var actionText = 'Turn Off'
+		}
+		if (addedHours == 0)  {
+			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will ' + actionText + ' in ' + addedMinutes + " minute(s)");
+		} else {
+			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will ' + actionText + ' in ' + addedHours + ' hour(s) and ' + addedMinutes + ' minute(s)');
 		}
 	}
 
