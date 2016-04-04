@@ -218,6 +218,7 @@ AlarmClock.prototype.getSleep = function()
 	var sleepTask = self.getSleepConf();
 	var sleep_hour = sleepTask.sleep_hour;
 	var sleep_minute = sleepTask.sleep_minute;
+	var sleep_action = sleepTask.sleep_action;
 	var when = new Date(sleepTask.sleep_requestedat);
 	var now = moment(new Date());
 
@@ -231,7 +232,8 @@ AlarmClock.prototype.getSleep = function()
 
 	defer.resolve({
 		enabled:sleepTask.sleep_enabled,
-		time:sleep_hour+':'+sleep_minute
+		time:sleep_hour+':'+sleep_minute,
+		action: sleep_action
 	});
 	return defer.promise;
 };
@@ -268,7 +270,8 @@ AlarmClock.prototype.setSleep = function(data)
 		sleep_enabled: data.enabled,
 		sleep_hour: splitted[0],
 		sleep_minute: splitted[1],
-		sleep_requestedat: new Date().toISOString()
+		sleep_requestedat: new Date().toISOString(),
+		sleep_action: data.action
 	};
 	self.setSleepConf(sleepTask);
 
@@ -294,7 +297,11 @@ AlarmClock.prototype.setSleep = function(data)
 			console.log("System is shutting down....");
 			setTimeout(function()
 			{
+				if (data.action == 'stop'){
+					self.commandRouter.volumioStop();
+				} else {
 				self.commandRouter.shutdown();
+				}
 			},5000);
 		});
 		// if (sleepminute >= 60 ) {
