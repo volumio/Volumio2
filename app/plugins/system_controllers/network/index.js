@@ -170,6 +170,31 @@ ControllerNetwork.prototype.saveWiredNet = function (data) {
 	return defer.promise;
 };
 
+ControllerNetwork.prototype.saveWirelessNet = function (data) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	var dhcp = data['dhcp'];
+	var static_ip = data['static_ip'];
+	var static_netmask = data['static_netmask'];
+	var static_gateway = data['static_gateway'];
+
+	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
+
+	config.set('wirelessdhcp', dhcp);
+	config.set('wirelessip', static_ip);
+	config.set('wirelessnetmask', static_netmask);
+	config.set('wirelessgateway', static_gateway);
+
+	self.rebuildWirelessNetworkConfig();
+	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+
+
+	defer.resolve({});
+	return defer.promise;
+};
+
 
 ControllerNetwork.prototype.getData = function (data, key) {
 	var self = this;
@@ -218,7 +243,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 		if (data.pass.length <= 13) {
 			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
 		} else {
-		 var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL ;
+			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL ;
 		}
 	} else {
 		var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt = NONE' + os.EOL + '}'
@@ -275,6 +300,13 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	catch (err) {
 		self.commandRouter.pushToastMessage('error', "Network setup", 'Error while setting network: ' + err);
 	}
+
+};
+
+ControllerNetwork.prototype.rebuildWirelessNetworkConfig = function () {
+	var self = this;
+
+	//TODO
 
 };
 
