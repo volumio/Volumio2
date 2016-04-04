@@ -218,7 +218,11 @@ AlarmClock.prototype.getSleep = function()
 	var sleepTask = self.getSleepConf();
 	var sleep_hour = sleepTask.sleep_hour;
 	var sleep_minute = sleepTask.sleep_minute;
+	if (sleepTask.sleep_action){
 	var sleep_action = sleepTask.sleep_action;
+	} else {
+		var sleep_action = "stop"
+	}
 	var when = new Date(sleepTask.sleep_requestedat);
 	var now = moment(new Date());
 
