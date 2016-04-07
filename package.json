@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "album-art": "^1.0.2",
-    "base64-url": "^1.2.1",
+    "base64-url": "^1.2.2",
     "body-parser": "^1.15.0",
     "chokidar": "^1.4.3",
     "compression": "^1.6.1",
@@ -56,7 +56,7 @@
     "v-conf": "0.10.0",
     "winston": "^2.2.0",
     "wireless-tools": "0.15.0",
-    "yargs": "^4.3.2"
+    "yargs": "^4.4.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {

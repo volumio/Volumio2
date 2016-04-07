@@ -66,3 +66,9 @@ PlatformSpecific.prototype.startupSound = function () {
 		}
 	});
 }
+
+PlatformSpecific.prototype.fileUpdate = function () {
+	var self = this;
+
+	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update');
+}

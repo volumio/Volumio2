@@ -74,6 +74,77 @@
         }
       ]
     },
+    { "visible":false,
+      "id": "section_wireless_network",
+      "element": "section",
+      "label": "Wireless Network",
+      "icon": "fa-wifi",
+      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWirelessNet"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "dhcp",
+          "static_ip",
+          "static_netmask",
+          "static_gateway"
+        ]
+      },
+      "content": [
+        {
+          "id": "dhcp",
+          "element": "switch",
+          "doc" : "Choose between DHCP and Static IP configuration.",
+          "label": "Automatic IP",
+          "value": true
+        },
+        {
+          "id": "static_ip",
+          "type": "ip",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.123"
+            }
+          ],
+          "label": "Static IP",
+          "value": "",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": false
+          }
+        },
+        {
+          "id": "static_netmask",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "255.255.255.0"
+            }
+          ],
+          "type": "ip",
+          "label": "Netmask",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": false
+          }
+        },
+        {
+          "id": "static_gateway",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.1"
+            }
+          ],
+          "type": "ip",
+          "label": "Gateway",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": false
+          }
+        }
+      ]
+    },
     {"coreSection":"wifi"},{"coreSection":"network-status"}
   ]
 }
