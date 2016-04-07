@@ -1483,7 +1483,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
     var items = [];
     var uriPath='/mnt/'+self.fromUriToPath(uri);
 
-     var uris=self.scanFolder(uriPath);
+    var uris=self.scanFolder(uriPath);
     var response=[];
 
     libQ.all(uris)
@@ -1491,6 +1491,9 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         {
            for(var j in result)
             {
+
+                self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
+
                 if(result[j].uri!=undefined)
                 {
                     response.push({
@@ -1502,7 +1505,10 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                         type: 'track',
                         tracknumber: result[j].tracknumber,
                         albumart: result[j].albumart,
-                        duration: result[j].duration
+                        duration: result[j].duration,
+                        samplerate: result[j].samplerate,
+                        bitdepth: result[j].bitdepth,
+                        trackType: result[j].trackType
                     });
                 }
 
@@ -1583,7 +1589,6 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
             });*/
 
-            self.commandRouter.logger.info("----->>>>> "+uri);
             var sections = uri.split('/');
             var folderToList = '';
             var command = 'lsinfo';
@@ -1595,8 +1600,6 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
             }
 
-            self.commandRouter.logger.info("----->>>>> "+command);
-
             var cmd = libMpd.cmd;
 
             self.mpdReady.then(function () {
@@ -1605,13 +1608,14 @@ ControllerMpd.prototype.scanFolder=function(uri)
                     if (msg) {
 
 
-                        self.commandRouter.logger.info("----->>>>> "+msg);
                         var s0 = sections[0] + '/';
                         var path;
                         var name;
                         var lines = msg.split('\n');
                         for (var i = 0; i < lines.length; i++) {
                             var line = lines[i];
+
+                            self.commandRouter.logger.info("----->>>>> "+JSON.stringify(line));
 
                             if (line.indexOf('file:') === 0) {
                                 var path = line.slice(6);
@@ -1637,8 +1641,11 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     type: 'track',
                                     tracknumber: 0,
                                     albumart: self.getAlbumArt({artist:artist,album: album},uri),
-                                    duration: time
-                                });
+                                    duration: time,
+                                    samplerate: '128',
+                                    bitdepth: 8,
+                                    trackType: uri.split('.').pop()
+                            });
                             }
 
                         }

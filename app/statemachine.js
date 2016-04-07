@@ -56,7 +56,7 @@ CoreStateMachine.prototype.getState = function () {
             album: trackBlock.album,
             albumart: trackBlock.albumart,
             uri: trackBlock.uri,
-            trackType: this.currentTrackType,
+            trackType: trackBlock.trackType,
             seek: this.currentSeek,
             duration: trackBlock.duration,
             samplerate: trackBlock.samplerate,
@@ -66,7 +66,7 @@ CoreStateMachine.prototype.getState = function () {
             repeat: this.currentRepeat,
             volume: this.currentVolume,
             mute: this.currentMute,
-            stream: false,
+            stream: trackBlock.trackType,
             service: trackBlock.service
         };
     }

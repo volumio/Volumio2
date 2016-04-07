@@ -418,6 +418,9 @@ ControllerSpop.prototype.explodeUri = function(uri) {
 
     self.spotifyApi.getTrack(splitted[2])
         .then(function(data) {
+            self.commandRouter.logger.info(JSON.stringify(data));
+
+
             var artist='';
             var album='';
             var title='';
@@ -439,7 +442,11 @@ ControllerSpop.prototype.explodeUri = function(uri) {
                 type: 'track',
                 duration: parseInt(data.body.duration_ms/1000),
                 tracknumber: data.body.track_number,
-                albumart: albumart
+                albumart: albumart,
+                samplerate: '128',
+                bitdepth: 16,
+                trackType: 'Spotify'
+
             });
 
         });

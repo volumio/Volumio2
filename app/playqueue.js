@@ -64,6 +64,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     {
         var item=array[i];
 
+        self.commandRouter.logger.info("ADDING THIS ITEM TO QUEUE: "+JSON.stringify(item));
         var service='mpd';
 
         if(item.hasOwnProperty('service'))
