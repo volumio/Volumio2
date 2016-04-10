@@ -82,7 +82,19 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	uiconf.sections[0].content[3].value = config.get('ethgateway');
 
 
-	//
+	//Wireless
+
+	//dhcp
+	uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
+
+	//static ip
+	uiconf.sections[1].content[1].value = config.get('wirelessip');
+
+	//static netmask
+	uiconf.sections[1].content[2].value = config.get('wirelessnetmask');
+
+	//static gateway
+	uiconf.sections[1].content[3].value = config.get('wirelessgateway');
 
 	//console.log(uiconf);
 
@@ -175,19 +187,26 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 
 	var defer = libQ.defer();
 
-	var dhcp = data['dhcp'];
-	var static_ip = data['static_ip'];
-	var static_netmask = data['static_netmask'];
-	var static_gateway = data['static_gateway'];
+	var dhcp = data['wireless_dhcp'];
+	var static_ip = data['wireless_static_ip'];
+	var static_netmask = data['wireless_static_netmask'];
+	var static_gateway = data['wireless_static_gateway'];
 
 	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
+	var wirelessdhcp = config.get('wirelessdhcp');
+	if (wirelessdhcp == undefined) {
+		config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
+		config.addConfigValue('wirelessip', 'string', static_ip);
+		config.addConfigValue('wirelessnetmask', 'string', static_netmask);
+		config.addConfigValue('wirelessgateway', 'string', static_gateway);
+	} else {
+		config.set('wirelessdhcp', dhcp);
+		config.set('wirelessip', static_ip);
+		config.set('wirelessnetmask', static_netmask);
+		config.set('wirelessgateway', static_gateway);
+	}
 
-	config.set('wirelessdhcp', dhcp);
-	config.set('wirelessip', static_ip);
-	config.set('wirelessnetmask', static_netmask);
-	config.set('wirelessgateway', static_gateway);
-
-	self.rebuildWirelessNetworkConfig();
+	self.rebuildNetworkConfig();
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
 
 
@@ -265,11 +284,12 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		var ws = fs.createOutputStream('/etc/network/interfaces');
 
 		ws.cork();
+		ws.write('auto wlan0\n');
 		ws.write('auto lo\n');
 		ws.write('iface lo inet loopback\n');
 		ws.write('\n');
 
-		ws.write('auto eth0\n');
+		ws.write('allow-hotplug eth0\n');
 		if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
 			ws.write('iface eth0 inet dhcp\n');
 		}
@@ -282,6 +302,22 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		}
 
 		ws.write('\n');
+
+		ws.write('allow-hotplug wlan0\n');
+		if(config.get('wirelessdhcp')) {
+		if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
+			ws.write('iface wlan0 inet manual\n');
+		}
+		else {
+			ws.write('iface wlan0 inet static\n');
+
+			ws.write('address ' + config.get('wirelessip') + '\n');
+			ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
+			ws.write('gateway ' + config.get('wirelessgateway') + '\n');
+		}
+		} else {
+			ws.write('iface wlan0 inet manual\n');
+		}
 
 		ws.uncork();
 		ws.end();
