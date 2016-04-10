@@ -280,6 +280,13 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	var self = this;
 
+	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
+
+		} else {
+			self.logger.info('Permissions for /etc/network/interfaces set')
+
 	try {
 		var ws = fs.createOutputStream('/etc/network/interfaces');
 
@@ -323,28 +330,17 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		ws.end();
 
 		//console.log("Restarting networking layer");
-		exec('sudo /bin/systemctl restart volumio-network.service',
-			function (error, stdout, stderr) {
-
-				if (error !== null) {
-					self.commandRouter.pushToastMessage('error', "Network restart", 'Error while restarting network: ' + error);
-				}
-				else self.commandRouter.pushToastMessage('success', "Network restart", 'Network successfully restarted');
-
-			});
+		self.commandRouter.wirelessRestart();
+		self.commandRouter.networkRestart();
 	}
 	catch (err) {
 		self.commandRouter.pushToastMessage('error', "Network setup", 'Error while setting network: ' + err);
 	}
+		}
+	});
 
 };
 
-ControllerNetwork.prototype.rebuildWirelessNetworkConfig = function () {
-	var self = this;
-
-	//TODO
-
-};
 
 ControllerNetwork.prototype.getInfoNetwork = function () {
 	var self = this;
