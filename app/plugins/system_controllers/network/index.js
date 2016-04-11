@@ -316,7 +316,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		ws.write('\n');
 
 		ws.write('allow-hotplug wlan0\n');
-		if(config.get('wirelessdhcp')) {
+
 		if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
 			ws.write('iface wlan0 inet manual\n');
 		}
@@ -326,9 +326,6 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 			ws.write('address ' + config.get('wirelessip') + '\n');
 			ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
 			ws.write('gateway ' + config.get('wirelessgateway') + '\n');
-		}
-		} else {
-			ws.write('iface wlan0 inet manual\n');
 		}
 
 		ws.uncork();
