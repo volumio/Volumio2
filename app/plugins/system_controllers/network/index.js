@@ -85,7 +85,12 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	//Wireless
 
 	//dhcp
-	uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
+	  //dhcp
+        if (config.get('wirelessdhcp') == undefined) {
+            uiconf.sections[1].content[0].value = true;
+        } else {
+            uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
+        }
 
 	//static ip
 	uiconf.sections[1].content[1].value = config.get('wirelessip');
