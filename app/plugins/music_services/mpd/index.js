@@ -1121,16 +1121,18 @@ ControllerMpd.prototype.updateQueue = function () {
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 					if (line.indexOf('file:') === 0) {
-						var path = line.slice(5).trimLeft();
-						var name = path.split('/');
-						var count = name.length;
-
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
-						var title = self.searchFor(lines, i + 1, 'Title:');
+						var rawtitle = self.searchFor(lines, i + 1, 'Title:');
 						var tracknumber = self.searchFor(lines, i + 1, 'Pos:');
-						if (title == undefined) {
-							title = name[count - 1];
+						var path = line.slice(5).trimLeft();
+
+						if (rawtitle) {
+							var title = rawtitle;
+						} else {
+							var path = line.slice(5).trimLeft();
+							var name = path.split('/');
+							var title = name.slice(-1)[0];
 						}
 
 						var queueItem = {
