@@ -11,7 +11,7 @@ function PlatformSpecific(coreCommand) {
 
 PlatformSpecific.prototype.shutdown = function () {
 	var self = this;
-	exec("sudo /sbin/halt", function (error, stdout, stderr) {
+	exec("sudo /sbin/shutdown -h now", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.coreCommand.pushConsoleMessage(error);
 		} else self.coreCommand.pushConsoleMessage('Shutting Down');

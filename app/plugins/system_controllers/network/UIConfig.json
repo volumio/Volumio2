@@ -74,7 +74,7 @@
         }
       ]
     },
-    { "visible":false,
+    { 
       "id": "section_wireless_network",
       "element": "section",
       "label": "Wireless Network",
@@ -83,22 +83,22 @@
       "saveButton": {
         "label": "Save",
         "data": [
-          "dhcp",
-          "static_ip",
-          "static_netmask",
-          "static_gateway"
+          "wireless_dhcp",
+          "wireless_static_ip",
+          "wireless_static_netmask",
+          "wireless_static_gateway"
         ]
       },
       "content": [
         {
-          "id": "dhcp",
+          "id": "wireless_dhcp",
           "element": "switch",
           "doc" : "Choose between DHCP and Static IP configuration.",
           "label": "Automatic IP",
           "value": true
         },
         {
-          "id": "static_ip",
+          "id": "wireless_static_ip",
           "type": "ip",
           "element": "input",
           "attributes": [
@@ -109,12 +109,12 @@
           "label": "Static IP",
           "value": "",
           "visibleIf": {
-            "field": "dhcp",
+            "field": "wireless_dhcp",
             "value": false
           }
         },
         {
-          "id": "static_netmask",
+          "id": "wireless_static_netmask",
           "element": "input",
           "attributes": [
             {
@@ -124,12 +124,12 @@
           "type": "ip",
           "label": "Netmask",
           "visibleIf": {
-            "field": "dhcp",
+            "field": "wireless_dhcp",
             "value": false
           }
         },
         {
-          "id": "static_gateway",
+          "id": "wireless_static_gateway",
           "element": "input",
           "attributes": [
             {
@@ -139,7 +139,7 @@
           "type": "ip",
           "label": "Gateway",
           "visibleIf": {
-            "field": "dhcp",
+            "field": "wireless_dhcp",
             "value": false
           }
         }

@@ -26,8 +26,6 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	var volumeval = this.config.get('volumestart');
 
-	if (volumeval != "disabled"){
-	var volume = Number(volumeval);
 
 	var socketURL = 'http://localhost:3000';
 	var options = {
@@ -39,10 +37,10 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	var self = this;
 	client1.on('connect', function (data) {
-		self.logger.info("Setting volume on startup at " + volume);
-		client1.emit('volume', volume);
+		self.logger.info("Setting volume on startup at " + volumeval);
+		client1.emit('volume', volumeval);
 	});
-	}
+
 
 	if (this.config.has('outputdevice') == false) {
 		this.config.addConfigValue('outputdevice', 'string', '0');
@@ -52,6 +50,11 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 		var value = this.config.get('outputdevice');
 		this.setDefaultMixer(value);
 		this.updateVolumeSettings();
+	}
+
+	if (this.config.has('volumesteps') == false) {
+	this.config.addConfigValue('volumesteps', 'string', '10');
+	this.updateVolumeSettings();
 	}
 
 	this.logger.debug("Creating shared var alsa.outputdevice");
@@ -189,9 +192,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-	value = self.config.get('volumecurvemode');
+	value = self.config.get('volumesteps');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+
+	value = self.config.get('volumecurvemode');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
 	return uiconf;
 };
@@ -265,6 +272,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
+	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 
 	self.logger.info('Volume configurations have been set');
@@ -459,13 +467,15 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
 	var valvolumestart = self.config.get('volumestart');
+	var valvolumesteps = self.config.get('volumesteps');
 
 	var settings = {
 		device : valdevice,
 		mixer : valmixer,
 		maxvolume : valvolumemax,
 		volumecurve : valvolumecurvemode,
-		volumestart : valvolumestart
+		volumestart : valvolumestart,
+		volumesteps : valvolumesteps
 	}
 
 	return self.commandRouter.volumioUpdateVolumeSettings(settings)

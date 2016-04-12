@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 var iwlist = require('./lib/iwlist.js');
 var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
@@ -82,7 +83,24 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	uiconf.sections[0].content[3].value = config.get('ethgateway');
 
 
-	//
+	//Wireless
+
+	//dhcp
+	  //dhcp
+        if (config.get('wirelessdhcp') == undefined) {
+            uiconf.sections[1].content[0].value = true;
+        } else {
+            uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
+        }
+
+	//static ip
+	uiconf.sections[1].content[1].value = config.get('wirelessip');
+
+	//static netmask
+	uiconf.sections[1].content[2].value = config.get('wirelessnetmask');
+
+	//static gateway
+	uiconf.sections[1].content[3].value = config.get('wirelessgateway');
 
 	//console.log(uiconf);
 
@@ -175,19 +193,26 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 
 	var defer = libQ.defer();
 
-	var dhcp = data['dhcp'];
-	var static_ip = data['static_ip'];
-	var static_netmask = data['static_netmask'];
-	var static_gateway = data['static_gateway'];
+	var dhcp = data['wireless_dhcp'];
+	var static_ip = data['wireless_static_ip'];
+	var static_netmask = data['wireless_static_netmask'];
+	var static_gateway = data['wireless_static_gateway'];
 
 	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
+	var wirelessdhcp = config.get('wirelessdhcp');
+	if (wirelessdhcp == undefined) {
+		config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
+		config.addConfigValue('wirelessip', 'string', static_ip);
+		config.addConfigValue('wirelessnetmask', 'string', static_netmask);
+		config.addConfigValue('wirelessgateway', 'string', static_gateway);
+	} else {
+		config.set('wirelessdhcp', dhcp);
+		config.set('wirelessip', static_ip);
+		config.set('wirelessnetmask', static_netmask);
+		config.set('wirelessgateway', static_gateway);
+	}
 
-	config.set('wirelessdhcp', dhcp);
-	config.set('wirelessip', static_ip);
-	config.set('wirelessnetmask', static_netmask);
-	config.set('wirelessgateway', static_gateway);
-
-	self.rebuildWirelessNetworkConfig();
+	self.rebuildNetworkConfig();
 	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
 
 
@@ -261,15 +286,23 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	var self = this;
 
+	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
+
+		} else {
+			self.logger.info('Permissions for /etc/network/interfaces set')
+
 	try {
 		var ws = fs.createOutputStream('/etc/network/interfaces');
 
 		ws.cork();
+		ws.write('auto wlan0\n');
 		ws.write('auto lo\n');
 		ws.write('iface lo inet loopback\n');
 		ws.write('\n');
 
-		ws.write('auto eth0\n');
+		ws.write('allow-hotplug eth0\n');
 		if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
 			ws.write('iface eth0 inet dhcp\n');
 		}
@@ -283,32 +316,34 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 		ws.write('\n');
 
+		ws.write('allow-hotplug wlan0\n');
+
+		if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
+			ws.write('iface wlan0 inet manual\n');
+		}
+		else {
+			ws.write('iface wlan0 inet static\n');
+
+			ws.write('address ' + config.get('wirelessip') + '\n');
+			ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
+			ws.write('gateway ' + config.get('wirelessgateway') + '\n');
+		}
+
 		ws.uncork();
 		ws.end();
 
 		//console.log("Restarting networking layer");
-		exec('sudo /bin/systemctl restart volumio-network.service',
-			function (error, stdout, stderr) {
-
-				if (error !== null) {
-					self.commandRouter.pushToastMessage('error', "Network restart", 'Error while restarting network: ' + error);
-				}
-				else self.commandRouter.pushToastMessage('success', "Network restart", 'Network successfully restarted');
-
-			});
+		self.commandRouter.wirelessRestart();
+		self.commandRouter.networkRestart();
 	}
 	catch (err) {
 		self.commandRouter.pushToastMessage('error', "Network setup", 'Error while setting network: ' + err);
 	}
+		}
+	});
 
 };
 
-ControllerNetwork.prototype.rebuildWirelessNetworkConfig = function () {
-	var self = this;
-
-	//TODO
-
-};
 
 ControllerNetwork.prototype.getInfoNetwork = function () {
 	var self = this;
@@ -316,6 +351,8 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var defer = libQ.defer();
 	var response = [];
 	var oll;
+	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
+	var wirelessspeed = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 
 	var ethip = ''
 	var wlanip = ''
@@ -328,7 +365,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: " ", online: oll}
+				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll}
 				response.push(ethstatus);
 			}
 		}
@@ -338,7 +375,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				wlanip = status.ipv4_address
-				var wlanstatus = {type: "Wireless", ip: wlanip, status: "connected", speed: "", online: oll}
+				var wlanstatus = {type: "Wireless", ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				response.push(wlanstatus);
 				//console.log(wlanstatus);
 
