@@ -15,6 +15,7 @@
     "convert-seconds": "1.0.1",
     "cookie-parser": "^1.4.1",
     "cue-parser": "0.0.3",
+    "decompress-zip":"0.3.0",
     "ejs": "^2.3.4",
     "express": "^4.13.4",
     "fast.js": "^0.1.1",

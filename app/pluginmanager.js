@@ -4,8 +4,10 @@ var fs = require('fs-extra');
 var HashMap = require('hashmap');
 var libFast = require('fast.js');
 var S = require('string');
-
+var download = require('file-download')
 var vconf=require('v-conf');
+var libQ=require('kew');
+var DecompressZip = require('decompress-zip');
 
 module.exports = PluginManager;
 function PluginManager(ccommand, server) {
@@ -295,5 +297,170 @@ PluginManager.prototype.checkRequiredConfigurationParameters = function (require
 
     configJson.save();
 };
+
+PluginManager.prototype.installPlugin = function (uri) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info("Downloading plugin at "+uri);
+
+    var options = {
+        directory: self.pluginPath[1],  //skipping path at entry 0 since it is a system folder
+        filename: "downloaded_plugin.zip"
+    }
+
+    download(uri, options, function(err){
+        if (err) defer.reject(new Error());
+        else {
+            var pluginFolder=self.pluginPath[1]+'downloaded_plugin';
+
+
+            self.createFolder(pluginFolder)
+                .then(self.unzipPackage.bind(self))
+                .then(self.renameFolder.bind(self))
+                .then(self.moveToCategory.bind(self))
+                .then(self.cleanupDownloadedPlugin.bind(self))
+                .then(self.addPluginToConfig.bind(self))
+                .then(function()
+                {
+                    self.logger.info("Done installing plugin.");
+                    defer.resolve();
+                })
+                .fail(function(e)
+                {
+                    self.logger.info('An error occurred installing the plugin. Rolling back config');
+                    defer.reject(new Error());
+                });
+        }
+    })
+    
+    return defer.promise;
+};
+
+
+PluginManager.prototype.createFolder = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    fs.mkdirs(folder, function (err) {
+        if (err) defer.reject(new Error());
+        else
+        {
+            defer.resolve(folder);
+        }
+    });
+
+    return defer.promise;
+}
+
+PluginManager.prototype.unzipPackage = function () {
+    var self=this;
+    var defer=libQ.defer();
+
+    var extractFolder=self.pluginPath[1]+'/downloadedPlugin';
+    var unzipper = new DecompressZip(self.pluginPath[1]+'/downloaded_plugin.zip')
+
+    unzipper.on('error', function (err) {
+        console.log("ERROR: "+err);
+        defer.reject(new Error());
+    });
+
+    unzipper.on('extract', function (log) {
+        defer.resolve(extractFolder);
+    });
+
+    unzipper.extract({
+        path: extractFolder
+    });
+
+    return defer.promise;
+}
+
+
+PluginManager.prototype.renameFolder = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    var package_json = self.getPackageJson(folder);
+    var name = package_json.name;
+
+    var newFolderName=self.pluginPath[1]+'/'+name;
+
+    fs.move(folder,newFolderName ,function (err) {
+        if (err) defer.reject(new Error());
+        else
+        {
+            defer.resolve(newFolderName);
+        }
+    });
+
+    return defer.promise;
+}
+
+PluginManager.prototype.moveToCategory = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    var package_json = self.getPackageJson(folder);
+    var name = package_json.name;
+    var category = package_json.volumio_info.plugin_type;
+
+    var newFolderName=self.pluginPath[1]+'/'+category+'/'+name;
+
+    fs.move(folder,newFolderName ,function (err) {
+        if (err) defer.reject(new Error());
+        else
+        {
+            defer.resolve(newFolderName);
+        }
+    });
+
+    return defer.promise;
+}
+
+PluginManager.prototype.cleanupDownloadedPlugin = function () {
+    var self=this;
+    var defer=libQ.defer();
+
+    var folder=self.pluginPath[1]+'/downloadedPlugin';
+    var zipFile=self.pluginPath[1]+'/downloaded_plugin.zip';
+    fs.remove(folder,function (err) {
+        if (err) defer.reject(new Error());
+        else
+        {
+            fs.remove(zipFile,function (err) {
+                if (err) defer.reject(new Error());
+                else
+                {
+                    defer.resolve();
+                }
+            });
+        }
+    });
+
+    return defer.promise;
+}
+
+PluginManager.prototype.addPluginToConfig = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info("Adding refernce to registry");
+
+    var package_json = self.getPackageJson(folder);
+    var name = package_json.name;
+    var category = package_json.volumio_info.plugin_type;
+
+    var key=category+"."+name;
+    self.config.addConfigValue(key+'.enabled','boolean',false);
+    self.config.addConfigValue(key+'.status','string','STOPPED');
+
+    defer.resolve();
+    return defer.promise;
+}
+
+
+
+
 
 

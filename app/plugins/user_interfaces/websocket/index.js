@@ -1088,6 +1088,27 @@ function InterfaceWebUI(context) {
 			});
 
 
+            /*
+                PLUGIN INSTALLATION METHODS
+             */
+
+            /*
+                Format expected: tar.gz
+                data:   {uri:'http://....../plugin.tar.gz'}
+             */
+            connWebSocket.on('installPlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.installPlugin(data.uri);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushListUsbDrives', data);
+                    });
+                }
+                else self.logger.error("Error on installing plugin");
+            });
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);

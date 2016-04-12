@@ -7,6 +7,7 @@ var exec = require('child_process').exec;
 var winston = require('winston');
 var vconf = require('v-conf');
 
+
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
@@ -508,4 +509,18 @@ CoreCommandRouter.prototype.startupSound = function () {
 
 CoreCommandRouter.prototype.fileUpdate = function () {
 	this.platformspecific.fileUpdate();
+};
+
+
+CoreCommandRouter.prototype.installPlugin = function (uri) {
+    var defer=libQ.defer();
+
+    this.pluginManager.installPlugin(uri).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+         defer.reject(new Error('Cannot install plugin'));
+    });
+
+    return defer.promise;
 };
