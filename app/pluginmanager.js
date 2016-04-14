@@ -305,31 +305,35 @@ PluginManager.prototype.installPlugin = function (uri) {
     self.logger.info("Downloading plugin at "+uri);
 
     var options = {
-        directory: self.pluginPath[1],  //skipping path at entry 0 since it is a system folder
+        directory: '/tmp',  //skipping path at entry 0 since it is a system folder
         filename: "downloaded_plugin.zip"
     }
 
     download(uri, options, function(err){
         if (err) defer.reject(new Error());
         else {
-            var pluginFolder=self.pluginPath[1]+'downloaded_plugin';
+            var pluginFolder='/tmp/downloaded_plugin';
 
 
             self.createFolder(pluginFolder)
                 .then(self.unzipPackage.bind(self))
                 .then(self.renameFolder.bind(self))
                 .then(self.moveToCategory.bind(self))
-                .then(self.cleanupDownloadedPlugin.bind(self))
+                .then(self.executeInstallationScript.bind(self))
                 .then(self.addPluginToConfig.bind(self))
                 .then(function()
                 {
                     self.logger.info("Done installing plugin.");
                     defer.resolve();
+
+                    self.tempCleanup();
                 })
                 .fail(function(e)
                 {
                     self.logger.info('An error occurred installing the plugin. Rolling back config');
                     defer.reject(new Error());
+
+                    self.tempCleanup();
                 });
         }
     })
@@ -337,6 +341,20 @@ PluginManager.prototype.installPlugin = function (uri) {
     return defer.promise;
 };
 
+PluginManager.prototype.tempCleanup = function () {
+    var self=this;
+    fs.remove('/tmp/downloaded_plugin', function (err) {
+        if (err) return console.error(err)
+
+        self.logger.info("/tmp/downloaded_plugin removed");
+    });
+
+    fs.remove('/tmp/downloaded_plugin.zip', function (err) {
+        if (err) return console.error(err)
+
+        self.logger.info("/tmp/downloaded_plugin.zip removed");
+    });
+}
 
 PluginManager.prototype.createFolder = function (folder) {
     var self=this;
@@ -357,8 +375,8 @@ PluginManager.prototype.unzipPackage = function () {
     var self=this;
     var defer=libQ.defer();
 
-    var extractFolder=self.pluginPath[1]+'/downloadedPlugin';
-    var unzipper = new DecompressZip(self.pluginPath[1]+'/downloaded_plugin.zip')
+    var extractFolder='/tmp/downloadedPlugin';
+    var unzipper = new DecompressZip('/tmp/downloaded_plugin.zip')
 
     unzipper.on('error', function (err) {
         console.log("ERROR: "+err);
@@ -381,6 +399,8 @@ PluginManager.prototype.renameFolder = function (folder) {
     var self=this;
     var defer=libQ.defer();
 
+    self.logger.info("Rename folder");
+
     var package_json = self.getPackageJson(folder);
     var name = package_json.name;
 
@@ -401,6 +421,8 @@ PluginManager.prototype.moveToCategory = function (folder) {
     var self=this;
     var defer=libQ.defer();
 
+    self.logger.info("Move to category");
+
     var package_json = self.getPackageJson(folder);
     var name = package_json.name;
     var category = package_json.volumio_info.plugin_type;
@@ -418,36 +440,15 @@ PluginManager.prototype.moveToCategory = function (folder) {
     return defer.promise;
 }
 
-PluginManager.prototype.cleanupDownloadedPlugin = function () {
-    var self=this;
-    var defer=libQ.defer();
-
-    var folder=self.pluginPath[1]+'/downloadedPlugin';
-    var zipFile=self.pluginPath[1]+'/downloaded_plugin.zip';
-    fs.remove(folder,function (err) {
-        if (err) defer.reject(new Error());
-        else
-        {
-            fs.remove(zipFile,function (err) {
-                if (err) defer.reject(new Error());
-                else
-                {
-                    defer.resolve();
-                }
-            });
-        }
-    });
-
-    return defer.promise;
-}
-
 PluginManager.prototype.addPluginToConfig = function (folder) {
     var self=this;
     var defer=libQ.defer();
 
-    self.logger.info("Adding refernce to registry");
+    self.logger.info("Adding reference to registry");
 
     var package_json = self.getPackageJson(folder);
+
+    self.logger.info(JSON.stringify(package_json));
     var name = package_json.name;
     var category = package_json.volumio_info.plugin_type;
 
@@ -458,6 +459,37 @@ PluginManager.prototype.addPluginToConfig = function (folder) {
     defer.resolve();
     return defer.promise;
 }
+
+PluginManager.prototype.executeInstallationScript = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info("Checking if install.sh is present");
+    var installScript=folder+'/install.sh';
+    fs.stat(installScript,function(err,stat){
+        if(err)
+        {
+            self.logger.info("Check return the error "+err);
+            defer.reject(new Error());
+        }
+        else {
+             self.logger.info("Executing install.sh");
+                exec(installScript, {uid:1000, gid:1000},function(error, stdout, stderr) {
+                    if (error!==undefined && error!==null) {
+                        self.logger.info("Install script return the error "+error);
+                        defer.reject(new Error());
+                    } else {
+                        self.logger.info("Install script completed");
+                        defer.resolve(folder);
+                    }
+                });
+
+        }
+    });
+    return defer.promise;
+}
+
+
 
 
 
