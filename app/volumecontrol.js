@@ -132,7 +132,7 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	var self = this;
 
 
-	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Mixer: '+ data.mixer)
+	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Mixer: '+ data.mixer + ' Max Vol: ' + data.maxvolume + ' Vol Curve; ' + data.volumecurve + ' Vol Steps: ' + data.volumesteps);
 	device = data.device;
 	mixer = '"'+data.mixer+'"';
 	maxvolume = data.maxvolume;
