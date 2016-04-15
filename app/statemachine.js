@@ -177,9 +177,14 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 	if (this.currentStatus === 'play') {
 		// Play -> Pause transition
-		this.currentStatus = 'pause';
+		if (this.currentTrackType === 'webradio') {
+			this.currentStatus = 'stop';
+			return this.serviceStop();
 
-		return this.servicePause();
+		} else {
+			this.currentStatus = 'pause';
+			return this.servicePause();
+		}
 	}
 };
 
