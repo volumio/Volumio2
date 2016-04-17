@@ -1122,6 +1122,32 @@ function InterfaceWebUI(context) {
                 else self.logger.error("Error on installing plugin");
             });
 
+            connWebSocket.on('enablePlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.enablePlugin(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushEnablePlugin', data);
+                    });
+                }
+                else self.logger.error("Error on installing plugin");
+            });
+
+            connWebSocket.on('disablePlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.disablePlugin(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushDisablePlugin', data);
+                    });
+                }
+                else self.logger.error("Error on disabling plugin");
+            });
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);

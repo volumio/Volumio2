@@ -538,3 +538,29 @@ CoreCommandRouter.prototype.unInstallPlugin = function (data) {
 
     return defer.promise;
 };
+
+CoreCommandRouter.prototype.enablePlugin = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.enablePlugin(data).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot enable plugin'));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.disablePlugin = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.disablePlugin(data).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot disable plugin'));
+    });
+
+    return defer.promise;
+};

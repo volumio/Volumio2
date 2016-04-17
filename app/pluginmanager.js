@@ -605,7 +605,9 @@ PluginManager.prototype.unInstallPlugin = function (data) {
     {
        self.logger.info("Uninstalling plugin "+data.plugin);
        self.stopPlugin(data.category,data.plugin).
-            then(self.disablePlugin.bind(self,data)).
+            then(self.disablePlugin.bind(self,data.category,data.plugin)).
+            then(self.removePluginFromConfiguration.bind(self,data.category,data.plugin)).
+            then(self.pluginFolderCleanup.bind(self))
             then(function(e){
                 defer.resolve(data);
              })
@@ -627,7 +629,7 @@ PluginManager.prototype.disablePlugin = function (category,name) {
     var key = category + '.' + name;
     self.config.set(key + '.enabled',false);
 
-    defer.resolve(data);
+    defer.resolve();
     return defer.promise;
 }
 
@@ -641,7 +643,22 @@ PluginManager.prototype.enablePlugin = function (category,name) {
     var key = category + '.' + name;
     self.config.set(key + '.enabled',true);
 
-    defer.resolve(data);
+    defer.resolve();
+    return defer.promise;
+}
+
+PluginManager.prototype.removePluginFromConfiguration = function (category,name) {
+    var self = this;
+    var defer=libQ.defer();
+
+    self.logger.info("Removing plugin "+name+" from configuration");
+
+    var key = category + '.' + name;
+    self.config.delete(key);
+
+    self.plugins.remove(key);
+
+    defer.resolve();
     return defer.promise;
 }
 
