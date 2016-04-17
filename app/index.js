@@ -37,6 +37,7 @@ function CoreCommandRouter(server) {
 
 	// Start plugins
 	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+    this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
 	//self.pluginManager.onVolumioStart();
 	//self.pluginManager.startPlugins();
@@ -520,6 +521,19 @@ CoreCommandRouter.prototype.installPlugin = function (uri) {
         defer.resolve();
     }).fail(function(){
          defer.reject(new Error('Cannot install plugin'));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.unInstallPlugin = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.unInstallPlugin(data).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot uninstall plugin'));
     });
 
     return defer.promise;

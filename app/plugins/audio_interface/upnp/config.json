@@ -4,5 +4,5 @@
   "openhome":{"modifiable":false,"value":"true","type":"boolean"},
   "ohmetapersist":{"modifiable":false,"value":"true","type":"boolean"},
   "cachedir":{"modifiable":false,"value":"/tmp/upmpdcli","type":"string"},
-  "iconpath":{"modifiable":false,"value":"/volumio/app/plugins/audio_interfaces/upnp_interface/upnpicon.png","type":"string"}
+  "iconpath":{"modifiable":false,"value":"/volumio/app/plugins/audio_interface/upnp_interface/upnpicon.png","type":"string"}
 }

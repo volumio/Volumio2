@@ -340,7 +340,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 	var soundCardDir = '/proc/asound/';
 	var idFile = '/id';
 	var regex = /card(\d+)/;
-	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interfaces/alsa_controller/cards.json'),  'utf8', {throws: false});
+	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
 	var soundFiles = fs.readdirSync(soundCardDir);
 
@@ -394,7 +394,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var currentcardname = '';
 	var defaultmixer = '';
 	var match = '';
-	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interfaces/alsa_controller/cards.json'),  'utf8', {throws: false});
+	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 

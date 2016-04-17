@@ -1103,7 +1103,20 @@ function InterfaceWebUI(context) {
 
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
-                        selfConnWebSocket.emit('pushListUsbDrives', data);
+                        selfConnWebSocket.emit('pushInstallPlugin', data);
+                    });
+                }
+                else self.logger.error("Error on installing plugin");
+            });
+
+            connWebSocket.on('unInstallPlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.unInstallPlugin(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushUnInstallPlugin', data);
                     });
                 }
                 else self.logger.error("Error on installing plugin");

@@ -129,17 +129,20 @@ PluginManager.prototype.loadPlugins = function () {
 						var pluginFolder = groupfolder + '/' + subfolder;
 
 						var package_json = self.getPackageJson(pluginFolder);
+                        if(package_json!==undefined)
+                        {
+                            var boot_priority = package_json.volumio_info.boot_priority;
+                            if (boot_priority == undefined)
+                                boot_priority = 100;
 
-						var boot_priority = package_json.volumio_info.boot_priority;
-						if (boot_priority == undefined)
-							boot_priority = 100;
+                            var plugin_array = priority_array.get(boot_priority);
+                            if (plugin_array == undefined)
+                                plugin_array = [];
 
-						var plugin_array = priority_array.get(boot_priority);
-						if (plugin_array == undefined)
-							plugin_array = [];
+                            plugin_array.push(pluginFolder);
+                            priority_array.set(boot_priority, plugin_array);
+                        }
 
-						plugin_array.push(pluginFolder);
-						priority_array.set(boot_priority, plugin_array);
 					}
 				}
 
@@ -163,7 +166,14 @@ PluginManager.prototype.loadPlugins = function () {
 PluginManager.prototype.getPackageJson = function (folder) {
 	var self = this;
 
-	return fs.readJsonSync(folder + '/package.json');
+    try {
+        return fs.readJsonSync(folder + '/package.json');
+    }
+    catch(ex)
+    {
+        self.logger.info("Error loading package.json in "+folder + '/package.json');
+    }
+
 };
 
 
@@ -174,19 +184,29 @@ PluginManager.prototype.isEnabled = function (category, pluginName) {
 
 PluginManager.prototype.startPlugin = function (category, name) {
 	var self = this;
+    var defer=libQ.defer();
 
-	self.config.set(category + '.' + name + '.status', "STARTED");
+    self.config.set(category + '.' + name + '.status', "STARTED");
 
 	var plugin = self.getPlugin(category, name);
-	plugin.onStart();
+    if(plugin!==undefined)
+        pluginplugin.onStart();
+
+    defer.resolve();
+    return defer.promise;
 };
 
 PluginManager.prototype.stopPlugin = function (category, name) {
 	var self = this;
+    var defer=libQ.defer();
 
 	self.config.set(category + '.' + name + '.status', "STOPPED");
 	var plugin = self.getPlugin(category, name);
-	plugin.onStop();
+	if(plugin!==undefined)
+        plugin.onStop();
+
+    defer.resolve();
+    return defer.promise;
 };
 
 PluginManager.prototype.startPlugins = function () {
@@ -260,8 +280,6 @@ PluginManager.prototype.getPlugin = function (category, name) {
 	var self = this;
 	if (self.plugins.get(category + '.' + name)) {
 		return self.plugins.get(category + '.' + name).instance;
-	} else {
-		self.logger.error("Plugin " + name + " is not loaded. Unable to get an instance");
 	}
 };
 
@@ -330,10 +348,8 @@ PluginManager.prototype.installPlugin = function (uri) {
                 })
                 .fail(function(e)
                 {
-                    self.logger.info('An error occurred installing the plugin. Rolling back config');
                     defer.reject(new Error());
-
-                    self.tempCleanup();
+                    self.rollbackInstall();
                 });
         }
     })
@@ -341,19 +357,26 @@ PluginManager.prototype.installPlugin = function (uri) {
     return defer.promise;
 };
 
+PluginManager.prototype.rmDir = function (folder) {
+    var self=this;
+
+    var defer=libQ.defer();
+    fs.remove('/tmp/downloaded_plugin', function (err) {
+        if (err) defere.reject(new Error("Cannot delete folder "+folder));
+
+        self.logger.info("Folder "+folder+" removed");
+        defer.resolve(folder);
+    });
+
+    return defer.promise;
+}
+
+
 PluginManager.prototype.tempCleanup = function () {
     var self=this;
-    fs.remove('/tmp/downloaded_plugin', function (err) {
-        if (err) return console.error(err)
 
-        self.logger.info("/tmp/downloaded_plugin removed");
-    });
-
-    fs.remove('/tmp/downloaded_plugin.zip', function (err) {
-        if (err) return console.error(err)
-
-        self.logger.info("/tmp/downloaded_plugin.zip removed");
-    });
+    self.rmDir('/tmp/downloaded_plugin');
+    self.rmDir('/tmp/downloaded_plugin.zip');
 }
 
 PluginManager.prototype.createFolder = function (folder) {
@@ -490,9 +513,136 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 }
 
 
+PluginManager.prototype.rollbackInstall = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info('An error occurred installing the plugin. Rolling back config');
 
 
+    self.pluginFolderCleanup();
+    self.tempCleanup();
+
+    return defer.promise;
+}
 
 
+//This method uses synchronous methods only in order to block the whole volumio and don't let it access plugins methods
+//this in order to avoid "multithreading" issues. Returning a promise just iin case the method would be used in a promise chain
+PluginManager.prototype.pluginFolderCleanup = function () {
+    var self=this;
+    self.logger.info("Plugin folders cleanup");
+    //scanning folders for non installed plugins
+    for(var i in self.pluginPath)
+    {
+        self.logger.info("Scanning into folder "+self.pluginPath[i]);
+        var categories=fs.readdirSync(self.pluginPath[i]);
+
+        for(var j in categories)
+        {
+            var catFile=self.pluginPath[i]+'/'+categories[j];
+            self.logger.info("Scanning category "+categories[j]);
+
+            if(fs.statSync(catFile).isDirectory())
+            {
+                var plugins=fs.readdirSync(catFile);
+
+                for( var k in plugins)
+                {
+                    var pluginName=plugins[k];
+                    var pluginFile=catFile+'/'+pluginName;
+
+                    if(fs.statSync(pluginFile).isDirectory())
+                    {
+                        if(self.config.has(categories[j]+'.'+pluginName))
+                        {
+                            self.logger.debug("Plugin "+pluginName+" found. Leaving it untouched.");
+                        }
+                        else {
+                            self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Removing folder.");
+
+                            fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
+                        }
+                    }
+                    else
+                    {
+                        self.logger.info("Removing "+pluginFile);
+                        fs.removeSync(pluginFile);
+                    }
+
+                }
+
+
+                if(plugins.length==0)
+                {
+                    fs.removeSync(catFile);
+                }
+            }
+            else
+            {
+                if(categories[j]!=='plugins.json')
+                {
+                    self.logger.info("Removing "+catFile);
+                    fs.removeSync(catFile);
+                }
+
+            }
+
+
+        }
+    }
+
+    self.logger.info("Plugin folders cleanup completed");
+}
+
+
+PluginManager.prototype.unInstallPlugin = function (data) {
+    var self=this;
+    var defer=libQ.defer();
+
+    var key=data.category+'.'+data.plugin;
+    if(self.config.has(key))
+    {
+       self.logger.info("Uninstalling plugin "+data.plugin);
+       self.stopPlugin(data.category,data.plugin).
+            then(self.disablePlugin.bind(self,data)).
+            then(function(e){
+                defer.resolve(data);
+             })
+           .fail(function(e){
+               defer.reject(new Error());
+           });
+    }
+    else defer.reject(new Error("Plugin doesn't exist"));
+
+    return defer.promise;
+};
+
+PluginManager.prototype.disablePlugin = function (category,name) {
+    var self = this;
+    var defer=libQ.defer();
+
+    self.logger.info("Disabling plugin "+name);
+
+    var key = category + '.' + name;
+    self.config.set(key + '.enabled',false);
+
+    defer.resolve(data);
+    return defer.promise;
+}
+
+
+PluginManager.prototype.enablePlugin = function (category,name) {
+    var self = this;
+    var defer=libQ.defer();
+
+    self.logger.info("Disabling plugin "+name);
+
+    var key = category + '.' + name;
+    self.config.set(key + '.enabled',true);
+
+    defer.resolve(data);
+    return defer.promise;
+}
 
 

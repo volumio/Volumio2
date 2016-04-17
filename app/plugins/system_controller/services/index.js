@@ -52,14 +52,14 @@ ControllerServices.prototype.getUIConfig = function()
 
 	var uiconf=fs.readJsonSync(__dirname+'/UIConfig.json');
 
-	var plugins=self.commandRouter.pluginManager.getPluginNames('music_services');
+	var plugins=self.commandRouter.pluginManager.getPluginNames('music_service');
 
 	for(var i in plugins)
 	{
 		var pluginName=plugins[i];
-		if(self.commandRouter.pluginManager.isEnabled('music_services',pluginName)==true)
+		if(self.commandRouter.pluginManager.isEnabled('music_service',pluginName)==true)
 		{
-			var plugin=self.commandRouter.pluginManager.getPlugin('music_services',pluginName);
+			var plugin=self.commandRouter.pluginManager.getPlugin('music_service',pluginName);
 
 			uiconf.sections.push(plugin.getUIConfig());
 
