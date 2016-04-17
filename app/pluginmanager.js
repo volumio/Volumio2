@@ -4,7 +4,7 @@ var fs = require('fs-extra');
 var HashMap = require('hashmap');
 var libFast = require('fast.js');
 var S = require('string');
-var download = require('file-download')
+var download = require('file-download');
 var vconf=require('v-conf');
 var libQ=require('kew');
 var DecompressZip = require('decompress-zip');
@@ -667,11 +667,57 @@ PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
     var self = this;
     var defer=libQ.defer();
 
-    self.logger.info("Changing plugin "+name+" status to "+status);
-
     var key = category + '.' + name;
-    self.config.set(key+'.status',status);
+    var isEnabled=self.config.get(key+'.enabled');
 
-    defer.resolve();
+    if(isEnabled==false)
+        defere.reject(new Error());
+    else
+    {
+        self.logger.info("Changing plugin "+name+" status to "+status);
+
+        var keyStatus=key+'.status';
+
+        var currentStatus=self.config.get(keyStatus);
+        if(currentStatus==='STARTED')
+        {
+            if(status==='START')
+            {
+                defer.resolve();
+            }
+            else if(status==='STOP')
+            {
+                self.stopPlugin(category,name).
+                then(function()
+                {
+                    defer.resolve();
+                }).
+                fail(function()
+                {
+                    defer.reject(new Error());
+                });
+            }
+        }
+        else if(currentStatus==='STOPPED')
+        {
+            if(status==='START')
+            {
+                self.startPlugin(category,name).
+                then(function()
+                {
+                    defer.resolve();
+                }).
+                fail(function()
+                {
+                    defer.reject(new Error());
+                });
+            }
+            else if(status==='STOP')
+            {
+                defer.resolve();
+            }
+        }
+    }
+
     return defer.promise;
 }
