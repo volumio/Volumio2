@@ -1148,6 +1148,18 @@ function InterfaceWebUI(context) {
                 else self.logger.error("Error on disabling plugin");
             });
 
+            connWebSocket.on('modifyPluginStatus', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.modifyPluginStatus(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushModifyPluginStatus', data);
+                    });
+                }
+                else self.logger.error("Error on disabling plugin");
+            });
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);

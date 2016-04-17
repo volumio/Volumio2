@@ -596,20 +596,20 @@ PluginManager.prototype.pluginFolderCleanup = function () {
 }
 
 
-PluginManager.prototype.unInstallPlugin = function (data) {
+PluginManager.prototype.unInstallPlugin = function (category,name) {
     var self=this;
     var defer=libQ.defer();
 
-    var key=data.category+'.'+data.plugin;
+    var key=category+'.'+name;
     if(self.config.has(key))
     {
-       self.logger.info("Uninstalling plugin "+data.plugin);
-       self.stopPlugin(data.category,data.plugin).
-            then(self.disablePlugin.bind(self,data.category,data.plugin)).
-            then(self.removePluginFromConfiguration.bind(self,data.category,data.plugin)).
+       self.logger.info("Uninstalling plugin "+name);
+       self.stopPlugin(category,name).
+            then(self.disablePlugin.bind(self,category,name)).
+            then(self.removePluginFromConfiguration.bind(self,category,name)).
             then(self.pluginFolderCleanup.bind(self))
             then(function(e){
-                defer.resolve(data);
+                defer.resolve();
              })
            .fail(function(e){
                defer.reject(new Error());
@@ -663,3 +663,15 @@ PluginManager.prototype.removePluginFromConfiguration = function (category,name)
 }
 
 
+PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
+    var self = this;
+    var defer=libQ.defer();
+
+    self.logger.info("Changing plugin "+name+" status to "+status);
+
+    var key = category + '.' + name;
+    self.config.set(key+'.status',status);
+
+    defer.resolve();
+    return defer.promise;
+}

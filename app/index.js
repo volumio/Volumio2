@@ -529,7 +529,7 @@ CoreCommandRouter.prototype.installPlugin = function (uri) {
 CoreCommandRouter.prototype.unInstallPlugin = function (data) {
     var defer=libQ.defer();
 
-    this.pluginManager.unInstallPlugin(data).then(function()
+    this.pluginManager.unInstallPlugin(data.category,data.plugin).then(function()
     {
         defer.resolve();
     }).fail(function(){
@@ -542,7 +542,7 @@ CoreCommandRouter.prototype.unInstallPlugin = function (data) {
 CoreCommandRouter.prototype.enablePlugin = function (data) {
     var defer=libQ.defer();
 
-    this.pluginManager.enablePlugin(data).then(function()
+    this.pluginManager.enablePlugin(data.category,data.plugin).then(function()
     {
         defer.resolve();
     }).fail(function(){
@@ -555,7 +555,7 @@ CoreCommandRouter.prototype.enablePlugin = function (data) {
 CoreCommandRouter.prototype.disablePlugin = function (data) {
     var defer=libQ.defer();
 
-    this.pluginManager.disablePlugin(data).then(function()
+    this.pluginManager.disablePlugin(data.category,data.plugin).then(function()
     {
         defer.resolve();
     }).fail(function(){
@@ -564,3 +564,17 @@ CoreCommandRouter.prototype.disablePlugin = function (data) {
 
     return defer.promise;
 };
+
+CoreCommandRouter.prototype.modifyPluginStatus = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.modifyPluginStatus(data.category,data.plugin,data.status).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot update plugin status'));
+    });
+
+    return defer.promise;
+};
+
