@@ -1312,7 +1312,6 @@ InterfaceWebUI.prototype.emitFavourites = function (value) {
 };
 
 InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
-    this.logger.info("[BROADCAST] "+emit+" "+JSON.stringify(payload));
     this.libSocketIO.sockets.emit(emit,payload);
 };
 

@@ -641,14 +641,35 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
     if(self.config.has(key))
     {
        self.logger.info("Uninstalling plugin "+name);
-       self.stopPlugin(category,name).
-            then(self.disablePlugin.bind(self,category,name)).
-            then(self.removePluginFromConfiguration.bind(self,category,name)).
+       self.stopPlugin(category,name)
+           .then(function(e)
+           {
+               self.pushMessage('installPluginStatus',{'progress': 30, 'message': 'Plugin stopped'});
+               return e;
+           }).
+            then(self.disablePlugin.bind(self,category,name))
+           .then(function(e)
+           {
+               self.pushMessage('installPluginStatus',{'progress': 60, 'message': 'Plugin disabled'});
+               return e;
+           }).
+            then(self.removePluginFromConfiguration.bind(self,category,name))
+           .then(function(e)
+           {
+               self.pushMessage('installPluginStatus',{'progress': 90, 'message': 'Plugin removed from registry'});
+               return e;
+           }).
             then(self.pluginFolderCleanup.bind(self))
+           .then(function(e)
+           {
+               self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'Plugin uninstalled'});
+               return e;
+           }).
             then(function(e){
                 defer.resolve();
              })
            .fail(function(e){
+               self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'An error occurred uninstalling the plugin. Details: '+e});
                defer.reject(new Error());
            });
     }
