@@ -578,3 +578,13 @@ CoreCommandRouter.prototype.modifyPluginStatus = function (data) {
     return defer.promise;
 };
 
+CoreCommandRouter.prototype.broadcastMessage = function (emit,payload) {
+    var self = this;
+    return libQ.all(
+        libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+            var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+            if (typeof thisInterface.broadcastMessage === "function")
+                return thisInterface.broadcastMessage(emit,payload);
+        })
+    );
+};

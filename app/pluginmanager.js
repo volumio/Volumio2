@@ -327,18 +327,51 @@ PluginManager.prototype.installPlugin = function (uri) {
         filename: "downloaded_plugin.zip"
     }
 
+    self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin'});
+
     download(uri, options, function(err){
         if (err) defer.reject(new Error());
         else {
             var pluginFolder='/tmp/downloaded_plugin';
 
-
             self.createFolder(pluginFolder)
+                .then(self.pushMessage.bind(self,'installPluginStatus',{'progress': 30, 'message': 'Creating folder on disk'}))
                 .then(self.unzipPackage.bind(self))
+                .then(function(e)
+                {
+                    self.pushMessage('installPluginStatus',{'progress': 40, 'message': 'Unpacking plugin'});
+                    return e;
+                })
+                .then(self.checkPluginDoesntExist.bind(self))
+                .then(function(e)
+                {
+                    self.pushMessage('installPluginStatus',{'progress': 50, 'message': 'Checking for duplicate plugin'});
+                    return e;
+                })
                 .then(self.renameFolder.bind(self))
+                .then(function(e)
+                {
+                    self.pushMessage('installPluginStatus',{'progress': 60, 'message': 'Moving stuff'});
+                    return e;
+                })
                 .then(self.moveToCategory.bind(self))
+                .then(function(e)
+                {
+                    self.pushMessage('installPluginStatus',{'progress': 70, 'message': 'Installing dependencies'});
+                    return e;
+                })
                 .then(self.executeInstallationScript.bind(self))
+                .then(function(e)
+                {
+                    self.pushMessage('installPluginStatus',{'progress': 90, 'message': 'Adding plugin to registry'});
+                    return e;
+                })
                 .then(self.addPluginToConfig.bind(self))
+                .then(function(e)
+                {
+                    self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'Installed'});
+                    return e;
+                })
                 .then(function()
                 {
                     self.logger.info("Done installing plugin.");
@@ -348,6 +381,7 @@ PluginManager.prototype.installPlugin = function (uri) {
                 })
                 .fail(function(e)
                 {
+                    self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'The folowing error occurred when installing the plugin: '+e});
                     defer.reject(new Error());
                     self.rollbackInstall();
                 });
@@ -452,13 +486,17 @@ PluginManager.prototype.moveToCategory = function (folder) {
 
     var newFolderName=self.pluginPath[1]+'/'+category+'/'+name;
 
-    fs.move(folder,newFolderName ,function (err) {
-        if (err) defer.reject(new Error());
-        else
-        {
-            defer.resolve(newFolderName);
-        }
+    fs.remove(newFolderName,function()
+    {
+        fs.move(folder,newFolderName ,function (err) {
+            if (err) defer.reject(new Error(err));
+            else
+            {
+                defer.resolve(newFolderName);
+            }
+        });
     });
+
 
     return defer.promise;
 }
@@ -471,7 +509,6 @@ PluginManager.prototype.addPluginToConfig = function (folder) {
 
     var package_json = self.getPackageJson(folder);
 
-    self.logger.info(JSON.stringify(package_json));
     var name = package_json.name;
     var category = package_json.volumio_info.plugin_type;
 
@@ -721,3 +758,38 @@ PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
 
     return defer.promise;
 }
+
+/*
+   { , buttons[{name:nome bottone, emit:emit, payload:payload emit},{name:nome2, emit:emit2,payload:payload2}]}
+
+
+ */
+PluginManager.prototype.pushMessage = function (emit,payload) {
+    var self = this;
+    var defer=libQ.defer();
+
+    this.coreCommand.broadcastMessage(emit,payload);
+
+    defer.resolve();
+    return defer.promise;
+}
+
+PluginManager.prototype.checkPluginDoesntExist = function (folder) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info("Checking if plugin already exists");
+
+    var package_json = self.getPackageJson(folder);
+    var name = package_json.name;
+    var category = package_json.volumio_info.plugin_type;
+
+    var key=category+'.'+name;
+
+    if(self.config.has(key))
+        defer.reject(new Error('Plugin '+name+" already exists"));
+    else defer.resolve(folder);
+
+    return defer.promise;
+}
+
