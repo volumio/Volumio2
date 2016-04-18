@@ -20,8 +20,8 @@
     "express": "^4.13.4",
     "fast.js": "^0.1.1",
     "file-download": "^0.1.2",
-    "fs-extra": "^0.26.7",
-    "hashmap": "^2.0.4",
+    "fs-extra": "^0.27.0",
+    "hashmap": "^2.0.5",
     "inotify": "1.4.0",
     "ip": "^1.1.2",
     "is-online": "^5.1.1",
@@ -30,7 +30,7 @@
     "level": "^1.4.0",
     "linux-mountutils": "^1.0.0",
     "mdns": "^2.3.1",
-    "moment": "^2.12.0",
+    "moment": "^2.13.0",
     "morgan": "^1.7.0",
     "mpd": "^1.3.0",
     "musicbrainz": "^0.2.6",
@@ -56,7 +56,7 @@
     "v-conf": "0.10.0",
     "winston": "^2.2.0",
     "wireless-tools": "0.15.0",
-    "yargs": "^4.4.0"
+    "yargs": "^4.6.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {

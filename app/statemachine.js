@@ -177,9 +177,14 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 	if (this.currentStatus === 'play') {
 		// Play -> Pause transition
-		this.currentStatus = 'pause';
+		if (this.currentTrackType === 'webradio') {
+			this.currentStatus = 'stop';
+			return this.serviceStop();
 
-		return this.servicePause();
+		} else {
+			this.currentStatus = 'pause';
+			return this.servicePause();
+		}
 	}
 };
 
@@ -233,6 +238,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentDuration = 0;
 			self.currentTrackBlock = [];
 			self.timeLastServiceStateUpdate = 0;
+			this.currentTrackType = null;
 			self.timerPlayback = null;
 			self.currentTitle = null;
 			self.currentArtist = null;
@@ -369,6 +375,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
+			this.currentTrackType = null;
 			this.currentTitle = null;
 			this.currentArtist = null;
 			this.currentAlbum = null;
@@ -391,6 +398,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
+			this.currentTrackType = null;
 			this.currentTitle = null;
 			this.currentArtist = null;
 			this.currentAlbum = null;
@@ -421,6 +429,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
+			this.currentTrackType = null;
 			this.currentTitle = null;
 			this.currentArtist = null;
 			this.currentAlbum = null;
