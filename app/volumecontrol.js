@@ -12,6 +12,7 @@ var mixer = '';
 var maxvolume = '';
 var volumecurve = '';
 var volumesteps = '';
+var currentvolume = '';
 
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
@@ -174,7 +175,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			//UnMute
 			self.setMuted(false, function (err) {
 				self.getVolume(function (err, vol) {
-
+					if (vol == null) {
+						vol =  currentvolume
+					}
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
 					Volume.vol = VolumeInteger;
 					Volume.mute = false;
@@ -186,6 +189,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			//Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
 			self.setMuted(false, function (err) {
 				self.getVolume(function (err, vol) {
+					if (vol == null) {
+						vol =  currentvolume
+					}
 					VolumeInteger = Number(vol)+Number(volumesteps);
 					if (VolumeInteger > maxvolume){
 						VolumeInteger = maxvolume;
@@ -203,6 +209,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 		case '-':
 			//Decrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
 			self.getVolume(function (err, vol) {
+				if (vol == null) {
+					vol =  currentvolume
+				}
 				VolumeInteger = Number(vol)-Number(volumesteps);
 				if (VolumeInteger > maxvolume){
 					VolumeInteger = maxvolume;
@@ -226,6 +235,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					//Log Volume Control
 					Volume.vol = VolumeInteger;
 					Volume.mute = false;
+					currentvolume = VolumeInteger;
 					self.commandRouter.volumioupdatevolume(Volume);
 
 				});
