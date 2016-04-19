@@ -13,6 +13,8 @@ var maxvolume = '';
 var volumecurve = '';
 var volumesteps = '';
 var currentvolume = '';
+var currentmute = '';
+var premutevolume = '';
 
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
@@ -149,41 +151,32 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 	switch (VolumeInteger) {
 		case 'mute':
 			//Mute or Unmute, depending on state
-			self.getMuted(function (err, mute) {
-				if (mute == false) {
-					self.getVolume(function (err, vol) {
-						self.setMuted(true, function (err) {
-							self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Muted ');
-							Volume.vol = 0;
-							Volume.mute = true;
-							self.commandRouter.volumioupdatevolume(Volume);
-						});
-					});
-				} else if (mute == true) {
-					self.setMuted(false, function (err) {
-						self.getVolume(function (err, vol) {
-							self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
-							Volume.vol = 0;
-							Volume.mute = false;
-							self.commandRouter.volumioupdatevolume(Volume);
-						});
-					});
+			self.getVolume(function (err, vol) {
+				if (vol == null) {
+					vol =  currentvolume
 				}
+				currentmute = true;
+				premutevolume = vol;
+
+				self.setVolume(0, function (err) {
+					Volume.vol = 0
+					Volume.mute = true;
+					self.commandRouter.volumioupdatevolume(Volume);
+				});
 			});
 			break;
 		case 'unmute':
 			//UnMute
-			self.setMuted(false, function (err) {
-				self.getVolume(function (err, vol) {
-					if (vol == null) {
-						vol =  currentvolume
-					}
-					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::UnMuted ');
-					Volume.vol = VolumeInteger;
-					Volume.mute = false;
-					self.commandRouter.volumioupdatevolume(Volume);
-				});
-			});
+					currentmute = false;
+					self.setVolume(premutevolume, function (err) {
+						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+						//Log Volume Control
+						Volume.vol = premutevolume;
+						Volume.mute = false;
+						currentvolume = premutevolume;
+						self.commandRouter.volumioupdatevolume(Volume);
+
+					});
 			break;
 		case '+':
 			//Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
@@ -229,7 +222,6 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			if (VolumeInteger > maxvolume){
 				VolumeInteger = maxvolume;
 			}
-			self.setMuted(false, function (err) {
 				self.setVolume(VolumeInteger, function (err) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
 					//Log Volume Control
@@ -237,8 +229,6 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					Volume.mute = false;
 					currentvolume = VolumeInteger;
 					self.commandRouter.volumioupdatevolume(Volume);
-
-				});
 			});
 	}
 };

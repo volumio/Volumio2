@@ -385,6 +385,32 @@ function InterfaceWebUI(context) {
 					});
 			});
 
+			connWebSocket.on('mute', function () {
+				var timeStart = Date.now();
+				var VolumeInteger = 'mute';
+				self.logStart('Client requests Mute')
+					.then(function () {
+						return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+					})
+					.fail(self.pushError.bind(self))
+					.done(function () {
+						return self.logDone(timeStart);
+					});
+			});
+
+			connWebSocket.on('unmute', function () {
+				var timeStart = Date.now();
+				var VolumeInteger = 'unmute';
+				self.logStart('Client requests Unmute')
+					.then(function () {
+						return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+					})
+					.fail(self.pushError.bind(self))
+					.done(function () {
+						return self.logDone(timeStart);
+					});
+			});
+
 			connWebSocket.on('importServicePlaylists', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests import of playlists')
