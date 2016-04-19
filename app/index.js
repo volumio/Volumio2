@@ -588,3 +588,8 @@ CoreCommandRouter.prototype.broadcastMessage = function (emit,payload) {
         })
     );
 };
+
+CoreCommandRouter.prototype.getInstalledPlugins = function () {
+    return this.pluginManager.getInstalledPlugins();
+};
+

@@ -814,3 +814,56 @@ PluginManager.prototype.checkPluginDoesntExist = function (folder) {
     return defer.promise;
 }
 
+PluginManager.prototype.getInstalledPlugins = function () {
+    var self=this;
+    var defer=libQ.defer();
+
+    var response=[];
+
+    for (var i=1;i<this.pluginPath.length;i++) {
+        var folder = self.pluginPath[i];
+
+        if (fs.existsSync(folder)) {
+            var pluginsFolder = fs.readdirSync(folder);
+
+            for (var k in pluginsFolder) {
+                var groupfolder = folder + '/' + pluginsFolder[k];
+
+                var stats = fs.statSync(groupfolder);
+                if (stats.isDirectory()) {
+
+                    var folderContents = fs.readdirSync(groupfolder);
+                    for (var j in folderContents) {
+                        var subfolder = folderContents[j];
+
+                        //loading plugin package.json
+                        var pluginFolder = groupfolder + '/' + subfolder;
+
+                        var package_json = self.getPackageJson(pluginFolder);
+                        if(package_json!==undefined)
+                        {
+                            var name = package_json.name;
+                            var category = package_json.volumio_info.plugin_type;
+                            var key=category+'.'+name;
+
+                            response.push({
+                                prettyName:name,
+                                name:name,
+                                category:category,
+                                enabled:self.config.get(key+'.enabled'),
+                                active:self.config.get(key+'.status')==='STARTED'
+                            });
+                        }
+
+                    }
+                }
+
+            }
+        }
+
+    }
+    defer.resolve(response);
+
+    return defer.promise;
+}
+

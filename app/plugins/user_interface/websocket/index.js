@@ -1160,6 +1160,22 @@ function InterfaceWebUI(context) {
                 }
                 else self.logger.error("Error on disabling plugin");
             });
+
+            connWebSocket.on('getInstalledPlugins', function (pippo) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.getInstalledPlugins();
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (installedPLugins) {
+                        self.logger.info(JSON.stringify(installedPLugins));
+                        selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+                    });
+                }
+                else self.logger.error("Error on getting installed plugins");
+            });
+
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
