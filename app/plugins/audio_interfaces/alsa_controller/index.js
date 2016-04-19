@@ -373,8 +373,6 @@ ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
 ControllerAlsa.prototype.getAlsaCards = function () {
 	var cards = [];
 
-	try {
-
 	var soundCardDir = '/proc/asound/';
 	var idFile = '/id';
 	var regex = /card(\d+)/;
@@ -399,10 +397,6 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			} cards.push({id: id, name: name});
 
 		}
-	}
-	}
-	catch(err) {
-		
 	}
 
 	return cards;
