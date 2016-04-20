@@ -12,8 +12,8 @@ var mixer = '';
 var maxvolume = '';
 var volumecurve = '';
 var volumesteps = '';
-var currentvolume = '';
-var currentmute = '';
+var currentvolume = 100;
+var currentmute = false;
 var premutevolume = '';
 
 module.exports = CoreVolumeController;
@@ -239,6 +239,13 @@ CoreVolumeController.prototype.retrievevolume = function () {
 		self.getMuted(function (err, mute) {
 			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController:: Volume=' + vol + ' Mute =' + mute);
 			//Log Volume Control
+			 //Log Volume Control
+                        if (vol == null) {
+                        vol = currentvolume,
+                        mute = currentmute
+                        } else {
+                        currentvolume = vol
+                        }
 			Volume.vol = vol;
 			Volume.mute = mute;
 			return libQ.resolve(Volume)
