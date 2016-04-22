@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var S = require('string');
 
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
@@ -456,7 +457,7 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('browseLibrary', function (data) {
 				var selfConnWebSocket = this;
 
-				var curUri = data.uri;
+				var curUri = S(data.uri);
 
 				var response;
 
