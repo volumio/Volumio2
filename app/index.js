@@ -593,3 +593,12 @@ CoreCommandRouter.prototype.getInstalledPlugins = function () {
     return this.pluginManager.getInstalledPlugins();
 };
 
+
+CoreCommandRouter.prototype.enableAndStartPlugin = function (category,name) {
+    return this.pluginManager.enableAndStartPlugin(category,name);
+};
+
+
+CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
+    return this.pluginManager.disableAndStopPlugin(category,name);
+};

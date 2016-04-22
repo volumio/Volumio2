@@ -64,6 +64,7 @@ PluginManager.prototype.initializeConfiguration = function (package_json, plugin
 
 PluginManager.prototype.loadPlugin = function (folder) {
 	var self = this;
+    var defer=libQ.defer();
 
 	var package_json = self.getPackageJson(folder);
 
@@ -101,6 +102,8 @@ PluginManager.prototype.loadPlugin = function (folder) {
 	}
 	else self.logger.info("Plugin " + name + " is not enabled");
 
+    defer.resolve();
+    return defer.promise;
 };
 
 
@@ -190,7 +193,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
 
 	var plugin = self.getPlugin(category, name);
     if(plugin!==undefined)
-        pluginplugin.onStart();
+        plugin.onStart();
 
     defer.resolve();
     return defer.promise;
@@ -200,6 +203,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	var self = this;
     var defer=libQ.defer();
 
+    self.logger.info("Stopping plugin "+name);
 	self.config.set(category + '.' + name + '.status', "STOPPED");
 	var plugin = self.getPlugin(category, name);
 	if(plugin!==undefined)
@@ -696,7 +700,7 @@ PluginManager.prototype.enablePlugin = function (category,name) {
     var self = this;
     var defer=libQ.defer();
 
-    self.logger.info("Disabling plugin "+name);
+    self.logger.info("Enabling plugin "+name);
 
     var key = category + '.' + name;
     self.config.set(key + '.enabled',true);
@@ -865,5 +869,66 @@ PluginManager.prototype.getInstalledPlugins = function () {
     defer.resolve(response);
 
     return defer.promise;
+}
+
+PluginManager.prototype.enableAndStartPlugin = function (category,name) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.enablePlugin(category,name)
+        .then(function(e)
+        {
+            var folder=self.findPluginFolder(category,name);
+            self.loadPlugin(folder);
+            return libQ.resolve();
+        })
+        .then(self.startPlugin.bind(self,category,name))
+        .then(function(e)
+        {
+            self.logger.info("Done.");
+            defer.resolve({});
+        })
+        .fail(function(e)
+        {
+            self.logger.info("Error: "+e);
+            defer.reject(new Error());
+        });
+
+    return defer.promise;
+}
+
+PluginManager.prototype.disableAndStopPlugin = function (category,name) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.stopPlugin(category,name)
+        .then(self.disablePlugin.bind(self,category,name))
+        .then(function(e)
+        {
+            var key = category + '.' + name;
+            self.plugins.remove(key);
+
+            self.logger.info("Done.");
+            defer.resolve({});
+        })
+        .fail(function(e)
+        {
+            self.logger.info("Error: "+e);
+            defer.reject(new Error());
+        });
+
+    return defer.promise;
+}
+
+
+PluginManager.prototype.findPluginFolder = function (category,name) {
+    var self=this;
+    for (var ppaths in self.pluginPath) {
+        var folder = self.pluginPath[ppaths];
+
+        var pathToCheck=folder+'/'+category+'/'+name;
+        if (fs.existsSync(pathToCheck))
+            return pathToCheck;
+    }
 }
 

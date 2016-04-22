@@ -1175,6 +1175,29 @@ function InterfaceWebUI(context) {
                 else self.logger.error("Error on getting installed plugins");
             });
 
+            connWebSocket.on('pluginManager', function (data) {
+                var selfConnWebSocket = this;
+
+                self.logger.info("ACTION= "+data.action);
+                if(data.action==='getUiConfig')
+                {
+                    return self.commandRouter.executeOnPlugin(data.category,data.name,'getUiConfig');
+                }
+                else if(data.action==='setUiConfig')
+                {
+                    return self.commandRouter.executeOnPlugin(data.category,data.name,'setUiConfig',data);
+                }
+                else if(data.action==='enable')
+                {
+                    return self.commandRouter.enableAndStartPlugin(data.category,data.name);
+                }
+                else if(data.action==='disable')
+                {
+                    return self.commandRouter.disableAndStopPlugin(data.category,data.name);
+                }
+            });
+
+
 
 		}
 		catch (ex) {
