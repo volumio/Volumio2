@@ -15,6 +15,13 @@ function PluginManager(ccommand, server) {
 	var self = this;
 
 	self.plugins = new HashMap();
+
+    fs.ensureDir('/data/plugins/', function (err) {
+        if (err) {
+            self.logger.info('ERROR: Cannot create /data/plugins directory');
+        }
+    })
+
 	self.pluginPath = [__dirname + '/plugins/', '/data/plugins/'];
 
 	self.config = new (require('v-conf'))();
