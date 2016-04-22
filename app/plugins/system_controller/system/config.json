@@ -1,0 +1,22 @@
+{
+  "playerName": {
+    "value": "Volumio",
+    "type": "string"
+  },
+  "startupSound": {
+    "value": true,
+    "type": "boolean"
+  },
+  "kernelSettingValue": {
+    "value": 1,
+    "type": "number"
+  },
+  "kernelSettingLabel": {
+    "value": "Default",
+    "type": "string"
+  },
+  "device": {
+    "value": "",
+    "type": "string"
+  }
+}
