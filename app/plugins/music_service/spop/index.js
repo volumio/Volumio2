@@ -533,3 +533,116 @@ ControllerSpop.prototype.logStart = function(sCommand) {
 	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
+
+
+
+ControllerSpop.prototype.createSPOPDFile = function () {
+    var self = this;
+
+    var defer=libQ.defer();
+
+    try {
+
+        fs.readFile(__dirname + "/spop.conf.tmpl", 'utf8', function (err, data) {
+            if (err) {
+                defer.reject(new Error(err));
+                return console.log(err);
+            }
+
+
+            var conf1 = data.replace("${username}", self.config.get('username'));
+            var conf2 = conf1.replace("${password}", self.config.get('password'));
+            var conf3 = conf2.replace("${bitrate}", self.config.get('bitrate'));
+
+            fs.writeFile("/etc/spopd.conf", conf3, 'utf8', function (err) {
+                if (err)
+                    defer.reject(new Error(err));
+                else defer.resolve();
+            });
+
+
+        });
+
+        callback();
+    }
+    catch (err) {
+
+        callback(err);
+    }
+
+    return defer.promise;
+
+};
+
+ControllerSpop.prototype.saveSpotifyAccount = function (data) {
+    var self = this;
+
+    var defer = libQ.defer();
+
+    self.config.set('username', data['username']);
+    self.config.set('password', data['password']);
+
+    self.rebuildSPOPDAndRestartDaemon()
+        .then(function(e){
+            self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+            defer.resolve({});
+        })
+        .fail(function(e)
+        {
+            defer.reject(new Error());
+        })
+
+
+    return defer.promise;
+
+};
+
+ControllerSpop.prototype.saveMiscellanea = function (data) {
+    var self = this;
+
+    var defer = libQ.defer();
+
+    self.config.set('bitrate', data['bitrate']);
+
+    self.rebuildSPOPDAndRestartDaemon()
+        .then(function(e){
+            self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+            defer.resolve({});
+        })
+        .fail(function(e)
+        {
+            defer.reject(new Error());
+        })
+
+
+    return defer.promise;
+
+};
+
+ControllerSpop.prototype.rebuildSPOPDAndRestartDaemon = function () {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.createSPOPDFile()
+        .then(function(e)
+        {
+            var edefer=libQ.defer();
+            exec("killall spopd", function (error, stdout, stderr) {
+                edefer.resolve();
+            });
+            return edefer.promise;
+        })
+        .then(function(e){
+            self.onVolumioStart();
+            return libQ.resolve();
+        })
+        .then(function(e)
+        {
+            defer.resolve();
+        })
+        .fail(function(e){
+            defer.reject(new Error());
+        })
+
+    return defer.promise;
+}

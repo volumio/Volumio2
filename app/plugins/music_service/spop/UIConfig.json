@@ -1,0 +1,62 @@
+{
+  "page": {
+    "label": "Network"
+  },
+  "sections": [ 
+   {
+      "id": "section_account",
+      "element": "section",
+      "label": "Spotify account",
+      "icon": "fa-plug",
+      "onSave": {"type":"controller", "endpoint":"music_service/spop", "method":"saveSpotifyAccount"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "username",
+          "password"
+        ]
+      },
+      "content": [
+        {
+          "id": "username",
+          "type":"text",
+          "element": "input",
+          "doc": "This is the username of your Spotify account",
+          "label": "Username",
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type":"text",
+          "element": "input",
+          "doc": "This is the password of your Spotify account",
+          "label": "Password",
+          "value": ""
+        }
+      ]
+   },
+
+    {
+      "id": "section_miscellanea",
+      "element": "section",
+      "label": "Miscellanea",
+      "icon": "fa-plug",
+      "onSave": {"type":"controller", "endpoint":"music_service/spop", "method":"saveMiscellanea"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "bitrate"
+        ]
+      },
+      "content": [
+        {
+          "id":"bitrate",
+          "element": "switch",
+          "doc": "High bitrate",
+          "label": "Set for high bitrate",
+          "value": true
+        }
+      ]
+    }
+  ]
+}
