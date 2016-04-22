@@ -54,6 +54,7 @@
     "underscore": "^1.8.3",
     "unirest": "0.4.2",
     "v-conf": "0.10.0",
+    "wget-improved":"",
     "winston": "^2.2.0",
     "wireless-tools": "0.15.0",
     "yargs": "^4.6.0"

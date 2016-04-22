@@ -5,6 +5,7 @@ var HashMap = require('hashmap');
 var libFast = require('fast.js');
 var S = require('string');
 var download = require('file-download');
+var wget=require('wget-improved');
 var vconf=require('v-conf');
 var libQ=require('kew');
 var DecompressZip = require('decompress-zip');
@@ -326,72 +327,70 @@ PluginManager.prototype.installPlugin = function (uri) {
 
     self.logger.info("Downloading plugin at "+uri);
 
-    var options = {
-        directory: '/tmp',  //skipping path at entry 0 since it is a system folder
-        filename: "downloaded_plugin.zip"
-    }
-
     self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin'});
 
-    download(uri, options, function(err){
-        if (err) defer.reject(new Error());
-        else {
-            var pluginFolder='/tmp/downloaded_plugin';
 
-            self.createFolder(pluginFolder)
-                .then(self.pushMessage.bind(self,'installPluginStatus',{'progress': 30, 'message': 'Creating folder on disk'}))
-                .then(self.unzipPackage.bind(self))
-                .then(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 40, 'message': 'Unpacking plugin'});
-                    return e;
-                })
-                .then(self.checkPluginDoesntExist.bind(self))
-                .then(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 50, 'message': 'Checking for duplicate plugin'});
-                    return e;
-                })
-                .then(self.renameFolder.bind(self))
-                .then(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 60, 'message': 'Moving stuff'});
-                    return e;
-                })
-                .then(self.moveToCategory.bind(self))
-                .then(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 70, 'message': 'Installing dependencies'});
-                    return e;
-                })
-                .then(self.executeInstallationScript.bind(self))
-                .then(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 90, 'message': 'Adding plugin to registry'});
-                    return e;
-                })
-                .then(self.addPluginToConfig.bind(self))
-                .then(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'Installed'});
-                    return e;
-                })
-                .then(function()
-                {
-                    self.logger.info("Done installing plugin.");
-                    defer.resolve();
+    var download = wget.download(uri, "/tmp/downloaded_plugin.zip",{});
+    download.on('error', function(err) {
+        self.logger.info("ERROR DOWNLOAD: "+err);
+        defer.reject(new Error(err));
+    });
+   download.on('end', function(output) {
+       self.logger.info("END DOWNLOAD: "+output);
 
-                    self.tempCleanup();
-                })
-                .fail(function(e)
-                {
-                    self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'The folowing error occurred when installing the plugin: '+e});
-                    defer.reject(new Error());
-                    self.rollbackInstall();
-                });
-        }
-    })
-    
+       var pluginFolder = '/tmp/downloaded_plugin';
+
+       self.createFolder(pluginFolder)
+           .then(self.pushMessage.bind(self, 'installPluginStatus', {
+               'progress': 30,
+               'message': 'Creating folder on disk'
+           }))
+           .then(self.unzipPackage.bind(self))
+           .then(function (e) {
+               self.pushMessage('installPluginStatus', {'progress': 40, 'message': 'Unpacking plugin'});
+               return e;
+           })
+           .then(self.checkPluginDoesntExist.bind(self))
+           .then(function (e) {
+               self.pushMessage('installPluginStatus', {'progress': 50, 'message': 'Checking for duplicate plugin'});
+               return e;
+           })
+           .then(self.renameFolder.bind(self))
+           .then(function (e) {
+               self.pushMessage('installPluginStatus', {'progress': 60, 'message': 'Moving stuff'});
+               return e;
+           })
+           .then(self.moveToCategory.bind(self))
+           .then(function (e) {
+               self.pushMessage('installPluginStatus', {'progress': 70, 'message': 'Installing dependencies'});
+               return e;
+           })
+           .then(self.executeInstallationScript.bind(self))
+           .then(function (e) {
+               self.pushMessage('installPluginStatus', {'progress': 90, 'message': 'Adding plugin to registry'});
+               return e;
+           })
+           .then(self.addPluginToConfig.bind(self))
+           .then(function (e) {
+               self.pushMessage('installPluginStatus', {'progress': 100, 'message': 'Installed'});
+               return e;
+           })
+           .then(function () {
+               self.logger.info("Done installing plugin.");
+               defer.resolve();
+
+               self.tempCleanup();
+           })
+           .fail(function (e) {
+               self.pushMessage('installPluginStatus', {
+                   'progress': 100,
+                   'message': 'The folowing error occurred when installing the plugin: ' + e
+               });
+               defer.reject(new Error());
+               self.rollbackInstall();
+           });
+   });
+
     return defer.promise;
 };
 

@@ -514,13 +514,15 @@ CoreCommandRouter.prototype.fileUpdate = function () {
 
 
 CoreCommandRouter.prototype.installPlugin = function (uri) {
+    var self=this;
     var defer=libQ.defer();
 
     this.pluginManager.installPlugin(uri).then(function()
     {
         defer.resolve();
-    }).fail(function(){
-         defer.reject(new Error('Cannot install plugin'));
+    }).fail(function(e){
+        self.logger.info("Error: "+e);
+         defer.reject(new Error('Cannot install plugin. Error: '+e));
     });
 
     return defer.promise;
