@@ -642,6 +642,10 @@ CoreCommandRouter.prototype.getInstalledPlugins = function () {
     return this.pluginManager.getInstalledPlugins();
 };
 
+CoreCommandRouter.prototype.getAvailablePlugins = function () {
+	return this.pluginManager.getAvailablePlugins();
+};
+
 
 CoreCommandRouter.prototype.enableAndStartPlugin = function (category,name) {
     return this.pluginManager.enableAndStartPlugin(category,name);

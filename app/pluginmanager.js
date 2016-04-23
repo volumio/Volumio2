@@ -9,6 +9,7 @@ var wget=require('wget-improved');
 var vconf=require('v-conf');
 var libQ=require('kew');
 var DecompressZip = require('decompress-zip');
+var http = require('http');
 
 module.exports = PluginManager;
 function PluginManager(ccommand, server) {
@@ -876,6 +877,48 @@ PluginManager.prototype.getInstalledPlugins = function () {
 
     return defer.promise;
 }
+
+PluginManager.prototype.getAvailablePlugins = function () {
+    var self=this;
+    var defer=libQ.defer();
+
+    var response=[];
+    var url = 'http://plugins.volumio.org/plugins.json';
+
+    http.get(url, function(res){
+    var body = '';
+        if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
+            self.logger.info("Following Redirect to: " + res.headers.location);
+            http.get(res.headers.location, function(res){
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', function(){
+
+                defer.resolve(body);
+            });
+            }).on('error', function(e){
+                self.logger.info("Cannot download Available plugins list: "+e);
+            });
+        } else
+            {
+                res.on('data', function (chunk) {
+                    body += chunk;
+                });
+
+                res.on('end', function () {
+
+                    defer.resolve(body);
+                });
+            }
+    }).on('error', function(e){
+        self.logger.info("Cannot download Available plugins list: "+e);
+    });
+
+    return defer.promise;
+}
+
 
 PluginManager.prototype.enableAndStartPlugin = function (category,name) {
     var self=this;

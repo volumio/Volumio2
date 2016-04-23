@@ -1236,6 +1236,19 @@ function InterfaceWebUI(context) {
                 else self.logger.error("Error on getting installed plugins");
             });
 
+			connWebSocket.on('getAvailablePlugins', function (pippo) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.getAvailablePlugins();
+
+				if (returnedData != undefined) {
+					returnedData.then(function (AvailablePlugins) {
+						selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
+					});
+				}
+				else self.logger.error("Error on getting Available plugins");
+			});
+
             connWebSocket.on('pluginManager', function (data) {
                 var selfConnWebSocket = this;
 
@@ -1261,10 +1274,8 @@ function InterfaceWebUI(context) {
             connWebSocket.on('PreunInstallPlugin', function (data) {
                 var selfConnWebSocket = this;
 
-                selfConnWebSocket.emit('showModal', {title:'Confirm plugin uninstall',
-                                content:'Are you sure you want to uninstall plugin '+data.name+'?',
-                                buttons[{name:'Uninstall', 'emit':'unInstallPlugin', 'payload':'{\"category\":\"'+data.category+'\",\"name\":\"'+data.name+'\"}',
-                                 {'name':'Cancel'}]});
+
+                //selfConnWebSocket.emit('showModal', {title:'Confirm plugin uninstall', content:'Are you sure you want to uninstall plugin '+data.name+'?', buttons[{name:'Uninstall', 'emit':'unInstallPlugin', 'payload':'{\"category\":\"'+data.category+'\",\"name\":\"'+data.name+'\"}',{'name':'Cancel'}]});
                 
             });
 		}
