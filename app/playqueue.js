@@ -1,5 +1,7 @@
 'use strict';
 
+var libQ = require('kew');
+
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
 function CorePlayQueue(commandRouter, stateMachine) {
@@ -20,6 +22,8 @@ CorePlayQueue.prototype.getQueue = function () {
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
+    this.commandRouter.pushConsoleMessage('----------> '+nStartIndex);
+
 
 	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
@@ -48,18 +52,75 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
 
 // Add one item to the queue
 CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
+    var self=this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
-	this.arrayQueue = this.arrayQueue.concat(arrayItems);
-	return this.commandRouter.volumioPushQueue(this.arrayQueue);
+
+    self.commandRouter.logger.info(arrayItems);
+    var array = [].concat( arrayItems );
+
+    // We need to ask the service if the uri corresponds to something bigger, like a playlist
+    var promiseArray=[];
+    for(var i in array)
+    {
+        var item=array[i];
+
+        self.commandRouter.logger.info("ADDING THIS ITEM TO QUEUE: "+JSON.stringify(item));
+        var service='mpd';
+
+        if(item.hasOwnProperty('service'))
+        {
+            service=item.service;
+        }
+
+        if(item.uri.startsWith('spotify:'))
+        {
+            service='spop';
+        }
+
+        promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
+    }
+
+    libQ.all(promiseArray)
+        .then(function(content){
+            for(var j in content)
+            {
+                self.arrayQueue = self.arrayQueue.concat(content[j]);
+            }
+
+            self.commandRouter.volumioPushQueue(self.arrayQueue);
+        })
+        .then(function(){
+            self.stateMachine.updateTrackBlock();
+
+        }).fail(function (e) {
+        self.commandRouter.logger.info("An error occurred while exploding URI");
+    });
+};
+
+CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearAddPlayQueue');
+    this.arrayQueue = [];
+    this.arrayQueue = this.arrayQueue.concat(arrayItems);
+    this.commandRouter.serviceClearAddPlayTracks(arrayItems,arrayItems[0].service);
+    return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
 CorePlayQueue.prototype.clearPlayQueue = function () {
-        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
-        this.arrayQueue = [];
-        return this.commandRouter.volumioPushQueue(this.arrayQueue);
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+	return this.arrayQueue = [];
+};
+
+CorePlayQueue.prototype.getTrack = function (index) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrack '+index);
+
+    if(this.arrayQueue.length>index)
+    {
+        return this.arrayQueue[index];
+    }
+    else return;
 };
 
 
-CorePlayQueue.prototype.clearMpdQueue = function () {
+/*CorePlayQueue.prototype.clearMpdQueue = function () {
 	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');
-};
+};*/

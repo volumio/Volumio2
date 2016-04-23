@@ -6,6 +6,8 @@ var libFast = require('fast.js');
 var libLevel = require('level');
 var fs=require('fs-extra');
 var exec = require('child_process').exec;
+var SpotifyWebApi = require('spotify-web-api-node');
+var nodetools = require('nodetools');
 
 // Define the ControllerSpop class
 module.exports = ControllerSpop;
@@ -16,6 +18,15 @@ function ControllerSpop(context) {
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
 }
+
+
+ControllerSpop.prototype.addToBrowseSources = function () {
+    var self = this;
+    var data = {name: 'Spotify', uri: 'spotify',plugin_type:'music_service',plugin_name:'spop'};
+
+    self.commandRouter.volumioAddToBrowseSources(data);
+};
+
 
 
 ControllerSpop.prototype.getConfigurationFiles = function()
@@ -29,8 +40,10 @@ ControllerSpop.prototype.getConfigurationFiles = function()
 ControllerSpop.prototype.onVolumioStart = function() {
 	var self = this;
 
-	//var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
-	//config.loadFile(configFile);
+    var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+    self.config = new (require('v-conf'))();
+    self.config.loadFile(configFile);
+
 
 	// TODO use names from the package.json instead
 	self.servicename = 'spop';
@@ -94,7 +107,7 @@ ControllerSpop.prototype.onVolumioStart = function() {
 
 	// Start a listener for status socket messages
 	self.connSpopStatus.on('data', function(data) {
-		self.sStatusBuffer = self.sStatusBuffer.concat(data.toString());
+        self.sStatusBuffer = self.sStatusBuffer.concat(data.toString());
 
 		// If the last character in the data chunk is a newline, this is the end of the status update
 		if (data.slice(data.length - 1).toString() === '\n') {
@@ -110,6 +123,9 @@ ControllerSpop.prototype.onVolumioStart = function() {
 				var sStatus = self.sStatusBuffer;
 
 				self.logStart('Spop announces state update')
+                    /*.then(function(){
+                        return self.getState.call(self);
+                    })*/
 					.then(function() {
 						return self.parseState.call(self, sStatus);
 					})
@@ -136,10 +152,6 @@ ControllerSpop.prototype.onVolumioStart = function() {
 	// Attempt to load tracklist from database on disk
 	// TODO make this a relative path
 	self.sTracklistPath = __dirname + '/db/tracklist';
-	self.loadTracklistFromDB()
-		.fail(libFast.bind(self.pushError, self));
-
-
 
 	exec("spopd -c /etc/spopd.conf", function (error, stdout, stderr) {
 		if (error !== null) {
@@ -149,7 +161,150 @@ ControllerSpop.prototype.onVolumioStart = function() {
 			self.commandRouter.pushConsoleMessage('SpopD Daemon Started');
 		}
 	});
+
+
+    self.addToBrowseSources();
+
+
+    self.spotifyApi= new SpotifyWebApi({
+        clientId : self.config.get('spotify_api_client_id'),
+        clientSecret : self.config.get('spotify_api_client_secret')
+    });
 };
+
+
+ControllerSpop.prototype.handleBrowseUri=function(curUri)
+{
+    var self=this;
+
+    //self.commandRouter.logger.info(curUri);
+    var response;
+
+    if (curUri.startsWith('spotify')) {
+        if(curUri=='spotify')
+        {
+            response=libQ.resolve({
+                navigation: {
+                    prev: {
+                        uri: 'spotify'
+                    },
+                    list: [{
+                        service: 'spop',
+                        type: 'folder',
+                        title: 'Playlists',
+                        artist: '',
+                        album: '',
+                        icon: 'fa fa-folder-open-o',
+                        uri: 'spotify/playlists'
+                    }
+
+                    ]
+                }
+            });
+        }
+        else if(curUri.startsWith('spotify/playlists'))
+        {
+            if(curUri=='spotify/playlists')
+                response=self.listPlaylists();
+            else
+            {
+                response=self.listPlaylist(curUri);
+            }
+        }
+    }
+
+    return response;
+};
+
+ControllerSpop.prototype.listPlaylists=function()
+{
+    var self=this;
+
+    var defer=libQ.defer();
+    var commandDefer=self.sendSpopCommand('ls',[]);
+    commandDefer.then(function(results){
+            var resJson=JSON.parse(results);
+
+        self.commandRouter.logger.info(resJson);
+            var response={
+                navigation: {
+                    prev: {
+                        uri: 'spotify'
+                    },
+                    list: []
+                }
+            };
+
+            for(var i in resJson.playlists)
+            {
+                if(resJson.playlists[i].name!=='')
+                {
+                    response.navigation.list.push({
+                        service: 'spop',
+                        type: 'folder',
+                        title: resJson.playlists[i].name,
+                        icon: 'fa fa-folder-open-o',
+                        uri: 'spotify/playlists/'+resJson.playlists[i].index
+                    });
+                }
+            }
+
+            defer.resolve(response);
+
+        })
+        .fail(function()
+        {
+            defer.fail(new Error('An error occurred while listing playlists'));
+        });
+
+    return defer.promise;
+};
+
+ControllerSpop.prototype.listPlaylist=function(curUri)
+{
+    var self=this;
+
+    var uriSplitted=curUri.split('/');
+
+    var defer=libQ.defer();
+    var commandDefer=self.sendSpopCommand('ls',[uriSplitted[2]]);
+    commandDefer.then(function(results){
+            var resJson=JSON.parse(results);
+
+            var response={
+                navigation: {
+                    prev: {
+                        uri: 'spotify/playlists'
+                    },
+                    list: []
+                }
+            };
+
+            for(var i in resJson.tracks)
+            {
+                response.navigation.list.push({
+                    service: 'spop',
+                    type: 'song',
+                    title: resJson.tracks[i].title,
+                    artist:resJson.tracks[i].artist,
+                    album: resJson.tracks[i].album,
+                    icon: 'fa fa-list-ol',
+                    uri: resJson.tracks[i].uri
+                });
+            }
+
+            defer.resolve(response);
+        })
+        .fail(function()
+        {
+            defer.fail(new Error('An error occurred while listing playlists'));
+        });
+
+    return defer.promise;
+};
+
+
+
 
 ControllerSpop.prototype.onStop = function() {
 	var self = this;
@@ -158,158 +313,10 @@ ControllerSpop.prototype.onStop = function() {
 	});
 };
 
-ControllerSpop.prototype.onRestart = function() {
-	var self = this;
-	//
-};
 
-ControllerSpop.prototype.onInstall = function() {
-	var self = this;
-	//Perform your installation tasks here
-};
 
-ControllerSpop.prototype.onUninstall = function() {
-	var self = this;
-	//Perform your installation tasks here
-};
 
-ControllerSpop.prototype.getUIConfig = function() {
-	var self = this;
 
-	return {success:true,plugin:"spop"};
-};
-
-ControllerSpop.prototype.setUIConfig = function(data) {
-	var self = this;
-	//Perform your installation tasks here
-};
-
-ControllerSpop.prototype.getConf = function(varName) {
-	var self = this;
-	//Perform your installation tasks here
-};
-
-ControllerSpop.prototype.setConf = function(varName, varValue) {
-	var self = this;
-	//Perform your installation tasks here
-};
-
-// Public Methods ---------------------------------------------------------------------------------------
-// These are 'this' aware, and return a promise
-
-// Load the tracklist from database on disk
-ControllerSpop.prototype.loadTracklistFromDB = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::loadTracklistFromDB');
-	self.commandRouter.pushConsoleMessage('Loading Spop tracklist from DB...');
-
-	self.tracklist = [];
-
-	self.tracklistReadyDeferred = libQ.defer();
-	self.tracklistReady = self.tracklistReadyDeferred.promise;
-
-	var dbTracklist = libLevel(self.sTracklistPath, {'valueEncoding': 'json', 'createIfMissing': true});
-
-	return libQ.resolve()
-	.then(function() {
-		return libQ.nfcall(libFast.bind(dbTracklist.get, dbTracklist), 'tracklist');
-	})
-	.then(function(result) {
-		self.tracklist = result;
-
-		self.commandRouter.pushConsoleMessage('Spop tracklist loaded from DB.');
-
-		try {
-			self.tracklistReadyDeferred.resolve();
-		} catch (error) {
-			self.pushError('Unable to resolve tracklist promise: ' + error);
-		}
-
-		return libQ.resolve();
-	})
-	.fail(function(sError) {
-		try {
-			self.tracklistReadyDeferred.reject(sError);
-		} catch (error) {
-			self.pushError('Unable to reject tracklist promise: ' + error);
-		}
-
-		throw new Error('Error reading DB: ' + sError);
-	})
-	.fin(libFast.bind(dbTracklist.close, dbTracklist));
-};
-
-// Rebuild a library of user's playlisted Spotify tracks
-ControllerSpop.prototype.rebuildTracklist = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklist');
-
-	self.tracklist = [];
-	self.tracklistReadyDeferred = libQ.defer();
-	self.tracklistReady = self.tracklistReadyDeferred.promise;
-
-	var dbTracklist = libLevel(self.sTracklistPath, {'valueEncoding': 'json', 'createIfMissing': true});
-
-	self.commandRouter.pushConsoleMessage('Populating Spop tracklist...');
-
-	// Scan the user's Spotify playlists and populate the tracklist
-	return self.sendSpopCommand('ls', [])
-	.then(JSON.parse)
-	.then(function(objPlaylists) {
-		return self.rebuildTracklistFromSpopPlaylists(objPlaylists, [self.displayname]);
-	})
-	.then(function() {
-		self.commandRouter.pushConsoleMessage('Storing Spop tracklist in db...');
-
-		var ops = [
-			{type: 'put', key: 'tracklist', value: self.tracklist}
-		];
-
-		return libQ.nfcall(libFast.bind(dbTracklist.batch, dbTracklist), ops);
-	})
-	.then(function() {
-		self.commandRouter.pushConsoleMessage('Spop tracklist rebuild complete.');
-
-		try {
-			self.tracklistReadyDeferred.resolve();
-		} catch (error) {
-			self.pushError('Unable to resolve tracklist promise: ' + error);
-		}
-
-		return libQ.resolve();
-	})
-	.fail(function(sError) {
-		try {
-			self.tracklistReadyDeferred.reject(sError);
-		} catch (error) {
-			self.pushError('Unable to reject tracklist promise: ' + error);
-		}
-
-		throw new Error('Tracklist Rebuild Error: ' + sError);
-	})
-	.fin(libFast.bind(dbTracklist.close, dbTracklist));
-};
-
-// Define a method to clear, add, and play an array of tracks
-ControllerSpop.prototype.clearAddPlayTracks = function(arrayTrackUris) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
-
-	// Clear the queue, add the first track, and start playback
-	var firstTrack = arrayTrackUris.shift();
-	var promisedActions = self.sendSpopCommand('uplay', [firstTrack]);
-
-	// If there are more tracks in the array, add those also
-	if (arrayTrackUris.length > 0) {
-		promisedActions = libFast.reduce(arrayTrackUris, function(previousPromise, curTrackUri) {
-			return previousPromise
-			.then(function() {
-				return self.sendSpopCommand('uadd', [curTrackUri]);
-			});
-		}, promisedActions);
-	}
-	return promisedActions;
-};
 
 // Spop stop
 ControllerSpop.prototype.stop = function() {
@@ -319,68 +326,19 @@ ControllerSpop.prototype.stop = function() {
 	return self.sendSpopCommand('stop', []);
 };
 
-// Spop pause
-ControllerSpop.prototype.pause = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pause');
 
-	// TODO don't send 'toggle' if already paused
-	return self.sendSpopCommand('toggle', []);
-};
 
-// Spop resume
-ControllerSpop.prototype.resume = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::resume');
 
-	// TODO don't send 'toggle' if already playing
-	return self.sendSpopCommand('toggle', []);
-};
 
-// Spop music library
-ControllerSpop.prototype.getTracklist = function() {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::getTracklist');
 
-	return self.tracklistReady
-	.then(function() {
-		return self.tracklist;
-	});
-};
 
-// Internal methods ---------------------------------------------------------------------------
-// These are 'this' aware, and may or may not return a promise
-
-// Send command to Spop
-ControllerSpop.prototype.sendSpopCommand = function(sCommand, arrayParameters) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
-
-	// Convert the array of parameters to a string
-	var sParameters = libFast.reduce(arrayParameters, function(sCollected, sCurrent) {
-		return sCollected + ' ' + sCurrent;
-	}, '');
-
-	// Pass the command to Spop when the command socket is ready
-	self.spopCommandReady
-	.then(function() {
-		return libQ.nfcall(libFast.bind(self.connSpopCommand.write, self.connSpopCommand), sCommand + sParameters + '\n', 'utf-8');
-	});
-
-	var spopResponseDeferred = libQ.defer();
-	var spopResponse = spopResponseDeferred.promise;
-	self.arrayResponseStack.push(spopResponseDeferred);
-
-	// Return a promise for the command response
-	return spopResponse;
-};
 
 // Spop get state
 ControllerSpop.prototype.getState = function() {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::getState');
 
-	return self.sendSpopCommand('status', []);
+    return self.sendSpopCommand('status', []);
 };
 
 // Spop parse state
@@ -389,6 +347,7 @@ ControllerSpop.prototype.parseState = function(sState) {
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::parseState');
 
 	var objState = JSON.parse(sState);
+    self.commandRouter.logger.info('STATE: '+JSON.stringify(objState));
 
 	var nSeek = null;
 	if ('position' in objState) {
@@ -423,7 +382,10 @@ ControllerSpop.prototype.parseState = function(sState) {
 		duration: nDuration,
 		samplerate: null, // Pull these values from somwhere else since they are not provided in the Spop state
 		bitdepth: null,
-		channels: null
+		channels: null,
+        artist: objState.artist,
+        title: objState.title,
+        album: objState.album
 	});
 };
 
@@ -444,92 +406,232 @@ ControllerSpop.prototype.pushError = function(sReason) {
 	return libQ.resolve();
 };
 
-// Scan tracks in playlists via Spop and populates tracklist
-// Metadata fields to roughly conform to Ogg Vorbis standards (http://xiph.org/vorbis/doc/v-comment.html)
-ControllerSpop.prototype.rebuildTracklistFromSpopPlaylists = function(objInput, arrayPath) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::rebuildTracklistFromSpopPlaylists');
 
-	if (!('playlists' in objInput)) {
-		throw new Error('Error building Spop tracklist - no playlists found.');
-	}
 
-	var arrayPlaylists = objInput.playlists;
-	// We want each playlist to be parsed sequentially instead of simultaneously so that Spop is not overwhelmed
-	// with requests. Use this chained promisedActions to guarantee sequential execution.
-	var promisedActions = libQ.resolve();
 
-	libFast.map(arrayPlaylists, function(curPlaylist) {
-/*
-		if (!('index' in curPlaylist)) {
-			return;
-		}*/
-		var sPlaylistName = '';
-		if (curPlaylist.name === '') {
-			// The Starred playlist has a blank name
-			sPlaylistName = 'Starred';
-		} else {
-			sPlaylistName = curPlaylist.name;
-		}
-		var arrayNewPath = arrayPath.concat(sPlaylistName);
+ControllerSpop.prototype.explodeUri = function(uri) {
+    var self = this;
 
-		if (curPlaylist.type === 'folder') {
-			promisedActions = promisedActions
-				.then(function() {
-					return self.rebuildTracklistFromSpopPlaylists(curPlaylist, arrayNewPath);
-				});
+    var defer=libQ.defer();
 
-		} else if (curPlaylist.type === 'playlist') {
-			var curPlaylistIndex = curPlaylist.index;
+    var splitted=uri.split(':');
 
-			promisedActions = promisedActions
-			.then(function() {
-				return self.sendSpopCommand('ls', [curPlaylistIndex]);
-			})
-			.then(JSON.parse)
-			.then(function(curTracklist) {
-				var nTracks = 0;
+    self.spotifyApi.getTrack(splitted[2])
+        .then(function(data) {
+            self.commandRouter.logger.info(JSON.stringify(data));
 
-				if (!('tracks' in curTracklist)) {
-					return;
-				}
 
-				nTracks = curTracklist.tracks.length;
+            var artist='';
+            var album='';
+            var title='';
 
-				for (var j = 0; j < nTracks; j++) {
-					self.tracklist.push({
-						'name': curTracklist.tracks[j].title,
-						'service': self.servicename,
-						'uri': curTracklist.tracks[j].uri,
-						'browsepath': arrayNewPath,
-						'album': curTracklist.tracks[j].album,
-						'artists': libFast.map(curTracklist.tracks[j].artist.split(','), function(sArtist) {
-							// TODO - parse other options in artist string, such as "feat."
-							return sArtist.trim();
+            if(data.body.artists.length>0)
+                artist=data.body.artists[0].name;
 
-						}),
-						'performers': [],
-						'genres': [],
-						'tracknumber': 0,
-						'date': '',
-						'duration': 0
-					});
-				}
-			});
-		}
-	});
+            if(data.body.album!==undefined)
+                album=data.body.album.name;
 
-	return promisedActions;
+            var albumart=self.getAlbumArt({artist:artist,album:album},"");
+
+            defer.resolve({
+                uri: uri,
+                service: 'spop',
+                name: data.body.name,
+                artist: artist,
+                album: album,
+                type: 'track',
+                duration: parseInt(data.body.duration_ms/1000),
+                tracknumber: data.body.track_number,
+                albumart: albumart,
+                samplerate: '128',
+                bitdepth: 16,
+                trackType: 'Spotify'
+
+            });
+
+        });
+
+
+
+    return defer.promise;
 };
 
-ControllerSpop.prototype.logDone = function(timeStart) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
-	return libQ.resolve();
+ControllerSpop.prototype.getAlbumArt = function (data, path) {
+
+    var artist, album;
+
+    if (data != undefined && data.path != undefined) {
+        path = data.path;
+    }
+
+    var web;
+
+    if (data != undefined && data.artist != undefined) {
+        artist = data.artist;
+        if (data.album != undefined)
+            album = data.album;
+        else album = data.artist;
+
+        web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
+    }
+
+    var url = '/albumart';
+
+    if (web != undefined)
+        url = url + web;
+
+    if (web != undefined && path != undefined)
+        url = url + '&';
+    else if (path != undefined)
+        url = url + '?';
+
+    if (path != undefined)
+        url = url + 'path=' + nodetools.urlEncode(path);
+
+    return url;
 };
 
-ControllerSpop.prototype.logStart = function(sCommand) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
-	return libQ.resolve();
+
+ControllerSpop.prototype.logDone = function (timeStart) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+    return libQ.resolve();
+};
+
+ControllerSpop.prototype.logStart = function (sCommand) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+    return libQ.resolve();
+};
+
+
+
+
+
+// New play mechanism. used method
+
+ControllerSpop.prototype.play = function() {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::play');
+
+    return this.sendSpopCommand('play', []);
+};
+
+ControllerSpop.prototype.seek = function(position) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::seek');
+
+    return this.sendSpopCommand('seek', [position]);
+};
+
+
+// Define a method to clear, add, and play an array of tracks
+ControllerSpop.prototype.clearAddPlayTrack = function(track) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::clearAddPlayTracks');
+
+    var methodPromise=libQ.defer();
+
+    // Clear the queue, add the first track, and start playback
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Clearing Queue');
+
+    var clearPromise=self.sendSpopCommand('qclear', []);
+    clearPromise.then(function(){
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Adding track '+track.uri);
+        return self.sendSpopCommand('uadd', [track.uri]);
+    })
+    .then(function(){
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::Going to play');
+        return self.sendSpopCommand('play', [])
+    })
+    .then(function()
+    {
+        methodPromise.resolve();
+    })
+    /*.then(function(){
+        var splitted=track.uri.split(':');
+
+        self.spotifyApi.getTrack(splitted[2])
+            .then(function(data) {
+                var artist='';
+                var album='';
+
+                if(data.body.artists.length>0)
+                    artist=data.body.artists[0].name;
+
+                if(data.body.album!==undefined)
+                    album=data.body.album.name;
+
+                var albumart=self.getAlbumArt({artist:artist,album:album},"");
+
+                var defer=libQ.defer();
+
+                var state={
+                    uri: uri,
+                    service: 'spop',
+                    name: data.body.name,
+                    artist: artist,
+                    album: album,
+                    type: 'track',
+                    tracknumber: data.body.track_number,
+                    albumart: albumart
+                };
+
+                defer.resolve(state);
+                return defer.promise;
+            })
+            .then(function(state){
+                self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SpopD pushes status '+JSON.stringify(state));
+
+                self.pushState(state);
+            });
+
+        return libQ.resolve();
+    })*/
+    .fail(function(){
+        methodPromise.reject(new Error("Cannot play with plugin SPOP"));
+    });
+
+    return methodPromise.promise;
+};
+
+
+// Send command to Spop
+ControllerSpop.prototype.sendSpopCommand = function(sCommand, arrayParameters) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::sendSpopCommand');
+
+    // Convert the array of parameters to a string
+    var sParameters = libFast.reduce(arrayParameters, function(sCollected, sCurrent) {
+        return sCollected + ' ' + sCurrent;
+    }, '');
+
+    // Pass the command to Spop when the command socket is ready
+    self.spopCommandReady
+        .then(function() {
+            self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + sCommand + sParameters);
+            return libQ.nfcall(libFast.bind(self.connSpopCommand.write, self.connSpopCommand), sCommand + sParameters + '\n', 'utf-8');
+        });
+
+    var spopResponseDeferred = libQ.defer();
+    var spopResponse = spopResponseDeferred.promise;
+    self.arrayResponseStack.push(spopResponseDeferred);
+
+    // Return a promise for the command response
+    return spopResponse;
+};
+
+// Spop pause
+ControllerSpop.prototype.pause = function() {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::pause');
+
+    return self.sendSpopCommand('toggle', []);
+};
+
+// Spop resume
+ControllerSpop.prototype.resume = function() {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerSpop::resume');
+
+    // TODO don't send 'toggle' if already playing
+    return self.sendSpopCommand('toggle', []);
 };

@@ -12,5 +12,13 @@
   "last_fm_username":{"modifiable":true,"value":"","type":"string","ui_label_key":"last_fm_username","enabled_by":"plugins"},
   "last_fm_password":{"modifiable":true,"value":"","type":"password","ui_label_key":"last_fm_password","enabled_by":"plugins"},
   "output_type":{"modifiable":false,"value":"alsa","type":"string"},
-  "output_name":{"modifiable":false,"value":"hw:0","type":"string"}
+  "output_name":{"modifiable":false,"value":"hw:0","type":"string"},
+  "spotify_api_client_id":{
+    "type":"string",
+    "value":""
+  },
+  "spotify_api_client_secret":{
+    "type":"string",
+    "value":""
+  }
 }

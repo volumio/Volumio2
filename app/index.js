@@ -64,11 +64,7 @@ function CoreCommandRouter(server) {
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
-// Volumio Play
-CoreCommandRouter.prototype.volumioPlay = function () {
-	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
-	return this.stateMachine.play();
-};
+
 
 // Volumio Pause
 CoreCommandRouter.prototype.volumioPause = function () {
@@ -309,6 +305,7 @@ CoreCommandRouter.prototype.serviceStop = function (sService) {
 // MPD Pause
 CoreCommandRouter.prototype.servicePause = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::servicePause');
+
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 	return thisPlugin.pause();
 };
@@ -316,7 +313,16 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+    var state=this.stateMachine.getState();
+
+    if(state==='stop')
+    {
+        thisPlugin.clearAddPlayTracks();
+    }
+
 	return thisPlugin.resume();
 };
 
@@ -346,6 +352,8 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 // Volumio Add Queue Items
 CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
+
+    this.pushConsoleMessage(JSON.stringify(arrayItems));
 	return this.stateMachine.addQueueItems(arrayItems);
 };
 
@@ -506,6 +514,47 @@ CoreCommandRouter.prototype.startupSound = function () {
 	this.platformspecific.startupSound();
 };
 
-CoreCommandRouter.prototype.fileUpdate = function () {
-	this.platformspecific.fileUpdate();
+
+
+
+//------------------------- Multiservice queue methods -----------------------------------
+
+CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
+    this.logger.info("Exploding uri "+uri+" in service "+service);
+
+    var thisPlugin = this.pluginManager.getPlugin('music_service', service);
+    if(thisPlugin.explodeUri !=undefined)
+        return  thisPlugin.explodeUri(uri);
+    else {
+        var promise=libQ.defer();
+        promise.resolve();
+        return promise.promise;
+    }
 };
+
+
+
+
+
+
+
+//------------------------ Used in new play system -------------------------------
+
+// Volumio Play
+CoreCommandRouter.prototype.volumioPlay = function (N) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
+    if(N===undefined)
+        return this.stateMachine.play();
+    else 
+    {
+        return this.stateMachine.play(N);
+    }
+};
+
+// Volumio Play
+CoreCommandRouter.prototype.volumioSeek = function (position) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
+    return this.stateMachine.seek(position);
+};
+
+
