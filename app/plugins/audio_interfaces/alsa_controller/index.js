@@ -26,8 +26,6 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	var volumeval = this.config.get('volumestart');
 
-	if (volumeval != "disabled"){
-	var volume = Number(volumeval);
 
 	var socketURL = 'http://localhost:3000';
 	var options = {
@@ -39,10 +37,10 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	var self = this;
 	client1.on('connect', function (data) {
-		self.logger.info("Setting volume on startup at " + volume);
-		client1.emit('volume', volume);
+		self.logger.info("Setting volume on startup at " + volumeval);
+		client1.emit('volume', volumeval);
 	});
-	}
+
 
 	if (this.config.has('outputdevice') == false) {
 		this.config.addConfigValue('outputdevice', 'string', '0');
@@ -52,6 +50,11 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 		var value = this.config.get('outputdevice');
 		this.setDefaultMixer(value);
 		this.updateVolumeSettings();
+	}
+
+	if (this.config.has('volumesteps') == false) {
+	this.config.addConfigValue('volumesteps', 'string', '10');
+	this.updateVolumeSettings();
 	}
 
 	this.logger.debug("Creating shared var alsa.outputdevice");
@@ -76,14 +79,32 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	if (value == undefined){
 		value = 0;}
 
+
 	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelectedCard(cards, value));
+	var outdevicename = self.config.get('outputdevicename');
+	if (outdevicename) {
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+	} else {
+		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelectedCard(cards, value));
+	}
+
 
 	for (var i in cards) {
+		if (cards[i].name === 'Audio Jack') {
+			self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+				value: cards[i].id,
+				label: 'Audio Jack'
+			});
+			self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+				value: cards[i].id,
+				label: 'HDMI Out'
+			});
+		} else {
 		self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
 			value: cards[i].id,
 			label: cards[i].name
 		});
+		}
 	}
 
 	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
@@ -189,9 +210,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-	value = self.config.get('volumecurvemode');
+	value = self.config.get('volumesteps');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+
+	value = self.config.get('volumecurvemode');
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
+	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
 	return uiconf;
 };
@@ -205,6 +230,24 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
 	var OutputDeviceNumber = data.output_device.value;
+
+	if (data.output_device.label === 'HDMI Out') {
+		if (this.config.has('outputdevicename') == false) {
+			this.config.addConfigValue('outputdevicename', 'string', 'HDMI Out');
+		} else {
+			this.config.set('outputdevicename', 'HDMI Out');
+		}
+		self.enablePiHDMI();
+	}
+
+	if (data.output_device.label === 'Audio Jack') {
+		if (this.config.has('outputdevicename') == false) {
+			this.config.addConfigValue('outputdevicename', 'string', 'Audio Jack');
+		} else {
+			this.config.set('outputdevicename', 'Audio Jack');
+		}
+		self.enablePiJack();
+	}
 
 	if (data.i2s){
 		var I2SNumber = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SNumber', data.i2sid.label);
@@ -265,6 +308,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
+	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 
 	self.logger.info('Volume configurations have been set');
@@ -459,14 +503,56 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
 	var valvolumestart = self.config.get('volumestart');
+	var valvolumesteps = self.config.get('volumesteps');
 
 	var settings = {
 		device : valdevice,
 		mixer : valmixer,
 		maxvolume : valvolumemax,
 		volumecurve : valvolumecurvemode,
-		volumestart : valvolumestart
+		volumestart : valvolumestart,
+		volumesteps : valvolumesteps
 	}
 
 	return self.commandRouter.volumioUpdateVolumeSettings(settings)
+}
+
+ControllerAlsa.prototype.enablePiJack  = function () {
+	var self = this;
+
+	exec('/usr/bin/amixer cset numid=3 1', function (error, stdout, stderr) {
+		if (error) {
+			self.logger.error('Cannot Enable Raspberry PI Jack Output: '+error);
+		} else {
+			self.logger.error('Raspberry PI Jack Output Enabled ');
+			self.storeAlsaSettings();
+		}
+	});
+
+}
+
+ControllerAlsa.prototype.enablePiHDMI  = function () {
+	var self = this;
+
+
+	exec('/usr/bin/amixer cset numid=3 2', function (error, stdout, stderr) {
+		if (error) {
+			self.logger.error('Cannot Enable Raspberry PI HDMI Output: '+error);
+		} else {
+			self.logger.error('Raspberry PI HDMI Output Enabled ');
+			self.storeAlsaSettings();
+		}
+	});
+
+}
+
+ControllerAlsa.prototype.storeAlsaSettings  = function () {
+	var self = this;
+	exec('/usr/bin/sudo /usr/sbin/alsactl store', function (error, stdout, stderr) {
+		if (error) {
+			self.logger.error('Cannot Store Alsa Settings: '+error);
+		} else {
+			self.logger.error('Alsa Settings successfully stored');
+		}
+	});
 }

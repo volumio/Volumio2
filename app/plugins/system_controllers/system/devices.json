@@ -1,0 +1,4 @@
+{"devices":[
+  {"name":"Raspberry PI 2/3", "cpuid":"BCM2709"},
+  {"name":"Raspberry PI", "cpuid":"BCM2708"}
+]}

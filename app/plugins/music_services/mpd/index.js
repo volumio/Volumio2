@@ -392,6 +392,10 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.file != undefined) {
 		resp.uri = objTrackInfo.file;
 		resp.trackType = objTrackInfo.file.split('.').pop();
+		if (resp.uri.indexOf('cdda:///') >= 0) {
+			resp.trackType = 'CD Audio';
+			resp.title = resp.uri.replace('cdda:///', 'Track ');
+		}
 	} else {
 		resp.uri = null;
 	}
@@ -617,7 +621,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system-playlist', function () {
 		var timeStart = Date.now();
 
-		self.logStart('MPD announces sysyrm state update')
+		self.logStart('MPD announces system state update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
@@ -627,7 +631,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 	//Notify that The mpd DB has changed
 	self.clientMpd.on('system-database', function () {
-
+		self.commandRouter.fileUpdate();
 		return self.reportUpdatedLibrary();
 	});
 };
@@ -1117,16 +1121,18 @@ ControllerMpd.prototype.updateQueue = function () {
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 					if (line.indexOf('file:') === 0) {
-						var path = line.slice(5).trimLeft();
-						var name = path.split('/');
-						var count = name.length;
-
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
-						var title = self.searchFor(lines, i + 1, 'Title:');
+						var rawtitle = self.searchFor(lines, i + 1, 'Title:');
 						var tracknumber = self.searchFor(lines, i + 1, 'Pos:');
-						if (title == undefined) {
-							title = name[count - 1];
+						var path = line.slice(5).trimLeft();
+
+						if (rawtitle) {
+							var title = rawtitle;
+						} else {
+							var path = line.slice(5).trimLeft();
+							var name = path.split('/');
+							var title = name.slice(-1)[0];
 						}
 
 						var queueItem = {
@@ -1179,7 +1185,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 			album = data.album;
 		else album = data.artist;
 
-		web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
+		web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/extralarge'
 	}
 
 	var url = '/albumart';

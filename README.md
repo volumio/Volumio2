@@ -16,13 +16,16 @@ Volumio is obtained with 3 main components:
 ## Volumio 2 System Images
 
 LATEST
-* [Beta4 (2016-03-03)](http://updates.volumio.org/pi/volumio/0.839/volumio-0.839-2016-03-03-pi.img.zip)
+* [RC1 (2016-03-25)](http://updates.volumio.org/pi/volumio/0.861/volumio-0.861-2016-03-25-pi.img.zip)
 
 PREVIOUS VERSIONS
+* [Beta4 (2016-03-03)](http://updates.volumio.org/pi/volumio/0.839/volumio-0.839-2016-03-03-pi.img.zip)
 * [Beta3 (2016-02-23)](http://updates.volumio.org/pi/volumio/0.836/volumio-0.836-2016-02-23-pi.img.zip)
 * [Beta2 (2016-02-20)](http://updates.volumio.org/pi/volumio/0.833/volumio-0.833-2016-02-20-pi.img.zip)
 * [Beta1 (2016-02-11)](http://updates.volumio.org/pi/volumio/0.830/Volumio0.830-2016-02-11PI.img.zip)
 * [Alpha6 (2016-01-25)](http://updates.volumio.org/pi/volumio/0.824/Volumio0.824-2016-01-25PI.img.zip)
+
+[Forum Thread for Feedbacks and suggestions)](https://volumio.org/forum/introducing-volumio-t3169.html)
 
 
 Logins
@@ -108,7 +111,13 @@ All new improvements and developments are meant to be done on the dev branch, on
 
 ## Development tasks and milestones
 
-### Current Tasks
+### Next Tasks for RC2 
+
+- [ ] Spotify Integration
+- [ ] Common queue for Music Library and Spotify Integration
+Both tasks are under development on [playqueue branch](https://github.com/volumio/Volumio2/tree/playqueue)
+
+### Archived  Tasks
 
 - [X] Templating System
 
@@ -146,36 +155,36 @@ All new improvements and developments are meant to be done on the dev branch, on
  - [X] Mixer Controls
  - [X] Volume Controls
  
-- [ ] Communication Interfaces 
+- [X] Communication Interfaces 
  - [X] Socket.io Controller
- - [ ] API Controller 
+ - [X] API Controller 
  - [X] MPD Emulation Interface
 
-- [ ] Audio services Controllers
+- [X] Audio services Controllers
  - [X] MPD Service and Library
  - [X] SPOP Service and Library
  - [X] Shairport Service and Library
  - [X] UPNP Service and Library
- - [ ] \(groove?\) Service and Library
 
-- [ ] System manager worker
+- [X] System manager worker
  - [X] Networking
  - [X] CIFS\SAMBA
- - [ ] I2S Driver
+ - [X] I2S Driver
  - [X] Hardware Layer
  - [X] USB Drives
  - [X] Volumio Service Discovery 
- - 
+
+
 ### Frontend
 
-- [ ] Volumio 2 WebUI (Playback)
+- [X] Volumio 2 WebUI (Playback)
  - [X] Boostrap Based Structure
  - [X] Playback Handling
  - [X] Library retrieval
  - [X] Library Sorting 
  - [X] Airplay Hooks
 
-- [ ] Volumio 2 WebUI (Configuration)
+- [X] Volumio 2 WebUI (Configuration)
  - [X] Playback Option Configuration
  - [X] Network Option Configuration
  - [X] Plug-in System Configuration
