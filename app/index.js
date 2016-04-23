@@ -553,15 +553,12 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
     }
 };
 
-<<<<<<< HEAD
+
 // Volumio Play
 CoreCommandRouter.prototype.volumioSeek = function (position) {
     this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
     return this.stateMachine.seek(position);
 };
-
-
-=======
 
 CoreCommandRouter.prototype.installPlugin = function (uri) {
     var self=this;
@@ -654,4 +651,4 @@ CoreCommandRouter.prototype.enableAndStartPlugin = function (category,name) {
 CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
     return this.pluginManager.disableAndStopPlugin(category,name);
 };
->>>>>>> plugin-install
+
