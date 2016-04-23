@@ -7,6 +7,7 @@ var exec = require('child_process').exec;
 var winston = require('winston');
 var vconf = require('v-conf');
 
+
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
@@ -36,6 +37,7 @@ function CoreCommandRouter(server) {
 
 	// Start plugins
 	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+    this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
 	//self.pluginManager.onVolumioStart();
 	//self.pluginManager.startPlugins();
@@ -551,6 +553,7 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
     }
 };
 
+<<<<<<< HEAD
 // Volumio Play
 CoreCommandRouter.prototype.volumioSeek = function (position) {
     this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
@@ -558,3 +561,97 @@ CoreCommandRouter.prototype.volumioSeek = function (position) {
 };
 
 
+=======
+
+CoreCommandRouter.prototype.installPlugin = function (uri) {
+    var self=this;
+    var defer=libQ.defer();
+
+    this.pluginManager.installPlugin(uri).then(function()
+    {
+        defer.resolve();
+    }).fail(function(e){
+        self.logger.info("Error: "+e);
+         defer.reject(new Error('Cannot install plugin. Error: '+e));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.unInstallPlugin = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.unInstallPlugin(data.category,data.plugin).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot uninstall plugin'));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.enablePlugin = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.enablePlugin(data.category,data.plugin).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot enable plugin'));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.disablePlugin = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.disablePlugin(data.category,data.plugin).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot disable plugin'));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.modifyPluginStatus = function (data) {
+    var defer=libQ.defer();
+
+    this.pluginManager.modifyPluginStatus(data.category,data.plugin,data.status).then(function()
+    {
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot update plugin status'));
+    });
+
+    return defer.promise;
+};
+
+CoreCommandRouter.prototype.broadcastMessage = function (emit,payload) {
+    var self = this;
+    return libQ.all(
+        libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+            var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+            if (typeof thisInterface.broadcastMessage === "function")
+                return thisInterface.broadcastMessage(emit,payload);
+        })
+    );
+};
+
+CoreCommandRouter.prototype.getInstalledPlugins = function () {
+    return this.pluginManager.getInstalledPlugins();
+};
+
+
+CoreCommandRouter.prototype.enableAndStartPlugin = function (category,name) {
+    return this.pluginManager.enableAndStartPlugin(category,name);
+};
+
+
+CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
+    return this.pluginManager.disableAndStopPlugin(category,name);
+};
+>>>>>>> plugin-install

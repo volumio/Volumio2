@@ -1149,6 +1149,117 @@ function InterfaceWebUI(context) {
 			});
 
 
+            /*
+                PLUGIN INSTALLATION METHODS
+             */
+
+            /*
+                Format expected: tar.gz
+                data:   {uri:'http://....../plugin.tar.gz'}
+             */
+            connWebSocket.on('installPlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.installPlugin(data.uri);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushInstallPlugin', data);
+                    });
+                }
+                else self.logger.error("Error on installing plugin");
+            });
+
+            connWebSocket.on('unInstallPlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.unInstallPlugin(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushUnInstallPlugin', data);
+                    });
+                }
+                else self.logger.error("Error on installing plugin");
+            });
+
+            connWebSocket.on('enablePlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.enablePlugin(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushEnablePlugin', data);
+                    });
+                }
+                else self.logger.error("Error on installing plugin");
+            });
+
+            connWebSocket.on('disablePlugin', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.disablePlugin(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushDisablePlugin', data);
+                    });
+                }
+                else self.logger.error("Error on disabling plugin");
+            });
+
+            connWebSocket.on('modifyPluginStatus', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.modifyPluginStatus(data);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushModifyPluginStatus', data);
+                    });
+                }
+                else self.logger.error("Error on disabling plugin");
+            });
+
+            connWebSocket.on('getInstalledPlugins', function (pippo) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.getInstalledPlugins();
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (installedPLugins) {
+                        self.logger.info(JSON.stringify(installedPLugins));
+                        selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+                    });
+                }
+                else self.logger.error("Error on getting installed plugins");
+            });
+
+            connWebSocket.on('pluginManager', function (data) {
+                var selfConnWebSocket = this;
+
+                self.logger.info("ACTION= "+data.action);
+                if(data.action==='getUiConfig')
+                {
+                    return self.commandRouter.executeOnPlugin(data.category,data.name,'getUiConfig');
+                }
+                else if(data.action==='setUiConfig')
+                {
+                    return self.commandRouter.executeOnPlugin(data.category,data.name,'setUiConfig',data);
+                }
+                else if(data.action==='enable')
+                {
+                    return self.commandRouter.enableAndStartPlugin(data.category,data.name);
+                }
+                else if(data.action==='disable')
+                {
+                    return self.commandRouter.disableAndStopPlugin(data.category,data.name);
+                }
+            });
+
+
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
@@ -1301,11 +1412,7 @@ InterfaceWebUI.prototype.emitFavourites = function (value) {
 	self.libSocketIO.sockets.emit('urifavourites', value);
 };
 
-InterfaceWebUI.prototype.broadcastMessage = function(data) {
-    var self = this;
-    var msg = data.msg;
-    var value = data.value;
-
-    self.libSocketIO.sockets.emit(msg, value);
+InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
+    this.libSocketIO.sockets.emit(emit,payload);
 };
 

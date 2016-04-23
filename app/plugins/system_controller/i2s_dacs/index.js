@@ -172,7 +172,7 @@ ControllerI2s.prototype.getI2sOptions = function () {
 	var self = this;
 
 	var options = [];
-	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
 	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
 
 	for(var i = 0; i < dacdata.devices.length; i++)
@@ -211,7 +211,7 @@ ControllerI2s.prototype.getI2sStatus = function () {
 ControllerI2s.prototype.getI2SNumber = function (data) {
 	var self = this;
 
-	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
 	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
 	var number = '';
 
@@ -234,7 +234,7 @@ ControllerI2s.prototype.getI2SNumber = function (data) {
 ControllerI2s.prototype.getI2SMixer = function (data) {
 	var self = this;
 
-	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
 	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
 	var mixer = '';
 
@@ -259,7 +259,7 @@ ControllerI2s.prototype.getI2SMixer = function (data) {
 ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var self = this;
 
-	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controllers/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
 	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
 
 	for(var i = 0; i < dacdata.devices.length; i++)
