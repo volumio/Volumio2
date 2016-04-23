@@ -10,6 +10,11 @@ var vconf=require('v-conf');
 var libQ=require('kew');
 var DecompressZip = require('decompress-zip');
 var http = require('http');
+var execSync = require('child_process').execSync;
+
+var arch = '';
+var variant = '';
+var device = '';
 
 module.exports = PluginManager;
 function PluginManager(ccommand, server) {
@@ -41,6 +46,21 @@ function PluginManager(ccommand, server) {
     self.configManager=new(require(__dirname+'/configManager.js'))(self.logger);
 
     self.configurationFolder = '/data/configuration/';
+
+    var archraw = execSync('/usr/bin/dpkg --print-architecture', { encoding: 'utf8' });
+    arch = archraw.replace(/(\r\n|\n|\r)/gm,"")
+
+    var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+    for (var l in file) {
+        if (file[l].match(/VOLUMIO_VARIANT/i)) {
+            var str = file[l].split('=');
+            variant = str[1].replace(/\"/gi, "");
+        }
+        if (file[l].match(/VOLUMIO_HARDWARE/i)) {
+            var str = file[l].split('=');
+            var device = str[1].replace(/\"/gi, "");
+        }
+    }
 }
 
 PluginManager.prototype.initializeConfiguration = function (package_json, pluginInstance, folder) {
@@ -883,7 +903,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
     var defer=libQ.defer();
 
     var response=[];
-    var url = 'http://plugins.volumio.org/plugins.json';
+    var url = 'http://plugins.volumio.org/plugins/'+variant+'/'+arch+'/plugins.json';
 
     http.get(url, function(res){
     var body = '';
