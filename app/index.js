@@ -652,3 +652,4 @@ CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
     return this.pluginManager.disableAndStopPlugin(category,name);
 };
 
+

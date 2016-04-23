@@ -1239,7 +1239,6 @@ function InterfaceWebUI(context) {
             connWebSocket.on('pluginManager', function (data) {
                 var selfConnWebSocket = this;
 
-                self.logger.info("ACTION= "+data.action);
                 if(data.action==='getUiConfig')
                 {
                     return self.commandRouter.executeOnPlugin(data.category,data.name,'getUiConfig');
@@ -1259,7 +1258,15 @@ function InterfaceWebUI(context) {
             });
 
 
+            connWebSocket.on('PreunInstallPlugin', function (data) {
+                var selfConnWebSocket = this;
 
+                selfConnWebSocket.emit('showModal', {title:'Confirm plugin uninstall',
+                                content:'Are you sure you want to uninstall plugin '+data.name+'?',
+                                buttons[{name:'Uninstall', 'emit':'unInstallPlugin', 'payload':'{\"category\":\"'+data.category+'\",\"name\":\"'+data.name+'\"}',
+                                 {'name':'Cancel'}]});
+                
+            });
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
