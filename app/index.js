@@ -580,9 +580,12 @@ CoreCommandRouter.prototype.installPlugin = function (uri) {
 };
 
 CoreCommandRouter.prototype.unInstallPlugin = function (data) {
-    var defer=libQ.defer();
+    var self = this;
+	var defer=libQ.defer();
 
-    this.pluginManager.unInstallPlugin(data.category,data.plugin).then(function()
+	self.logger.info('Starting Uninstall of plugin ' + data.category + ' - ' +data.name);
+
+    this.pluginManager.unInstallPlugin(data.category,data.name).then(function()
     {
         defer.resolve();
     }).fail(function(){

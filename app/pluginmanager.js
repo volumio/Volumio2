@@ -669,6 +669,7 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
     var defer=libQ.defer();
 
     var key=category+'.'+name;
+    console.log(key);
     if(self.config.has(key))
     {
        self.logger.info("Uninstalling plugin "+name);
@@ -703,7 +704,7 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
                self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'An error occurred uninstalling the plugin. Details: '+e});
                defer.reject(new Error());
            });
-    }
+   }
     else defer.reject(new Error("Plugin doesn't exist"));
 
     return defer.promise;
@@ -928,7 +929,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
     http.get(url, function(res){
     var body = '';
         if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
-            self.logger.info("Following Redirect to: " + res.headers.location);
+            //self.logger.info("Following Redirect to: " + res.headers.location);
             http.get(res.headers.location, function(res){
             res.on('data', function(chunk){
                 body += chunk;
@@ -965,6 +966,8 @@ PluginManager.prototype.getAvailablePlugins = function () {
                 var p = myplugins.lastIndexOf(availableName);
                 if (p > -1) {
                     plugins[a].installed = true;
+                } else {
+                    plugins[a].installed = false;
                 }
             }
 
