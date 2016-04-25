@@ -1249,6 +1249,19 @@ function InterfaceWebUI(context) {
 				else self.logger.error("Error on getting Available plugins");
 			});
 
+			connWebSocket.on('getPluginDetails', function () {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.getPluginDetails();
+
+				if (returnedData != undefined) {
+					returnedData.then(function (Details) {
+						selfConnWebSocket.emit('showModal',Details);
+					});
+				}
+				else self.logger.error("Error on getting Plugin Details");
+			});
+
             connWebSocket.on('pluginManager', function (data) {
                 var selfConnWebSocket = this;
 

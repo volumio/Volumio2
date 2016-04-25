@@ -939,6 +939,66 @@ PluginManager.prototype.getAvailablePlugins = function () {
     return defer.promise;
 }
 
+PluginManager.prototype.getPluginDetails = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var responseData ='';
+
+    var response = [];
+    var url = 'http://plugins.volumio.org/plugins/' + variant + '/' + arch + '/plugins.json';
+
+    http.get(url, function (res) {
+        var body = '';
+        if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
+            self.logger.info("Following Redirect to: " + res.headers.location);
+            http.get(res.headers.location, function (res) {
+                res.on('data', function (chunk) {
+                    body += chunk;
+                });
+
+                res.on('end', function () {
+                    var response = JSON.parse(body);
+                    pushDetails();
+
+                });
+            }).on('error', function (e) {
+                self.logger.info("Cannot download Available plugins list: " + e);
+            });
+        } else {
+            res.on('data', function (chunk) {
+                body += chunk;
+            });
+
+            res.on('end', function () {
+                var response = JSON.parse(body);
+                pushDetails();
+            });
+        }
+    }).on('error', function (e) {
+        self.logger.info("Cannot download Available plugins list: " + e);
+    });
+
+    function pushDetails() {
+
+        var responseData = {
+            title: 'Plugin  Detail',
+            message: 'Here you find all the plugins details',
+            size: 'lg',
+            buttons: [
+                {
+                    name: 'Close',
+                    class: 'btn btn-warning'
+                }
+            ]
+        }
+        defer.resolve(responseData);
+
+
+    }
+
+    return defer.promise;
+}
+
 
 PluginManager.prototype.enableAndStartPlugin = function (category,name) {
     var self=this;
