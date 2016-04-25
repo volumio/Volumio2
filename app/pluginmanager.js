@@ -915,8 +915,8 @@ PluginManager.prototype.getAvailablePlugins = function () {
             });
 
             res.on('end', function(){
-
-                defer.resolve(body);
+                var response = JSON.parse(body);
+                defer.resolve(response);
             });
             }).on('error', function(e){
                 self.logger.info("Cannot download Available plugins list: "+e);
@@ -928,14 +928,14 @@ PluginManager.prototype.getAvailablePlugins = function () {
                 });
 
                 res.on('end', function () {
-
-                    defer.resolve(body);
+                    var response = JSON.parse(body);
+                    defer.resolve(response);
                 });
             }
     }).on('error', function(e){
         self.logger.info("Cannot download Available plugins list: "+e);
     });
-
+    
     return defer.promise;
 }
 

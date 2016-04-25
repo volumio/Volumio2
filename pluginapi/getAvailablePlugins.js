@@ -10,6 +10,6 @@ socket.emit('getAvailablePlugins', '');
 
 socket.on('pushAvailablePlugins',function(data)
 {
-    console.log(data);
+    console.log(data.categories);
 //console.log(JSON.parse(data));
 });
