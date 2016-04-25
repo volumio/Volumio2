@@ -349,16 +349,16 @@ PluginManager.prototype.checkRequiredConfigurationParameters = function (require
     configJson.save();
 };
 
-PluginManager.prototype.installPlugin = function (uri) {
+PluginManager.prototype.installPlugin = function (url) {
     var self=this;
     var defer=libQ.defer();
 
-    self.logger.info("Downloading plugin at "+uri);
+    self.logger.info("Downloading plugin at "+url);
 
     self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin'});
 
 
-    var download = wget.download(uri, "/tmp/downloaded_plugin.zip",{});
+    var download = wget.download(url, "/tmp/downloaded_plugin.zip",{});
     download.on('error', function(err) {
         self.logger.info("ERROR DOWNLOAD: "+err);
         defer.reject(new Error(err));

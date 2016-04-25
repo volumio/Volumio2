@@ -1160,7 +1160,7 @@ function InterfaceWebUI(context) {
             connWebSocket.on('installPlugin', function (data) {
                 var selfConnWebSocket = this;
 
-                var returnedData = self.commandRouter.installPlugin(data.uri);
+                var returnedData = self.commandRouter.installPlugin(data.url);
 
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
