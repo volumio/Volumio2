@@ -11,7 +11,8 @@ var commandArray = [
     "ifconfig",
     "iwconfig",
     "ps -ef",
-    "sudo journalctl -p 7"
+    "sudo journalctl -p 7",
+    "sudo journalctl -u airplay -p 7"
     ];
 
 var logFile = "/tmp/logondemand";
@@ -34,7 +35,7 @@ for (var itemN in commandArray) {
     exec.execSync(itemWithoutput);
 }
 
-var command = "cat logFile";
+var command = "/bin/bash /volumio/axiom/s3.sh " + logFile;
 console.log(command);
 exec.execSync(command);
 exec.execSync("rm " + logFile);
