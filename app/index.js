@@ -653,8 +653,8 @@ CoreCommandRouter.prototype.getAvailablePlugins = function () {
 	return this.pluginManager.getAvailablePlugins();
 };
 
-CoreCommandRouter.prototype.getPluginDetails = function () {
-	return this.pluginManager.getPluginDetails();
+CoreCommandRouter.prototype.getPluginDetails = function (data) {
+	return this.pluginManager.getPluginDetails(data);
 };
 
 

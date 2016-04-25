@@ -978,13 +978,17 @@ PluginManager.prototype.getAvailablePlugins = function () {
     return defer.promise;
 }
 
-PluginManager.prototype.getPluginDetails = function () {
+PluginManager.prototype.getPluginDetails = function (data) {
     var self = this;
     var defer = libQ.defer();
     var responseData ='';
 
     var response = [];
     var url = 'http://plugins.volumio.org/plugins/' + variant + '/' + arch + '/plugins.json';
+
+    var pluginCategory= data.category;
+    var pluginName = data.name;
+
 
     http.get(url, function (res) {
         var body = '';
@@ -997,7 +1001,7 @@ PluginManager.prototype.getPluginDetails = function () {
 
                 res.on('end', function () {
                     var response = JSON.parse(body);
-                    pushDetails();
+                    searchDetails(response);
 
                 });
             }).on('error', function (e) {
@@ -1010,18 +1014,40 @@ PluginManager.prototype.getPluginDetails = function () {
 
             res.on('end', function () {
                 var response = JSON.parse(body);
-                pushDetails();
+                searchDetails(response);
             });
         }
     }).on('error', function (e) {
         self.logger.info("Cannot download Available plugins list: " + e);
     });
 
-    function pushDetails() {
+    function searchDetails(response) {
+        var self = this;
+        for(var i = 0; i < response.categories.length; i++) {
+            var category = response.categories[i];
+            var categoryName = response.categories[i].name;
+            if (categoryName == data.category) {
+                for(var c = 0; c < category.plugins.length; c++) {
+                    var plugin = category.plugins[c];
+                    var name = category.plugins[c].name;
+                    var prettyname = category.plugins[c].prettyName;
+                    if (name == pluginName){
+                        var details = 'No Details available for plugin '+ prettyname + '.';
+                        if (plugin.details){
+                            var details = plugin.details;
+                        }
+                        pushDetails(details, prettyname);
+                    }
+                }
+            }
+        }
+    }
+
+    function pushDetails(details, prettyname) {
 
         var responseData = {
-            title: 'Plugin  Detail',
-            message: 'Here you find all the plugins details',
+            title: prettyname + ' Plugin',
+            message: details,
             size: 'lg',
             buttons: [
                 {
