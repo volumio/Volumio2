@@ -876,11 +876,18 @@ PluginManager.prototype.getInstalledPlugins = function () {
                             var name = package_json.name;
                             var category = package_json.volumio_info.plugin_type;
                             var key=category+'.'+name;
+                            var version = package_json.version;
+                            if (package_json.volumio_info.pretty_name) {
+                                var prettyName = package_json.volumio_info.pretty_name;
+                            } else {
+                                var prettyName = name;
+                            }
 
                             response.push({
-                                prettyName:name,
+                                prettyName:prettyName,
                                 name:name,
                                 category:category,
+                                version:version,
                                 enabled:self.config.get(key+'.enabled'),
                                 active:self.config.get(key+'.status')==='STARTED'
                             });
@@ -901,9 +908,22 @@ PluginManager.prototype.getInstalledPlugins = function () {
 PluginManager.prototype.getAvailablePlugins = function () {
     var self=this;
     var defer=libQ.defer();
+    var response=libQ.defer();
 
+    var myplugins = [];
     var response=[];
+
     var url = 'http://plugins.volumio.org/plugins/'+variant+'/'+arch+'/plugins.json';
+    var installed = self.getInstalledPlugins();
+
+    if (installed != undefined) {
+        installed.then(function (installedPlugins) {
+            for (var e = 0; e <  installedPlugins.length; e++) {
+                var pluginpretty = installedPlugins[e].prettyName;
+                myplugins.push(pluginpretty);
+            }
+        });
+    }
 
     http.get(url, function(res){
     var body = '';
@@ -916,7 +936,8 @@ PluginManager.prototype.getAvailablePlugins = function () {
 
             res.on('end', function(){
                 var response = JSON.parse(body);
-                defer.resolve(response);
+                pushAvailablePlugins(response);
+
             });
             }).on('error', function(e){
                 self.logger.info("Cannot download Available plugins list: "+e);
@@ -929,13 +950,28 @@ PluginManager.prototype.getAvailablePlugins = function () {
 
                 res.on('end', function () {
                     var response = JSON.parse(body);
-                    defer.resolve(response);
+                    pushAvailablePlugins(response);
                 });
             }
     }).on('error', function(e){
         self.logger.info("Cannot download Available plugins list: "+e);
     });
-    
+
+    function pushAvailablePlugins(response) {
+        for(var i = 0; i < response.categories.length; i++) {
+            var plugins = response.categories[i].plugins;
+            for(var a = 0; a <  plugins.length; a++) {
+                var availableName = plugins[a].name;
+                var p = myplugins.lastIndexOf(availableName);
+                if (p > -1) {
+                    plugins[a].installed = true;
+                }
+            }
+
+        }
+        defer.resolve(response);
+    }
+
     return defer.promise;
 }
 

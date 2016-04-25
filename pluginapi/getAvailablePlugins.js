@@ -11,5 +11,6 @@ socket.emit('getAvailablePlugins', '');
 socket.on('pushAvailablePlugins',function(data)
 {
     console.log(data.categories);
+	console.log(data.categories[0].plugins[0]);
 //console.log(JSON.parse(data));
 });
