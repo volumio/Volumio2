@@ -7,8 +7,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var restapi = require('./restapi.js');
+var busboy = require('connect-busboy');
+var path = require('path');
+var fs = require('fs-extra');
 var app = express();
 var dev = express();
+
 
 // view engine setup
 dev.set('views', path.join(__dirname, 'dev/views'));
@@ -26,6 +30,7 @@ dev.use('/', routes);
 
 app.use(compression())
 app.use(express.static(path.join(__dirname, 'www')));
+app.use(busboy());
 
 app.use('/dev', dev);
 app.use('/api', restapi);
@@ -61,5 +66,27 @@ dev.use(function(err, req, res, next) {
         error: {}
     });
 });
+
+
+
+app.route('/plugin-upload')
+    .post(function (req, res, next) {
+
+        var fstream;
+        req.pipe(req.busboy);
+        req.busboy.on('file', function (fieldname, file, filename) {
+            console.log("Uploading: " + filename);
+
+            //Path where image will be uploaded
+            fstream = fs.createWriteStream('/tmp/plugins/' + filename);
+            file.pipe(fstream);
+            fstream.on('close', function () {
+                console.log("Upload Finished of " + filename);
+                res.redirect('back');           //where to go next
+            });
+        });
+    });
+
+
 module.exports.app = app;
 module.exports.dev = dev;

@@ -58,6 +58,16 @@
 			<button type="submit">Send</button>
 		</form>
 
+		<h3>Plugin Upload</h3>
+		<form ref='uploadForm'
+			  id='uploadForm'
+			  action='/plugin-upload'
+			  method='post'
+			  encType="multipart/form-data">
+			<input type="file" name="Choose Plugin" />
+			<input type='submit' value='Upload!' />
+		</form>
+
 		<h3>Console</h3>
 			<button id='button-clearconsole'>Clear</button>
 			<div id='div-console' style='border: 1px solid black; height: 400px; overflow-y: scroll;'>
