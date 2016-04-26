@@ -566,6 +566,8 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
         else {
              self.logger.info("Executing install.sh");
                 exec(installScript, {uid:1000, gid:1000},function(error, stdout, stderr) {
+                    console.log(stdout);
+                    console.log(stderr);
                     if (error!==undefined && error!==null) {
                         self.logger.info("Install script return the error "+error);
                         defer.reject(new Error());
