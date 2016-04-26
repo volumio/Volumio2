@@ -574,7 +574,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
-        self.logger.info(status);
+        self.logger.info('Mpd Status Update: '+status);
 		self.logStart('MPD announces state update')
 			.then(self.getState.bind(self))
 			.then(self.pushState.bind(self))
@@ -737,7 +737,6 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	self.config.set('volume_normalization', data['volume_normalization'].value);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
-	self.config.set('auto_update', data['auto_update'].value);
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
@@ -799,93 +798,56 @@ ControllerMpd.prototype.restartMpd = function (callback) {
 ControllerMpd.prototype.createMPDFile = function (callback) {
 	var self = this;
 
+	exec('/usr/bin/sudo /bin/chmod 777 /etc/mpd.conf', {uid:1000,gid:1000},
+		function (error, stdout, stderr) {
+			if(error != null) {
+			self.logger.info('Error setting mpd conf file perms: '+error);
+			} else {
+				self.logger.info('MPD Permissions set');
+			}
+		});
+
 	try {
-		libFsExtra.copySync('/etc/mpd.conf', '/tmp/mpd.conf.old');
 
-		var ws = libFsExtra.createOutputStream('/etc/mpd.conf');
+		fs.readFile(__dirname + "/mpd.conf.tmpl", 'utf8', function (err, data) {
+			if (err) {
+				return console.log(err);
+			}
 
-		ws.write('# Volumio MPD Configuration File\n');
-		ws.write('\n');
-		ws.write('# Files and directories #######################################################\n');
-		ws.write('music_directory		"/var/lib/mpd/music"\n');
-		ws.write('playlist_directory		"/var/lib/mpd/playlists"\n');
-		ws.write('db_file			"/var/lib/mpd/tag_cache"\n');
-		ws.write('#log_file			"/var/log/mpd/mpd.log"\n');
-		ws.write('pid_file			"/var/run/mpd/pid"\n');
-		ws.write('#state_file			"/var/lib/mpd/state"\n');
-		ws.write('#sticker_file                   "/var/lib/mpd/sticker.sql"\n');
-		ws.write('###############################################################################\n');
-		ws.write('\n');
-		ws.write('# General music daemon options ################################################\n');
-		ws.write('user				"mpd"\n');
-		ws.write('group                          "audio"\n');
-		ws.write('bind_to_address		"any"\n');
-		ws.write('#port				"6600"\n');
-		ws.write('#log_level			"default"\n');
-		ws.write('gapless_mp3_playback			"' + self.config.get('gapless_mp3_playback') + '"\n');
-		ws.write('#save_absolute_paths_in_playlists	"no"\n');
-		ws.write('#metadata_to_use	"artist,album,title,track,name,genre,date,composer,performer,disc"\n');
-		ws.write('auto_update    "' + self.config.get('auto_update') + '"\n');
-		ws.write('#auto_update_depth "3"\n');
-		ws.write('###############################################################################\n');
-		ws.write('# Symbolic link behavior ######################################################\n');
-		ws.write('follow_outside_symlinks	"yes"\n');
-		ws.write('follow_inside_symlinks		"yes"\n');
-		ws.write('###############################################################################\n');
-		ws.write('# Input #######################################################################\n');
-		ws.write('#\n');
-		ws.write('#input {\n');
-		ws.write('#        plugin "curl"\n');
-		ws.write('#       proxy "proxy.isp.com:8080"\n');
-		ws.write('#       proxy_user "user"\n');
-		ws.write('#       proxy_password "password"\n');
-		ws.write('#}\n');
-		ws.write('###############################################################################\n');
-		ws.write('\n');
-		ws.write('	# Audio Output ################################################################\n');
-		ws.write('audio_output {\n');
-		ws.write('		type		"alsa"\n');
-		ws.write('		name		"alsa"\n');
-		ws.write('		device		"hw:' + self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice') + ',0"\n');
-		ws.write('}\n');
-		ws.write('samplerate_converter "soxr very high"\n');
-		ws.write('#replaygain			"album"\n');
-		ws.write('#replaygain_preamp		"0"\n');
-		ws.write('volume_normalization		"' + self.config.get('volume_normalization') + '"\n');
-		ws.write('###############################################################################\n');
-		ws.write('\n');
-		ws.write('# MPD Internal Buffering ######################################################\n');
-		ws.write('audio_buffer_size		"' + self.config.get('audio_buffer_size') + '"\n');
-		ws.write('buffer_before_play		"' + self.config.get('buffer_before_play') + '"\n');
-		ws.write('###############################################################################\n');
-		ws.write('\n');
-		ws.write('\n');
-		ws.write('# Resource Limitations ########################################################\n');
-		ws.write('#connection_timeout		"60"\n');
-		ws.write('max_connections			"20"\n');
-		ws.write('#max_playlist_length		"16384"\n');
-		ws.write('#max_command_list_size		"2048"\n');
-		ws.write('#max_output_buffer_size		"8192"\n');
-		ws.write('###############################################################################\n');
-		ws.write('\n');
-		ws.write('# Character Encoding ##########################################################\n');
-		ws.write('filesystem_charset		"UTF-8"\n');
-		ws.write('id3v1_encoding			"UTF-8"\n');
-		ws.write('###############################################################################\n');
-		ws.end();
+
+			var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
+			var conf2 = conf1.replace("${device}", self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice'));
+			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
+			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
+			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
+
+			fs.writeFile("/etc/mpd.conf", conf5, 'utf8', function (err) {
+				if (err) return console.log(err);
+			});
+		});
 
 		callback();
 	}
 	catch (err) {
 
-		if (libFsExtra.existsSync('/tmp/mpd.conf.old')) {
-			libFsExtra.copySync('/tmp/mpd.conf.old', '/etc/mpd.conf');
-		}
-
 		callback(err);
 	}
 
 };
+
+ControllerMpd.prototype.checkTrue = function (config) {
+	var self = this;
+	var out = "no";
+	var value = self.config.get(config);
+
+	if(value){
+		out = "yes";
+		return out
+	} else {
+		return out
+	}
+};
+
 
 
 /*
@@ -893,6 +855,13 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
  */
 ControllerMpd.prototype.setConfiguration = function (configuration) {
 	//DO something intelligent
+};
+
+ControllerMpd.prototype.getConfigParam = function (key) {
+	return this.config.get(key);
+};
+ControllerMpd.prototype.setConfigParam = function (data) {
+	this.config.set(data.key, data.value);
 };
 
 ControllerMpd.prototype.fswatch = function () {
