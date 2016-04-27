@@ -10,8 +10,14 @@ var restapi = require('./restapi.js');
 var busboy = require('connect-busboy');
 var path = require('path');
 var fs = require('fs-extra');
+var io=require('socket.io-client');
+
+
 var app = express();
 var dev = express();
+var plugin = express();
+
+var plugindir = '/tmp/plugins';
 
 
 // view engine setup
@@ -34,6 +40,7 @@ app.use(busboy());
 
 app.use('/dev', dev);
 app.use('/api', restapi);
+app.use('/plugin-serve', plugin);
 
 
 // catch 404 and forward to error handler
@@ -77,15 +84,26 @@ app.route('/plugin-upload')
         req.busboy.on('file', function (fieldname, file, filename) {
             console.log("Uploading: " + filename);
 
+            try {
+                fs.ensureDirSync(plugindir)
+            } catch (err) {
+                console.log('Cannot Create Plugin DIR ')
+            }
             //Path where image will be uploaded
             fstream = fs.createWriteStream('/tmp/plugins/' + filename);
             file.pipe(fstream);
             fstream.on('close', function () {
                 console.log("Upload Finished of " + filename);
-                res.redirect('back');           //where to go next
+                var socket= io.connect('http://localhost:3000');
+                var pluginurl= 'http://127.0.0.1:3000/plugin-serve/'+filename.replace(/'|\\/g, '\\$&');;
+                socket.emit('installPlugin', { url:pluginurl});
+                res.redirect('/');
             });
         });
     });
+
+plugin.use(express.static(path.join(plugindir)));
+
 
 
 module.exports.app = app;
