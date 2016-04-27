@@ -5,7 +5,6 @@ var HashMap = require('hashmap');
 var libFast = require('fast.js');
 var S = require('string');
 var download = require('file-download');
-var wget=require('wget-improved');
 var vconf=require('v-conf');
 var libQ=require('kew');
 var DecompressZip = require('decompress-zip');
@@ -357,14 +356,13 @@ PluginManager.prototype.installPlugin = function (url) {
 
     self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin'});
 
-
-    var download = wget.download(url, "/tmp/downloaded_plugin.zip",{});
-    download.on('error', function(err) {
-        self.logger.info("ERROR DOWNLOAD: "+err);
-        defer.reject(new Error(err));
-    });
-   download.on('end', function(output) {
-       self.logger.info("END DOWNLOAD: "+output);
+    exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip "+url, function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info("Cannot download file "+url+ ' - ' + error);
+            defer.reject(new Error(error));
+        }
+        else {
+            self.logger.info("END DOWNLOAD: "+url);
 
        var pluginFolder = '/tmp/downloaded_plugin';
 
@@ -417,7 +415,8 @@ PluginManager.prototype.installPlugin = function (url) {
                defer.reject(new Error());
                self.rollbackInstall();
            });
-   });
+        }
+    });
 
     return defer.promise;
 };

@@ -97,7 +97,7 @@ app.route('/plugin-upload')
                 var socket= io.connect('http://localhost:3000');
                 var pluginurl= 'http://127.0.0.1:3000/plugin-serve/'+filename.replace(/'|\\/g, '\\$&');;
                 socket.emit('installPlugin', { url:pluginurl});
-                res.redirect('/');
+                //res.redirect('/');
             });
         });
     });
