@@ -4,7 +4,6 @@ var libMpd = require('mpd');
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
-var libChokidar = require('chokidar');
 var exec = require('child_process').exec;
 var nodetools = require('nodetools');
 var convert = require('convert-seconds');
@@ -863,49 +862,6 @@ ControllerMpd.prototype.getConfigParam = function (key) {
 ControllerMpd.prototype.setConfigParam = function (data) {
 	this.config.set(data.key, data.value);
 };
-
-ControllerMpd.prototype.fswatch = function () {
-	var self = this;
-	var watcher = libChokidar.watch('/mnt/', {ignored: /^\./, persistent: true, interval: 100, ignoreInitial: true});
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::StartedWatchService');
-	watcher
-		.on('add', function (path) {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
-
-			watcher.close();
-			return self.waitupdate();
-		})
-		.on('addDir', function (path) {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
-			self.sendMpdCommand('update', []);
-			watcher.close();
-			return self.waitupdate();
-		})
-		.on('unlink', function (path) {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase');
-			self.sendMpdCommand('update', []);
-			watcher.close();
-			return self.waitupdate();
-		})
-		.on('error', function (error) {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::UpdateMusicDatabase ERROR');
-		})
-};
-
-ControllerMpd.prototype.waitupdate = function () {
-	var self = this;
-
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::WaitUpdatetoFinish');
-	//Delay to ensure any media is properly mounted and accessible
-	setTimeout(function () {
-		return self.sendMpdCommand('update', []);
-	}, 500);
-
-	setTimeout(function () {
-		return self.fswatch()
-	}, 5000);
-};
-
 
 ControllerMpd.prototype.listPlaylists = function (uri) {
 	var self = this;

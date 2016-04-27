@@ -2,7 +2,6 @@ var express = require('express');
 var compression = require('compression')
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
@@ -26,7 +25,6 @@ dev.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
-dev.use(logger('dev'));
 dev.use(bodyParser.json());
 dev.use(bodyParser.urlencoded({ extended: false }));
 dev.use(cookieParser());

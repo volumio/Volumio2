@@ -4,7 +4,6 @@ var fs = require('fs-extra');
 var HashMap = require('hashmap');
 var libFast = require('fast.js');
 var S = require('string');
-var download = require('file-download');
 var vconf=require('v-conf');
 var libQ=require('kew');
 var DecompressZip = require('decompress-zip');
