@@ -19,7 +19,7 @@
     "express": "^4.13.4",
     "fast.js": "^0.1.1",
     "file-download": "^0.1.2",
-    "fs-extra": "^0.28.0",
+    "fs-extra": "^0.29.0",
     "hashmap": "^2.0.5",
     "inotify": "1.4.0",
     "ip": "^1.1.2",
