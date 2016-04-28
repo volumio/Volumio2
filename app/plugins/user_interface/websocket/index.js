@@ -139,6 +139,14 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addPlay', function (data) {
+                self.commandRouter.addQueueItems(data)
+                    .then(function(e){
+                        self.logger.info("PUTTING IN PLAY ITEM AT INDEX "+e.firstItemIndex);
+                        return self.commandRouter.volumioPlay(e.firstItemIndex);
+                    });
+/*
+
+
                 var timeStart = Date.now();
                 self.logStart('Client requests add and Play Volumio queue item')
                     .then(function () {
@@ -169,7 +177,7 @@ function InterfaceWebUI(context) {
 					.fail(self.pushError.bind(self))
 					.done(function () {
 						return self.commandRouter.pushToastMessage('success', "Play", str);
-					});
+					});*/
 			});
 
 			connWebSocket.on('addPlayCue', function (data) {

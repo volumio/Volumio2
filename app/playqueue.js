@@ -53,10 +53,15 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
 // Add one item to the queue
 CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     var self=this;
+    var defer=libQ.defer();
+
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
 
     self.commandRouter.logger.info(arrayItems);
     var array = [].concat( arrayItems );
+
+    var firstItemIndex=this.arrayQueue.length;
+    self.commandRouter.logger.info("First index is "+firstItemIndex);
 
     // We need to ask the service if the uri corresponds to something bigger, like a playlist
     var promiseArray=[];
@@ -91,10 +96,12 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         })
         .then(function(){
             self.stateMachine.updateTrackBlock();
-
+            defer.resolve({firstItemIndex:firstItemIndex});
         }).fail(function (e) {
+        defer.reject(new Error());
         self.commandRouter.logger.info("An error occurred while exploding URI");
     });
+    return defer.promise;
 };
 
 CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {

@@ -311,21 +311,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		this.uri = '/' + stateService.uri;
 	}
 
-
-	//If play is issued by a different entity than Volumio, the system will accept and handle it
-	/*if (this.currentTrackBlock.service !== sService) {
-		console.log(sService);
-		this.currentTrackBlock.service = sService;
-		this.currentStatus = stateService.status;
-
-        if(stateService.currentPosition===null || stateService.currentPosition===undefined)
-            this.currentPosition=0;
-        else
-            this.currentPosition = stateService.position;
-
-		this.currentPosition = stateService.position;
-	}*/
-
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   stateService '+stateService.status);
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   currentStatus '+this.currentStatus);
 
@@ -338,7 +323,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
         }
 		else if (this.currentStatus === 'stop') {
 
-			this.currentPosition = stateService.position;
+			//this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
 			this.currentTrackType = null;
@@ -508,11 +493,13 @@ CoreStateMachine.prototype.getTrack = function (position) {
 CoreStateMachine.prototype.play = function (index) {
     var self=this;
 
-    var currentPos=0;
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
     if(this.currentPosition ==null || this.currentPosition===undefined)
+    {
+        self.logger.info("CURRENT POSITION NOT SET, RESETTING TO 0");
         this.currentPosition=0;
+    }
 
 
     if(index!==undefined)
