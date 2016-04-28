@@ -412,3 +412,22 @@ ControllerSystem.prototype.StartDebugConsole = function () {
 
 };
 
+ControllerSystem.prototype.enableSSH = function (data) {
+	var self = this;
+
+	var action = 'enable';
+	var immediate = 'start'
+	if (data == 'false') {
+		action = 'disable';
+		immediate = 'stop';
+	}
+
+	exec('/usr/bin/sudo /bin/systemctl '+immediate+' ssh.service && /usr/bin/sudo /bin/systemctl '+action+' ssh.service',{uid:1000,gid:1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log(error);
+			self.logger.info('Cannot '+action+' SSH service: ' + error);
+		} else {
+			self.logger.info(action+ ' SSH service success');
+		}
+	});
+}
