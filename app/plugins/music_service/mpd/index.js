@@ -943,7 +943,6 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	var prev = '';
 	var folderToList = '';
 	var command = 'lsinfo';
-	console.log(uri);
 
 	if (sections.length > 1) {
 
@@ -1360,7 +1359,6 @@ ControllerMpd.prototype.getGroupVolume = function () {
 			var state = self.parseState(objState);
 			if (state.volume != undefined) {
 				state.volume = groupvolume;
-				console.log(groupvolume);
 				return libQ.resolve(groupvolume);
 			}
 		});
@@ -1409,7 +1407,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
     var items = [];
     var uriPath='/mnt/'+self.fromUriToPath(uri);
-
+	self.commandRouter.logger.info('----------------------------'+uriPath);
     var uris=self.scanFolder(uriPath);
     var response=[];
 
@@ -1490,10 +1488,6 @@ ControllerMpd.prototype.scanFolder=function(uri)
             uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
     }
     else {
-        //getting file extension
-        var ext= uri.substr((~-uri.lastIndexOf(".") >>> 0) + 2);
-        if(ext=='mp3' || ext=='m4a')
-        {
             var defer=libQ.defer();
 /*
             var parser = mm(libFsExtra.createReadStream(uri), function (err, metadata) {
@@ -1581,7 +1575,7 @@ ControllerMpd.prototype.scanFolder=function(uri)
                 });
 
             return defer.promise;
-        }
+
     }
 
     return uris;
