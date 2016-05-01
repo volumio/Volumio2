@@ -18,6 +18,20 @@ var plugin = express();
 
 var plugindir = '/tmp/plugins';
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    }
+    else {
+        next();
+    }
+};
+
 
 // view engine setup
 dev.set('views', path.join(__dirname, 'dev/views'));
@@ -35,6 +49,7 @@ dev.use('/', routes);
 app.use(compression())
 app.use(express.static(path.join(__dirname, 'www')));
 app.use(busboy());
+app.use(allowCrossDomain);
 
 app.use('/dev', dev);
 app.use('/api', restapi);
@@ -95,6 +110,7 @@ app.route('/plugin-upload')
                 var socket= io.connect('http://localhost:3000');
                 var pluginurl= 'http://127.0.0.1:3000/plugin-serve/'+filename.replace(/'|\\/g, '\\$&');;
                 socket.emit('installPlugin', { url:pluginurl});
+                res.status(201);
                 //res.redirect('/');
             });
         });
