@@ -1133,20 +1133,13 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
     var self=this;
     var defer=libQ.defer();
 
-    var pluginFolder=self.findPluginFolder(category,name);
-    var package_json = self.getPackageJson(pluginFolder);
-    var pretty_name=self.getPrettyName(package_json);
-
-    self.pushMessage('pushInstalledPlugins',{'prettyName':pretty_name,'enabled':false,'active':false,'category': category,'name':name})
-        .then(self.enablePlugin.bind(self,category,name))
-        .then(self.pushMessage.bind(self,'pushInstalledPlugins',{'prettyName':pretty_name,'enabled':true,'active':false,'category': category,'name':name}))
+    self.enablePlugin(category,name)
         .then(function(e)
         {
             var folder=self.findPluginFolder(category,name);
             self.loadPlugin(folder);
             return libQ.resolve();
         })
-        .then(self.pushMessage.bind(self,'pushInstalledPlugins',{'prettyName':pretty_name,'enabled':true,'active':true,'category': category,'name':name}))
         .then(self.startPlugin.bind(self,category,name))
         .then(function(e)
         {
@@ -1166,15 +1159,8 @@ PluginManager.prototype.disableAndStopPlugin = function (category,name) {
     var self=this;
     var defer=libQ.defer();
 
-    var pluginFolder=self.findPluginFolder(category,name);
-    var package_json = self.getPackageJson(pluginFolder);
-    var pretty_name=self.getPrettyName(package_json);
-    
-    self.pushMessage('pushInstalledPlugins',{'prettyName':pretty_name,'enabled':true,'active':true,'category': category,'name':name})
     self.stopPlugin(category,name)
-        .then(self.pushMessage.bind(self,'pushInstalledPlugins',{'prettyName':pretty_name,'enabled':true,'active':false,'category': category,'name':name}))
         .then(self.disablePlugin.bind(self,category,name))
-        .then(self.pushMessage.bind(self,'pushInstalledPlugins',{'prettyName':pretty_name,'enabled':false,'active':false,'category': category,'name':name}))
         .then(function(e)
         {
             var key = category + '.' + name;
