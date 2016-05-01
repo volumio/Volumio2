@@ -1292,11 +1292,11 @@ function InterfaceWebUI(context) {
             });
 
 
-            connWebSocket.on('PreunInstallPlugin', function (data) {
+            connWebSocket.on('preUninstallPlugin', function (data) {
                 var selfConnWebSocket = this;
 
 
-                //selfConnWebSocket.emit('showModal', {title:'Confirm plugin uninstall', content:'Are you sure you want to uninstall plugin '+data.name+'?', buttons[{name:'Uninstall', 'emit':'unInstallPlugin', 'payload':'{\"category\":\"'+data.category+'\",\"name\":\"'+data.name+'\"}',{'name':'Cancel'}]});
+                selfConnWebSocket.emit('openModal', {'title':'Confirm plugin uninstall', 'content':'Are you sure you want to uninstall this Plugin?', 'buttons':[{'name':'Uninstall', 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':'Cancel','class':'btn btn-warning'}]});
                 
             });
 		}
