@@ -448,7 +448,6 @@ PluginManager.prototype.installPlugin = function (url) {
            .then(function () {
                self.logger.info("Done installing plugin.");
                defer.resolve();
-
                self.tempCleanup();
            })
            .fail(function (e) {
@@ -470,6 +469,19 @@ PluginManager.prototype.installPlugin = function (url) {
 
     return defer.promise;
 };
+
+PluginManager.prototype.notifyInstalledPlugins = function () {
+    var self=this;
+
+    var defer=libQ.defer();
+
+    var installedplugins = self.getInstalledPlugins();
+    defer.resolve(installedplugins);
+
+    self.pushMessage('pushInstalledPlugins',installedplugins)
+
+    return defer.promise;
+}
 
 PluginManager.prototype.rmDir = function (folder) {
     var self=this;
