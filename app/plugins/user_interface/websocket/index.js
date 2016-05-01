@@ -1330,11 +1330,34 @@ function InterfaceWebUI(context) {
                 }
                 else if(data.action==='enable')
                 {
-                    return self.commandRouter.enableAndStartPlugin(data.category,data.name);
+					var returnedData = self.commandRouter.enableAndStartPlugin(data.category,data.name);
+
+
+						returnedData.then(function (data) {
+							var installed = self.commandRouter.getInstalledPlugins();
+							if (installed != undefined) {
+								installed.then(function (installedPLugins) {
+									selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+								});
+							}
+						});
+
                 }
                 else if(data.action==='disable')
                 {
-                    return self.commandRouter.disableAndStopPlugin(data.category,data.name);
+					var returnedData = self.commandRouter.disableAndStopPlugin(data.category,data.name);
+
+					if (returnedData != undefined) {
+						returnedData.then(function (data) {
+							selfConnWebSocket.emit('pushDisablePlugin', data);
+							var installed = self.commandRouter.getInstalledPlugins();
+							if (installed != undefined) {
+								installed.then(function (installedPLugins) {
+									selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+								});
+							}
+						});
+					}
                 }
             });
 

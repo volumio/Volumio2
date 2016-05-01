@@ -1144,7 +1144,7 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
         .then(function(e)
         {
             self.logger.info("Done.");
-            defer.resolve({});
+            defer.resolve('ok');
         })
         .fail(function(e)
         {
@@ -1167,7 +1167,7 @@ PluginManager.prototype.disableAndStopPlugin = function (category,name) {
             self.plugins.remove(key);
 
             self.logger.info("Done.");
-            defer.resolve({});
+            defer.resolve('ok');
         })
         .fail(function(e)
         {
