@@ -1173,6 +1173,19 @@ function InterfaceWebUI(context) {
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
                         selfConnWebSocket.emit('pushInstallPlugin', data);
+						var installed = self.commandRouter.getInstalledPlugins();
+						if (installed != undefined) {
+							installed.then(function (installedPLugins) {
+								self.logger.info(JSON.stringify(installedPLugins));
+								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+							});
+						}
+						var available = self.commandRouter.getAvailablePlugins();
+						if (available != undefined) {
+							available.then(function (AvailablePlugins) {
+								selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
+							});
+						}
                     });
                 }
                 else self.logger.error("Error on installing plugin");
@@ -1186,6 +1199,19 @@ function InterfaceWebUI(context) {
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
                         selfConnWebSocket.emit('pushUnInstallPlugin', data);
+						var installed = self.commandRouter.getInstalledPlugins();
+						if (installed != undefined) {
+							installed.then(function (installedPLugins) {
+								self.logger.info(JSON.stringify(installedPLugins));
+								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+							});
+						}
+						var available = self.commandRouter.getAvailablePlugins();
+						if (available != undefined) {
+							available.then(function (AvailablePlugins) {
+								selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
+							});
+						}
                     });
                 }
                 else self.logger.error("Error on installing plugin");
@@ -1199,6 +1225,13 @@ function InterfaceWebUI(context) {
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
                         selfConnWebSocket.emit('pushEnablePlugin', data);
+						var installed = self.commandRouter.getInstalledPlugins();
+						if (installed != undefined) {
+							installed.then(function (installedPLugins) {
+								self.logger.info(JSON.stringify(installedPLugins));
+								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+							});
+						}
                     });
                 }
                 else self.logger.error("Error on installing plugin");
@@ -1212,6 +1245,13 @@ function InterfaceWebUI(context) {
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
                         selfConnWebSocket.emit('pushDisablePlugin', data);
+						var installed = self.commandRouter.getInstalledPlugins();
+						if (installed != undefined) {
+							installed.then(function (installedPLugins) {
+								self.logger.info(JSON.stringify(installedPLugins));
+								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+							});
+						}
                     });
                 }
                 else self.logger.error("Error on disabling plugin");
@@ -1225,6 +1265,13 @@ function InterfaceWebUI(context) {
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
                         selfConnWebSocket.emit('pushModifyPluginStatus', data);
+						var installed = self.commandRouter.getInstalledPlugins();
+						if (installed != undefined) {
+							installed.then(function (installedPLugins) {
+								self.logger.info(JSON.stringify(installedPLugins));
+								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+							});
+						}
                     });
                 }
                 else self.logger.error("Error on disabling plugin");

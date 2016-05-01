@@ -476,7 +476,7 @@ PluginManager.prototype.notifyInstalledPlugins = function () {
     var defer=libQ.defer();
 
     var installedplugins = self.getInstalledPlugins();
-    defer.resolve(installedplugins);
+    defer.resolve();
 
     self.pushMessage('pushInstalledPlugins',installedplugins)
 
