@@ -74,7 +74,8 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
         if(item.hasOwnProperty('service'))
         {
-            service=item.service;
+            if(item.service!==null)
+                service=item.service;
         }
 
         if(item.uri.startsWith('spotify:'))
