@@ -1440,8 +1440,9 @@ InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 	//console.log("pushMultiroom 2");
 	var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
 	var response = volumiodiscovery.getDevices();
-
+	if(response != undefined){
 	selfConnWebSocket.emit('pushMultiRoomDevices', response);
+	}
 }
 
 
