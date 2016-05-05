@@ -499,13 +499,31 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 
 						if (fullUri.startsWith('music-library')) {
 							uri = fullUri.chompLeft('music-library/').s;
-						} else if (fullUri.startsWith('/')) {
+						} /*else if (fullUri.startsWith('/')) {
 							uri = fullUri.chompLeft('/').s;
-						} else uri = data[i].uri;
-						uris.push(uri);
+						}*/ else uri = data[i].uri;
+
+
+                        var service;
+
+                        if(data[i].service===undefined)
+                            service='mpd';
+                        else service=data[i].service;
+
+						uris.push({uri:uri,service:service});
 					}
 
-					self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clearAddPlayTracks', uris);
+                    self.commandRouter.addQueueItems(uris)
+                        .then(function()
+                        {
+                            self.commandRouter.volumioPlay();
+                            defer.resolve();
+                        })
+                        .fail(function()
+                        {
+                            defer.reject(new Error());
+                        })
+					//self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clearAddPlayTracks', uris);
 
 				}
 			});
