@@ -21,7 +21,7 @@
     "file-download": "^0.1.2",
     "fs-extra": "^0.30.0",
     "hashmap": "^2.0.5",
-    "inotify": "1.4.0",
+    "inotify": "1.4.1",
     "ip": "^1.1.3",
     "is-online": "^5.1.1",
     "json-query": "^1.8.0",
