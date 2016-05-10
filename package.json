@@ -51,7 +51,7 @@
     "tail": "^1.0.0",
     "telnet": "0.0.1",
     "underscore": "^1.8.3",
-    "unirest": "0.4.2",
+    "unirest": "0.5.0",
     "v-conf": "0.10.0",
     "winston": "^2.2.0",
     "wireless-tools": "0.15.0",
