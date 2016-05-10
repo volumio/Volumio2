@@ -363,7 +363,7 @@ function InterfaceWebUI(context) {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio Random ' + data.value)
 					.then(function () {
-						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'random', data.value);
+                        return self.commandRouter.volumioRandom(data.value);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {

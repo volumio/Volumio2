@@ -44,7 +44,9 @@ CoreStateMachine.prototype.getState = function () {
             channels: '',
             bitdepth: 0,
             Streaming: false,
-            service: 'mpd'
+            service: 'mpd',
+            random:this.currentRandom,
+            repeat: this.currentRepeat
         };
     }
     else {
@@ -335,8 +337,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentSampleRate = null;
 			this.currentBitDepth = null;
 			this.currentChannels = null;
-			this.currentRandom = stateService.random;
-			this.currentRepeat = stateService.repeat;
 			this.currentStatus = 'play';
 
             if (this.currentPosition >= this.playQueue.arrayQueue.length) {
@@ -372,16 +372,18 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentSampleRate = null;
 			this.currentBitDepth = null;
 			this.currentChannels = null;
-			this.currentRandom = stateService.random;
-			this.currentRepeat = stateService.repeat;
-
 
             //Queuing following track;
-
-
-            if(this.currentPosition ==null || this.currentPosition===undefined)
-                this.currentPosition=0;
-            else this.currentPosition++;
+            if(this.currentRandom!==undefined && this.currentRandom===true)
+            {
+                this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
+                this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+            }
+            else {
+                if(this.currentPosition ==null || this.currentPosition===undefined)
+                    this.currentPosition=0;
+                else this.currentPosition++;
+            }
 
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
@@ -581,7 +583,12 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 
     if (this.currentStatus === 'stop') {
         // Stop -> Next transition
-        if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
+        if(this.currentRandom!==undefined && this.currentRandom===true)
+        {
+            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
+            return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+        }
+        else if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
             this.currentPosition++;
             this.currentSeek = 0;
 
@@ -590,6 +597,15 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 
     } else if (this.currentStatus === 'play') {
         // Play -> Next transition
+        if(this.currentRandom!==undefined && this.currentRandom===true)
+        {
+            this.stop();
+            setTimeout(function() {
+                self.currentPosition=Math.floor(Math.random() * (self.playQueue.arrayQueue.length));
+                self.play();
+            },500);
+        }
+        else
         if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
 
             this.stop();
@@ -600,7 +616,11 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
         }
     } else if (this.currentStatus === 'pause') {
         // Pause -> Next transitiom
-        if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
+        if(this.currentRandom!==undefined && this.currentRandom===true)
+        {
+            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length  + 1));
+        }
+        else if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
             this.currentPosition++;
         }
         this.play();
@@ -668,14 +688,27 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
     if (this.currentStatus === 'stop') {
         // Stop -> Previous transition
-        if (this.currentPosition > 0) {
+        if(this.currentRandom!==undefined && this.currentRandom===true)
+        {
+            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
+            return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
+        }
+        else if (this.currentPosition > 0) {
             this.currentPosition--;
             this.updateTrackBlock();
             return this.pushState();
         }
 
     } else if (this.currentStatus === 'play') {
-         if (this.currentPosition > 0) {
+        if(this.currentRandom!==undefined && this.currentRandom===true)
+        {
+            this.stop();
+            setTimeout(function() {
+                self.currentPosition=Math.floor(Math.random() * (self.playQueue.arrayQueue.length));
+                self.play();
+            },500);
+        }
+        else if (this.currentPosition > 0) {
             this.stop();
              setTimeout(function()
              {
@@ -686,7 +719,11 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
          }
     } else if (this.currentStatus === 'pause') {
         // Pause -> Previous transition
-        if (this.currentPosition > 0) {
+        if(this.currentRandom!==undefined && this.currentRandom===true)
+        {
+            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length  + 1));
+        }
+        else if (this.currentPosition > 0) {
             this.currentPosition--;
         }
         this.currentSeek = 0;
@@ -705,4 +742,12 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
     }
         
     return this.playQueue.removeQueueItem(nIndex);
+};
+
+CoreStateMachine.prototype.setRandom = function (value) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setRandom '+value);
+
+    this.currentRandom=value;
+
+    this.pushState().fail(this.pushError.bind(this));
 };

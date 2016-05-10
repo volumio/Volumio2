@@ -397,8 +397,10 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
-	var thisPlugin = this.pluginManager.getPlugin(type, name);
-	return thisPlugin.getUIConfig(data);
+
+    var thisPlugin = this.pluginManager.getPlugin(type, name);
+
+    return thisPlugin.getUIConfig(data);
 };
 
 /* what is this?
@@ -668,4 +670,9 @@ CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
     return this.pluginManager.disableAndStopPlugin(category,name);
 };
 
+
+CoreCommandRouter.prototype.volumioRandom = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+    return this.stateMachine.setRandom(data);
+};
 
