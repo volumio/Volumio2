@@ -295,7 +295,8 @@ ControllerDirble.prototype.getRadioForCategory = function (id, per_page, page, c
 
 	var Request = unirest.get(self.config.get('url_category_stations') + id + '/stations');
 	Request.query({
-		token: self.config.get('api_token')
+		token: self.config.get('api_token'),
+		all:1
 	}).query({
 		page: page,
 		per_page: per_page
