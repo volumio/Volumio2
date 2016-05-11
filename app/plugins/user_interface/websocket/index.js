@@ -1369,6 +1369,25 @@ function InterfaceWebUI(context) {
                 selfConnWebSocket.emit('openModal', {'title':'Confirm plugin uninstall', 'content':'Are you sure you want to uninstall this Plugin?', 'buttons':[{'name':'Uninstall', 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':'Cancel','class':'btn btn-warning'}]});
                 
             });
+
+
+	connWebSocket.on('clearQueue', function (data) {
+                var selfConnWebSocket = this;
+
+		var returnedData = self.commandRouter.volumioClearQueue();
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushClearQueue', data);
+		    });
+                }
+                else self.logger.error("Error on clearing queue");
+                
+                
+            });
+
+		
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);

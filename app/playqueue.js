@@ -115,7 +115,8 @@ CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
 
 CorePlayQueue.prototype.clearPlayQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
-	return this.arrayQueue = [];
+	this.arrayQueue = [];
+	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
 CorePlayQueue.prototype.getTrack = function (index) {
