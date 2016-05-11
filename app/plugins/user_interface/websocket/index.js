@@ -1386,7 +1386,22 @@ function InterfaceWebUI(context) {
                 
             });
 
-		
+	connWebSocket.on('saveQueueToPlaylist', function (data) {
+                var selfConnWebSocket = this;
+
+		var returnedData = self.commandRouter.volumioSaveQueueToPlaylist(data.name);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushSaveQueueToPlaylist', data);
+		    });
+                }
+                else self.logger.error("Error on saving queue to playlist");
+                
+                
+            });
+
+
 
 		}
 		catch (ex) {
