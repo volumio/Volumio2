@@ -122,6 +122,8 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 CorePlayQueue.prototype.getTrack = function (index) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrack '+index);
 
+    this.commandRouter.logger.info(JSON.stringify(index));
+    
     if(this.arrayQueue.length>index)
     {
         return this.arrayQueue[index];

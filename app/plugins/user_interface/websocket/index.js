@@ -105,37 +105,6 @@ function InterfaceWebUI(context) {
                 var timeStart = Date.now();
 
                  self.commandRouter.addQueueItems(data);
-
-
-                /*
-                self.logStart('Client requests add Volumio queue items')
-                    .then(function () {
-
-                        self.logger.info("PRE");
-                        return self.commandRouter.addQueueItems(data);
-                    })
-                    .fail(self.pushError.bind(self))
-                    .done(function () {
-                        return self.commandRouter.pushToastMessage('success', "Added", str);
-                    });
-
-				/*if (data.service == undefined || data.service == 'mpd') {
-					var uri = data.uri;
-					var arr = uri.split("/");
-					arr.shift();
-					var str = arr.join('/');
-				}
-				else str = data.uri;
-				//TODO add proper service handler
-				var timeStart = Date.now();
-				self.logStart('Client requests add Volumio queue items')
-					.then(function () {
-						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', str);
-					})
-					.fail(self.pushError.bind(self))
-					.done(function () {
-
-					});*/
 			});
 
 			connWebSocket.on('addPlay', function (data) {
@@ -1371,22 +1340,22 @@ function InterfaceWebUI(context) {
             });
 
 
-	connWebSocket.on('clearQueue', function (data) {
+	connWebSocket.on('saveQueueToPlaylist', function (data) {
                 var selfConnWebSocket = this;
 
-		var returnedData = self.commandRouter.volumioClearQueue();
+		var returnedData = self.commandRouter.volumioSaveQueueToPlaylist(data.name);
 
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
-                        selfConnWebSocket.emit('pushClearQueue', data);
+                        selfConnWebSocket.emit('pushSaveQueueToPlaylist', data);
 		    });
                 }
-                else self.logger.error("Error on clearing queue");
+                else self.logger.error("Error on saving queue to playlist");
                 
                 
             });
 
-		
+
 
 		}
 		catch (ex) {

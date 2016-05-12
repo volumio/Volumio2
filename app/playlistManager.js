@@ -99,6 +99,14 @@ PlaylistManager.prototype.addToPlaylist = function (name, service, uri) {
 	return self.commonAddToPlaylist(self.playlistFolder, name, service, uri);
 };
 
+PlaylistManager.prototype.addItemsToPlaylist = function (name, data) {
+    var self = this;
+
+    //self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
+    return self.commonAddToPlaylist(self.playlistFolder, name, service, uri);
+};
+
+
 PlaylistManager.prototype.removeFromPlaylist = function (name, service, uri) {
 	var self = this;
 
@@ -132,30 +140,28 @@ PlaylistManager.prototype.enqueue = function (name) {
 				if (err)
 					defer.resolve({success: false});
 				else {
-					var promises = [];
-					var promise;
+                    var promises = [];
+                    var promise;
 
-					for (var i in data) {
-						var fullUri = S(data[i].uri);
-						if (fullUri.startsWith('music-library')) {
-							var uri = fullUri.chompLeft('music-library/').s;
-						} else if (fullUri.startsWith('/')) {
-							var uri = fullUri.chompLeft('/').s;
-						} else var uri = data[i].uri;
-						promise = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'add', uri);
-						promises.push(promise);
-					}
+                    var array = [];
 
-					libQ.all(promises)
-						.then(function (data) {
-							defer.resolve({success: true});
-						})
-						.fail(function (e) {
-							defer.resolve({success: false, reason: e});
-						});
+                    for (var i in data) {
+                        var item = {
+                            service: data[i].service,
+                            uri: data[i].uri,
+                            name: data[i].title,
+                            artist: data[i].artist,
+                            album: data[i].album,
+                            albumart: data[i].albumart
+                        }
 
+                        array.push(item);
+                    }
 
-				}
+                    self.commandRouter.addQueueItems(array);
+
+                    defer.resolve();
+                }
 			});
 		}
 
@@ -600,3 +606,40 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 
 	return defer.promise;
 };
+
+
+
+PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, data) {
+    var self = this;
+
+    var defer = libQ.defer();
+
+    var playlist = [];
+    var filePath = folder + name;
+
+
+    for(var i in data)
+    {
+        playlist.push({
+            service: data[i].service,
+            uri: self.sanitizeUri(data[i].uri),
+            title: data[i].name,
+            artist: data[i].artist,
+            album: data[i].album,
+            albumart: data[i].albumart
+        });
+    }
+
+    fs.writeJson(filePath,playlist,function(err)
+    {
+        self.logger.info("WRITE FILE "+err);
+        if(err) defer.reject(new Error('Cannot write playlist file'));
+        else defer.resolve();
+    });
+
+    return defer.promise;
+};
+
+PlaylistManager.prototype.sanitizeUri = function (uri) {
+    return uri.replace('music-library/', '').replace('mnt/', '');
+}

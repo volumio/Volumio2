@@ -676,3 +676,15 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
     return this.stateMachine.setRandom(data);
 };
 
+
+CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
+   
+    var queueArray=this.stateMachine.getQueue();
+    this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+    
+};
+
+
+
+
