@@ -3,6 +3,9 @@
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var os = require('os');
+var ifconfig = require('wireless-tools/ifconfig');
+var ip = require('ip');
+var libQ = require('kew');
 
 // Define the UpnpInterface class
 module.exports = UpnpInterface;
@@ -37,6 +40,26 @@ UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
 UpnpInterface.prototype.onStart = function () {
 	var self = this;
 
+};
+
+UpnpInterface.prototype.getCurrentIP = function () {
+	var self = this;
+
+	var defer = libQ.defer();
+	var ipaddr = '';
+
+	ifconfig.status('wlan0', function(err, status) {
+				if (status != undefined) {
+						if (status.ipv4_address != undefined) {
+							ipaddr = status.ipv4_address;
+							defer.resolve(ipaddr);
+							} else {
+							ipaddr = ip.address();
+							defer.resolve(ipaddr);
+						}
+					}
+	});
+	return defer.promise;
 };
 
 UpnpInterface.prototype.onStop = function () {
@@ -115,6 +138,35 @@ UpnpInterface.prototype.startUpmpdcli = function() {
 	var upmpdcliconf = __dirname + "/upmpdcli.conf";
 	var upmpdcliconftmpl = __dirname + "/upmpdcli.conf.tmpl";
 	var namestring = 'friendlyname = ' + name + os.EOL;
+	var ipaddress = self.getCurrentIP()
+	ipaddress.then(function (ipaddresspromise) {
+		fs.readFile(__dirname + "/presentation.html.tmpl", 'utf8', function (err, data) {
+			if (err) {
+				return self.logger.log('Error writing Upnp presentation file: '+err);
+			}
+			var conf1 = data.replace('{IP-ADDRESS}', ipaddresspromise);
+
+			fs.writeFile(__dirname + "/presentation.html", conf1, 'utf8', function (err) {
+				if (err) {
+					self.logger.log('Error writing Upnp presentation file: '+err);
+				}
+			});
+		});
+	});
+
+
+	fs.readFile(__dirname + "/presentation.html.tmpl", 'utf8', function (err, data) {
+				if (err) {
+						return self.logger.log('Error writing Upnp presentation file: '+err);
+					}
+				var conf1 = data.replace('{IP-ADDRESS}', ipaddress);
+
+					fs.writeFile(__dirname + "/presentation.html", conf1, 'utf8', function (err) {
+							if (err) {
+								self.logger.log('Error writing Upnp presentation file: '+err);
+							}
+						});
+			});
 
 	fs.outputFile(upmpdcliconf, namestring , function (err) {
 
