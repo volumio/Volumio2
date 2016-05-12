@@ -677,17 +677,12 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
 };
 
 
-CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (data) {
+CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
     this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
    
     var queueArray=this.stateMachine.getQueue();
-    for(var i in queueArray)
-    {
-	var queueItem=queueArray[i];
-
-	//TODO: update method to handle an array of queue items
-	this.playListManager.addToPlaylist(data.name,queueItem.service,queueItem.uri);
-    }
+    this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+    
 };
 
 

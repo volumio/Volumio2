@@ -6,6 +6,9 @@ var libQ = require('kew');
 module.exports = CoreStateMachine;
 function CoreStateMachine(commandRouter) {
 	this.commandRouter = commandRouter;
+
+    this.currentPosition=0;
+
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
 }
@@ -24,7 +27,7 @@ CoreStateMachine.prototype.getState = function () {
 	} else this.Streaming = false;
 
 	*/
-
+    this.commandRouter.logger.info("CUURENT POS: "+this.currentPosition);
 
     var trackBlock = this.getTrack(this.currentPosition);
     this.commandRouter.logger.info(JSON.stringify(trackBlock));
@@ -360,7 +363,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if (this.currentStatus === 'play') {
 
 			// Service has stopped without client request, meaning it is finished playing its track block. Move on to next track block.
-			this.currentPosition = stateService.position;
+			//this.currentPosition = stateService.position;
 			this.currentSeek = stateService.seek;
 			this.currentDuration = stateService.duration;
 			this.currentTrackType = null;
@@ -372,6 +375,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentSampleRate = null;
 			this.currentBitDepth = null;
 			this.currentChannels = null;
+
+            this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
             //Queuing following track;
             if(this.currentRandom!==undefined && this.currentRandom===true)
@@ -402,27 +407,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
 		} else if (this.currentStatus === 'stop') {
-			// Client has requested stop, so stop the timer
-			/*this.currentPosition = stateService.position;
-			this.currentSeek = stateService.seek;
-			this.currentDuration = stateService.duration;
-			this.currentTrackType = null;
-			this.currentTitle = null;
-			this.currentArtist = null;
-			this.currentAlbum = null;
-			this.currentAlbumArt = '/albumart';
-			this.currentUri = stateService.uri;
-			this.currentSampleRate = null;
-			this.currentBitDepth = null;
-			this.currentChannels = null;
-			this.currentRandom = stateService.random;
-			this.currentRepeat = stateService.repeat;
-
 			this.pushState().fail(this.pushError.bind(this));
-
-			return this.stopPlaybackTimer();*/
-
-            this.pushState().fail(this.pushError.bind(this));
             this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'No code');
 		}
 	} else if (stateService.status === 'pause') {
@@ -515,6 +500,9 @@ CoreStateMachine.prototype.play = function (index) {
     else
     {
         var trackBlock = this.getTrack(this.currentPosition);
+        this.commandRouter.logger.info("TRKBL "+JSON.stringify(trackBlock));
+
+
         var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
         if(this.currentStatus==='stop')
@@ -529,6 +517,7 @@ CoreStateMachine.prototype.play = function (index) {
             this.startPlaybackTimer();
             thisPlugin.resume();
         }
+
     }
 
 
@@ -581,7 +570,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
     var self=this;
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::next');
 
-    if (this.currentStatus === 'stop') {
+   /* if (this.currentStatus === 'stop') {
         // Stop -> Next transition
         if(this.currentRandom!==undefined && this.currentRandom===true)
         {
@@ -626,7 +615,27 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
         this.play();
         this.updateTrackBlock();
         return this.serviceClearAddPlay();
-    }
+    }*/
+
+
+
+
+    this.stop()
+        .then(function()
+        {
+            if(self.currentRandom!==undefined && self.currentRandom===true)
+            {
+                self.currentPosition=Math.floor(Math.random() * (self.playQueue.arrayQueue.length  + 1));
+            }
+            else if (self.currentPosition < self.playQueue.arrayQueue.length - 1) {
+                self.currentPosition++;
+            }
+
+            self.commandRouter.logger.info("NEXT POSITION "+self.currentPosition);
+
+            return libQ.resolve();
+        })
+        .then(self.play.bind(self));
 };
 
 

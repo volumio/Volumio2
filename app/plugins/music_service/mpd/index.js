@@ -1406,7 +1406,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
     var defer=libQ.defer();
 
     var items = [];
-    var uriPath='/mnt/'+self.fromUriToPath(uri);
+    var uriPath='/mnt/'+self.sanitizeUri(uri);
 	self.commandRouter.logger.info('----------------------------'+uriPath);
     var uris=self.scanFolder(uriPath);
     var response=[];
@@ -1422,7 +1422,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                 if(result[j].uri!=undefined)
                 {
                     response.push({
-                        uri: 'music-library/'+self.fromPathToUri(result[j].uri),
+                        uri: self.fromPathToUri(result[j].uri),
                         service: 'mpd',
                         name: result[j].name,
                         artist: result[j].artist,
@@ -1591,11 +1591,11 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
     var sections = track.uri.split('/');
     var prev = '';
 
-    var uri;
+    var uri=self.sanitizeUri(track.uri);
 
-    if (sections.length > 2) {
+    /*if (sections.length > 2) {
         uri ='"'+ sections.slice(2, sections.length).join('/')+'"';
-    }
+    }*/
 
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
 
@@ -1610,7 +1610,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
         })
         .then(function()
         {
-            return self.sendMpdCommand('add '+uri,[])
+            return self.sendMpdCommand('add "'+uri+'"',[])
         })
         .then(function()
         {
@@ -1659,3 +1659,8 @@ ControllerMpd.prototype.stop = function () {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::stop');
     return this.sendMpdCommand('stop', []);
 };
+
+
+ControllerMpd.prototype.sanitizeUri = function (uri) {
+    return uri.replace('music-library/', '').replace('mnt/', '');
+}
