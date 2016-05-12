@@ -514,6 +514,7 @@ ControllerMpd.prototype.logStart = function (sCommand) {
 ControllerMpd.prototype.onVolumioStart = function () {
 	var self = this;
 
+	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 	// Connect to MPD only if process MPD is running
 	pidof('mpd', function (err, pid) {
 		if (err) {
@@ -725,6 +726,33 @@ ControllerMpd.prototype.getLabelForSelect = function (options, key) {
 
 	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
 };
+
+
+ControllerMpd.prototype.outputDeviceCallback = function () {
+	var self = this;
+
+	var defer = libQ.defer();
+	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting MPD');
+	self.createMPDFile(function (error) {
+		if (error !== undefined && error !== null) {
+			self.commandRouter.pushToastMessage('error', "Configuration update", 'Error while Applying new configuration');
+			defer.resolve({});
+		}
+		else {
+			self.commandRouter.pushToastMessage('success', "Configuration update", 'The playback configuration has been successfully updated');
+
+			self.restartMpd(function (error) {
+				if (error !== null && error != undefined) {
+					self.logger.info('Cannot restart MPD: ' + error);
+					self.commandRouter.pushToastMessage('error', "Player restart", 'Error while restarting player');
+				}
+				else self.commandRouter.pushToastMessage('success', "Player restart", 'Player successfully restarted');
+
+				defer.resolve({});
+			});
+		}
+	});
+}
 
 
 ControllerMpd.prototype.savePlaybackOptions = function (data) {
