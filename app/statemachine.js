@@ -342,7 +342,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentChannels = null;
 			this.currentStatus = 'play';
 
-            if (this.currentPosition >= this.playQueue.arrayQueue.length) {
+           /* if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
 
                 this.pushState().fail(this.pushError.bind(this));
@@ -352,7 +352,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             } else {
                 this.play();
                 this.pushState().fail(this.pushError.bind(this));
-            }
+            }*/
 		}
         else if (this.currentStatus === 'pause') {
             this.currentStatus='play';
@@ -379,16 +379,25 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
             //Queuing following track;
-            if(this.currentRandom!==undefined && this.currentRandom===true)
+            if(this.currentRepeat!==undefined && this.currentRepeat===true)
             {
-                this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
-                this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                this.commandRouter.logger.info("Repeating song at position "+this.currentPosition);
             }
-            else {
-                if(this.currentPosition ==null || this.currentPosition===undefined)
-                    this.currentPosition=0;
-                else this.currentPosition++;
+            else
+            {
+                if(this.currentRandom!==undefined && this.currentRandom===true)
+                {
+                    this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
+                    this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                }
+                else {
+                    if(this.currentPosition ==null || this.currentPosition===undefined)
+                        this.currentPosition=0;
+                    else this.currentPosition++;
+                }
             }
+
+
 
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
@@ -500,9 +509,6 @@ CoreStateMachine.prototype.play = function (index) {
     else
     {
         var trackBlock = this.getTrack(this.currentPosition);
-        this.commandRouter.logger.info("TRKBL "+JSON.stringify(trackBlock));
-
-
         var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
         if(this.currentStatus==='stop')
@@ -757,6 +763,14 @@ CoreStateMachine.prototype.setRandom = function (value) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setRandom '+value);
 
     this.currentRandom=value;
+
+    this.pushState().fail(this.pushError.bind(this));
+};
+
+CoreStateMachine.prototype.setRepeat = function (value) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setRepeat '+value);
+
+    this.currentRepeat=value;
 
     this.pushState().fail(this.pushError.bind(this));
 };
