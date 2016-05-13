@@ -681,6 +681,11 @@ CoreCommandRouter.prototype.volumioRepeat = function (data) {
     return this.stateMachine.setRepeat(data);
 };
 
+CoreCommandRouter.prototype.volumioConsume = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioConsume');
+    return this.stateMachine.setConsume(data);
+};
+
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
     this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
    

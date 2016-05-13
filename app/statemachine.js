@@ -8,6 +8,7 @@ function CoreStateMachine(commandRouter) {
 	this.commandRouter = commandRouter;
 
     this.currentPosition=0;
+    this.currentConsume=false;
 
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
@@ -17,20 +18,8 @@ function CoreStateMachine(commandRouter) {
 // Get the current state of the player
 CoreStateMachine.prototype.getState = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
-	/*var sService = null;
-	if ('service' in this.currentTrackBlock) {
-		sService = this.currentTrackBlock.service;
-	}
-	if (this.currentDuration === 0 && this.currentStatus != 'stop') {
-		this.Streaming = true;
-		this.currentTrackType = 'webradio'
-	} else this.Streaming = false;
-
-	*/
-    this.commandRouter.logger.info("CUURENT POS: "+this.currentPosition);
 
     var trackBlock = this.getTrack(this.currentPosition);
-    this.commandRouter.logger.info(JSON.stringify(trackBlock));
     if(trackBlock===undefined)
     {
         return {
@@ -49,7 +38,8 @@ CoreStateMachine.prototype.getState = function () {
             Streaming: false,
             service: 'mpd',
             random:this.currentRandom,
-            repeat: this.currentRepeat
+            repeat: this.currentRepeat,
+            consume: this.currentConsume
         };
     }
     else {
@@ -69,6 +59,7 @@ CoreStateMachine.prototype.getState = function () {
             channels: trackBlock.channels,
             random: this.currentRandom,
             repeat: this.currentRepeat,
+            consume: this.currentConsume,
             volume: this.currentVolume,
             mute: this.currentMute,
             stream: trackBlock.trackType,
@@ -95,7 +86,10 @@ CoreStateMachine.prototype.addQueueItems = function (arrayItems) {
 // Add array of items to queue
 CoreStateMachine.prototype.clearQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::ClearQueue');
-	return this.playQueue.clearPlayQueue();
+
+    this.stop();
+    return this.playQueue.clearPlayQueue();
+
 };
 
 
@@ -385,15 +379,22 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             }
             else
             {
-                if(this.currentRandom!==undefined && this.currentRandom===true)
+                if(this.currentConsume!==undefined && this.currentConsume==true)
                 {
-                    this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
-                    this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                    this.playQueue.removeQueueItem(this.currentPosition);
                 }
-                else {
-                    if(this.currentPosition ==null || this.currentPosition===undefined)
-                        this.currentPosition=0;
-                    else this.currentPosition++;
+                else
+                {
+                    if(this.currentRandom!==undefined && this.currentRandom===true)
+                    {
+                        this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
+                        this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                    }
+                    else {
+                        if(this.currentPosition ==null || this.currentPosition===undefined)
+                            this.currentPosition=0;
+                        else this.currentPosition++;
+                    }
                 }
             }
 
@@ -771,6 +772,14 @@ CoreStateMachine.prototype.setRepeat = function (value) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setRepeat '+value);
 
     this.currentRepeat=value;
+
+    this.pushState().fail(this.pushError.bind(this));
+};
+
+CoreStateMachine.prototype.setConsume = function (value) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setConsume '+value);
+
+    this.currentConsume=value;
 
     this.pushState().fail(this.pushError.bind(this));
 };

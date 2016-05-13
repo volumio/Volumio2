@@ -1355,6 +1355,24 @@ function InterfaceWebUI(context) {
                 
             });
 
+            connWebSocket.on('setConsume', function (data) {
+                var selfConnWebSocket = this;
+
+                var returnedData = self.commandRouter.volumioConsume(data.value);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushSetConsume', data);
+                    });
+                }
+                else self.logger.error("Error on setting consume mode");
+
+
+            });
+
+
+
+
 
 
 		}
