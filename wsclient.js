@@ -7,5 +7,5 @@ var message = process.argv[3];
 
 console.log("EVENT: "+event);
 console.log("MESSAGE: "+message);
-socket.emit(event, JSON.parse(message));
+socket.emit(event, message);
 
