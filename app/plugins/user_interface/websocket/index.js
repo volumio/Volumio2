@@ -345,7 +345,7 @@ function InterfaceWebUI(context) {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio Repeat ' + data.value)
 					.then(function () {
-						return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'repeat', data.value);
+                        return self.commandRouter.volumioRepeat(data.value);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {

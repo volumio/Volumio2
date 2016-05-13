@@ -1561,10 +1561,10 @@ ControllerMpd.prototype.scanFolder=function(uri)
                         var path;
                         var name;
                         var lines = msg.split('\n');
+                        var isSolved=false;
+
                         for (var i = 0; i < lines.length; i++) {
                             var line = lines[i];
-
-                            self.commandRouter.logger.info("----->>>>> "+JSON.stringify(line));
 
                             if (line.indexOf('file:') === 0) {
                                 var path = line.slice(6);
@@ -1595,10 +1595,17 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     bitdepth: 8,
                                     trackType: uri.split('.').pop()
                             });
+
+                                isSolved=true;
                             }
 
                         }
+
+                        if(isSolved===false)
+                            defer.resolve({});
+
                     }
+                    else defer.resolve({});
                     });
                 });
 

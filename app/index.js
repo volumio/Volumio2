@@ -676,6 +676,10 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
     return this.stateMachine.setRandom(data);
 };
 
+CoreCommandRouter.prototype.volumioRepeat = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+    return this.stateMachine.setRepeat(data);
+};
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
     this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
