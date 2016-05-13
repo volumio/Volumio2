@@ -695,5 +695,13 @@ CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
 };
 
 
+CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
+
+    return this.stateMachine.moveQueueItem(from,to);
+};
+
+
+
 
 

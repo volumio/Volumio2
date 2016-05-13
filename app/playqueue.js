@@ -131,6 +131,18 @@ CorePlayQueue.prototype.getTrack = function (index) {
     else return;
 };
 
+CorePlayQueue.prototype.moveQueueItem = function (from,to) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::moveQueueItem '+from+' --> '+to);
+
+    if(this.arrayQueue.length>to)
+    {
+        this.arrayQueue.splice(to,0,this.arrayQueue.splice(from,1)[0]);
+        return this.commandRouter.volumioPushQueue(this.arrayQueue);
+    }
+    else return;
+};
+
+
 
 /*CorePlayQueue.prototype.clearMpdQueue = function () {
 	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');

@@ -1371,7 +1371,20 @@ function InterfaceWebUI(context) {
             });
 
 
+            connWebSocket.on('moveQueue', function (data) {
+                var selfConnWebSocket = this;
 
+                var returnedData = self.commandRouter.volumioMoveQueue(data.from,data.to);
+
+                if (returnedData != undefined) {
+                    returnedData.then(function (data) {
+                        selfConnWebSocket.emit('pushMoveQueue', data);
+                    });
+                }
+                else self.logger.error("Error on moving item in list");
+
+
+            });
 
 
 

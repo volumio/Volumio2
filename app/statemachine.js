@@ -783,3 +783,10 @@ CoreStateMachine.prototype.setConsume = function (value) {
 
     this.pushState().fail(this.pushError.bind(this));
 };
+
+CoreStateMachine.prototype.moveQueueItem = function (from,to) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
+
+    return this.playQueue.moveQueueItem(from,to);
+};
+
