@@ -36,18 +36,18 @@ playbackcommand="play"
 #PLAYBACK STATUS CONTROLS
 
 function status {
-var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/status.js
+var=$ /volumio/app/plugins/user_interface/volumio_command_line_client/commands/status.js
 echo $var
 }
 
 function volumeget {
-var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/getvolume.js
+var=$ /volumio/app/plugins/user_interface/volumio_command_line_client/commands/getvolume.js
 echo $var
 }
 
 function volumeset {
 echo "Setting Volume "$volumeval""
-var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/setvolume.js "$volumeval"
+var=$ /volumio/app/plugins/user_interface/volumio_command_line_client/commands/setvolume.js "$volumeval"
 echo $var
 }
 
@@ -55,7 +55,7 @@ echo $var
 
 function playback {
 echo "Sending "$playbackcommand" "
-var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/playback.js "$playbackcommand"
+var=$ /volumio/app/plugins/user_interface/volumio_command_line_client/commands/playback.js "$playbackcommand"
 echo $var
 }
 
