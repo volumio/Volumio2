@@ -8,6 +8,14 @@ function CorePlayQueue(commandRouter, stateMachine) {
 	this.commandRouter = commandRouter;
 	this.stateMachine = stateMachine;
 	this.arrayQueue = [];
+
+
+    this.defaultSampleRate='44.1 KHz';
+    this.defaultBitdepth=8;
+    this.defaultChannels=2;
+
+    
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -58,6 +66,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
 
     self.commandRouter.logger.info(arrayItems);
+
     var array = [].concat( arrayItems );
 
     var firstItemIndex=this.arrayQueue.length;
@@ -90,6 +99,21 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         .then(function(content){
             for(var j in content)
             {
+                if(content[j].samplerate===undefined)
+                {
+                    content[j].samplerate=self.defaultSampleRate;
+                }
+
+                if(content[j].bitdepth===undefined)
+                {
+                    content[j].bitdepth=self.defaultBitdepth;
+                }
+
+                if(content[j].channels===undefined)
+                {
+                    content[j].channels=self.defaultChannels;
+                }
+
                 self.arrayQueue = self.arrayQueue.concat(content[j]);
             }
 
