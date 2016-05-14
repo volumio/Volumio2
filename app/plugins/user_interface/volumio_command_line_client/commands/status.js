@@ -6,6 +6,6 @@ socket.emit('getState', '');
 
 socket.on('pushState',function(data)
 {
-    console.log(data.volume);
+    console.log(data);
     process.exit()
 });

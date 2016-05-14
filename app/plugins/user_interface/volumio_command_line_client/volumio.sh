@@ -3,15 +3,65 @@
 
 function doc {
 echo "
-Usage : volumio
+Usage : volumio <argument1> <argument2>
 
-start :
-stop :
-restart :
-volume
+[[PLAYBACK STATUS]]
+
+status                             Gives Playback status information
+volume                             Gives Current Volume Information
+volume <desired volume>            Sets Volume at desired level 0-100
+
+
+[[PLAYBACK CONTROL]]
+
+play
+pause
+next
+previous
+
+
+[[VOLUMIO SERVICE CONTROL]]
+
+start                               Starts Volumio Service
+stop                                Stops Volumio Service
+restart                             Restarts Volumio Service
 "
 
 }
+
+volumeval="0"
+playbackcommand="play"
+
+
+#PLAYBACK STATUS CONTROLS
+
+function status {
+var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/status.js
+echo $var
+}
+
+function volumeget {
+var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/getvolume.js
+echo $var
+}
+
+function volumeset {
+echo "Setting Volume "$volumeval""
+var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/setvolume.js "$volumeval"
+echo $var
+}
+
+#PLAYBACK CONTROLS
+
+function playback {
+echo "Sending "$playbackcommand" "
+var=$ node /volumio/app/plugins/user_interface/volumio_command_line_client/commands/playback.js "$playbackcommand"
+echo $var
+}
+
+
+#VOLUMIO SERVICE CONTROLS
+
 function start {
 systemctl start volumio.service
 }
@@ -20,20 +70,29 @@ function stop {
 systemctl stop volumio.service
 }
 
-function status {
-echo "Not Implemented yet"
-}
 
-function volumeget {
-var=$(/path/to/command arg1 arg2)
-}
 
-function volumeset {
-echo "Setting Volume $volumeval"
-/volumio/wsclient.js volume $volumeval
-}
 
 case "$1" in
+        play)
+            playbackcommand=$1
+            playback
+            ;;
+        pause)
+            playbackcommand=$1
+            playback
+            ;;
+        next)
+            playbackcommand=$1
+            playback
+            ;;
+        previous)
+            playbackcommand=$1
+            playback
+            ;;
+        start)
+            start
+            ;;
         start)
             start
             ;;
@@ -52,7 +111,7 @@ case "$1" in
             ;;
         volume)
             if [ "$2" != "" ]; then
-                volumeval = "$2"
+                volumeval=$2
                 volumeset
             else
                 volumeget
