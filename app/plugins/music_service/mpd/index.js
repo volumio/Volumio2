@@ -462,7 +462,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 				var nSampleRateRaw = nSampleRateRaw+' KHz';
 			}
 		nSampleRate = nSampleRateRaw;
-		nBitDepth = Number(objMetrics[1]);
+		nBitDepth = Number(objMetrics[1])+' bit';
 		nChannels = Number(objMetrics[2]);
 	}
 
