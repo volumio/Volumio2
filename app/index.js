@@ -535,7 +535,10 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
         return  thisPlugin.explodeUri(uri);
     else {
         var promise=libQ.defer();
-        promise.resolve();
+        promise.resolve({
+                        uri: uri,
+                        service: service
+                        });
         return promise.promise;
     }
 };

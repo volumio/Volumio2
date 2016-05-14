@@ -316,9 +316,25 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
     if (stateService.status === 'play') {
 		if (this.currentStatus === 'play') {
-			this.pushState().fail(this.pushError.bind(this));
-            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'No code');
+            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received an update from plaugin. extracting info from apyload');
 
+            if(stateService.samplerate!==undefined)
+            {
+                trackBlock.samplerate=stateService.samplerate;
+            }
+
+            if(stateService.bitdepth!==undefined)
+            {
+                trackBlock.bitdepth=stateService.bitdepth;
+            }
+
+            if(stateService.channels!==undefined)
+            {
+                trackBlock.channels=stateService.channels;
+            }
+
+
+            this.pushState().fail(this.pushError.bind(this));
         }
 		else if (this.currentStatus === 'stop') {
 

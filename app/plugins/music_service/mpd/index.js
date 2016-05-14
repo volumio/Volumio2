@@ -1591,8 +1591,6 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     tracknumber: 0,
                                     albumart: self.getAlbumArt({artist:artist,album: album},uri),
                                     duration: time,
-                                    samplerate: '128',
-                                    bitdepth: 8,
                                     trackType: uri.split('.').pop()
                             });
 
