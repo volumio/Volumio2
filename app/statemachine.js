@@ -388,33 +388,24 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
-            //Queuing following track;
-            if(this.currentRepeat!==undefined && this.currentRepeat===true)
+
+            if(this.currentConsume!==undefined && this.currentConsume==true)
             {
-                this.commandRouter.logger.info("Repeating song at position "+this.currentPosition);
+                this.playQueue.removeQueueItem(this.currentPosition);
             }
             else
             {
-                if(this.currentConsume!==undefined && this.currentConsume==true)
+                if(this.currentRandom!==undefined && this.currentRandom===true)
                 {
-                    this.playQueue.removeQueueItem(this.currentPosition);
+                    this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
+                    this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
                 }
-                else
-                {
-                    if(this.currentRandom!==undefined && this.currentRandom===true)
-                    {
-                        this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
-                        this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-                    }
-                    else {
-                        if(this.currentPosition ==null || this.currentPosition===undefined)
-                            this.currentPosition=0;
-                        else this.currentPosition++;
-                    }
+                else {
+                    if(this.currentPosition ==null || this.currentPosition===undefined)
+                        this.currentPosition=0;
+                    else this.currentPosition++;
                 }
             }
-
-
 
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
@@ -423,9 +414,24 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
 
-                this.pushState().fail(this.pushError.bind(this));
 
-                return this.stopPlaybackTimer();
+                //Queuing following track;
+                if(this.currentRepeat!==undefined && this.currentRepeat===true)
+                {
+                    this.currentPosition=0;
+                    this.play();
+
+                    this.commandRouter.logger.info("Repeating playlist ");
+                }
+                else
+                {
+                    this.currentPosition=0;
+                    this.pushState().fail(this.pushError.bind(this));
+
+                    return this.stopPlaybackTimer();
+                }
+
+
 
             } else {
                 this.play();
