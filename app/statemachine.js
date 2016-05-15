@@ -273,6 +273,43 @@ CoreStateMachine.prototype.pushState = function () {
 	return promise.promise;
 };
 
+CoreStateMachine.prototype.pushEmptyState = function () {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushState');
+
+    var promise = libQ.defer();
+
+    var state = {
+        status: 'stop',
+        position: 0,
+        title: '',
+        artist: '',
+        album: '',
+        albumart: '/albumart',
+        duration:0,
+        uri: '',
+        seek: 0,
+        samplerate: '',
+        channels: '',
+        bitdepth: 0,
+        Streaming: false,
+        service: 'mpd',
+        volume: this.currentVolume,
+        random:this.currentRandom,
+        repeat: this.currentRepeat,
+        consume: this.currentConsume
+    };
+    var self = this;
+    self.commandRouter.volumioPushState(state)
+        .then(function (data) {
+            self.checkFavourites(state)
+                .then(function (a) {
+                    promise.resolve({});
+                })
+        });
+
+    return promise.promise;
+};
+
 // Pass the error if we don't want to handle it
 CoreStateMachine.prototype.pushError = function (sReason) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushError');
@@ -426,7 +463,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                 else
                 {
                     this.currentPosition=0;
-                    this.pushState().fail(this.pushError.bind(this));
+                    this.pushEmptyState().fail(this.pushError.bind(this));
 
                     return this.stopPlaybackTimer();
                 }
