@@ -107,6 +107,14 @@ volumioAppearance.prototype.setAdditionalConf = function()
     //Perform your installation tasks here
 };
 
+volumioAppearance.prototype.getUIConfig = function () {
+    var self = this;
+
+    var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
+    
+    return uiconf;
+};
+
 volumioAppearance.prototype.getUiSettings = function()
 {
     var self = this;
