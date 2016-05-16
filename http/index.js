@@ -131,11 +131,11 @@ app.route('/backgrounds-upload')
             } catch (err) {
                 console.log('Cannot Create Background DIR ')
             }
-            //Path where image will be uploaded
-            fstream = fs.createWriteStream('/data/backgrounds/' + filename);
+            var properfilename = filename.replace(/ /g,'-');
+            fstream = fs.createWriteStream('/data/backgrounds/' + properfilename);
             file.pipe(fstream);
             fstream.on('close', function () {
-                console.log("Upload Finished of " + filename);
+                console.log("Upload Finished of " + properfilename);
                 var socket= io.connect('http://localhost:3000');
                 socket.emit('regenerateThumbnails', '');
                 res.status(201);

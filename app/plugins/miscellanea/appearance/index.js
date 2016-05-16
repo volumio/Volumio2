@@ -168,7 +168,7 @@ volumioAppearance.prototype.generateThumbnails = function(){
                     .resize(300, 200)
                     .toFile(backgroundPath+'/thumbnail-'+f, function(err) {
                         if (err){
-                            console.log(error);
+                            console.log(err);
                         }
                     });
             }
