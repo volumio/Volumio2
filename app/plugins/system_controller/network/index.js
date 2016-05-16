@@ -32,11 +32,8 @@ ControllerNetwork.prototype.onVolumioStart = function () {
 	//getting configuration
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 	config.loadFile(configFile);
-};
 
-ControllerNetwork.prototype.onStart = function () {
-	var self = this;
-	//Perform startup tasks here
+    return libQ.resolve();
 };
 
 ControllerNetwork.prototype.onStop = function () {

@@ -6,6 +6,7 @@ var inotify = new Inotify(); //persistent by default, new Inotify(false) //no pe
 global.io = require('socket.io')(3005);
 global.exec = require('child_process').exec;
 global.fs = require('fs');
+var libQ = require('kew');
 
 
 function updater_comm(context) {
@@ -77,6 +78,8 @@ updater_comm.prototype.onVolumioStart = function () {
 			var ilFileDescriptor = inotify.addWatch(ilFile);
 		});
 	});
+
+    return libQ.resolve();
 };
 
 updater_comm.prototype.onStop = function () {

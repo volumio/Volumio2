@@ -38,12 +38,10 @@ AlarmClock.prototype.onVolumioStart = function() {
 	self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
 	config.loadFile(self.configFile);
 	self.applyConf(self.getConf());
+
+    return libQ.resolve();
 };
 
-AlarmClock.prototype.onStart = function() {
-	var self = this;
-	//Perform startup tasks here
-};
 
 AlarmClock.prototype.onStop = function() {
 	var self = this;

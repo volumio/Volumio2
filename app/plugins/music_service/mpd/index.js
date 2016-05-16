@@ -529,6 +529,8 @@ ControllerMpd.prototype.onVolumioStart = function () {
 			}
 		}
 	});
+
+    return libQ.resolve();
 };
 
 ControllerMpd.prototype.mpdEstablish = function () {

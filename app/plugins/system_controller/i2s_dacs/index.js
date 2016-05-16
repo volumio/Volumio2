@@ -29,7 +29,7 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
 
-
+    return libQ.resolve();
 };
 
 ControllerI2s.prototype.onStop = function () {

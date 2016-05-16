@@ -15,6 +15,8 @@ function ExamplePlugin(context) {
 ExamplePlugin.prototype.onVolumioStart = function () {
 	var self = this;
 	//Perform startup tasks here
+
+    return libQ.resolve();
 };
 
 ExamplePlugin.prototype.onStop = function () {

@@ -39,8 +39,7 @@ function CoreCommandRouter(server) {
 	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
     this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
-	//self.pluginManager.onVolumioStart();
-	//self.pluginManager.startPlugins();
+	this.pluginManager.startPlugins();
 
 	// Start the state machine
 	this.stateMachine = new (require('./statemachine.js'))(this);

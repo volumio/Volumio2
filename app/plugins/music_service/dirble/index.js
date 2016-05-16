@@ -30,6 +30,8 @@ ControllerDirble.prototype.onVolumioStart = function () {
 
     self.addToBrowseSources();
 
+    return libQ.resolve();
+
 };
 
 ControllerDirble.prototype.getConfigurationFiles = function () {

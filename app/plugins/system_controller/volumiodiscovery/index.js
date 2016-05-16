@@ -7,6 +7,7 @@ var mdns=require('mdns');
 var HashMap = require('hashmap');
 var io=require('socket.io-client');
 var exec = require('child_process').exec;
+var libQ = require('kew');
 
 // Define the ControllerVolumioDiscovery class
 
@@ -70,6 +71,8 @@ ControllerVolumioDiscovery.prototype.onVolumioStart = function() {
 
 	var boundMethod = self.onPlayerNameChanged.bind(self);
 	self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
+
+    return libQ.resolve();
 }
 
 ControllerVolumioDiscovery.prototype.getNewName=function(curName,i)

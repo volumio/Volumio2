@@ -29,6 +29,7 @@ UpnpInterface.prototype.onVolumioStart = function () {
 	var boundMethod = self.onPlayerNameChanged.bind(self);
 	self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
+    return libQ.resolve();
 };
 
 UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
@@ -37,10 +38,6 @@ UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
 	self.onRestart();
 };
 
-UpnpInterface.prototype.onStart = function () {
-	var self = this;
-
-};
 
 UpnpInterface.prototype.getCurrentIP = function () {
 	var self = this;

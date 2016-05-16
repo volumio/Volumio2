@@ -353,7 +353,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
     if (stateService.status === 'play') {
 		if (this.currentStatus === 'play') {
-            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received an update from plaugin. extracting info from apyload');
+            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received an update from plaugin. extracting info from payload');
 
             if(stateService.samplerate!==undefined)
             {
@@ -585,30 +585,6 @@ CoreStateMachine.prototype.play = function (index) {
         }
 
     }
-
-
-    /*else if(this.currentStatus==='play')
-    {
-        if(oldService!==undefined && newService !==undefined && oldService!==newService)
-        {
-            this.commandRouter.pushConsoleMessage('##############################' + 'Asking '+oldService+' to stop');
-            this.commandRouter.pushConsoleMessage('##############################' + 'Asking '+newService+' to stop');
-            oldPlugin.stop();
-        }
-
-        this.currentSeek=0;
-        thisPlugin.clearAddPlayTrack(trackBlock);
-        this.startPlaybackTimer();
-    }*/
-
-
-
-
-
-
-
-
-
 };
 
 // Volumio Play Command

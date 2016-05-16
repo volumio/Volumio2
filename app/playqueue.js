@@ -9,13 +9,9 @@ function CorePlayQueue(commandRouter, stateMachine) {
 	this.stateMachine = stateMachine;
 	this.arrayQueue = [];
 
-
-    this.defaultSampleRate='44.1 KHz';
-    this.defaultBitdepth=8;
-    this.defaultChannels=2;
-
-    
-
+    this.defaultSampleRate='';
+    this.defaultBitdepth=0;
+    this.defaultChannels=0;
 }
 
 // Public Methods ---------------------------------------------------------------------------------------

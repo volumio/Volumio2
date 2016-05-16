@@ -1,6 +1,7 @@
 'use strict';
 
 var exec = require('child_process').exec;
+var libQ = require('kew');
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -31,11 +32,8 @@ AlbumArt.prototype.onVolumioStart = function() {
 			else console.log('Album art server started up');
 
 		});
-};
 
-AlbumArt.prototype.onStart = function() {
-	var self = this;
-	//Perform startup tasks here
+    return libQ.resolve();
 };
 
 AlbumArt.prototype.onStop = function() {

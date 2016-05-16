@@ -14,15 +14,6 @@ function ControllerServices(context) {
 	self.commandRouter = self.context.coreCommand;
 }
 
-ControllerServices.prototype.onVolumioStart = function() {
-	var self = this;
-	//Perform startup tasks here
-};
-
-ControllerServices.prototype.onStart = function() {
-	var self = this;
-	//Perform startup tasks here
-};
 
 ControllerServices.prototype.onStop = function() {
 	var self = this;

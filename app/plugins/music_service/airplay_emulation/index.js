@@ -3,6 +3,7 @@
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var config = new (require('v-conf'))();
+var libQ = require('kew');
 
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;
@@ -19,10 +20,10 @@ AirPlayInterface.prototype.onVolumioStart = function () {
 	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 	this.startShairportSync();
+
+    return libQ.resolve();
 };
 
-AirPlayInterface.prototype.onStart = function () {
-};
 
 AirPlayInterface.prototype.onStop = function () {
 };

@@ -217,13 +217,24 @@ PluginManager.prototype.startPlugin = function (category, name) {
 	var self = this;
     var defer=libQ.defer();
 
-    self.config.set(category + '.' + name + '.status', "STARTED");
-
 	var plugin = self.getPlugin(category, name);
-    if(plugin!==undefined)
-        plugin.onStart();
 
-    defer.resolve();
+    self.logger.info("STARTING PLUGIN "+name+"    "+plugin);
+
+    if(plugin!==undefined)
+    {
+        if(plugin.onStart!==undefined)
+        {
+            var deferStart=plugin.onStart();
+            deferStart.then(function(){
+                self.config.set(category + '.' + name + '.status', "STARTED");
+                defer.resolve();
+            });
+        }
+        else defer.resolve();
+
+    } else defer.resolve();
+
     return defer.promise;
 };
 
@@ -232,29 +243,33 @@ PluginManager.prototype.stopPlugin = function (category, name) {
     var defer=libQ.defer();
 
     self.logger.info("Stopping plugin "+name);
-	self.config.set(category + '.' + name + '.status', "STOPPED");
 	var plugin = self.getPlugin(category, name);
-	if(plugin!==undefined)
-        plugin.onStop();
+    if(plugin!==undefined)
+    {
+        var deferStart=plugin.onStop();
+        deferStart.then(function(){
+            self.config.set(category + '.' + name + '.status', "STOPPED");
+            defer.resolve();
+        })
+    } else defer.resolve();
 
-    defer.resolve();
+
     return defer.promise;
 };
 
 PluginManager.prototype.startPlugins = function () {
 	var self = this;
 
-	self.plugins.forEach(function (value, key) {
+    self.logger.info("___________ START PLUGINS ___________");
+    self.plugins.forEach(function (value,key) {
+        self.startPlugin(value.category,value.name);
 
-		self.config.set(key + '.status', "STARTED");
-
-		var plugin = value.instance;
-		plugin.onStart();
 	});
 };
 
 PluginManager.prototype.stopPlugins = function () {
 	var self = this;
+
 
 	self.plugins.forEach(function (value, key) {
 		self.config.set(key + '.status', "STOPPED");

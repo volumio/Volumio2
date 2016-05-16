@@ -34,12 +34,10 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
 	config.loadFile(configFile);
 
 	self.initShares();
+
+    return libQ.resolve();
 };
 
-ControllerNetworkfs.prototype.onStart = function () {
-	var self = this;
-	//Perform startup tasks here
-};
 
 ControllerNetworkfs.prototype.onStop = function () {
 	var self = this;

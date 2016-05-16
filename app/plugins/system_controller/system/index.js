@@ -36,14 +36,13 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		var uuid = require('node-uuid');
 		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
-
-
-
-
+    
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
 	self.deviceDetect();
 	self.checkTestSystem();
+
+    return libQ.resolve();
 };
 
 ControllerSystem.prototype.onStop = function () {

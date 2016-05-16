@@ -61,6 +61,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 
+    return libQ.resolve();
 };
 
 
