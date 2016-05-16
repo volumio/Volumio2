@@ -15,8 +15,10 @@ var io=require('socket.io-client');
 var app = express();
 var dev = express();
 var plugin = express();
+var background = express();
 
 var plugindir = '/tmp/plugins';
+var backgrounddir = '/data/backgrounds';
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -116,8 +118,33 @@ app.route('/plugin-upload')
         });
     });
 
-plugin.use(express.static(path.join(plugindir)));
+app.route('/backgrounds-upload')
+    .post(function (req, res, next) {
 
+        var fstream;
+        req.pipe(req.busboy);
+        req.busboy.on('file', function (fieldname, file, filename) {
+            console.log("Uploading: " + filename);
+
+            try {
+                fs.ensureDirSync(backgrounddir)
+            } catch (err) {
+                console.log('Cannot Create Background DIR ')
+            }
+            //Path where image will be uploaded
+            fstream = fs.createWriteStream('/data/backgrounds/' + filename);
+            file.pipe(fstream);
+            fstream.on('close', function () {
+                console.log("Upload Finished of " + filename);
+                res.status(201);
+                //res.redirect('/');
+            });
+        });
+    });
+
+plugin.use(express.static(path.join(plugindir)));
+background.use(express.static(path.join(backgrounddir)));
+app.use('/backgrounds', express.static('/data/backgrounds/'));
 
 
 module.exports.app = app;

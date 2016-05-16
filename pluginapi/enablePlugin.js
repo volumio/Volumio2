@@ -6,9 +6,9 @@ var io=require('socket.io-client');
 var socket= io.connect('http://localhost:3000');
 
 
-socket.emit('pluginManager', { action:'enable', category:'music_service',name:'spop'});
+socket.emit('setBackgrounds',{name:'Morning',path:'morning.jpg'});
 
-socket.on('pushInstalledPlugins',function(data)
+socket.on('pushBackgrounds',function(data)
 {
     console.log(data);
 //console.log(JSON.parse(data));

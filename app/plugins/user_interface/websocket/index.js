@@ -1386,7 +1386,53 @@ function InterfaceWebUI(context) {
 
             });
 
+			connWebSocket.on('getUiSettings', function () {
+				var selfConnWebSocket = this;
 
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushUiSettings', data);
+					});
+				}
+				else self.logger.error("Cannot get UI Settings");
+
+
+			});
+
+			connWebSocket.on('getBackgrounds', function () {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushBackgrounds', data);
+					});
+				}
+				else self.logger.error("Cannot get UI Settings");
+
+
+			});
+
+
+			connWebSocket.on('setBackgrounds', function (data) {
+			var curUri = data.uri;
+
+			var response;
+
+			response=self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setBackgrounds', data);
+
+			if (response != undefined) {
+				response.then(function (result) {
+						selfConnWebSocket.emit('pushBackgrounds', result);
+					})
+					.fail(function () {
+						self.printToastMessage('error', "Appearance", 'Cannot set new Backgroung');
+					});
+			}
+			});
 
 		}
 		catch (ex) {
