@@ -140,7 +140,8 @@ volumioAppearance.prototype.getBackgrounds = function()
             }
         });
         var background_title = config.get('background_title');
-        var backgrounds = {"current":background_title,"available":backgroundsArray};
+        var background_path = config.get('background_path');
+        var backgrounds = {"current":{"name":background_title,"path":background_path},"available":backgroundsArray};
         defer.resolve(backgrounds);
 
     });
