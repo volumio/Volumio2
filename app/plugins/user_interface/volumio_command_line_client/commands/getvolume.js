@@ -1,3 +1,4 @@
+#!/bin/node
 var io=require('socket.io-client');
 
 var socket= io.connect('http://localhost:3000');
@@ -9,3 +10,4 @@ socket.on('pushState',function(data)
     console.log(data.volume);
     process.exit()
 });
+

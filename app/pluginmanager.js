@@ -706,8 +706,8 @@ PluginManager.prototype.pluginFolderCleanup = function () {
                         }
                         else {
                             self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Removing folder.");
-
-                            fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
+                            //Disabled
+                            //fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
                         }
                     }
                     else

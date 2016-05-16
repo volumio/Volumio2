@@ -83,6 +83,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "appearance": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "user_interface": {

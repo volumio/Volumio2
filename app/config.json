@@ -2,6 +2,7 @@
   "menuItems":[
     {"id": "networkfs", "name": "My Music", "state": "volumio.plugin","params": {"pluginName": "system_controller/networkfs"}},
     {"id": "playback_options", "name": "Playback Options", "state": "volumio.plugin","params": {"pluginName": "audio_interface/alsa_controller"}},
+    {"id": "appearance", "name": "Appearance", "state": "volumio.plugin","params": {"pluginName": "miscellanea/appearance"}},
     {"id": "network", "name": "Network", "state": "volumio.plugin","params": {"pluginName": "system_controller/network"}},
     {"id": "system", "name": "System", "state": "volumio.plugin", "params": {"pluginName": "system_controller/system"}},
     {"id": "plugin-manager", "name": "Plugins", "state":"volumio.plugin-manager"},

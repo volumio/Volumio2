@@ -1386,7 +1386,81 @@ function InterfaceWebUI(context) {
 
             });
 
+			connWebSocket.on('getUiSettings', function () {
+				var selfConnWebSocket = this;
 
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushUiSettings', data);
+					});
+				}
+				else self.logger.error("Cannot get UI Settings");
+
+
+			});
+
+			connWebSocket.on('getBackgrounds', function () {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushBackgrounds', data);
+					});
+				}
+				else self.logger.error("Cannot get UI Settings");
+
+
+			});
+
+			connWebSocket.on('setBackgrounds', function (data) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setBackgrounds', data);
+
+				if (returnedData != undefined) {
+						var backgrounds=self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
+						if (backgrounds != undefined) {
+							backgrounds.then(function (backgroundsdata) {
+								selfConnWebSocket.emit('pushBackgrounds', backgroundsdata);
+							});
+						}
+				}
+				else self.logger.error("Cannot set UI Settings");
+
+			});
+
+			connWebSocket.on('deleteBackground', function (data) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'deleteBackgrounds', data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (backgroundsdata) {
+							selfConnWebSocket.emit('pushBackgrounds', backgroundsdata);
+						});
+					}
+				else self.logger.error("Cannot Delete Image");
+			});
+
+			connWebSocket.on('regenerateThumbnails', function (data) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'generateThumbnails', '' );
+
+				if (returnedData != undefined) {
+					var backgrounds=self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
+					if (backgrounds != undefined) {
+						backgrounds.then(function (backgroundsdata) {
+							self.libSocketIO.sockets.emit('pushBackgrounds', backgroundsdata);
+						});
+					}
+				}
+				else self.logger.error("Cannot Regenerate Thumbnails");
+			});
 
 		}
 		catch (ex) {
