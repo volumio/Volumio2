@@ -157,6 +157,7 @@ volumioAppearance.prototype.capitalize = function() {
 
 volumioAppearance.prototype.generateThumbnails = function(){
     var self=this;
+    var defer = libQ.defer();
     fs.readdir(backgroundPath, function(err, files) {
         if (err) {
             console.log(err);
@@ -172,7 +173,9 @@ volumioAppearance.prototype.generateThumbnails = function(){
                     });
             }
         });
+        defer.resolve('Ok');
     });
+    return defer.promise;
 };
 
 volumioAppearance.prototype.createThumbnailPath = function() {
@@ -200,9 +203,56 @@ volumioAppearance.prototype.setBackgrounds = function(data)
 
     self.commandRouter.pushToastMessage('success',"Appearance",'New Background Applied');
 
-    var response = self.getBackgrounds();
+    return ('Done');
+};
 
-    defer.resolve(response);
+volumioAppearance.prototype.deleteBackgrounds = function(data)
+{
+    var self = this;
+    var defer = libQ.defer();
+    var splitted = data.path.split('/').pop();
+    var thumbpathdel = backgroundPath+'/thumbnail-'+splitted;
+    var imgpathdel = backgroundPath+'/'+splitted;
+
+    self.deleteFile(imgpathdel);
+    var deleted = self.deleteFile(thumbpathdel);
+
+
+    if (deleted != undefined) {
+        deleted.then(function (data) {
+            var backgrounds = self.getBackgrounds();
+            if (backgrounds != undefined) {
+                backgrounds.then(function (data) {
+                  defer.resolve(data);
+            });
+            }
+        });
+    }
 
     return defer.promise;
 };
+
+volumioAppearance.prototype.deleteFile = function(filepath){
+    var self = this;
+
+    var defer = libQ.defer();
+    fs.stat(filepath, function (err, stats) {
+        if (err) {
+            console.log(err);
+        } else {
+            fs.unlink(filepath,function(err){
+                if(err) {
+                    console.log(err);
+                } else {
+                    if (filepath.indexOf("thumbnail-") < 0) {
+                        self.commandRouter.pushToastMessage('success', "Appearance", 'Background Successfully Deleted');
+                    } defer.resolve('Done');
+                }
+            });
+        }
+    });
+
+    return defer.promise;
+}
+
+

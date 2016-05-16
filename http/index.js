@@ -136,6 +136,8 @@ app.route('/backgrounds-upload')
             file.pipe(fstream);
             fstream.on('close', function () {
                 console.log("Upload Finished of " + filename);
+                var socket= io.connect('http://localhost:3000');
+                socket.emit('regenerateThumbnails', '');
                 res.status(201);
                 //res.redirect('/');
             });
