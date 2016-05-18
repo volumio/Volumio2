@@ -317,7 +317,7 @@ ControllerSystem.prototype.checkTestSystem = function () {
 
 	fs.exists('/data/test', function (exists) {
 		self.logger.info('------------ TEST ENVIRONMENT DETECTED ---------------');
-		self.StartDebugConsole();
+		//self.StartDebugConsole();
 	});
 
 }
