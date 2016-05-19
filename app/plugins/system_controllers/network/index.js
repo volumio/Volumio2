@@ -286,7 +286,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	var self = this;
 
-	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcp/dhclient.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
 
@@ -294,7 +294,8 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 			self.logger.info('Permissions for /etc/network/interfaces set')
 
 	try {
-		var ws = fs.createOutputStream('/etc/network/interfaces');
+		var ws = fs.createWriteStream('/etc/network/interfaces');
+		var staticlease = fs.createWriteStream('/etc/dhcp/dhclient.conf');
 
 		ws.cork();
 		ws.write('auto wlan0\n');
@@ -302,16 +303,37 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		ws.write('iface lo inet loopback\n');
 		ws.write('\n');
 
+		staticlease.cork();
+		staticlease.write('option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;\n');
+		staticlease.write('send host-name = gethostname();\n');
+		staticlease.write('request subnet-mask, broadcast-address, time-offset, routers,\n');
+		staticlease.write('        domain-name, domain-name-servers, domain-search, host-name,\n');
+		staticlease.write('        dhcp6.name-servers, dhcp6.domain-search,\n');
+		staticlease.write('        netbios-name-servers, netbios-scope, interface-mtu,\n');
+		staticlease.write('        ntp-servers;\n');
+		staticlease.write('timeout 15;\n');
+		staticlease.write('backoff-cutoff 3;\n');
+		staticlease.write('initial-interval 3;\n');
+
 		ws.write('allow-hotplug eth0\n');
 		if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
 			ws.write('iface eth0 inet dhcp\n');
 		}
 		else {
+			//TODO ADD REAL STATIC ADDRESS, HOW TO DO IT IN JESSIE???
+			ws.write('iface eth0 inet dhcp\n');
+			staticlease.write('lease {\n');
+			staticlease.write('  interface "eth0";\n');
+			staticlease.write('  fixed-address '+config.get('ethip')+';\n');
+			staticlease.write('  option subnet-mask '+config.get('ethnetmask')+';\n');
+			staticlease.write('}\n');
+			/*
 			ws.write('iface eth0 inet static\n');
 
 			ws.write('address ' + config.get('ethip') + '\n');
 			ws.write('netmask ' + config.get('ethnetmask') + '\n');
 			ws.write('gateway ' + config.get('ethgateway') + '\n');
+			*/
 		}
 
 		ws.write('\n');
@@ -322,15 +344,27 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 			ws.write('iface wlan0 inet manual\n');
 		}
 		else {
+			//TODO ADD REAL STATIC ADDRESS, HOW TO DO IT IN JESSIE???
+			ws.write('iface wlan0 inet manual\n');
+			staticlease.write('alias {\n');
+			staticlease.write('  interface "wlan0";\n');
+			staticlease.write('  fixed-address '+config.get('wirelessip')+';\n');
+			staticlease.write('  option subnet-mask '+config.get('wirelessnetmask')+';\n');
+			staticlease.write('}\n');
+			/*
 			ws.write('iface wlan0 inet static\n');
 
 			ws.write('address ' + config.get('wirelessip') + '\n');
 			ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
 			ws.write('gateway ' + config.get('wirelessgateway') + '\n');
+			*/
 		}
 
 		ws.uncork();
 		ws.end();
+
+		staticlease.uncork();
+		staticlease.end();
 
 		//console.log("Restarting networking layer");
 		self.commandRouter.wirelessRestart();
