@@ -37,6 +37,7 @@ function CoreCommandRouter(server) {
 
 	// Start plugins
 	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+    this.pluginManager.checkIndex();
     this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
 	this.pluginManager.startPlugins();

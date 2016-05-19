@@ -88,7 +88,13 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             service='spop';
         }
 
-        promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
+        if(service==='dirble')
+        {
+            item.name=item.title;
+            item.albumart="/albumart";
+            promiseArray.push(libQ.resolve(item));
+        }
+        else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
     }
 
     libQ.all(promiseArray)

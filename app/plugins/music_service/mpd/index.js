@@ -348,9 +348,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	//self.commandRouter.logger.info(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
 	var resp = {};
 
-	var file = objTrackInfo.file;
-	var filetitle = file.replace(/^.*\/(?=[^\/]*$)/, '');
-	
+
 	if (objTrackInfo.Time === 0){
 		resp.isStreaming = true;
 	}
@@ -362,6 +360,9 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 			resp.trackType = 'CD Audio';
 			resp.title = resp.uri.replace('cdda:///', 'Track ');
 		}
+        else if (resp.uri.indexOf('http://') >= 0) {
+            resp.service='dirble';
+        }
 	} else {
 		resp.uri = null;
 	}
@@ -369,7 +370,10 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.Title != undefined) {
 		resp.title = objTrackInfo.Title;
 	} else {
-		resp.title = filetitle;
+        var file = objTrackInfo.file;
+        var filetitle = file.replace(/^.*\/(?=[^\/]*$)/, '');
+
+        resp.title = filetitle;
 	}
 
 	if (objTrackInfo.Artist != undefined) {
@@ -996,6 +1000,8 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
+
+                    self.logger.info("LINE "+line);
 					if (line.indexOf('directory:') === 0) {
 						path = line.slice(11);
 						name = path.split('/').pop();

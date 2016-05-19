@@ -10,6 +10,16 @@
         "value": "STARTED"
       }
     },
+    "mpd2": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
     "mpd": {
       "enabled": {
         "type": "boolean",

@@ -33,6 +33,7 @@ function PluginManager(ccommand, server) {
 
 	var pluginsDataFile = '/data/configuration/plugins.json';
 	if (!fs.existsSync(pluginsDataFile)) {
+        ccommand.logger.info("File /data/configuration/plugins.json does not exist. Copying from Volumio");
 		fs.copySync(__dirname + '/plugins/plugins.json', pluginsDataFile);
 	}
 
@@ -202,7 +203,7 @@ PluginManager.prototype.getPackageJson = function (folder) {
     }
     catch(ex)
     {
-        self.logger.info("Error loading package.json in "+folder + '/package.json');
+
     }
 
 };
@@ -706,8 +707,7 @@ PluginManager.prototype.pluginFolderCleanup = function () {
                         }
                         else {
                             self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Removing folder.");
-                            //Disabled
-                            //fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
+                            fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
                         }
                     }
                     else
@@ -1213,6 +1213,68 @@ PluginManager.prototype.getPrettyName = function (package_json) {
         return package_json.volumio_info.pretty_name;
     else return package_json.name;     
 }
+
+
+PluginManager.prototype.checkIndex = function () {
+    var self=this;
+    var coreConf=new (vconf)();
+
+    coreConf.loadFile(__dirname+'/plugins/plugins.json');
+
+    // checking that all key exist
+    var categories=coreConf.getKeys();
+    for(var i in categories)
+    {
+        var category=categories[i];
+
+        var plugins=coreConf.getKeys(category);
+        for(var k in plugins)
+        {
+            var plugin=plugins[k];
+            var key=category+'.'+plugin;
+
+            if(self.config.has(key)===false)
+            {
+                self.logger.info("Found new core plugin "+category+"/"+plugin+". Adding it");
+
+                self.config.addConfigValue(key+'.enabled','boolean',false);
+                self.config.addConfigValue(key+'.status','string','STOPPED');
+
+            }
+
+        }
+    }
+
+    self.config.print();
+
+   /* categories=self.config.getKeys();
+    for(var i in categories) {
+        var category = categories[i];
+
+        var plugins = self.config.getKeys(category);
+        for (var k in plugins) {
+            var plugin = plugins[k];
+            var key = category + '.' + plugin;
+
+            var plugin_exists = false;
+            for (var d in self.pluginPath) {
+                var package_json = self.getPackageJson(self.pluginPath[d] + category + '/' + plugin);
+                plugin_exists = plugin_exists | (package_json !== undefined);
+            }
+
+            if (plugin_exists == false) {
+                self.logger.info("Configured plugin " + category + "/" + plugin + " cannot be loaded. Removing from configuration");
+                self.config.delete(key+'.enabled');
+                self.config.delete(key+'.status');
+            }
+        }
+    }*/
+
+
+}
+
+
+
 
 
 

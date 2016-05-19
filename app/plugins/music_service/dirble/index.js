@@ -109,8 +109,9 @@ ControllerDirble.prototype.rebuildTracklist = function () {
 };
 
 // Define a method to clear, add, and play an array of tracks
-ControllerDirble.prototype.clearAddPlayTracks = function (arrayTrackUris) {
-	return libQ.resolve();
+ControllerDirble.prototype.clearAddPlayTrack = function (track) {
+    var mpdplugin=this.commandRouter.pluginManager.getPlugin("music_service","mpd");
+    return mpdplugin.clearAddPlayTrack(track);
 };
 
 // Dirble stop
