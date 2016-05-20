@@ -113,7 +113,7 @@ PluginManager.prototype.loadPlugin = function (folder) {
 		context.setEnvVariable('name', name);
 
         pluginInstance = new (require(folder + '/' + package_json.main))(context);
-        
+
 		self.initializeConfiguration(package_json, pluginInstance, folder);
 
 
@@ -1237,7 +1237,7 @@ PluginManager.prototype.checkIndex = function () {
             {
                 self.logger.info("Found new core plugin "+category+"/"+plugin+". Adding it");
 
-                self.config.addConfigValue(key+'.enabled','boolean',false);
+                self.config.addConfigValue(key+'.enabled','boolean',true);
                 self.config.addConfigValue(key+'.status','string','STOPPED');
 
             }
