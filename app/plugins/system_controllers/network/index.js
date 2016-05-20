@@ -86,12 +86,12 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	//Wireless
 
 	//dhcp
-	  //dhcp
-        if (config.get('wirelessdhcp') == undefined) {
-            uiconf.sections[1].content[0].value = true;
-        } else {
-            uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
-        }
+	//dhcp
+	if (config.get('wirelessdhcp') == undefined) {
+		uiconf.sections[1].content[0].value = true;
+	} else {
+		uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
+	}
 
 	//static ip
 	uiconf.sections[1].content[1].value = config.get('wirelessip');
@@ -285,6 +285,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
 ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	var self = this;
+	var staticwlanfile = '/data/configuration/wlanstatic';
 
 	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcp/dhclient.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
@@ -293,86 +294,74 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		} else {
 			self.logger.info('Permissions for /etc/network/interfaces set')
 
-	try {
-		var ws = fs.createWriteStream('/etc/network/interfaces');
-		var staticlease = fs.createWriteStream('/etc/dhcp/dhclient.conf');
+			try {
+				var ws = fs.createWriteStream('/etc/network/interfaces');
 
-		ws.cork();
-		ws.write('auto wlan0\n');
-		ws.write('auto lo\n');
-		ws.write('iface lo inet loopback\n');
-		ws.write('\n');
+				ws.cork();
+				ws.write('auto wlan0\n');
+				ws.write('auto lo\n');
+				ws.write('iface lo inet loopback\n');
+				ws.write('\n');
 
-		staticlease.cork();
-		staticlease.write('option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;\n');
-		staticlease.write('send host-name = gethostname();\n');
-		staticlease.write('request subnet-mask, broadcast-address, time-offset, routers,\n');
-		staticlease.write('        domain-name, domain-name-servers, domain-search, host-name,\n');
-		staticlease.write('        dhcp6.name-servers, dhcp6.domain-search,\n');
-		staticlease.write('        netbios-name-servers, netbios-scope, interface-mtu,\n');
-		staticlease.write('        ntp-servers;\n');
-		staticlease.write('timeout 15;\n');
-		staticlease.write('backoff-cutoff 3;\n');
-		staticlease.write('initial-interval 3;\n');
 
-		ws.write('allow-hotplug eth0\n');
-		if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
-			ws.write('iface eth0 inet dhcp\n');
-		}
-		else {
-			//TODO ADD REAL STATIC ADDRESS, HOW TO DO IT IN JESSIE???
-			ws.write('iface eth0 inet dhcp\n');
-			staticlease.write('lease {\n');
-			staticlease.write('  interface "eth0";\n');
-			staticlease.write('  fixed-address '+config.get('ethip')+';\n');
-			staticlease.write('  option subnet-mask '+config.get('ethnetmask')+';\n');
-			staticlease.write('}\n');
-			/*
-			ws.write('iface eth0 inet static\n');
+				ws.write('allow-hotplug eth0\n');
+				if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
+					ws.write('iface eth0 inet dhcp\n');
+				}
+				else {
+					ws.write('iface eth0 inet static\n');
 
-			ws.write('address ' + config.get('ethip') + '\n');
-			ws.write('netmask ' + config.get('ethnetmask') + '\n');
-			ws.write('gateway ' + config.get('ethgateway') + '\n');
-			*/
-		}
+					ws.write('address ' + config.get('ethip') + '\n');
+					ws.write('netmask ' + config.get('ethnetmask') + '\n');
+					ws.write('gateway ' + config.get('ethgateway') + '\n');
+				}
 
-		ws.write('\n');
+				ws.write('\n');
 
-		ws.write('allow-hotplug wlan0\n');
+				ws.write('allow-hotplug wlan0\n');
 
-		if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
-			ws.write('iface wlan0 inet manual\n');
-		}
-		else {
-			//TODO ADD REAL STATIC ADDRESS, HOW TO DO IT IN JESSIE???
-			ws.write('iface wlan0 inet manual\n');
-			staticlease.write('alias {\n');
-			staticlease.write('  interface "wlan0";\n');
-			staticlease.write('  fixed-address '+config.get('wirelessip')+';\n');
-			staticlease.write('  option subnet-mask '+config.get('wirelessnetmask')+';\n');
-			staticlease.write('}\n');
-			/*
-			ws.write('iface wlan0 inet static\n');
+				if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
+					ws.write('iface wlan0 inet manual\n');
 
-			ws.write('address ' + config.get('wirelessip') + '\n');
-			ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
-			ws.write('gateway ' + config.get('wirelessgateway') + '\n');
-			*/
-		}
 
-		ws.uncork();
-		ws.end();
+						fs.unlink(staticwlanfile, function (err) {
+							if (err) {
+								self.logger.info('Cannot delete wlanstatic file ')
+							} else {
+								self.logger.info('Sucessfully deleted wlanstatic file');
+							}
 
-		staticlease.uncork();
-		staticlease.end();
+						});
 
-		//console.log("Restarting networking layer");
-		self.commandRouter.wirelessRestart();
-		self.commandRouter.networkRestart();
-	}
-	catch (err) {
-		self.commandRouter.pushToastMessage('error', "Network setup", 'Error while setting network: ' + err);
-	}
+				}
+				else {
+					//TODO ADD REAL STATIC ADDRESS, HOW TO DO IT IN JESSIE???
+					ws.write('iface wlan0 inet manual\n');
+
+					var wlanstatic = fs.createWriteStream(staticwlanfile);
+					wlanstatic.cork();
+					wlanstatic.write('/sbin/ifconfig wlan0 '+config.get('wirelessip')+' netmask '+config.get('wirelessnetmask')+' && /sbin/route add default gw ' + config.get('wirelessgateway') + ' wlan0');
+					wlanstatic.uncork();
+					wlanstatic.end();
+					/*
+					 ws.write('iface wlan0 inet static\n');
+
+					 ws.write('address ' + config.get('wirelessip') + '\n');
+					 ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
+					 ws.write('gateway ' + config.get('wirelessgateway') + '\n');
+					 */
+				}
+
+				ws.uncork();
+				ws.end();
+
+				//console.log("Restarting networking layer");
+				self.commandRouter.wirelessRestart();
+				self.commandRouter.networkRestart();
+			}
+			catch (err) {
+				self.commandRouter.pushToastMessage('error', "Network setup", 'Error while setting network: ' + err);
+			}
 		}
 	});
 
