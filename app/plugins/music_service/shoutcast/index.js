@@ -5,10 +5,9 @@ var unirest = require('unirest');
 var S = require('string');
 var http = require('http');
 var url = require('url');
-//var internetradio = require('node-internet-radio');
 
-module.exports = ControllerDirble;
-function ControllerDirble(context) {
+module.exports = ControllerShoutcast;
+function ControllerShoutcast(context) {
 	var self = this;
 
 	self.context = context;
@@ -22,7 +21,7 @@ function ControllerDirble(context) {
  * This method can be defined by every plugin which needs to be informed of the startup of Volumio.
  * The Core controller checks if the method is defined and executes it on startup if it exists.
  */
-ControllerDirble.prototype.onVolumioStart = function () {
+ControllerShoutcast.prototype.onVolumioStart = function () {
 	var self = this;
 
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
@@ -34,254 +33,136 @@ ControllerDirble.prototype.onVolumioStart = function () {
 
 };
 
-ControllerDirble.prototype.getConfigurationFiles = function () {
+ControllerShoutcast.prototype.getConfigurationFiles = function () {
 	var self = this;
 
 	return ['config.json'];
 };
 
 //Registering into Browse Sources
-ControllerDirble.prototype.addToBrowseSources = function () {
+ControllerShoutcast.prototype.addToBrowseSources = function () {
 	var self = this;
-	var data = {name: 'WebRadio', uri: 'radio',plugin_type:'music_service',plugin_name:'dirble'};
+	var data = {name: 'WebRadio', uri: 'radio',plugin_type:'music_service',plugin_name:'shoutcast'};
 
 	self.commandRouter.volumioAddToBrowseSources(data);
 };
 
-ControllerDirble.prototype.onStop = function () {
+ControllerShoutcast.prototype.onStop = function () {
 	//Perform startup tasks here
 };
 
-ControllerDirble.prototype.onRestart = function () {
+ControllerShoutcast.prototype.onRestart = function () {
 	//Perform startup tasks here
 };
 
-ControllerDirble.prototype.onInstall = function () {
+ControllerShoutcast.prototype.onInstall = function () {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.onUninstall = function () {
+ControllerShoutcast.prototype.onUninstall = function () {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.getUIConfig = function () {
+ControllerShoutcast.prototype.getUIConfig = function () {
 	return {success: true, plugin: "dirble"};
 };
 
-ControllerDirble.prototype.setUIConfig = function (data) {
+ControllerShoutcast.prototype.setUIConfig = function (data) {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.getConf = function (varName) {
+ControllerShoutcast.prototype.getConf = function (varName) {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.setConf = function (varName, varValue) {
+ControllerShoutcast.prototype.setConf = function (varName, varValue) {
 	//Perform your installation tasks here
 };
 
 
 //Optional functions exposed for making development easier and more clear
-ControllerDirble.prototype.getSystemConf = function (pluginName, varName) {
+ControllerShoutcast.prototype.getSystemConf = function (pluginName, varName) {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.setSystemConf = function (pluginName, varName) {
+ControllerShoutcast.prototype.setSystemConf = function (pluginName, varName) {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.getAdditionalConf = function () {
+ControllerShoutcast.prototype.getAdditionalConf = function () {
 	//Perform your installation tasks here
 };
 
-ControllerDirble.prototype.setAdditionalConf = function () {
+ControllerShoutcast.prototype.setAdditionalConf = function () {
 	//Perform your installation tasks here
 };
 
 // Load the tracklist from database on disk
-ControllerDirble.prototype.loadTracklistFromDB = function () {
+ControllerShoutcast.prototype.loadTracklistFromDB = function () {
 	return libQ.resolve();
 };
 
 // Rebuild a library of user's playlisted Dirble tracks
-ControllerDirble.prototype.rebuildTracklist = function () {
+ControllerShoutcast.prototype.rebuildTracklist = function () {
 	return libQ.resolve();
 };
 
 // Define a method to clear, add, and play an array of tracks
-ControllerDirble.prototype.clearAddPlayTrack = function (track) {
-    var mpdplugin=this.commandRouter.pluginManager.getPlugin("music_service","mpd");
-    return mpdplugin.clearAddPlayTrack(track);
+ControllerShoutcast.prototype.clearAddPlayTrack = function (track) {
+   
 };
 
 // Dirble stop
-ControllerDirble.prototype.stop = function () {
+ControllerShoutcast.prototype.stop = function () {
 	return libQ.resolve();
 };
 
 // Dirble pause
-ControllerDirble.prototype.pause = function () {
+ControllerShoutcast.prototype.pause = function () {
 	return libQ.resolve();
 };
 
 // Dirble resume
-ControllerDirble.prototype.resume = function () {
+ControllerShoutcast.prototype.resume = function () {
 	return libQ.resolve();
 };
 
 // Dirble music library
-ControllerDirble.prototype.getTracklist = function () {
+ControllerShoutcast.prototype.getTracklist = function () {
 	return libQ.resolve([]);
 };
 
-ControllerDirble.prototype.listRadioCategories = function () {
+ControllerShoutcast.prototype.listRadioCategories = function () {
 	var self = this;
 
 	var defer = libQ.defer();
 
-	var response = {
-		navigation: {
-			prev: {
-				uri: 'radio'
-			},
-			list: []
-		}
-	};
-
-	var dirbleDefer = libQ.defer();
-	self.getPrimariesCategories(dirbleDefer.makeNodeResolver());
-	dirbleDefer.promise.then(function (data) {
-		for (var i in data) {
-			var category = {
-				type: 'radio-category',
-				title: data[i].title,
-				icon: 'fa fa-folder-open-o',
-				uri: 'radio/byGenre/' + data[i].id
-			};
-
-			response.navigation.list.push(category);
-		}
-
-		defer.resolve(response);
-	});
-
+    defer.resolve();
+    
 
 	return defer.promise;
 };
 
-ControllerDirble.prototype.listRadioForCategory = function (uri) {
+ControllerShoutcast.prototype.listRadioForCategory = function (uri) {
 	var self = this;
 
-	var defer = libQ.defer();
-
-	var response = {
-		navigation: {
-			prev: {
-				uri: 'radio/byGenre'
-			},
-			list: []
-		}
-	};
-
-	var id = uri.split('/')[2];
-
-
-	var paginationPromises = [];
-
-	for (var i = 0; i < 1; i++) {
-		var dirbleDefer = libQ.defer();
-		self.getRadioForCategory(id, 30, i, dirbleDefer.makeNodeResolver());
-
-		paginationPromises.push(dirbleDefer);
-	}
-
-	libQ.all(paginationPromises)
-		.then(function (results) {
-			//console.log(results);
-			for (var j in results) {
-				var pageData = results[j];
-				//console.log(pageData);
-
-				for (var k in pageData) {
-					var category = {
-						service: 'dirble',
-						type: 'webradio',
-						title: pageData[k].name,
-						id: pageData[k].id,
-						artist: '',
-						album: '',
-						icon: 'fa fa-microphone',
-						uri: pageData[k].streams[0].stream
-					};
-
-					response.navigation.list.push(category);
-				}
-			}
-
-			defer.resolve(response);
-		});
+    defer.resolve();
 
 	return defer.promise;
 };
 
 
-ControllerDirble.prototype.listFirstLevelRadioSections = function (callback) {
+ControllerShoutcast.prototype.listFirstLevelRadioSections = function (callback) {
 	var self = this;
 
 	var defer = libQ.defer();
 
-	var response = {
-		navigation: {
-			prev: {
-				uri: ''
-			},
-			list: [{
-				service: 'dirble',
-				type: 'mywebradio-category',
-				title: 'My Web Radios',
-				artist: '',
-				album: '',
-				icon: 'fa fa-heartbeat',
-				uri: 'radio/myWebRadio'
-			},
-				{
-					service: 'dirble',
-					type: 'radio-favourites',
-					title: 'Favourite Radios',
-					artist: '',
-					album: '',
-					icon: 'fa fa-heart',
-					uri: 'radio/favourites'
-				},
-				{
-					service: 'dirble',
-					type: 'radio-category',
-					title: 'By Genre',
-					artist: '',
-					album: '',
-					icon: 'fa fa-tags',
-					uri: 'radio/byGenre'
-				},
-				{
-					service: 'dirble',
-					type: 'radio-category',
-					title: 'By Country',
-					artist: '',
-					album: '',
-					icon: 'fa fa-globe',
-					uri: 'radio/byCountry'
-				}
-
-			]
-		}
-	};
-
-	defer.resolve(response);
+    defer.resolve();
 	return defer.promise;
 };
 
 
-ControllerDirble.prototype.getPrimariesCategories = function (callback) {
+ControllerShoutcast.prototype.getPrimariesCategories = function (callback) {
 	var self = this;
 
 	var Request = unirest.get(self.config.get('url_categories_primary'));
@@ -293,7 +174,7 @@ ControllerDirble.prototype.getPrimariesCategories = function (callback) {
 
 };
 
-ControllerDirble.prototype.getRadioForCategory = function (id, per_page, page, callback) {
+ControllerShoutcast.prototype.getRadioForCategory = function (id, per_page, page, callback) {
 	var self = this;
 
 	var Request = unirest.get(self.config.get('url_category_stations') + id + '/stations');
@@ -310,7 +191,7 @@ ControllerDirble.prototype.getRadioForCategory = function (id, per_page, page, c
 };
 
 
-ControllerDirble.prototype.listRadioCountries = function () {
+ControllerShoutcast.prototype.listRadioCountries = function () {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -355,7 +236,7 @@ ControllerDirble.prototype.listRadioCountries = function () {
 	return defer.promise;
 };
 
-ControllerDirble.prototype.getCountries = function (callback) {
+ControllerShoutcast.prototype.getCountries = function (callback) {
 	var self = this;
 
 	var Request = unirest.get(self.config.get('url_countries'));
@@ -367,7 +248,7 @@ ControllerDirble.prototype.getCountries = function (callback) {
 
 };
 
-ControllerDirble.prototype.listRadioForCountry = function (uri) {
+ControllerShoutcast.prototype.listRadioForCountry = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -433,7 +314,7 @@ ControllerDirble.prototype.listRadioForCountry = function (uri) {
 	return defer.promise;
 };
 
-ControllerDirble.prototype.getStationsForCountry = function (id, per_page, page, callback) {
+ControllerShoutcast.prototype.getStationsForCountry = function (id, per_page, page, callback) {
 	var self = this;
 
 	var Request = unirest.get('http://api.dirble.com/v2/countries/' + id + '/stations');
@@ -447,7 +328,7 @@ ControllerDirble.prototype.getStationsForCountry = function (id, per_page, page,
 
 };
 
-ControllerDirble.prototype.listRadioFavourites = function (uri) {
+ControllerShoutcast.prototype.listRadioFavourites = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -490,7 +371,7 @@ ControllerDirble.prototype.listRadioFavourites = function (uri) {
 };
 
 
-ControllerDirble.prototype.listMyWebRadio = function (uri) {
+ControllerShoutcast.prototype.listMyWebRadio = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -533,7 +414,7 @@ ControllerDirble.prototype.listMyWebRadio = function (uri) {
 /*
  Let the user add a web radio. The given name is a key to the array
  */
-ControllerDirble.prototype.addMyWebRadio = function (data) {
+ControllerShoutcast.prototype.addMyWebRadio = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -611,7 +492,7 @@ ControllerDirble.prototype.addMyWebRadio = function (data) {
 	return defer.promise;
 };
 
-ControllerDirble.prototype.removeMyWebRadio = function (data) {
+ControllerShoutcast.prototype.removeMyWebRadio = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
@@ -622,7 +503,7 @@ ControllerDirble.prototype.removeMyWebRadio = function (data) {
 	return defer.promise;
 };
 
-ControllerDirble.prototype.handleBrowseUri=function(curUri)
+ControllerShoutcast.prototype.handleBrowseUri=function(curUri)
 {
     var self=this;
 

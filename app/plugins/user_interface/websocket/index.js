@@ -541,7 +541,7 @@ function InterfaceWebUI(context) {
 
 				var response;
 
-				response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'addMyWebRadio', data);
+				response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'addMyWebRadio', data);
 
 				if (response != undefined) {
 					response.then(function (result) {
@@ -559,7 +559,7 @@ function InterfaceWebUI(context) {
 
 				var response;
 
-				response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'removeMyWebRadio', data);
+				response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'removeMyWebRadio', data);
 
 				if (response != undefined) {
 					response.then(function (result) {
@@ -674,8 +674,8 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, data.service, data.uri);
 				returnedData.then(function () {
-					if (data.service === 'dirble') {
-						response = self.commandRouter.executeOnPlugin('music_service', 'dirble', 'listRadioFavourites');
+					if (data.service === 'shoutcast') {
+						response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'listRadioFavourites');
 						if (response != undefined) {
 							response.then(function (result) {
 									selfConnWebSocket.emit('pushBrowseLibrary', result);
@@ -716,7 +716,7 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addToRadioFavourites', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.addToRadioFavourites('dirble', data.uri);
+				var returnedData = self.commandRouter.playListManager.addToRadioFavourites('shoutcast', data.uri);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushAddToRadioFavourites', data);
 				});
@@ -726,7 +726,7 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('removeFromRadioFavourites', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.removeFromRadioFavourites(data.name, 'dirble', data.uri);
+				var returnedData = self.commandRouter.playListManager.removeFromRadioFavourites(data.name, 'shoutcast', data.uri);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushRemoveFromRadioFavourites', data);
 				});

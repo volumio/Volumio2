@@ -1,7 +1,7 @@
 {
-  "name": "dirble",
+  "name": "shoutcast",
   "version": "1.0.0",
-  "description": "Dirble plugin for Volumio2",
+  "description": "Shoucast plugin for Volumio2",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -20,7 +20,7 @@
         "value": "STARTED"
       }
     },
-    "dirble": {
+    "shoutcast": {
       "enabled": {
         "type": "boolean",
         "value": true
