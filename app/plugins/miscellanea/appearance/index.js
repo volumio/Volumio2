@@ -37,7 +37,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
 
 volumioAppearance.prototype.onStart = function() {
     var self = this;
-    //Perform startup tasks here
+    return libQ.resolve();
 };
 
 volumioAppearance.prototype.onStop = function() {
