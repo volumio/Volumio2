@@ -112,8 +112,8 @@ PluginManager.prototype.loadPlugin = function (folder) {
         context.setEnvVariable('category', category);
 		context.setEnvVariable('name', name);
 
-		pluginInstance = new (require(folder + '/' + package_json.main))(context);
-
+        pluginInstance = new (require(folder + '/' + package_json.main))(context);
+        
 		self.initializeConfiguration(package_json, pluginInstance, folder);
 
 
@@ -1245,9 +1245,7 @@ PluginManager.prototype.checkIndex = function () {
         }
     }
 
-    self.config.print();
-
-   /* categories=self.config.getKeys();
+    categories=self.config.getKeys();
     for(var i in categories) {
         var category = categories[i];
 
@@ -1266,9 +1264,10 @@ PluginManager.prototype.checkIndex = function () {
                 self.logger.info("Configured plugin " + category + "/" + plugin + " cannot be loaded. Removing from configuration");
                 self.config.delete(key+'.enabled');
                 self.config.delete(key+'.status');
+                self.config.delete(key);
             }
         }
-    }*/
+    }
 
 
 }
