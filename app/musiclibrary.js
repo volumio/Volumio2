@@ -685,21 +685,6 @@ CoreMusicLibrary.prototype.search = function(data) {
 		}
 
 
-		var response;
-
-		response = self.commandRouter.executeOnPlugin('music_service','mpd','search',query);
-
-		if (response != undefined) {
-			response.then(function (result) {
-					defer.resolve(result);
-			})
-				.fail(function () {
-					console.log('Search error in Plugin: ');
-				});
-		};
-
-		//TODO SEARCH IN ALL PLUGINS
-		/*
 		for (var i = 0; i < self.browseSources.length; i++) {
 			var source=self.browseSources[i];
 
@@ -709,36 +694,31 @@ CoreMusicLibrary.prototype.search = function(data) {
 
 			if (response != undefined) {
 				response.then(function (result) {
+					console.log(i);
 					//console.log('RRRRRRRRRRR' +JSON.stringify(result))
-					self.searcharray.push(result);
-					if (i === (self.browseSources.length-1)){
-						console.log('end');
+					searcharray = searcharray.concat(result);
+					//console.log(searcharray);
+				})
+					//TODO FIX WITH MORE PLUGINS
+				.then(function (result) {
 						defer.resolve({
 							navigation: {
 								prev: {
 									uri: '/'
 								},
-								list: self.searcharray
+								list: searcharray
 							}
 						});
-					}
 
 				})
 					.fail(function () {
 						console.log('Search error in Plugin: '+source.plugin_name);
 					});
 			};
-
 		}
-		*/
-		//console.log(JSON.stringify(searcharray));
-
-		//console.log(JSON.stringify(searchresult));
-
 	} else {
 
 	}
-	//console.log(JSON.stringify(searchresult));
 	return defer.promise;
 }
 

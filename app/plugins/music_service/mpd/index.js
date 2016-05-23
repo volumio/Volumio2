@@ -1141,14 +1141,7 @@ ControllerMpd.prototype.search = function (query) {
 			}
 			else self.logger.info(err);
 
-			defer.resolve({
-				navigation: {
-					prev: {
-						uri: '/'
-					},
-					list: list
-				}
-			});
+			defer.resolve(list);
 		});
 	});
 	return defer.promise;
