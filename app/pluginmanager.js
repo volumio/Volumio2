@@ -455,11 +455,16 @@ PluginManager.prototype.installPlugin = function (url) {
                return e;
            })
            .then(self.addPluginToConfig.bind(self))
-           .then(function (e) {
+           .then(function (folder) {
                currentMessage = 'Plugin Successfully Installed';
                advancedlog = advancedlog + "<br>" + currentMessage;
-               self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':[{'name':'Close','class': 'btn btn-warning'},{'name':'Enable Plugin', 'class': 'btn btn-info', 'emit':'pluginManager','payload':{'action':'enable','category':'category','name':'name'}}]});
-               return e;
+
+               var package_json = self.getPackageJson(folder);
+               var name = package_json.name;
+               var category = package_json.volumio_info.plugin_type;
+
+               self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':[{'name':'Close','class': 'btn btn-warning'},{'name':'Enable Plugin', 'class': 'btn btn-info', 'emit':'pluginManager','payload':{'action':'enable','category':category,'name':name}}]});
+               return folder;
            })
            .then(function () {
                self.logger.info("Done installing plugin.");
@@ -624,7 +629,7 @@ PluginManager.prototype.addPluginToConfig = function (folder) {
     self.config.addConfigValue(key+'.enabled','boolean',false);
     self.config.addConfigValue(key+'.status','string','STOPPED');
 
-    defer.resolve();
+    defer.resolve(folder);
     return defer.promise;
 }
 
