@@ -520,6 +520,16 @@ function InterfaceWebUI(context) {
 				});
 			});
 
+			connWebSocket.on('goTo', function (data) {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.musicLibrary.search(data);
+				returnedData.then(function (result) {
+					selfConnWebSocket.emit('pushBrowseLibrary', result);
+				});
+			});
+
+
 			connWebSocket.on('GetTrackInfo', function (data) {
 				var selfConnWebSocket = this;
 				selfConnWebSocket.emit('pushGetTrackInfo', data);
