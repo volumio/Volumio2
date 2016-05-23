@@ -671,6 +671,77 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
 }
 
 
+CoreMusicLibrary.prototype.search = function(data) {
+	var self = this;
+
+	var query = {};
+	var defer = libQ.defer();
+	var searcharray = [];
+	if (data.value) {
+		if (data.type) {
+			query = {"value": data.value, "type": data.type};
+		} else {
+			query = {"value": data.value};
+		}
+
+
+		var response;
+
+		response = self.commandRouter.executeOnPlugin('music_service','mpd','search',query);
+
+		if (response != undefined) {
+			response.then(function (result) {
+					defer.resolve(result);
+			})
+				.fail(function () {
+					console.log('Search error in Plugin: ');
+				});
+		};
+
+		//TODO SEARCH IN ALL PLUGINS
+		/*
+		for (var i = 0; i < self.browseSources.length; i++) {
+			var source=self.browseSources[i];
+
+			var response;
+
+			response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+
+			if (response != undefined) {
+				response.then(function (result) {
+					//console.log('RRRRRRRRRRR' +JSON.stringify(result))
+					self.searcharray.push(result);
+					if (i === (self.browseSources.length-1)){
+						console.log('end');
+						defer.resolve({
+							navigation: {
+								prev: {
+									uri: '/'
+								},
+								list: self.searcharray
+							}
+						});
+					}
+
+				})
+					.fail(function () {
+						console.log('Search error in Plugin: '+source.plugin_name);
+					});
+			};
+
+		}
+		*/
+		//console.log(JSON.stringify(searcharray));
+
+		//console.log(JSON.stringify(searchresult));
+
+	} else {
+
+	}
+	//console.log(JSON.stringify(searchresult));
+	return defer.promise;
+}
+
 
 // Helper functions ------------------------------------------------------------------------------------
 

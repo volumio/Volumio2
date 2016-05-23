@@ -1098,8 +1098,12 @@ ControllerMpd.prototype.search = function (query) {
 	var self = this;
 
 	var defer = libQ.defer();
-	var command = 'search any';
-	command += ' "' + query + '"';
+	var command = 'search ';
+	var type = 'any'
+	if (query.type){
+		type = query.type;
+	}
+	command += type+' "' + query.value + '"';
 	var cmd = libMpd.cmd;
 	var list = [];
 

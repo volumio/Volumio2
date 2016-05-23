@@ -514,20 +514,10 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('search', function (data) {
 				var selfConnWebSocket = this;
 
-				var query = data.value;
-
-				var response;
-
-				response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'search', query);
-
-				if (response != undefined) {
-					response.then(function (result) {
-							selfConnWebSocket.emit('pushBrowseLibrary', result);
-						})
-						.fail(function () {
-							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
-						});
-				}
+				var returnedData = self.musicLibrary.search(data);
+				returnedData.then(function (result) {
+					selfConnWebSocket.emit('pushBrowseLibrary', result);
+				});
 			});
 
 			connWebSocket.on('GetTrackInfo', function (data) {

@@ -255,6 +255,14 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function () {
 	return this.playlistFS.importServicePlaylists();
 };
 
+// Volumio Search
+CoreCommandRouter.prototype.volumioSearch = function (data) {
+	this.pushConsoleMessage('CoreCommandRouter::Search '+data);
+	var asd = this.musicLibrary.search(data);
+	console.log(asd)
+	return this.musicLibrary.search(data);
+};
+
 // Methods usually called by the State Machine --------------------------------------------------------------------
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
