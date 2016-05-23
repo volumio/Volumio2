@@ -671,6 +671,57 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
 }
 
 
+CoreMusicLibrary.prototype.search = function(data) {
+	var self = this;
+
+	var query = {};
+	var defer = libQ.defer();
+	var searcharray = [];
+	if (data.value) {
+		if (data.type) {
+			query = {"value": data.value, "type": data.type};
+		} else {
+			query = {"value": data.value};
+		}
+
+
+		for (var i = 0; i < self.browseSources.length; i++) {
+			var source=self.browseSources[i];
+
+			var response;
+
+			response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+
+			if (response != undefined) {
+				response.then(function (result) {
+					console.log(i);
+					//console.log('RRRRRRRRRRR' +JSON.stringify(result))
+					searcharray = searcharray.concat(result);
+					//console.log(searcharray);
+				})
+					//TODO FIX WITH MORE PLUGINS
+				.then(function (result) {
+						defer.resolve({
+							navigation: {
+								prev: {
+									uri: '/'
+								},
+								list: searcharray
+							}
+						});
+
+				})
+					.fail(function () {
+						console.log('Search error in Plugin: '+source.plugin_name);
+					});
+			};
+		}
+	} else {
+
+	}
+	return defer.promise;
+}
+
 
 // Helper functions ------------------------------------------------------------------------------------
 
