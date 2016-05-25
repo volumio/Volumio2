@@ -30,7 +30,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
     this.config = new (require('v-conf'))();
     this.config.loadFile(configFile);
 
-    var uuid = config.get('uuid');
+    var uuid = this.config.get('uuid');
     if (uuid == undefined) {
         console.log("No id defined. Creating one");
         var uuid = require('node-uuid');
