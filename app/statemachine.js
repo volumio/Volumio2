@@ -120,6 +120,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		this.updateTrackBlock();
 		return this.serviceStop();
 	}
+    else return libQ.resolve();
 };
 
 // Volumio Pause Command
@@ -584,6 +585,8 @@ CoreStateMachine.prototype.play = function (index) {
             thisPlugin.resume();
         }
 
+        this.pushState().fail(this.pushError.bind(this));
+
     }
 };
 
@@ -722,6 +725,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
         this.stopPlaybackTimer();
         return this.serviceStop();
     }
+    else return libQ.resolve();
 };
 
 // Stop the current track block playback
