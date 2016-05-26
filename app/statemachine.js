@@ -457,7 +457,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                 if(this.currentRepeat!==undefined && this.currentRepeat===true)
                 {
                     this.currentPosition=0;
-                    this.play();
+                    this.play()
+                        .then(self.pushState.bind(self))
+                        .fail(this.pushError.bind(this));
 
                     this.commandRouter.logger.info("Repeating playlist ");
                 }
@@ -472,8 +474,11 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
             } else {
-                this.play();
+                this.play()
+                    .then(self.pushState.bind(self))
+                    .fail(this.pushError.bind(this));
             }
+
 
 
 		} else if (this.currentStatus === 'stop') {
@@ -487,12 +492,15 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			return this.stopPlaybackTimer();
 		}
 	}
-	/*else if (stateService.status === 'undefined') {
-	 stateService.status = 'stop';
-	 }
 
-	 return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
-	 */
+    this.pushState().fail(this.pushError.bind(this));
+
+    /*else if (stateService.status === 'undefined') {
+     stateService.status = 'stop';
+     }
+
+     return libQ.reject('Error: \"' + sService + '\" state \"' + stateService.status + '\" not recognized when Volumio state is \"' + self.currentStatus + '\"');
+     */
 };
 
 CoreStateMachine.prototype.checkFavourites = function (state) {
@@ -561,11 +569,12 @@ CoreStateMachine.prototype.play = function (index) {
 
     if(index!==undefined)
     {
-        this.stop();
-        setTimeout(function() {
-            self.currentPosition=index;
-            self.play();
-        },500);
+       return this.stop()
+            .then(function(e)
+            {
+                self.currentPosition=index;
+                return self.play();
+            });
     }
     else
     {
@@ -577,6 +586,7 @@ CoreStateMachine.prototype.play = function (index) {
             //queuing
             this.currentSeek=0;
             this.startPlaybackTimer();
+
             thisPlugin.clearAddPlayTrack(trackBlock);
         }
         else  if(this.currentStatus==='pause')
@@ -585,7 +595,7 @@ CoreStateMachine.prototype.play = function (index) {
             thisPlugin.resume();
         }
 
-        this.pushState().fail(this.pushError.bind(this));
+        return libQ.resolve();
 
     }
 };

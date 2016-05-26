@@ -110,7 +110,6 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addPlay', function (data) {
                 self.commandRouter.addQueueItems(data)
                     .then(function(e){
-                        self.logger.info("PUTTING IN PLAY ITEM AT INDEX "+e.firstItemIndex);
                         return self.commandRouter.volumioPlay(e.firstItemIndex);
                     });
 /*

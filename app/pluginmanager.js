@@ -220,8 +220,6 @@ PluginManager.prototype.startPlugin = function (category, name) {
 
 	var plugin = self.getPlugin(category, name);
 
-    self.logger.info("STARTING PLUGIN "+name+"    "+plugin);
-
     if(plugin!==undefined)
     {
         if(plugin.onStart!==undefined)
@@ -232,7 +230,11 @@ PluginManager.prototype.startPlugin = function (category, name) {
                 defer.resolve();
             });
         }
-        else defer.resolve();
+        else
+        {
+            self.config.set(category + '.' + name + '.status', "STARTED");
+            defer.resolve();
+        }
 
     } else defer.resolve();
 

@@ -26,9 +26,7 @@ CorePlayQueue.prototype.getQueue = function () {
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
-    this.commandRouter.pushConsoleMessage('----------> '+nStartIndex);
-
-
+    
 	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
 	var nToCheck = this.arrayQueue.length - 1;
@@ -119,6 +117,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
                 self.arrayQueue = self.arrayQueue.concat(content[j]);
             }
 
+            self.commandRouter.logger.info("Adding item to queue: "+JSON.stringify(content[j]));
             self.commandRouter.volumioPushQueue(self.arrayQueue);
         })
         .then(function(){
@@ -148,8 +147,6 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 CorePlayQueue.prototype.getTrack = function (index) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrack '+index);
 
-    this.commandRouter.logger.info(JSON.stringify(index));
-    
     if(this.arrayQueue.length>index)
     {
         return this.arrayQueue[index];
