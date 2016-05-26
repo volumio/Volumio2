@@ -1020,9 +1020,13 @@ PluginManager.prototype.getAvailablePlugins = function () {
             });
 
             res.on('end', function(){
-                var response = JSON.parse(body);
-                pushAvailablePlugins(response);
 
+                try {
+                    var response = JSON.parse(body);
+                    pushAvailablePlugins(response);
+                } catch (e) {
+                    self.logger.info("Error Parsing Plugins JSON");
+                }
             });
             }).on('error', function(e){
                 self.logger.info("Cannot download Available plugins list: "+e);
@@ -1034,8 +1038,12 @@ PluginManager.prototype.getAvailablePlugins = function () {
                 });
 
                 res.on('end', function () {
-                    var response = JSON.parse(body);
-                    pushAvailablePlugins(response);
+                    try {
+                        var response = JSON.parse(body);
+                        pushAvailablePlugins(response);
+                    } catch (e) {
+                        self.logger.info("Error Parsing Plugins JSON");
+                    }
                 });
             }
     }).on('error', function(e){
@@ -1084,9 +1092,12 @@ PluginManager.prototype.getPluginDetails = function (data) {
                 });
 
                 res.on('end', function () {
-                    var response = JSON.parse(body);
-                    searchDetails(response);
-
+                    try {
+                        var response = JSON.parse(body);
+                        searchDetails(response);
+                    } catch (e) {
+                        self.logger.info("Error Parsing Plugins JSON");
+                    }
                 });
             }).on('error', function (e) {
                 self.logger.info("Cannot download Available plugins list: " + e);
@@ -1097,8 +1108,12 @@ PluginManager.prototype.getPluginDetails = function (data) {
             });
 
             res.on('end', function () {
-                var response = JSON.parse(body);
-                searchDetails(response);
+                try {
+                    var response = JSON.parse(body);
+                    searchDetails(response);
+                } catch (e) {
+                    self.logger.info("Error Parsing Plugins JSON");
+                }
             });
         }
     }).on('error', function (e) {
