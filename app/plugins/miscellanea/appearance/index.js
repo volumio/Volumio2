@@ -3,7 +3,8 @@
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var libQ = require('kew');
-var sharp = require('sharp');
+var path = require('path');
+var lwip = require('lwip');
 
 var backgroundPath = '/data/backgrounds';
 
@@ -172,13 +173,15 @@ volumioAppearance.prototype.generateThumbnails = function(){
         }
         files.forEach(function(f) {
             if (!fs.existsSync(backgroundPath+'/thumbnail-'+f)) {
-                sharp(backgroundPath+'/'+f)
-                    .resize(300, 200)
-                    .toFile(backgroundPath+'/thumbnail-'+f, function(err) {
-                        if (err){
-                            console.log(err);
-                        }
+                lwip.open(backgroundPath+'/'+f, function(err, image) {
+                    if (err) return console.log(err);
+                    image.resize(300, 200 , function(err, imageres) {
+                        if (err) return console.log(err);
+                    imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
+                        if (err) return console.log(err);
                     });
+                });
+                });
             }
         });
         defer.resolve('Ok');
