@@ -33,7 +33,7 @@
     "morgan": "^1.7.0",
     "mpd": "^1.3.0",
     "musicbrainz": "^0.2.6",
-    "musicmetadata": "2.0.2",
+    "musicmetadata": "2.0.4",
     "njstrace": "0.0.2",
     "node-schedule": "1.1.0",
     "node-uuid": "^1.4.7",
