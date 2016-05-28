@@ -1452,7 +1452,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
                 self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
 
-                if(result[j].uri!=undefined)
+                if(result!==undefined && result[j].uri!==undefined)
                 {
                     response.push({
                         uri: self.fromPathToUri(result[j].uri),
@@ -1473,9 +1473,10 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             }
 
             defer.resolve(response);
-        }).fail(function()
+        }).fail(function(err)
     {
-        defer.resolve({});
+        self.commandRouter.logger.info("explodeURI: ERROR "+err);
+        defer.resolve([]);
     });
 
     return defer.promise;
