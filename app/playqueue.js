@@ -1,17 +1,32 @@
 'use strict';
 
 var libQ = require('kew');
+var fs = require('fs-extra');
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
 function CorePlayQueue(commandRouter, stateMachine) {
-	this.commandRouter = commandRouter;
+	var self=this;
+
+    this.commandRouter = commandRouter;
 	this.stateMachine = stateMachine;
 	this.arrayQueue = [];
 
     this.defaultSampleRate='';
     this.defaultBitdepth=0;
     this.defaultChannels=0;
+    
+    //trying to read play queue from file
+    fs.readJson('/data/queue', function (err, queue) {
+        if(err)
+            self.commandRouter.logger.info("Cannot read play queue form file");
+        else
+        {
+            self.commandRouter.logger.info("Reloading queue from file");
+            self.commandRouter.logger.info(queue);
+            self.arrayQueue=queue;
+        }
+    })
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -49,7 +64,9 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem');
 	this.arrayQueue.splice(nIndex, 1);
-	return this.commandRouter.volumioPushQueue(this.arrayQueue);
+    this.saveQueue();
+
+    return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
 // Add one item to the queue
@@ -117,6 +134,8 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
                 self.arrayQueue = self.arrayQueue.concat(content[j]);
             }
 
+            self.saveQueue();
+
             self.commandRouter.logger.info("Adding item to queue: "+JSON.stringify(content[j]));
             self.commandRouter.volumioPushQueue(self.arrayQueue);
         })
@@ -124,8 +143,8 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             self.stateMachine.updateTrackBlock();
             defer.resolve({firstItemIndex:firstItemIndex});
         }).fail(function (e) {
-        defer.reject(new Error());
-        self.commandRouter.logger.info("An error occurred while exploding URI");
+        defer.reject(new Error(e));
+        self.commandRouter.logger.info("An error occurred while exploding URI: "+e);
     });
     return defer.promise;
 };
@@ -134,6 +153,8 @@ CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearAddPlayQueue');
     this.arrayQueue = [];
     this.arrayQueue = this.arrayQueue.concat(arrayItems);
+    this.saveQueue();
+
     this.commandRouter.serviceClearAddPlayTracks(arrayItems,arrayItems[0].service);
     return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
@@ -141,6 +162,7 @@ CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
 CorePlayQueue.prototype.clearPlayQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
 	this.arrayQueue = [];
+    this.saveQueue();
 	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
@@ -166,7 +188,15 @@ CorePlayQueue.prototype.moveQueueItem = function (from,to) {
 };
 
 
+CorePlayQueue.prototype.saveQueue = function () {
+    var self=this;
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::saveQueue');
 
+    fs.writeJson('/data/queue', self.arrayQueue, function (err) {
+        if(err)
+            self.commandRouter.logger.info("An error occurred saving queue to disk: "+err);
+    });
+};
 /*CorePlayQueue.prototype.clearMpdQueue = function () {
 	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');
 };*/
