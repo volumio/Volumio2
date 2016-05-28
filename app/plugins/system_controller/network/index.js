@@ -291,7 +291,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 			self.logger.info('Permissions for /etc/network/interfaces set')
 
 	try {
-		var ws = fs.createOutputStream('/etc/network/interfaces');
+		var ws = fs.createWriteStream('/etc/network/interfaces');
 
 		ws.cork();
 		ws.write('auto wlan0\n');
