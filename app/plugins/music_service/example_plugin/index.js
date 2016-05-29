@@ -1,5 +1,5 @@
 'use strict';
-
+var libQ = require('kew');
 module.exports = ExamplePlugin;
 
 function ExamplePlugin(context) {
