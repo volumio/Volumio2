@@ -37,8 +37,8 @@ function CoreCommandRouter(server) {
 
 	// Start plugins
 	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
-    this.pluginManager.checkIndex();
-    this.pluginManager.pluginFolderCleanup();
+	this.pluginManager.checkIndex();
+	this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
 	this.pluginManager.startPlugins();
 
@@ -138,8 +138,8 @@ CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
 CoreCommandRouter.prototype.volumioUpdateVolumeSettings = function (vol) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateVolumeSettings');
 	if (this.volumeControl){
-	return this.volumeControl.updateVolumeSettings(vol);
-	} 
+		return this.volumeControl.updateVolumeSettings(vol);
+	}
 };
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
@@ -216,13 +216,13 @@ CoreCommandRouter.prototype.volumioAddToBrowseSources = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioRemoveToBrowseSources = function (data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioRemoveToBrowseSources' + data);
-    return this.musicLibrary.removeBrowseSource(data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioRemoveToBrowseSources' + data);
+	return this.musicLibrary.removeBrowseSource(data);
 };
 
 CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
-    return this.musicLibrary.updateBrowseSources(name,data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
+	return this.musicLibrary.updateBrowseSources(name,data);
 };
 // Volumio Get Playlist Index
 CoreCommandRouter.prototype.volumioGetPlaylistIndex = function (sUid) {
@@ -324,14 +324,14 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 CoreCommandRouter.prototype.serviceResume = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
 
-    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 
-    var state=this.stateMachine.getState();
+	var state=this.stateMachine.getState();
 
-    if(state==='stop')
-    {
-        thisPlugin.clearAddPlayTracks();
-    }
+	if(state==='stop')
+	{
+		thisPlugin.clearAddPlayTracks();
+	}
 
 	return thisPlugin.resume();
 };
@@ -363,7 +363,7 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
 
-    this.pushConsoleMessage(JSON.stringify(arrayItems));
+	this.pushConsoleMessage(JSON.stringify(arrayItems));
 	return this.stateMachine.addQueueItems(arrayItems);
 };
 
@@ -406,9 +406,9 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
 
-    var thisPlugin = this.pluginManager.getPlugin(type, name);
+	var thisPlugin = this.pluginManager.getPlugin(type, name);
 
-    return thisPlugin.getUIConfig(data);
+	return thisPlugin.getUIConfig(data);
 };
 
 /* what is this?
@@ -536,19 +536,19 @@ CoreCommandRouter.prototype.fileUpdate = function () {
 //------------------------- Multiservice queue methods -----------------------------------
 
 CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
-    this.logger.info("Exploding uri "+uri+" in service "+service);
+	this.logger.info("Exploding uri "+uri+" in service "+service);
 
-    var thisPlugin = this.pluginManager.getPlugin('music_service', service);
-    if(thisPlugin.explodeUri !=undefined)
-        return  thisPlugin.explodeUri(uri);
-    else {
-        var promise=libQ.defer();
-        promise.resolve({
-                        uri: uri,
-                        service: service
-                        });
-        return promise.promise;
-    }
+	var thisPlugin = this.pluginManager.getPlugin('music_service', service);
+	if(thisPlugin.explodeUri !=undefined)
+		return  thisPlugin.explodeUri(uri);
+	else {
+		var promise=libQ.defer();
+		promise.resolve({
+			uri: uri,
+			service: service
+		});
+		return promise.promise;
+	}
 };
 
 
@@ -561,105 +561,105 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
 
 // Volumio Play
 CoreCommandRouter.prototype.volumioPlay = function (N) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
-    if(N===undefined)
-        return this.stateMachine.play();
-    else 
-    {
-        return this.stateMachine.play(N);
-    }
+	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
+	if(N===undefined)
+		return this.stateMachine.play();
+	else
+	{
+		return this.stateMachine.play(N);
+	}
 };
 
 
 // Volumio Play
 CoreCommandRouter.prototype.volumioSeek = function (position) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
-    return this.stateMachine.seek(position);
+	this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
+	return this.stateMachine.seek(position);
 };
 
 CoreCommandRouter.prototype.installPlugin = function (uri) {
-    var self=this;
-    var defer=libQ.defer();
+	var self=this;
+	var defer=libQ.defer();
 
-    this.pluginManager.installPlugin(uri).then(function()
-    {
-        defer.resolve();
-    }).fail(function(e){
-        self.logger.info("Error: "+e);
-         defer.reject(new Error('Cannot install plugin. Error: '+e));
-    });
+	this.pluginManager.installPlugin(uri).then(function()
+	{
+		defer.resolve();
+	}).fail(function(e){
+		self.logger.info("Error: "+e);
+		defer.reject(new Error('Cannot install plugin. Error: '+e));
+	});
 
-    return defer.promise;
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.unInstallPlugin = function (data) {
-    var self = this;
+	var self = this;
 	var defer=libQ.defer();
 
 	self.logger.info('Starting Uninstall of plugin ' + data.category + ' - ' +data.name);
 
-    this.pluginManager.unInstallPlugin(data.category,data.name).then(function()
-    {
-        defer.resolve();
-    }).fail(function(){
-        defer.reject(new Error('Cannot uninstall plugin'));
-    });
+	this.pluginManager.unInstallPlugin(data.category,data.name).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot uninstall plugin'));
+	});
 
-    return defer.promise;
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.enablePlugin = function (data) {
-    var defer=libQ.defer();
+	var defer=libQ.defer();
 
-    this.pluginManager.enablePlugin(data.category,data.plugin).then(function()
-    {
-        defer.resolve();
-    }).fail(function(){
-        defer.reject(new Error('Cannot enable plugin'));
-    });
+	this.pluginManager.enablePlugin(data.category,data.plugin).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot enable plugin'));
+	});
 
-    return defer.promise;
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.disablePlugin = function (data) {
-    var defer=libQ.defer();
+	var defer=libQ.defer();
 
-    this.pluginManager.disablePlugin(data.category,data.plugin).then(function()
-    {
-        defer.resolve();
-    }).fail(function(){
-        defer.reject(new Error('Cannot disable plugin'));
-    });
+	this.pluginManager.disablePlugin(data.category,data.plugin).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot disable plugin'));
+	});
 
-    return defer.promise;
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.modifyPluginStatus = function (data) {
-    var defer=libQ.defer();
+	var defer=libQ.defer();
 
-    this.pluginManager.modifyPluginStatus(data.category,data.plugin,data.status).then(function()
-    {
-        defer.resolve();
-    }).fail(function(){
-        defer.reject(new Error('Cannot update plugin status'));
-    });
+	this.pluginManager.modifyPluginStatus(data.category,data.plugin,data.status).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot update plugin status'));
+	});
 
-    return defer.promise;
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.broadcastMessage = function (emit,payload) {
-    var self = this;
-    return libQ.all(
-        libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
-            var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-            if (typeof thisInterface.broadcastMessage === "function")
-                return thisInterface.broadcastMessage(emit,payload);
-        })
-    );
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			if (typeof thisInterface.broadcastMessage === "function")
+				return thisInterface.broadcastMessage(emit,payload);
+		})
+	);
 };
 
 CoreCommandRouter.prototype.getInstalledPlugins = function () {
-    return this.pluginManager.getInstalledPlugins();
+	return this.pluginManager.getInstalledPlugins();
 };
 
 CoreCommandRouter.prototype.getAvailablePlugins = function () {
@@ -673,45 +673,44 @@ CoreCommandRouter.prototype.getPluginDetails = function (data) {
 
 
 CoreCommandRouter.prototype.enableAndStartPlugin = function (category,name) {
-    return this.pluginManager.enableAndStartPlugin(category,name);
+	return this.pluginManager.enableAndStartPlugin(category,name);
 };
 
 
 CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
-    return this.pluginManager.disableAndStopPlugin(category,name);
+	return this.pluginManager.disableAndStopPlugin(category,name);
 };
 
 
 CoreCommandRouter.prototype.volumioRandom = function (data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
-    return this.stateMachine.setRandom(data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+	return this.stateMachine.setRandom(data);
 };
 
 CoreCommandRouter.prototype.volumioRepeat = function (data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
-    return this.stateMachine.setRepeat(data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+	return this.stateMachine.setRepeat(data);
 };
 
 CoreCommandRouter.prototype.volumioConsume = function (data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioConsume');
-    return this.stateMachine.setConsume(data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');
+	return this.stateMachine.setConsume(data);
 };
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
-   
-    var queueArray=this.stateMachine.getQueue();
-    this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
-    
+	this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
+
+	var queueArray=this.stateMachine.getQueue();
+	this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+
 };
 
 
 CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
+	this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
 
-    return this.stateMachine.moveQueueItem(from,to);
+	return this.stateMachine.moveQueueItem(from,to);
 };
-
 
 
 
