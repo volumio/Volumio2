@@ -526,8 +526,8 @@ CoreCommandRouter.prototype.startupSound = function () {
 	this.platformspecific.startupSound();
 };
 
-CoreCommandRouter.prototype.fileUpdate = function () {
-	this.platformspecific.fileUpdate();
+CoreCommandRouter.prototype.fileUpdate = function (data) {
+	this.platformspecific.fileUpdate(data);
 }
 
 

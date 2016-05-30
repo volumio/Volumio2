@@ -2,6 +2,8 @@
 
 var exec = require('child_process').exec;
 
+var dbUpdateState = false;
+
 module.exports = PlatformSpecific;
 function PlatformSpecific(coreCommand) {
 	var self = this;
@@ -67,8 +69,10 @@ PlatformSpecific.prototype.startupSound = function () {
 	});
 }
 
-PlatformSpecific.prototype.fileUpdate = function () {
+PlatformSpecific.prototype.fileUpdate = function (data) {
 	var self = this;
+	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update'+data);
 
-	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update');
+	return self.coreCommand.broadcastMessage('dbUpdate', {'status':data});
+
 }

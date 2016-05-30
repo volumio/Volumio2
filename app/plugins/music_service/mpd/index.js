@@ -604,8 +604,19 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 	//Notify that The mpd DB has changed
 	self.clientMpd.on('system-database', function () {
-		self.commandRouter.fileUpdate();
-		return self.reportUpdatedLibrary();
+		//return self.commandRouter.fileUpdate();
+		//return self.reportUpdatedLibrary();
+	});
+
+	var updatedb = false;
+	self.clientMpd.on('system-update', function () {
+		if (updatedb){
+			updatedb = false;
+		} else {
+			updatedb = false;
+		}
+		return self.commandRouter.fileUpdate(updatedb);
+		//return self.reportUpdatedLibrary();
 	});
 };
 
@@ -1276,7 +1287,7 @@ ControllerMpd.prototype.reportUpdatedLibrary = function () {
 	var self = this;
 	// TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::DB Update Finished');
-	return self.commandRouter.pushToastMessage('Success', 'ASF', ' Added');
+	//return self.commandRouter.pushToastMessage('Success', 'ASF', ' Added');
 };
 
 ControllerMpd.prototype.getConfigurationFiles = function () {
