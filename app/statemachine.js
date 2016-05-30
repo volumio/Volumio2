@@ -39,6 +39,7 @@ CoreStateMachine.prototype.getState = function () {
             service: 'mpd',
             random:this.currentRandom,
             repeat: this.currentRepeat,
+            updatedb: this.currentUpdate,
             consume: this.currentConsume
         };
     }
@@ -63,6 +64,7 @@ CoreStateMachine.prototype.getState = function () {
             volume: this.currentVolume,
             mute: this.currentMute,
             stream: trackBlock.trackType,
+            updatedb: this.currentUpdate,
             service: trackBlock.service
         };
     }
@@ -197,6 +199,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentRepeat = null;
 			self.currentVolume = null;
 			self.currentMute = null;
+            self.currentUpdate = false;
 			return self.getcurrentVolume();
 		});
 };
@@ -297,6 +300,7 @@ CoreStateMachine.prototype.pushEmptyState = function () {
         volume: this.currentVolume,
         random:this.currentRandom,
         repeat: this.currentRepeat,
+        updatedb: this.currentUpdate,
         consume: this.currentConsume
     };
     var self = this;
@@ -347,6 +351,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	} else {
 		this.uri = '/' + stateService.uri;
 	}
+    this.currentUpdate = stateService.updatedb;
 
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   stateService '+stateService.status);
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   currentStatus '+this.currentStatus);

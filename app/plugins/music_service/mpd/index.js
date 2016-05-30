@@ -426,6 +426,7 @@ ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 // Parse MPD's text status into a Volumio recognizable status object
 ControllerMpd.prototype.parseState = function (objState) {
 	var self = this;
+	//console.log(objState);
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseState');
 
@@ -485,6 +486,10 @@ ControllerMpd.prototype.parseState = function (objState) {
 		sStatus = objState.state;
 	}
 
+	var updatedb = false;
+	if ('updating_db' in objState) {
+		updatedb = true;
+	}
 
 	return {
 		status: sStatus,
@@ -495,6 +500,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 		bitdepth: nBitDepth,
 		channels: nChannels,
 		random: random,
+		updatedb: updatedb,
 		repeat: repeat
 	};
 };
@@ -608,15 +614,15 @@ ControllerMpd.prototype.mpdEstablish = function () {
 		//return self.reportUpdatedLibrary();
 	});
 
-	var updatedb = false;
+
 	self.clientMpd.on('system-update', function () {
-		if (updatedb){
-			updatedb = false;
-		} else {
-			updatedb = false;
-		}
-		return self.commandRouter.fileUpdate(updatedb);
-		//return self.reportUpdatedLibrary();
+		
+		 self.sendMpdCommand('status', [])
+			.then(function (objState) {
+				var state = self.parseState(objState);
+
+				return self.commandRouter.fileUpdate(state.updatedb);
+			});
 	});
 };
 
