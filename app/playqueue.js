@@ -23,7 +23,7 @@ function CorePlayQueue(commandRouter, stateMachine) {
         else
         {
             self.commandRouter.logger.info("Reloading queue from file");
-            self.commandRouter.logger.info(queue);
+            //self.commandRouter.logger.info(queue);
             self.arrayQueue=queue;
         }
     })
