@@ -190,3 +190,13 @@ UpnpInterface.prototype.startUpmpdcli = function() {
 		});
 	}
 }
+
+UpnpInterface.prototype.startUpnpPlayback = function () {
+    var self = this;
+    
+};
+
+UpnpInterface.prototype.stopUpnpPlayback = function () {
+    var self = this;
+    
+};
