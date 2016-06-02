@@ -1,5 +1,6 @@
 {"devices":[
   {"name":"Raspberry PI 2/3", "cpuid":"BCM2709"},
   {"name":"Raspberry PI", "cpuid":"BCM2708"},
-  {"name":"Odroid-C1", "cpuid":"ODROIDC"}
+  {"name":"Odroid-C", "cpuid":"ODROIDC"},
+  {"name":"Odroid-C2", "cpuid":"ODROID-C2"}
 ]}
