@@ -5,7 +5,7 @@ var socket= io.connect('http://localhost:3000');
 
 var data={
     "endpoint":"audio_interface/upnp",
-    "method":"startUpnpPlayback",
+    "method":"stopUpnpPlayback",
     "data": {}
 };
 

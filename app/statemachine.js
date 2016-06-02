@@ -5,7 +5,7 @@ var libQ = require('kew');
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
 function CoreStateMachine(commandRouter) {
-    this.unmanagedMode=true;
+    this.unmanagedMode=false;
 
     this.commandRouter = commandRouter;
 
@@ -21,54 +21,81 @@ function CoreStateMachine(commandRouter) {
 CoreStateMachine.prototype.getState = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
 
-    var trackBlock = this.getTrack(this.currentPosition);
-    if(trackBlock===undefined)
+    if(this.unmanagedMode===true)
     {
-        return {
-            status: 'stop',
-            position: 0,
-            title: '',
-            artist: '',
-            album: '',
-            albumart: '/albumart',
-            duration:0,
-            uri: '',
-            seek: 0,
-            samplerate: '',
-            channels: '',
-            bitdepth: 0,
-            Streaming: false,
-            service: 'mpd',
-            random:this.currentRandom,
-            repeat: this.currentRepeat,
-            updatedb: this.currentUpdate,
-            consume: this.currentConsume
-        };
-    }
-    else {
-        return {
+        var unmanagedStatus={
             status: this.currentStatus,
             position: this.currentPosition,
-            title: trackBlock.name,
-            artist: trackBlock.artist,
-            album: trackBlock.album,
-            albumart: trackBlock.albumart,
-            uri: trackBlock.uri,
-            trackType: trackBlock.trackType,
+            title: this.currentTitle,
+            artist: this.currentArtist,
+            album: this.currentAlbum,
+            albumart: this.currentAlbumart,
+            uri: this.currentUri,
+            trackType: this.currentTracktype,
             seek: this.currentSeek,
-            duration: trackBlock.duration,
-            samplerate: trackBlock.samplerate,
-            bitdepth: trackBlock.bitdepth,
-            channels: trackBlock.channels,
-            random: this.currentRandom,
-            repeat: this.currentRepeat,
-            consume: this.currentConsume,
-            volume: this.currentVolume,
-            mute: this.currentMute,
-            stream: trackBlock.trackType,
-            updatedb: this.currentUpdate,
-            service: trackBlock.service
+            duration: this.currentDuration,
+            samplerate: this.currentSamplerate,
+            bitdepth: this.currentBitdepth,
+            channels: this.currentChannels,
+            service: this.currentService,
+            volume: this.currentVolume
         };
+
+        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::UNMANAGED STATUS   '+JSON.stringify(unmanagedStatus));
+
+
+        return unmanagedStatus;
+    }
+    else {
+        var trackBlock = this.getTrack(this.currentPosition);
+        if(trackBlock===undefined )
+        {
+            return {
+                status: 'stop',
+                position: 0,
+                title: '',
+                artist: '',
+                album: '',
+                albumart: '/albumart',
+                duration:0,
+                uri: '',
+                seek: 0,
+                samplerate: '',
+                channels: '',
+                bitdepth: 0,
+                Streaming: false,
+                service: 'mpd',
+                random:this.currentRandom,
+                repeat: this.currentRepeat,
+                updatedb: this.currentUpdate,
+                consume: this.currentConsume
+            };
+        }
+        else {
+            return {
+                status: this.currentStatus,
+                position: this.currentPosition,
+                title: trackBlock.name,
+                artist: trackBlock.artist,
+                album: trackBlock.album,
+                albumart: trackBlock.albumart,
+                uri: trackBlock.uri,
+                trackType: trackBlock.trackType,
+                seek: this.currentSeek,
+                duration: trackBlock.duration,
+                samplerate: trackBlock.samplerate,
+                bitdepth: trackBlock.bitdepth,
+                channels: trackBlock.channels,
+                random: this.currentRandom,
+                repeat: this.currentRepeat,
+                consume: this.currentConsume,
+                volume: this.currentVolume,
+                mute: this.currentMute,
+                stream: trackBlock.trackType,
+                updatedb: this.currentUpdate,
+                service: trackBlock.service
+            };
+        }
     }
 };
 
@@ -334,25 +361,20 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
         //pushing state update
         this.commandRouter.logger.info("UNMANAGED STATE SERVICE "+JSON.stringify(stateService));
 
-        var unmanagedStatus={
-            status: stateService.status,
-            position: stateService.position,
-            title: stateService.title,
-            artist: stateService.artist,
-            album: stateService.album,
-            albumart: stateService.albumart,
-            uri: stateService.uri,
-            trackType: stateService.tracktype,
-            seek: stateService.seek,
-            duration: stateService.duration,
-            samplerate: stateService.samplerate,
-            bitdepth: stateService.bitdepth,
-            channels: stateService.channels,
-            service: stateService.service
-        };
+        this.currentStatus = stateService.status;
+        this.currentSeek = stateService.seek;
+        this.currentDuration = stateService.duration;
+        this.currentTrackType = stateService.tracktype;
+        this.currentTitle = stateService.title;
+        this.currentArtist = stateService.artist;
+        this.currentAlbum = stateService.album;
+        this.currentUri = stateService.uri;
+        this.currentAlbumArt = stateService.albumart;
+        this.currentSampleRate = stateService.samplerate;
+        this.currentBitDepth = stateService.bitdepth;
+        this.currentChannels = stateService.channels;
 
-        this.commandRouter.volumioPushState(unmanagedStatus);
-        return;
+        return this.pushState().fail(this.pushError.bind(this));
     }
 
 
@@ -509,7 +531,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
             } else {
                 this.play()
-                    .then(self.pushState.bind(self))
+                    .then(this.pushState.bind(this))
                     .fail(this.pushError.bind(this));
             }
 
@@ -839,7 +861,23 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
 CoreStateMachine.prototype.setUnmanagedMode = function (value) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setUnmanagedMode '+value);
 
-    self.unmanagedMode=value;
+    var defer;
 
-    return libQ.resolve();
+    if(value===false && this.unmanagedMode===true)
+    {
+        // shall stop MPD
+        var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+        defer= mpdPlugin.stop();
+    }
+    else if(value===true && this.unmanagedMode===false)
+    {
+         defer= this.stopPlaybackTimer()
+            .then(this.updateTrackBlock.bind(this))
+            .then(this.serviceStop.bind(this));
+    }
+    else defer=libQ.resolve();
+
+    this.unmanagedMode=value;
+
+    return defer;
 };
