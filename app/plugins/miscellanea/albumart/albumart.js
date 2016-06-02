@@ -308,6 +308,10 @@ var processRequest = function (web, path) {
 		}
 
 	}
+    else
+    {
+        searchOnline(defer,web);
+    }
 	return defer.promise;
 };
 
