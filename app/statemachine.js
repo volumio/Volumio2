@@ -5,7 +5,9 @@ var libQ = require('kew');
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
 function CoreStateMachine(commandRouter) {
-	this.commandRouter = commandRouter;
+    this.unmanagedMode=true;
+
+    this.commandRouter = commandRouter;
 
     this.currentPosition=0;
     this.currentConsume=false;
@@ -327,6 +329,33 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 	//this.currentTrackBlock.service = sService;
 
+    if(this.unmanagedMode==true)
+    {
+        //pushing state update
+        this.commandRouter.logger.info("UNMANAGED STATE SERVICE "+JSON.stringify(stateService));
+
+        var unmanagedStatus={
+            status: stateService.status,
+            position: stateService.position,
+            title: stateService.title,
+            artist: stateService.artist,
+            album: stateService.album,
+            albumart: stateService.albumart,
+            uri: stateService.uri,
+            trackType: stateService.tracktype,
+            seek: stateService.seek,
+            duration: stateService.duration,
+            samplerate: stateService.samplerate,
+            bitdepth: stateService.bitdepth,
+            channels: stateService.channels,
+            service: stateService.service
+        };
+
+        this.commandRouter.volumioPushState(unmanagedStatus);
+        return;
+    }
+
+
     var trackBlock = this.getTrack(this.currentPosition);
     if(trackBlock!=undefined && trackBlock.service!==sService)
     {
@@ -565,6 +594,8 @@ CoreStateMachine.prototype.play = function (index) {
 
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
 
+    this.setUnmanagedMode(false);
+
     if(this.currentPosition ==null || this.currentPosition===undefined)
     {
         self.logger.info("CURRENT POSITION NOT SET, RESETTING TO 0");
@@ -609,6 +640,8 @@ CoreStateMachine.prototype.play = function (index) {
 CoreStateMachine.prototype.seek = function (position) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::seek');
 
+    this.setUnmanagedMode(false);
+
     var trackBlock = this.getTrack(this.currentPosition);
     if (trackBlock !== undefined) 
     {
@@ -630,55 +663,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
     var self=this;
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::next');
 
-   /* if (this.currentStatus === 'stop') {
-        // Stop -> Next transition
-        if(this.currentRandom!==undefined && this.currentRandom===true)
-        {
-            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
-            return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
-        }
-        else if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
-            this.currentPosition++;
-            this.currentSeek = 0;
-
-            return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
-        }
-
-    } else if (this.currentStatus === 'play') {
-        // Play -> Next transition
-        if(this.currentRandom!==undefined && this.currentRandom===true)
-        {
-            this.stop();
-            setTimeout(function() {
-                self.currentPosition=Math.floor(Math.random() * (self.playQueue.arrayQueue.length));
-                self.play();
-            },500);
-        }
-        else
-        if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
-
-            this.stop();
-            setTimeout(function() {
-                self.currentPosition++;
-                self.play();
-            },500);
-        }
-    } else if (this.currentStatus === 'pause') {
-        // Pause -> Next transitiom
-        if(this.currentRandom!==undefined && this.currentRandom===true)
-        {
-            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length  + 1));
-        }
-        else if (this.currentPosition < this.playQueue.arrayQueue.length - 1) {
-            this.currentPosition++;
-        }
-        this.play();
-        this.updateTrackBlock();
-        return this.serviceClearAddPlay();
-    }*/
-
-
-
+    self.setUnmanagedMode(false);
 
     this.stop()
         .then(function()
@@ -704,6 +689,8 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 CoreStateMachine.prototype.pause = function (promisedResponse) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pause');
 
+    this.setUnmanagedMode(false);
+
     if (this.currentStatus === 'play') {
         this.currentStatus = 'pause';
         this.stopPlaybackTimer();
@@ -722,6 +709,8 @@ CoreStateMachine.prototype.servicePause = function () {
 // Volumio Stop Command
 CoreStateMachine.prototype.stop = function (promisedResponse) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
+
+    this.setUnmanagedMode(false);
 
     if (this.currentStatus === 'play') {
         // Play -> Stop transition
@@ -755,6 +744,8 @@ CoreStateMachine.prototype.serviceStop = function () {
 // Volumio Previous Command
 CoreStateMachine.prototype.previous = function (promisedResponse) {
     var self=this;
+
+    self.setUnmanagedMode(false);
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::previous');
 
     if (this.currentStatus === 'stop') {
@@ -845,3 +836,10 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
     return this.playQueue.moveQueueItem(from,to);
 };
 
+CoreStateMachine.prototype.setUnmanagedMode = function (value) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setUnmanagedMode '+value);
+
+    self.unmanagedMode=value;
+
+    return libQ.resolve();
+};
