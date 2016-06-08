@@ -371,9 +371,13 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		resp.title = objTrackInfo.Title;
 	} else {
         var file = objTrackInfo.file;
-        var filetitle = file.replace(/^.*\/(?=[^\/]*$)/, '');
+        if(file!== undefined)
+        {
+            var filetitle = file.replace(/^.*\/(?=[^\/]*$)/, '');
 
-        resp.title = filetitle;
+            resp.title = filetitle;
+        }
+
 	}
 
 	if (objTrackInfo.Artist != undefined) {

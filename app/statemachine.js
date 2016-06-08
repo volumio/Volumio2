@@ -356,10 +356,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 	//this.currentTrackBlock.service = sService;
 
-    if(this.unmanagedMode==true)
-    {
+    if(this.unmanagedMode==true) {
         //pushing state update
-        this.commandRouter.logger.info("UNMANAGED STATE SERVICE "+JSON.stringify(stateService));
+        this.commandRouter.logger.info("UNMANAGED STATE SERVICE " + JSON.stringify(stateService));
 
         this.currentStatus = stateService.status;
         this.currentSeek = stateService.seek;
@@ -379,10 +378,20 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
     var trackBlock = this.getTrack(this.currentPosition);
-    if(trackBlock!=undefined && trackBlock.service!==sService)
+    if(this.consumeUpdateService!=sService)
     {
-        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.');
+        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification.');
         return;
+    }
+    else if(this.consumeUpdateService===undefined)
+    {
+
+        if(trackBlock!=undefined && trackBlock.service!==sService)
+        {
+            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.');
+            return;
+        }
+
     }
 
     this.timeLastServiceStateUpdate = Date.now();
@@ -425,6 +434,26 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             if(stateService.channels!==undefined)
             {
                 trackBlock.channels=stateService.channels;
+            }
+
+            if(stateService.title!==undefined)
+            {
+                trackBlock.name=stateService.title;
+            }
+
+            if(stateService.artist!==undefined)
+            {
+                trackBlock.artist=stateService.artist;
+            }
+
+            if(stateService.album!==undefined)
+            {
+                trackBlock.album=stateService.album;
+            }
+
+            if(stateService.albumart!==undefined)
+            {
+                trackBlock.albumart=stateService.albumart;
             }
 
 
@@ -504,6 +533,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
             this.currentStatus = 'stop';
+            this.consumeUpdateService=undefined;
 
             if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
@@ -881,3 +911,9 @@ CoreStateMachine.prototype.setUnmanagedMode = function (value) {
 
     return defer;
 };
+
+CoreStateMachine.prototype.setConsumeUpdateService = function (value) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setConsumeUpdateService '+value);
+
+    this.consumeUpdateService = value;
+}
