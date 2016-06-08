@@ -1,4 +1,4 @@
-
+#!/usr/local/bin/node
 var io=require('socket.io-client');
 
 var socket= io.connect('http://localhost:3000');
@@ -10,3 +10,4 @@ var data={
 };
 
 socket.emit('callMethod',data);
+process.exit()
