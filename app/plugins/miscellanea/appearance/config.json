@@ -1,6 +1,8 @@
 {
   "language":{"value":"english","type":"string"},
+  "background_type":{"value":"background","type":"string"},
   "background_title":{"value":"Default","type":"string"},
   "background_path":{"value":"default.png","type":"string"},
+  "background_color":{"value":"#000000","type":"string"},
   "theme":{"value":"default","type":"string"}
 }

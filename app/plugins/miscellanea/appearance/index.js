@@ -122,11 +122,17 @@ volumioAppearance.prototype.getUiSettings = function()
     var defer = libQ.defer();
 
     var language = config.get('language');
-    var background_title = config.get('background_title');
-    var background_path = config.get('background_path');
     var theme = config.get('theme');
+    var background_type = config.get('background_type');
 
-    var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme}
+    if (background_type === 'background') {
+        var background_title = config.get('background_title');
+        var background_path = config.get('background_path');
+        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme}
+    } else {
+        var background_color = config.get('background_color');
+        var UiSettings = {"color":background_color, "language":language, "theme":theme}
+    }
 
     defer.resolve(UiSettings);
     return defer.promise;
@@ -228,9 +234,15 @@ volumioAppearance.prototype.setBackgrounds = function(data)
     var self = this;
     var defer = libQ.defer();
 
-    config.set('background_title', data.name);
-    config.set('background_path', data.path);
-
+    if (data.color) {
+        config.set('background_type', 'color');
+        config.set('background_color', data.color);
+    } else {
+        config.set('background_type', 'background');
+        config.set('background_title', data.name);
+        config.set('background_path', data.path);
+    }
+    
     self.commandRouter.pushToastMessage('success',"Appearance",'New Background Applied');
 
     return ('Done');
