@@ -1022,7 +1022,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 
-                    self.logger.info("LINE "+line);
+                    //self.logger.info("LINE "+line);
 					if (line.indexOf('directory:') === 0) {
 						path = line.slice(11);
 						name = path.split('/').pop();

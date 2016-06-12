@@ -378,12 +378,14 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
     var trackBlock = this.getTrack(this.currentPosition);
-    if(this.consumeUpdateService!=sService)
-    {
-        this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification.');
-        return;
-    }
-    else if(this.consumeUpdateService===undefined)
+    if(this.consumeUpdateService){
+        if(this.consumeUpdateService!=sService)
+
+        {
+            this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification.');
+            return;
+        }
+    } else
     {
 
         if(trackBlock!=undefined && trackBlock.service!==sService)
