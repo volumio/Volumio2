@@ -171,20 +171,39 @@ volumioAppearance.prototype.generateThumbnails = function(){
         if (err) {
             console.log(err);
         }
+        //console.log(files)
+        //console.log('Found '+ files.length + ' images')
+        var numberfile = 0;
         files.forEach(function(f) {
-            if (!fs.existsSync(backgroundPath+'/thumbnail-'+f)) {
+            numberfile++;
+            if (f.indexOf("thumbnail-") >= 0) {
+            } else  {
+
+            //console.log('Processing file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
+            try {
+                fs.accessSync(backgroundPath+'/thumbnail-'+f, fs.F_OK);
+                //console.log('Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f+ ' exists');
+            } catch (e) {
+                console.log('Creating Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
                 lwip.open(backgroundPath+'/'+f, function(err, image) {
                     if (err) return console.log(err);
                     image.resize(300, 200 , function(err, imageres) {
                         if (err) return console.log(err);
-                    imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
-                        if (err) return console.log(err);
+                        imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
+                            if (err) return console.log(err);
+                        });
                     });
                 });
-                });
+            }
+
+
+            }
+            if (numberfile===files.length){
+                    //console.log('resolving')
+                defer.resolve('Ok');
             }
         });
-        defer.resolve('Ok');
+
     });
     return defer.promise;
 };

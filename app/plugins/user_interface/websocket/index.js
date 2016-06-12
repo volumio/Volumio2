@@ -1455,9 +1455,8 @@ function InterfaceWebUI(context) {
 					if (backgrounds != undefined) {
 						backgrounds.then(function (backgroundsdata) {
 							setTimeout(function () {
-								self.libSocketIO.sockets.emit('pushBackgrounds', backgroundsdata);
+							self.libSocketIO.sockets.emit('pushBackgrounds', backgroundsdata);
 							}, 1000)
-
 						});
 					}
 				}
