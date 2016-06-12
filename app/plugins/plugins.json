@@ -20,7 +20,7 @@
         "value": "STARTED"
       }
     },
-    "shoutcast": {
+    "webradio": {
       "enabled": {
         "type": "boolean",
         "value": true
