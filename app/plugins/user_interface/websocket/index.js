@@ -1454,7 +1454,10 @@ function InterfaceWebUI(context) {
 					var backgrounds=self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
 					if (backgrounds != undefined) {
 						backgrounds.then(function (backgroundsdata) {
-							self.libSocketIO.sockets.emit('pushBackgrounds', backgroundsdata);
+							setTimeout(function () {
+								self.libSocketIO.sockets.emit('pushBackgrounds', backgroundsdata);
+							}, 1000)
+
 						});
 					}
 				}
