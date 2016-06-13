@@ -1425,6 +1425,15 @@ function InterfaceWebUI(context) {
 						if (backgrounds != undefined) {
 							backgrounds.then(function (backgroundsdata) {
 								selfConnWebSocket.emit('pushBackgrounds', backgroundsdata);
+								var returnedData2 = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
+
+								if (returnedData2 != undefined) {
+									returnedData2.then(function (data2) {
+										selfConnWebSocket.emit('pushUiSettings', data2);
+									});
+								}
+
+
 							});
 						}
 				}
