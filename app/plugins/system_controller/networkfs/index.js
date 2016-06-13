@@ -644,6 +644,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	var defer = libQ.defer();
 	var sharesjson = {"nas":[]}
 	var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8' });
+	console.log(shares);
 	var allshares = shares.split("\n");
 	var num = allshares.length;
 	var progress = 0;
@@ -655,16 +656,17 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		var asd2 = asd.replace('\t\t\\\\','');
 		if (asd2.indexOf('\t\\\\') >= 0) {
 			var cleaned = asd.split(' ');
-			var final = cleaned[0].replace('\t\\\\','');
+			var final1 = cleaned[0].replace('\t\\\\','');
+			var final2 = final1.split('\t');
+			var final = final2[0];
 			sharesjson.nas.push({"name":final,"shares":[]});
 		} else  {
 			var clean2 = asd2.split(' ');
 			for (var e = 0; e < sharesjson.nas.length; e++) {
-				var name = sharesjson.nas[e].name;
-				if (asd2.indexOf(name) >= 0) {
+				if (asd2.indexOf(sharesjson.nas[e].name) >= 0) {
 					var sharenamearray = clean2[0].split("\\");
 					var sharename = sharenamearray[1];
-					if (sharename!='IPC$') {
+					if(sharename.indexOf('$') < 0) {
 						sharesjson.nas[e].shares.push({"sharename": sharename, "path": clean2[0].replace('\\', '/')});
 					}
 				}
