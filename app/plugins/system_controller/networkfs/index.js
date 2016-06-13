@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
 var libUUID = require('node-uuid');
@@ -636,3 +637,54 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 
 	return defer.promise;
 };
+
+ControllerNetworkfs.prototype.discoverShares = function () {
+	var self = this;
+
+	var defer = libQ.defer();
+	var sharesjson = {"nas":[]}
+	var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8' });
+	var allshares = shares.split("\n");
+	var num = allshares.length;
+	var progress = 0;
+
+
+	for (var i = 0; i < allshares.length; i++) {
+		progress++
+		var asd = allshares[i];
+		var asd2 = asd.replace('\t\t\\\\','');
+		if (asd2.indexOf('\t\\\\') >= 0) {
+			var cleaned = asd.split(' ');
+			var final = cleaned[0].replace('\t\\\\','');
+			sharesjson.nas.push({"name":final,"shares":[]});
+		} else  {
+			var clean2 = asd2.split(' ');
+			for (var e = 0; e < sharesjson.nas.length; e++) {
+				var name = sharesjson.nas[e].name;
+				if (asd2.indexOf(name) >= 0) {
+					var sharenamearray = clean2[0].split("\\");
+					var sharename = sharenamearray[1];
+					if (sharename!='IPC$') {
+						sharesjson.nas[e].shares.push({"sharename": sharename, "path": clean2[0].replace('\\', '/')});
+					}
+				}
+			}
+		}
+		if (progress === num) {
+			defer.resolve(sharesjson);
+		}
+	}
+
+
+	return defer.promise;
+};
+
+ControllerNetworkfs.prototype.shareCredentialCheck = function (data) {
+	var self = this;
+
+	//TODO FINISH
+
+	var sharename = config.get('NasMounts.' + shareid + '.name');
+
+	var shares = execSync("/bin/echo volumio | echo volumio | smbclient //DISKSTATION/flac", { uid: 1000, gid: 1000, encoding: 'utf8' });
+}

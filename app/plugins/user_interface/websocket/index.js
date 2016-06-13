@@ -1463,6 +1463,19 @@ function InterfaceWebUI(context) {
 				else self.logger.error("Cannot Regenerate Thumbnails");
 			});
 
+			connWebSocket.on('getNetworkSharesDiscovery', function () {
+				var selfConnWebSocket = this;
+
+				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'discoverShares', '');
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+							selfConnWebSocket.emit('pushNetworkSharesDiscovery', data);
+						});
+					}
+
+			});
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
