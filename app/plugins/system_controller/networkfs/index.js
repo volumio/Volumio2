@@ -667,7 +667,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 					var sharenamearray = clean2[0].split("\\");
 					var sharename = sharenamearray[1];
 					if(sharename.indexOf('$') < 0) {
-						sharesjson.nas[e].shares.push({"sharename": sharename, "path": clean2[0].replace('\\', '/')});
+						sharesjson.nas[e].shares.push({"sharename": sharename, "path": sharename});
 					}
 				}
 			}
