@@ -273,9 +273,15 @@ volumioAppearance.prototype.setLanguage = function(data)
         config.set('language', data.language.label);
         config.set('language_code', data.language.value);
     }
-
     self.commandRouter.pushToastMessage('success',"Appearance",'New Language Set');
 
+    var data = self.getUiSettings();
+
+    if (data != undefined) {
+        data.then(function (data) {
+            self.commandRouter.broadcastMessage('pushUiSettings', data);
+        });
+    }
     return ('Done');
 };
 
