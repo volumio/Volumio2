@@ -2,6 +2,37 @@
     "label": "Appearance"
   },
   "sections": [
+    {
+      "id": "language_selector",
+      "element": "section",
+      "label": "Language",
+      "icon": "fa-map-signs",
+      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setLanguage"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "language"
+        ]
+      },
+      "value":  {
+        "value": "0",
+        "label": "Unknown"
+      },
+      "content": [
+        {
+          "id": "language",
+          "element": "select",
+          "doc": "Select Language",
+          "label": "Language",
+          "value":  {
+            "value":0,
+            "label": "0"
+          },
+          "options": [
+          ]
+        }
+      ]
+    },
     {"coreSection": "ui-settings"}
   ]
 }

@@ -17,6 +17,7 @@ function volumioAppearance(context) {
     // Save a reference to the parent commandRouter
     self.context=context;
     self.commandRouter = self.context.coreCommand;
+    self.configManager = self.context.configManager;
 
     self.logger=self.context.logger;
 }
@@ -112,7 +113,22 @@ volumioAppearance.prototype.getUIConfig = function () {
     var self = this;
 
     var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
-    
+    var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
+    var language = config.get('language');
+    var language_code = config.get('language_code');
+
+
+    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+        value: language_code,
+        label: language
+    });
+    for (var n = 0; n < languagesdata.languages.length; n++){
+
+        self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+            value: languagesdata.languages[n].code,
+            label: languagesdata.languages[n].name
+        });
+    }
     return uiconf;
 };
 
@@ -121,7 +137,7 @@ volumioAppearance.prototype.getUiSettings = function()
     var self = this;
     var defer = libQ.defer();
 
-    var language = config.get('language');
+    var language = config.get('language_code');
     var theme = config.get('theme');
     var background_type = config.get('background_type');
 
@@ -244,6 +260,21 @@ volumioAppearance.prototype.setBackgrounds = function(data)
     }
     
     self.commandRouter.pushToastMessage('success',"Appearance",'New Background Applied');
+
+    return ('Done');
+};
+
+volumioAppearance.prototype.setLanguage = function(data)
+{
+    var self = this;
+    var defer = libQ.defer();
+
+    if (data.language) {
+        config.set('language', data.language.label);
+        config.set('language_code', data.language.value);
+    }
+
+    self.commandRouter.pushToastMessage('success',"Appearance",'New Language Set');
 
     return ('Done');
 };
