@@ -454,6 +454,8 @@ function InterfaceWebUI(context) {
 
 				var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
 				var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
+
+                self.logger.info("CALLMETHOD: "+category+" "+name+" "+dataJson.method+" "+dataJson.data);
 				var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
 				if (promise != undefined) {
 							connWebSocket.emit(promise.message, promise.payload);

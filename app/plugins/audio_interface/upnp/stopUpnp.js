@@ -10,4 +10,7 @@ var data={
 };
 
 socket.emit('callMethod',data);
-process.exit()
+setTimeout(function()
+{
+    process.exit();
+},2000);

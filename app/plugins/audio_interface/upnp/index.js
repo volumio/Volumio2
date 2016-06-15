@@ -193,14 +193,15 @@ UpnpInterface.prototype.startUpmpdcli = function() {
 
 UpnpInterface.prototype.startUpnpPlayback = function () {
     var self = this;
-    
-    this.commandRouter.stateMachine.setUnmanagedMode(true);
+
+    self.logger.info("Starting playback through UPNP");
+    this.commandRouter.stateMachine.setConsumeUpdateService('mpd');
     
 };
 
 UpnpInterface.prototype.stopUpnpPlayback = function () {
     var self = this;
 
-
-    this.commandRouter.stateMachine.setUnmanagedMode(false);
+    self.logger.info("Stopping playback through UPNP");
+    this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
 };
