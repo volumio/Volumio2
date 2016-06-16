@@ -16,7 +16,7 @@
     "cookie-parser": "^1.4.3",
     "cue-parser": "0.0.3",
     "ejs": "^2.4.2",
-    "express": "^4.13.4",
+    "express": "^4.14.0",
     "fast.js": "^0.1.1",
     "file-download": "^0.1.2",
     "fs-extra": "^0.30.0",
