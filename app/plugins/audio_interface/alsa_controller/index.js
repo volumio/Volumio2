@@ -315,7 +315,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.logger.info('Volume configurations have been set');
 
 
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The volume configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('configuration_update'),
+        self.getI18NString('configuration_update_description'));
 
 	defer.resolve({});
 	this.updateVolumeSettings();
@@ -556,4 +557,15 @@ ControllerAlsa.prototype.storeAlsaSettings  = function () {
 			self.logger.error('Alsa Settings successfully stored');
 		}
 	});
+}
+
+ControllerAlsa.prototype.loadI18NStrings = function (code) {
+    this.logger.info('ALSA-CONTROLLER I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=libFsExtra.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+ControllerAlsa.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
 }

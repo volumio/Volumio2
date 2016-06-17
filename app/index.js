@@ -25,6 +25,7 @@ function CoreCommandRouter(server) {
 
 	this.callbacks = [];
 	this.sharedVars = new vconf();
+    this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
 
 	this.logger.info("-------------------------------------------");
 	this.logger.info("-----            Volumio2              ----");
@@ -41,6 +42,8 @@ function CoreCommandRouter(server) {
 	this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
 	this.pluginManager.startPlugins();
+
+    this.loadI18nStrings();
 
 	// Start the state machine
 	this.stateMachine = new (require('./statemachine.js'))(this);
@@ -59,9 +62,6 @@ function CoreCommandRouter(server) {
 	this.pushConsoleMessage('BOOT COMPLETED');
 
 	this.startupSound();
-
-
-
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -711,6 +711,37 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 
 	return this.stateMachine.moveQueueItem(from,to);
 };
+
+CoreCommandRouter.prototype.getI18nString = function (key) {
+    return this.i18nStrings[key];
+};
+
+CoreCommandRouter.prototype.loadI18nStrings = function () {
+    var self=this;
+    var language_code=this.sharedVars.get('language_code');
+
+    this.logger.info("Loading i18n strings for locale "+language_code);
+
+    this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+
+    var categories=this.pluginManager.getPluginCategories();
+    for(var i in categories)
+    {
+        var category=categories[i];
+        var names=this.pluginManager.getPluginNames(category);
+        for(var j in names)
+        {
+            var name=names[j];
+            var instance=this.pluginManager.getPlugin(category,name);
+
+            if(instance.loadI18NStrings)
+                instance.loadI18NStrings(language_code);
+
+        }
+    }
+};
+
+
 
 
 

@@ -170,10 +170,10 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 			// Something went wrong!
 			defer.reject(new Error("Cannot mount share"));
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Error Mounting Share ' + sharename + ': ' + result.error);
-			self.context.coreCommand.pushToastMessage('alert', "Music Library", 'Error adding Network Share: ' + result.error);
+			self.context.coreCommand.pushToastMessage('alert', self.getI18NString(''), self.getI18NString('networkfs_add_network_share_error') + result.error);
 		} else {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + ']' + sharename + ' Share Mounted Successfully');
-			self.context.coreCommand.pushToastMessage('success', "Music Library", 'Network Share Successfully added ');
+			self.context.coreCommand.pushToastMessage('success', self.getI18NString('networkfs_music_library'), self.getI18NString('networkfs_add_network_share_success'));
 			defer.resolve({});
 		}
 	});
@@ -199,7 +199,7 @@ ControllerNetworkfs.prototype.saveShare = function (data) {
 	 * Check special characters
 	 */
 	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', "Shares", 'Share names cannot contain /');
+		self.commandRouter.pushToastMessage('warning', self.getI18NString('networkfs_shares'), self.getI18NString('networkfs_share_name_error'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return;
 	}
@@ -224,7 +224,7 @@ ControllerNetworkfs.prototype.saveShare = function (data) {
 
 	self.initShares();
 
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_configuration_update_success'));
 	setTimeout(function () {
 		self.scanDatabase();
 		//Wait for share to be mounted before scanning
@@ -257,12 +257,12 @@ ControllerNetworkfs.prototype.scanDatabase = function () {
 
 	exec("/usr/bin/mpc update", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.commandRouter.pushToastMessage('warning', "My Music", 'Error scanning Database: ' + error);
+			self.commandRouter.pushToastMessage('warning', self.getI18NString('networkfs_my_music'), self.getI18NString('networkfs_scan_database_error') + error);
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database scan error: ' + error);
 		}
 		else {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database update started');
-			self.commandRouter.pushToastMessage('success', "My Music", 'Music Database Update in Progress');
+			self.commandRouter.pushToastMessage('success', self.getI18NString('networkfs_my_music'), self.getI18NString('networkfs_scan_database_in_progress'));
 		}
 	});
 };
@@ -305,7 +305,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	 * Check special characters
 	 */
 	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', "Shares", 'Share names cannot contain /');
+		self.commandRouter.pushToastMessage('warning', self.getI18NString('networkfs_shares'), self.getI18NString('networkfs_share_name_error'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return defer.promise;
 	}
@@ -345,7 +345,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 				};
 
 				setTimeout(function () {
-					self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+					self.commandRouter.pushToastMessage('success', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_configuration_update_success'));
 					self.scanDatabase();
 				}, 3000);
 				defer.resolve(response);
@@ -388,18 +388,18 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 					gid: 1000
 				}, function (error, stdout, stderr) {
 					if (error !== null) {
-						self.commandRouter.pushToastMessage('alert', "Configuration update", 'The share cannot be deleted: ' + error);
+						self.commandRouter.pushToastMessage('alert', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_share_delete_error') + error);
 						self.logger.error("Mount point cannot be removed, won't appear next boot. Error: " + error);
 					}
 					else {
 						exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								self.commandRouter.pushToastMessage('alert', "Configuration update", 'The folder cannot be deleted: ' + error);
+								self.commandRouter.pushToastMessage('alert', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_folder_delete_error') + error);
 								self.logger.error("Cannot Delete Folder. Error: " + error);
 							}
 							else {
 
-								self.commandRouter.pushToastMessage('success', "Configuration update", 'The share has been deleted');
+								self.commandRouter.pushToastMessage('success',self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_share_delete_success'));
 							}
 						});
 					}
@@ -692,4 +692,15 @@ ControllerNetworkfs.prototype.shareCredentialCheck = function (data) {
 	var sharename = config.get('NasMounts.' + shareid + '.name');
 
 	var shares = execSync("/bin/echo volumio | echo volumio | smbclient //DISKSTATION/flac", { uid: 1000, gid: 1000, encoding: 'utf8' });
+}
+
+ControllerNetworkfs.prototype.loadI18NStrings = function (code) {
+    this.logger.info('NETWORK FS I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+ControllerNetworkfs.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
 }

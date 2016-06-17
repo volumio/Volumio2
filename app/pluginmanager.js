@@ -290,14 +290,11 @@ PluginManager.prototype.getPluginCategories = function () {
 	var values = self.plugins.values();
 	for (var i in values) {
 		var metadata = values[i];
-		console.log(metadata.category);
 		if (libFast.indexOf(categories, metadata.category) == -1)
 			categories.push(metadata.category);
 	}
 
-	console.log(categories);
-
-	return names;
+	return categories;
 };
 
 PluginManager.prototype.getPluginNames = function (category) {

@@ -202,7 +202,8 @@ AlarmClock.prototype.saveAlarm=function(data)
 	var defer = libQ.defer();
 
 	self.setConf(data);
-	self.commandRouter.pushToastMessage('success',"Alarm clock", 'Your alarm clock has been set');
+	self.commandRouter.pushToastMessage('success',self.getI18NString('alarm_clock_title'),
+        self.getI18NString('alarm_clock_descr_1'));
 
 
 	defer.resolve({});
@@ -331,12 +332,35 @@ AlarmClock.prototype.setSleep = function(data)
 			var actionText = 'Turn Off'
 		}
 		if (addedHours == 0)  {
-			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will ' + actionText + ' in ' + addedMinutes + " minute(s)");
+			self.commandRouter.pushToastMessage('success',self.getI18NString('sleep_mode_title'),
+                self.getI18NString('sleep_mode_descr_1')
+                + actionText +
+                self.getI18NString('alarm_clock_descr_2')
+                + addedMinutes +
+                self.getI18NString('alarm_clock_descr_3'));
 		} else {
-			self.commandRouter.pushToastMessage('success',"Sleep mode", 'System will ' + actionText + ' in ' + addedHours + ' hour(s) and ' + addedMinutes + ' minute(s)');
+			self.commandRouter.pushToastMessage('success',self.getI18NString('sleep_mode_title'),
+                self.getI18NString('sleep_mode_descr_1')
+                + actionText +
+                self.getI18NString('alarm_clock_descr_2')
+                + addedHours +
+                self.getI18NString('sleep_mode_descr_1')
+                + addedMinutes +
+                self.getI18NString('alarm_clock_descr_3'));
 		}
 	}
 
 	defer.resolve({});
 	return defer.promise;
 };
+
+AlarmClock.prototype.loadI18NStrings = function (code) {
+    this.logger.info('ALARM-CLOCK I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+AlarmClock.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
+}

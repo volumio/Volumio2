@@ -1,0 +1,6 @@
+{
+  "network_setup":"Network setup",
+  "network_setup_error":"Error while setting network: ",
+  "network_configuration_update":"Configuration update",
+  "network_configuration_update_success":"The configuration has been successfully updated"
+}

@@ -150,7 +150,7 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 	self.config.set('playerName', player_name);
 	self.config.set('startupSound', startup_sound);
 
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('system_configuration_update'), self.getI18NString('system_configuration_update_success'));
 	self.setHostname(player_name);
 	defer.resolve({});
 
@@ -175,7 +175,7 @@ ControllerSystem.prototype.saveSoundQuality = function (data) {
 	self.config.set('kernelSettingLabel', kernel_profile_label);
 
 
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('system_configuration_update'), self.getI18NString('system_configuration_update_success'));
 
 	defer.resolve({});
 	return defer.promise;
@@ -184,7 +184,7 @@ ControllerSystem.prototype.saveSoundQuality = function (data) {
 ControllerSystem.prototype.systemUpdate = function (data) {
 	var self = this;
 
-	self.commandRouter.pushToastMessage('success', "System update", 'No newer versions found, your system is up to date.');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('system_update'), self.getI18NString('system_update_no_newer_version'));
 
 	var defer = libQ.defer();
 	defer.resolve({});
@@ -212,7 +212,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 	fs.writeFile('/etc/hostname', newhostname, function (err) {
 		if (err) {
 			console.log(err);
-			self.commandRouter.pushToastMessage('alert', "System Name", 'Cannot Change System Name');
+			self.commandRouter.pushToastMessage('alert', self.getI18NString('system_name'), self.getI18NString('system_name_error'));
 		}
 		else {
 			exec("/usr/bin/sudo /bin/chmod 777 /etc/hosts", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
@@ -228,7 +228,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						console.log(err);
 					}
 					else {
-						self.commandRouter.pushToastMessage('success', "System Name Changed", 'System name is now ' + newhostname);
+						self.commandRouter.pushToastMessage('success', self.getI18NString('system_name_changed'), self.getI18NString('system_name_now') + newhostname);
 						self.logger.info('Hostname now is ' + newhostname);
 						setTimeout(function () {
 							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
@@ -237,7 +237,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 							}, function (error, stdout, stderr) {
 								if (error !== null) {
 									console.log(error);
-									self.commandRouter.pushToastMessage('alert', "System Name", 'Cannot Change System Name');
+									self.commandRouter.pushToastMessage('alert', self.getI18NString('system_name'), self.getI18NString('system_name_error'));
 								} else {
 									self.logger.info('Avahi Daemon Restarted')
 								}
@@ -411,3 +411,13 @@ ControllerSystem.prototype.StartDebugConsole = function () {
 
 };
 
+ControllerSystem.prototype.loadI18NStrings = function (code) {
+    this.logger.info('SYSTEM I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+ControllerSystem.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
+}

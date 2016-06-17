@@ -1,0 +1,17 @@
+{
+  "mpd_success":"Success",
+  "mpd_added":" Added",
+  "mpd_on":"ON",
+  "mpd_off":"OFF",
+  "mpd_added":" Added",
+  "mpd_configuration_update":"Configuration update",
+  "mpd_configuration_update_error":"Error while Applying new configuration",
+  "mpd_playback_configuration_error":"The playback configuration has been successfully updated",
+  "mpd_player_restart":"Player restart",
+  "mpd_player_restart_error":"Error while restarting player",
+  "mpd_player_restart_success":"Player successfully restarted",
+  "mpd_configuration_update":"Configuration update",
+  "mpd_configuration_update_error":"Error while Applying new configuration",
+  "mpd_volume_configuration_success":"The volume configuration has been successfully updated",
+  "mpd_output_device_success":"The output device has been successfully updated"
+}

@@ -95,7 +95,8 @@ PlaylistManager.prototype.addToPlaylist = function (name, service, uri) {
 	var self = this;
 
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
-	self.commandRouter.pushToastMessage('success', "Added", uri + ' to playlist ' + name);
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), 
+        uri +  self.commandRouter.getI18nString('added_to_playlist') + name);
 	return self.commonAddToPlaylist(self.playlistFolder, name, service, uri);
 };
 
@@ -181,8 +182,8 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	var self = this;
 
 	if (title){
-		self.commandRouter.pushToastMessage('success', "Added", title + ' to Favourites ');
-	} else self.commandRouter.pushToastMessage('success', "Added", uri + ' to Favourites ');
+		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), title + self.commandRouter.getI18nString('added_to_favourites'));
+	} else self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), uri + self.commandRouter.getI18nString('added_to_favourites'));
 
 	if (service === 'dirble') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
@@ -464,11 +465,11 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 
 					fs.writeJson(filePath, newData, function (err) {
 						if (err) {
-							self.commandRouter.pushToastMessage('error', "Cannot Remove", uri);
+							self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('remove_error'), uri);
 							defer.resolve(name);
 						}
 						else {
-							self.commandRouter.pushToastMessage('success', "Removed", uri);
+							self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('remove_success'), uri);
 							defer.resolve(name);
 						}
 					})

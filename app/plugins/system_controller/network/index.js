@@ -178,7 +178,7 @@ ControllerNetwork.prototype.saveWiredNet = function (data) {
 	config.set('ethgateway', static_gateway);
 
 	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('network_configuration_update'), self.getI18NString('network_configuration_update_success'));
 
 
 	defer.resolve({});
@@ -210,7 +210,7 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 	}
 
 	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('network_configuration_update'), self.getI18NString('network_configuration_update_success'));
 
 
 	defer.resolve({});
@@ -249,7 +249,7 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 
 	self.wirelessConnect({ssid: network_ssid, pass: network_pass});
 
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success', self.getI18NString('network_configuration_update'), self.getI18NString('network_configuration_update_success'));
 	fs.writeFile('/data/configuration/netconfigured', ' ', function (err) {
 		if (err) {
 			self.logger.error('Cannot write netconfigured '+error);
@@ -334,7 +334,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		self.commandRouter.networkRestart();
 	}
 	catch (err) {
-		self.commandRouter.pushToastMessage('error', "Network setup", 'Error while setting network: ' + err);
+		self.commandRouter.pushToastMessage('error',self.getI18NString('network_setup'), self.getI18NString('network_setup_error') + err);
 	}
 		}
 	});
@@ -383,3 +383,14 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 //console.log(response);
 	return defer.promise;
 };
+
+ControllerNetwork.prototype.loadI18NStrings = function (code) {
+    this.logger.info('MPD I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+ControllerNetwork.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
+}

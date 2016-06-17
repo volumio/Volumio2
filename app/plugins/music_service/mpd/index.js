@@ -34,7 +34,7 @@ ControllerMpd.prototype.play = function (N) {
 
 //MPD Add
 ControllerMpd.prototype.add = function (data) {
-	this.commandRouter.pushToastMessage('Success', '', data + ' Added');
+	this.commandRouter.pushToastMessage('success', data + self.getI18NString('mpd_added'));
 	return this.sendMpdCommand('add', [data]);
 };
 //MPD Remove
@@ -68,14 +68,14 @@ ControllerMpd.prototype.seek = function (timepos) {
 //MPD Random
 ControllerMpd.prototype.random = function (randomcmd) {
 	var string = randomcmd ? 1 : 0;
-	this.commandRouter.pushToastMessage('success', "Random", string === 1 ? 'ON' : 'OFF');
+	this.commandRouter.pushToastMessage('success', "Random", string === 1 ? self.getI18NString('mpd_on') : self.getI18NString('mpd_off'));
 	return this.sendMpdCommand('random', [string])
 };
 
 //MPD Repeat
 ControllerMpd.prototype.repeat = function (repeatcmd) {
 	var string = repeatcmd ? 1 : 0;
-	this.commandRouter.pushToastMessage('success', "Repeat", string === 1 ? 'ON' : 'OFF');
+	this.commandRouter.pushToastMessage('success', "Repeat", string === 1 ? self.getI18NString('mpd_on') : self.getI18NString('mpd_off'));
 	return this.sendMpdCommand('repeat', [string]);
 };
 
@@ -110,7 +110,7 @@ ControllerMpd.prototype.updateMpdDB = function () {
 ControllerMpd.prototype.addPlay = function (fileName) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
-	this.commandRouter.pushToastMessage('Success', '', fileName + ' Added');
+	this.commandRouter.pushToastMessage('Success', '', fileName + self.getI18NString('mpd_added'));
 
 
 	//Add playlists and cue with load command
@@ -135,7 +135,7 @@ ControllerMpd.prototype.addPlay = function (fileName) {
 };
 
 ControllerMpd.prototype.addPlayCue = function (data) {
-	this.commandRouter.pushToastMessage('Success', '', data.uri + ' Added');
+	this.commandRouter.pushToastMessage('Success', '', data.uri + self.getI18NString('mpd_added'));
 
 	//Add playlists and cue with load command
 	this.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri)
@@ -762,18 +762,18 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting MPD');
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
-			self.commandRouter.pushToastMessage('error', "Configuration update", 'Error while Applying new configuration');
+			self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_configuration_update_error'));
 			defer.resolve({});
 		}
 		else {
-			self.commandRouter.pushToastMessage('success', "Configuration update", 'The playback configuration has been successfully updated');
+			self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_playback_configuration_error'));
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.info('Cannot restart MPD: ' + error);
-					self.commandRouter.pushToastMessage('error', "Player restart", 'Error while restarting player');
+					self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_error'));
 				}
-				else self.commandRouter.pushToastMessage('success', "Player restart", 'Player successfully restarted');
+				else self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_success'));
 
 				defer.resolve({});
 			});
@@ -794,18 +794,18 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
-			self.commandRouter.pushToastMessage('error', "Configuration update", 'Error while Applying new configuration');
+			self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_configuration_update_error'));
 			defer.resolve({});
 		}
 		else {
-			self.commandRouter.pushToastMessage('success', "Configuration update", 'The playback configuration has been successfully updated');
+			self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_playback_configuration_error'));
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.info('Cannot restart MPD: ' + error);
-					self.commandRouter.pushToastMessage('error', "Player restart", 'Error while restarting player');
+					self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_error'));
 				}
-				else self.commandRouter.pushToastMessage('success', "Player restart", 'Player successfully restarted');
+				else self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_success'));
 
 				defer.resolve({});
 			});
@@ -831,7 +831,7 @@ ControllerMpd.prototype.saveVolumeOptions = function (data) {
 	self.logger.info('Volume configurations have been set');
 
 
-	self.commandRouter.pushToastMessage('success', "Configuration update", 'The volume configuration has been successfully updated');
+	self.commandRouter.pushToastMessage('success',self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_volume_configuration_success'));
 
 	defer.resolve({});
 
@@ -1384,18 +1384,18 @@ ControllerMpd.prototype.saveAlsaOptions = function (data) {
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
-			self.commandRouter.pushToastMessage('error', "Configuration update", 'Error while Applying new configuration');
+			self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_configuration_update_error'));
 			defer.resolve({});
 		}
 		else {
-			self.commandRouter.pushToastMessage('success', "Configuration update", 'The output device has been successfully updated');
+			self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_output_device_success'));
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.info('Cannot restart MPD: ' + error);
-					self.commandRouter.pushToastMessage('error', "Player restart", 'Error while restarting player');
+					self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_error'));
 				}
-				else self.commandRouter.pushToastMessage('success', "Player restart", 'Player successfully restarted');
+				else self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_success'));
 
 				defer.resolve({});
 			});
@@ -1723,4 +1723,15 @@ ControllerMpd.prototype.stop = function () {
 
 ControllerMpd.prototype.sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
+}
+
+ControllerMpd.prototype.loadI18NStrings = function (code) {
+    this.logger.info('MPD I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=libFsExtra.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+ControllerMpd.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
 }

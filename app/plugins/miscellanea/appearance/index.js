@@ -34,6 +34,8 @@ volumioAppearance.prototype.onVolumioStart = function() {
     //Perform startup tasks here
     self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
     config.loadFile(self.configFile);
+
+    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
 };
 
@@ -259,7 +261,8 @@ volumioAppearance.prototype.setBackgrounds = function(data)
         config.set('background_path', data.path);
     }
     
-    self.commandRouter.pushToastMessage('success',"Appearance",'New Background Applied');
+    self.commandRouter.pushToastMessage('success',self.getI18NString('appearance_title'),
+                                            self.getI18NString('new_background_applied'));
 
     return ('Done');
 };
@@ -272,8 +275,10 @@ volumioAppearance.prototype.setLanguage = function(data)
     if (data.language) {
         config.set('language', data.language.label);
         config.set('language_code', data.language.value);
+        this.commandRouter.sharedVars.set('language_code',data.language.value);
     }
-    self.commandRouter.pushToastMessage('success',"Appearance",'New Language Set');
+    self.commandRouter.pushToastMessage('success',self.getI18NString('appearance_title'),
+    self.getI18NString('new_language_set'));
 
     var data = self.getUiSettings();
 
@@ -324,7 +329,8 @@ volumioAppearance.prototype.deleteFile = function(filepath){
                     console.log(err);
                 } else {
                     if (filepath.indexOf("thumbnail-") < 0) {
-                        self.commandRouter.pushToastMessage('success', "Appearance", 'Background Successfully Deleted');
+                        self.commandRouter.pushToastMessage('success', self.getI18NString('appearance_title'),
+                            self.getI18NString('background_deleted'));
                     } defer.resolve('Done');
                 }
             });
@@ -332,6 +338,17 @@ volumioAppearance.prototype.deleteFile = function(filepath){
     });
 
     return defer.promise;
+}
+
+volumioAppearance.prototype.loadI18NStrings = function (code) {
+    this.logger.info('APPEARANCE I18N LOAD FOR LOCALE '+code);
+
+    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
+}
+
+
+volumioAppearance.prototype.getI18NString = function (key) {
+    return this.i18nString[key];
 }
 
 

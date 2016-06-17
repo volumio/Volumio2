@@ -1,0 +1,13 @@
+{
+  "network_restart_title":"Network restart",
+  "network_restart_error":"Error while restarting network: ",
+  "network_restart_success":"Network successfully restarted",
+  "wireless_restart_title":"Wireless restart",
+  "wireless_restart_error":"Error while restarting wireless: ",
+  "wireless_restart_success":"Wireless successfully restarted",
+  "added_title":"Added",
+  "added_to_playlist":" to playlist ",
+  "added_to_favourites":" to Favourites ",
+  "remove_error":"Cannot Remove",
+  "remove_success":"Removed"
+}
