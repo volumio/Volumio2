@@ -1,0 +1,15 @@
+{
+  "networkfs_music_library":"Bibliothèque",
+  "networkfs_configuration_update":"Mise à jour de la configuration",
+  "networkfs_add_network_share_error":"Erreur en ajoutant un partage réseau",
+  "networkfs_add_network_share_success":"Partage réseau ajouté avec succès",
+  "networkfs_my_music":"Ma musique",
+  "networkfs_shares":"Partage",
+  "networkfs_configuration_update_success":"La configuration a été mise à jour avec succès",
+  "networkfs_share_name_error":"Le nom de partage ne peut contenir de /",
+  "networkfs_scan_database_error":"Erreur en scannant la base de données",
+  "networkfs_scan_database_in_progress":"Mise à jour de la base de données en cours",
+  "networkfs_share_delete_error":"Le paratge ne peut être supprimé : ",
+  "networkfs_folder_delete_error":"Le dossier ne peut être supprimé: ",
+  "networkfs_share_delete_success":"Le dossier a été supprimé"
+}
