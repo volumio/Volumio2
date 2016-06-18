@@ -644,8 +644,11 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	var defer = libQ.defer();
 	var sharesjson = {"nas":[]};
 	try {
-	var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8' });
-	console.log(shares);
+	var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 2000 });
+	} catch (err) {
+		var shares = err.stdout;
+	}
+	//console.log(shares);
 	var allshares = shares.split("\n");
 	var num = allshares.length;
 	var progress = 0;
@@ -678,9 +681,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		}
 	}
 
-	} catch (err) {
-		defer.resolve(sharesjson);
-	}
+
 	return defer.promise;
 };
 
