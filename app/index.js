@@ -741,8 +741,66 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     }
 };
 
+CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionaryFile,jsonFile) {
+    var self=this;
+    var methodDefer=libQ.defer();
+    var defers=[];
 
+    defers.push(libQ.nfcall(fs.readJson,dictionaryFile));
+    defers.push(libQ.nfcall(fs.readJson,defaultDictionaryFile));
+    defers.push(libQ.nfcall(fs.readJson,jsonFile));
 
+    libQ.all(defers).
+            then(function(documents)
+    {
 
+        var dictionary=documents[0];
+        var defaultDictionary=documents[1];
+        var jsonFile=documents[2];
 
+        self.translateKeys(jsonFile,dictionary,defaultDictionary);
 
+        methodDefer.resolve(jsonFile);
+    })
+    .fail(function(err){
+        self.logger.info("ERROR LOADING JSON "+err);
+
+        methodDefer.reject(new Error());
+    });
+
+    return methodDefer.promise;
+
+};
+
+CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultDictionary) {
+    var self=this;
+
+    var keys=Object.keys(parent);
+
+    for(var i in keys)
+    {
+        var obj=parent[keys[i]];
+        var type=typeof(obj);
+
+        if(type==='object')
+        {
+           self.translateKeys(obj,dictionary,defaultDictionary);
+        }
+        else if(type==='string')
+        {
+            if(obj.startsWith("translate."))
+            {
+                var replaceKey=obj.slice(10);
+
+                var value=dictionary[replaceKey];
+                if(value===undefined)
+                {
+                    value=defaultDictionary[replaceKey];
+                }
+                parent[keys[i]]=value;
+
+            }
+
+        }
+    }
+}

@@ -474,7 +474,11 @@ function InterfaceWebUI(context) {
 					response = self.commandRouter.getUIConfigOnPlugin(splitted[0], splitted[1], {});
 				else response = self.commandRouter.getUIConfigOnPlugin('system_controller', splitted[0], {});
 
-				selfConnWebSocket.emit('pushUiConfig', response);
+                response.then(function(config)
+                {
+                    selfConnWebSocket.emit('pushUiConfig', config);
+                });
+
 			});
 
 			connWebSocket.on('getMultiRoomDevices', function (data) {
