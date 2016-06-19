@@ -20,6 +20,7 @@ function ControllerNetworkfs(context) {
 	self.commandRouter = self.context.coreCommand;
 	self.logger = self.commandRouter.logger;
 
+
 }
 
 ControllerNetworkfs.prototype.getConfigurationFiles = function () {
@@ -37,6 +38,11 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
 	self.initShares();
 
     return libQ.resolve();
+};
+
+ControllerNetworkfs.prototype.languageCallback = function (data) {
+	var self = this;
+	console.log(data);
 };
 
 
@@ -63,9 +69,23 @@ ControllerNetworkfs.prototype.onUninstall = function () {
 ControllerNetworkfs.prototype.getUIConfig = function () {
 	var self = this;
 
-	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
+	var self = this;
+	var lang_code = self.commandRouter.sharedVars.get('language_code');
 
-	return uiconf;
+	var defer=libQ.defer();
+	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+		__dirname+'/../../../i18n/strings_en.json',
+		__dirname + '/UIConfig.json')
+		.then(function(uiconf)
+		{
+			defer.resolve(uiconf);
+		})
+		.fail(function()
+		{
+			defer.reject(new Error());
+		})
+
+	return defer.promise;
 };
 
 ControllerNetworkfs.prototype.setUIConfig = function (data) {
