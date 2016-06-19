@@ -25,17 +25,12 @@
   "background_deleted":"Fond d'écran supprimé",
 
 
-  "button_save":"Save",
-  "appearance_ui_config_language":"Language",
-  "appearance_ui_config_select_language":"Select Language"
-
-
   "common":{
-    "button_save":"Save"
+    "button_save":"Sauver"
   },
   "appearance":
   {
-    "ui_config_language":"Language",
-    "ui_config_select_language":"Select Language"
+    "ui_config_language":"Langue",
+    "ui_config_select_language":"Sélectionner une langue"
   }
 }
