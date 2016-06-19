@@ -11,8 +11,12 @@
   "remove_error":"Cannot Remove",
   "remove_success":"Removed",
 
-
-  "button_save":"Save",
-  "appearance_ui_config_language":"Language",
-  "appearance_ui_config_select_language":"Select Language"
+  "common":{
+    "button_save":"Save"
+  },
+  "appearance":
+  {
+    "ui_config_language":"Language",
+    "ui_config_select_language":"Select Language"
+  }
 }

@@ -792,12 +792,30 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
             {
                 var replaceKey=obj.slice(10);
 
-                var value=dictionary[replaceKey];
-                if(value===undefined)
+                var dotIndex=replaceKey.indexOf('.');
+
+                if(dotIndex==-1)
                 {
-                    value=defaultDictionary[replaceKey];
+                    var value=dictionary[replaceKey];
+                    if(value===undefined)
+                    {
+                        value=defaultDictionary[replaceKey];
+                    }
+                    parent[keys[i]]=value;
                 }
-                parent[keys[i]]=value;
+                else {
+                    var category=replaceKey.slice(0,dotIndex);
+                    var key=replaceKey.slice(dotIndex+1);
+
+                    var value=dictionary[category][key];
+                    if(value===undefined)
+                    {
+                        value=defaultDictionary[category][key];
+                    }
+                    parent[keys[i]]=value;
+                }
+
+
 
             }
 

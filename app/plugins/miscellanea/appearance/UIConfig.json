@@ -5,11 +5,11 @@
     {
       "id": "language_selector",
       "element": "section",
-      "label": "translate.appearance_ui_config_language",
+      "label": "translate.appearance.ui_config_language",
       "icon": "fa-map-signs",
       "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setLanguage"},
       "saveButton": {
-        "label": "translate.button_save",
+        "label": "translate.common.button_save",
         "data": [
           "language"
         ]
@@ -22,8 +22,8 @@
         {
           "id": "language",
           "element": "select",
-          "doc": "translate.appearance_ui_config_select_language",
-          "label": "translate.appearance_ui_config_select_language",
+          "doc": "translate.appearance.ui_config_select_language",
+          "label": "translate.appearance.ui_config_select_language",
           "value":  {
             "value":0,
             "label": "0"
