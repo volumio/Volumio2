@@ -67,13 +67,30 @@ ControllerSystem.prototype.onUninstall = function () {
 
 ControllerSystem.prototype.getUIConfig = function () {
 	var self = this;
+	var defer = libQ.defer();
+
+	var lang_code = self.commandRouter.sharedVars.get('language_code');
+
+	var defer=libQ.defer();
+	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+		__dirname+'/../../../i18n/strings_en.json',
+		__dirname + '/UIConfig.json')
+		.then(function(uiconf)
+		{
 
 	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName'));
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
-	return uiconf;
+			defer.resolve(uiconf);
+		})
+		.fail(function()
+		{
+			defer.reject(new Error());
+		})
+
+	return defer.promise
 };
 
 ControllerSystem.prototype.setUIConfig = function (data) {

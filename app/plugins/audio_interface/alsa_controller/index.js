@@ -70,7 +70,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 	var defer = libQ.defer();
 
-	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
+	var lang_code = this.commandRouter.sharedVars.get('language_code');
+
+	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+		__dirname+'/../../../i18n/strings_en.json',
+		__dirname + '/UIConfig.json')
+		.then(function(uiconf)
+		{
 	var value;
 	var devicevalue;
 
@@ -218,8 +224,14 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	value = self.config.get('volumecurvemode');
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
 	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+			defer.resolve(uiconf);
+		})
+		.fail(function()
+		{
+			defer.reject(new Error());
+		})
 
-	return uiconf;
+	return defer.promise
 };
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {

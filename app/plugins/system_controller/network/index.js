@@ -65,6 +65,15 @@ ControllerNetwork.prototype.getConfigurationFiles = function () {
 ControllerNetwork.prototype.getUIConfig = function () {
 	var self = this;
 
+	var lang_code = self.commandRouter.sharedVars.get('language_code');
+
+	var defer=libQ.defer();
+	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+		__dirname+'/../../../i18n/strings_en.json',
+		__dirname + '/UIConfig.json')
+		.then(function(uiconf)
+		{
+
 	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
 	//dhcp
@@ -101,7 +110,14 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 	//console.log(uiconf);
 
-	return uiconf;
+			defer.resolve(uiconf);
+		})
+		.fail(function()
+		{
+			defer.reject(new Error());
+		})
+
+	return defer.promise
 };
 
 ControllerNetwork.prototype.setUIConfig = function (data) {
