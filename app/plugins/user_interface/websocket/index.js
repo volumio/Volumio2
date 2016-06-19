@@ -1049,11 +1049,11 @@ function InterfaceWebUI(context) {
 				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'addShare', data);
 
 				if (returnedData != undefined) {
-					returnedData.then(function (data) {
-						console.log('RETURN NAS : ' +data);
-						selfConnWebSocket.emit(data.emit, data.data);
+					returnedData.then(function (datas) {
+						console.log('RETURN NAS : ' +JSON.stringify(datas));
+						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
-						var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
+						var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
 						if (listdata != undefined) {
 							listdata.then(function (datalist) {
 								selfConnWebSocket.emit('pushListShares', datalist);
@@ -1071,8 +1071,17 @@ function InterfaceWebUI(context) {
 				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'deleteShare', data);
 
 				if (returnedData != undefined) {
-					returnedData.then(function (data) {
-						selfConnWebSocket.emit('pushDeleteShare', data);
+					returnedData.then(function (datas) {
+						console.log('RETURN NAS : ' +JSON.stringify(datas));
+						selfConnWebSocket.emit(datas.emit, datas.data);
+						setTimeout(function () {
+							var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
+							if (listdata != undefined) {
+								listdata.then(function (datalist) {
+									selfConnWebSocket.emit('pushListShares', datalist);
+								});
+							}
+						}, 1000)
 					});
 				}
 				else self.logger.error("Error on deleting share");

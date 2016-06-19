@@ -167,8 +167,12 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 
 	mountutil.mount(pointer, mountpoint, {"createDir": true, "fstype": fstype, "fsopts": fsopts}, function (result) {
 		if (result.error) {
-			if (result.error.indexOf('Permission denied') > -1);{
+			console.log(result.error)
+			if (result.error.indexOf('Permission denied') >= 0) {
 				result.error = 'Permission denied';
+			} else {
+				var splitreason = result.error.split('mount error')
+				result.error = splitreason[1]
 			}
 			responsemessage = {status:"fail", reason:result.error}
 			defer.resolve(responsemessage);
@@ -187,55 +191,6 @@ ControllerNetworkfs.prototype.getConfigurationFiles = function () {
 
 	return ['config.json'];
 };
-
-ControllerNetworkfs.prototype.saveShare = function (data) {
-	var self = this;
-
-	var defer = libQ.defer();
-
-	console.log('saving share');
-
-	var name = data['Flac.name'];
-	var nameStr = S(name);
-
-	/**
-	 * Check special characters
-	 */
-	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', self.getI18NString('networkfs_shares'), self.getI18NString('networkfs_share_name_error'));
-		defer.reject(new Error('Share names cannot contain /'));
-		return;
-	}
-
-	var ip = data['Flac.ip'];
-	var fstype = data['Flac.fstype'].value;
-	var username = data['Flac.username'];
-	var password = data['Flac.password'];
-	var options = data['Flac.options'];
-
-	if (username == undefined) username = '';
-	if (password == undefined) password = '';
-	if (options == undefined) options = '';
-
-	config.addConfigValue('NasMounts.Flac.name', 'string', name);
-	config.addConfigValue('NasMounts.Flac.path', 'string', path);
-	config.addConfigValue('NasMounts.Flac.ip', 'string', ip);
-	config.addConfigValue('NasMounts.Flac.fstype', 'string', fstype);
-	config.addConfigValue('NasMounts.Flac.user', 'string', username);
-	config.addConfigValue('NasMounts.Flac.password', 'string', password);
-	config.addConfigValue('NasMounts.Flac.options', 'string', options);
-
-	self.mountShare();
-
-	self.commandRouter.pushToastMessage('success', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_configuration_update_success'));
-	setTimeout(function () {
-		self.scanDatabase();
-		//Wait for share to be mounted before scanning
-	}, 3000)
-	defer.resolve({});
-	return defer.promise;
-};
-
 
 ControllerNetworkfs.prototype.getShare = function (name, ip, path) {
 	var self = this;
@@ -260,7 +215,7 @@ ControllerNetworkfs.prototype.scanDatabase = function () {
 
 	exec("/usr/bin/mpc update", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.commandRouter.pushToastMessage('warning', self.getI18NString('networkfs_my_music'), self.getI18NString('networkfs_scan_database_error') + error);
+			self.commandRouter.pushToastMessage('error', self.getI18NString('networkfs_my_music'), self.getI18NString('networkfs_scan_database_error') + error);
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database scan error: ' + error);
 		}
 		else {
@@ -344,10 +299,19 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Success', message: name + ' mounted successfully'}};
 					defer.resolve(responsemessage);
 					self.scanDatabase();
-				} else if (data.status == 'fail') {
+				} else if (data.status === 'fail') {
 					if(data.reason) {
-						responsemessage = {emit: 'pushToastMessage', data:{ type: 'warning', title: 'Error in mounting share '+name, message: data.reason}};
+						if (data.reason == 'Permission denied') {
+							responsemessage = {emit: 'nasCredentialsCheck', data:{ 'id': uuid, 'name': name, 'username': username, 'password':password }};
+							self.logger.info("Permission denied for " + name + " on IP " + ip);
 							defer.resolve(responsemessage);
+						} else {
+							responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error in mounting share '+name, message: data.reason}};
+							self.logger.info("Error mounting  " + name + " on IP " + ip + ' : ' + data.reason);
+							defer.resolve(responsemessage);
+						}
+
+
 					}
 				}
 
@@ -388,32 +352,39 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 	var defer = libQ.defer();
 	var key = "NasMounts." + data['id'];
 
-	var response;
+	var responsemessage;
 
 	if (config.has(key)) {
-		var mountpoint = '/mnt/NAS/' + config.get(key + '.name');
 
-		setTimeout(function () {
+		var mountpoint = '/mnt/NAS/' + config.get(key + '.name');
+		var mountedshare = mountutil.isMounted(mountpoint, true);
+		if (mountedshare.mounted) {
+
+
 			try {
-				exec('/usr/bin/sudo /bin/umount -f ' + mountpoint + ' ', {
+				exec("echo volumio | sudo -S /bin/umount -l " + mountpoint, {
 					uid: 1000,
 					gid: 1000
 				}, function (error, stdout, stderr) {
 					if (error !== null) {
-						self.commandRouter.pushToastMessage('alert', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_share_delete_error') + error);
+						responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
 						self.logger.error("Mount point cannot be removed, won't appear next boot. Error: " + error);
+						defer.resolve(responsemessage);
 					}
 					else {
+						setTimeout(function () {
 						exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								self.commandRouter.pushToastMessage('alert', self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_folder_delete_error') + error);
+								responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
 								self.logger.error("Cannot Delete Folder. Error: " + error);
+								defer.resolve(responsemessage);
 							}
 							else {
-
-								self.commandRouter.pushToastMessage('success',self.getI18NString('networkfs_configuration_update'), self.getI18NString('networkfs_share_delete_success'));
+								responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
+								defer.resolve(responsemessage);
 							}
 						});
+						}, 3000);
 					}
 				});
 
@@ -422,25 +393,30 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 
 					self.scanDatabase();
 				}, 3000);
-				defer.resolve({success: true});
 			}
 			catch (err) {
-				defer.resolve({
-					success: false,
-					reason: 'An error occurred deleting your share'
-				});
+				responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
+				defer.resolve(responsemessage);
 			}
 
 
-		}, 500);
 
+	} else {
+			exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+				if (error !== null) {
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
+					self.logger.error("Cannot Delete Folder. Error: " + error);
+					defer.resolve(responsemessage);
+				} else {
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
+					defer.resolve(responsemessage);
+				}
+			});
+		}
 		config.delete(key);
-	}
-	else {
-		defer.resolve({
-			success: false,
-			reason: 'This share is not configured'
-		});
+	} else {
+		responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'This Share is not configured'}};
+		defer.resolve(responsemessage);
 	}
 
 	return defer.promise;
@@ -604,40 +580,61 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				var oldpassword = config.get(key + 'password');
 				var oldoptions = config.get(key + 'options');
 
+
+				if (data['name']) {
 				config.set(key + 'name', data['name']);
+				}
+				if(data['path']){
 				config.set(key + 'path', data['path']);
-				config.set(key + 'ip', data['ip']);
+				}
+				if(data['ip']) {
+					config.set(key + 'ip', data['ip']);
+				}
+				if (data['fstype']) {
 				config.set(key + 'fstype', data['fstype']);
-				config.set(key + 'user', data['username']);
-				config.set(key + 'password', data['password']);
-				config.set(key + 'options', data['options']);
+				}
+				if (data['username']) {
+					config.set(key + 'user', data['username']);
+				}
+				if (data['password']) {
+					config.set(key + 'password', data['password']);
+				}
+				if (data['options']) {
+					config.set(key + 'options', data['options']);
+				}
 
-				var mountDefer = self.mountShare(data['id']);
-				mountDefer.then(function (value) {
-						self.logger.info("New share mounted");
-						defer.resolve({
-							success: true,
-							reason: 'Cannot unmount share'
-						});
-					})
-					.fail(function () {
 
-						self.logger.info("An error occurred mounting the new share. Rolling back configuration");
-						config.set(key + 'name', oldname);
-						config.set(key + 'path', oldpath);
-						config.set(key + 'ip', oldip);
-						config.set(key + 'fstype', oldfstype);
-						config.set(key + 'user', oldusername);
-						config.set(key + 'password', oldpassword);
-						config.set(key + 'options', oldoptions);
+				var mountshare = self.mountShare(uuid);
+				if (mountshare != undefined) {
+					mountshare.then(function (data) {
+						var responsemessageedit = {};
+						if (data.status == 'success') {
+							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Success', message: name + ' mounted successfully'}};
+							defer.resolve(responsemessageedit);
+							self.scanDatabase();
+						} else if (data.status === 'fail') {
+							if(data.reason) {
+								self.logger.info("An error occurred mounting the new share. Rolling back configuration");
+								config.set(key + 'name', oldname);
+								config.set(key + 'path', oldpath);
+								config.set(key + 'ip', oldip);
+								config.set(key + 'fstype', oldfstype);
+								config.set(key + 'user', oldusername);
+								config.set(key + 'password', oldpassword);
+								config.set(key + 'options', oldoptions);
+								if (data.reason === 'Permission denied') {
+									responsemessageedit = {emit: 'nasCredentialsCheck', data:{ 'id': id, 'name': name, 'username': username, 'password':password }};
+								} else {
+									responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'warning', title: 'Error in mounting share '+name, message: data.reason}};
+								}
 
-						defer.resolve({
-							success: true,
-							reason: 'Cannot unmount share'
-						});
+								defer.resolve(responsemessageedit);
+							}
+						}
+
+
 					});
-
-
+				}
 			}
 		});
 
@@ -656,7 +653,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	var defer = libQ.defer();
 	var sharesjson = {"nas":[]};
 	try {
-	var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 2000 });
+	var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 5000 });
 	} catch (err) {
 		var shares = err.stdout;
 	}
