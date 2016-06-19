@@ -1046,12 +1046,13 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (data) {
-						selfConnWebSocket.emit('pushAddShare', data);
+						console.log('RETURN NAS : ' +data);
+						selfConnWebSocket.emit(data.emit, data.data);
 						setTimeout(function () {
-						var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
-						if (returnedData != undefined) {
-							returnedData.then(function (data) {
-								selfConnWebSocket.emit('pushListShares', data);
+						var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
+						if (listdata != undefined) {
+							listdata.then(function (datalist) {
+								selfConnWebSocket.emit('pushListShares', datalist);
 							});
 						}
 						}, 1000)

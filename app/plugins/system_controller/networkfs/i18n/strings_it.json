@@ -11,5 +11,6 @@
   "networkfs_scan_database_in_progress":"Aggiornamento del database della musica",
   "networkfs_share_delete_error":"La condivisione non può essere cancellata: ",
   "networkfs_folder_delete_error":"La cartella non può essere cancellata: ",
-  "networkfs_share_delete_success":"La condivisione è stata cancellata"
+  "networkfs_share_delete_success":"La condivisione è stata cancellata",
+  "error":"Errore"
 }

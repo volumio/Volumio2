@@ -11,5 +11,6 @@
   "networkfs_scan_database_in_progress":"Music Database Update in Progress",
   "networkfs_share_delete_error":"The share cannot be deleted: ",
   "networkfs_folder_delete_error":"The folder cannot be deleted: ",
-  "networkfs_share_delete_success":"The share has been deleted"
+  "networkfs_share_delete_success":"The share has been deleted",
+  "error":"Error"
 }
