@@ -23,13 +23,9 @@
   "new_background_applied":"Nouveau fond d'écran appliqué",
   "new_language_set":"Nouvelle langue reglée",
   "background_deleted":"Fond d'écran supprimé",
-
-
   "button_save":"Save",
   "appearance_ui_config_language":"Language",
-  "appearance_ui_config_select_language":"Select Language"
-
-
+  "appearance_ui_config_select_language":"Select Language",
   "common":{
     "button_save":"Save"
   },
