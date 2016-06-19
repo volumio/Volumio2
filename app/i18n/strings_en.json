@@ -9,5 +9,14 @@
   "added_to_playlist":" to playlist ",
   "added_to_favourites":" to Favourites ",
   "remove_error":"Cannot Remove",
-  "remove_success":"Removed"
+  "remove_success":"Removed",
+
+  "common":{
+    "button_save":"Save"
+  },
+  "appearance":
+  {
+    "ui_config_language":"Language",
+    "ui_config_select_language":"Select Language"
+  }
 }

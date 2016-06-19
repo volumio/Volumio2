@@ -22,5 +22,16 @@
   "appearance_title":"Tema",
   "new_background_applied":"Sfondo impostato correttamente",
   "new_language_set":"La lingua è stata impostata",
-  "background_deleted":"Sfondo cancellato correttamente"
+  "background_deleted":"Sfondo cancellato correttamente",
+
+
+  "common":{
+    "button_save":"Salva"
+  },
+  "appearance":
+  {
+    "ui_config_language":"Lingua",
+    "ui_config_select_language":"Scegli la Lingua"
+  }
+
 }

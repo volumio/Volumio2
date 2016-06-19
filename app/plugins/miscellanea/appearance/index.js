@@ -114,24 +114,41 @@ volumioAppearance.prototype.setAdditionalConf = function()
 volumioAppearance.prototype.getUIConfig = function () {
     var self = this;
 
-    var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
-    var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
-    var language = config.get('language');
-    var language_code = config.get('language_code');
+    var defer=libQ.defer();
+    self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+config.get('language_code')+'.json',
+                                __dirname+'/../../../i18n/strings_en.json',
+                                __dirname + '/UIConfig.json')
+        .then(function(uiconf)
+        {
+            var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
+            var language = config.get('language');
+            var language_code = config.get('language_code');
 
 
-    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
-        value: language_code,
-        label: language
-    });
-    for (var n = 0; n < languagesdata.languages.length; n++){
+            self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+                value: language_code,
+                label: language
+            });
+            for (var n = 0; n < languagesdata.languages.length; n++){
 
-        self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-            value: languagesdata.languages[n].code,
-            label: languagesdata.languages[n].name
-        });
-    }
-    return uiconf;
+                self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+                    value: languagesdata.languages[n].code,
+                    label: languagesdata.languages[n].name
+                });
+            }
+
+
+            defer.resolve(uiconf);
+        })
+        .fail(function()
+        {
+            defer.reject(new Error());
+        })
+
+
+    /*var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
+    */
+    return defer.promise;
 };
 
 volumioAppearance.prototype.getUiSettings = function()
