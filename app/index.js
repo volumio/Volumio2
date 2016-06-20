@@ -713,7 +713,15 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 };
 
 CoreCommandRouter.prototype.getI18nString = function (key) {
-    return this.i18nStrings[key];
+    var splitted=key.split('.');
+
+    if(splitted.length==1)
+    {
+        return this.i18nStrings[key];
+    }
+    else {
+        return this.i18nStrings[splitted[0]][splitted[1]];
+    }
 };
 
 CoreCommandRouter.prototype.loadI18nStrings = function () {

@@ -87,7 +87,10 @@ CoreStateMachine.prototype.getQueue = function () {
 // Add array of items to queue
 CoreStateMachine.prototype.addQueueItems = function (arrayItems) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueItems');
-	return this.playQueue.addQueueItems(arrayItems);
+
+    re
+
+    return this.playQueue.addQueueItems(arrayItems);
 };
 
 // Add array of items to queue
@@ -649,6 +652,8 @@ CoreStateMachine.prototype.play = function (index) {
                     self.startPlaybackTimer();
                     thisPlugin.resume();
                 }
+
+                self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('common.play_title'),self.commandRouter.getI18nString('common.play_text')+trackBlock.name);
 
                 return libQ.resolve();
 

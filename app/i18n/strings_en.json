@@ -12,7 +12,15 @@
   "remove_success":"Removed",
 
   "common":{
-    "button_save":"Save"
+    "button_save":"Save",
+    "play_title":"Play",
+    "play_text":"Started palyback of ",
+    "add_queue_title":"Add to queue",
+    "add_queue_text_1":"Added ",
+    "add_queue_text_2":" to queue",
+    "remove_queue_title":"Remove",
+    "remove_queue_text_1":"Remove ",
+    "remove_queue_text_2":" from queue"
   },
   "appearance":
   {

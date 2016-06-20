@@ -466,11 +466,11 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 					fs.writeJson(filePath, newData, function (err) {
 						if (err) {
 							self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('remove_error'), uri);
-							defer.resolve(name);
+							defer.resolve(newData);
 						}
 						else {
 							self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('remove_success'), uri);
-							defer.resolve(name);
+							defer.resolve(newData);
 						}
 					})
 				}

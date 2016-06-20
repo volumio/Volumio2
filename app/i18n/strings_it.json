@@ -26,7 +26,15 @@
 
 
   "common":{
-    "button_save":"Salva"
+    "button_save":"Salva",
+    "play_title":"Riproduzione",
+    "play_text":"Iniziata la riproduzione di ",
+    "add_queue_title":"Aggiungi alla coda",
+    "add_queue_text_1":"Aggiunta ",
+    "add_queue_text_2":" alla coda",
+    "remove_queue_title":"Rimozione dalla code",
+    "remove_queue_text_1":"Rimossa ",
+    "remove_queue_text_2":" dalla coda"
   },
   "appearance":
   {

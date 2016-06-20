@@ -62,9 +62,16 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 // Removes one item from the queue
 CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem');
-	this.arrayQueue.splice(nIndex, 1);
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
+	var item=this.arrayQueue.splice(nIndex.value, 1);
+
+    this.commandRouter.logger.info(JSON.stringify(item));
     this.saveQueue();
+
+    this.commandRouter.pushToastMessage('success',  this.commandRouter.getI18nString('common.remove_queue_title'),
+        this.commandRouter.getI18nString('common.remove_queue_text_1')+
+        item[0].name+
+        this.commandRouter.getI18nString('common.remove_queue_text_2'));
 
     return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
