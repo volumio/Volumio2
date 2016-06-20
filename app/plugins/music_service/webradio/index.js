@@ -7,6 +7,7 @@ var pidof = require('pidof');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
 var libMpd = require('mpd');
+var nodetools=require('nodetools');
 
 // Define the ControllerWebradio class
 module.exports = ControllerWebradio;
@@ -647,5 +648,73 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
             defer.reject(new Error("Cannot list Favourites"));
         });
 
+    return defer.promise;
+};
+
+
+ControllerWebradio.prototype.search = function (query) {
+    var self = this;
+
+    var defer = libQ.defer();
+    var list = [];
+
+    var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value);
+
+    memoryCache.wrap(uri, function (cacheCallback) {
+        var promise=libQ.defer();
+
+        unirest.get(uri)
+            .end(function(xml)
+            {
+                if(xml.ok)
+                {
+                    memoryCache.set(uri,xml);
+                    promise.resolve(xml);
+                }
+                else promise.reject(new Error());
+            });
+
+
+        return promise;
+    })
+    .then( function (xml) {
+
+        if(xml.ok)
+        {
+            var xmlDoc = libxmljs.parseXml(xml.body);
+
+            var children = xmlDoc.root().childNodes();
+            var base;
+
+            for(var i in children)
+            {
+                if(children[i].name()==='tunein')
+                {
+                    base=(children[i].attr('base').value()).replace('.pls','.m3u');
+                }
+                else if(children[i].name()==='station')
+                {
+                    var name=children[i].attr('name').value();
+                    var id=children[i].attr('id').value();
+
+                    var category = {
+                        service: 'webradio',
+                        type: 'webradio',
+                        title: name,
+                        artist: '',
+                        album: '',
+                        icon: 'fa fa-microphone',
+                        uri: 'http://yp.shoutcast.com' + base+'?id='+id
+                    };
+
+                    list.push(category);
+                }
+
+            }
+
+            defer.resolve(list);
+        }
+        else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+    });
     return defer.promise;
 };

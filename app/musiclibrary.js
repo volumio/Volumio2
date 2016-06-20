@@ -676,6 +676,7 @@ CoreMusicLibrary.prototype.search = function(data) {
 
 	var query = {};
 	var defer = libQ.defer();
+    var deferArray=[];
 	var searcharray = [];
 	if (data.value) {
 		if (data.type) {
@@ -693,29 +694,30 @@ CoreMusicLibrary.prototype.search = function(data) {
 			response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
 
 			if (response != undefined) {
-				response.then(function (result) {
-					console.log(i);
-					//console.log('RRRRRRRRRRR' +JSON.stringify(result))
-					searcharray = searcharray.concat(result);
-					//console.log(searcharray);
-				})
-					//TODO FIX WITH MORE PLUGINS
-				.then(function (result) {
-						defer.resolve({
-							navigation: {
-								prev: {
-									uri: '/'
-								},
-								list: searcharray
-							}
-						});
-
-				})
-					.fail(function () {
-						console.log('Search error in Plugin: '+source.plugin_name);
-					});
+                deferArray.push(response);
 			};
 		}
+
+        libQ.all(deferArray)
+            .then(function (result) {
+                for(var i in result)
+                {
+                    searcharray = searcharray.concat(result[i]);
+                }
+
+                defer.resolve({
+                    navigation: {
+                        prev: {
+                            uri: '/'
+                        },
+                        list: searcharray
+                    }
+                });
+            })
+            .fail(function () {
+                console.log('Search error in Plugin: '+source.plugin_name);
+                defer.reject(new Error());
+            });
 	} else {
 
 	}
