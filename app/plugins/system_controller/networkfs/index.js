@@ -158,7 +158,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 		} else {
 			credentials = 'guest,';
 		}
-		fsopts = credentials + "ro,dir_mode=0544,file_mode=0444,iocharset=utf8,noauto";
+		fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto";
 	} else { // nfs
 		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + config.get('NasMounts.' + shareid + '.path');
 	}
@@ -302,7 +302,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 				} else if (data.status === 'fail') {
 					if(data.reason) {
 						if (data.reason == 'Permission denied') {
-							responsemessage = {emit: 'nasCredentialsCheck', data:{ 'id': uuid, 'name': name, 'username': username, 'password':password }};
+							responsemessage = {emit: 'nasCredentialsCheck', data:{ 'id': uuid, 'title': 'Network Drive Authentication', 'message': 'This drive requires password', 'name': name, 'username': username, 'password':password }};
 							self.logger.info("Permission denied for " + name + " on IP " + ip);
 							defer.resolve(responsemessage);
 						} else {
@@ -558,7 +558,21 @@ ControllerNetworkfs.prototype.infoShare = function (data) {
 ControllerNetworkfs.prototype.editShare = function (data) {
 	var self = this;
 
+	console.log(data)
+	var responsemessageedit = {};
 	var defer = libQ.defer();
+	if (data.id){
+		var id= data['id'];
+	}
+	if (data.name){
+		var name= data['name'];
+	}
+	if (data.user){
+		var user= data['user'];
+	}
+	if (data.password){
+		var password= data['password'];
+	}
 
 	if (config.has('NasMounts.' + data['id'])) {
 		var mountpoint = '/mnt/NAS/' + config.get('NasMounts.' + data['id'] + '.name');
@@ -604,16 +618,19 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				}
 
 
-				var mountshare = self.mountShare(uuid);
+				var mountshare = self.mountShare(id);
 				if (mountshare != undefined) {
 					mountshare.then(function (data) {
-						var responsemessageedit = {};
+						console.log(data)
+						console.log(data.status);
 						if (data.status == 'success') {
-							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Success', message: name + ' mounted successfully'}};
-							defer.resolve(responsemessageedit);
 							self.scanDatabase();
+							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Success', message: 'Share mounted successfully'}};
+							defer.resolve(responsemessageedit);
+
 						} else if (data.status === 'fail') {
 							if(data.reason) {
+
 								self.logger.info("An error occurred mounting the new share. Rolling back configuration");
 								config.set(key + 'name', oldname);
 								config.set(key + 'path', oldpath);
@@ -624,11 +641,13 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 								config.set(key + 'options', oldoptions);
 								if (data.reason === 'Permission denied') {
 									responsemessageedit = {emit: 'nasCredentialsCheck', data:{ 'id': id, 'name': name, 'username': username, 'password':password }};
+									defer.resolve(responsemessageedit);
 								} else {
-									responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'warning', title: 'Error in mounting share '+name, message: data.reason}};
+									responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'warning', title: 'Error in mounting share ', message: data.reason}};
+									defer.resolve(responsemessageedit);
 								}
 
-								defer.resolve(responsemessageedit);
+
 							}
 						}
 

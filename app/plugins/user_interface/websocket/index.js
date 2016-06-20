@@ -1119,11 +1119,19 @@ function InterfaceWebUI(context) {
 				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'editShare', data);
 
 				if (returnedData != undefined) {
-					returnedData.then(function (data) {
-						selfConnWebSocket.emit('pushEditShare', data);
+					returnedData.then(function (datas) {
+						console.log('RETURN NAS : ' + JSON.stringify(datas));
+						selfConnWebSocket.emit(datas.emit, datas.data);
+						setTimeout(function () {
+							var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
+							if (listdata != undefined) {
+								listdata.then(function (datalist) {
+									selfConnWebSocket.emit('pushListShares', datalist);
+								});
+							}
+						}, 1000)
 					});
-				}
-				else self.logger.error("Error on storing on share");
+				} else self.logger.error("Error on storing on share");
 			});
 
 
