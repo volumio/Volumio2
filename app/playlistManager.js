@@ -185,7 +185,7 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), title + self.commandRouter.getI18nString('added_to_favourites'));
 	} else self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), uri + self.commandRouter.getI18nString('added_to_favourites'));
 
-	if (service === 'dirble') {
+	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
@@ -197,7 +197,7 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri ' + uri + ' from favourites');
 
-	if (service === 'dirble') {
+	if (service === 'webradio') {
 		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
 	} else {
 		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
@@ -411,7 +411,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 				});
 
 			});
-		} else if (service === 'dirble') {
+		} else if (service === 'webradio') {
 			fs.readJson(filePath, function (err, data) {
 				if (err)
 					defer.resolve({success: false});
