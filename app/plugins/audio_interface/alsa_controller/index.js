@@ -64,7 +64,6 @@ ControllerAlsa.prototype.onVolumioStart = function () {
     return libQ.resolve();
 };
 
-
 ControllerAlsa.prototype.getUIConfig = function () {
 	var self = this;
 

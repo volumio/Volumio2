@@ -1,15 +1,15 @@
 {  "page": {
-    "label": "Playback options"
+    "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE"
   },
   "sections": [
     {
       "id": "alsa_options",
       "element": "section",
-      "label": "Audio Output",
+      "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_OUTPUT",
       "icon": "fa-volume-up",
       "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveAlsaOptions"},
       "saveButton": {
-        "label": "translate.common.button_save",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "output_device"
         ]
@@ -22,8 +22,8 @@
         {
           "id": "output_device",
           "element": "select",
-          "doc": "Output device",
-          "label": "Output device",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.OUTPUT_DEVICE_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.OUTPUT_DEVICE",
           "value":  {
             "value":0,
             "label": "0"
@@ -36,7 +36,7 @@
         {
           "id": "",
           "element": "",
-          "doc" : "Enable I2S DACs",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ENABLE_I2S_DAC",
           "label": "",
           "value": false
         },
@@ -64,11 +64,11 @@
     {
       "id": "playback_options",
       "element": "section",
-      "label": "Playback options",
+      "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE",
       "icon": "fa-sliders",
       "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"savePlaybackOptions"},
       "saveButton": {
-        "label": "Save",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "gapless_mp3_playback",
           "volume_normalization",
@@ -81,7 +81,7 @@
           "id": "gapless_mp3_playback",
           "element": "switch",
           "doc": "If you have a problem with your MP3s ending abruptly it is recommended that you turn this On to attempt to fix the problem. Default is Off.",
-          "label": "Gapless MP3 playback",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.GAPLESS_MP3_PLAYBACK",
           "value":false
         },
 
@@ -90,7 +90,7 @@
           "id": "volume_normalization",
           "element": "switch",
           "doc":"If turned On Volumio will normalize the volume of tracks as they play. Default is Off.",
-          "label": "Volume normalization",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION",
           "value":false
         },
 
@@ -98,7 +98,7 @@
           "id": "audio_buffer_size",
           "element": "select",
           "doc":"This specifies the size of the audio buffer. The default is 2 MB, large enough for nearly 12 seconds of CD-quality audio.",
-          "label": "Audio buffer size",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_BUFFER_SIZE",
           "value":  {
             "value":8192,
             "label": "8192"
@@ -132,7 +132,7 @@
           "id": "buffer_before_play",
           "element": "select",
           "doc": "This specifies how much of the audio buffer should be filled before playing a track. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
-          "label": "Buffer before play",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.BUFFER_BEFORE_PLAY",
           "value":  {
             "value":"20%",
             "label": "20%"
@@ -162,11 +162,11 @@
     {
       "id": "volume_options",
       "element": "section",
-      "label": "Volume options",
+      "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_OPTIONS",
       "icon": "fa-volume-up",
       "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveVolumeOptions"},
       "saveButton": {
-        "label": "Save",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "mixer",
           "volumestart",
@@ -194,15 +194,15 @@
           "id": "volumestart",
           "element": "select",
           "doc" : "This is the default volume that is set at system startup.",
-          "label": "Default Startup Volume",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME",
           "value":  {
             "value":"disabled",
-            "label": "Disabled"
+            "label": "TRANSLATE.COMMON.DISABLED"
           },
           "options": [
             {
               "value":"disabled",
-              "label": "Disabled"
+              "label": "TRANSLATE.COMMON.DISABLED"
             },
             {
               "value":"10",
@@ -252,7 +252,7 @@
           "id": "volumemax",
           "element": "select",
           "doc" : "This is the maximum volume of the system.",
-          "label": "Max volume level",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL",
           "value":  {
             "value":"100",
             "label": "100"
@@ -305,7 +305,7 @@
           "id": "volumesteps",
           "element": "select",
           "doc" : "This is the maximum volume of the system.",
-          "label": "One-click Volume Steps",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS",
           "value":  {
             "value":"10",
             "label": "10"
@@ -343,19 +343,19 @@
           "id": "volumecurvemode",
           "element": "select",
           "doc" : "This is the volume curve used by the system, most DACs will use a logarithmic curve.",
-          "label": "Volume curve mode",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE",
           "value":  {
             "value":"logarithmic",
-            "label": "Natural"
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.NATURAL"
           },
           "options": [
             {
               "value":"logarithmic",
-              "label": "Natural"
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.NATURAL"
             },
             {
               "value":"linear",
-              "label": "Linear"
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.LINEAR"
             }
           ]
 

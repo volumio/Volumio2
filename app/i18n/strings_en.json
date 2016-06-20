@@ -1,30 +1,51 @@
 {
-  "network_restart_title":"Network restart",
-  "network_restart_error":"Error while restarting network: ",
-  "network_restart_success":"Network successfully restarted",
-  "wireless_restart_title":"Wireless restart",
-  "wireless_restart_error":"Error while restarting wireless: ",
-  "wireless_restart_success":"Wireless successfully restarted",
-  "added_title":"Added",
-  "added_to_playlist":" to playlist ",
-  "added_to_favourites":" to Favourites ",
-  "remove_error":"Cannot Remove",
-  "remove_success":"Removed",
-
-  "common":{
-    "button_save":"Save",
-    "play_title":"Play",
-    "play_text":"Started playback of ",
-    "add_queue_title":"Add to queue",
-    "add_queue_text_1":"Added ",
-    "add_queue_text_2":" to queue",
-    "remove_queue_title":"Remove",
-    "remove_queue_text_1":"Remove ",
-    "remove_queue_text_2":" from queue"
+  "PLAYBACK_OPTIONS":{
+    "PLAYBACK_OPTIONS_TITLE":"Playback options",
+    "AUDIO_OUTPUT":"Audio Output",
+    "OUTPUT_DEVICE_DOC":"Output Device",
+    "OUTPUT_DEVICE":"Output Device",
+    "ENABLE_I2S_DAC":"Enable I2S DACs",
+    "GAPLESS_MP3_PLAYBACK":"Gapless MP3 playback",
+    "VOLUME_NORMALIZATION":"Volume normalization",
+    "AUDIO_BUFFER_SIZE":"Audio buffer size",
+    "BUFFER_BEFORE_PLAY":"Buffer before play",
+    "VOLUME_OPTIONS":"Volume options",
+    "DEFAULT_STARTUP_VOLUME":"Default Startup Volume",
+    "MAX_VOLUME_LEVEL":"Max volume level",
+    "ONE_CLICK_VOLUME_STEPS":"One_click Volume Steps",
+    "VOLUME_CURVE_MODE":"Volume curve mode",
+    "NATURAL":"Natural",
+    "LINEAR":"Linear",
+    "MIXER_CONTROL":"Mixer Control",
+    "NO_HARDWARE_MIXER":"No Hardware Mixer Available"
   },
-  "appearance":
+  "NETWORK_RESTART_TITLE":"Network restart",
+  "NETWORK_RESTART_ERROR":"Error while restarting network: ",
+  "NETWORK_RESTART_SUCCESS":"Network successfully restarted",
+  "WIRELESS_RESTART_TITLE":"Wireless restart",
+  "WIRELESS_RESTART_ERROR":"Error while restarting wireless: ",
+  "WIRELESS_RESTART_SUCCESS":"Wireless successfully restarted",
+  "ADDED_TITLE":"Added",
+  "ADDED_TO_PLAYLIST":" to playlist ",
+  "ADDED_TO_FAVOURITES":" to Favourites ",
+  "REMOVE_ERROR":"Cannot Remove",
+  "REMOVE_SUCCESS":"Removed",
+
+  "COMMON":{
+    "SAVE":"Save",
+    "DISABLED":"Disabled",
+    "PLAY_TITLE":"Play",
+    "PLAY_TEXT":"Started playback of ",
+    "ADD_QUEUE_TITLE":"Add to queue",
+    "ADD_QUEUE_TEXT_1":"Added ",
+    "ADD_QUEUE_TEXT_2":" to queue",
+    "REMOVE_QUEUE_TITLE":"Remove",
+    "REMOVE_QUEUE_TEXT_1":"Remove ",
+    "REMOVE_QUEUE_TEXT_2":" from queue"
+  },
+  "APPEARANCE":
   {
-    "ui_config_language":"Language",
-    "ui_config_select_language":"Select Language"
+    "UI_CONFIG_LANGUAGE":"Language",
+    "UI_CONFIG_SELECT_LANGUAGE":"Select Language"
   }
 }
