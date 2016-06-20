@@ -174,13 +174,13 @@ ControllerWebradio.prototype.listRadioGenres = function () {
         return promise;
         })
         .then( function (xml) {
-            self.logger.info("THEN");
-
             if(xml.ok)
             {
                 var xmlDoc = libxmljs.parseXml(xml.body);
 
                 var children = xmlDoc.root().childNodes();
+                if(children.length==0)
+                    self.logger.info("No genres returned by Shoutcast");
 
                 for(var i in children)
                 {
@@ -718,3 +718,12 @@ ControllerWebradio.prototype.search = function (query) {
     });
     return defer.promise;
 };
+
+
+ControllerWebradio.prototype.addMyWebRadio = function (data) {
+    this.logger.info(JSON.stringify(data));
+
+    return this.commandRouter.playListManager.addToMyWebRadio('webradio',data.name,data.uri);
+    //addToMyWebRadio = function (service, radio_name, uri)
+}
+

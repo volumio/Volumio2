@@ -546,7 +546,7 @@ function InterfaceWebUI(context) {
 
 				var response;
 
-				response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'addMyWebRadio', data);
+				response = self.commandRouter.executeOnPlugin('music_service', 'webradio', 'addMyWebRadio', data);
 
 				if (response != undefined) {
 					response.then(function (result) {
@@ -564,7 +564,7 @@ function InterfaceWebUI(context) {
 
 				var response;
 
-				response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'removeMyWebRadio', data);
+				response = self.commandRouter.executeOnPlugin('music_service', 'webradio', 'removeMyWebRadio', data);
 
 				if (response != undefined) {
 					response.then(function (result) {
