@@ -14,7 +14,7 @@
   "common":{
     "button_save":"Save",
     "play_title":"Play",
-    "play_text":"Started palyback of ",
+    "play_text":"Started playback of ",
     "add_queue_title":"Add to queue",
     "add_queue_text_1":"Added ",
     "add_queue_text_2":" to queue",
