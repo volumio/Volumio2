@@ -6,7 +6,7 @@
       "id": "language_selector",
       "element": "section",
       "label": "translate.appearance.ui_config_language",
-      "icon": "fa-map-signs",
+      "icon": "fa-language",
       "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setLanguage"},
       "saveButton": {
         "label": "translate.common.button_save",
