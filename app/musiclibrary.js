@@ -685,24 +685,32 @@ CoreMusicLibrary.prototype.search = function(data) {
 			query = {"value": data.value};
 		}
 
+        var executed=[];
 
 		for (var i = 0; i < self.browseSources.length; i++) {
 			var source=self.browseSources[i];
 
-			var response;
+            var key=source.plugin_type+'_'+source.plugin_name;
+            if(executed.indexOf(key)==-1)
+            {
+                executed.push(key);
 
-			response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+                var response;
 
-			if (response != undefined) {
-                deferArray.push(response);
-			};
+                response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+
+                if (response != undefined) {
+                    deferArray.push(response);
+                };
+            }
 		}
 
         libQ.all(deferArray)
             .then(function (result) {
                 for(var i in result)
                 {
-                    searcharray = searcharray.concat(result[i]);
+                    if(result[i]!== undefined && result[i]!==null)
+                        searcharray = searcharray.concat(result[i]);
                 }
 
                 defer.resolve({
@@ -714,8 +722,8 @@ CoreMusicLibrary.prototype.search = function(data) {
                     }
                 });
             })
-            .fail(function () {
-                console.log('Search error in Plugin: '+source.plugin_name);
+            .fail(function (err) {
+                console.log('Search error in Plugin: '+source.plugin_name+". Details: "+err);
                 defer.reject(new Error());
             });
 	} else {

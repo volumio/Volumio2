@@ -1119,52 +1119,149 @@ ControllerMpd.prototype.search = function (query) {
 	var self = this;
 
 	var defer = libQ.defer();
-	var command = 'search ';
-	var type = 'any'
-	if (query.type){
-		type = query.type;
-	}
-	command += type+' "' + query.value + '"';
-	var cmd = libMpd.cmd;
-	var list = [];
+	var commandArtist = 'search artist '+' "' + query.value + '"';
+    var commandAlbum = 'search album '+' "' + query.value + '"';
+    var commandSong = 'search title '+' "' + query.value + '"';
+    var deferArray=[];
+    deferArray.push(libQ.defer());
+    deferArray.push(libQ.defer());
+    deferArray.push(libQ.defer());
 
-	self.mpdReady.then(function () {
-		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
-			if (msg) {
+    var cmd = libMpd.cmd;
+
+    self.mpdReady.then(function () {
+		self.clientMpd.sendCommand(cmd(commandArtist, []), function (err, msg) {
+            var subList=[];
+
+            if (msg) {
+
 				var lines = msg.split('\n');
-				for (var i = 0; i < lines.length; i++) {
+                for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 
 					if (line.startsWith('file:')) {
-						var path = line.slice(5).trimLeft();
-						var name = path.split('/');
-						var count = name.length;
+                        var path = line.slice(5).trimLeft();
+                        var name = path.split('/');
+                        var count = name.length;
 
-						var artist = self.searchFor(lines, i + 1, 'Artist:');
-						var album = self.searchFor(lines, i + 1, 'Album:');
-						var title = self.searchFor(lines, i + 1, 'Title:');
+                        var artist = self.searchFor(lines, i + 1, 'Artist:');
 
-						if (title == undefined) {
-							title = name[count - 1];
-						}
-						list.push({
-							service: 'mpd',
-							type: 'song',
-							title: title,
-							artist: artist,
-							album: album,
-							icon: 'fa fa-music',
-							uri: 'music-library/' + path
-						});
+                        deferArray[0].resolve([{
+                            service: 'mpd',
+                            type: 'song',
+                            title: artist,
+                            icon: 'fa fa-music',
+                            uri: 'search://artist/' + artist
+                        }]);
+
+                        return;
 					}
 
 				}
-			}
-			else self.logger.info(err);
 
-			defer.resolve(list);
+
+			}
+			else if(err)  deferArray[0].reject(new Error('Artist:' +err));
+            else deferArray[0].resolve();
 		});
 	});
+
+    self.mpdReady.then(function () {
+        self.clientMpd.sendCommand(cmd(commandAlbum, []), function (err, msg) {
+            var subList=[];
+
+            if (msg) {
+
+                var lines = msg.split('\n');
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+
+                    if (line.startsWith('file:')) {
+                        var path = line.slice(5).trimLeft();
+                        var name = path.split('/');
+                        var count = name.length;
+
+                        var album = self.searchFor(lines, i + 1, 'Album:');
+                        var artist = self.searchFor(lines, i + 1, 'Artist:');
+
+                        deferArray[1].resolve([{
+                            service: 'mpd',
+                            type: 'song',
+                            title: album,
+                            artist: artist,
+                            album:'',
+                            icon: 'fa fa-music',
+                            uri: 'search://album/' + album
+                        }]);
+
+                        return;
+                    }
+
+                }
+            }
+            else if(err)  deferArray[1].reject(new Error('Album:' +err));
+            else deferArray[1].resolve();
+        });
+    });
+
+    self.mpdReady.then(function () {
+        self.clientMpd.sendCommand(cmd(commandSong, []), function (err, msg) {
+            var subList=[];
+
+            if (msg) {
+
+                var lines = msg.split('\n');
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+
+                    if (line.startsWith('file:')) {
+                        var path = line.slice(5).trimLeft();
+                        var name = path.split('/');
+                        var count = name.length;
+
+                        var artist = self.searchFor(lines, i + 1, 'Artist:');
+                        var album = self.searchFor(lines, i + 1, 'Album:');
+                        var title = self.searchFor(lines, i + 1, 'Title:');
+
+                        if (title == undefined) {
+                            title = name[count - 1];
+                        }
+                        subList.push({
+                            service: 'mpd',
+                            type: 'song',
+                            title: title,
+                            artist: artist,
+                            album: album,
+                            icon: 'fa fa-music',
+                            uri: 'music-library/' + path
+                        });
+                    }
+
+                }
+
+                deferArray[2].resolve(subList);
+            }
+            else if(err)  deferArray[2].reject(new Error('Song:' +err));
+            else deferArray[2].resolve();
+        });
+    });
+
+    libQ.all(deferArray).then(function(values){
+        var list = [];
+
+        list=[{type:'title',title:self.commandRouter.getI18nString('MPD.SEARCH_ARTIST_SECTION')}].
+        concat(values[0]).
+        concat([{type:'title',title:self.commandRouter.getI18nString('MPD.SEARCH_ALBUM_SECTION')}]).
+        concat(values[1]).
+        concat([{type:'title',title:self.commandRouter.getI18nString('MPD.SEARCH_SONG_SECTION')}]).
+        concat(values[2]).filter(function(v){return !!(v)==true;});
+
+        defer.resolve(list);
+    }).fail(function(err){
+        self.commandRouter.logger.info("PARSING RESPONSE ERROR "+err);
+
+        defer.resolve();
+    })
 	return defer.promise;
 };
 

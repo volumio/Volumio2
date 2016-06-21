@@ -60,6 +60,12 @@
   {
     "UI_CONFIG_LANGUAGE":"Lingua",
     "UI_CONFIG_SELECT_LANGUAGE":"Scegli la Lingua"
+  },
+  "MPD":{
+    "SEARCH_ARTIST_SECTION":"Artisti",
+    "SEARCH_ALBUM_SECTION":"Album",
+    "SEARCH_SONG_SECTION":"Canzoni"
+
   }
 
 }

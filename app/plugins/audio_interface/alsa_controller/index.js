@@ -70,12 +70,14 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	var defer = libQ.defer();
 
 	var lang_code = this.commandRouter.sharedVars.get('language_code');
-
+    
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
 		__dirname + '/UIConfig.json')
 		.then(function(uiconf)
 		{
+
+
 	var value;
 	var devicevalue;
 

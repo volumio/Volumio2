@@ -657,6 +657,7 @@ ControllerWebradio.prototype.search = function (query) {
 
     var defer = libQ.defer();
     var list = [];
+    list.push({type:'title',title:'Webradios'});
 
     var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value);
 
@@ -678,7 +679,6 @@ ControllerWebradio.prototype.search = function (query) {
         return promise;
     })
     .then( function (xml) {
-
         if(xml.ok)
         {
             var xmlDoc = libxmljs.parseXml(xml.body);
@@ -714,7 +714,11 @@ ControllerWebradio.prototype.search = function (query) {
 
             defer.resolve(list);
         }
-        else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+        else
+        {
+            self.commandRouter.logger.info('An error occurred while querying SHOUTCAST');
+            defer.resolve();
+        }
     });
     return defer.promise;
 };
