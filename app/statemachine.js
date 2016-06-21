@@ -88,8 +88,6 @@ CoreStateMachine.prototype.getQueue = function () {
 CoreStateMachine.prototype.addQueueItems = function (arrayItems) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::addQueueItems');
 
-    re
-
     return this.playQueue.addQueueItems(arrayItems);
 };
 
