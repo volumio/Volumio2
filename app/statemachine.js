@@ -651,7 +651,7 @@ CoreStateMachine.prototype.play = function (index) {
                     thisPlugin.resume();
                 }
 
-                self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('common.play_title'),self.commandRouter.getI18nString('common.play_text')+trackBlock.name);
+                self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('COMMON.PLAY_TITLE'),self.commandRouter.getI18nString('COMMON.PLAY_TEXT')+trackBlock.name);
 
                 return libQ.resolve();
 
