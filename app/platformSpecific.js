@@ -33,11 +33,11 @@ PlatformSpecific.prototype.networkRestart = function () {
 	var self = this;
 	exec("sudo /bin/systemctl restart networking.service", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('network_restart_title'),
-                self.coreCommand.getI18nString('network_restart_error')+error);
+			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_ERROR')+error);
 		} else
-			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('network_restart_title'),
-                self.coreCommand.getI18nString('network_restart_success'));
+			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
 		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
@@ -49,11 +49,11 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 	var self = this;
 	exec("sudo /bin/systemctl restart wireless.service", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('wireless_restart_title'),
-                self.coreCommand.getI18nString('wireless_restart_error')+error);
+			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_ERROR')+error);
 		} else
-			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('wireless_restart_title'),
-                self.coreCommand.getI18nString('wireless_restart_error'))
+			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_SUCCESS'))
 		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');

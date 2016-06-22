@@ -2,7 +2,8 @@
   "page": {
     "label": "Network"
   },
-  "sections": [ 
+  "sections": [
+    {"coreSection":"network-status"},
    {
       "id": "section_wired_network",
       "element": "section",
@@ -145,6 +146,6 @@
         }
       ]
     },
-    {"coreSection":"wifi"},{"coreSection":"network-status"}
+    {"coreSection":"wifi"}
   ]
 }

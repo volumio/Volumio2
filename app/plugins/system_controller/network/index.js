@@ -77,16 +77,16 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
 	//dhcp
-	uiconf.sections[0].content[0].value = config.get('dhcp');
+	uiconf.sections[1].content[0].value = config.get('dhcp');
 
 	//static ip
-	uiconf.sections[0].content[1].value = config.get('ethip');
+	uiconf.sections[1].content[1].value = config.get('ethip');
 
 	//static netmask
-	uiconf.sections[0].content[2].value = config.get('ethnetmask');
+	uiconf.sections[1].content[2].value = config.get('ethnetmask');
 
 	//static gateway
-	uiconf.sections[0].content[3].value = config.get('ethgateway');
+	uiconf.sections[1].content[3].value = config.get('ethgateway');
 
 
 	//Wireless
@@ -94,19 +94,19 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	//dhcp
 	  //dhcp
         if (config.get('wirelessdhcp') == undefined) {
-            uiconf.sections[1].content[0].value = true;
+            uiconf.sections[2].content[0].value = true;
         } else {
-            uiconf.sections[1].content[0].value = config.get('wirelessdhcp');
+            uiconf.sections[2].content[0].value = config.get('wirelessdhcp');
         }
 
 	//static ip
-	uiconf.sections[1].content[1].value = config.get('wirelessip');
+	uiconf.sections[2].content[1].value = config.get('wirelessip');
 
 	//static netmask
-	uiconf.sections[1].content[2].value = config.get('wirelessnetmask');
+	uiconf.sections[2].content[2].value = config.get('wirelessnetmask');
 
 	//static gateway
-	uiconf.sections[1].content[3].value = config.get('wirelessgateway');
+	uiconf.sections[2].content[3].value = config.get('wirelessgateway');
 
 	//console.log(uiconf);
 
@@ -193,8 +193,9 @@ ControllerNetwork.prototype.saveWiredNet = function (data) {
 	config.set('ethnetmask', static_netmask);
 	config.set('ethgateway', static_gateway);
 
+
 	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', self.getI18NString('network_configuration_update'), self.getI18NString('network_configuration_update_success'));
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
 
 
 	defer.resolve({});
@@ -226,7 +227,7 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 	}
 
 	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', self.getI18NString('network_configuration_update'), self.getI18NString('network_configuration_update_success'));
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
 
 
 	defer.resolve({});
@@ -265,7 +266,7 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 
 	self.wirelessConnect({ssid: network_ssid, pass: network_pass});
 
-	self.commandRouter.pushToastMessage('success', self.getI18NString('network_configuration_update'), self.getI18NString('network_configuration_update_success'));
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.WIRELESS_RESTART_SUCCESS'));
 	fs.writeFile('/data/configuration/netconfigured', ' ', function (err) {
 		if (err) {
 			self.logger.error('Cannot write netconfigured '+error);
@@ -350,7 +351,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 		self.commandRouter.networkRestart();
 	}
 	catch (err) {
-		self.commandRouter.pushToastMessage('error',self.getI18NString('network_setup'), self.getI18NString('network_setup_error') + err);
+		self.commandRouter.pushToastMessage('error',self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_ERROR'), self.getI18NString('NETWORK.NETWORK_RESTART_ERROR') + err);
 	}
 		}
 	});
@@ -363,15 +364,14 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var defer = libQ.defer();
 	var response = [];
-	var oll;
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 
 	var ethip = ''
 	var wlanip = ''
+	var oll = 'no';
 	isOnline(function (err, online) {
 		if (online) oll = 'yes';
-		else oll = 'no';
 	});
 
 	ifconfig.status('eth0', function (err, status) {
@@ -400,13 +400,3 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	return defer.promise;
 };
 
-ControllerNetwork.prototype.loadI18NStrings = function (code) {
-    this.logger.info('MPD I18N LOAD FOR LOCALE '+code);
-
-    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-ControllerNetwork.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}

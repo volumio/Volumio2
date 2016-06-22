@@ -19,6 +19,7 @@
     "MIXER_CONTROL":"Mixer Control",
     "NO_HARDWARE_MIXER":"No Hardware Mixer Available"
   },
+  "NETWORK":{
   "NETWORK_RESTART_TITLE":"Network restart",
   "NETWORK_RESTART_ERROR":"Error while restarting network: ",
   "NETWORK_RESTART_SUCCESS":"Network successfully restarted",
@@ -29,8 +30,8 @@
   "ADDED_TO_PLAYLIST":" to playlist ",
   "ADDED_TO_FAVOURITES":" to Favourites ",
   "REMOVE_ERROR":"Cannot Remove",
-  "REMOVE_SUCCESS":"Removed",
-
+  "REMOVE_SUCCESS":"Removed"
+  },
   "COMMON":{
     "SAVE":"Save",
     "DISABLED":"Disabled",
