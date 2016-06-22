@@ -961,8 +961,8 @@ PluginManager.prototype.getInstalledPlugins = function () {
 							var category = package_json.volumio_info.plugin_type;
 							var key=category+'.'+name;
 							var version = package_json.version;
-							if (package_json.volumio_info.pretty_name) {
-								var prettyName = package_json.volumio_info.pretty_name;
+							if (package_json.volumio_info.prettyName) {
+								var prettyName = package_json.volumio_info.prettyName;
 							} else {
 								var prettyName = name;
 							}
@@ -1228,8 +1228,8 @@ PluginManager.prototype.findPluginFolder = function (category,name) {
 
 PluginManager.prototype.getPrettyName = function (package_json) {
 	if(package_json.volumio_info !== undefined &&
-		package_json.volumio_info.pretty_name!==undefined)
-		return package_json.volumio_info.pretty_name;
+		package_json.volumio_info.prettyName!==undefined)
+		return package_json.volumio_info.prettName;
 	else return package_json.name;
 }
 
