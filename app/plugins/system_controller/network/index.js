@@ -74,7 +74,6 @@ ControllerNetwork.prototype.getUIConfig = function () {
 		.then(function(uiconf)
 		{
 
-	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
 	//dhcp
 	uiconf.sections[1].content[0].value = config.get('dhcp');

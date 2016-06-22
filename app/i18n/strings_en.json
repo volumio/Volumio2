@@ -19,13 +19,22 @@
     "MIXER_CONTROL":"Mixer Control",
     "NO_HARDWARE_MIXER":"No Hardware Mixer Available"
   },
-  "NETWORK":{
-  "NETWORK_RESTART_TITLE":"Network restart",
-  "NETWORK_RESTART_ERROR":"Error while restarting network: ",
-  "NETWORK_RESTART_SUCCESS":"Network successfully restarted",
-  "WIRELESS_RESTART_TITLE":"Wireless restart",
-  "WIRELESS_RESTART_ERROR":"Error while restarting wireless: ",
-  "WIRELESS_RESTART_SUCCESS":"Wireless successfully restarted",
+  "NETWORK": {
+    "NETWORK_SETTINGS":"Network Settings",
+    "WIRED_NETWORK":"Wired Network",
+    "AUTOMATIC_IP":"Automatic IP",
+    "STATIC_IP":"Static IP",
+    "NETMASK":"Netmask",
+    "GATEWAY":"Gateway",
+    "WIRELESS_NETWORK":"Wireless Network",
+    "NETWORK_RESTART_TITLE": "Network restart",
+    "NETWORK_RESTART_ERROR": "Error while restarting network: ",
+    "NETWORK_RESTART_SUCCESS": "Network successfully restarted",
+    "WIRELESS_RESTART_TITLE": "Wireless restart",
+    "WIRELESS_RESTART_ERROR": "Error while restarting wireless: ",
+    "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted"
+  },
+  "PLAYLIST":{
   "ADDED_TITLE":"Added",
   "ADDED_TO_PLAYLIST":" to playlist ",
   "ADDED_TO_FAVOURITES":" to Favourites ",

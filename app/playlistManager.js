@@ -95,8 +95,8 @@ PlaylistManager.prototype.addToPlaylist = function (name, service, uri) {
 	var self = this;
 
 	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), 
-        uri +  self.commandRouter.getI18nString('added_to_playlist') + name);
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'),
+        uri +  self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_PLAYLIST') + name);
 	return self.commonAddToPlaylist(self.playlistFolder, name, service, uri);
 };
 
@@ -182,8 +182,8 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	var self = this;
 
 	if (title){
-		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), title + self.commandRouter.getI18nString('added_to_favourites'));
-	} else self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('added_title'), uri + self.commandRouter.getI18nString('added_to_favourites'));
+		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), title + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+	} else self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), uri + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
 
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
@@ -465,11 +465,11 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 
 					fs.writeJson(filePath, newData, function (err) {
 						if (err) {
-							self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('remove_error'), uri);
+							self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), uri);
 							defer.resolve(newData);
 						}
 						else {
-							self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('remove_success'), uri);
+							self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'), uri);
 							defer.resolve(newData);
 						}
 					})

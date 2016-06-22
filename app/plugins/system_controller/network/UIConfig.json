@@ -1,17 +1,17 @@
 {
   "page": {
-    "label": "Network"
+    "label": "TRANSLATE.NETWORK.NETWORK_SETTINGS"
   },
   "sections": [
     {"coreSection":"network-status"},
    {
       "id": "section_wired_network",
       "element": "section",
-      "label": "Wired Network",
+      "label": "TRANSLATE.NETWORK.WIRED_NETWORK",
       "icon": "fa-plug",
       "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWiredNet"},
       "saveButton": {
-        "label": "Save",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "dhcp",
           "static_ip",
@@ -24,7 +24,7 @@
           "id": "dhcp",
           "element": "switch",
           "doc" : "Choose between DHCP and Static IP configuration.",
-          "label": "Automatic IP",
+          "label": "TRANSLATE.NETWORK.AUTOMATIC_IP",
           "value": true
         },
         {
@@ -36,7 +36,7 @@
               "placeholder": "192.168.1.123"
             }
           ],
-          "label": "Static IP",
+          "label": "TRANSLATE.NETWORK.STATIC_IP",
           "value": "",
           "visibleIf": {
             "field": "dhcp",
@@ -52,7 +52,7 @@
             }
           ],
           "type": "ip",
-          "label": "Netmask",
+          "label": "TRANSLATE.NETWORK.NETMASK",
           "visibleIf": {
             "field": "dhcp",
             "value": false
@@ -67,7 +67,7 @@
             }
           ],
           "type": "ip",
-          "label": "Gateway",
+          "label": "TRANSLATE.NETWORK.GATEWAY",
           "visibleIf": {
             "field": "dhcp",
             "value": false
@@ -78,11 +78,11 @@
     { 
       "id": "section_wireless_network",
       "element": "section",
-      "label": "Wireless Network",
+      "label": "TRANSLATE.NETWORK.WIRELESS_NETWORK",
       "icon": "fa-wifi",
       "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWirelessNet"},
       "saveButton": {
-        "label": "Save",
+        "label": "COMMON.SAVE",
         "data": [
           "wireless_dhcp",
           "wireless_static_ip",
@@ -95,7 +95,7 @@
           "id": "wireless_dhcp",
           "element": "switch",
           "doc" : "Choose between DHCP and Static IP configuration.",
-          "label": "Automatic IP",
+          "label": "TRANSLATE.NETWORK.AUTOMATIC_IP",
           "value": true
         },
         {
@@ -107,7 +107,7 @@
               "placeholder": "192.168.1.123"
             }
           ],
-          "label": "Static IP",
+          "label": "TRANSLATE.NETWORK.STATIC_IP",
           "value": "",
           "visibleIf": {
             "field": "wireless_dhcp",
@@ -123,7 +123,7 @@
             }
           ],
           "type": "ip",
-          "label": "Netmask",
+          "label": "TRANSLATE.NETWORK.NETMASK",
           "visibleIf": {
             "field": "wireless_dhcp",
             "value": false
@@ -138,7 +138,7 @@
             }
           ],
           "type": "ip",
-          "label": "Gateway",
+          "label": "TRANSLATE.NETWORK.GATEWAY",
           "visibleIf": {
             "field": "wireless_dhcp",
             "value": false
