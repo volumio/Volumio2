@@ -605,7 +605,23 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 
 	if(data.name!= undefined) {
 	    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
-	    self.browseSources.push(data);
+
+        var replaced=false;
+
+        //searching for existing browse source
+        for(var i in self.browseSources)
+        {
+            var source=self.browseSources[i];
+            if(source.name===data.name)
+            {
+                source.uri=data.uri;
+                source.plugin_type=data.plugin_type;
+                source.plugin_name=data.plugin_name;
+                replaced=true;
+            }
+        }
+        if(replaced===false)
+            self.browseSources.push(data);
 	}
 	var response = self.getBrowseSources();
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
