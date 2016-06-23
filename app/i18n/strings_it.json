@@ -68,6 +68,7 @@
     "MY_MUSIC":"La mia Musica"
   },
   "APPEARANCE": {
+    "APPEARANCE":"Effetti Visivi",
     "UI_CONFIG_LANGUAGE":"Lingua",
     "UI_CONFIG_SELECT_LANGUAGE":"Scegli la Lingua"
   },

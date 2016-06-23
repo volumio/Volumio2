@@ -55,6 +55,7 @@
     "MY_MUSIC":"My Music"
   },
   "APPEARANCE":{
+    "APPEARANCE":"Appearance",
     "UI_CONFIG_LANGUAGE":"Language",
     "UI_CONFIG_SELECT_LANGUAGE":"Select Language"
   },

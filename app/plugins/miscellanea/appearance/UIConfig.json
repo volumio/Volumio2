@@ -1,15 +1,15 @@
 {  "page": {
-    "label": "Appearance"
+    "label": "TRANSLATE.APPEARANCE.APPEARANCE"
   },
   "sections": [
     {
       "id": "language_selector",
       "element": "section",
-      "label": "translate.appearance.ui_config_language",
+      "label": "TRANSLATE.APPEARANCE.UI_CONFIG_LANGUAGE",
       "icon": "fa-language",
       "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setLanguage"},
       "saveButton": {
-        "label": "translate.common.button_save",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "language"
         ]
@@ -22,8 +22,8 @@
         {
           "id": "language",
           "element": "select",
-          "doc": "translate.appearance.ui_config_select_language",
-          "label": "translate.appearance.ui_config_select_language",
+          "doc": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
+          "label": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
           "value":  {
             "value":0,
             "label": "0"
