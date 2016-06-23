@@ -158,7 +158,7 @@ var searchInFolder = function (defer, path, web) {
 	var coverFolder = '';
 	var splitted = path.split('/');
 
-	for (var k = 0; k < splitted.length - 1; k++) {
+	for (var k = 1; k < splitted.length; k++) {
 		coverFolder = coverFolder + '/' + splitted[k];
 	}
 
@@ -234,8 +234,12 @@ var processRequest = function (web, path) {
 	}
 
 	if (path != undefined) {
-        path = '/mnt/' + path;
-		logger.info(path);
+
+        if(path.startsWith('/'))
+            path = '/mnt' + path;
+		else path = '/mnt/' + path;
+
+        logger.info(path);
 		if (fs.existsSync(path)) {
             var stats = fs.statSync(path);
             var isFolder=false;
