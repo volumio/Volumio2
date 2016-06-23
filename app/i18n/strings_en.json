@@ -51,10 +51,10 @@
     "ADD_QUEUE_TEXT_2":" to queue",
     "REMOVE_QUEUE_TITLE":"Remove",
     "REMOVE_QUEUE_TEXT_1":"Remove ",
-    "REMOVE_QUEUE_TEXT_2":" from queue"
+    "REMOVE_QUEUE_TEXT_2":" from queue",
+    "MY_MUSIC":"My Music"
   },
-  "APPEARANCE":
-  {
+  "APPEARANCE":{
     "UI_CONFIG_LANGUAGE":"Language",
     "UI_CONFIG_SELECT_LANGUAGE":"Select Language"
   },
@@ -63,5 +63,17 @@
     "SEARCH_ALBUM_SECTION":"Albums",
     "SEARCH_SONG_SECTION":"Songs"
 
+  },
+  "MAIN_MENU":{
+    "MY_MUSIC":"My Music",
+    "PLAYBACK_OPTIONS":"Playback Options",
+    "APPEARANCE":"Appearance",
+    "NETWORK":"Network",
+    "SYSTEM":"System",
+    "PLUGINS":"Plugins",
+    "ALARM":"Alarm",
+    "SLEEP":"Sleep",
+    "CREDITS":"Credits",
+    "SHUTDOWN":"Shutdown"
   }
 }

@@ -49,7 +49,6 @@
   "SLEEP_MODE_DESCR_1":"System will " ,
   "ALARM_CLOCK_DESCR_2":" in ",
   "ALARM_CLOCK_DESCR_3":" minute(s)",
-  "SLEEP_MODE_DESCR_1":" hour(s) and ",
   "APPEARANCE_TITLE":"Tema",
   "NEW_BACKGROUND_APPLIED":"Sfondo impostato correttamente",
   "NEW_LANGUAGE_SET":"La lingua è stata impostata",
@@ -65,10 +64,10 @@
     "ADD_QUEUE_TEXT_2":" alla coda",
     "REMOVE_QUEUE_TITLE":"Rimozione dalla code",
     "remove_queue_text_1":"Rimossa ",
-    "REMOVE_QUEUE_TEXT_2":" dalla coda"
+    "REMOVE_QUEUE_TEXT_2":" dalla coda",
+    "MY_MUSIC":"La mia Musica"
   },
-  "APPEARANCE":
-  {
+  "APPEARANCE": {
     "UI_CONFIG_LANGUAGE":"Lingua",
     "UI_CONFIG_SELECT_LANGUAGE":"Scegli la Lingua"
   },
@@ -77,6 +76,17 @@
     "SEARCH_ALBUM_SECTION":"Album",
     "SEARCH_SONG_SECTION":"Canzoni"
 
+  },
+  "MAIN_MENU":{
+    "MY_MUSIC":"La Mia Musica",
+    "PLAYBACK_OPTIONS":"Riproduzione",
+    "APPEARANCE":"Effetti visivi",
+    "NETWORK":"Rete",
+    "SYSTEM":"Sistema",
+    "PLUGINS":"Plugins",
+    "ALARM":"Sveglie",
+    "SLEEP":"Sleep",
+    "CREDITS":"Crediti",
+    "SHUTDOWN":"Spegni"
   }
-
 }

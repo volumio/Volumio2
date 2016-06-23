@@ -1,0 +1,14 @@
+{
+  "menuItems":[
+    {"id": "networkfs", "name": "TRANSLATE.MAIN_MENU.MY_MUSIC", "state": "volumio.plugin","params": {"pluginName": "system_controller/networkfs"}},
+    {"id": "playback_options", "name": "TRANSLATE.MAIN_MENU.PLAYBACK_OPTIONS", "state": "volumio.plugin","params": {"pluginName": "audio_interface/alsa_controller"}},
+    {"id": "appearance", "name": "TRANSLATE.MAIN_MENU.APPEARANCE", "state": "volumio.plugin","params": {"pluginName": "miscellanea/appearance"}},
+    {"id": "network", "name": "TRANSLATE.MAIN_MENU.NETWORK", "state": "volumio.plugin","params": {"pluginName": "system_controller/network"}},
+    {"id": "system", "name": "TRANSLATE.MAIN_MENU.SYSTEM", "state": "volumio.plugin", "params": {"pluginName": "system_controller/system"}},
+    {"id": "plugin-manager", "name": "TRANSLATE.MAIN_MENU.PLUGINS", "state":"volumio.plugin-manager"},
+    {"id": "modal", "name": "TRANSLATE.MAIN_MENU.ALARM", "params": {"modalName": "modal-alarm-clock"}},
+    {"id": "modal", "name": "TRANSLATE.MAIN_MENU.SLEEP", "params": {"modalName": "modal-sleep"}},
+    {"id": "static-page","name": "TRANSLATE.MAIN_MENU.CREDITS","pageName": "credits"},
+    {"id": "modal", "name": "TRANSLATE.MAIN_MENU.SHUTDOWN", "params": {"modalName": "modal-power-off"}}
+  ]
+}

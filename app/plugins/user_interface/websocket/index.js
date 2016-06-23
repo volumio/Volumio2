@@ -436,7 +436,16 @@ function InterfaceWebUI(context) {
 				var timeStart = Date.now();
 				self.logStart('Client requests Menu Items')
 					.then(function () {
-						var menuitems = fs.readJsonSync(__dirname + '/../../../config.json');
+
+						var lang_code = self.commandRouter.sharedVars.get('language_code');
+
+						var defer=libQ.defer();
+						self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+							__dirname+'/../../../i18n/strings_en.json',
+							__dirname + '/../../../mainmenu.json')
+							.then(function(menuitems)
+							{
+
 
 						//console.log(JSON.stringify(menuitems['menuItems']));
 
@@ -447,6 +456,7 @@ function InterfaceWebUI(context) {
 					.done(function () {
 						return self.logDone(timeStart);
 					});
+			});
 			});
 
 			connWebSocket.on('callMethod', function (dataJson) {
