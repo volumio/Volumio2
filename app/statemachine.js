@@ -41,6 +41,8 @@ CoreStateMachine.prototype.getState = function () {
                 bitdepth: 0,
                 Streaming: false,
                 service: 'mpd',
+                volume: this.currentVolume,
+                mute: this.currentMute,
                 random:this.currentRandom,
                 repeat: this.currentRepeat,
                 updatedb: this.currentUpdate,
