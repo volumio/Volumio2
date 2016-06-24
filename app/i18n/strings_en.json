@@ -63,7 +63,13 @@
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
     "RESTART":"Restart",
     "ON":"On",
-    "OFF":"Off"
+    "OFF":"Off",
+    "SEARCH_ARTIST_SECTION":"Artists",
+    "SEARCH_ALBUM_SECTION":"Albums",
+    "SEARCH_SONG_SECTION":"Songs",
+    "SCAN_DB_ERROR":"Error while scanning database",
+    "SCAN_DB":"Scanning Music",
+    "ILLEGAL_CHARACTER":"Remove forbidden character "
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",

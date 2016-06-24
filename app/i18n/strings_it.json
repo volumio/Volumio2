@@ -58,7 +58,10 @@
     "remove_queue_text_1":"Rimossa ",
     "REMOVE_QUEUE_TEXT_2":" dalla coda",
     "MY_MUSIC":"La mia Musica",
-    "RESTART":"Riavvia"
+    "RESTART":"Riavvia",
+    "SCAN_DB_ERROR":"Errore nella scansione delle cartelle",
+    "SCAN_DB":"Scansione cominciata",
+    "ILLEGAL_CHARACTER_/":"Rimuovere il carattere /"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

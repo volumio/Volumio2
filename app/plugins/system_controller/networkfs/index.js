@@ -215,12 +215,12 @@ ControllerNetworkfs.prototype.scanDatabase = function () {
 
 	exec("/usr/bin/mpc update", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.commandRouter.pushToastMessage('error', self.getI18NString('networkfs_my_music'), self.getI18NString('networkfs_scan_database_error') + error);
+			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.SCAN_DB_ERROR') + error);
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database scan error: ' + error);
 		}
 		else {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Database update started');
-			self.commandRouter.pushToastMessage('success', self.getI18NString('networkfs_my_music'), self.getI18NString('networkfs_scan_database_in_progress'));
+			self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.SCAN_DB'));
 		}
 	});
 };
@@ -265,7 +265,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	 * Check special characters
 	 */
 	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', self.getI18NString('networkfs_shares'), self.getI18NString('networkfs_share_name_error'));
+		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('ILLEGAL_CHARACTER_/'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return defer.promise;
 	}
@@ -723,13 +723,3 @@ ControllerNetworkfs.prototype.shareCredentialCheck = function (data) {
 	var shares = execSync("/bin/echo volumio | echo volumio | smbclient //DISKSTATION/flac", { uid: 1000, gid: 1000, encoding: 'utf8' });
 }
 
-ControllerNetworkfs.prototype.loadI18NStrings = function (code) {
-    this.logger.info('NETWORK FS I18N LOAD FOR LOCALE '+code);
-
-    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-ControllerNetworkfs.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}
