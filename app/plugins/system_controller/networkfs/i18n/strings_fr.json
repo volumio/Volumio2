@@ -12,5 +12,5 @@
   "networkfs_share_delete_error":"Le paratge ne peut être supprimé : ",
   "networkfs_folder_delete_error":"Le dossier ne peut être supprimé: ",
   "networkfs_share_delete_success":"Le dossier a été supprimé",
-  "error":"Errore"
+  "error":"Erreur"
 }
