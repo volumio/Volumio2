@@ -278,8 +278,8 @@ volumioAppearance.prototype.setBackgrounds = function(data)
         config.set('background_path', data.path);
     }
     
-    self.commandRouter.pushToastMessage('success',self.getI18NString('appearance_title'),
-                                            self.getI18NString('new_background_applied'));
+    self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
+        self.commandRouter.getI18nString('APPEARANCE.NEW_BACKGROUND_APPLIED'));
 
     return ('Done');
 };
@@ -294,8 +294,8 @@ volumioAppearance.prototype.setLanguage = function(data)
         config.set('language_code', data.language.value);
         this.commandRouter.sharedVars.set('language_code',data.language.value);
     }
-    self.commandRouter.pushToastMessage('success',self.getI18NString('appearance_title'),
-    self.getI18NString('new_language_set'));
+    self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
+        self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
     var data = self.getUiSettings();
 
@@ -357,15 +357,6 @@ volumioAppearance.prototype.deleteFile = function(filepath){
     return defer.promise;
 }
 
-volumioAppearance.prototype.loadI18NStrings = function (code) {
-    this.logger.info('APPEARANCE I18N LOAD FOR LOCALE '+code);
 
-    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-volumioAppearance.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}
 
 

@@ -1,16 +1,16 @@
 {
   "page": {
-    "label": "System"
+    "label": "TRANSLATE.SYSTEM.SYSTEM_SETTINGS"
   },
   "sections": [
     {
       "id": "section_general_settings",
       "element": "section",
-      "label": "General Settings",
+      "label": "TRANSLATE.SYSTEM.GENERAL_SETTINGS",
       "icon": "fa-wrench",
       "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveGeneralSettings"},
       "saveButton": {
-        "label": "Save",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "player_name",
           "startup_sound"
@@ -22,14 +22,14 @@
           "type":"text",
           "element": "input",
           "doc": "This is the name of your system as it will appear on your network.",
-          "label": "Player Name",
+          "label": "TRANSLATE.SYSTEM.PLAYER_NAME",
           "value": "volumio"
         },
         {
           "id":"startup_sound",
           "element": "switch",
           "doc": "By default Volumio will play a short startup sound after it has finished booting",
-          "label": "Startup Sound",
+          "label": "TRANSLATE.SYSTEM.STARTUP_SOUND",
           "value": true
         }
 
@@ -39,29 +39,29 @@
     {
       "id":"section_updates",
       "type": "section",
-      "label": "System updates",
+      "label": "TRANSLATE.SYSTEM.SYSTEM_UPDATES",
       "icon": "fa-refresh",
       "content": [
         {
           "id":"update",
           "element": "button",
-          "label": "Check Updates",
-          "description": "Check if newer versions of the system are available",
+          "label": "TRANSLATE.SYSTEM.CHECK_UPDATESCheck Updates",
+          "description": "TRANSLATE.SYSTEM.CHECK_UPDATES_DESCR",
           "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
         },
         {
           "id":"user",
           "element": "button",
-          "label": "Delete User Data",
-          "description": "Delete all your settings and data",
-          "onClick": {"type":"emit", "message":"deleteUserData", "data":" ", "askForConfirm": {"title": "Confirm Delete user Data", "message": "This will delete all your personal settings, favourites and playlists (USB and NAS music won't be deleted). The system will automatically restart once data has been deleted. Do you want to continue?"}}
+          "label": "TRANSLATE.SYSTEM.DELETE_USER_DATA",
+          "description": "TRANSLATE.SYSTEM.DELETE_USER_DATA_DESCR",
+          "onClick": {"type":"emit", "message":"deleteUserData", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.DELETE_USER_DATA_TITLE", "message": "TRANSLATE.SYSTEM.DELETE_USER_DATA_MESSAGE"}}
         },
          {
             "id":"factory",
               "element": "button",
-              "label": "Factory Reset",
-              "description": "Reset your System to factory Settings",
-              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "Confirm Factory Reset", "message": "This will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"}}
+              "label": "TRANSLATE.SYSTEM.FACTORY_RESET",
+              "description": "TRANSLATE.SYSTEM.FACTORY_RESET_DESCR",
+              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.FACTORY_RESET_TITLE", "message": "TRANSLATE.SYSTEM.FACTORY_RESET_MESSAGEThis will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"}}
           }
       ]
 

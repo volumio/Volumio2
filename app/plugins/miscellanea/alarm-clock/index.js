@@ -202,8 +202,7 @@ AlarmClock.prototype.saveAlarm=function(data)
 	var defer = libQ.defer();
 
 	self.setConf(data);
-	self.commandRouter.pushToastMessage('success',self.getI18NString('alarm_clock_title'),
-        self.getI18NString('alarm_clock_descr_1'));
+	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_TITLE'), self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_SAVE'));
 
 
 	defer.resolve({});
@@ -295,6 +294,7 @@ AlarmClock.prototype.setSleep = function(data)
 
 	if(data.enabled)
 	{
+		var actionText
 		var date = new Date(thisMoment.year(), thisMoment.month(), thisMoment.date(), sleephour, sleepminute, 0);
 		self.commandRouter.pushConsoleMessage("Set Sleep at " + date);
 		self.haltSchedule=schedule.scheduleJob(date, function(){
@@ -327,40 +327,28 @@ AlarmClock.prototype.setSleep = function(data)
 			sleepminute = "0" + sleepminute;
 		}
 		if (data.action == 'stop'){
-			var actionText = 'Stop Music'
+			actionText = self.commandRouter.getI18nString('ALARM.STOP_MUSIC');
 		} else {
-			var actionText = 'Turn Off'
+			actionText = self.commandRouter.getI18nString('ALARM.TURN_OFF');
 		}
 		if (addedHours == 0)  {
-			self.commandRouter.pushToastMessage('success',self.getI18NString('sleep_mode_title'),
-                self.getI18NString('sleep_mode_descr_1')
-                + actionText +
-                self.getI18NString('alarm_clock_descr_2')
-                + addedMinutes +
-                self.getI18NString('alarm_clock_descr_3'));
+			self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.SLEEP_MODE_TITLE'), self.commandRouter.getI18nString('ALARM.SLEEP_MODE_SYSTEM_WILL')
+                + ' ' + actionText + ' ' +
+                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_IN') + ' ' +
+                + addedMinutes + ' ' +
+                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_MINUTE'));
 		} else {
-			self.commandRouter.pushToastMessage('success',self.getI18NString('sleep_mode_title'),
-                self.getI18NString('sleep_mode_descr_1')
-                + actionText +
-                self.getI18NString('alarm_clock_descr_2')
-                + addedHours +
-                self.getI18NString('sleep_mode_descr_1')
-                + addedMinutes +
-                self.getI18NString('alarm_clock_descr_3'));
+			self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.SLEEP_MODE_TITLE'),
+                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_SYSTEM_WILL') + ' ' +
+                + actionText + ' ' +
+                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_IN') + ' ' +
+                + addedHours + ' ' +
+                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_HOUR')
+                + addedMinutes + ' ' +
+                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_MINUTE'));
 		}
 	}
 
 	defer.resolve({});
 	return defer.promise;
 };
-
-AlarmClock.prototype.loadI18NStrings = function (code) {
-    this.logger.info('ALARM-CLOCK I18N LOAD FOR LOCALE '+code);
-
-    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-AlarmClock.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}

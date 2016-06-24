@@ -47,20 +47,6 @@
     "REMOVE_ERROR":"Impossibile rimouovere",
     "REMOVE_SUCCESS":"Rimossa"
   },
-  "CONFIGURATION_UPDATE":"Configuration update",
-  "CONFIGURATION_UPDATE_DESCRIPTION":"The volume configuration has been successfully updated",
-  "ALARM_CLOCK_TITLE":"Alarm clock",
-  "SLEEP_MODE_TITLE":"Sleep mode",
-  "ALARM_CLOCK_DESCR_1":"Your alarm clock has been set",
-  "SLEEP_MODE_DESCR_1":"System will " ,
-  "ALARM_CLOCK_DESCR_2":" in ",
-  "ALARM_CLOCK_DESCR_3":" minute(s)",
-  "APPEARANCE_TITLE":"Tema",
-  "NEW_BACKGROUND_APPLIED":"Sfondo impostato correttamente",
-  "NEW_LANGUAGE_SET":"La lingua è stata impostata",
-  "BACKGROUND_DELETED":"Sfondo cancellato correttamente",
-
-
   "COMMON":{
     "SAVE":"Salva",
     "PLAY_TITLE":"Riproduzione",
@@ -77,7 +63,9 @@
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
     "UI_CONFIG_LANGUAGE":"Lingua",
-    "UI_CONFIG_SELECT_LANGUAGE":"Scegli la Lingua"
+    "UI_CONFIG_SELECT_LANGUAGE":"Scegli la Lingua",
+    "NEW_LANGUAGE_SET":"Nuova lingua impostata",
+    "NEW_BACKGROUND_APPLIED":"Nuovo sfondo impostato"
   },
   "MPD":{
     "SEARCH_ARTIST_SECTION":"Artisti",
@@ -96,5 +84,33 @@
     "SLEEP":"Sleep",
     "CREDITS":"Crediti",
     "SHUTDOWN":"Spegni"
+  },
+  "ALARM":{
+    "ALARM_CLOCK_TITLE":"Sveglia",
+    "SLEEP_MODE_TITLE":"Modalità sleep",
+    "ALARM_CLOCK_SAVE":"La sveglia è stata impostata",
+    "SLEEP_MODE_SYSTEM_WILL":"Il sistema" ,
+    "SLEEP_MODE_IN":"in",
+    "SLEEP_MODE_MINUTE":"minuti",
+    "SLEEP_MODE_HOUR":"ore",
+    "STOP_MUSIC":"fermerà la musica",
+    "TURN_OFF":"Spegni"
+  },
+  "SYSTEM":{
+    "SYSTEM_SETTINGS":"System Settings",
+    "GENERAL_SETTINGS":"General Settings",
+    "PLAYER_NAME":"Player Name",
+    "STARTUP_SOUND":"Startup Sound",
+    "SYSTEM_UPDATES":"System updates",
+    "CHECK_UPDATES":"Check Updates",
+    "CHECK_UPDATES_DESCR":"Check if newer versions of the system are available",
+    "DELETE_USER_DATA":"Delete User Data",
+    "DELETE_USER_DATA_DESCR":"Delete all your settings and data",
+    "DELETE_USER_DATA_TITLE":"Confirm Delete user Data",
+    "DELETE_USER_DATA_MESSAGE":"This will delete all your personal settings, favourites and playlists (USB and NAS music won't be deleted). The system will automatically restart once data has been deleted. Do you want to continue?",
+    "FACTORY_RESET":"Factory Reset",
+    "FACTORY_RESET_DESCR":"Reset your System to factory Settings",
+    "FACTORY_RESET_TITLE":"Confirm Factory Reset",
+    "FACTORY_RESET_MESSAGE":"This will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"
   }
 }

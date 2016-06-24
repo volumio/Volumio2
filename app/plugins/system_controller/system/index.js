@@ -79,9 +79,6 @@ ControllerSystem.prototype.getUIConfig = function () {
 		__dirname + '/UIConfig.json')
 		.then(function(uiconf)
 		{
-
-	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
-
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName'));
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 

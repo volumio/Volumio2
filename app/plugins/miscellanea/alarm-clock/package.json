@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "volumio_info": {
-    "plugin_type": "miscellanea"
+    "plugin_type": "miscellanea",
+    "boot_priority":10
   }
 }

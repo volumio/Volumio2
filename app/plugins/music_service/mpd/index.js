@@ -34,7 +34,7 @@ ControllerMpd.prototype.play = function (N) {
 
 //MPD Add
 ControllerMpd.prototype.add = function (data) {
-	this.commandRouter.pushToastMessage('success', data + self.getI18NString('mpd_added'));
+	this.commandRouter.pushToastMessage('success', data + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 	return this.sendMpdCommand('add', [data]);
 };
 //MPD Remove
@@ -68,14 +68,14 @@ ControllerMpd.prototype.seek = function (timepos) {
 //MPD Random
 ControllerMpd.prototype.random = function (randomcmd) {
 	var string = randomcmd ? 1 : 0;
-	this.commandRouter.pushToastMessage('success', "Random", string === 1 ? self.getI18NString('mpd_on') : self.getI18NString('mpd_off'));
+	this.commandRouter.pushToastMessage('success', "Random", string === 1 ? self.commandRouter.getI18nString('COMMON.ON') : self.commandRouter.getI18nString('COMMON.OFF'));
 	return this.sendMpdCommand('random', [string])
 };
 
 //MPD Repeat
 ControllerMpd.prototype.repeat = function (repeatcmd) {
 	var string = repeatcmd ? 1 : 0;
-	this.commandRouter.pushToastMessage('success', "Repeat", string === 1 ? self.getI18NString('mpd_on') : self.getI18NString('mpd_off'));
+	this.commandRouter.pushToastMessage('success', "Repeat", string === 1 ? self.commandRouter.getI18nString('COMMON.ON') : self.commandRouter.getI18nString('COMMON.ON'));
 	return this.sendMpdCommand('repeat', [string]);
 };
 
@@ -110,7 +110,7 @@ ControllerMpd.prototype.updateMpdDB = function () {
 ControllerMpd.prototype.addPlay = function (fileName) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
-	this.commandRouter.pushToastMessage('Success', '', fileName + self.getI18NString('mpd_added'));
+	this.commandRouter.pushToastMessage('Success', '', fileName + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 
 
 	//Add playlists and cue with load command
@@ -135,7 +135,7 @@ ControllerMpd.prototype.addPlay = function (fileName) {
 };
 
 ControllerMpd.prototype.addPlayCue = function (data) {
-	this.commandRouter.pushToastMessage('Success', '', data.uri + self.getI18NString('mpd_added'));
+	this.commandRouter.pushToastMessage('Success', '', data.uri + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 
 	//Add playlists and cue with load command
 	this.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri)
@@ -252,7 +252,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.title = trackinfo.title;
 						collectedState.artist = trackinfo.artist;
 						collectedState.album = trackinfo.album;
-						//collectedState.albumart = trackinfo.albumart;
+						collectedState.albumart = trackinfo.albumart;
 						collectedState.uri = trackinfo.uri;
 						collectedState.trackType = trackinfo.trackType;
 						return collectedState;
@@ -263,7 +263,7 @@ ControllerMpd.prototype.getState = function () {
 				collectedState.title = null;
 				collectedState.artist = null;
 				collectedState.album = null;
-				//collectedState.albumart = null;
+				collectedState.albumart = null;
 				collectedState.uri = null;
 				return collectedState;
 			}
@@ -762,18 +762,19 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting MPD');
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
-			self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_configuration_update_error'));
+			//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_configuration_update_error'));
 			defer.resolve({});
 		}
 		else {
-			self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_playback_configuration_error'));
+			//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_playback_configuration_error'));
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.info('Cannot restart MPD: ' + error);
-					self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_error'));
+					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
 				}
-				else self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_success'));
+				else
+					//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
 
 				defer.resolve({});
 			});
@@ -794,18 +795,19 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
-			self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_configuration_update_error'));
+			//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_configuration_update_error'));
 			defer.resolve({});
 		}
 		else {
-			self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_playback_configuration_error'));
+			//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_playback_configuration_error'));
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.info('Cannot restart MPD: ' + error);
-					self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_error'));
+					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
 				}
-				else self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_success'));
+				else
+					//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
 
 				defer.resolve({});
 			});
@@ -816,28 +818,6 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 };
 
-ControllerMpd.prototype.saveVolumeOptions = function (data) {
-	var self = this;
-
-	var defer = libQ.defer();
-
-	self.setAdditionalConf('audio_interface', 'alsa_controller', {key: 'volumestart', value: data.volumestart.value});
-	self.setAdditionalConf('audio_interface', 'alsa_controller', {key: 'volumemax', value: data.volumemax.value});
-	self.setAdditionalConf('audio_interface', 'alsa_controller', {
-		key: 'volumecurvemode',
-		value: data.volumecurvemode.value
-	});
-
-	self.logger.info('Volume configurations have been set');
-
-
-	self.commandRouter.pushToastMessage('success',self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_volume_configuration_success'));
-
-	defer.resolve({});
-
-	return defer.promise;
-
-};
 
 ControllerMpd.prototype.restartMpd = function (callback) {
 	var self = this;
@@ -1249,25 +1229,12 @@ ControllerMpd.prototype.search = function (query) {
     libQ.all(deferArray).then(function(values){
         var list = [];
 
-        if(values[0])
-        {
-            list=[{type:'title',title:self.commandRouter.getI18nString('MPD.SEARCH_ARTIST_SECTION')}].
-            concat(values[0]);
-        }
-
-        if(values[1])
-        {
-            list=list.concat([{type:'title',title:self.commandRouter.getI18nString('MPD.SEARCH_ALBUM_SECTION')}]).
-            concat(values[1]);
-        }
-
-        if(values[2])
-        {
-            list=list.concat([{type:'title',title:self.commandRouter.getI18nString('MPD.SEARCH_SONG_SECTION')}]).
-            concat(values[2]);
-        }
-
-        list=list.filter(function(v){return !!(v)==true;})
+        list=[{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION')}].
+        concat(values[0]).
+        concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION')}]).
+        concat(values[1]).
+        concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION')}]).
+        concat(values[2]).filter(function(v){return !!(v)==true;});
 
         defer.resolve(list);
     }).fail(function(err){
@@ -1484,37 +1451,6 @@ ControllerMpd.prototype.rescanDb = function () {
 	return self.sendMpdCommand('rescan', []);
 };
 
-ControllerMpd.prototype.saveAlsaOptions = function (data) {
-
-	var self = this;
-
-	var defer = libQ.defer();
-
-	self.commandRouter.sharedVars.set('alsa.outputdevice', data.output_device.value);
-
-	self.createMPDFile(function (error) {
-		if (error !== undefined && error !== null) {
-			self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_configuration_update_error'));
-			defer.resolve({});
-		}
-		else {
-			self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_configuration_update'), self.getI18NString('mpd_output_device_success'));
-
-			self.restartMpd(function (error) {
-				if (error !== null && error != undefined) {
-					self.logger.info('Cannot restart MPD: ' + error);
-					self.commandRouter.pushToastMessage('error', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_error'));
-				}
-				else self.commandRouter.pushToastMessage('success', self.getI18NString('mpd_player_restart'), self.getI18NString('mpd_player_restart_success'));
-
-				defer.resolve({});
-			});
-		}
-	});
-
-	return defer.promise;
-
-};
 
 ControllerMpd.prototype.getGroupVolume = function () {
 	var self = this;
@@ -1831,9 +1767,6 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     title = name;
                                 }
 
-                                self.commandRouter.logger.info("ALBUMART "+self.getAlbumArt({artist:artist,album: album},uri));
-                                self.commandRouter.logger.info("URI "+uri);
-
                                 defer.resolve({
                                     uri: 'music-library/'+self.fromPathToUri(uri),
                                     service: 'mpd',
@@ -1842,7 +1775,7 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     album: album,
                                     type: 'track',
                                     tracknumber: 0,
-                                    albumart: self.getAlbumArt({artist:artist,album: album},self.getAlbumArtPathFromUri(uri)),
+                                    albumart: self.getAlbumArt({artist:artist,album: album},uri),
                                     duration: time,
                                     trackType: uri.split('.').pop()
                             });
@@ -1926,35 +1859,6 @@ ControllerMpd.prototype.seek = function(position) {
     return defer.promise;
 };
 
-ControllerMpd.prototype.getAlbumArtPathFromUri = function (uri) {
-    var self=this;
-    var startIndex=0;
-
-    var splitted=uri.split('/');
-
-    while(splitted[startIndex]==='')
-    {
-        startIndex=startIndex+1;
-    }
-
-
-    if(splitted[startIndex]==='mnt')
-    {
-        startIndex=startIndex+1;
-    }
-
-    var result='';
-
-    for(var i=startIndex;i<splitted.length-1;i++)
-    {
-
-        result=result+'/'+splitted[i];
-    }
-
-    return result;
-}
-
-
 
 // MPD pause
 ControllerMpd.prototype.pause = function () {
@@ -1980,13 +1884,3 @@ ControllerMpd.prototype.sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
 }
 
-ControllerMpd.prototype.loadI18NStrings = function (code) {
-    this.logger.info('MPD I18N LOAD FOR LOCALE '+code);
-
-    this.i18nString=libFsExtra.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-ControllerMpd.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}
