@@ -3,7 +3,9 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var config = new (require('v-conf'))();
+var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
+var crypto = require('crypto');
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -410,14 +412,22 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 ControllerSystem.prototype.callHome = function () {
 	var self = this;
 
-	var uuid = self.config.get('uuid');
+
+	try {
+		var macaddr = fs.readFileSync('/sys/class/net/eth0/address', "utf8");
+		var anonid = macaddr.toString().replace(':','');
+
+	} catch (e) {
+		console.log(e)
+		var anonid = self.config.get('uuid');
+	}
+	var md5 = crypto.createHash('md5').update(anonid).digest("hex");
 	var info = self.getSystemVersion();
 	info.then(function(infos)
 	{
-
-		if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (uuid)) {
+		if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
 		console.log('Volumio Calling Home');
-		exec('/usr/bin/curl -X POST --data-binary "device='+ infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + uuid +'" http://updates.volumio.org:7070/downloader-v1/track-device',
+		exec('/usr/bin/curl -X POST --data-binary "device='+ infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 +'" http://updates.volumio.org:7070/downloader-v1/track-device',
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
