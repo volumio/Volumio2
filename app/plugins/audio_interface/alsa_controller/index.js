@@ -59,6 +59,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	this.logger.debug("Creating shared var alsa.outputdevice");
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
+	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 
     return libQ.resolve();
@@ -183,11 +184,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	} else {
 		self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
 			value: "no",
-			label: "No Hardware Mixer Available"
+			label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
 		});
 		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
 			value: "no",
-			label: "No Hardware Mixer Available"
+			label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
 		});
 
 	}
@@ -271,12 +272,12 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			OutputDeviceNumber = I2SNumber;
 
 			var responseData = {
-				title: 'I2S DAC Activated',
-				message: data.i2sid.label+ ' has been activated, restart the system for changes to take effect',
+				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
+				message: data.i2sid.label+ ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
 				size: 'lg',
 				buttons: [
 					{
-						name: 'Restart',
+						name: self.commandRouter.getI18nString('COMMON.RESTART'),
 						class: 'btn btn-info',
 						emit:'reboot',
 						payload:''
@@ -291,12 +292,12 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 		self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
 		OutputDeviceNumber = "0";
 		var responseData = {
-			title: 'I2S DAC Dectivated',
-			message: data.i2sid.label+ ' has been deactivated, restart the system for changes to take effect',
+			title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED'),
+			message: data.i2sid.label+ ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED_MESSAGE'),
 			size: 'lg',
 			buttons: [
 				{
-					name: 'Restart',
+					name: self.commandRouter.getI18nString('COMMON.RESTART'),
 					class: 'btn btn-info',
 					emit:'reboot',
 					payload:''
@@ -309,6 +310,13 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
 	self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
 	self.setDefaultMixer(OutputDeviceNumber);
+
+	var respconfig = self.getUIConfig();
+
+	respconfig.then(function(config)
+	{
+		self.commandRouter.broadcastMessage('pushUiConfig', config);
+	});
 
 	return defer.promise;
 
@@ -326,10 +334,9 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 
 	self.logger.info('Volume configurations have been set');
+	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', data.mixer.value);
 
-
-	self.commandRouter.pushToastMessage('success', self.getI18NString('configuration_update'),
-        self.getI18NString('configuration_update_description'));
+	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_CONTROLS'), self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_CONTROLS_UPDATE'));
 
 	defer.resolve({});
 	this.updateVolumeSettings();
@@ -418,22 +425,21 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 };
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
-//TODO: FINISH THIS PARSING
+
 	var mixers = [];
 	try {
-	var array = execSync('amixer -c '+device+' scontrols', { encoding: 'utf8' })
-		var line = array.toString().split("\n");
+		var array = execSync('amixer -c 5 scontents', { encoding: 'utf8' })
+		var genmixers = array.toString().split("Simple mixer control");
 
-	for (var i in line) {
-		var lineraw = line[i].split("'")
-		var control = lineraw[1];
-		//var number = line[2];
-		var mixerraw = control;
-		if (mixerraw){
-			var mixer = mixerraw.replace(",", " ");
-			mixers.push(mixer);
+		for (var i in genmixers) {
+			if (genmixers[i].indexOf("Playback") >= 0) {
+				var line = genmixers[i].split('\n');
+				var line2 = line[0].split(',')
+				var mixerspace = line2[0].replace(/'/g,"").toString();
+				var mixer = mixerspace.replace(" ", "")
+				mixers.push(mixer);
+			}
 		}
-	}
 	} catch (e) {}
 	return mixers
 }
@@ -461,7 +467,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		var cardname = i2sstatus.name;
 		var mixer = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SMixer', cardname);
 		if (mixer){
-			var defaultmixer = mixer;
+			defaultmixer = mixer;
 			self.logger.info('Found match in i2s Card Database: setting mixer '+ defaultmixer + ' for card ' + cardname);
 		}
 
@@ -470,7 +476,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		var cardname = carddata.cards[n].prettyname.toString().trim();
 
 		if (cardname == currentcardname){
-			var defaultmixer = carddata.cards[n].defaultmixer;
+			defaultmixer = carddata.cards[n].defaultmixer;
 			self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
 		}
 	}
@@ -485,14 +491,20 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 			var audiodevice = this.config.get('outputdevice')
 		}
 
-		var array = execSync('amixer -c '+audiodevice+' scontrols', { encoding: 'utf8' })
-		var line = array.toString().split("\n");
-		var lineraw = line[0].split("'")
-		var control = lineraw[1];
-		var mixerraw = control;
-		var mixerraw = control;
-		if (control){
-			var defaultmixer = mixerraw.replace(",", " ");
+		var array = execSync('amixer -c 5 scontents', { encoding: 'utf8' })
+		var genmixers = array.toString().split("Simple mixer control");
+
+		for (var i in genmixers) {
+			if (genmixers[i].indexOf("Playback") >= 0) {
+				var line = genmixers[i].split('\n');
+				var line2 = line[0].split(',')
+				var mixerspace = line2[0].replace(/'/g,"");
+				var mixer = mixerspace.replace(" ","");
+				mixers.push(mixer);
+			}
+		}
+		if (mixers[0]){
+			defaultmixer = mixers[0].toString()
 			self.logger.info('Setting mixer '+ defaultmixer + ' for card ' + currentcardname);
 		}
 
@@ -570,15 +582,4 @@ ControllerAlsa.prototype.storeAlsaSettings  = function () {
 			self.logger.error('Alsa Settings successfully stored');
 		}
 	});
-}
-
-ControllerAlsa.prototype.loadI18NStrings = function (code) {
-    this.logger.info('ALSA-CONTROLLER I18N LOAD FOR LOCALE '+code);
-
-    this.i18nString=libFsExtra.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-ControllerAlsa.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
 }

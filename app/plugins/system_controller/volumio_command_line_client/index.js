@@ -18,7 +18,7 @@ function CommandLineClient(context) {
 CommandLineClient.prototype.onVolumioStart = function () {
 	var self = this;
 
-	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+	this.commandRouter.sharedVars.registerCallback('alsa.outputdevicemixer', this.outputDeviceCallback.bind(this));
 
 	self.buildVolumeFiles();
 

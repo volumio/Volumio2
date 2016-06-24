@@ -16,8 +16,14 @@
     "VOLUME_CURVE_MODE":"Curva del volume",
     "NATURAL":"Naturale",
     "LINEAR":"Lineare",
-    "MIXER_CONTROL":"Controlli Mixer",
-    "NO_HARDWARE_MIXER":"Nessun mixer hardware disponibile"
+    "MIXER_CONTROL":"Controllo volume",
+    "NO_HARDWARE_MIXER":"Nessun mixer hardware disponibile",
+    "MIXER_CONTROLS":"Controllo volume",
+    "MIXER_CONTROLS_UPDATE":"Impostazioni Volume aggiornate",
+    "I2S_DAC_ACTIVATED":"I2S DAC dttivato",
+    "I2S_DAC_ACTIVATED_MESSAGE":"è stato attivato, riavvia il sistema per rendere effettivi i cambiamenti",
+    "I2S_DAC_DEACTIVATED":"I2S DAC disattivato",
+    "I2S_DAC_DEACTIVATED_MESSAGE":"è stato disattivato, riavvia il sistema per rendere effettivi i cambiamenti"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
@@ -65,7 +71,8 @@
     "REMOVE_QUEUE_TITLE":"Rimozione dalla code",
     "remove_queue_text_1":"Rimossa ",
     "REMOVE_QUEUE_TEXT_2":" dalla coda",
-    "MY_MUSIC":"La mia Musica"
+    "MY_MUSIC":"La mia Musica",
+    "RESTART":"Riavvia"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

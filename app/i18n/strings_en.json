@@ -17,7 +17,13 @@
     "NATURAL":"Natural",
     "LINEAR":"Linear",
     "MIXER_CONTROL":"Mixer Control",
-    "NO_HARDWARE_MIXER":"No Hardware Mixer Available"
+    "NO_HARDWARE_MIXER":"No Hardware Mixer Available",
+    "MIXER_CONTROLS":"Mixer Controls",
+    "MIXER_CONTROLS_UPDATE":"Mixer Controls settings updated",
+    "I2S_DAC_ACTIVATED":"I2S DAC Enabled",
+    "I2S_DAC_ACTIVATED_MESSAGE":"has been enabled, restart the system for changes to take effect",
+    "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
+    "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -52,7 +58,10 @@
     "REMOVE_QUEUE_TITLE":"Remove",
     "REMOVE_QUEUE_TEXT_1":"Remove ",
     "REMOVE_QUEUE_TEXT_2":" from queue",
-    "MY_MUSIC":"My Music"
+    "MY_MUSIC":"My Music",
+    "CONFIGURATION_UPDATE":"Configuration update",
+    "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
+    "RESTART":"Restart"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
