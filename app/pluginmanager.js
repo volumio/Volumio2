@@ -462,7 +462,7 @@ PluginManager.prototype.installPlugin = function (url) {
 					var name = package_json.name;
 					var category = package_json.volumio_info.plugin_type;
 
-					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':[{'name':'Close','class': 'btn btn-warning'},{'name':'Enable Plugin', 'class': 'btn btn-info', 'emit':'pluginManager','payload':{'action':'enable','category':category,'name':name}}]});
+					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':[{'name':'Close','class': 'btn btn-warning'}]});
 					return folder;
 				})
 				.then(function () {

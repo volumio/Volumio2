@@ -82,7 +82,7 @@
       "icon": "fa-wifi",
       "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWirelessNet"},
       "saveButton": {
-        "label": "COMMON.SAVE",
+        "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "wireless_dhcp",
           "wireless_static_ip",
