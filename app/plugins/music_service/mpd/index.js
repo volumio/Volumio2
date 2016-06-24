@@ -1580,6 +1580,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
                         var lines = msg.split('\n');
                         for (var i = 0; i < lines.length; i++) {
+							var line = lines[i];
                             var path = line.slice(5).trimLeft();
                             var name = path.split('/');
                             var count = name.length;

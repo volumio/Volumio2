@@ -69,7 +69,7 @@
     "SEARCH_SONG_SECTION":"Songs",
     "SCAN_DB_ERROR":"Error while scanning database",
     "SCAN_DB":"Scanning Music",
-    "ILLEGAL_CHARACTER":"Remove forbidden character "
+    "ILLEGAL_CHARACTER_/":"Remove forbidden character /"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -77,12 +77,6 @@
     "UI_CONFIG_SELECT_LANGUAGE":"Select Language",
     "NEW_LANGUAGE_SET":"New language set",
     "NEW_BACKGROUND_APPLIED":"New Background applied"
-  },
-  "MPD":{
-    "SEARCH_ARTIST_SECTION":"Artists",
-    "SEARCH_ALBUM_SECTION":"Albums",
-    "SEARCH_SONG_SECTION":"Songs"
-
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",

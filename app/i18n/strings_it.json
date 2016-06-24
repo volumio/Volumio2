@@ -59,6 +59,9 @@
     "REMOVE_QUEUE_TEXT_2":" dalla coda",
     "MY_MUSIC":"La mia Musica",
     "RESTART":"Riavvia",
+    "SEARCH_ARTIST_SECTION":"Artisti",
+    "SEARCH_ALBUM_SECTION":"Album",
+    "SEARCH_SONG_SECTION":"Canzoni",
     "SCAN_DB_ERROR":"Errore nella scansione delle cartelle",
     "SCAN_DB":"Scansione cominciata",
     "ILLEGAL_CHARACTER_/":"Rimuovere il carattere /"
@@ -69,12 +72,6 @@
     "UI_CONFIG_SELECT_LANGUAGE":"Scegli la Lingua",
     "NEW_LANGUAGE_SET":"Nuova lingua impostata",
     "NEW_BACKGROUND_APPLIED":"Nuovo sfondo impostato"
-  },
-  "MPD":{
-    "SEARCH_ARTIST_SECTION":"Artisti",
-    "SEARCH_ALBUM_SECTION":"Album",
-    "SEARCH_SONG_SECTION":"Canzoni"
-
   },
   "MAIN_MENU":{
     "MY_MUSIC":"La Mia Musica",
