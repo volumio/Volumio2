@@ -365,8 +365,22 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var response = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
-	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\/" -f2', { encoding: 'utf8' });
+	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
+	var wirelessqualityraw1 = execSync(" /usr/bin/sudo /sbin/iwconfig wlan0 | sed 's/  /\\n/g' | grep Signal | sed 's/Signal level://' | sed 's/Signal level=//' | sed 's/ //g'", { encoding: 'utf8' });
+	var wirelessqualityraw2 = wirelessqualityraw1.split('/')[0];
+	var wirelessquality = 0;
 
+	if (wirelessqualityraw2 >= 65)
+		wirelessquality = 5;
+	else if (wirelessqualityraw2 >= 50)
+		wirelessquality = 4;
+	else if (wirelessqualityraw2 >= 40)
+		wirelessquality = 3;
+	else if (wirelessqualityraw2 >= 30)
+		wirelessquality = 2;
+	else if (wirelessqualityraw2 >= 1)
+		wirelessquality = 1;
+	
 	var ethip = ''
 	var wlanip = ''
 	var oll = 'no';
@@ -388,7 +402,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				wlanip = status.ipv4_address;
-				var wlanstatus = {type: "Wireless", ssid: ssid, ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
+				var wlanstatus = {type: "Wireless", ssid: ssid, signal: wirelessquality,ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				response.push(wlanstatus);
 				//console.log(wlanstatus);
 
