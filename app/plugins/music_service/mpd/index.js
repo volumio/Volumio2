@@ -252,7 +252,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.title = trackinfo.title;
 						collectedState.artist = trackinfo.artist;
 						collectedState.album = trackinfo.album;
-						collectedState.albumart = trackinfo.albumart;
+						//collectedState.albumart = trackinfo.albumart;
 						collectedState.uri = trackinfo.uri;
 						collectedState.trackType = trackinfo.trackType;
 						return collectedState;
@@ -263,7 +263,7 @@ ControllerMpd.prototype.getState = function () {
 				collectedState.title = null;
 				collectedState.artist = null;
 				collectedState.album = null;
-				collectedState.albumart = null;
+				//collectedState.albumart = null;
 				collectedState.uri = null;
 				return collectedState;
 			}
@@ -1831,6 +1831,9 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     title = name;
                                 }
 
+                                self.commandRouter.logger.info("ALBUMART "+self.getAlbumArt({artist:artist,album: album},uri));
+                                self.commandRouter.logger.info("URI "+uri);
+
                                 defer.resolve({
                                     uri: 'music-library/'+self.fromPathToUri(uri),
                                     service: 'mpd',
@@ -1839,7 +1842,7 @@ ControllerMpd.prototype.scanFolder=function(uri)
                                     album: album,
                                     type: 'track',
                                     tracknumber: 0,
-                                    albumart: self.getAlbumArt({artist:artist,album: album},uri),
+                                    albumart: self.getAlbumArt({artist:artist,album: album},self.getAlbumArtPathFromUri(uri)),
                                     duration: time,
                                     trackType: uri.split('.').pop()
                             });
@@ -1922,6 +1925,35 @@ ControllerMpd.prototype.seek = function(position) {
 
     return defer.promise;
 };
+
+ControllerMpd.prototype.getAlbumArtPathFromUri = function (uri) {
+    var self=this;
+    var startIndex=0;
+
+    var splitted=uri.split('/');
+
+    while(splitted[startIndex]==='')
+    {
+        startIndex=startIndex+1;
+    }
+
+
+    if(splitted[startIndex]==='mnt')
+    {
+        startIndex=startIndex+1;
+    }
+
+    var result='';
+
+    for(var i=startIndex;i<splitted.length-1;i++)
+    {
+
+        result=result+'/'+splitted[i];
+    }
+
+    return result;
+}
+
 
 
 // MPD pause
