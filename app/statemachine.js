@@ -661,6 +661,7 @@ CoreStateMachine.prototype.play = function (index) {
 
 // Volumio Play Command
 CoreStateMachine.prototype.seek = function (position) {
+    var self=this;
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::seek');
 
     self.setConsumeUpdateService(undefined);
