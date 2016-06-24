@@ -45,7 +45,7 @@
         {
           "id":"update",
           "element": "button",
-          "label": "TRANSLATE.SYSTEM.CHECK_UPDATESCheck Updates",
+          "label": "TRANSLATE.SYSTEM.CHECK_UPDATES",
           "description": "TRANSLATE.SYSTEM.CHECK_UPDATES_DESCR",
           "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
         },
