@@ -365,6 +365,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var response = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
+	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\/" -f2', { encoding: 'utf8' });
 
 	var ethip = ''
 	var wlanip = ''
@@ -386,8 +387,8 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	ifconfig.status('wlan0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
-				wlanip = status.ipv4_address
-				var wlanstatus = {type: "Wireless", ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
+				wlanip = status.ipv4_address;
+				var wlanstatus = {type: "Wireless", ssid: ssid, ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				response.push(wlanstatus);
 				//console.log(wlanstatus);
 
