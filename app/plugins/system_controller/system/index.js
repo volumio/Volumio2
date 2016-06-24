@@ -29,8 +29,8 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
-	
-	var uuid = config.get('uuid');
+
+	var uuid = this.config.get('uuid');
 	if (uuid == undefined) {
 		console.log("No id defined. Creating one");
 		var uuid = require('node-uuid');
@@ -40,7 +40,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
 	self.deviceDetect();
-	self.checkTestSystem();
+	self.callHome();
 
     return libQ.resolve();
 };
@@ -282,9 +282,11 @@ ControllerSystem.prototype.getSystemVersion = function () {
 	var file = fs.readFileSync('/etc/os-release').toString().split('\n');
 	var releaseinfo = {
 		'systemversion': null,
-		'builddate': null
+		'builddate': null,
+		'variant': null,
+		'hardware':null
 	};
-	console.log(file);
+	//console.log(file);
 	var nLines = file.length;
 	var str;
 	for (var l = 0; l < nLines; l++) {
@@ -296,6 +298,15 @@ ControllerSystem.prototype.getSystemVersion = function () {
 			str = file[l].split('=');
 			releaseinfo.builddate = str[1].replace(/\"/gi, "");
 		}
+		if (file[l].match(/VOLUMIO_VARIANT/i)) {
+			str = file[l].split('=');
+			releaseinfo.variant = str[1].replace(/\"/gi, "");
+		}
+		if (file[l].match(/VOLUMIO_HARDWARE/i)) {
+			str = file[l].split('=');
+			releaseinfo.hardware = str[1].replace(/\"/gi, "");
+		}
+
 	}
 	defer.resolve(releaseinfo);
 
@@ -327,16 +338,6 @@ ControllerSystem.prototype.setTestSystem = function (data) {
 
 	}
 };
-
-ControllerSystem.prototype.checkTestSystem = function () {
-	var self = this;
-
-	fs.exists('/data/test', function (exists) {
-		self.logger.info('------------ TEST ENVIRONMENT DETECTED ---------------');
-		self.StartDebugConsole();
-	});
-
-}
 
 
 ControllerSystem.prototype.sendBugReport = function (message) {
@@ -405,36 +406,28 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 	}
 }
 
-ControllerSystem.prototype.StartDebugConsole = function () {
+
+ControllerSystem.prototype.callHome = function () {
 	var self = this;
-		// Starts a debug telnet interface on port 2023 
-		fs.writeFile('/tmp/logtail', ' ', function (err) {
-			if (err) {
-				self.logger.info('Cannot write logtail file' + err)
-			}
 
-			exec('/usr/local/bin/node '+__dirname+'/telnetServer.js ',
-				function (error, stdout, stderr) {
+	var uuid = self.config.get('uuid');
+	var info = self.getSystemVersion();
+	info.then(function(infos)
+	{
 
-					if (error !== null) {
-						self.logger.info('Cannot Start Telnet Log Server: '+error);
-					}
-					else self.logger.info('Telnet Log Server Started');
+		if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (uuid)) {
+		console.log('Volumio Calling Home');
+		exec('/usr/bin/curl -X POST --data-binary "device='+ infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + uuid +'" http://updates.volumio.org:7070/downloader-v1/track-device',
+			function (error, stdout, stderr) {
 
-				});
+				if (error !== null) {
+					self.logger.info('Cannot call home: '+error);
+				}
+				else self.logger.info('Volumio called home');
 
-		});
-
-
+			});
+	} else {
+			self.logger.info('Cannot retrieve data for calling home');
+	}
+	});
 };
-
-ControllerSystem.prototype.loadI18NStrings = function (code) {
-    this.logger.info('SYSTEM I18N LOAD FOR LOCALE '+code);
-
-    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-ControllerSystem.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}
