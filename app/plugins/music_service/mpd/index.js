@@ -1230,12 +1230,25 @@ ControllerMpd.prototype.search = function (query) {
     libQ.all(deferArray).then(function(values){
         var list = [];
 
-        list=[{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION')}].
-        concat(values[0]).
-        concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION')}]).
-        concat(values[1]).
-        concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION')}]).
-        concat(values[2]).filter(function(v){return !!(v)==true;});
+		if(values[0])
+		{
+			list=[{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION')}].
+			concat(values[0]);
+		}
+
+		if(values[1])
+		{
+			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION')}]).
+			concat(values[1]);
+		}
+
+		if(values[2])
+		{
+			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION')}]).
+			concat(values[2]);
+		}
+
+		list=list.filter(function(v){return !!(v)==true;})
 
         defer.resolve(list);
     }).fail(function(err){
