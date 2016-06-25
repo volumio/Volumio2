@@ -61,18 +61,27 @@
     "MY_MUSIC":"Ma Musique",
     "CONFIGURATION_UPDATE":"Mise à jour de la configuration",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration mise à jour avec succès",
-    "RESTART":"Redémarrage"
-  },
-  "APPEARANCE":{
-    "APPEARANCE":"Apparence",
-    "UI_CONFIG_LANGUAGE":"Langue",
-    "UI_CONFIG_SELECT_LANGUAGE":"Selectionner une Langue"
-  },
-  "MPD":{
+    "CONFIGURATION_UPDATE_ERROR":"Une erreur est survenue",
+    "PLAYER_RESTARTED":"Lecture redémarré avec succès",
+    "RESTART":"Redémarrer",
+    "ON":"Marche",
+    "OFF":"Arrêt",
     "SEARCH_ARTIST_SECTION":"Artistes",
     "SEARCH_ALBUM_SECTION":"Albums",
-    "SEARCH_SONG_SECTION":"Pistes"
-
+    "SEARCH_SONG_SECTION":"Pistes",
+    "SCAN_DB_ERROR":"Erreur lors du scan de la base de données",
+    "SCAN_DB":"Scannage de la musique",
+    "ILLEGAL_CHARACTER_/":"Suppression des caractères interdits : /",
+    "FAVOURITES":"Favoris",
+    "PLAYLISTS":"Playlists",
+    "MUSIC_LIBRARY":"Bibliothèque"
+  },
+  "APPEARANCE":{
+     "APPEARANCE":"Apparence",
+    "UI_CONFIG_LANGUAGE":"Langue",
+    "UI_CONFIG_SELECT_LANGUAGE":"Selectionner une Langue",
+    "NEW_LANGUAGE_SET":"Nouvelle langue appliquée",
+    "NEW_BACKGROUND_APPLIED":"Nouveau fond d'écran appliqué"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
@@ -85,5 +94,46 @@
     "SLEEP":"Sommeil",
     "CREDITS":"Credits",
     "SHUTDOWN":"Arrêt"
+  },
+  "ALARM":{
+    "ALARM_CLOCK_TITLE":"Réveil",
+    "SLEEP_MODE_TITLE":"Mode sommeil",
+    "ALARM_CLOCK_SAVE":"L'Alarme a été reglée",
+    "SLEEP_MODE_SYSTEM_WILL":"Le système va " ,
+    "SLEEP_MODE_IN":" dans ",
+    "SLEEP_MODE_MINUTE":" minute (s)",
+    "SLEEP_MODE_HOUR":"heure(s)",
+    "STOP_MUSIC":"Arrêter la musique",
+    "TURN_OFF":"S'éteindre"
+  },
+  "SYSTEM":{
+    "SYSTEM_SETTINGS":"Réglages du Systeme",
+    "GENERAL_SETTINGS":" Réglages globaux",
+    "PLAYER_NAME":"Nom du lecteur",
+    "STARTUP_SOUND":"Son de démarrage",
+    "SYSTEM_UPDATES":"Mise à jour du système",
+    "CHECK_UPDATES":"Vérifier les mise à jour",
+    "CHECK_UPDATES_DESCR":"Vérifier si une version plus récentes est disponible",
+    "DELETE_USER_DATA":"Effacer les données utilisateur",
+    "DELETE_USER_DATA_DESCR":"Effacer toutes vos réglages",
+    "DELETE_USER_DATA_TITLE":"Confirmer la suppression des données utilisateur",
+    "DELETE_USER_DATA_MESSAGE":"Vos réglages, favoris et playlist vont être éffacés (Les contenus USB et NAS music ne sont pas éffacés. Le sytème va redémarrer aprês l'éffacement des données. Voulez vous continuer?",
+    "FACTORY_RESET":"Remise en état d'origine",
+    "FACTORY_RESET_DESCR":"Remettre votre système dans l'état d'origine",
+    "FACTORY_RESET_TITLE":"Confirmer la remise à zéro",
+    "FACTORY_RESET_MESSAGE":"Vos réglages, favoris et playlist vont être éffacés. Le sytème va redémarrer aprês l'éffacement des données. Voulez vous continuer?",
+    "SYSTEM_CONFIGURATION_UPDATE":"Mise à jour de la configuration du sytème",
+    "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"Systeme mis à jour avec succès",
+    "SYSTEM_NAME":"Nom du système",
+    "SYSTEM_NAME_ERROR":"Impossible de changer le nom du système",
+    "SYSTEM_NAME_NOW":"Le nom du système est désormais"
+  },
+  "WEBRADIO":{
+    "MY_WEB_RADIOS":"Mes Web Radios",
+    "FAVOURITE_RADIOS":"Radios Favorites",
+    "TOP_500_RADIOS":"Top 500 Radios",
+    "BY_GENRE_RADIOS":"Par genre",
+    "BY_COUNTRY_RADIOS":"Par pays",
+    "WEBRADIO":"Web Radio"
   }
 }
