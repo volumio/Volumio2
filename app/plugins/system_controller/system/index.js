@@ -166,7 +166,7 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 	self.config.set('playerName', player_name);
 	self.config.set('startupSound', startup_sound);
 
-	self.commandRouter.pushToastMessage('success', self.getI18NString('system_configuration_update'), self.getI18NString('system_configuration_update_success'));
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 	self.setHostname(player_name);
 	defer.resolve({});
 
@@ -191,21 +191,12 @@ ControllerSystem.prototype.saveSoundQuality = function (data) {
 	self.config.set('kernelSettingLabel', kernel_profile_label);
 
 
-	self.commandRouter.pushToastMessage('success', self.getI18NString('system_configuration_update'), self.getI18NString('system_configuration_update_success'));
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 
 	defer.resolve({});
 	return defer.promise;
 };
 
-ControllerSystem.prototype.systemUpdate = function (data) {
-	var self = this;
-
-	self.commandRouter.pushToastMessage('success', self.getI18NString('system_update'), self.getI18NString('system_update_no_newer_version'));
-
-	var defer = libQ.defer();
-	defer.resolve({});
-	return defer.promise;
-};
 
 
 ControllerSystem.prototype.getData = function (data, key) {
@@ -228,7 +219,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 	fs.writeFile('/etc/hostname', newhostname, function (err) {
 		if (err) {
 			console.log(err);
-			self.commandRouter.pushToastMessage('alert', self.getI18NString('system_name'), self.getI18NString('system_name_error'));
+			self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
 		}
 		else {
 			exec("/usr/bin/sudo /bin/chmod 777 /etc/hosts", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
@@ -244,7 +235,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						console.log(err);
 					}
 					else {
-						self.commandRouter.pushToastMessage('success', self.getI18NString('system_name_changed'), self.getI18NString('system_name_now') + newhostname);
+						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_NOW') + ' ' + newhostname);
 						self.logger.info('Hostname now is ' + newhostname);
 						setTimeout(function () {
 							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
@@ -253,7 +244,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 							}, function (error, stdout, stderr) {
 								if (error !== null) {
 									console.log(error);
-									self.commandRouter.pushToastMessage('alert', self.getI18NString('system_name'), self.getI18NString('system_name_error'));
+									self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
 								} else {
 									self.logger.info('Avahi Daemon Restarted')
 								}

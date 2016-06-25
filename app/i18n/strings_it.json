@@ -111,6 +111,11 @@
     "FACTORY_RESET":"Impostazioni di fabbrica",
     "FACTORY_RESET_DESCR":"Reimposta il dispositivo alle impostazioni di fabbrica.",
     "FACTORY_RESET_TITLE":"Conferma il ripristino",
-    "FACTORY_RESET_MESSAGE":"Verranno ripristinate le impostazioni di fabbrica, tutte le impostazioni verranno perse. Il sistema si riavvierà automaticamente. Vuoi continuare?"
+    "FACTORY_RESET_MESSAGE":"Verranno ripristinate le impostazioni di fabbrica, tutte le impostazioni verranno perse. Il sistema si riavvierà automaticamente. Vuoi continuare?",
+    "SYSTEM_CONFIGURATION_UPDATE":"Impostazioni di sistema",
+    "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"Impostazioni di sistema aggiornate",
+    "SYSTEM_NAME":"Nome di sistema",
+    "SYSTEM_NAME_ERROR":"Impossibile cambiare il nome di sistema",
+    "SYSTEM_NAME_NOW":"Il nome del sistema è ora"
   }
 }

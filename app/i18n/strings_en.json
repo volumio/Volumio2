@@ -116,6 +116,10 @@
     "FACTORY_RESET":"Factory Reset",
     "FACTORY_RESET_DESCR":"Reset your System to factory Settings",
     "FACTORY_RESET_TITLE":"Confirm Factory Reset",
-    "FACTORY_RESET_MESSAGE":"This will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"
+    "FACTORY_RESET_MESSAGE":"This will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?",
+    "SYSTEM_CONFIGURATION_UPDATE":"System configuration update",
+    "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"System settings updated successfully",
+    "SYSTEM_NAME":"System Name",
+    "SYSTEM_NAME_ERROR":"Cannot change system name"
   }
 }
