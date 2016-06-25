@@ -64,6 +64,8 @@
     "CONFIGURATION_UPDATE_ERROR":"Errore",
     "PLAYER_RESTARTED":"Il player è stato riavviato",
     "RESTART":"Riavvia",
+    "ON":"On",
+    "OFF":"Off",
     "SEARCH_ARTIST_SECTION":"Artisti",
     "SEARCH_ALBUM_SECTION":"Album",
     "SEARCH_SONG_SECTION":"Canzoni",
