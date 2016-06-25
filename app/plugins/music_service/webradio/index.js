@@ -81,7 +81,7 @@ ControllerWebradio.prototype.handleBrowseUri=function(curUri)
 
 
 ControllerWebradio.prototype.listRoot=function()
-{
+{  var self = this;
     return libQ.resolve({
         navigation: {
             prev: {
@@ -90,7 +90,7 @@ ControllerWebradio.prototype.listRoot=function()
             list: [{
                 service: 'radio',
                 type: 'mywebradio-category',
-                title: 'My Web Radios',
+                title: self.commandRouter.getI18nString('WEBRADIO.MY_WEB_RADIOS'),
                 artist: '',
                 album: '',
                 icon: 'fa fa-heartbeat',
@@ -99,7 +99,7 @@ ControllerWebradio.prototype.listRoot=function()
                 {
                     service: 'webradio',
                     type: 'radio-favourites',
-                    title: 'Favourite Radios',
+                    title: self.commandRouter.getI18nString('WEBRADIO.FAVOURITE_RADIOS'),
                     artist: '',
                     album: '',
                     icon: 'fa fa-heart',
@@ -108,7 +108,7 @@ ControllerWebradio.prototype.listRoot=function()
                 {
                     service: 'webradio',
                     type: 'radio-category',
-                    title: 'Top 500 Radios (Shoutcast)',
+                    title: self.commandRouter.getI18nString('WEBRADIO.TOP_500_RADIOS') + ' (Shoutcast)',
                     artist: '',
                     album: '',
                     icon: 'fa fa-star',
@@ -117,7 +117,7 @@ ControllerWebradio.prototype.listRoot=function()
                 {
                     service: 'webradio',
                     type: 'radio-category',
-                    title: 'By Genre (Shoutcast)',
+                    title: self.commandRouter.getI18nString('WEBRADIO.BY_GENRE_RADIOS') + ' (Shoutcast)',
                     artist: '',
                     album: '',
                     icon: 'fa fa-tags',
@@ -126,7 +126,7 @@ ControllerWebradio.prototype.listRoot=function()
                 {
                     service: 'webradio',
                     type: 'radio-category',
-                    title: 'By Country (Dirble)',
+                    title: self.commandRouter.getI18nString('WEBRADIO.BY_COUNTRY_RADIOS') + ' (Dirble)',
                     artist: '',
                     album: '',
                     icon: 'fa fa-globe',

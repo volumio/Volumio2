@@ -10,7 +10,8 @@
   "license": "ISC",
   "volumio_info": {
     "prettyName": "Webradio",
-    "plugin_type": "music_service"
+    "plugin_type": "music_service",
+    "boot_priority":10
   },
   "dependencies": {
     "fast.js": "^0.1.1",

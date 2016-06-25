@@ -69,7 +69,10 @@
     "SEARCH_SONG_SECTION":"Canzoni",
     "SCAN_DB_ERROR":"Errore nella scansione delle cartelle",
     "SCAN_DB":"Scansione cominciata",
-    "ILLEGAL_CHARACTER_/":"Rimuovere il carattere /"
+    "ILLEGAL_CHARACTER_/":"Rimuovere il carattere /",
+    "FAVOURITES":"Preferiti",
+    "PLAYLISTS":"Playlist",
+    "MUSIC_LIBRARY":"Libreria Musicale"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -122,5 +125,13 @@
     "SYSTEM_NAME":"Nome di sistema",
     "SYSTEM_NAME_ERROR":"Impossibile cambiare il nome di sistema",
     "SYSTEM_NAME_NOW":"Il nome del sistema è ora"
+  },
+  "WEBRADIO":{
+    "MY_WEB_RADIOS":"Le mie Web Radio",
+    "FAVOURITE_RADIOS":"Radio preferite",
+    "TOP_500_RADIOS":"Le migliori 500",
+    "BY_GENRE_RADIOS":"Per genere",
+    "BY_COUNTRY_RADIOS":"Per nazione",
+    "WEBRADIO":"Web Radio"
   }
 }

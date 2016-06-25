@@ -170,7 +170,7 @@ function InterfaceWebUI(context) {
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
-						return self.commandRouter.pushToastMessage('success', self.getI18NString('websocket_play'), str);
+						return self.commandRouter.pushToastMessage('success', self.getI18NString('COMMON.PLAY'), str);
 					});
 			});
 
@@ -1676,14 +1676,5 @@ InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
     this.libSocketIO.sockets.emit(emit,payload);
 };
 
-InterfaceWebUI.prototype.loadI18NStrings = function (code) {
-    this.logger.info('WEBSOCKET I18N LOAD FOR LOCALE '+code);
 
-    this.i18nString=fs.readJsonSync(__dirname+'/i18n/strings_'+code+".json");
-}
-
-
-InterfaceWebUI.prototype.getI18NString = function (key) {
-    return this.i18nString[key];
-}
 

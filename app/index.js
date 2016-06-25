@@ -44,6 +44,7 @@ function CoreCommandRouter(server) {
 	this.pluginManager.startPlugins();
 
     this.loadI18nStrings();
+	this.musicLibrary.updateBrowseSourcesLang();
 
 	// Start the state machine
 	this.stateMachine = new (require('./statemachine.js'))(this);

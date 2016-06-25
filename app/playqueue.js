@@ -68,10 +68,10 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
     this.commandRouter.logger.info(JSON.stringify(item));
     this.saveQueue();
 
-    this.commandRouter.pushToastMessage('success',  this.commandRouter.getI18nString('common.remove_queue_title'),
-        this.commandRouter.getI18nString('common.remove_queue_text_1')+
+    this.commandRouter.pushToastMessage('success',  this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TITLE'),
+        this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_1')+
         item[0].name+
-        this.commandRouter.getI18nString('common.remove_queue_text_2'));
+        this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_2'));
 
     return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };

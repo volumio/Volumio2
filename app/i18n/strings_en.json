@@ -61,6 +61,8 @@
     "MY_MUSIC":"My Music",
     "CONFIGURATION_UPDATE":"Configuration update",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
+    "CONFIGURATION_UPDATE_ERROR":"An error has occurred",
+    "PLAYER_RESTARTED":"Player sucecssfully restarted",
     "RESTART":"Restart",
     "ON":"On",
     "OFF":"Off",
@@ -69,7 +71,10 @@
     "SEARCH_SONG_SECTION":"Songs",
     "SCAN_DB_ERROR":"Error while scanning database",
     "SCAN_DB":"Scanning Music",
-    "ILLEGAL_CHARACTER_/":"Remove forbidden character /"
+    "ILLEGAL_CHARACTER_/":"Remove forbidden character /",
+    "FAVOURITES":"Favourites",
+    "PLAYLISTS":"Playlists",
+    "MUSIC_LIBRARY":"Music Library"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -120,6 +125,15 @@
     "SYSTEM_CONFIGURATION_UPDATE":"System configuration update",
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"System settings updated successfully",
     "SYSTEM_NAME":"System Name",
-    "SYSTEM_NAME_ERROR":"Cannot change system name"
+    "SYSTEM_NAME_ERROR":"Cannot change system name",
+    "SYSTEM_NAME_NOW":"System name is now"
+  },
+  "WEBRADIO":{
+    "MY_WEB_RADIOS":"My Web Radios",
+    "FAVOURITE_RADIOS":"Favourite Radios",
+    "TOP_500_RADIOS":"Top 500 Radios",
+    "BY_GENRE_RADIOS":"By genre",
+    "BY_COUNTRY_RADIOS":"By country",
+    "WEBRADIO":"Web Radio"
   }
 }

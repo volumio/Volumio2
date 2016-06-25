@@ -779,4 +779,12 @@ function flattenArrayToCSV(arrayInput) {
 }
 
 
+CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
+	var self = this;
+
+	console.log('Updating browse sources language')
+	self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
+	self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
+	self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+}
 
