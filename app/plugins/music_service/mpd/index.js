@@ -762,7 +762,7 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting MPD');
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
-			//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_configuration_update_error'));
+			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE_ERROR'));
 			defer.resolve({});
 		}
 		else {
@@ -773,9 +773,10 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 					self.logger.info('Cannot restart MPD: ' + error);
 					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
 				}
-				else
-					//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
-
+				else {
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('COMMON.PLAYER_RESTARTED'));
+					setTimeout(function(){self.mpdEstablish()}, 3000)
+				}
 				defer.resolve({});
 			});
 		}
