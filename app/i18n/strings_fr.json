@@ -1,43 +1,89 @@
 {
-  "NETWORK_RESTART_TITLE":"Redémarrage réseau",
-  "NETWORK_RESTART_ERROR":"Erreur lors du redémarrage réseau: ",
-  "NETWORK_RESTART_SUCCESS":"Réseau redémarré avec succès",
-  "WIRELESS_RESTART_TITLE":"Redémarrage réseau Wifi",
-  "WIRELESS_RESTART_ERROR":"Erreur mors du redémarrage réseau Wifi ",
-  "WIRELESS_RESTART_SUCCESS":"Réseau wifi redémarrer avec succès",
-  "ADDED_TITLE":"Ajouté",
-  "ADDED_TO_PLAYLIST":" à la liste de lecture ",
-  "ADDED_TO_FAVOURITES":" aux favoris ",
-  "REMOVE_ERROR":"Ne peut supprimer",
-  "REMOVE_SUCCESS":"Supprimé avec succès",
-  "CONFIGURATION_UPDATE":"Mise à jour de la configuration",
-  "CONFIGURATION_UPDATE_DESCRIPTION":"La configuration à été mise à jour avec succès",
-  "ALARM_CLOCK_TITLE":"Alarme",
-  "SLEEP_MODE_TITLE":"Mode sommeil",
-  "ALARM_CLOCK_DESCR_1":"Votre alarme a été reglée",
-  "SLEEP_MODE_DESCR_1":"Le system va " ,
-  "ALARM_CLOCK_DESCR_2":" dans ",
-  "ALARM_CLOCK_DESCR_3":" minute(s)",
-  "SLEEP_MODE_DESCR_1":" heure(s) et ",
-  "APPEARANCE_TITLE":"Theme",
-  "NEW_BACKGROUND_APPLIED":"Nouveau fond d'écran appliqué",
-  "NEW_LANGUAGE_SET":"Nouvelle langue reglée",
-  "BACKGROUND_DELETED":"Fond d'écran supprimé",
-  "BUTTON_SAVE":"Save",
-  "APPEARANCE_UI_CONFIG_LANGUAGE":"Language",
-  "APPEARANCE_UI_CONFIG_SELECT_LANGUAGE":"Select Language",
-  "COMMON":{
-    "SAVE":"Save"
+  "PLAYBACK_OPTIONS":{
+    "PLAYBACK_OPTIONS_TITLE":"Options de lecture",
+    "AUDIO_OUTPUT":"Sortie Audio",
+    "OUTPUT_DEVICE_DOC":"Périphérique de sortie",
+    "OUTPUT_DEVICE":"Périphérique de sortie",
+    "ENABLE_I2S_DAC":"Activer les DACs I2S",
+    "GAPLESS_MP3_PLAYBACK":"Lecture MP3 sans blanc",
+    "VOLUME_NORMALIZATION":"Normalisation du Volume",
+    "AUDIO_BUFFER_SIZE":"Taille du buffer audio",
+    "BUFFER_BEFORE_PLAY":"Buffer avant lecture",
+    "VOLUME_OPTIONS":"Options de volume",
+    "DEFAULT_STARTUP_VOLUME":"Volume au démarrage",
+    "MAX_VOLUME_LEVEL":"Volume maximum",
+    "ONE_CLICK_VOLUME_STEPS":"Incrément de réglage du volume",
+    "VOLUME_CURVE_MODE":"Type de courbe de Volume",
+    "NATURAL":"Naturel",
+    "LINEAR":"Linéaire",
+    "MIXER_CONTROL":"Contrôle du mixeur",
+    "NO_HARDWARE_MIXER":"Pas de mixeur matériel trouvé",
+    "MIXER_CONTROLS":"Contrôles du mixeur",
+    "MIXER_CONTROLS_UPDATE":"Réglages du mixeur mis à jour",
+    "I2S_DAC_ACTIVATED":"DAC I2S activé",
+    "I2S_DAC_ACTIVATED_MESSAGE":"a éte activé, redémarrage du système pour la prise en compte",
+    "I2S_DAC_DEACTIVATED":"DAC I2S DAC Désactivé",
+    "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte"
   },
-  "APPEARANCE":
-  {
-    "UI_CONFIG_LANGUAGE":"Language",
-    "UI_CONFIG_SELECT_LANGUAGE":"Select Language"
+  "NETWORK": {
+    "NETWORK_SETTINGS":"Réglages du réseau",
+    "WIRED_NETWORK":"Réseau cablé",
+    "AUTOMATIC_IP":"IP Automatique",
+    "STATIC_IP":"IP statique",
+    "NETMASK":"Masque réseau",
+    "GATEWAY":"Passerelle",
+    "WIRELESS_NETWORK":"Réseau sans fil (WiFi)",
+    "NETWORK_RESTART_TITLE": "Redémarrage du réseau",
+    "NETWORK_RESTART_ERROR": "Erreur lors du redémarrage réseau: ",
+    "NETWORK_RESTART_SUCCESS": "Réseau redémarré avec succès",
+    "WIRELESS_RESTART_TITLE": "Redémarrage WiFi",
+    "WIRELESS_RESTART_ERROR": "Erreur lors du redémarrage WiFi: ",
+    "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès"
+  },
+  "PLAYLIST":{
+  "ADDED_TITLE":"Ajouté",
+  "ADDED_TO_PLAYLIST":" à la playlist ",
+  "ADDED_TO_FAVOURITES":" aux favoris ",
+  "REMOVE_ERROR":"Impossible de supprimer",
+  "REMOVE_SUCCESS":"Supprimé"
+  },
+  "COMMON":{
+    "SAVE":"Sauver",
+    "DISABLED":"Désactivé",
+    "PLAY_TITLE":"Lecture",
+    "PLAY_TEXT":"Lecture de ",
+    "ADD_QUEUE_TITLE":"Ajouté à la queue",
+    "ADD_QUEUE_TEXT_1":"Ajouté ",
+    "ADD_QUEUE_TEXT_2":" à la queue",
+    "REMOVE_QUEUE_TITLE":"Supprimé",
+    "REMOVE_QUEUE_TEXT_1":"Supprimé ",
+    "REMOVE_QUEUE_TEXT_2":" de la queue",
+    "MY_MUSIC":"Ma Musique",
+    "CONFIGURATION_UPDATE":"Mise à jour de la configuration",
+    "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration mise à jour avec succès",
+    "RESTART":"Redémarrage"
+  },
+  "APPEARANCE":{
+    "APPEARANCE":"Apparence",
+    "UI_CONFIG_LANGUAGE":"Langue",
+    "UI_CONFIG_SELECT_LANGUAGE":"Sélectionner une Langue"
   },
   "MPD":{
-    "SEARCH_ARTIST_SECTION":"Artists",
+    "SEARCH_ARTIST_SECTION":"Artistes",
     "SEARCH_ALBUM_SECTION":"Albums",
-    "SEARCH_SONG_SECTION":"Songs"
+    "SEARCH_SONG_SECTION":"Pistes"
 
+  },
+  "MAIN_MENU":{
+    "MY_MUSIC":"Ma Musique",
+    "PLAYBACK_OPTIONS":"Options de lecture",
+    "APPEARANCE":"Apparence",
+    "NETWORK":"Réseau",
+    "SYSTEM":"Système",
+    "PLUGINS":"Plugins",
+    "ALARM":"Alarme",
+    "SLEEP":"Sommeil",
+    "CREDITS":"Credits",
+    "SHUTDOWN":"Arrêt"
   }
 }
