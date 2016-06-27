@@ -298,6 +298,7 @@ volumioAppearance.prototype.setLanguage = function(data)
         self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
     var data = self.getUiSettings();
+    self.commandRouter.updateBrowseSourcesLang();
 
     if (data != undefined) {
         data.then(function (data) {

@@ -834,3 +834,9 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
         }
     }
 }
+
+CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
+	var self=this;
+
+	return this.musicLibrary.updateBrowseSourcesLang();
+}

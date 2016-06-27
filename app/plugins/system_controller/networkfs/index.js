@@ -149,9 +149,13 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	var fsopts;
 	var credentials;
 	var responsemessage = {status:""};
+	var pathraw = config.get('NasMounts.' + shareid + '.path');
+	var path = pathraw.replace(/ /g,"\\ ");
+	var mountidraw = config.get('NasMounts.' + shareid + '.name');
+	var mountid = mountidraw.replace(/ /g,"\\ ");
 
 	if (fstype == "cifs") {
-		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + config.get('NasMounts.' + shareid + '.path');
+		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
 		//Password-protected mount
 		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
 			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
@@ -160,10 +164,10 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 		}
 		fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto";
 	} else { // nfs
-		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + config.get('NasMounts.' + shareid + '.path');
+		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
 	}
 
-	var mountpoint = '/mnt/NAS/' + config.get('NasMounts.' + shareid + '.name');
+	var mountpoint = '/mnt/NAS/' +  mountid;
 
 	mountutil.mount(pointer, mountpoint, {"createDir": true, "fstype": fstype, "fsopts": fsopts}, function (result) {
 		if (result.error) {
@@ -171,7 +175,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 			if (result.error.indexOf('Permission denied') >= 0) {
 				result.error = 'Permission denied';
 			} else {
-				var splitreason = result.error.split('mount error')
+				var splitreason = result.error.split('mount error');
 				result.error = splitreason[1]
 			}
 			responsemessage = {status:"fail", reason:result.error}
@@ -289,7 +293,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
 
 		var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
-		
+
 		saveshare.then(function () {
 		var mountshare = self.mountShare(uuid);
 		if (mountshare != undefined) {
@@ -341,7 +345,7 @@ ControllerNetworkfs.prototype.saveShareConf = function (key, uuid, name, ip, pat
 	config.addConfigValue(key + 'user', 'string', username);
 	config.addConfigValue(key + 'password', 'string', password);
 	config.addConfigValue(key + 'options', 'string', options);
-	
+
 	defer.resolve('ok')
 	return defer.promise;
 }

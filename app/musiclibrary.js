@@ -786,5 +786,7 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 	self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
 	self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
 	self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+	self.browseSources[3].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+
 }
 
