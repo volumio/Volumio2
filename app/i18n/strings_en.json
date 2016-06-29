@@ -68,7 +68,7 @@
     "OFF":"Off",
     "SEARCH_ARTIST_SECTION":"Artists",
     "SEARCH_ALBUM_SECTION":"Albums",
-    "SEARCH_SONG_SECTION":"Songs",
+    "SEARCH_SONG_SECTION":"Tracks",
     "SCAN_DB_ERROR":"Error while scanning database",
     "SCAN_DB":"Scanning Music",
     "ILLEGAL_CHARACTER_/":"Remove forbidden character /",
