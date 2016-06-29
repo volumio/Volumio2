@@ -71,7 +71,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 	var defer = libQ.defer();
 
 	var lang_code = this.commandRouter.sharedVars.get('language_code');
-    
+
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
 		__dirname + '/UIConfig.json')
@@ -238,7 +238,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 
@@ -255,6 +255,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 		if (i2sstatus.name != data.i2sid.label) {
 			self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
 			self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+			this.config.set('outputdevicename', data.i2sid.label);
 			OutputDeviceNumber = I2SNumber;
 
 			var responseData = {
@@ -273,6 +274,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
 			self.commandRouter.broadcastMessage("openModal", responseData);
 		}
+
 	} else {
 
 		if (data.output_device.label === 'HDMI Out') {
@@ -282,21 +284,25 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 				this.config.set('outputdevicename', 'HDMI Out');
 			}
 			self.enablePiHDMI();
-		}
-
-		if (data.output_device.label === 'Audio Jack') {
+		} else if (data.output_device.label === 'Audio Jack') {
 			if (this.config.has('outputdevicename') == false) {
 				this.config.addConfigValue('outputdevicename', 'string', 'Audio Jack');
 			} else {
 				this.config.set('outputdevicename', 'Audio Jack');
 			}
 			self.enablePiJack();
+		} else {
+			if (this.config.has('outputdevicename') == false) {
+				this.config.addConfigValue('outputdevicename', 'string', data.output_device.label);
+			} else {
+				this.config.set('outputdevicename', data.output_device.label);
+			}
 		}
-
 
 		if (i2sstatus.enabled){
 			self.logger.info('Disabling I2S DAC: ');
 			self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
+			this.config.set('outputdevicename', 'Audio Jack');
 			OutputDeviceNumber = "0";
 			var responseData = {
 				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED'),
