@@ -685,7 +685,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	var num = allshares.length;
 	var progress = 0;
 
-
+	try {
 	for (var i = 0; i < allshares.length; i++) {
 		progress++
 		var asd = allshares[i];
@@ -711,6 +711,10 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		if (progress === num) {
 			defer.resolve(sharesjson);
 		}
+	}
+	} catch (e) {
+		sharesjson = {"nas":[]};
+		defer.resolve(sharesjson);
 	}
 
 
