@@ -123,22 +123,28 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         .then(function(content){
             for(var j in content)
             {
-                if(content[j].samplerate===undefined)
+                if(content[j][0].samplerate===undefined)
                 {
-                    content[j].samplerate=self.defaultSampleRate;
+                    content[j][0].samplerate=self.defaultSampleRate;
                 }
 
-                if(content[j].bitdepth===undefined)
+                if(content[j][0].bitdepth===undefined)
                 {
-                    content[j].bitdepth=self.defaultBitdepth;
+                    content[j][0].bitdepth=self.defaultBitdepth;
                 }
 
-                if(content[j].channels===undefined)
+                if(content[j][0].channels===undefined)
                 {
-                    content[j].channels=self.defaultChannels;
+                    content[j][0].channels=self.defaultChannels;
                 }
 
-                self.arrayQueue = self.arrayQueue.concat(content[j]);
+                if(self.arrayQueue.length>0)
+                {
+                    if(content[j][0].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
+                        self.arrayQueue = self.arrayQueue.concat(content[j]);
+                }
+                else  self.arrayQueue = self.arrayQueue.concat(content[j]);
+
             }
 
             self.saveQueue();
