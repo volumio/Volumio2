@@ -303,7 +303,7 @@ ControllerMpd.prototype.pushError = function (sReason) {
 // Define a general method for sending an MPD command, and return a promise for its execution
 ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommand');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommand '+sCommand);
 
 	return self.mpdReady
 		.then(function () {
@@ -1842,11 +1842,11 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
     return self.sendMpdCommand('stop',[])
         .then(function()
         {
-            return self.sendMpdCommand('clear',[])
+            return self.sendMpdCommand('clear',[]);
         })
         .then(function()
         {
-            return self.sendMpdCommand('add "'+uri+'"',[])
+            return self.sendMpdCommand('add "'+uri+'"',[]);
         })
         .then(function()
         {

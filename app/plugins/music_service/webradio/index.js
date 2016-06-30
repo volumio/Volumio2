@@ -18,8 +18,6 @@ function ControllerWebradio(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
-
-    self.mpdPlugin=self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 }
 
 
@@ -38,6 +36,7 @@ ControllerWebradio.prototype.addToBrowseSources = function () {
 ControllerWebradio.prototype.onStart = function() {
     this.addToBrowseSources();
 
+    this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
     return libQ.resolve();
 };
 
@@ -369,11 +368,11 @@ ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
     return self.mpdPlugin.sendMpdCommand('stop',[])
         .then(function()
         {
-            return self.mpdPlugin.sendMpdCommand('clear',[])
+            return self.mpdPlugin.sendMpdCommand('clear',[]);
         })
         .then(function()
         {
-            return self.mpdPlugin.sendMpdCommand('load "'+track.uri+'"',[])
+            return self.mpdPlugin.sendMpdCommand('load "'+track.uri+'"',[]);
         })
         .then(function()
         {
