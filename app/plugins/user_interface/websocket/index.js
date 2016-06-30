@@ -579,7 +579,17 @@ function InterfaceWebUI(context) {
 
 				if (response != undefined) {
 					response.then(function (result) {
-							selfConnWebSocket.emit('pushRemoveWebRadio', result);
+
+						var response2=self.musicLibrary.executeBrowseSource('radio/myWebRadio');
+
+						if (response2 != undefined) {
+							response2.then(function (result2) {
+								selfConnWebSocket.emit('pushBrowseLibrary', result2);
+							})
+								.fail(function () {
+									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+								});
+						}
 						})
 						.fail(function () {
 							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
@@ -1370,7 +1380,7 @@ function InterfaceWebUI(context) {
 
 
                 selfConnWebSocket.emit('openModal', {'title':'Confirm plugin uninstall', 'content':'Are you sure you want to uninstall this Plugin?', 'buttons':[{'name':'Uninstall', 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':'Cancel','class':'btn btn-warning'}]});
-                
+
             });
 
 
@@ -1385,8 +1395,8 @@ function InterfaceWebUI(context) {
 		    });
                 }
                 else self.logger.error("Error on saving queue to playlist");
-                
-                
+
+
             });
 
             connWebSocket.on('setConsume', function (data) {

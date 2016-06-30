@@ -588,10 +588,10 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
             var ithdata = data[i];
             var song = {
                 service: 'webradio',
-                type: 'webradio',
+                type: 'mywebradio',
                 title: ithdata.name,
                 uri: ithdata.uri,
-                icon: '/albumart'
+                icon: 'fa fa-microphone'
             };
 
             response.navigation.list.push(song);
@@ -728,5 +728,12 @@ ControllerWebradio.prototype.addMyWebRadio = function (data) {
 
     return this.commandRouter.playListManager.addToMyWebRadio('webradio',data.name,data.uri);
     //addToMyWebRadio = function (service, radio_name, uri)
+}
+
+ControllerWebradio.prototype.removeMyWebRadio = function (data) {
+	this.logger.info(JSON.stringify(data));
+
+	return this.commandRouter.playListManager.removeFromMyWebRadio(data.name,'webradio',data.uri);
+	//addToMyWebRadio = function (service, radio_name, uri)
 }
 

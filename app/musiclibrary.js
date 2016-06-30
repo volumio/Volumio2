@@ -664,6 +664,7 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
     var self = this;
 
     var response;
+	console.log('--------------------------'+curUri)
 
     if (curUri.startsWith('favourites')) {
         return self.commandRouter.playListManager.listFavourites(curUri);

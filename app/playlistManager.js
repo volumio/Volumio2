@@ -445,6 +445,10 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 	var playlist = [];
 	var filePath = folder + name;
 
+	console.log(filePath)
+	console.log(service)
+	console.log(uri)
+
 	fs.exists(filePath, function (exists) {
 		if (!exists)
 			defer.resolve({success: false, reason: 'Playlist does not exist'});
