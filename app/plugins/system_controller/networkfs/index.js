@@ -701,7 +701,9 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 			var final1 = cleaned[0].replace('\t\\\\','');
 			var final2 = final1.split('\t');
 			var final = final2[0];
-			sharesjson.nas.push({"name":final,"shares":[]});
+			if (final != 'VOLUMIO') {
+				sharesjson.nas.push({"name":final,"shares":[]});
+			}
 		} else  {
 			var clean2 = asd2.split(' ');
 			for (var e = 0; e < sharesjson.nas.length; e++) {
