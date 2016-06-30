@@ -15,7 +15,7 @@ function CorePlayQueue(commandRouter, stateMachine) {
     this.defaultSampleRate='';
     this.defaultBitdepth=0;
     this.defaultChannels=0;
-    
+
     //trying to read play queue from file
     fs.readJson('/data/queue', function (err, queue) {
         if(err)
@@ -41,7 +41,7 @@ CorePlayQueue.prototype.getQueue = function () {
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
-    
+
 	var sTargetService = this.arrayQueue[nStartIndex].service;
 	var nEndIndex = nStartIndex;
 	var nToCheck = this.arrayQueue.length - 1;
@@ -110,7 +110,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             service='spop';
         }
 
-        if(service==='dirble')
+        if(service==='webradio')
         {
             item.name=item.title;
             item.albumart="/albumart";
@@ -123,24 +123,24 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         .then(function(content){
             for(var j in content)
             {
-                if(content[j][0].samplerate===undefined)
+                if(content[j].samplerate===undefined)
                 {
-                    content[j][0].samplerate=self.defaultSampleRate;
+                    content[j].samplerate=self.defaultSampleRate;
                 }
 
-                if(content[j][0].bitdepth===undefined)
+                if(content[j].bitdepth===undefined)
                 {
-                    content[j][0].bitdepth=self.defaultBitdepth;
+                    content[j].bitdepth=self.defaultBitdepth;
                 }
 
-                if(content[j][0].channels===undefined)
+                if(content[j].channels===undefined)
                 {
-                    content[j][0].channels=self.defaultChannels;
+                    content[j].channels=self.defaultChannels;
                 }
 
                 if(self.arrayQueue.length>0)
                 {
-                    if(content[j][0].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
+                    if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
                         self.arrayQueue = self.arrayQueue.concat(content[j]);
                 }
                 else  self.arrayQueue = self.arrayQueue.concat(content[j]);
