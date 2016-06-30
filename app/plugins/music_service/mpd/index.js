@@ -1595,33 +1595,36 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                         var lines = msg.split('\n');
                         for (var i = 0; i < lines.length; i++) {
 							var line = lines[i];
-                            var path = line.slice(5).trimLeft();
-                            var name = path.split('/');
-                            var count = name.length;
 
-                            var artist = self.searchFor(lines, i + 1, 'Artist:');
-                            var album = self.searchFor(lines, i + 1, 'Album:');
-                            var title = self.searchFor(lines, i + 1, 'Title:');
-                            var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                            if (line.startsWith('file:')) {
+                                var path = line.slice(5).trimLeft();
+                                var name = path.split('/');
+                                var count = name.length;
 
-                            if (title) {
-                                title = title;
-                            } else {
-                                title = name;
+                                var artist = self.searchFor(lines, i + 1, 'Artist:');
+                                var album = self.searchFor(lines, i + 1, 'Album:');
+                                var title = self.searchFor(lines, i + 1, 'Title:');
+                                var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+
+                                if (title) {
+                                    title = title;
+                                } else {
+                                    title = name;
+                                }
+
+                                items.push({
+                                    uri: 'music-library/' + path,
+                                    service: 'mpd',
+                                    name: title,
+                                    artist: artist,
+                                    album: album,
+                                    type: 'track',
+                                    tracknumber: 0,
+                                    albumart: self.getAlbumArt({artist: artist, album: album}, uri),
+                                    duration: time,
+                                    trackType: 'mp3'
+                                });
                             }
-
-                            items.push({
-                                uri: 'music-library/'+path,
-                                service: 'mpd',
-                                name: title,
-                                artist: artist,
-                                album: album,
-                                type: 'track',
-                                tracknumber: 0,
-                                albumart: self.getAlbumArt({artist:artist,album: album},uri),
-                                duration: time,
-                                trackType: 'mp3'
-                            });
                         }
                         defer.resolve(items);
                     }
