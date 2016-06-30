@@ -304,6 +304,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
 			this.config.set('outputdevicename', 'Audio Jack');
 			OutputDeviceNumber = "0";
+			self.enablePiJack();
 			var responseData = {
 				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED'),
 				message: data.i2sid.label+ ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED_MESSAGE'),
