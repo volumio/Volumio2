@@ -145,6 +145,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 
 	var sharename = config.get('NasMounts.' + shareid + '.name');
 	var fstype = config.get('NasMounts.' + shareid + '.fstype');
+	var options = config.get('NasMounts.' + shareid + '.options');
 	var pointer;
 	var fsopts;
 	var credentials;
@@ -162,7 +163,12 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 		} else {
 			credentials = 'guest,';
 		}
-		fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto";
+		if (options) {
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,"+options;
+		} else {
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto";
+		}
+
 	} else { // nfs
 		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
 	}
