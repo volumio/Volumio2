@@ -393,7 +393,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 						self.logger.error("Mount point cannot be removed, won't appear next boot. Error: " + error);
 					}
 					else {
-						exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						exec('/bin/rmdir ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
 								self.commandRouter.pushToastMessage('alert', "Configuration update", 'The folder cannot be deleted: ' + error);
 								self.logger.error("Cannot Delete Folder. Error: " + error);
