@@ -1,0 +1,35 @@
+{ "devices":[
+  {"name":"Raspberry PI 2/3","data":[
+    {"id":"aoide-kazoo-dac","name":"Aoide Kazoo DAC","overlay":"aoide-kazoo-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"aoide-zero-dacplus","name":"Aoide Zero DAC+","overlay":"aoide-zero-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"aoide-zero-digiplus","name":"Aoide Zero Digi+","overlay":"aoide-zero-digiplus","alsanum":"1","mixer":"","modules":"","script":""},
+    {"id":"aoide-dacii","name":"Aoide DACII","overlay":"aoide-dacii","alsanum":"1","mixer":"","modules":"","script":""},
+    {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"hifiberry-dacplus","name":"Hifiberry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"hifiberry-dac","name":"Hifiberry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"hifiberry-amp","name":"Hifiberry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"hifiberry-digi","name":"Hifiberry DIGI","overlay":"hifiberry-digi","alsanum":"1","mixer":"","modules":"","script":""},
+    {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"iqaudio-amp","name":"IQaudIO Pi-DigiAMP+","overlay":"iqaudio-dacplus,auto_mute_amp","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"mamboberry-dac","name":"Mamboberry HiFi DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"st400-dac-amp","name":"ST400 Dac (PCM5122) - Amp","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":""}
+  ]},
+  {"name":"Raspberry PI","data":[
+    {"id":"aoide-kazoo-dac","name":"Aoide Kazoo DAC","overlay":"aoide-kazoo-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"aoide-zero-dacplus","name":"Aoide Zero DAC+","overlay":"aoide-zero-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"aoide-zero-digiplus","name":"Aoide Zero Digi+","overlay":"aoide-zero-digiplus","alsanum":"1","mixer":"","modules":"","script":""},
+    {"id":"aoide-dacii","name":"Aoide DACII","overlay":"aoide-dacii","alsanum":"1","mixer":"","modules":"","script":""},
+    {"id":"hifiberry-amp","name":"Hifiberry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"hifiberry-dac","name":"Hifiberry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"hifiberry-digi","name":"Hifiberry DIGI","overlay":"hifiberry-digi","alsanum":"1","mixer":"","modules":"","script":""},
+    {"id":"iqaudio-dac","name":"IQaudIO DAC","overlay":"iqaudio-dac","alsanum":"1","mixer":"Digital","modules":"","script":""},
+    {"id":"raspidac3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":""}
+  ]},
+  {"name":"Odroid C1+","data":[
+    {"id":"odroid-hifi-shield","name":"HiFi Shield","overlay":"","alsanum":"2","mixer":"","modules":"","script":""}
+  ]}
+  ]}
+

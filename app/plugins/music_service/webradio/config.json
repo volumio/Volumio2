@@ -1,0 +1,34 @@
+{
+  "api_key": {
+    "type": "string",
+    "value": "vKgHQrwysboWzMwH"
+  },
+  "nHost":{
+    "type": "string",
+    "value": "localhost"
+  },
+  "nPort":{
+    "type": "number",
+    "value": 6600
+  },
+  "api_token":{
+    "type": "string",
+    "value": "8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2"
+  },
+  "url_categories_primary":{
+    "type": "string",
+    "value": "http://api.dirble.com/v2/categories/primary"
+  },
+  "url_category_stations":{
+    "type": "string",
+    "value": "http://api.dirble.com/v2/category/"
+  },
+  "url_countries":{
+    "type": "string",
+    "value": "http://api.dirble.com/v2/countries"
+  },
+  "per_page":{
+    "type":"number",
+    "value":20
+  }
+}

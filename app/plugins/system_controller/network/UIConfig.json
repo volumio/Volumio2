@@ -1,0 +1,151 @@
+{
+  "page": {
+    "label": "TRANSLATE.NETWORK.NETWORK_SETTINGS"
+  },
+  "sections": [
+    {"coreSection":"network-status"},
+   {
+      "id": "section_wired_network",
+      "element": "section",
+      "label": "TRANSLATE.NETWORK.WIRED_NETWORK",
+      "icon": "fa-plug",
+      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWiredNet"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "dhcp",
+          "static_ip",
+          "static_netmask",
+          "static_gateway"
+        ]
+      },
+      "content": [
+        {
+          "id": "dhcp",
+          "element": "switch",
+          "doc" : "Choose between DHCP and Static IP configuration.",
+          "label": "TRANSLATE.NETWORK.AUTOMATIC_IP",
+          "value": true
+        },
+        {
+          "id": "static_ip",
+          "type": "ip",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.123"
+            }
+          ],
+          "label": "TRANSLATE.NETWORK.STATIC_IP",
+          "value": "",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": false
+          }
+        },
+        {
+          "id": "static_netmask",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "255.255.255.0"
+            }
+          ],
+          "type": "ip",
+          "label": "TRANSLATE.NETWORK.NETMASK",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": false
+          }
+        },
+        {
+          "id": "static_gateway",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.1"
+            }
+          ],
+          "type": "ip",
+          "label": "TRANSLATE.NETWORK.GATEWAY",
+          "visibleIf": {
+            "field": "dhcp",
+            "value": false
+          }
+        }
+      ]
+    },
+    { 
+      "id": "section_wireless_network",
+      "element": "section",
+      "label": "TRANSLATE.NETWORK.WIRELESS_NETWORK",
+      "icon": "fa-wifi",
+      "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveWirelessNet"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "wireless_dhcp",
+          "wireless_static_ip",
+          "wireless_static_netmask",
+          "wireless_static_gateway"
+        ]
+      },
+      "content": [
+        {
+          "id": "wireless_dhcp",
+          "element": "switch",
+          "doc" : "Choose between DHCP and Static IP configuration.",
+          "label": "TRANSLATE.NETWORK.AUTOMATIC_IP",
+          "value": true
+        },
+        {
+          "id": "wireless_static_ip",
+          "type": "ip",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.123"
+            }
+          ],
+          "label": "TRANSLATE.NETWORK.STATIC_IP",
+          "value": "",
+          "visibleIf": {
+            "field": "wireless_dhcp",
+            "value": false
+          }
+        },
+        {
+          "id": "wireless_static_netmask",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "255.255.255.0"
+            }
+          ],
+          "type": "ip",
+          "label": "TRANSLATE.NETWORK.NETMASK",
+          "visibleIf": {
+            "field": "wireless_dhcp",
+            "value": false
+          }
+        },
+        {
+          "id": "wireless_static_gateway",
+          "element": "input",
+          "attributes": [
+            {
+              "placeholder": "192.168.1.1"
+            }
+          ],
+          "type": "ip",
+          "label": "TRANSLATE.NETWORK.GATEWAY",
+          "visibleIf": {
+            "field": "wireless_dhcp",
+            "value": false
+          }
+        }
+      ]
+    },
+    {"coreSection":"wifi"}
+  ]
+}

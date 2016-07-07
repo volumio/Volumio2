@@ -1,0 +1,15 @@
+{
+  "name": "volumio_command_line_client",
+  "version": "1.0.0",
+  "description": "Command line client for Volumio",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Volumio",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "system_controller",
+    "boot_priority":8
+  }
+}

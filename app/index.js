@@ -7,6 +7,7 @@ var exec = require('child_process').exec;
 var winston = require('winston');
 var vconf = require('v-conf');
 
+
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
@@ -24,6 +25,7 @@ function CoreCommandRouter(server) {
 
 	this.callbacks = [];
 	this.sharedVars = new vconf();
+    this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
 
 	this.logger.info("-------------------------------------------");
 	this.logger.info("-----            Volumio2              ----");
@@ -36,9 +38,13 @@ function CoreCommandRouter(server) {
 
 	// Start plugins
 	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+	this.pluginManager.checkIndex();
+	this.pluginManager.pluginFolderCleanup();
 	this.pluginManager.loadPlugins();
-	//self.pluginManager.onVolumioStart();
-	//self.pluginManager.startPlugins();
+	this.pluginManager.startPlugins();
+
+    this.loadI18nStrings();
+	this.musicLibrary.updateBrowseSourcesLang();
 
 	// Start the state machine
 	this.stateMachine = new (require('./statemachine.js'))(this);
@@ -57,18 +63,11 @@ function CoreCommandRouter(server) {
 	this.pushConsoleMessage('BOOT COMPLETED');
 
 	this.startupSound();
-
-
-
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
 
-// Volumio Play
-CoreCommandRouter.prototype.volumioPlay = function () {
-	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
-	return this.stateMachine.play();
-};
+
 
 // Volumio Pause
 CoreCommandRouter.prototype.volumioPause = function () {
@@ -140,8 +139,8 @@ CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
 CoreCommandRouter.prototype.volumioUpdateVolumeSettings = function (vol) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateVolumeSettings');
 	if (this.volumeControl){
-	return this.volumeControl.updateVolumeSettings(vol);
-	} 
+		return this.volumeControl.updateVolumeSettings(vol);
+	}
 };
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
@@ -218,13 +217,13 @@ CoreCommandRouter.prototype.volumioAddToBrowseSources = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioRemoveToBrowseSources = function (data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioRemoveToBrowseSources' + data);
-    return this.musicLibrary.removeBrowseSource(data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioRemoveToBrowseSources' + data);
+	return this.musicLibrary.removeBrowseSource(data);
 };
 
 CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
-    return this.musicLibrary.updateBrowseSources(name,data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
+	return this.musicLibrary.updateBrowseSources(name,data);
 };
 // Volumio Get Playlist Index
 CoreCommandRouter.prototype.volumioGetPlaylistIndex = function (sUid) {
@@ -255,6 +254,14 @@ CoreCommandRouter.prototype.volumiopushwirelessnetworks = function (results) {
 CoreCommandRouter.prototype.volumioImportServicePlaylists = function () {
 	this.pushConsoleMessage('CoreCommandRouter::volumioImportServicePlaylists');
 	return this.playlistFS.importServicePlaylists();
+};
+
+// Volumio Search
+CoreCommandRouter.prototype.volumioSearch = function (data) {
+	this.pushConsoleMessage('CoreCommandRouter::Search '+data);
+	var asd = this.musicLibrary.search(data);
+	console.log(asd)
+	return this.musicLibrary.search(data);
 };
 
 // Methods usually called by the State Machine --------------------------------------------------------------------
@@ -309,6 +316,7 @@ CoreCommandRouter.prototype.serviceStop = function (sService) {
 // MPD Pause
 CoreCommandRouter.prototype.servicePause = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::servicePause');
+
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 	return thisPlugin.pause();
 };
@@ -316,7 +324,16 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
+
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+	var state=this.stateMachine.getState();
+
+	if(state==='stop')
+	{
+		thisPlugin.clearAddPlayTracks();
+	}
+
 	return thisPlugin.resume();
 };
 
@@ -346,6 +363,8 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 // Volumio Add Queue Items
 CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
+
+	this.pushConsoleMessage(JSON.stringify(arrayItems));
 	return this.stateMachine.addQueueItems(arrayItems);
 };
 
@@ -387,7 +406,9 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+
 	var thisPlugin = this.pluginManager.getPlugin(type, name);
+
 	return thisPlugin.getUIConfig(data);
 };
 
@@ -506,6 +527,316 @@ CoreCommandRouter.prototype.startupSound = function () {
 	this.platformspecific.startupSound();
 };
 
-CoreCommandRouter.prototype.fileUpdate = function () {
-	this.platformspecific.fileUpdate();
+CoreCommandRouter.prototype.fileUpdate = function (data) {
+	this.platformspecific.fileUpdate(data);
+}
+
+
+
+
+//------------------------- Multiservice queue methods -----------------------------------
+
+CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
+	this.logger.info("Exploding uri "+uri+" in service "+service);
+
+	var thisPlugin = this.pluginManager.getPlugin('music_service', service);
+	if(thisPlugin.explodeUri !=undefined)
+		return  thisPlugin.explodeUri(uri);
+	else {
+		var promise=libQ.defer();
+		promise.resolve({
+			uri: uri,
+			service: service
+		});
+		return promise.promise;
+	}
 };
+
+
+
+
+
+
+
+//------------------------ Used in new play system -------------------------------
+
+// Volumio Play
+CoreCommandRouter.prototype.volumioPlay = function (N) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
+	if(N===undefined)
+		return this.stateMachine.play();
+	else
+	{
+		return this.stateMachine.play(N);
+	}
+};
+
+
+// Volumio Play
+CoreCommandRouter.prototype.volumioSeek = function (position) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
+	return this.stateMachine.seek(position);
+};
+
+CoreCommandRouter.prototype.installPlugin = function (uri) {
+	var self=this;
+	var defer=libQ.defer();
+
+	this.pluginManager.installPlugin(uri).then(function()
+	{
+		defer.resolve();
+	}).fail(function(e){
+		self.logger.info("Error: "+e);
+		defer.reject(new Error('Cannot install plugin. Error: '+e));
+	});
+
+	return defer.promise;
+};
+
+CoreCommandRouter.prototype.unInstallPlugin = function (data) {
+	var self = this;
+	var defer=libQ.defer();
+
+	self.logger.info('Starting Uninstall of plugin ' + data.category + ' - ' +data.name);
+
+	this.pluginManager.unInstallPlugin(data.category,data.name).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot uninstall plugin'));
+	});
+
+	return defer.promise;
+};
+
+CoreCommandRouter.prototype.enablePlugin = function (data) {
+	var defer=libQ.defer();
+
+	this.pluginManager.enablePlugin(data.category,data.plugin).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot enable plugin'));
+	});
+
+	return defer.promise;
+};
+
+CoreCommandRouter.prototype.disablePlugin = function (data) {
+	var defer=libQ.defer();
+
+	this.pluginManager.disablePlugin(data.category,data.plugin).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot disable plugin'));
+	});
+
+	return defer.promise;
+};
+
+CoreCommandRouter.prototype.modifyPluginStatus = function (data) {
+	var defer=libQ.defer();
+
+	this.pluginManager.modifyPluginStatus(data.category,data.plugin,data.status).then(function()
+	{
+		defer.resolve();
+	}).fail(function(){
+		defer.reject(new Error('Cannot update plugin status'));
+	});
+
+	return defer.promise;
+};
+
+CoreCommandRouter.prototype.broadcastMessage = function (emit,payload) {
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
+			if (typeof thisInterface.broadcastMessage === "function")
+				return thisInterface.broadcastMessage(emit,payload);
+		})
+	);
+};
+
+CoreCommandRouter.prototype.getInstalledPlugins = function () {
+	return this.pluginManager.getInstalledPlugins();
+};
+
+CoreCommandRouter.prototype.getAvailablePlugins = function () {
+	return this.pluginManager.getAvailablePlugins();
+};
+
+CoreCommandRouter.prototype.getPluginDetails = function (data) {
+	return this.pluginManager.getPluginDetails(data);
+};
+
+
+
+CoreCommandRouter.prototype.enableAndStartPlugin = function (category,name) {
+	return this.pluginManager.enableAndStartPlugin(category,name);
+};
+
+
+CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
+	return this.pluginManager.disableAndStopPlugin(category,name);
+};
+
+
+CoreCommandRouter.prototype.volumioRandom = function (data) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+	return this.stateMachine.setRandom(data);
+};
+
+CoreCommandRouter.prototype.volumioRepeat = function (data) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+	return this.stateMachine.setRepeat(data);
+};
+
+CoreCommandRouter.prototype.volumioConsume = function (data) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');
+	return this.stateMachine.setConsume(data);
+};
+
+CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
+
+	var queueArray=this.stateMachine.getQueue();
+	this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+
+};
+
+
+CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
+
+	return this.stateMachine.moveQueueItem(from,to);
+};
+
+CoreCommandRouter.prototype.getI18nString = function (key) {
+    var splitted=key.split('.');
+
+	console.log(key);
+	console.log(splitted)
+
+    if(splitted.length==1)
+    {
+        return this.i18nStrings[key];
+    }
+    else {
+        return this.i18nStrings[splitted[0]][splitted[1]];
+    }
+};
+
+CoreCommandRouter.prototype.loadI18nStrings = function () {
+    var self=this;
+    var language_code=this.sharedVars.get('language_code');
+
+    this.logger.info("Loading i18n strings for locale "+language_code);
+
+    this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+
+    var categories=this.pluginManager.getPluginCategories();
+    for(var i in categories)
+    {
+        var category=categories[i];
+        var names=this.pluginManager.getPluginNames(category);
+        for(var j in names)
+        {
+            var name=names[j];
+            var instance=this.pluginManager.getPlugin(category,name);
+
+            if(instance.loadI18NStrings)
+                instance.loadI18NStrings(language_code);
+
+        }
+    }
+};
+
+CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionaryFile,jsonFile) {
+    var self=this;
+    var methodDefer=libQ.defer();
+    var defers=[];
+
+    defers.push(libQ.nfcall(fs.readJson,dictionaryFile));
+    defers.push(libQ.nfcall(fs.readJson,defaultDictionaryFile));
+    defers.push(libQ.nfcall(fs.readJson,jsonFile));
+
+    libQ.all(defers).
+            then(function(documents)
+    {
+
+        var dictionary=documents[0];
+        var defaultDictionary=documents[1];
+        var jsonFile=documents[2];
+
+        self.translateKeys(jsonFile,dictionary,defaultDictionary);
+
+        methodDefer.resolve(jsonFile);
+    })
+    .fail(function(err){
+        self.logger.info("ERROR LOADING JSON "+err);
+
+        methodDefer.reject(new Error());
+    });
+
+    return methodDefer.promise;
+
+};
+
+CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultDictionary) {
+    var self=this;
+
+    var keys=Object.keys(parent);
+
+    for(var i in keys)
+    {
+        var obj=parent[keys[i]];
+        var type=typeof(obj);
+
+        if(type==='object')
+        {
+           self.translateKeys(obj,dictionary,defaultDictionary);
+        }
+        else if(type==='string')
+        {
+            if(obj.startsWith("TRANSLATE."))
+            {
+                var replaceKey=obj.slice(10);
+
+                var dotIndex=replaceKey.indexOf('.');
+
+                if(dotIndex==-1)
+                {
+                    var value=dictionary[replaceKey];
+                    if(value===undefined)
+                    {
+                        value=defaultDictionary[replaceKey];
+                    }
+                    parent[keys[i]]=value;
+                }
+                else {
+                    var category=replaceKey.slice(0,dotIndex);
+                    var key=replaceKey.slice(dotIndex+1);
+
+                    var value=dictionary[category][key];
+                    if(value===undefined)
+                    {
+                        value=defaultDictionary[category][key];
+                    }
+                    parent[keys[i]]=value;
+                }
+
+
+
+            }
+
+        }
+    }
+}
+
+CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
+	var self=this;
+
+	return this.musicLibrary.updateBrowseSourcesLang();
+}

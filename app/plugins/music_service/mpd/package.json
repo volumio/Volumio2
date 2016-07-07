@@ -1,0 +1,15 @@
+{
+  "name": "mpd",
+  "version": "1.0.0",
+  "description": "MPD plugin for Volumio2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Volumio",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "music_service",
+    "boot_priority":9
+  }
+}

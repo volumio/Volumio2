@@ -1,0 +1,24 @@
+general =
+{
+    name = "${name}";
+log_verbosity = 0;
+};
+
+alsa =
+{
+  output_device = "${device}";
+};
+
+sessioncontrol =
+{
+  run_this_before_play_begins = "/usr/bin/mpc stop";
+};
+metadata =
+{
+	enabled = "yes";
+	include_cover_art = "yes";
+	pipe_name = "/tmp/shairport-sync-metadata";
+	pipe_timeout = 5000;
+	socket_port = "5555";
+	socket_msglength = "65000";
+}

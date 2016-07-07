@@ -605,7 +605,23 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 
 	if(data.name!= undefined) {
 	    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
-	    self.browseSources.push(data);
+
+        var replaced=false;
+
+        //searching for existing browse source
+        for(var i in self.browseSources)
+        {
+            var source=self.browseSources[i];
+            if(source.name===data.name)
+            {
+                source.uri=data.uri;
+                source.plugin_type=data.plugin_type;
+                source.plugin_name=data.plugin_name;
+                replaced=true;
+            }
+        }
+        if(replaced===false)
+            self.browseSources.push(data);
 	}
 	var response = self.getBrowseSources();
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
@@ -648,6 +664,7 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
     var self = this;
 
     var response;
+	console.log('--------------------------'+curUri)
 
     if (curUri.startsWith('favourites')) {
         return self.commandRouter.playListManager.listFavourites(curUri);
@@ -670,6 +687,67 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
 
 }
 
+
+CoreMusicLibrary.prototype.search = function(data) {
+	var self = this;
+
+	var query = {};
+	var defer = libQ.defer();
+    var deferArray=[];
+	var searcharray = [];
+	if (data.value) {
+		if (data.type) {
+			query = {"value": data.value, "type": data.type};
+		} else {
+			query = {"value": data.value};
+		}
+
+        var executed=[];
+
+		for (var i = 0; i < self.browseSources.length; i++) {
+			var source=self.browseSources[i];
+
+            var key=source.plugin_type+'_'+source.plugin_name;
+            if(executed.indexOf(key)==-1)
+            {
+                executed.push(key);
+
+                var response;
+
+                response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+
+                if (response != undefined) {
+                    deferArray.push(response);
+                };
+            }
+		}
+
+        libQ.all(deferArray)
+            .then(function (result) {
+                for(var i in result)
+                {
+                    if(result[i]!== undefined && result[i]!==null)
+                        searcharray = searcharray.concat(result[i]);
+                }
+
+                defer.resolve({
+                    navigation: {
+                        prev: {
+                            uri: '/'
+                        },
+                        list: searcharray
+                    }
+                });
+            })
+            .fail(function (err) {
+                console.log('Search error in Plugin: '+source.plugin_name+". Details: "+err);
+                defer.reject(new Error());
+            });
+	} else {
+
+	}
+	return defer.promise;
+}
 
 
 // Helper functions ------------------------------------------------------------------------------------
@@ -702,4 +780,14 @@ function flattenArrayToCSV(arrayInput) {
 }
 
 
+CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
+	var self = this;
+
+	console.log('Updating browse sources language')
+	self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
+	self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
+	self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+	self.browseSources[3].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+
+}
 

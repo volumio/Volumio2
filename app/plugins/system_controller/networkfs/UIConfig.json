@@ -1,0 +1,8 @@
+{
+  "page": {
+    "label": "TRANSLATE.COMMON.MY_MUSIC"
+  },
+  "sections": [
+    {"coreSection":"my-music"},
+{"coreSection":"network-drives"}
+]}

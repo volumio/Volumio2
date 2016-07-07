@@ -2,6 +2,8 @@
 
 var exec = require('child_process').exec;
 
+var dbUpdateState = false;
+
 module.exports = PlatformSpecific;
 function PlatformSpecific(coreCommand) {
 	var self = this;
@@ -31,9 +33,11 @@ PlatformSpecific.prototype.networkRestart = function () {
 	var self = this;
 	exec("sudo /bin/systemctl restart networking.service", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.coreCommand.pushToastMessage('error',"Network restart",'Error while restarting network: '+error);
+			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_ERROR')+error);
 		} else
-			self.coreCommand.pushToastMessage('success',"Network restart",'Network successfully restarted');
+			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
 		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
@@ -45,9 +49,11 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 	var self = this;
 	exec("sudo /bin/systemctl restart wireless.service", function (error, stdout, stderr) {
 		if (error !== null) {
-			self.coreCommand.pushToastMessage('error',"Wireless restart",'Error while restarting wireless: '+error);
+			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_ERROR')+error);
 		} else
-			self.coreCommand.pushToastMessage('success',"Wiress restart",'Wireless successfully restarted');
+			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_SUCCESS'))
 		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
@@ -67,8 +73,10 @@ PlatformSpecific.prototype.startupSound = function () {
 	});
 }
 
-PlatformSpecific.prototype.fileUpdate = function () {
+PlatformSpecific.prototype.fileUpdate = function (data) {
 	var self = this;
+	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update'+data);
 
-	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update');
+	return self.coreCommand.broadcastMessage('dbUpdate', {'status':data});
+
 }

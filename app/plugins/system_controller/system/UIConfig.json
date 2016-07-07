@@ -1,0 +1,70 @@
+{
+  "page": {
+    "label": "TRANSLATE.SYSTEM.SYSTEM_SETTINGS"
+  },
+  "sections": [
+    {
+      "id": "section_general_settings",
+      "element": "section",
+      "label": "TRANSLATE.SYSTEM.GENERAL_SETTINGS",
+      "icon": "fa-wrench",
+      "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveGeneralSettings"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "player_name",
+          "startup_sound"
+        ]
+      },
+      "content": [
+        {
+          "id": "player_name",
+          "type":"text",
+          "element": "input",
+          "doc": "This is the name of your system as it will appear on your network.",
+          "label": "TRANSLATE.SYSTEM.PLAYER_NAME",
+          "value": "volumio"
+        },
+        {
+          "id":"startup_sound",
+          "element": "switch",
+          "doc": "By default Volumio will play a short startup sound after it has finished booting",
+          "label": "TRANSLATE.SYSTEM.STARTUP_SOUND",
+          "value": true
+        }
+
+      ]
+    },
+    {"coreSection": "system-version"},
+    {
+      "id":"section_updates",
+      "type": "section",
+      "label": "TRANSLATE.SYSTEM.SYSTEM_UPDATES",
+      "icon": "fa-refresh",
+      "content": [
+        {
+          "id":"update",
+          "element": "button",
+          "label": "TRANSLATE.SYSTEM.CHECK_UPDATES",
+          "description": "TRANSLATE.SYSTEM.CHECK_UPDATES_DESCR",
+          "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
+        },
+        {
+          "id":"user",
+          "element": "button",
+          "label": "TRANSLATE.SYSTEM.DELETE_USER_DATA",
+          "description": "TRANSLATE.SYSTEM.DELETE_USER_DATA_DESCR",
+          "onClick": {"type":"emit", "message":"deleteUserData", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.DELETE_USER_DATA_TITLE", "message": "TRANSLATE.SYSTEM.DELETE_USER_DATA_MESSAGE"}}
+        },
+         {
+            "id":"factory",
+              "element": "button",
+              "label": "TRANSLATE.SYSTEM.FACTORY_RESET",
+              "description": "TRANSLATE.SYSTEM.FACTORY_RESET_DESCR",
+              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.FACTORY_RESET_TITLE", "message": "TRANSLATE.SYSTEM.FACTORY_RESET_MESSAGEThis will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"}}
+          }
+      ]
+
+    }
+  ]
+}
