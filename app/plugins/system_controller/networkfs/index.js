@@ -171,6 +171,11 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 
 	} else { // nfs
 		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
+		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
+			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
+		} else {
+			credentials = '';
+		}
 		if (options) {
 			fsopts = credentials + "ro,soft,noauto,"+options;
 		} else {
