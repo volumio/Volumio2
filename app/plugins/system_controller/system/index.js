@@ -11,23 +11,23 @@ var crypto = require('crypto');
 module.exports = ControllerSystem;
 
 function ControllerSystem(context) {
-	var self = this;
+    var self = this;
 
 
-	// Save a reference to the parent commandRouter
-	self.context = context;
-	self.commandRouter = self.context.coreCommand;
+    // Save a reference to the parent commandRouter
+    self.context = context;
+    self.commandRouter = self.context.coreCommand;
     self.configManager=self.context.configManager;
 
     self.logger = self.context.logger;
-	self.callbacks = [];
+    self.callbacks = [];
 }
 
 ControllerSystem.prototype.onVolumioStart = function () {
-	var self = this;
+    var self = this;
 
-	//getting configuration
-	var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+    //getting configuration
+    var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
 
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
@@ -38,7 +38,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		var uuid = require('node-uuid');
 		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
-    
+
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
 	self.deviceDetect();
@@ -48,23 +48,23 @@ ControllerSystem.prototype.onVolumioStart = function () {
 };
 
 ControllerSystem.prototype.onStop = function () {
-	var self = this;
-	//Perform startup tasks here
+    var self = this;
+    //Perform startup tasks here
 };
 
 ControllerSystem.prototype.onRestart = function () {
-	var self = this;
-	//Perform startup tasks here
+    var self = this;
+    //Perform startup tasks here
 };
 
 ControllerSystem.prototype.onInstall = function () {
-	var self = this;
-	//Perform your installation tasks here
+    var self = this;
+    //Perform your installation tasks here
 };
 
 ControllerSystem.prototype.onUninstall = function () {
-	var self = this;
-	//Perform your installation tasks here
+    var self = this;
+    //Perform your installation tasks here
 };
 
 ControllerSystem.prototype.getUIConfig = function () {
@@ -73,7 +73,6 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
 
-	var defer=libQ.defer();
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
 		__dirname + '/UIConfig.json')
@@ -93,123 +92,121 @@ ControllerSystem.prototype.getUIConfig = function () {
 };
 
 ControllerSystem.prototype.setUIConfig = function (data) {
-	var self = this;
+    var self = this;
 
-	var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
+    var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
 
 };
 
 ControllerSystem.prototype.getConf = function (varName) {
-	var self = this;
+    var self = this;
 
-	return self.config.get(varName);
+    return self.config.get(varName);
 };
 
 ControllerSystem.prototype.setConf = function (varName, varValue) {
-	var self = this;
+    var self = this;
 
-	var defer = libQ.defer();
+    var defer = libQ.defer();
 
-	self.config.set(varName, varValue);
-	if (varName = 'player_name') {
-		var player_name = varValue;
+    self.config.set(varName, varValue);
+    if (varName = 'player_name') {
+        var player_name = varValue;
 
-		for (var i in self.callbacks) {
-			var callback = self.callbacks[i];
+        for (var i in self.callbacks) {
+            var callback = self.callbacks[i];
 
-			callback.call(callback, player_name);
-		}
-		return defer.promise;
-	}
+            callback.call(callback, player_name);
+        }
+        return defer.promise;
+    }
 };
 
 
 ControllerSystem.prototype.getConfigurationFiles = function () {
-	var self = this;
+    var self = this;
 
-	return ['config.json'];
+    return ['config.json'];
 };
 
 //Optional functions exposed for making development easier and more clear
 ControllerSystem.prototype.getSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
+    var self = this;
+    //Perform your installation tasks here
 };
 
 ControllerSystem.prototype.setSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
+    var self = this;
+    //Perform your installation tasks here
 };
 
 ControllerSystem.prototype.getAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
+    var self = this;
+    //Perform your installation tasks here
 };
 
 ControllerSystem.prototype.setAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
+    var self = this;
+    //Perform your installation tasks here
 };
 
 ControllerSystem.prototype.getConfigParam = function (key) {
-	return this.config.get(key);
+    return this.config.get(key);
 };
 
 ControllerSystem.prototype.saveGeneralSettings = function (data) {
-	var self = this;
+    var self = this;
 
-	var defer = libQ.defer();
+    var defer = libQ.defer();
 
-	var player_name = data['player_name'].split(" ").join("-");
-	var startup_sound = data['startup_sound'];
+    var player_name = data['player_name'];
+    var hostname = data['player_name'].split(" ").join("-");
+    var startup_sound = data['startup_sound'];
 
-	self.config.set('playerName', player_name);
-	self.config.set('startupSound', startup_sound);
+    self.config.set('playerName', player_name);
+    self.config.set('startupSound', startup_sound);
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 	self.setHostname(player_name);
 	defer.resolve({});
 
+    for (var i in self.callbacks) {
+        var callback = self.callbacks[i];
 
-	for (var i in self.callbacks) {
-		var callback = self.callbacks[i];
-
-		callback.call(callback, player_name);
-	}
-	return defer.promise;
+        callback.call(callback, player_name);
+    }
+    return defer.promise;
 };
 
 ControllerSystem.prototype.saveSoundQuality = function (data) {
-	var self = this;
+    var self = this;
 
-	var defer = libQ.defer();
+    var defer = libQ.defer();
 
-	var kernel_profile_value = data['kernel_profile'].value;
-	var kernel_profile_label = data['kernel_profile'].label;
+    var kernel_profile_value = data['kernel_profile'].value;
+    var kernel_profile_label = data['kernel_profile'].label;
 
-	self.config.set('kernelSettingValue', kernel_profile_value);
-	self.config.set('kernelSettingLabel', kernel_profile_label);
-
+    self.config.set('kernelSettingValue', kernel_profile_value);
+    self.config.set('kernelSettingLabel', kernel_profile_label);
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 
-	defer.resolve({});
-	return defer.promise;
+    defer.resolve({});
+    return defer.promise;
 };
 
 
-
 ControllerSystem.prototype.getData = function (data, key) {
-	var self = this;
+    var self = this;
 
-	for (var i in data) {
-		var ithdata = data[i];
+    for (var i in data) {
+        var ithdata = data[i];
 
-		if (ithdata[key] != undefined)
-			return ithdata[key];
-	}
+        if (ithdata[key] != undefined)
+            return ithdata[key];
+    }
 
-	return null;
+    return null;
 };
 
 ControllerSystem.prototype.setHostname = function (hostname) {
@@ -260,10 +257,12 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 };
 
 
-ControllerSystem.prototype.registerCallback = function (callback) {
-	var self = this;
 
-	self.callbacks.push(callback);
+
+ControllerSystem.prototype.registerCallback = function (callback) {
+    var self = this;
+
+    self.callbacks.push(callback);
 };
 
 ControllerSystem.prototype.getSystemVersion = function () {
@@ -305,51 +304,51 @@ ControllerSystem.prototype.getSystemVersion = function () {
 };
 
 ControllerSystem.prototype.setTestSystem = function (data) {
-	var self = this;
+    var self = this;
 
-	if (data == 'true') {
-		fs.writeFile('/data/test', ' ', function (err) {
-			if (err) {
-				self.logger.info('Cannot set as test device:' + err)
-			}
-			self.logger.info('Device is now in test mode')
-		});
-	} else if (data == 'false') {
-		fs.exists('/data/test', function (exists) {
-			exec('rm /data/test', function (error, stdout, stderr) {
-				if (error !== null) {
-					console.log(error);
-					self.logger.info('Cannot delete test file: ' + error);
-				} else {
-					self.logger.info('Test File deleted');
-				}
-			});
-		});
+    if (data == 'true') {
+        fs.writeFile('/data/test', ' ', function (err) {
+            if (err) {
+                self.logger.info('Cannot set as test device:' + err)
+            }
+            self.logger.info('Device is now in test mode')
+        });
+    } else if (data == 'false') {
+        fs.exists('/data/test', function (exists) {
+            exec('rm /data/test', function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log(error);
+                    self.logger.info('Cannot delete test file: ' + error);
+                } else {
+                    self.logger.info('Test File deleted');
+                }
+            });
+        });
 
-	}
+    }
 };
 
 
 ControllerSystem.prototype.sendBugReport = function (message) {
-	for (var key in message) {
-		console.log("BUG: " + key + " - " + message[key]);
-		fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
-	}
-	exec('sudo systemctl start logondemand');
+    for (var key in message) {
+        console.log("BUG: " + key + " - " + message[key]);
+        fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
+    }
+    exec('sudo systemctl start logondemand');
 };
 
 ControllerSystem.prototype.deleteUserData = function () {
-	var self = this;
+    var self = this;
 
-	fs.writeFile('/boot/user_data', ' ', function (err) {
-		if (err) {
-			self.logger.info('Cannot User Data delete file');
-		} else {
-			self.logger.info('Created User Data delete file, rebooting');
-			self.commandRouter.reboot();
-		}
+    fs.writeFile('/boot/user_data', ' ', function (err) {
+        if (err) {
+            self.logger.info('Cannot User Data delete file');
+        } else {
+            self.logger.info('Created User Data delete file, rebooting');
+            self.commandRouter.reboot();
+        }
 
-	});
+    });
 };
 
 
@@ -383,17 +382,17 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 };
 
 ControllerSystem.prototype.deviceCheck = function (data) {
-	var self = this;
+    var self = this;
 
-	var device = config.get('device');
+    var device = config.get('device');
 
-	if (device == undefined) {
-		self.logger.info ('Setting Device type: ' + data)
-		self.config.set('device', data);
-	} else if (device != data) {
-		self.logger.info ('Device has changed, setting Device type: ' + data)
-		self.config.set('device', data);
-	}
+    if (device == undefined) {
+        self.logger.info ('Setting Device type: ' + data)
+        self.config.set('device', data);
+    } else if (device != data) {
+        self.logger.info ('Device has changed, setting Device type: ' + data)
+        self.config.set('device', data);
+    }
 }
 
 
@@ -429,3 +428,25 @@ ControllerSystem.prototype.callHome = function () {
 	}
 	});
 };
+
+
+ControllerSystem.prototype.enableSSH = function (data) {
+    var self = this;
+
+    var action = 'enable';
+    var immediate = 'start'
+    if (data == 'false') {
+        action = 'disable';
+        immediate = 'stop';
+    }
+
+    exec('/usr/bin/sudo /bin/systemctl '+immediate+' ssh.service && /usr/bin/sudo /bin/systemctl '+action+' ssh.service',{uid:1000,gid:1000}, function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log(error);
+            self.logger.info('Cannot '+action+' SSH service: ' + error);
+        } else {
+            self.logger.info(action+ ' SSH service success');
+        }
+    });
+}
+

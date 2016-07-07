@@ -279,12 +279,12 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
 	if (data.pass) {
 		if (data.pass.length <= 13) {
-			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
+			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}';
 		} else {
-			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL ;
+			var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL ;
 		}
 	} else {
-		var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + '}'
+		var netstring = 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + '}';
 	}
 	fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
 		if (err) {
@@ -298,52 +298,45 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
 ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	var self = this;
+	var staticwlanfile = '/data/configuration/wlanstatic';
 
-	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcp/dhclient.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/network/interfaces set')
 
-	try {
-		var ws = fs.createWriteStream('/etc/network/interfaces');
+			try {
+				var ws = fs.createWriteStream('/etc/network/interfaces');
 
-		ws.cork();
-		ws.write('auto wlan0\n');
-		ws.write('auto lo\n');
-		ws.write('iface lo inet loopback\n');
-		ws.write('\n');
+				ws.cork();
+				ws.write('auto wlan0\n');
+				ws.write('auto lo\n');
+				ws.write('iface lo inet loopback\n');
+				ws.write('\n');
 
-		ws.write('allow-hotplug eth0\n');
-		if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
-			ws.write('iface eth0 inet dhcp\n');
-		}
-		else {
-			ws.write('iface eth0 inet static\n');
 
-			ws.write('address ' + config.get('ethip') + '\n');
-			ws.write('netmask ' + config.get('ethnetmask') + '\n');
-			ws.write('gateway ' + config.get('ethgateway') + '\n');
-		}
+				ws.write('allow-hotplug eth0\n');
+				if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
+					ws.write('iface eth0 inet dhcp\n');
+				}
+				else {
+					ws.write('iface eth0 inet static\n');
 
-		ws.write('\n');
+					ws.write('address ' + config.get('ethip') + '\n');
+					ws.write('netmask ' + config.get('ethnetmask') + '\n');
+					ws.write('gateway ' + config.get('ethgateway') + '\n');
+				}
 
-		ws.write('allow-hotplug wlan0\n');
+				ws.write('\n');
 
-		if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
-			ws.write('iface wlan0 inet manual\n');
-		}
-		else {
-			ws.write('iface wlan0 inet static\n');
+				ws.write('allow-hotplug wlan0\n');
 
-			ws.write('address ' + config.get('wirelessip') + '\n');
-			ws.write('netmask ' + config.get('wirelessnetmask') + '\n');
-			ws.write('gateway ' + config.get('wirelessgateway') + '\n');
-		}
+				if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
+					ws.write('iface wlan0 inet manual\n');
 
-		ws.uncork();
-		ws.end();
+
 
 		//console.log("Restarting networking layer");
 		self.commandRouter.wirelessRestart();
@@ -352,6 +345,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	catch (err) {
 		self.commandRouter.pushToastMessage('error',self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_ERROR'), self.getI18NString('NETWORK.NETWORK_RESTART_ERROR') + err);
 	}
+
 		}
 	});
 
@@ -380,7 +374,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		wirelessquality = 2;
 	else if (wirelessqualityraw2 >= 1)
 		wirelessquality = 1;
-	
+
 	var ethip = ''
 	var wlanip = ''
 	var oll = 'no';

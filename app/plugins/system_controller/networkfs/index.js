@@ -393,7 +393,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 					}
 					else {
 						setTimeout(function () {
-						exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						exec('/bin/rmdir ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
 								responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
 								self.logger.error("Cannot Delete Folder. Error: " + error);
