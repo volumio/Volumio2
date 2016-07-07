@@ -172,9 +172,9 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	} else { // nfs
 		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
 		if (options) {
-			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,"+options;
+			fsopts = credentials + "ro,soft,noauto,"+options;
 		} else {
-			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto";
+			fsopts = credentials + "ro,soft,noauto";
 		}
 	}
 
