@@ -337,15 +337,14 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 					ws.write('iface wlan0 inet manual\n');
 
 
+					//console.log("Restarting networking layer");
+					self.commandRouter.wirelessRestart();
+					self.commandRouter.networkRestart();
+				}
 
-		//console.log("Restarting networking layer");
-		self.commandRouter.wirelessRestart();
-		self.commandRouter.networkRestart();
-	}
-	catch (err) {
-		self.commandRouter.pushToastMessage('error',self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_ERROR'), self.getI18NString('NETWORK.NETWORK_RESTART_ERROR') + err);
-	}
-
+			} catch (err) {
+				self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_ERROR'), self.getI18NString('NETWORK.NETWORK_RESTART_ERROR') + err);
+			}
 		}
 	});
 

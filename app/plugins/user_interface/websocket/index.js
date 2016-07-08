@@ -1530,6 +1530,27 @@ function InterfaceWebUI(context) {
 
 			});
 
+			connWebSocket.on('getWizard', function (data) {
+				var selfConnWebSocket = this;
+
+				console.log('----------------------------------------------wizaaaaaaaaaaa'+data)
+
+				selfConnWebSocket.emit('pushWizard', {"openWizard": true});
+
+
+			});
+
+			connWebSocket.on('getWizardSteps', function (data) {
+				var selfConnWebSocket = this;
+
+				console.log('----------------------------------------------wizaaaaaaaaaaa'+data)
+				var steps = ["language","name","output","network","music","share"];
+				selfConnWebSocket.emit('pushWizardSteps', steps);
+			});
+
+
+
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
@@ -1621,6 +1642,7 @@ InterfaceWebUI.prototype.pushState = function (state, connWebSocket) {
 		return libQ.fcall(self.libSocketIO.emit.bind(self.libSocketIO), 'pushState', state);
 	}
 };
+
 
 InterfaceWebUI.prototype.printToastMessage = function (type, title, message) {
 	var self = this;
