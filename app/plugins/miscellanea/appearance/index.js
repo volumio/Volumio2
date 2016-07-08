@@ -383,6 +383,21 @@ volumioAppearance.prototype.selectRandomBacground = function(){
     
 }
 
+volumioAppearance.prototype.getAvailableLanguages = function() {
+
+    var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'), 'utf8', {throws: false});
+    var defer = libQ.defer();
+
+
+    var available = [];
+    for (var n = 0; n < languagesdata.languages.length; n++) {
+        var language = {"language":languagesdata.languages[n].name, "code":languagesdata.languages[n].code }
+        available.push(language);
+    }
+    var languagearray = {'defaultLanguage':{'language': 'English', 'code': 'en'}, 'available':available};
+    defer.resolve(languagearray);
+    return defer.promise;
+}
 
 
 

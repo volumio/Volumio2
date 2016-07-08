@@ -1530,22 +1530,37 @@ function InterfaceWebUI(context) {
 
 			});
 
-			connWebSocket.on('getWizard', function (data) {
+			connWebSocket.on('getWizard', function () {
 				var selfConnWebSocket = this;
 
-				console.log('----------------------------------------------wizaaaaaaaaaaa'+data)
 
 				selfConnWebSocket.emit('pushWizard', {"openWizard": true});
 
 
 			});
 
-			connWebSocket.on('getWizardSteps', function (data) {
+			connWebSocket.on('getWizardSteps', function () {
 				var selfConnWebSocket = this;
 
-				console.log('----------------------------------------------wizaaaaaaaaaaa'+data)
+
 				var steps = ["language","name","output","network","music","share"];
 				selfConnWebSocket.emit('pushWizardSteps', steps);
+			});
+
+			connWebSocket.on('getAvailableLanguages', function () {
+				var selfConnWebSocket = this;
+
+				//var languages =  {'defaultLanguage':{'language': 'English', 'code': 'en'}, 'available':[{'language': 'English', 'code': 'en'},{'language': 'Italiano', 'code': 'it'}]};
+				var languages = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getAvailableLanguages', '');
+
+				if (languages != undefined) {
+					languages.then(function (data) {
+						console.log('fghsefhgsdfghdfghsdffgffffffffffffffffffffffffffffffffffffffffffff'+data)
+						selfConnWebSocket.emit('pushAvailableLanguages', data);
+					});
+				}
+
+
 			});
 
 
