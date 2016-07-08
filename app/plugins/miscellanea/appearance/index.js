@@ -37,6 +37,11 @@ volumioAppearance.prototype.onVolumioStart = function() {
 
     this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
+    
+    var background = config.get('background_title')
+    if (background === 'Initial') {
+        self.selectRandomBacground();
+    }
 };
 
 volumioAppearance.prototype.onStart = function() {
@@ -356,6 +361,26 @@ volumioAppearance.prototype.deleteFile = function(filepath){
     });
 
     return defer.promise;
+}
+
+volumioAppearance.prototype.selectRandomBacground = function(){
+    var self = this;
+    
+    var backgrounds = self.getBackgrounds();
+    if (backgrounds != undefined) {
+        backgrounds.then(function (result) {
+            var max = result.available.length;
+            var random = Math.floor(Math.random() * (max - 0 + 1) + 0);
+            var randomBackground = result.available[random];
+            var setting = {'name':randomBackground.name, 'path':randomBackground.path}
+
+            return self.setBackgrounds(setting);
+        })
+            .fail(function () {
+            });
+    }
+
+    
 }
 
 
