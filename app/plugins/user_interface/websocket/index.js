@@ -478,17 +478,26 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var splitted = data.page.split('/');
-
 				var response;
 
-				if (splitted.length > 1)
+				if (splitted.length == 2) {
 					response = self.commandRouter.getUIConfigOnPlugin(splitted[0], splitted[1], {});
-				else response = self.commandRouter.getUIConfigOnPlugin('system_controller', splitted[0], {});
+					response.then(function(config)
+					{
+						selfConnWebSocket.emit('pushUiConfig', config);
+					});
+				} else if (splitted.length == 3) {
+					selfConnWebSocket.emit('pushUiConfig', {"page": {"label": ""},"sections": [{"coreSection":splitted[2]}]});
+				} else {
+					response = self.commandRouter.getUIConfigOnPlugin('system_controller', splitted[0], {});
+					response.then(function(config)
+					{
+						selfConnWebSocket.emit('pushUiConfig', config);
+					});
+				}
 
-                response.then(function(config)
-                {
-                    selfConnWebSocket.emit('pushUiConfig', config);
-                });
+
+
 
 			});
 
@@ -1555,13 +1564,44 @@ function InterfaceWebUI(context) {
 
 				if (languages != undefined) {
 					languages.then(function (data) {
-						console.log('fghsefhgsdfghdfghsdffgffffffffffffffffffffffffffffffffffffffffffff'+data)
 						selfConnWebSocket.emit('pushAvailableLanguages', data);
 					});
 				}
-
-
 			});
+
+			connWebSocket.on('getDeviceName', function () {
+				var selfConnWebSocket = this;
+
+				var name = self.commandRouter.sharedVars.get('system.name');
+				selfConnWebSocket.emit('pushDeviceName', {'name':name});
+			});
+
+			connWebSocket.on('setDeviceName', function (data) {
+				var selfConnWebSocket = this;
+				var options = {'player_name':data.name};
+				var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'saveGeneralSettings', options);
+			});
+
+			connWebSocket.on('getOutputDevices', function () {
+				var selfConnWebSocket = this;
+
+				var audiolist = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAudioDevices', '');
+
+				if (audiolist != undefined) {
+					audiolist.then(function (data) {
+						selfConnWebSocket.emit('pushOutputDevices', data);
+					});
+				}
+			});
+
+			connWebSocket.on('setOutputDevices', function (data) {
+				var selfConnWebSocket = this;
+
+				var name = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
+			});
+
+
+
 
 
 

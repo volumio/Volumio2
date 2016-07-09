@@ -530,6 +530,11 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 	// Connect to MPD only if process MPD is running
+
+	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
+
+	self.config = new (require('v-conf'))();
+	self.config.loadFile(configFile);
 	pidof('mpd', function (err, pid) {
 		if (err) {
 			self.logger.info('Cannot initialize  MPD Connection: MPD is not running');
@@ -549,10 +554,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 ControllerMpd.prototype.mpdEstablish = function () {
 	var self = this;
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 
-	self.config = new (require('v-conf'))();
-	self.config.loadFile(configFile);
 
 	// TODO use names from the package.json instead
 	self.servicename = 'mpd';
@@ -620,7 +622,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 
 	self.clientMpd.on('system-update', function () {
-		
+
 		 self.sendMpdCommand('status', [])
 			.then(function (objState) {
 				var state = self.parseState(objState);
@@ -1058,7 +1060,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					else if (line.indexOf('file:') === 0) {
 						var path = line.slice(6);
 						var name = path.split('/').pop();
-						
+
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
 						var title = self.searchFor(lines, i + 1, 'Title:');
