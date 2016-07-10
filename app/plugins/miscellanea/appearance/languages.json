@@ -1,7 +1,7 @@
 {"languages":[
-  {"name":"Dutch","code":"nl"},
-  {"name":"Deutsch","code":"de"},
   {"name":"Dansk","code":"da"},
+  {"name":"Deutsch","code":"de"},
+  {"name":"Dutch","code":"nl"},
   {"name":"English","code":"en"},
   {"name":"Français","code":"fr"},
   {"name":"Italiano","code":"it"},
