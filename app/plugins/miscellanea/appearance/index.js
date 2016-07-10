@@ -37,7 +37,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
 
     this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
-    
+
     var background = config.get('background_title')
     if (background === 'Initial') {
         self.selectRandomBacground();
@@ -256,7 +256,12 @@ volumioAppearance.prototype.generateThumbnails = function(){
 
 volumioAppearance.prototype.createThumbnailPath = function() {
     var self=this;
-    if (!fs.existsSync(backgroundPath)) {
+
+	try {
+		fs.statSync(backgroundPath);
+	} catch(e) {
+		fs.mkdirSync(backgroundPath);
+	}
         fs.copy(__dirname+'/backgrounds', backgroundPath, function (err) {
             if (err) {
                 console.error(err);
@@ -265,7 +270,6 @@ volumioAppearance.prototype.createThumbnailPath = function() {
                 console.log("success!");
             }
         });
-    }
 
 }
 
@@ -282,7 +286,7 @@ volumioAppearance.prototype.setBackgrounds = function(data)
         config.set('background_title', data.name);
         config.set('background_path', data.path);
     }
-    
+
     self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
         self.commandRouter.getI18nString('APPEARANCE.NEW_BACKGROUND_APPLIED'));
 
@@ -365,7 +369,7 @@ volumioAppearance.prototype.deleteFile = function(filepath){
 
 volumioAppearance.prototype.selectRandomBacground = function(){
     var self = this;
-    
+
     var backgrounds = self.getBackgrounds();
     if (backgrounds != undefined) {
         backgrounds.then(function (result) {
@@ -380,7 +384,7 @@ volumioAppearance.prototype.selectRandomBacground = function(){
             });
     }
 
-    
+
 }
 
 volumioAppearance.prototype.getAvailableLanguages = function() {
