@@ -40,8 +40,11 @@ volumioAppearance.prototype.onVolumioStart = function() {
 
     var background = config.get('background_title')
     if (background === 'Initial') {
-        self.selectRandomBacground();
-    }
+		setTimeout(function () {
+			self.selectRandomBacground();
+		}, 5000);
+	}
+
 };
 
 volumioAppearance.prototype.onStart = function() {
