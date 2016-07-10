@@ -38,13 +38,6 @@ volumioAppearance.prototype.onVolumioStart = function() {
     this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
 
-    var background = config.get('background_title')
-    if (background === 'Initial') {
-		setTimeout(function () {
-			self.selectRandomBacground();
-		}, 5000);
-	}
-
 };
 
 volumioAppearance.prototype.onStart = function() {
@@ -248,7 +241,10 @@ volumioAppearance.prototype.generateThumbnails = function(){
 
             }
             if (numberfile===files.length){
-                    //console.log('resolving')
+				var background = config.get('background_title')
+				if (background === 'Initial') {
+						self.selectRandomBacground();
+				}
                 defer.resolve('Ok');
             }
         });
