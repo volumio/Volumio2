@@ -19,6 +19,7 @@ function ControllerMpd(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
+	this.config = new (require('v-conf'))();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -533,7 +534,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 
-	self.config = new (require('v-conf'))();
+
 	self.config.loadFile(configFile);
 	pidof('mpd', function (err, pid) {
 		if (err) {
@@ -679,8 +680,10 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
+	var asd= JSON.stringify(data)
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+asd);
 
-	self.config.set('volume_normalization', data['volume_normalization'].value);
+	self.config.set('volume_normalization', data['volume_normalization']);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
 
@@ -688,7 +691,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	if (self.config.get('dop') == null) {
 		self.config.addConfigValue('dop', 'boolean', true);
 	} else {
-		self.config.set('dop', data['dop'].value);
+		self.config.set('dop', data['dop']);
 	}
 
 
@@ -721,7 +724,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 ControllerMpd.prototype.restartMpd = function (callback) {
 	var self = this;
 
-	exec('sudo /bin/systemctl restart mpd.service ',
+	exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
 		function (error, stdout, stderr) {
 			callback(error);
 		});
@@ -797,10 +800,14 @@ ControllerMpd.prototype.setConfiguration = function (configuration) {
 };
 
 ControllerMpd.prototype.getConfigParam = function (key) {
-	return this.config.get(key);
+	var self = this;
+
+	return self.config.get(key);
 };
 ControllerMpd.prototype.setConfigParam = function (data) {
-	this.config.set(data.key, data.value);
+	var self = this;
+
+	self.config.set(data.key, data.value);
 };
 
 ControllerMpd.prototype.listPlaylists = function (uri) {

@@ -195,7 +195,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'gapless_mp3_playback');
+			value = self.getAdditionalConf('music_service', 'mpd', 'dop');
 			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
 
