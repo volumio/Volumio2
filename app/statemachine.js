@@ -24,11 +24,6 @@ CoreStateMachine.prototype.getState = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
 
     var trackBlock = this.getTrack(this.currentPosition);
-	if (trackBlock.service === 'webradio') {
-		trackBlock.trackType = 'webradio';
-		trackBlock.bitdepth = '';
-		trackBlock.samplerate = '';
-	}
         if(trackBlock===undefined )
         {
             return {
@@ -55,6 +50,11 @@ CoreStateMachine.prototype.getState = function () {
             };
         }
         else {
+			if (trackBlock.service === 'webradio') {
+				trackBlock.trackType = 'webradio';
+				trackBlock.bitdepth = '';
+				trackBlock.samplerate = '';
+			}
             return {
                 status: this.currentStatus,
                 position: this.currentPosition,
