@@ -24,6 +24,11 @@ CoreStateMachine.prototype.getState = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::getState');
 
     var trackBlock = this.getTrack(this.currentPosition);
+	if (trackBlock.service === 'webradio') {
+		trackBlock.trackType = 'webradio';
+		trackBlock.bitdepth = '';
+		trackBlock.samplerate = '';
+	}
         if(trackBlock===undefined )
         {
             return {
@@ -227,7 +232,7 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 // Stop playback timer
 CoreStateMachine.prototype.stopPlaybackTimer = function () {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stPlaybackTimer');
-    
+
     this.runPlaybackTimer=false;
     return libQ.resolve();
 };
@@ -237,7 +242,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
     var now=Date.now();
     this.currentSeek+=(now-this.playbackStart);
-    
+
     if(this.runPlaybackTimer==true)
     {
         this.playbackStart=Date.now();
@@ -669,15 +674,15 @@ CoreStateMachine.prototype.seek = function (position) {
     self.setConsumeUpdateService(undefined);
 
     var trackBlock = this.getTrack(this.currentPosition);
-    if (trackBlock !== undefined) 
+    if (trackBlock !== undefined)
     {
         this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
-    
+
         var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
-    
+
         this.currentSeek = position*1000;
         this.startPlaybackTimer(position*1000);
-    
+
         thisPlugin.seek(position*1000);
 
         this.pushState().fail(this.pushError.bind(this));
@@ -824,13 +829,13 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
-    
+
     if(this.currentPosition==nIndex)
     {
         this.next();
         this.currentPosition--;
     }
-        
+
     return this.playQueue.removeQueueItem(nIndex);
 };
 
