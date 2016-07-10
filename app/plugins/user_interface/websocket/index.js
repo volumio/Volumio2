@@ -644,7 +644,9 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addToPlaylist', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, 'mpd', data.uri);
+				console.log(data)
+
+				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushAddToPlaylist', data);
 				});
@@ -656,15 +658,15 @@ function InterfaceWebUI(context) {
 				var playlistname = data.name;
 				var returnedData = self.commandRouter.playListManager.removeFromPlaylist(data.name, 'mpd', data.uri);
 				returnedData.then(function (name) {
-						var response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'browsePlaylist', 'playlists/'+name);
-						if (response != undefined) {
-							response.then(function (result) {
-									selfConnWebSocket.emit('pushBrowseLibrary', result);
-								})
-								.fail(function () {
-									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
-								});
-						}
+					var response=self.musicLibrary.executeBrowseSource('playlists/'+playlistname);
+					if (response != undefined) {
+						response.then(function (result) {
+							selfConnWebSocket.emit('pushBrowseLibrary', result);
+						})
+							.fail(function () {
+								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							});
+					}
 				});
 
 

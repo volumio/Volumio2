@@ -348,10 +348,11 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 	var playlist = [];
 	var filePath = folder + name;
 	var path = uri;
-
+	console.log(path)
 
 	if (uri.indexOf('music-library/') >= 0) {
-		path = uri.replace('music-library/', '');
+		path = uri.replace('music-library/', '/mnt/');
+		uri = uri.replace('music-library/', 'mnt/');
 	}
 
 	fs.exists(filePath, function (exists) {
