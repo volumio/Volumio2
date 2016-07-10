@@ -23,7 +23,8 @@
     "I2S_DAC_ACTIVATED":"I2S DAC Enabled",
     "I2S_DAC_ACTIVATED_MESSAGE":"has been enabled, restart the system for changes to take effect",
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
-    "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect"
+    "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
+	"DOP":"DSD over PCM (DoP)"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

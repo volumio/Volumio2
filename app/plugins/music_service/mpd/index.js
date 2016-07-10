@@ -645,117 +645,6 @@ ControllerMpd.prototype.mpdConnect = function () {
 	var nPort = self.config.get('nPort');
 	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
 };
-/*
- * This method shall be defined by every plugin which needs to be configured.
- */
-/*ControllerMpd.prototype.getConfiguration = function(mainConfig) {
-
- var language=__dirname+"/i18n/"+mainConfig.locale+".json";
- if(!libFsExtra.existsSync(language))
- {
- language=__dirname+"/i18n/EN.json";
- }
-
- var languageJSON=libFsExtra.readJsonSync(language);
-
- var config=libFsExtra.readJsonSync(__dirname+'/config.json');
- var uiConfig={};
-
- for(var key in config)
- {
- if(config[key].modifiable==true)
- {
- uiConfig[key]={
- "value":config[key].value,
- "type":config[key].type,
- "label":languageJSON[config[key].ui_label_key]
- };
-
- if(config[key].enabled_by!=undefined)
- uiConfig[key].enabled_by=config[key].enabled_by;
- }
- }
-
- return uiConfig;
- }*/
-
-ControllerMpd.prototype.getUIConfig = function () {
-	var self = this;
-
-	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
-	var value;
-
-	value = self.config.get('gapless_mp3_playback');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[0].options'), value));
-
-	value = self.config.get('volume_normalization');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[1].options'), value));
-
-	value = self.config.get('audio_buffer_size');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[2].options'), value));
-
-	value = self.config.get('buffer_before_play');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[3].options'), value));
-
-	value = self.config.get('auto_update')
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[4].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
-
-	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
-	if (value == undefined)
-		value = 0;
-
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelectedCard(cards, value));
-
-	for (var i in cards) {
-		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-			value: cards[i].id,
-			label: cards[i].name
-		});
-	}
-
-	return uiconf;
-};
-
-ControllerMpd.prototype.getLabelForSelectedCard = function (cards, key) {
-	var n = cards.length;
-	for (var i = 0; i < n; i++) {
-		if (cards[i].id == key)
-			return cards[i].name;
-	}
-
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
-};
-
-ControllerMpd.prototype.getLabelForSelect = function (options, key) {
-	var n = options.length;
-	for (var i = 0; i < n; i++) {
-		if (options[i].value == key)
-			return options[i].label;
-	}
-
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
-};
-
 
 ControllerMpd.prototype.outputDeviceCallback = function () {
 	var self = this;
@@ -791,10 +680,17 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	var defer = libQ.defer();
 
-	self.config.set('gapless_mp3_playback', data['gapless_mp3_playback'].value);
 	self.config.set('volume_normalization', data['volume_normalization'].value);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
+
+	//fixing dop
+	if (self.config.get('dop') == null) {
+		self.config.addConfigValue('dop', 'boolean', true);
+	} else {
+		self.config.set('dop', data['dop'].value);
+	}
+
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
@@ -857,8 +753,14 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
 			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
 			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
+			if (self.config.get('dop')){
+				var dop = 'yes';
+			} else {
+				var dop = 'no';
+			}
+			var conf6 = conf5.replace("${dop}", dop);
 
-			fs.writeFile("/etc/mpd.conf", conf5, 'utf8', function (err) {
+			fs.writeFile("/etc/mpd.conf", conf6, 'utf8', function (err) {
 				if (err) return console.log(err);
 			});
 		});
