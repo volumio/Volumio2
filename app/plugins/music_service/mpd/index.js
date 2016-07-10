@@ -534,7 +534,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 
-	self.checkMpd();
+
 	self.config.loadFile(configFile);
 	pidof('mpd', function (err, pid) {
 		if (err) {
@@ -551,28 +551,6 @@ ControllerMpd.prototype.onVolumioStart = function () {
 	});
 
     return libQ.resolve();
-};
-
-ControllerMpd.prototype.checkMpd = function () {
-	var self = this;
-
-	setInterval(function () {
-		pidof('mpd', function (err, pid) {
-			if (err) {
-				self.logger.info('MPD is not running: restarting ');
-				self.restartMpd();
-			} else {
-				if (pid) {
-				} else {
-					self.logger.info('MPD is not running: restarting');
-					self.restartMpd();
-				}
-			}
-		});
-	}, 10000);
-
-
-
 };
 
 ControllerMpd.prototype.mpdEstablish = function () {
