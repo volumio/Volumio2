@@ -348,7 +348,6 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 	var playlist = [];
 	var filePath = folder + name;
 	var path = uri;
-	console.log(path)
 
 	if (uri.indexOf('music-library/') >= 0) {
 		path = uri.replace('music-library/', '/mnt/');
@@ -445,10 +444,6 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 
 	var playlist = [];
 	var filePath = folder + name;
-
-	console.log(filePath)
-	console.log(service)
-	console.log(uri)
 
 	fs.exists(filePath, function (exists) {
 		if (!exists)
