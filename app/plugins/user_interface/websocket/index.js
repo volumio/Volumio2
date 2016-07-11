@@ -108,7 +108,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addPlay', function (data) {
-				console.log(data);
+			
                 self.commandRouter.addQueueItems(data)
                     .then(function(e){
                         return self.commandRouter.volumioPlay(e.firstItemIndex);
@@ -644,8 +644,6 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addToPlaylist', function (data) {
 				var selfConnWebSocket = this;
 
-				console.log(data)
-
 				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushAddToPlaylist', data);
@@ -1082,7 +1080,6 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (datas) {
-						console.log('RETURN NAS : ' +JSON.stringify(datas));
 						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
 						var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
@@ -1104,7 +1101,6 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (datas) {
-						console.log('RETURN NAS : ' +JSON.stringify(datas));
 						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
 							var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
@@ -1152,7 +1148,6 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (datas) {
-						console.log('RETURN NAS : ' + JSON.stringify(datas));
 						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
 							var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
