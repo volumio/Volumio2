@@ -1,9 +1,9 @@
 {"languages":[
-  {"name":"Español","es"}
   {"name":"Dansk","code":"da"},
   {"name":"Deutsch","code":"de"},
   {"name":"Dutch","code":"nl"},
   {"name":"English","code":"en"},
+  {"name":"Español","es"},
   {"name":"Français","code":"fr"},
   {"name":"Italiano","code":"it"},
   {"name":"日本語","code":"ja"},
