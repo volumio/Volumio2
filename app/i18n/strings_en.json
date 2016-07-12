@@ -63,7 +63,7 @@
     "CONFIGURATION_UPDATE":"Configuration update",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
     "CONFIGURATION_UPDATE_ERROR":"An error has occurred",
-    "PLAYER_RESTARTED":"Player sucecssfully restarted",
+    "PLAYER_RESTARTED":"Player successfully restarted",
     "RESTART":"Restart",
     "ON":"On",
     "OFF":"Off",
