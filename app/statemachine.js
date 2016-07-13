@@ -19,7 +19,6 @@ function CoreStateMachine(commandRouter) {
     this.volatileService="";
     this.volatileState={};
 	this.isVolatile = false;
-
     /**
      * This field tells the system if it is currenty running in consume mode
      * @type {boolean} true or false wether the system is in consume mode
@@ -36,6 +35,12 @@ function CoreStateMachine(commandRouter) {
      * This variable contains the service to handle when in consume mode
      */
 	this.consumeUpdateService;
+
+	/**
+	*This field tells the system if it is currenty running in consume mode, but no metadata should be retrieved
+	* @type {boolean} true or false
+	*/
+	this.consumeIgnoreMetadata = false;
 
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
@@ -625,22 +630,44 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 					stateService.service = 'mpd';
 				}
 
-                this.consumeState={
-                    status:stateService.status,
-                    title:stateService.title,
-                    artist:stateService.artist,
-                    album:stateService.album,
-                    albumart:consumeAlbumArt,
-                    uri:stateService.uri,
-                    trackType:stateService.trackType,
-                    seek:stateService.seek,
-                    duration:stateService.duration,
-                    samplerate:stateService.samplerate,
-                    bitdepth:stateService.bitdepth,
-                    channels:stateService.channels,
-                    stream:stateService.isStreaming,
-                    service:stateService.service
-                };
+				if (this.consumeIgnoreMetadata != undefined && this.consumeIgnoreMetadata) {
+					console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+					this.consumeState={
+						status:stateService.status,
+						title:trackBlock.name,
+						artist:trackBlock.artist,
+						album:trackBlock.album,
+						albumart:trackBlock.albumart,
+						uri:stateService.uri,
+						trackType:stateService.trackType,
+						seek:stateService.seek,
+						duration:stateService.duration,
+						samplerate:trackBlock.samplerate,
+						bitdepth:trackBlock.bitdepth,
+						channels:stateService.channels,
+						stream:stateService.isStreaming
+					};
+				} else {
+					console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
+					this.consumeState={
+						status:stateService.status,
+						title:stateService.title,
+						artist:stateService.artist,
+						album:stateService.album,
+						albumart:consumeAlbumArt,
+						uri:stateService.uri,
+						trackType:stateService.trackType,
+						seek:stateService.seek,
+						duration:stateService.duration,
+						samplerate:stateService.samplerate,
+						bitdepth:stateService.bitdepth,
+						channels:stateService.channels,
+						stream:stateService.isStreaming,
+						service:stateService.service
+					};
+					console.log(consumeState)
+				}
+
             }
 			else
             {
@@ -1260,9 +1287,9 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
 	return this.playQueue.moveQueueItem(from,to);
 };
 
-CoreStateMachine.prototype.setConsumeUpdateService = function (value) {
+CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setConsumeUpdateService '+value);
-
+	console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE '+value)
 	var defer;
 
 	/*if(value==undefined && this.consumeUpdateService!==undefined)
@@ -1286,7 +1313,12 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value) {
 	this.consumeUpdateService = value;
 	this.isConsume = value!=undefined;
 	this.consumeState.service = value;
-
+	if (ignoremeta != undefined) {
+		this.consumeIgnoreMetadata = ignoremeta;
+	} else {
+		this.consumeIgnoreMetadata = false;
+	}
+	console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE '+value)
 	return defer.promise;
 
 
