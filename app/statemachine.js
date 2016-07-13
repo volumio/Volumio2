@@ -369,7 +369,7 @@ CoreStateMachine.prototype.getNextIndex = function () {
     var nextIndex=this.currentPosition+1;
 
     var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
-    
+
     // Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
     if(this.currentRepeat)
     {
@@ -1052,15 +1052,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	this.stop()
 		.then(function()
 		{
-			if(self.currentRandom!==undefined && self.currentRandom===true)
-			{
-				self.currentPosition=Math.floor(Math.random() * (self.playQueue.arrayQueue.length  + 1));
-			}
-			else if (self.currentPosition < self.playQueue.arrayQueue.length - 1) {
-				self.currentPosition++;
-			}
-
-            this.commandRouter.pushDebugConsoleMessage("NEXT POSITION "+self.currentPosition);
+			self.currentPosition = self.getNextIndex();
 
 			return libQ.resolve();
 		})
