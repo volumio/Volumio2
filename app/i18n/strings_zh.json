@@ -10,7 +10,7 @@
     "AUDIO_BUFFER_SIZE":"音频缓冲区大小",
     "BUFFER_BEFORE_PLAY":"播放前缓冲",
     "VOLUME_OPTIONS":"音量选项",
-    "DEFAULT_STARTUP_VOLUME":"默认启动竟是",
+    "DEFAULT_STARTUP_VOLUME":"默认启动音量",
     "MAX_VOLUME_LEVEL":"最大音量值",
     "ONE_CLICK_VOLUME_STEPS":"一键音量步进",
     "VOLUME_CURVE_MODE":"音量曲线模式",
@@ -28,7 +28,7 @@
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"网络设定",
-    "WIRED_NETWORK":"有线设定",
+    "WIRED_NETWORK":"有线网络设定",
     "AUTOMATIC_IP":"自动获取 IP",
     "STATIC_IP":"静态 IP",
     "NETMASK":"掩码",
