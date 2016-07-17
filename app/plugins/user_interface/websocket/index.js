@@ -1598,6 +1598,13 @@ function InterfaceWebUI(context) {
 			});
 
 
+			connWebSocket.on('getDonationAmounts', function (data) {
+				var selfConnWebSocket = this;
+
+				var contributionsarray =  {"donationAmount": 20, "customAmount": 150, "amounts": [10, 20, 50, 100]};
+
+				selfConnWebSocket.emit('pushDonationAmounts', data);
+			});
 
 
 
