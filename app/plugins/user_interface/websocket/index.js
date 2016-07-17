@@ -1549,7 +1549,7 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 
-				var steps = ["language","name","output","network","music","share"];
+				var steps = ["language","name","output","network","music","follow","done"];
 				selfConnWebSocket.emit('pushWizardSteps', steps);
 			});
 
@@ -1598,12 +1598,13 @@ function InterfaceWebUI(context) {
 			});
 
 
-			connWebSocket.on('getDonationAmounts', function (data) {
+			connWebSocket.on('getDonePage', function () {
 				var selfConnWebSocket = this;
 
 				var contributionsarray =  {"donationAmount": 20, "customAmount": 150, "amounts": [10, 20, 50, 100]};
+				var laststep =  {"title":"Ready to roll","message":"Your Volumio Audiophile Music Player is ready. Please consider donating.","donation":true, "donationAmount": contributionsarray};
 
-				selfConnWebSocket.emit('pushDonationAmounts', data);
+				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
 
 
