@@ -257,7 +257,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
 			this.config.set('outputdevicename', data.i2sid.label);
 			OutputDeviceNumber = I2SNumber;
-
+			/*
 			var responseData = {
 				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
 				message: data.i2sid.label+ ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
@@ -273,6 +273,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			}
 
 			self.commandRouter.broadcastMessage("openModal", responseData);
+			 */
 		}
 
 	} else {
@@ -305,6 +306,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			this.config.set('outputdevicename', 'Audio Jack');
 			OutputDeviceNumber = "0";
 			self.enablePiJack();
+			/*
 			var responseData = {
 				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED'),
 				message: data.i2sid.label+ ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED_MESSAGE'),
@@ -320,6 +322,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			}
 
 			self.commandRouter.broadcastMessage("openModal", responseData);
+			 */
 		}
 	}
 
