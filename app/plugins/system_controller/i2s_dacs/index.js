@@ -31,7 +31,7 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
 	var i2sdac = this.config.get("i2s_dac");
-	
+
 	if (i2sdac == null || i2sdac.length === 0 ) {
 		self.logger.info('I2S DAC not set, start Auto-detection on USB Bus');
 		self.i2sDetect();
@@ -319,6 +319,10 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 					this.config.set("i2s_dac", outdevicename);
 					this.config.set("i2s_id", overlay);
 					self.commandRouter.sharedVars.set('alsa.outputdevice', num);
+					//Restarting MPD, this seems needed only on first boot
+					setTimeout(function () {
+						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+					}, 1500);
 				}
 
 			}

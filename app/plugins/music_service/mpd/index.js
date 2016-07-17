@@ -703,7 +703,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
-					self.logger.info('Cannot restart MPD: ' + error);
+					self.logger.error('Cannot restart MPD: ' + error);
 					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
 				}
 				else
@@ -722,10 +722,20 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 ControllerMpd.prototype.restartMpd = function (callback) {
 	var self = this;
 
-	exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
-		function (error, stdout, stderr) {
-			callback(error);
-		});
+	if (callback) {
+		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
+			function (error, stdout, stderr) {
+				callback(error);
+			});
+	} else {
+		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
+			function (error, stdout, stderr) {
+				if (error){
+					self.logger.error('Cannot restart MPD: ' + error);
+				}
+			});
+	}
+
 
 };
 
