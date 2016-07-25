@@ -384,9 +384,15 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	ifconfig.status('eth0', function (err, status) {
 		if (status != undefined) {
-			if (status.ipv4_address != undefined) {
+			if (status.ipv4_address != undefined && status.running != undefined) {
 				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll}
+				var running = 'connected';
+				if(!status.running) {
+					running = 'not connected';
+					ethspeed = '0Mb/s';
+					oll = 'no';
+				}
+				var ethstatus = {type: "Wired", ip: ethip, status: running, speed: ethspeed, online: oll}
 				response.push(ethstatus);
 			}
 		}
@@ -412,4 +418,3 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 //console.log(response);
 	return defer.promise;
 };
-
