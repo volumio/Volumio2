@@ -357,7 +357,8 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var defer = libQ.defer();
 	var response = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
-	var wirelessspeed = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
+	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
+	var wirelessspeed = wirelessspeedraw.replace('=', '');
 	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
 	var wirelessqualityraw1 = execSync(" /usr/bin/sudo /sbin/iwconfig wlan0 | sed 's/  /\\n/g' | grep Signal | sed 's/Signal level://' | sed 's/Signal level=//' | sed 's/ //g'", { encoding: 'utf8' });
 	var wirelessqualityraw2 = wirelessqualityraw1.split('/')[0];
