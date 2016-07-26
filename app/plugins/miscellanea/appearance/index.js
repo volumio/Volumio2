@@ -295,7 +295,8 @@ volumioAppearance.prototype.setBackgrounds = function(data)
 volumioAppearance.prototype.setLanguage = function(data)
 {
     var self = this;
-    var defer = libQ.defer();
+    var defer = libQ.defer();   
+    
 
     if (data.language) {
         config.set('language', data.language.label);

@@ -238,7 +238,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 

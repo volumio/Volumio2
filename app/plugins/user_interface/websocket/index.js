@@ -1566,6 +1566,17 @@ function InterfaceWebUI(context) {
 				}
 			});
 
+			connWebSocket.on('setLanguage', function (data) {
+				//var self = this;
+				console.log(data)
+				var value = data.defaultLanguage.code;
+				var label = data.defaultLanguage.language;
+				var languagedata = {'language':{'value':value,'label':label}}
+
+				//var lang = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
+				var name = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
+			});
+
 			connWebSocket.on('getDeviceName', function () {
 				var selfConnWebSocket = this;
 
