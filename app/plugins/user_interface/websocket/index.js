@@ -107,6 +107,15 @@ function InterfaceWebUI(context) {
                  self.commandRouter.addQueueItems(data);
 			});
 
+			connWebSocket.on('replaceAndPlay', function (data) {
+				var timeStart = Date.now();
+
+				self.commandRouter.replaceAndPlay(data)
+				.then(function(e){
+					return self.commandRouter.volumioPlay(e.firstItemIndex);
+				});
+			});
+
 			connWebSocket.on('addPlay', function (data) {
 
                 self.commandRouter.addQueueItems(data)
@@ -1568,7 +1577,6 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setLanguage', function (data) {
 				//var self = this;
-				console.log(data)
 				var value = data.defaultLanguage.code;
 				var label = data.defaultLanguage.language;
 				var languagedata = {'language':{'value':value,'label':label}}
