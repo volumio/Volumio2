@@ -238,7 +238,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 
@@ -254,26 +254,35 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 		var I2SNumber = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SNumber', data.i2sid.label);
 		if (i2sstatus.name != data.i2sid.label) {
 			self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
-			self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+			var response = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+			if (response != undefined) {
+				response.then(function (result) {
+					if (result.reboot == 'yes') {
+					var responseData = {
+						title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
+						message: data.i2sid.label+ ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
+						size: 'lg',
+						buttons: [
+							{
+								name: self.commandRouter.getI18nString('COMMON.RESTART'),
+								class: 'btn btn-info',
+								emit:'reboot',
+								payload:''
+							}
+						]
+					}
+
+					self.commandRouter.broadcastMessage("openModal", responseData);
+				}
+				})
+					.fail(function () {
+						self.logger.log('Error Setting i2s DAC')
+					});
+			}
 			this.config.set('outputdevicename', data.i2sid.label);
 			OutputDeviceNumber = I2SNumber;
-			/*
-			var responseData = {
-				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
-				message: data.i2sid.label+ ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
-				size: 'lg',
-				buttons: [
-					{
-						name: self.commandRouter.getI18nString('COMMON.RESTART'),
-						class: 'btn btn-info',
-						emit:'reboot',
-						payload:''
-					}
-				]
-			}
 
-			self.commandRouter.broadcastMessage("openModal", responseData);
-			 */
+			 
 		}
 
 	} else {
