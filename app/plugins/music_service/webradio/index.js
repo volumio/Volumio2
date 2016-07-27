@@ -661,7 +661,7 @@ ControllerWebradio.prototype.search = function (query) {
     var list = [];
     list.push({type:'title',title:'Webradios'});
 
-    var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value);
+    var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
 
     memoryCache.wrap(uri, function (cacheCallback) {
         var promise=libQ.defer();
