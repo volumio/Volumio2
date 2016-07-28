@@ -41,9 +41,10 @@ CorePlayQueue.prototype.getQueue = function () {
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
-
-	var sTargetService = this.arrayQueue[nStartIndex].service;
-	var nEndIndex = nStartIndex;
+	// jpa hack workaround for now....
+	var goodIndex = Math.min(this.arrayQueue.length - 1, nStartIndex);
+	var sTargetService = this.arrayQueue[goodIndex].service;
+	var nEndIndex = goodIndex;
 	var nToCheck = this.arrayQueue.length - 1;
 
 	while (nEndIndex < nToCheck) {
