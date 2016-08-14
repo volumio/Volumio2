@@ -360,7 +360,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = wirelessspeedraw.replace('=', '');
 	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
-	var wirelessqualityraw1 = execSync(" /usr/bin/sudo /sbin/iwconfig wlan0 | sed 's/  /\\n/g' | grep Signal | sed 's/Signal level://' | sed 's/Signal level=//' | sed 's/ //g'", { encoding: 'utf8' });
+	var wirelessqualityraw1 = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | awk '{if ($1==\"Link\"){split($2,A,\"/\");print A[1]}}' | sed 's/Quality=//g'", { encoding: 'utf8' });
 	var wirelessqualityraw2 = wirelessqualityraw1.split('/')[0];
 	var wirelessquality = 0;
 
