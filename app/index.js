@@ -765,6 +765,13 @@ CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionar
     var methodDefer=libQ.defer();
     var defers=[];
 
+
+	try {
+		fs.statSync(dictionaryFile);
+	} catch(e) {
+		dictionaryFile = defaultDictionaryFile;
+	}
+
     defers.push(libQ.nfcall(fs.readJson,dictionaryFile));
     defers.push(libQ.nfcall(fs.readJson,defaultDictionaryFile));
     defers.push(libQ.nfcall(fs.readJson,jsonFile));
