@@ -82,7 +82,8 @@
   	"UI_CONFIG_LANGUAGE":"Språk",
   	"UI_CONFIG_SELECT_LANGUAGE":"Välj språk",
   	"NEW_LANGUAGE_SET":"Nytt språk valt",
-  	"NEW_BACKGROUND_APPLIED":"Ny bakgrund tillämpad"
+  	"NEW_BACKGROUND_APPLIED":"Ny bakgrund tillämpad",
+    "BACKGROUND_DELETED":"Bakgrund borttagen"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Min musik",
