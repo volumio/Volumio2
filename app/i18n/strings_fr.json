@@ -81,7 +81,8 @@
     "UI_CONFIG_LANGUAGE":"Langue",
     "UI_CONFIG_SELECT_LANGUAGE":"Sélectionner une Langue",
     "NEW_LANGUAGE_SET":"Nouvelle langue appliquée",
-    "NEW_BACKGROUND_APPLIED":"Nouveau fond d'écran appliqué"
+    "NEW_BACKGROUND_APPLIED":"Nouveau fond d'écran appliqué",
+    "BACKGROUND_DELETED":"Fond d'écran supprimé"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
