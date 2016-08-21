@@ -6,10 +6,13 @@
   {"name":"English","code":"en"},
   {"name":"Español","code":"es"},
   {"name":"Français","code":"fr"},
-  {"name":"Magyar","code":"hu"},
   {"name":"Italiano","code":"it"},
   {"name":"日本語","code":"ja"},
+  {"name":"Magyar","code":"hu"},
+  {"name":"Norsk","code":"no"},
   {"name":"Polski","code":"pl"},
+  {"name":"Русский","code":"ru"},
   {"name":"Svenska","code":"sv"},
+  {"name":"Українська","code":"ua"},
   {"name":"简体中文","code":"zh"}
 ]}
