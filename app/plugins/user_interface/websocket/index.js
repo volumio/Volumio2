@@ -107,8 +107,17 @@ function InterfaceWebUI(context) {
                  self.commandRouter.addQueueItems(data);
 			});
 
+			connWebSocket.on('replaceAndPlay', function (data) {
+				var timeStart = Date.now();
+
+				self.commandRouter.replaceAndPlay(data)
+				.then(function(e){
+					return self.commandRouter.volumioPlay(e.firstItemIndex);
+				});
+			});
+
 			connWebSocket.on('addPlay', function (data) {
-				console.log(data);
+
                 self.commandRouter.addQueueItems(data)
                     .then(function(e){
                         return self.commandRouter.volumioPlay(e.firstItemIndex);
@@ -478,17 +487,26 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var splitted = data.page.split('/');
-
 				var response;
 
-				if (splitted.length > 1)
+				if (splitted.length == 2) {
 					response = self.commandRouter.getUIConfigOnPlugin(splitted[0], splitted[1], {});
-				else response = self.commandRouter.getUIConfigOnPlugin('system_controller', splitted[0], {});
+					response.then(function(config)
+					{
+						selfConnWebSocket.emit('pushUiConfig', config);
+					});
+				} else if (splitted.length == 3) {
+					selfConnWebSocket.emit('pushUiConfig', {"page": {"label": ""},"sections": [{"coreSection":splitted[2]}]});
+				} else {
+					response = self.commandRouter.getUIConfigOnPlugin('system_controller', splitted[0], {});
+					response.then(function(config)
+					{
+						selfConnWebSocket.emit('pushUiConfig', config);
+					});
+				}
 
-                response.then(function(config)
-                {
-                    selfConnWebSocket.emit('pushUiConfig', config);
-                });
+
+
 
 			});
 
@@ -635,7 +653,7 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addToPlaylist', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, 'mpd', data.uri);
+				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushAddToPlaylist', data);
 				});
@@ -647,15 +665,15 @@ function InterfaceWebUI(context) {
 				var playlistname = data.name;
 				var returnedData = self.commandRouter.playListManager.removeFromPlaylist(data.name, 'mpd', data.uri);
 				returnedData.then(function (name) {
-						var response = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'browsePlaylist', 'playlists/'+name);
-						if (response != undefined) {
-							response.then(function (result) {
-									selfConnWebSocket.emit('pushBrowseLibrary', result);
-								})
-								.fail(function () {
-									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
-								});
-						}
+					var response=self.musicLibrary.executeBrowseSource('playlists/'+playlistname);
+					if (response != undefined) {
+						response.then(function (result) {
+							selfConnWebSocket.emit('pushBrowseLibrary', result);
+						})
+							.fail(function () {
+								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							});
+					}
 				});
 
 
@@ -1071,7 +1089,6 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (datas) {
-						console.log('RETURN NAS : ' +JSON.stringify(datas));
 						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
 						var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
@@ -1093,7 +1110,6 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (datas) {
-						console.log('RETURN NAS : ' +JSON.stringify(datas));
 						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
 							var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
@@ -1141,7 +1157,6 @@ function InterfaceWebUI(context) {
 
 				if (returnedData != undefined) {
 					returnedData.then(function (datas) {
-						console.log('RETURN NAS : ' + JSON.stringify(datas));
 						selfConnWebSocket.emit(datas.emit, datas.data);
 						setTimeout(function () {
 							var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
@@ -1530,6 +1545,91 @@ function InterfaceWebUI(context) {
 
 			});
 
+			connWebSocket.on('getWizard', function () {
+				var selfConnWebSocket = this;
+
+
+				selfConnWebSocket.emit('pushWizard', {"openWizard": true});
+
+
+			});
+
+			connWebSocket.on('getWizardSteps', function () {
+				var selfConnWebSocket = this;
+
+
+				var steps = ["language","name","output","network","music","follow","done"];
+				selfConnWebSocket.emit('pushWizardSteps', steps);
+			});
+
+			connWebSocket.on('getAvailableLanguages', function () {
+				var selfConnWebSocket = this;
+
+				//var languages =  {'defaultLanguage':{'language': 'English', 'code': 'en'}, 'available':[{'language': 'English', 'code': 'en'},{'language': 'Italiano', 'code': 'it'}]};
+				var languages = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getAvailableLanguages', '');
+
+				if (languages != undefined) {
+					languages.then(function (data) {
+						selfConnWebSocket.emit('pushAvailableLanguages', data);
+					});
+				}
+			});
+
+			connWebSocket.on('setLanguage', function (data) {
+				//var self = this;
+				var value = data.defaultLanguage.code;
+				var label = data.defaultLanguage.language;
+				var languagedata = {'language':{'value':value,'label':label}}
+
+				//var lang = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
+				var name = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
+			});
+
+			connWebSocket.on('getDeviceName', function () {
+				var selfConnWebSocket = this;
+
+				var name = self.commandRouter.sharedVars.get('system.name');
+				selfConnWebSocket.emit('pushDeviceName', {'name':name});
+			});
+
+			connWebSocket.on('setDeviceName', function (data) {
+				var selfConnWebSocket = this;
+				var options = {'player_name':data.name};
+				var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'saveGeneralSettings', options);
+			});
+
+			connWebSocket.on('getOutputDevices', function () {
+				var selfConnWebSocket = this;
+
+				var audiolist = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAudioDevices', '');
+
+				if (audiolist != undefined) {
+					audiolist.then(function (data) {
+						selfConnWebSocket.emit('pushOutputDevices', data);
+					});
+				}
+			});
+
+			connWebSocket.on('setOutputDevices', function (data) {
+				var selfConnWebSocket = this;
+
+				var name = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
+			});
+
+
+			connWebSocket.on('getDonePage', function () {
+				var selfConnWebSocket = this;
+
+				var contributionsarray =  {"donationAmount": 20, "customAmount": 150, "amounts": [10, 20, 50, 100]};
+				var laststep =  {"title":"Ready to roll","message":"Your Volumio Audiophile Music Player is ready. Please consider donating.","donation":true, "donationAmount": contributionsarray};
+
+				selfConnWebSocket.emit('pushDonePage', laststep);
+			});
+
+
+
+
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
@@ -1621,6 +1721,7 @@ InterfaceWebUI.prototype.pushState = function (state, connWebSocket) {
 		return libQ.fcall(self.libSocketIO.emit.bind(self.libSocketIO), 'pushState', state);
 	}
 };
+
 
 InterfaceWebUI.prototype.printToastMessage = function (type, title, message) {
 	var self = this;

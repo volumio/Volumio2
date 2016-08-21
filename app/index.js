@@ -364,9 +364,16 @@ CoreCommandRouter.prototype.getAllTracklists = function () {
 CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueItems');
 
-	this.pushConsoleMessage(JSON.stringify(arrayItems));
+
 	return this.stateMachine.addQueueItems(arrayItems);
 };
+CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
+	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+
+	this.stateMachine.clearQueue();
+	return this.stateMachine.addQueueItems(arrayItems);
+};
+
 
 // Volumio Check Favourites
 CoreCommandRouter.prototype.checkFavourites = function (data) {

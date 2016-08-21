@@ -171,15 +171,10 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 
 	} else { // nfs
 		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
-		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
-			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
-		} else {
-			credentials = '';
-		}
 		if (options) {
-			fsopts = credentials + "ro,soft,noauto,"+options;
+			fsopts ="ro,soft,noauto,"+options;
 		} else {
-			fsopts = credentials + "ro,soft,noauto";
+			fsopts ="ro,soft,noauto";
 		}
 	}
 
@@ -393,7 +388,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 					}
 					else {
 						setTimeout(function () {
-						exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						exec('/bin/rmdir ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
 								responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
 								self.logger.error("Cannot Delete Folder. Error: " + error);
@@ -489,6 +484,9 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 			id: share,
 			name: name,
 			fstype: config.get(key + 'fstype'),
+			username: config.get(key + 'user'),
+			password: config.get(key + 'password'),
+			options: config.get(key + 'options'),
 			mounted: mounted.mounted,
 			size: realsize
 		};

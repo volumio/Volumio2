@@ -70,7 +70,7 @@
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
-          "gapless_mp3_playback",
+          "dop",
           "volume_normalization",
           "audio_buffer_size",
           "buffer_before_play"
@@ -78,10 +78,10 @@
       },
       "content": [
         {
-          "id": "gapless_mp3_playback",
+          "id": "dop",
           "element": "switch",
-          "doc": "If you have a problem with your MP3s ending abruptly it is recommended that you turn this On to attempt to fix the problem. Default is Off.",
-          "label": "TRANSLATE.PLAYBACK_OPTIONS.GAPLESS_MP3_PLAYBACK",
+          "doc": "DSD Over PCM",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP",
           "value":false
         },
 

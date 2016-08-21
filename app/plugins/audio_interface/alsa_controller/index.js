@@ -53,8 +53,8 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	}
 
 	if (this.config.has('volumesteps') == false) {
-	this.config.addConfigValue('volumesteps', 'string', '10');
-	this.updateVolumeSettings();
+		this.config.addConfigValue('volumesteps', 'string', '10');
+		this.updateVolumeSettings();
 	}
 
 	this.logger.debug("Creating shared var alsa.outputdevice");
@@ -62,7 +62,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 
-    return libQ.resolve();
+	return libQ.resolve();
 };
 
 ControllerAlsa.prototype.getUIConfig = function () {
@@ -79,153 +79,153 @@ ControllerAlsa.prototype.getUIConfig = function () {
 		{
 
 
-	var value;
-	var devicevalue;
+			var value;
+			var devicevalue;
 
-	var cards = self.getAlsaCards();
+			var cards = self.getAlsaCards();
 
-	value = self.config.get('outputdevice');
-	if (value == undefined){
-		value = 0;}
-
-
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
-	var outdevicename = self.config.get('outputdevicename');
-	if (outdevicename) {
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
-	} else {
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelectedCard(cards, value));
-	}
+			value = self.config.get('outputdevice');
+			if (value == undefined){
+				value = 0;}
 
 
-	for (var i in cards) {
-		if (cards[i].name === 'Audio Jack') {
-			self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-				value: cards[i].id,
-				label: 'Audio Jack'
-			});
-			self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-				value: cards[i].id,
-				label: 'HDMI Out'
-			});
-		} else {
-		self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
-			value: cards[i].id,
-			label: cards[i].name
-		});
-		}
-	}
-
-	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
-	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
-
-	if(i2soptions.length > 0){
-		if(i2sstatus.enabled){
-			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value', i2sstatus.enabled);
-			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
-				value: i2sstatus.id,
-				label: i2sstatus.name
-			});
-
-		} else {
-			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value', false);
-			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
-				value: i2soptions[0].value,
-				label: i2soptions[0].label
-			});
-		}
-
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
-		self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2s');
-		self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2sid');
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].id', 'i2sid');
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
-		self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'DAC Model');
-
-		for(var i in i2soptions) {
-			self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[2].options', {
-				value: i2soptions[i].value,
-				label: i2soptions[i].label
-			});
-		}
-	}
-
-	var mixers = self.getMixerControls(value);
-	var activemixer = self.config.get('mixer');
-
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].id', 'mixer');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
+			self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
+			var outdevicename = self.config.get('outputdevicename');
+			if (outdevicename) {
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+			} else {
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelectedCard(cards, value));
+			}
 
 
-	if (typeof mixers != "undefined" && mixers != null && mixers.length > 0) {
-		self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
-		if (activemixer){
-		self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-			value: activemixer,
-			label: activemixer
-		});
-		} else {
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-				value: mixers[0],
-				label: mixers[0]
-			});
-		}
+			for (var i in cards) {
+				if (cards[i].name === 'Audio Jack') {
+					self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+						value: cards[i].id,
+						label: 'Audio Jack'
+					});
+					self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+						value: cards[i].id,
+						label: 'HDMI Out'
+					});
+				} else {
+					self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+						value: cards[i].id,
+						label: cards[i].name
+					});
+				}
+			}
 
-	for(var i in mixers) {
-		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-			value: mixers[i],
-			label: mixers[i]
-		});
-	}
+			var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+			var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
-	} else {
-		self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-			value: "no",
-			label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
-		});
-		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-			value: "no",
-			label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
-		});
+			if(i2soptions.length > 0){
+				if(i2sstatus.enabled){
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value', i2sstatus.enabled);
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
+						value: i2sstatus.id,
+						label: i2sstatus.name
+					});
 
-	}
+				} else {
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value', false);
+					self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value', {
+						value: i2soptions[0].value,
+						label: i2soptions[0].label
+					});
+				}
+
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
+				self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2s');
+				self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2sid');
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].element', 'switch');
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].id', 'i2sid');
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].element', 'select');
+				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].label', 'DAC Model');
+
+				for(var i in i2soptions) {
+					self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[2].options', {
+						value: i2soptions[i].value,
+						label: i2soptions[i].label
+					});
+				}
+			}
+
+			var mixers = self.getMixerControls(value);
+			var activemixer = self.config.get('mixer');
+
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].id', 'mixer');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
+
+
+			if (typeof mixers != "undefined" && mixers != null && mixers.length > 0) {
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
+				if (activemixer){
+					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+						value: activemixer,
+						label: activemixer
+					});
+				} else {
+					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+						value: mixers[0],
+						label: mixers[0]
+					});
+				}
+
+				for(var i in mixers) {
+					self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+						value: mixers[i],
+						label: mixers[i]
+					});
+				}
+
+			} else {
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+					value: "no",
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
+				});
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					value: "no",
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
+				});
+
+			}
 
 
 
-	value = self.getAdditionalConf('music_service', 'mpd', 'gapless_mp3_playback');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
+			value = self.getAdditionalConf('music_service', 'mpd', 'dop');
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
 
-	value = self.getAdditionalConf('music_service', 'mpd', 'volume_normalization');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
+			value = self.getAdditionalConf('music_service', 'mpd', 'volume_normalization');
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
 
-	value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
+			value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
 
-	value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[3].options'), value));
+			value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[3].options'), value));
 
-	value = self.config.get('volumestart');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
+			value = self.config.get('volumestart');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
 
-	value = self.config.get('volumemax');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
+			value = self.config.get('volumemax');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-	value = self.config.get('volumesteps');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+			value = self.config.get('volumesteps');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
-	value = self.config.get('volumecurvemode');
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+			value = self.config.get('volumecurvemode');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 			defer.resolve(uiconf);
 		})
 		.fail(function()
@@ -238,7 +238,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 
@@ -254,25 +254,35 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 		var I2SNumber = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SNumber', data.i2sid.label);
 		if (i2sstatus.name != data.i2sid.label) {
 			self.logger.info('Enabling I2S DAC: ' + data.i2sid.label);
-			self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+			var response = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'enableI2SDAC', data.i2sid.label);
+			if (response != undefined) {
+				response.then(function (result) {
+					if (result.reboot == 'yes') {
+					var responseData = {
+						title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
+						message: data.i2sid.label+ ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
+						size: 'lg',
+						buttons: [
+							{
+								name: self.commandRouter.getI18nString('COMMON.RESTART'),
+								class: 'btn btn-info',
+								emit:'reboot',
+								payload:''
+							}
+						]
+					}
+
+					self.commandRouter.broadcastMessage("openModal", responseData);
+				}
+				})
+					.fail(function () {
+						self.logger.log('Error Setting i2s DAC')
+					});
+			}
 			this.config.set('outputdevicename', data.i2sid.label);
 			OutputDeviceNumber = I2SNumber;
 
-			var responseData = {
-				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
-				message: data.i2sid.label+ ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
-				size: 'lg',
-				buttons: [
-					{
-						name: self.commandRouter.getI18nString('COMMON.RESTART'),
-						class: 'btn btn-info',
-						emit:'reboot',
-						payload:''
-					}
-				]
-			}
-
-			self.commandRouter.broadcastMessage("openModal", responseData);
+			 
 		}
 
 	} else {
@@ -305,6 +315,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			this.config.set('outputdevicename', 'Audio Jack');
 			OutputDeviceNumber = "0";
 			self.enablePiJack();
+			/*
 			var responseData = {
 				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED'),
 				message: data.i2sid.label+ ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED_MESSAGE'),
@@ -320,6 +331,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			}
 
 			self.commandRouter.broadcastMessage("openModal", responseData);
+			 */
 		}
 	}
 
@@ -429,7 +441,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			for (var n = 0; n < carddata.cards.length; n++){
 				var cardname = carddata.cards[n].name.toString().trim();
 				if (cardname === rawname){
-					 var name = carddata.cards[n].prettyname;
+					var name = carddata.cards[n].prettyname;
 				}
 			} cards.push({id: id, name: name});
 
@@ -488,43 +500,43 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		}
 
 	} else {
-	for (var n = 0; n < carddata.cards.length; n++){
-		var cardname = carddata.cards[n].prettyname.toString().trim();
+		for (var n = 0; n < carddata.cards.length; n++){
+			var cardname = carddata.cards[n].prettyname.toString().trim();
 
-		if (cardname == currentcardname){
-			defaultmixer = carddata.cards[n].defaultmixer;
-			self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+			if (cardname == currentcardname){
+				defaultmixer = carddata.cards[n].defaultmixer;
+				self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+			}
 		}
-	}
 	}
 	if (defaultmixer) {
 
 	} else {
-	try {
-		if (this.config.has('outputdevice') == false) {
-			var audiodevice = "0";
-		} else {
-			var audiodevice = this.config.get('outputdevice')
-		}
-
-		var array = execSync('amixer -c 5 scontents', { encoding: 'utf8' })
-		var genmixers = array.toString().split("Simple mixer control");
-
-		for (var i in genmixers) {
-			if (genmixers[i].indexOf("Playback") >= 0) {
-				var line = genmixers[i].split('\n');
-				var line2 = line[0].split(',')
-				var mixerspace = line2[0].replace(/'/g,"");
-				var mixer = mixerspace.replace(" ","");
-				mixers.push(mixer);
+		try {
+			if (this.config.has('outputdevice') == false) {
+				var audiodevice = "0";
+			} else {
+				var audiodevice = this.config.get('outputdevice')
 			}
-		}
-		if (mixers[0]){
-			defaultmixer = mixers[0].toString()
-			self.logger.info('Setting mixer '+ defaultmixer + ' for card ' + currentcardname);
-		}
 
-	} catch (e) {}
+			var array = execSync('amixer -c 5 scontents', { encoding: 'utf8' })
+			var genmixers = array.toString().split("Simple mixer control");
+
+			for (var i in genmixers) {
+				if (genmixers[i].indexOf("Playback") >= 0) {
+					var line = genmixers[i].split('\n');
+					var line2 = line[0].split(',')
+					var mixerspace = line2[0].replace(/'/g,"");
+					var mixer = mixerspace.replace(" ","");
+					mixers.push(mixer);
+				}
+			}
+			if (mixers[0]){
+				defaultmixer = mixers[0].toString()
+				self.logger.info('Setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+			}
+
+		} catch (e) {}
 	}
 	if (this.config.has('mixer') == false) {
 		this.config.addConfigValue('mixer', 'string', defaultmixer);
@@ -598,4 +610,58 @@ ControllerAlsa.prototype.storeAlsaSettings  = function () {
 			self.logger.error('Alsa Settings successfully stored');
 		}
 	});
+}
+
+ControllerAlsa.prototype.getAudioDevices  = function () {
+	var self = this;
+
+	var defer = libQ.defer();
+	var cards = self.getAlsaCards();
+	var devicesarray = [];
+	var carddetail = '';
+	var i2sdevice = '';
+
+
+	for (var i in cards) {
+		if (cards[i].name === 'Audio Jack') {
+			carddetail = {'id': cards[i].id, 'name': 'Audio Jack'};
+			devicesarray.push(carddetail);
+			var carddetail2 = {'id': cards[i].id, 'name': 'HDMI Out'};
+			devicesarray.push(carddetail2);
+		} else
+		{
+			carddetail = {'id': cards[i].id, 'name': cards[i].name};
+			devicesarray.push(carddetail);
+		}
+	}
+
+	var outdevicename = self.config.get('outputdevicename');
+	if (outdevicename) {
+
+	} else {
+		outdevicename = devicesarray[0].name;
+	}
+
+	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
+	if (i2sstatus.enabled) {
+		i2sdevice = i2sstatus.name;
+	}
+
+	if(i2soptions.length > 0) {
+		var i2sarray = [];
+		for(var i in i2soptions) {
+			var i2scard = {'id': i2soptions[i].value, 'name': i2soptions[i].label}
+			i2sarray.push(i2scard)
+		}
+		var response = {'devices':{'active':outdevicename,'available':devicesarray},'i2s':{'enabled':i2sstatus.enabled,'active':i2sdevice,'available':i2sarray}};
+		console.log(response)
+		defer.resolve(response);
+	} else {
+		var response = {'devices':devicesarray}
+		console.log(response)
+		defer.resolve(response);
+	}
+
+	return defer.promise;
 }

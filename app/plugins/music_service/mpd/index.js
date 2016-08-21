@@ -19,6 +19,7 @@ function ControllerMpd(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
+	this.config = new (require('v-conf'))();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -530,6 +531,11 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 	// Connect to MPD only if process MPD is running
+
+	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
+
+
+	self.config.loadFile(configFile);
 	pidof('mpd', function (err, pid) {
 		if (err) {
 			self.logger.info('Cannot initialize  MPD Connection: MPD is not running');
@@ -549,10 +555,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 ControllerMpd.prototype.mpdEstablish = function () {
 	var self = this;
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 
-	self.config = new (require('v-conf'))();
-	self.config.loadFile(configFile);
 
 	// TODO use names from the package.json instead
 	self.servicename = 'mpd';
@@ -620,7 +623,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 
 	self.clientMpd.on('system-update', function () {
-		
+
 		 self.sendMpdCommand('status', [])
 			.then(function (objState) {
 				var state = self.parseState(objState);
@@ -643,117 +646,6 @@ ControllerMpd.prototype.mpdConnect = function () {
 	var nPort = self.config.get('nPort');
 	self.clientMpd = libMpd.connect({port: nPort, host: nHost});
 };
-/*
- * This method shall be defined by every plugin which needs to be configured.
- */
-/*ControllerMpd.prototype.getConfiguration = function(mainConfig) {
-
- var language=__dirname+"/i18n/"+mainConfig.locale+".json";
- if(!libFsExtra.existsSync(language))
- {
- language=__dirname+"/i18n/EN.json";
- }
-
- var languageJSON=libFsExtra.readJsonSync(language);
-
- var config=libFsExtra.readJsonSync(__dirname+'/config.json');
- var uiConfig={};
-
- for(var key in config)
- {
- if(config[key].modifiable==true)
- {
- uiConfig[key]={
- "value":config[key].value,
- "type":config[key].type,
- "label":languageJSON[config[key].ui_label_key]
- };
-
- if(config[key].enabled_by!=undefined)
- uiConfig[key].enabled_by=config[key].enabled_by;
- }
- }
-
- return uiConfig;
- }*/
-
-ControllerMpd.prototype.getUIConfig = function () {
-	var self = this;
-
-	var uiconf = libFsExtra.readJsonSync(__dirname + '/UIConfig.json');
-	var value;
-
-	value = self.config.get('gapless_mp3_playback');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[0].options'), value));
-
-	value = self.config.get('volume_normalization');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[1].options'), value));
-
-	value = self.config.get('audio_buffer_size');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[2].options'), value));
-
-	value = self.config.get('buffer_before_play');
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[3].options'), value));
-
-	value = self.config.get('auto_update')
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[4].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumestart');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[0].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumemax');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[1].options'), value));
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'volumecurvemode');
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[2].options'), value));
-
-	var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards');
-
-	value = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
-	if (value == undefined)
-		value = 0;
-
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
-	self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelectedCard(cards, value));
-
-	for (var i in cards) {
-		self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-			value: cards[i].id,
-			label: cards[i].name
-		});
-	}
-
-	return uiconf;
-};
-
-ControllerMpd.prototype.getLabelForSelectedCard = function (cards, key) {
-	var n = cards.length;
-	for (var i = 0; i < n; i++) {
-		if (cards[i].id == key)
-			return cards[i].name;
-	}
-
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
-};
-
-ControllerMpd.prototype.getLabelForSelect = function (options, key) {
-	var n = options.length;
-	for (var i = 0; i < n; i++) {
-		if (options[i].value == key)
-			return options[i].label;
-	}
-
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
-};
-
 
 ControllerMpd.prototype.outputDeviceCallback = function () {
 	var self = this;
@@ -789,10 +681,17 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	var defer = libQ.defer();
 
-	self.config.set('gapless_mp3_playback', data['gapless_mp3_playback'].value);
-	self.config.set('volume_normalization', data['volume_normalization'].value);
+	self.config.set('volume_normalization', data['volume_normalization']);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
+
+	//fixing dop
+	if (self.config.get('dop') == null) {
+		self.config.addConfigValue('dop', 'boolean', true);
+	} else {
+		self.config.set('dop', data['dop']);
+	}
+
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
@@ -804,7 +703,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
-					self.logger.info('Cannot restart MPD: ' + error);
+					self.logger.error('Cannot restart MPD: ' + error);
 					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
 				}
 				else
@@ -823,10 +722,20 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 ControllerMpd.prototype.restartMpd = function (callback) {
 	var self = this;
 
-	exec('sudo /bin/systemctl restart mpd.service ',
-		function (error, stdout, stderr) {
-			callback(error);
-		});
+	if (callback) {
+		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
+			function (error, stdout, stderr) {
+				callback(error);
+			});
+	} else {
+		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
+			function (error, stdout, stderr) {
+				if (error){
+					self.logger.error('Cannot restart MPD: ' + error);
+				}
+			});
+	}
+
 
 };
 
@@ -855,8 +764,14 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
 			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
 			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
+			if (self.config.get('dop')){
+				var dop = 'yes';
+			} else {
+				var dop = 'no';
+			}
+			var conf6 = conf5.replace("${dop}", dop);
 
-			fs.writeFile("/etc/mpd.conf", conf5, 'utf8', function (err) {
+			fs.writeFile("/etc/mpd.conf", conf6, 'utf8', function (err) {
 				if (err) return console.log(err);
 			});
 		});
@@ -893,10 +808,14 @@ ControllerMpd.prototype.setConfiguration = function (configuration) {
 };
 
 ControllerMpd.prototype.getConfigParam = function (key) {
-	return this.config.get(key);
+	var self = this;
+
+	return self.config.get(key);
 };
 ControllerMpd.prototype.setConfigParam = function (data) {
-	this.config.set(data.key, data.value);
+	var self = this;
+
+	self.config.set(data.key, data.value);
 };
 
 ControllerMpd.prototype.listPlaylists = function (uri) {
@@ -1058,7 +977,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					else if (line.indexOf('file:') === 0) {
 						var path = line.slice(6);
 						var name = path.split('/').pop();
-						
+
 						var artist = self.searchFor(lines, i + 1, 'Artist:');
 						var album = self.searchFor(lines, i + 1, 'Album:');
 						var title = self.searchFor(lines, i + 1, 'Title:');

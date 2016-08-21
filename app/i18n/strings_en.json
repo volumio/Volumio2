@@ -23,7 +23,8 @@
     "I2S_DAC_ACTIVATED":"I2S DAC Enabled",
     "I2S_DAC_ACTIVATED_MESSAGE":"has been enabled, restart the system for changes to take effect",
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
-    "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect"
+    "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
+	  "DOP":"DSD over PCM (DoP)"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -41,11 +42,11 @@
     "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted"
   },
   "PLAYLIST":{
-  "ADDED_TITLE":"Added",
-  "ADDED_TO_PLAYLIST":" to playlist ",
-  "ADDED_TO_FAVOURITES":" to Favourites ",
-  "REMOVE_ERROR":"Cannot Remove",
-  "REMOVE_SUCCESS":"Removed"
+    "ADDED_TITLE":"Added",
+    "ADDED_TO_PLAYLIST":" to playlist ",
+    "ADDED_TO_FAVOURITES":" to Favourites ",
+    "REMOVE_ERROR":"Cannot Remove",
+    "REMOVE_SUCCESS":"Removed"
   },
   "COMMON":{
     "SAVE":"Save",
@@ -62,7 +63,7 @@
     "CONFIGURATION_UPDATE":"Configuration update",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
     "CONFIGURATION_UPDATE_ERROR":"An error has occurred",
-    "PLAYER_RESTARTED":"Player sucecssfully restarted",
+    "PLAYER_RESTARTED":"Player successfully restarted",
     "RESTART":"Restart",
     "ON":"On",
     "OFF":"Off",

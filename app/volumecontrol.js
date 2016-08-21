@@ -12,7 +12,7 @@ var mixer = '';
 var maxvolume = '';
 var volumecurve = '';
 var volumesteps = '';
-var currentvolume = 100;
+var currentvolume = '';
 var currentmute = false;
 var premutevolume = '';
 

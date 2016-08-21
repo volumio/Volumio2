@@ -37,6 +37,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
 
     this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
+
 };
 
 volumioAppearance.prototype.onStart = function() {
@@ -240,7 +241,10 @@ volumioAppearance.prototype.generateThumbnails = function(){
 
             }
             if (numberfile===files.length){
-                    //console.log('resolving')
+				var background = config.get('background_title')
+				if (background === 'Initial') {
+						self.selectRandomBacground();
+				}
                 defer.resolve('Ok');
             }
         });
@@ -251,7 +255,12 @@ volumioAppearance.prototype.generateThumbnails = function(){
 
 volumioAppearance.prototype.createThumbnailPath = function() {
     var self=this;
-    if (!fs.existsSync(backgroundPath)) {
+
+	try {
+		fs.statSync(backgroundPath);
+	} catch(e) {
+		fs.mkdirSync(backgroundPath);
+	}
         fs.copy(__dirname+'/backgrounds', backgroundPath, function (err) {
             if (err) {
                 console.error(err);
@@ -260,7 +269,6 @@ volumioAppearance.prototype.createThumbnailPath = function() {
                 console.log("success!");
             }
         });
-    }
 
 }
 
@@ -277,7 +285,7 @@ volumioAppearance.prototype.setBackgrounds = function(data)
         config.set('background_title', data.name);
         config.set('background_path', data.path);
     }
-    
+
     self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
         self.commandRouter.getI18nString('APPEARANCE.NEW_BACKGROUND_APPLIED'));
 
@@ -287,7 +295,8 @@ volumioAppearance.prototype.setBackgrounds = function(data)
 volumioAppearance.prototype.setLanguage = function(data)
 {
     var self = this;
-    var defer = libQ.defer();
+    var defer = libQ.defer();   
+    
 
     if (data.language) {
         config.set('language', data.language.label);
@@ -358,6 +367,41 @@ volumioAppearance.prototype.deleteFile = function(filepath){
     return defer.promise;
 }
 
+volumioAppearance.prototype.selectRandomBacground = function(){
+    var self = this;
+
+    var backgrounds = self.getBackgrounds();
+    if (backgrounds != undefined) {
+        backgrounds.then(function (result) {
+            var max = result.available.length;
+            var random = Math.floor(Math.random() * (max - 0 + 1) + 0);
+            var randomBackground = result.available[random];
+            var setting = {'name':randomBackground.name, 'path':randomBackground.path}
+
+            return self.setBackgrounds(setting);
+        })
+            .fail(function () {
+            });
+    }
+
+
+}
+
+volumioAppearance.prototype.getAvailableLanguages = function() {
+
+    var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'), 'utf8', {throws: false});
+    var defer = libQ.defer();
+
+
+    var available = [];
+    for (var n = 0; n < languagesdata.languages.length; n++) {
+        var language = {"language":languagesdata.languages[n].name, "code":languagesdata.languages[n].code }
+        available.push(language);
+    }
+    var languagearray = {'defaultLanguage':{'language': 'English', 'code': 'en'}, 'available':available};
+    defer.resolve(languagearray);
+    return defer.promise;
+}
 
 
 

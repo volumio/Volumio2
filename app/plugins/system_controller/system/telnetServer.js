@@ -5,7 +5,7 @@ var telnet = require('telnet')
 var self = this;
 
 
-exec("/usr/bin/sudo /bin/journalctl -f > /tmp/logtail", {uid:1000, gid:1000},function(error, stdout, stderr) {
+exec("/usr/bin/sudo /bin/journalctl -f -p 7> /tmp/logtail", {uid:1000, gid:1000},function(error, stdout, stderr) {
     if (error) {
         console.log('Cannot tail to file: '+error)
     } else {

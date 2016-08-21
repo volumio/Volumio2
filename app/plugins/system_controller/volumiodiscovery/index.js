@@ -54,7 +54,7 @@ ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function(name)
 	} catch (e) {
 	console.log("Discovery: Stopped ads, if present ----> exception!");
 
-	}	
+	}
 	self.forceRename = true;
 	setTimeout(bound,5000);
 };
@@ -136,7 +136,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 					function () {
 						self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
 							console.log("Discovery: INT " + error);
-							
+
 						});
 
 
@@ -144,14 +144,17 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 					5000
 				);
 
-			} 
+			}
 
 		});
 		self.ad.on('error', function(error)
 		{
 			console.log("Discovery: ERROR" + error);
 			self.context.coreCommand.pushConsoleMessage('mDNS Advertisement raised the following error ' + error);
-			self.startAdvertisement();
+			setTimeout(function () {
+				self.startAdvertisement();
+			}, 5000);
+
 
 		});
 		self.ad.start();
@@ -187,7 +190,7 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			self.startMDNSBrowse();
 		});
 		self.browser.on('serviceUp', function(service) {
-			
+
 			if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
 				console.log("Discovery: this is already registered,  " + service.txtRecord.UUID);
 				foundVolumioInstances.delete(service.txtRecord.UUID+'.name');

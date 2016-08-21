@@ -1,8 +1,14 @@
 {"languages":[
-  {"name":"Dutch","code":"nl"},
+  {"name":"Català","code":"ca"},
+  {"name":"Dansk","code":"da"},
   {"name":"Deutsch","code":"de"},
+  {"name":"Dutch","code":"nl"},
   {"name":"English","code":"en"},
+  {"name":"Español","code":"es"},
   {"name":"Français","code":"fr"},
   {"name":"Italiano","code":"it"},
-  {"name":"日本語","code":"ja"}
+  {"name":"日本語","code":"ja"},
+  {"name":"Polski","code":"pl"},
+  {"name":"Svenska","code":"sv"},
+  {"name":"简体中文","code":"zh"}
 ]}
