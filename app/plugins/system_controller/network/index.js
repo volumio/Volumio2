@@ -162,15 +162,53 @@ ControllerNetwork.prototype.setAdditionalConf = function () {
 
 ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 	var self = this;
+
 	var networksarray = [];
 
+	var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", { encoding: 'utf8' });
+	var wirelessnets2 = wirelessnets.split('BSS');
+	for (var i = 0; i < wirelessnets2.length; i++) {
+		var wirelessnets3 = wirelessnets2[i].split("\n")
+			for (var e = 0; e < wirelessnets3.length; e++) {
+				var scanResults = wirelessnets3[e].replace('\t','').replace(' ','').split(":");
+				//	console.log(scan
+				var network = {ssid:'',security:'wep',signal:''}
+
+			switch(scanResults[0]) {
+				case 'SSID':
+					network.ssid = scanResults[1];
+
+					break;
+				case 'WPA':
+					network.security = 'WPA';
+
+					break;
+				case 'signal':
+					var signal= scanResults[1];
+					network.signal = signal;
+
+					break;
+				default:
+					break;
+			}
+				networksarray.push(network)
+			}
+
+
+
+	}
+	console.log(networksarray);
+
 	var defer = libQ.defer();
+
+	/*
 	iwlist.scan('wlan0', function (err, networks) {
 		var self = this;
 		var networksarray = networks;
 		var networkresults = {"available": networksarray}
 		defer.resolve(networkresults);
 	});
+	*/
 	return defer.promise;
 };
 
