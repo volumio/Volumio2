@@ -76,6 +76,9 @@
     "FAVOURITES":"Favourites",
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Music Library",
+    "ARTISTS":"Artists",
+    "ALBUMS":"Albums",
+    "GENRES":"Genres",
 	"CANCEL":"Cancel"
   },
   "APPEARANCE":{
