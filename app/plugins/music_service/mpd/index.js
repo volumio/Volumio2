@@ -2084,16 +2084,16 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri) {
         if (curUri == 'playlists')
             response = self.listPlaylists(curUri);
         else response = self.browsePlaylist(curUri);
-    }else if (curUri.startsWith('albums')) {
-        if (curUri == 'albums')
+    }else if (curUri.startsWith('albums:/')) {
+        if (curUri == 'albums:/')
             response = self.listAlbums(curUri);
         else response = self.listAlbumSongs(curUri);
-    }else if (curUri.startsWith('artists')) {
-        if (curUri == 'artists')
+    }else if (curUri.startsWith('artists:/')) {
+        if (curUri == 'artists:/')
             response = self.listArtists(curUri);
         else response = self.listArtist(curUri);
-    }else if (curUri.startsWith('genres')) {
-        if (curUri == 'genres')
+    }else if (curUri.startsWith('genres:/')) {
+        if (curUri == 'genres:/')
             response = self.listGenres(curUri);
         else response = self.listGenre(curUri);
     }
