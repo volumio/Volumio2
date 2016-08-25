@@ -7,6 +7,7 @@ var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var os = require('os');
 var libQ = require('kew');
+var util = require('util');
 
 // Define the ControllerSystem class
 module.exports = ControllerI2s;
@@ -33,7 +34,7 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	var i2sdac = this.config.get("i2s_dac");
 
 	if (i2sdac == null || i2sdac.length === 0 ) {
-		self.logger.info('I2S DAC not set, start Auto-detection on USB Bus');
+		self.logger.info('I2S DAC not set, start Auto-detection');
 		self.i2sDetect();
 	}
 
@@ -132,15 +133,67 @@ ControllerI2s.prototype.registerCallback = function (callback) {
 	self.callbacks.push(callback);
 };
 
-ControllerI2s.prototype.deviceDetect = function() {
-	var self = this;
 
-}
 
 ControllerI2s.prototype.i2sDetect = function () {
 	var self = this;
 
+	var eepromname = self.eepromDetect();
+	var i2caddr = self.i2cDetect();
+	var eepromName = '';
+	var i2cAddress = '';
+
+	var methods = [eepromname , i2caddr ]
+
+	libQ.all(methods)
+		.then(function(content) {
+			for (var j in content) {
+				var discoveryParameters = {eepromName:'',i2cAddress:''};
+
+				if (content[j].eeeprom){
+					eepromName = content[j].eeeprom
+				}
+
+				if (content[j].i2c){
+					i2cAddress = content[j].i2c;
+				}
+			}
+			self.i2sMatch({'eepromName':eepromName,'i2cAddress':i2cAddress});
+		});
+
+
+}
+
+ControllerI2s.prototype.eepromDetect = function () {
+	var self = this;
+
+	var defer = libQ.defer();
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var hatnamefile = '/proc/device-tree/hat/product';
+
+
+	try {
+		fs.statSync(hatnamefile);
+		fs.readFile(hatnamefile, 'utf8', function (err,data) {
+			if ((err) || (data == null)) {
+				self.logger.info('Cannot read eeprom hat name');
+			} else {
+				var name = data.replace("\u0000", "");
+				defer.resolve({eeeprom:name});
+			}
+
+		});
+	} catch(e) {
+		//self.i2cDetect();
+	}
+	return defer.promise;
+}
+
+ControllerI2s.prototype.i2cDetect = function () {
+	var self = this;
+
 	var i2cbus;
+	var defer = libQ.defer();
 	exec("echo `awk '{if ($1==\"Revision\") print substr($3,length($3)-3)}' /proc/cpuinfo`", function(err, stdout, stderr) {
 		var revision = stdout.slice(0, 4);
 		if((!err) && (revision != '0002') && (revision != '0003')) {
@@ -166,7 +219,7 @@ ControllerI2s.prototype.i2sDetect = function () {
 				items.forEach(function(item) {
 					if((item != '') && (item != '--')) {
 						var i2cAddr = (item);
-						return self.i2sMatch(i2cAddr)
+						defer.resolve({i2c:i2cAddr});
 					}
 				});
 			});
@@ -176,10 +229,14 @@ ControllerI2s.prototype.i2sDetect = function () {
 		self.logger.error('Cannot read i2c bus')
 	}
 	}
+
+	return defer.promise;
 };
 
-ControllerI2s.prototype.i2sMatch = function (i2caddr) {
+ControllerI2s.prototype.i2sMatch = function (data) {
 	var self = this;
+
+
 
 	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
 	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
@@ -190,11 +247,27 @@ ControllerI2s.prototype.i2sMatch = function (i2caddr) {
 		{ var num = i;
 			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
 				var dac = dacdata.devices[num].data[i];
-				if(dac.i2c_address == i2caddr) {
-					self.logger.info('I2S DAC DETECTION: Found Match with '+ dac.name + ' at address ' +  i2caddr)
 
+				if (util.isArray(dac.eeprom_name)){
+					for (var w = 0; w < dac.eeprom_name.length; w++) {
+						if (dac.eeprom_name[w] == data.eepromName) {
+							self.logger.info('I2S DAC DETECTION: Found Match with EEPROM '+ dac.eeprom_name[w] )
+							var str = {"output_device":{"value":dac.alsanum,"label":dac.name},"i2s":true,"i2sid":{"value":dac.id,"label":dac.name}}
+							return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
+						}
+					}
+				}
+				else if (dac.eeprom_name == data.eepromName) {
+					self.logger.info('I2S DAC DETECTION: Found Match with EEPROM '+ dac.eeprom_name )
 					var str = {"output_device":{"value":dac.alsanum,"label":dac.name},"i2s":true,"i2sid":{"value":dac.id,"label":dac.name}}
 					return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
+				} else if (dac.i2c_address == data.i2cAddress) {
+					self.logger.info('I2S DAC DETECTION: Found Match with '+ dac.name + ' at address ' + dac.i2c_address )
+					var str = {"output_device":{"value":dac.alsanum,"label":dac.name},"i2s":true,"i2sid":{"value":dac.id,"label":dac.name}}
+					return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
+
+				}  else {
+
 				}
 
 			}
