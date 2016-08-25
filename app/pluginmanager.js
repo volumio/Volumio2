@@ -527,10 +527,9 @@ PluginManager.prototype.updatePlugin = function (data) {
 			self.stopPlugin(category,name)
 				.then(function(e)
 				{
-					self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Plugin stopped', 'title' : modaltitle});
+					self.pushMessage('installPluginStatus',{'progress': 20, 'message': 'Plugin stopped', 'title' : modaltitle});
 					return e;
 				})
-				.then(self.createFolder(pluginFolder))
 				.then(self.pushMessage.bind(self, 'installPluginStatus', {
 					'progress': 30,
 					'message': currentMessage,
@@ -546,7 +545,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 				})
 				.then(self.renameFolder.bind(self))
 				.then(function (e) {
-					currentMessage = 'Copying Plugin into location';
+					currentMessage = 'Updating Plugin Files';
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 60, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
@@ -596,6 +595,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 					self.logger.info("Done installing plugin.");
 					defer.resolve();
 					self.tempCleanup();
+					self.enablePlugin(category,name);
 				})
 				.fail(function (e) {
 					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
