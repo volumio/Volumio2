@@ -364,6 +364,9 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 			var address=addresses[j];
 			if (albumart){
 				var albumartstring = 'http://'+address+albumart;
+				if (albumart.indexOf("http") !=-1) {
+					albumartstring = albumart;
+				}
 			} else {
 				var albumartstring = 'http://'+address+'/albumart';
 			}
