@@ -8,6 +8,8 @@ var HashMap = require('hashmap');
 var io=require('socket.io-client');
 var exec = require('child_process').exec;
 var libQ = require('kew');
+var ip = require('ip');
+var ifconfig = require('wireless-tools/ifconfig');
 
 // Define the ControllerVolumioDiscovery class
 
@@ -358,11 +360,22 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 
 		var isSelf=key==myuuid;
 
+
+
 		var addresses=foundVolumioInstances.get(key+'.addresses');
 
 		for(var j in addresses)
 		{
 			var address=addresses[j];
+			if (isSelf){
+				console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAA'+address+albumart);
+				ifconfig.status('wlan0', function(err, status) {
+					if (status != undefined) {
+						if (status.ipv4_address != undefined) {
+							address = status.ipv4_address;
+						} else address = ip.address();
+					} }); address = ip.address();
+			}
 			if (albumart){
 				var albumartstring = 'http://'+address+albumart;
 				if (albumart.indexOf("http") !=-1) {
