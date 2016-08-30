@@ -234,11 +234,12 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			{
 				var key=keys[i];
 				var uuidindex = registeredUUIDs.indexOf(key);
+
 				if (uuidindex !== -1) {
 				    registeredUUIDs.splice(uuidindex, 1);
 				}
 
-				var osname=foundVolumioInstances.get(key+'.name');
+				var osname=foundVolumioInstances.get(key+'.name').toLowerCase();
 				if(osname==service.name)
 				{
 					self.context.coreCommand.pushConsoleMessage('mDNS: Device '+service.name+' disapperared from network');
