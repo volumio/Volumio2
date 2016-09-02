@@ -600,6 +600,21 @@ CoreCommandRouter.prototype.installPlugin = function (uri) {
 	return defer.promise;
 };
 
+CoreCommandRouter.prototype.updatePlugin = function (data) {
+	var self=this;
+	var defer=libQ.defer();
+
+	this.pluginManager.updatePlugin(data).then(function()
+	{
+		defer.resolve();
+	}).fail(function(e){
+		self.logger.info("Error: "+e);
+		defer.reject(new Error('Cannot Update plugin. Error: '+e));
+	});
+
+	return defer.promise;
+};
+
 CoreCommandRouter.prototype.unInstallPlugin = function (data) {
 	var self = this;
 	var defer=libQ.defer();
