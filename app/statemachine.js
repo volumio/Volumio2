@@ -395,37 +395,37 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                 trackBlock.duration=stateService.duration;
             }
 
-            if(stateService.samplerate!==undefined)
+            if(stateService.samplerate!==undefined && trackBlock.samplerate===undefined)
             {
                 trackBlock.samplerate=stateService.samplerate;
             }
 
-            if(stateService.bitdepth!==undefined)
+            if(stateService.bitdepth!==undefined && trackBlock.bitdepth===undefined)
             {
                 trackBlock.bitdepth=stateService.bitdepth;
             }
 
-            if(stateService.channels!==undefined)
+            if(stateService.channels!==undefined && trackBlock.channels===undefined)
             {
                 trackBlock.channels=stateService.channels;
             }
 
-            if(stateService.title!==undefined)
+            if(stateService.title!==undefined && trackBlock.name===undefined)
             {
                 trackBlock.name=stateService.title;
             }
 
-            if(stateService.artist!==undefined)
+            if(stateService.artist!==undefined && trackBlock.artist===undefined)
             {
                 trackBlock.artist=stateService.artist;
             }
 
-            if(stateService.album!==undefined)
+            if(stateService.album!==undefined && trackBlock.album===undefined)
             {
                 trackBlock.album=stateService.album;
             }
 
-            if(stateService.albumart!==undefined)
+            if(stateService.albumart!==undefined && trackBlock.albumart===undefined)
             {
                 trackBlock.albumart=stateService.albumart;
             }
