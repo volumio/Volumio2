@@ -2273,22 +2273,74 @@ ControllerMpd.prototype.listAlbums = function () {
  *
  * list album
  */
-ControllerMpd.prototype.listAlbumSongs = function (curUri) {
+ControllerMpd.prototype.listAlbumSongs = function (uri) {
     var self = this;
 
     var defer = libQ.defer();
 
-    var splitted=curUri.split('/');
-    var albumName=""
+    var splitted = uri.split('/');
 
-    if(curUri.startsWith('/'))
-    {
-        albumName=splitted[2];
-    }
-    else
-    {
-        albumName=splitted[1];
-    }
+    var albumName = splitted[2];
+
+    self.logger.info("SEARCHING ALBUM NAME "+albumName);
+
+    var cmd = libMpd.cmd;
+    self.clientMpd.sendCommand(cmd("find album \""+albumName+"\"", []), function (err, msg) {
+        self.logger.info("ERR "+err);
+        self.logger.info("MSG "+msg);
+
+        var response = {
+            navigation: {
+                prev: {
+                    uri: 'albums:/'
+                },
+                list: []
+            }
+        };
+
+        if (msg) {
+            var path;
+            var name;
+            var lines = msg.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (line.indexOf('file:') === 0) {
+                    var path = line.slice(6);
+                    var name = path.split('/').pop();
+
+                    var artist = self.searchFor(lines, i + 1, 'Artist:');
+                    var album = self.searchFor(lines, i + 1, 'Album:');
+                    var title = self.searchFor(lines, i + 1, 'Title:');
+                    var albumart=self.getAlbumArt({artist: artist, album: album,icon:'fa-dot-circle'}, self.getParentFolder('/mnt/'+path));
+                    var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+
+                    if (title) {
+                        title = title;
+                    } else {
+                        title = name;
+                    }
+                    response.navigation.list.push({
+                        uri: 'music-library/'+path,
+                        service: 'mpd',
+                        title: title,
+                        artist: artist,
+                        album: album,
+                        type: 'song',
+                        tracknumber: 0,
+                        albumart: albumart,
+                        duration: time,
+                        trackType: path.split('.').pop()
+                    });
+
+
+                }
+
+            }
+        }
+        else self.logger.info(err);
+
+        defer.resolve(response);
+    });
 
     return defer.promise;
 
