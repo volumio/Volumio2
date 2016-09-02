@@ -345,7 +345,6 @@ var processExpressRequest = function (req, res) {
 			res.sendFile(filePath);
 		})
 		.fail(function () {
-		    logger.info("ICON= "+icon);
 		    if(icon!==undefined)
                 res.sendFile(__dirname + '/icons/'+icon+'.png');
 		    else

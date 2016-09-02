@@ -2177,16 +2177,16 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri) {
         if (curUri == 'playlists')
             response = self.listPlaylists(curUri);
         else response = self.browsePlaylist(curUri);
-    }else if (curUri.startsWith('albums:/')) {
-        if (curUri == 'albums:/')
+    }else if (curUri.startsWith('albums://')) {
+        if (curUri == 'albums://')
             response = self.listAlbums(curUri);
         else response = self.listAlbumSongs(curUri);
-    }else if (curUri.startsWith('artists:/')) {
-        if (curUri == 'artists:/')
+    }else if (curUri.startsWith('artists://')) {
+        if (curUri == 'artists://')
             response = self.listArtists(curUri);
         else response = self.listArtist(curUri);
-    }else if (curUri.startsWith('genres:/')) {
-        if (curUri == 'genres:/')
+    }else if (curUri.startsWith('genres://')) {
+        if (curUri == 'genres://')
             response = self.listGenres(curUri);
         else response = self.listGenre(curUri);
     }
@@ -2231,15 +2231,10 @@ ControllerMpd.prototype.listAlbums = function () {
     var self = this;
 
 
-    console.log("-------------");
-
     var defer = libQ.defer();
 
     var response = {
         navigation: {
-            prev: {
-                uri: '/'
-            },
             list: []
         }
     };
@@ -2257,7 +2252,7 @@ ControllerMpd.prototype.listAlbums = function () {
                 if(splitted[i].startsWith('Album:'))
                 {
                     var albumName=splitted[i].substring(7);
-                    var album = {type: 'folder', title: albumName, albumart: self.getAlbumArt({},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                    var album = {type: 'folder', title: albumName, albumart: self.getAlbumArt(undefined,undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
                     response.navigation.list.push(album);
                 }
@@ -2292,7 +2287,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
         var response = {
             navigation: {
                 prev: {
-                    uri: 'albums:/'
+                    uri: 'albums://'
                 },
                 list: []
             }
@@ -2350,6 +2345,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
  *
  * list album
  */
+/*
 ControllerMpd.prototype.playAlbum = function (curUri) {
     var self = this;
 
@@ -2419,7 +2415,7 @@ ControllerMpd.prototype.playAlbum = function (curUri) {
     }
     return defer.promise;
 
-};
+};*/
 
 
 
@@ -2434,9 +2430,6 @@ ControllerMpd.prototype.listArtists = function () {
 
     var response = {
         navigation: {
-            prev: {
-                uri: '/'
-            },
             list: []
         }
     };
@@ -2454,7 +2447,8 @@ ControllerMpd.prototype.listArtists = function () {
                 if(splitted[i].startsWith('Artist:'))
                 {
                     var albumName=splitted[i].substring(8);
-                    var album = {type: 'folder', title: albumName, icon: 'fa fa-list-ol', uri: 'artists:/' + albumName};
+                    var albumart=self.getAlbumArt({},undefined,'fa-users');
+                    var album = {type: 'folder', title: albumName, albumart: albumart, uri: 'artists://' + albumName};
 
                     response.navigation.list.push(album);
                 }
@@ -2480,7 +2474,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
     self.mpdReady
         .then(function()
         {
-            var artist=splitted[1];
+            var artist=splitted[2];
 
 
             var cmd = libMpd.cmd;
@@ -2514,7 +2508,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
                                 title: title,
                                 artist: artist,
                                 album: album,
-                                icon: albumart,
+                                albumart: albumart,
                                 uri: path
                             });
 
@@ -2530,7 +2524,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
                     var result=[];
                     result.push({type:'title',title:'Albums'});
                     for(var i in albums)
-                        result.push({type: 'folder', title: albums[i], icon: albumarts[i], uri: 'albums://' + albums[i]});
+                        result.push({type: 'folder', title: albums[i], albumart: albumarts[i], uri: 'albums://' + albums[i]});
 
                     result.push({type:'title',title:'Songs'});
                     result=result.concat(list);
@@ -2539,7 +2533,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
                     defer.resolve({
                         navigation: {
                             prev: {
-                                uri: 'artists:/'
+                                uri: 'artists://'
                             },
                             list: result
                         }
@@ -2563,6 +2557,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
  *
  * list album
  */
+/*
 ControllerMpd.prototype.playArtist = function (curUri) {
     var self = this;
 
@@ -2633,7 +2628,7 @@ ControllerMpd.prototype.playArtist = function (curUri) {
     }
     return defer.promise;
 
-};
+};*/
 
 
 
@@ -2649,9 +2644,6 @@ ControllerMpd.prototype.listGenres = function () {
 
     var response = {
         navigation: {
-            prev: {
-                uri: ''
-            },
             list: []
         }
     };
@@ -2670,7 +2662,8 @@ ControllerMpd.prototype.listGenres = function () {
                 if(splitted[i].startsWith('Genre:'))
                 {
                     var albumName=splitted[i].substring(7);
-                    var album = {type: 'folder', title: albumName, icon: 'fa fa-list-ol', uri: 'genres:/' + albumName};
+                    var albumart=self.getAlbumArt({},undefined,'fa-tags');
+                    var album = {type: 'folder', title: albumName, albumart:albumart, uri: 'genres://' + albumName};
 
                     response.navigation.list.push(album);
                 }
@@ -2756,11 +2749,11 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 
                     result.push({type:'title',title:'Artists'});
                     for(var i in artists)
-                        result.push({type: 'folder', title: artists[i], icon: artistArt[i], uri: 'artists://' + artists[i]});
+                        result.push({type: 'folder', title: artists[i], albumart: artistArt[i], uri: 'artists://' + artists[i]});
 
                     result.push({type:'title',title:'Albums'});
                     for(var i in albums)
-                        result.push({type: 'folder', title: albums[i], icon: albumsArt[i], uri: 'albums://' + albums[i]});
+                        result.push({type: 'folder', title: albums[i], albumart: albumsArt[i], uri: 'albums://' + albums[i]});
 
                     result.push({type:'title',title:'Songs'});
                     result=result.concat(list);
@@ -2768,7 +2761,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     defer.resolve({
                         navigation: {
                             prev: {
-                                uri: 'genres:/'
+                                uri: 'genres://'
                             },
                             list: result
                         }
