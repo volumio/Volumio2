@@ -1271,7 +1271,7 @@ ControllerMpd.prototype.updateQueue = function () {
 };
 
 
-ControllerMpd.prototype.getAlbumArt = function (data, path) {
+ControllerMpd.prototype.getAlbumArt = function (data, path,icon) {
 
 	var artist, album;
 
@@ -1303,7 +1303,16 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
 	if (path != undefined)
 		url = url + 'path=' + nodetools.urlEncode(path);
 
-	return url;
+    if(icon!==undefined)
+    {
+        if(url==='/albumart')
+            url=url+'?icon='+icon;
+        else url=url+'&icon='+icon;
+    }
+
+
+
+    return url;
 };
 
 
@@ -1558,7 +1567,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                         var artist = self.searchFor(lines, i + 1, 'Artist:');
                         var album = self.searchFor(lines, i + 1, 'Album:');
                         var title = self.searchFor(lines, i + 1, 'Title:');
-                        var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
+                        var albumart=self.getAlbumArt({artist: artist, album: album,icon:'fa-dot-circle'}, self.getParentFolder('/mnt/'+path));
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
                         if (title) {
@@ -2005,7 +2014,7 @@ return defer.promise;
 };
 */
 
-ControllerMpd.prototype.getAlbumArt = function (data, path) {
+/*ControllerMpd.prototype.getAlbumArt = function (data, path,icon) {
 
     var artist, album;
 
@@ -2037,8 +2046,11 @@ ControllerMpd.prototype.getAlbumArt = function (data, path) {
     if (path != undefined)
         url = url + 'path=' + nodetools.urlEncode(path);
 
+    if(icon!==undefined)
+        url=url+'&icon='+icon;
+
     return url;
-};
+};*/
 
 
 ControllerMpd.prototype.reportUpdatedLibrary = function () {
@@ -2245,7 +2257,7 @@ ControllerMpd.prototype.listAlbums = function () {
                 if(splitted[i].startsWith('Album:'))
                 {
                     var albumName=splitted[i].substring(7);
-                    var album = {type: 'folder', title: albumName, icon: 'fa fa-list-ol', uri: 'albums://' + albumName};
+                    var album = {type: 'folder', title: albumName, albumart: self.getAlbumArt({},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
                     response.navigation.list.push(album);
                 }

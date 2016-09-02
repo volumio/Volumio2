@@ -229,6 +229,7 @@ var processRequest = function (web, path) {
 	var defer = Q.defer();
 
 	if (web == undefined && path == undefined) {
+	    logger.info('No input data');
 		defer.reject(new Error(''));
 		return defer.promise;
 	}
@@ -332,6 +333,7 @@ var processRequest = function (web, path) {
 var processExpressRequest = function (req, res) {
 	var web = req.query.web;
 	var path = req.query.path;
+    var icon = req.query.icon;
 
     var starttime=Date.now();
 	var promise = processRequest(web, path);
@@ -343,7 +345,11 @@ var processExpressRequest = function (req, res) {
 			res.sendFile(filePath);
 		})
 		.fail(function () {
-			res.sendFile(__dirname + '/default.png');
+		    logger.info("ICON= "+icon);
+		    if(icon!==undefined)
+                res.sendFile(__dirname + '/icons/'+icon+'.png');
+		    else
+			    res.sendFile(__dirname + '/default.png');
 		});
 };
 
