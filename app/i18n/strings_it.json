@@ -74,7 +74,8 @@
     "ILLEGAL_CHARACTER_/":"Rimuovere il carattere /",
     "FAVOURITES":"Preferiti",
     "PLAYLISTS":"Playlist",
-    "MUSIC_LIBRARY":"Libreria Musicale"
+    "MUSIC_LIBRARY":"Libreria Musicale",
+	"CANCEL":"Annulla"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -135,5 +136,10 @@
     "BY_GENRE_RADIOS":"Per genere",
     "BY_COUNTRY_RADIOS":"Per nazione",
     "WEBRADIO":"Web Radio"
+  },
+  "PLUGINS":{
+	"CONFIRM_PLUGIN_UNINSTALL":"Conferma la disinstallazione del Plugin",
+	"CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Sicuro di voler disinstallare il plugin",
+	"UNINSTALL":"Disinstalla"
   }
 }

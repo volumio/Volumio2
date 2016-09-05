@@ -1219,6 +1219,34 @@ function InterfaceWebUI(context) {
                 else self.logger.error("Error on installing plugin");
             });
 
+			connWebSocket.on('updatePlugin', function (data) {
+				var selfConnWebSocket = this;
+
+				console.log(data);
+
+				var returnedData = self.commandRouter.updatePlugin(data);
+
+				if (returnedData != undefined) {
+					returnedData.then(function (data) {
+						selfConnWebSocket.emit('pushInstallPlugin', data);
+						var installed = self.commandRouter.getInstalledPlugins();
+						if (installed != undefined) {
+							installed.then(function (installedPLugins) {
+								self.logger.info(JSON.stringify(installedPLugins));
+								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+							});
+						}
+						var available = self.commandRouter.getAvailablePlugins();
+						if (available != undefined) {
+							available.then(function (AvailablePlugins) {
+								selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
+							});
+						}
+					});
+				}
+				else self.logger.error("Error on installing plugin");
+			});
+
             connWebSocket.on('unInstallPlugin', function (data) {
                 var selfConnWebSocket = this;
 
@@ -1394,9 +1422,10 @@ function InterfaceWebUI(context) {
                 var selfConnWebSocket = this;
 
 
-                selfConnWebSocket.emit('openModal', {'title':'Confirm plugin uninstall', 'content':'Are you sure you want to uninstall this Plugin?', 'buttons':[{'name':'Uninstall', 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':'Cancel','class':'btn btn-warning'}]});
+                selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('PLUGINS.UNINSTALL'), 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-warning'}]});
 
             });
+
 
 
 	connWebSocket.on('saveQueueToPlaylist', function (data) {

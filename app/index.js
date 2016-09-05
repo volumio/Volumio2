@@ -600,6 +600,21 @@ CoreCommandRouter.prototype.installPlugin = function (uri) {
 	return defer.promise;
 };
 
+CoreCommandRouter.prototype.updatePlugin = function (data) {
+	var self=this;
+	var defer=libQ.defer();
+
+	this.pluginManager.updatePlugin(data).then(function()
+	{
+		defer.resolve();
+	}).fail(function(e){
+		self.logger.info("Error: "+e);
+		defer.reject(new Error('Cannot Update plugin. Error: '+e));
+	});
+
+	return defer.promise;
+};
+
 CoreCommandRouter.prototype.unInstallPlugin = function (data) {
 	var self = this;
 	var defer=libQ.defer();
@@ -764,6 +779,13 @@ CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionar
     var self=this;
     var methodDefer=libQ.defer();
     var defers=[];
+
+
+	try {
+		fs.statSync(dictionaryFile);
+	} catch(e) {
+		dictionaryFile = defaultDictionaryFile;
+	}
 
     defers.push(libQ.nfcall(fs.readJson,dictionaryFile));
     defers.push(libQ.nfcall(fs.readJson,defaultDictionaryFile));

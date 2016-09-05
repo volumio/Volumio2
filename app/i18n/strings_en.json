@@ -24,7 +24,7 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"has been enabled, restart the system for changes to take effect",
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
     "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
-	  "DOP":"DSD over PCM (DoP)"
+	"DOP":"DSD over PCM (DoP)"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -75,14 +75,16 @@
     "ILLEGAL_CHARACTER_/":"Remove forbidden character /",
     "FAVOURITES":"Favourites",
     "PLAYLISTS":"Playlists",
-    "MUSIC_LIBRARY":"Music Library"
+    "MUSIC_LIBRARY":"Music Library",
+	"CANCEL":"Cancel"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
     "UI_CONFIG_LANGUAGE":"Language",
     "UI_CONFIG_SELECT_LANGUAGE":"Select Language",
     "NEW_LANGUAGE_SET":"New language set",
-    "NEW_BACKGROUND_APPLIED":"New Background applied"
+    "NEW_BACKGROUND_APPLIED":"New Background applied",
+    "BACKGROUND_DELETED":"Background deleted"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",
@@ -136,5 +138,13 @@
     "BY_GENRE_RADIOS":"By genre",
     "BY_COUNTRY_RADIOS":"By country",
     "WEBRADIO":"Web Radio"
+  },
+  "PLUGINS":{
+	"CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
+	"CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Are you sure you want to uninstall this Plugin",
+	"UNINSTALL":"Uninstall",
+	"UPDATING_PLUGIN":"Updating Plugin",
+	"DOWNLOADING_FROM":"Downloading Plugin from ",
+	"DOWNLOADING":"Downloading Plugin"
   }
 }
