@@ -140,11 +140,11 @@
     "WEBRADIO":"Web Radio"
   },
   "PLUGINS":{
-+	  "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
-+	  "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Etes vous sûr de vouloir désinstaller ce plugin",
-+	  "UNINSTALL":"Désinstaller",
-+	  "UPDATING_PLUGIN":"Mettre à jour le plugin",
-+	  "DOWNLOADING_FROM":"Télécharger le plugin depuis",
-+	  "DOWNLOADING":"Téléchargement du Plugin en cours"
+    "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
+    "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Etes vous sûr de vouloir désinstaller ce plugin",
+ 	  "UNINSTALL":"Désinstaller",
+	  "UPDATING_PLUGIN":"Mettre à jour le plugin",
+	  "DOWNLOADING_FROM":"Télécharger le plugin depuis",
+	  "DOWNLOADING":"Téléchargement du Plugin en cours"
   }
 }
