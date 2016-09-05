@@ -101,7 +101,10 @@ function CoreMusicLibrary (commandRouter) {
 	// The Browse Sources Array is the list showed on Browse Page
 	self.browseSources = [{name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
 		{name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
-		{name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'}
+		{name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
+        {name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
+        {name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
+        {name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
 		];
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
@@ -787,7 +790,10 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 	self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
 	self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
 	self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
-	self.browseSources[3].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+    self.browseSources[3].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
+    self.browseSources[4].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
+    self.browseSources[5].name = self.commandRouter.getI18nString('COMMON.GENRES');
+	self.browseSources[6].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
 
 }
 
