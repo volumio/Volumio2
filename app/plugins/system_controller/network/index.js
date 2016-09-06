@@ -298,9 +298,9 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
 ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 	var self = this;
-	var staticwlanfile = '/data/configuration/wlanstatic';
+	var staticfile = '/etc/dhcpcd.conf';
 
-	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcp/dhclient.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcpcd.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
 
@@ -309,38 +309,59 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 			try {
 				var ws = fs.createWriteStream('/etc/network/interfaces');
+				var staticconf = fs.createWriteStream(staticfile);
 
 				ws.cork();
+				staticconf.cork();
 				ws.write('auto wlan0\n');
 				ws.write('auto lo\n');
 				ws.write('iface lo inet loopback\n');
 				ws.write('\n');
 
 
+				staticconf.write('hostname\n');
+				staticconf.write('duid\n');
+				staticconf.write('option rapid_commit\n');
+				staticconf.write('option domain_name_servers, domain_name, domain_search, host_name\n');
+				staticconf.write('option classless_static_routes\n');
+				staticconf.write('option ntp_servers\n');
+				staticconf.write('require dhcp_server_identifier\n');
+				staticconf.write('nohook lookup-hostname\n');
+				staticconf.write('\n');
+
 				ws.write('allow-hotplug eth0\n');
 				if (config.get('dhcp') == true || config.get('dhcp') == 'true') {
 					ws.write('iface eth0 inet dhcp\n');
 				}
 				else {
-					ws.write('iface eth0 inet static\n');
-
-					ws.write('address ' + config.get('ethip') + '\n');
-					ws.write('netmask ' + config.get('ethnetmask') + '\n');
-					ws.write('gateway ' + config.get('ethgateway') + '\n');
+					ws.write('iface eth0 inet manual\n');
+					staticconf.write('interface eth0\n');
+					staticconf.write('static ip_address=' + config.get('ethip') + '/24\n');
+					staticconf.write('static routers=' + config.get('ethgateway') + '\n');
+					staticconf.write('static routers=' + config.get('ethgateway') + ' 8.8.8.8\n');
+					staticconf.write('\n');
 				}
 
 				ws.write('\n');
 
 				ws.write('allow-hotplug wlan0\n');
+				ws.write('iface wlan0 inet manual\n');
 
 				if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
-					ws.write('iface wlan0 inet manual\n');
+				} else {
+					staticconf.write('interface wlan0\n');
+					staticconf.write('static ip_address=' + config.get('wirelessip') + '/24\n');
+					staticconf.write('static routers=' + config.get('wirelessgateway') + '\n');
+					staticconf.write('static routers=' + config.get('wirelessgateway') + ' 8.8.8.8\n');
+					staticconf.write('\n');
+				}
 
-
+				ws.end();
+				staticconf.end();
 					//console.log("Restarting networking layer");
 					self.commandRouter.wirelessRestart();
 					self.commandRouter.networkRestart();
-				}
+
 
 			} catch (err) {
 				self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_ERROR'), self.getI18NString('NETWORK.NETWORK_RESTART_ERROR') + err);
