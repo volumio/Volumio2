@@ -2240,12 +2240,11 @@ ControllerMpd.prototype.listAlbums = function () {
     };
 
     var cmd = libMpd.cmd;
-    self.clientMpd.sendCommand(cmd("list", ["album"]), function (err, msg) {
+    self.clientMpd.sendCommand(cmd("list", ["album","group","artist"]), function (err, msg) {
         if(err)
             defer.reject(new Error('Cannot list albums'));
         else
         {
-            console.log(msg);
             var splitted=msg.split('\n');
 
             for(var i in splitted)
@@ -2254,13 +2253,12 @@ ControllerMpd.prototype.listAlbums = function () {
 
                 if(splitted[i].startsWith('Artist:'))
                 {
-
+                    artist=splitted[i].substring(8);
                 }
-                else artist='';
-
-                if(splitted[i].startsWith('Album:'))
+                else if(splitted[i].startsWith('Album:'))
                 {
                     var albumName=splitted[i].substring(7);
+
                     var album = {type: 'folder', title: albumName, albumart: self.getAlbumArt({artist:artist,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
                     response.navigation.list.push(album);
