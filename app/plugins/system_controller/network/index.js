@@ -338,7 +338,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 					staticconf.write('interface eth0\n');
 					staticconf.write('static ip_address=' + config.get('ethip') + '/24\n');
 					staticconf.write('static routers=' + config.get('ethgateway') + '\n');
-					staticconf.write('static routers=' + config.get('ethgateway') + ' 8.8.8.8\n');
+					staticconf.write('static domain_name_servers=' + config.get('ethgateway') + ' 8.8.8.8\n');
 					staticconf.write('\n');
 				}
 
@@ -352,7 +352,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 					staticconf.write('interface wlan0\n');
 					staticconf.write('static ip_address=' + config.get('wirelessip') + '/24\n');
 					staticconf.write('static routers=' + config.get('wirelessgateway') + '\n');
-					staticconf.write('static routers=' + config.get('wirelessgateway') + ' 8.8.8.8\n');
+					staticconf.write('static domain_name_servers=' + config.get('wirelessgateway') + ' 8.8.8.8\n');
 					staticconf.write('\n');
 				}
 
