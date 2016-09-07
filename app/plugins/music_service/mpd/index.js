@@ -1190,12 +1190,15 @@ ControllerMpd.prototype.searchFor = function (lines, startFrom, beginning) {
 	while (i < count) {
 		var line = lines[i];
 
-		if (line.indexOf(beginning) === 0)
-			return line.slice(beginning.length).trimLeft();
-		else if (line.indexOf('file:') === 0)
-			return '';
-		else if (line.indexOf('directory:') === 0)
-			return '';
+        if(line!==undefined)
+        {
+            if (line.indexOf(beginning) === 0)
+                return line.slice(beginning.length).trimLeft();
+            else if (line.indexOf('file:') === 0)
+                return '';
+            else if (line.indexOf('directory:') === 0)
+                return '';
+        }
 
 		i++;
 	}
@@ -2245,23 +2248,23 @@ ControllerMpd.prototype.listAlbums = function () {
             defer.reject(new Error('Cannot list albums'));
         else
         {
-            var splitted=msg.split('\n');
+            var lines=msg.split('\n');
 
-            for(var i in splitted)
+            for (var i = 0; i < lines.length; i++)
             {
-                var artist;
+                var line=lines[i];
+                if (line.indexOf('Album:') === 0) {
+                    var albumName = line.slice(6).trim();
 
-                if(splitted[i].startsWith('Artist:'))
-                {
-                    artist=splitted[i].substring(8);
-                }
-                else if(splitted[i].startsWith('Album:'))
-                {
-                    var albumName=splitted[i].substring(7);
+                    if(albumName!==undefined && albumName!=='')
+                    {
+                        var artistName=lines[i+1].slice(7).trim();
+                        console.log(artistName);
 
-                    var album = {type: 'folder', title: albumName, albumart: self.getAlbumArt({artist:artist,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                        var album = {type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
-                    response.navigation.list.push(album);
+                        response.navigation.list.push(album);
+                    }
                 }
             }
             defer.resolve(response);
