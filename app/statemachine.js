@@ -430,7 +430,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                 trackBlock.albumart=stateService.albumart;
             }
 
-
             this.pushState().fail(this.pushError.bind(this));
         }
 		else if (this.currentStatus === 'stop') {
