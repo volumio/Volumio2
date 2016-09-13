@@ -929,6 +929,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						list.push({
 							type: 'folder',
 							title: name,
+                            service:'mpd',
 							icon: 'fa fa-folder-open-o',
 							uri: s0 + path
 						});
