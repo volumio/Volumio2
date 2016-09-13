@@ -1,0 +1,10 @@
+{
+  "username":{
+    "type": "string",
+    "value":""
+  },
+  "password":{
+    "type":"string",
+    "value":""
+  }
+}
