@@ -19,6 +19,7 @@ function AirPlayInterface(context) {
 AirPlayInterface.prototype.onVolumioStart = function () {
 	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+	this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
 	this.startShairportSync();
 
     return libQ.resolve();
@@ -66,10 +67,10 @@ AirPlayInterface.prototype.startShairportSync = function () {
 	// Loading Configured output device
 	var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
 	var hwdev = 'plughw:' + outdev + ',0';
-	console.log(hwdev);
 
-	var systemController = this.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-	var name = systemController.getConf('playerName');
+	var name = this.commandRouter.sharedVars.get('system.name');
+
+
 	var fs = require('fs');
 
 	var self = this;
@@ -102,5 +103,12 @@ AirPlayInterface.prototype.outputDeviceCallback = function () {
 	var self = this;
 
 	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting Shairport Sync');
+	self.startShairportSync()
+}
+
+AirPlayInterface.prototype.playerNameCallback = function () {
+	var self = this;
+
+	self.context.coreCommand.pushConsoleMessage('System name has changed, restarting Shairport Sync');
 	self.startShairportSync()
 }
