@@ -11,18 +11,23 @@ function myVolumio(context)
     self.context = context;
     self.commandRouter = self.context.coreCommand;
 }
-myVolumio.prototype.onVolumioStart = function () {
+myVolumio.prototype.onVolumioStart = function ()
+{
     var self = this;
-    var configFile=this.commandRouter.pluginManager.getConfigurationFile(this.context,
+    var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,
         'config.json');
-    this.config = new (require('v-conf'))();
-    this.config.loadFile(configFile);
+    self.config = new (require('v-conf'))();
+    self.config.loadFile(configFile);
 };
+
 
 myVolumio.prototype.onStart = function ()
 {
     var self = this;
     var defer = libQ.defer();
+    var paths = self.commandRouter.getPluginsConf();
+
+    console.log(paths);
 
     return defer.promise;
 
@@ -71,6 +76,13 @@ myVolumio.prototype.getUIConfig = function ()
 
     return defer.promise;
 };
+
+//manage parameters from config.json file of every plugin
+myVolumio.prototype.retrievePlugConfig = function () {
+    var self = this;
+
+    return CoreCommandRouter.getPluginsConf();
+}
 
 myVolumio.prototype.login = function ()
 {

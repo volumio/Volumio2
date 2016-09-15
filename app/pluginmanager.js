@@ -313,6 +313,26 @@ PluginManager.prototype.getPluginNames = function (category) {
 	return names;
 };
 
+PluginManager.prototype.getPluginsMatrix = function () {
+	var self = this;
+
+	var plugins = {"categories": []};
+	var catNames = self.getPluginCategories();
+	for (var i = 0; i < catNames.length; i++){
+		var plugNames = self.getPluginNames(catNames[i]);
+		var catPlugin = {"plugin": []};
+		for (var j = 0; j < plugNames.length; j++){
+			var name = plugNames[j];
+			var enabled = self.isEnabled(catNames[i], plugNames[j]);
+			catPlugin.plugin.push((name, enabled));
+			console.log(catPlugin);
+		}
+		plugins.categories.push((catNames[i], catPlugin));
+		console.log(plugins);
+	}
+	return plugins;
+}
+
 PluginManager.prototype.onVolumioStart = function () {
 	var self = this;
 

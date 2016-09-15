@@ -397,6 +397,13 @@ CoreCommandRouter.prototype.playPlaylist = function (data) {
 
 // Utility functions ---------------------------------------------------------------------------------------------
 
+CoreCommandRouter.prototype.getPluginsConf = function () {
+	var self = this;
+	var paths = self.pluginManager.getPluginsMatrix();
+
+	return paths;
+}
+
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {
 	this.pushConsoleMessage('CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method);
 
