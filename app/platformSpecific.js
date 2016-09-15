@@ -31,7 +31,7 @@ PlatformSpecific.prototype.reboot = function () {
 
 PlatformSpecific.prototype.networkRestart = function () {
 	var self = this;
-	exec("sudo /bin/systemctl restart networking.service", function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /bin/ip addr flush dev eth0 && /usr/bin/sudo /sbin/ifconfig eth0 down && /usr/bin/sudo /sbin/ifconfig eth0 up", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_TITLE'),
                 self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_ERROR')+error);
