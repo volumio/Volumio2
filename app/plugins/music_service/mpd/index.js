@@ -1190,12 +1190,15 @@ ControllerMpd.prototype.searchFor = function (lines, startFrom, beginning) {
 	while (i < count) {
 		var line = lines[i];
 
-		if (line.indexOf(beginning) === 0)
-			return line.slice(beginning.length).trimLeft();
-		else if (line.indexOf('file:') === 0)
-			return '';
-		else if (line.indexOf('directory:') === 0)
-			return '';
+        if(line!==undefined)
+        {
+            if (line.indexOf(beginning) === 0)
+                return line.slice(beginning.length).trimLeft();
+            else if (line.indexOf('file:') === 0)
+                return '';
+            else if (line.indexOf('directory:') === 0)
+                return '';
+        }
 
 		i++;
 	}
@@ -2240,21 +2243,28 @@ ControllerMpd.prototype.listAlbums = function () {
     };
 
     var cmd = libMpd.cmd;
-    self.clientMpd.sendCommand(cmd("list", ["album"]), function (err, msg) {
+    self.clientMpd.sendCommand(cmd("list", ["album","group","artist"]), function (err, msg) {
         if(err)
             defer.reject(new Error('Cannot list albums'));
         else
         {
-            var splitted=msg.split('\n');
+            var lines=msg.split('\n');
 
-            for(var i in splitted)
+            for (var i = 0; i < lines.length; i++)
             {
-                if(splitted[i].startsWith('Album:'))
-                {
-                    var albumName=splitted[i].substring(7);
-                    var album = {type: 'folder', title: albumName, albumart: self.getAlbumArt(undefined,undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                var line=lines[i];
+                if (line.indexOf('Album:') === 0) {
+                    var albumName = line.slice(6).trim();
 
-                    response.navigation.list.push(album);
+                    if(albumName!==undefined && albumName!=='')
+                    {
+                        var artistName=lines[i+1].slice(7).trim();
+                        console.log(artistName);
+
+                        var album = {type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+
+                        response.navigation.list.push(album);
+                    }
                 }
             }
             defer.resolve(response);
@@ -2306,7 +2316,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
                     var title = self.searchFor(lines, i + 1, 'Title:');
-                    var albumart=self.getAlbumArt({artist: artist, album: album,icon:'fa-dot-circle'}, self.getParentFolder('/mnt/'+path));
+                    var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
                     if (title) {
@@ -2446,11 +2456,11 @@ ControllerMpd.prototype.listArtists = function () {
             {
                 if(splitted[i].startsWith('Artist:'))
                 {
-                    var albumName=splitted[i].substring(8);
-                    var albumart=self.getAlbumArt({},undefined,'fa-users');
-                    var album = {type: 'folder', title: albumName, albumart: albumart, uri: 'artists://' + albumName};
+                    var artist=splitted[i].substring(8);
+                    var albumart=self.getAlbumArt({artist:artist},undefined,'fa-users');
+                    var artist = {type: 'folder', title: artist, albumart: albumart, uri: 'artists://' + artist};
 
-                    response.navigation.list.push(album);
+                    response.navigation.list.push(artist);
                 }
             }
             defer.resolve(response);
@@ -2495,7 +2505,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
                             var title = self.searchFor(lines, i + 1, 'Title:');
-                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
+                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o');
 
                             if (title) {
                                 title = title;
@@ -2515,7 +2525,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
                             if(albums.indexOf(album)===-1)
                             {
                                 albums.push(album);
-                                albumarts.push(self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path)));
+                                albumarts.push(self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o'));
                             }
                         }
 
@@ -2710,7 +2720,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
                             var title = self.searchFor(lines, i + 1, 'Title:');
-                            var albumart = self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path));
+                            var albumart = self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags');
 
                             if (title) {
                                 title = title;
@@ -2737,7 +2747,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             if(artists.indexOf(artist)===-1)
                             {
                                 artists.push(artist);
-                                artistArt.push(self.getAlbumArt({artist: artist}, self.getParentFolder('/mnt/' + path)))
+                                artistArt.push(self.getAlbumArt({artist: artist}, self.getParentFolder('/mnt/' + path),'fa-users'))
                             }
 
                         }

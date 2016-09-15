@@ -25,10 +25,10 @@ var mountAlbumartFolder= '/data/albumart/folder';
 
 var setFolder = function (newFolder) {
 	//logger.info("Setting folder " + newFolder);
-	albumArtRootFolder = S(newFolder).ensureRight('/').s+'web';
+	albumArtRootFolder = S(newFolder).ensureRight('/').s+'web/';
     fs.ensureDirSync(albumArtRootFolder);
 
-    mountAlbumartFolder= S(newFolder).ensureRight('/').s+'folder';
+    mountAlbumartFolder= S(newFolder).ensureRight('/').s+'folder/';
     fs.ensureDirSync(mountAlbumartFolder);
 };
 
