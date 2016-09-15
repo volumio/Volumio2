@@ -144,7 +144,7 @@
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Är du säker på att du vill avinstallera detta plugin",
     "UNINSTALL":"Avinstallera",
     "UPDATING_PLUGIN":"Uppdaterar plugin",
-    "DOWNLOADING_FROM":"Laddar ner plugin från",
+    "DOWNLOADING_FROM":"Laddar ner plugin från ",
     "DOWNLOADING":"Laddar ner plugin"
   }
 }
