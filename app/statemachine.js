@@ -448,6 +448,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentChannels = null;
 			this.currentStatus = 'play';
 
+
            /* if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
 
@@ -751,6 +752,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 
         this.stopPlaybackTimer();
         this.updateTrackBlock();
+		this.pushState().fail(this.pushError.bind(this));
         return this.serviceStop();
 
     } else if (this.currentStatus === 'pause') {
@@ -760,6 +762,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
         this.updateTrackBlock();
 
         this.stopPlaybackTimer();
+		this.pushState().fail(this.pushError.bind(this));
         return this.serviceStop();
     }
     else return libQ.resolve();
