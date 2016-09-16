@@ -1729,22 +1729,30 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         if(uri.endsWith('.cue'))
         {
             try {
-                var cuesheet = parser.parse('/mnt/' + uri);
+                var uriPath='/mnt/'+self.sanitizeUri(uri);
+
+
+                var cuesheet = parser.parse(uriPath);
 
                 var tracks = cuesheet.files[0].tracks;
+                var list=[];
                 for (var j in tracks) {
 
                     list.push({
                         service: 'mpd',
-                        title: tracks[j].title,
+                        name: tracks[j].title,
                         artist: tracks[j].performer,
-                        album: path.substring(path.lastIndexOf("/") + 1),
+                        album: uriPath.substring(uriPath.lastIndexOf("/") + 1),
                         number: tracks[j].number - 1,
-                        uri: s0 + path
+                        uri: 'cue://'+uri+'@'+j,
+                        albumart:'/albumart'
                     });
                 }
+
+                defer.resolve(list);
             } catch (err) {
-                self.logger.info('Cue Parser - Cannot parse ' + path);
+                self.logger.info(err);
+                self.logger.info('Cue Parser - Cannot parse ' + uriPath);
             }
 
 
