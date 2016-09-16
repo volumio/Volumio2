@@ -586,7 +586,7 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 		} else {
 			console.log('Asound.conf file written');
 			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
-			this.config.set('outputdevice', 'softvolume')
+			self.config.set('outputdevice', 'softvolume')
 			self.setConfigParam({key: 'mixer', value: "SoftMaster"});
 			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
 			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");

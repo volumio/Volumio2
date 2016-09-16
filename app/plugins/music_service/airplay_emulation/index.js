@@ -68,7 +68,7 @@ AirPlayInterface.prototype.startShairportSync = function () {
 	if (outdev != 'softvolume' ) {
 		outdev = 'hw:'+outdev+',0';
 	}
-	var mixer = this.commandRouter.sharedVars.get(alsa.outputdevicemixer');
+	var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
 
 	var systemController = this.commandRouter.pluginManager.getPlugin('system_controller', 'system');
 	var name = systemController.getConf('playerName');
