@@ -278,21 +278,21 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                     this.prefetchDone=true;
                     plugin.prefetch(nextTrackBlock);
                 }
-
             }
         }
 
         this.logger.info("REMAINING TIME: "+remainingTime+" ASKED PREFETCH: "+this.askedForPrefetch+" SIMULATE: "+this.simulateStopStartDone);
-        if(remainingTime<=0 && this.askedForPrefetch==true && this.simulateStopStartDone==false)
+        if(remainingTime<=500 && this.askedForPrefetch==true && this.simulateStopStartDone==false)
         {
 
             this.logger.info("###################################MAGICAL SECTION##############################");
             this.simulateStopStartDone=true;
             this.currentSeek=0;
             this.currentPosition++;
+            this.askedForPrefetch=false;
             this.pushState.bind(this);
 
-            self.startPlaybackTimer();
+            this.startPlaybackTimer();
 
         } else setTimeout(this.increasePlaybackTimer.bind(this),250);
     }
@@ -433,52 +433,48 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if (this.currentStatus === 'play') {
             this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received an update from plaugin. extracting info from payload');
 
-            if(stateService.seek!==undefined)
-            {
-                this.currentSeek=stateService.seek;
-            }
+            //checking if prefetch has been done. In that case the update is sent elsewhere
+            if(this.askedForPrefetch==false) {
 
-            if(stateService.duration!==undefined)
-            {
-                trackBlock.duration=stateService.duration;
-            }
 
-            if(stateService.samplerate!==undefined && trackBlock.samplerate===undefined)
-            {
-                trackBlock.samplerate=stateService.samplerate;
-            }
+                if (stateService.seek !== undefined) {
+                    this.currentSeek = stateService.seek;
+                }
 
-            if(stateService.bitdepth!==undefined && trackBlock.bitdepth===undefined)
-            {
-                trackBlock.bitdepth=stateService.bitdepth;
-            }
+                if (stateService.duration !== undefined) {
+                    trackBlock.duration = stateService.duration;
+                }
 
-            if(stateService.channels!==undefined && trackBlock.channels===undefined)
-            {
-                trackBlock.channels=stateService.channels;
-            }
+                if (stateService.samplerate !== undefined && trackBlock.samplerate === undefined) {
+                    trackBlock.samplerate = stateService.samplerate;
+                }
 
-            if(stateService.title!==undefined && trackBlock.name===undefined)
-            {
-                trackBlock.name=stateService.title;
-            }
+                if (stateService.bitdepth !== undefined && trackBlock.bitdepth === undefined) {
+                    trackBlock.bitdepth = stateService.bitdepth;
+                }
 
-            if(stateService.artist!==undefined && trackBlock.artist===undefined)
-            {
-                trackBlock.artist=stateService.artist;
-            }
+                if (stateService.channels !== undefined && trackBlock.channels === undefined) {
+                    trackBlock.channels = stateService.channels;
+                }
 
-            if(stateService.album!==undefined && trackBlock.album===undefined)
-            {
-                trackBlock.album=stateService.album;
-            }
+                if (stateService.title !== undefined && trackBlock.name === undefined) {
+                    trackBlock.name = stateService.title;
+                }
 
-            if(stateService.albumart!==undefined && trackBlock.albumart===undefined)
-            {
-                trackBlock.albumart=stateService.albumart;
-            }
+                if (stateService.artist !== undefined && trackBlock.artist === undefined) {
+                    trackBlock.artist = stateService.artist;
+                }
 
-            this.pushState().fail(this.pushError.bind(this));
+                if (stateService.album !== undefined && trackBlock.album === undefined) {
+                    trackBlock.album = stateService.album;
+                }
+
+                if (stateService.albumart !== undefined && trackBlock.albumart === undefined) {
+                    trackBlock.albumart = stateService.albumart;
+                }
+
+                this.pushState().fail(this.pushError.bind(this));
+            }
         }
 		else if (this.currentStatus === 'stop') {
 
@@ -611,6 +607,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     this.prefetchDone=false;
                     this.askedForPrefetch=false;
                     this.simulateStopStartDone=false;
+                    this.pushState();
                     this.logger.info("Prefetch done, skipping queuing");
                 }
             }
