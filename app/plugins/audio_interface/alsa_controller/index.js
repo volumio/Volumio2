@@ -160,7 +160,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
 
 
-			if (typeof mixers != "undefined" && mixers != null && mixers.length > 0) {
+			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
 				self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
 				if (activemixer){
 					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
@@ -558,6 +558,13 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 	var self = this;
 
 	self.logger.info('Enable softmixer device for audio device number '+data);
+	var outnum = data;
+	if (this.config.has('softvolumenumber') == false) {
+		self.config.addConfigValue('softvolumenumber', 'string', data);
+		self.updateVolumeSettings();
+	} else {
+		self.setConfigParam({key: 'softvolumenumber', value: data});
+	}
 
 	var asoundcontent = '';
 	asoundcontent += 'pcm.softvolume {\n';
@@ -586,11 +593,13 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 		} else {
 			console.log('Asound.conf file written');
 			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
-			self.config.set('outputdevice', 'softvolume')
 			self.setConfigParam({key: 'mixer', value: "SoftMaster"});
+			self.setConfigParam({key: 'outputdevice', value: "softvolume"});
 			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
 			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
-			var apply = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' })
+
+			var apply = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
+			self.updateVolumeSettings();
 		}
 	});
 }
@@ -604,6 +613,9 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var valdevice = self.config.get('outputdevice');
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
+	if (valmixer === 'SoftMaster') {
+		valdevice = self.config.get('softvolumenumber');
+	}
 	var valvolumestart = self.config.get('volumestart');
 	var valvolumesteps = self.config.get('volumesteps');
 
