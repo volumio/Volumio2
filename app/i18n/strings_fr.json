@@ -24,7 +24,8 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"a été activé, redémarrage du système pour la prise en compte",
     "I2S_DAC_DEACTIVATED":"DAC I2S DAC Désactivé",
     "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte",
-    "DOP":"DSD sur PCM (DoP)"
+    "DOP":"DSD sur PCM (DoP)",
+    "SOFTVOL":"Contrôle logiciel du Volume"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
