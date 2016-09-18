@@ -368,7 +368,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		{
 			var address=addresses[j];
 			if (isSelf){
-				console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAA'+address+albumart);
+				
 				ifconfig.status('wlan0', function(err, status) {
 					if (status != undefined) {
 						if (status.ipv4_address != undefined) {

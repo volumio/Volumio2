@@ -430,6 +430,36 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 					})
 				}
 			});
+		} else if (service === 'spop') {
+			var uriSplitted = uri.split(':');
+			var spotifyItem = self.commandRouter.executeOnPlugin('music_service', 'spop', 'getTrack', uriSplitted[2]);
+			spotifyItem.then(function (info) {
+				var entries = [];
+				var track = info[0];
+				entries.push({
+					service: service,
+					uri: uri,
+					title: track.name,
+					artist: track.artist,
+					album: track.album,
+					albumart: track.albumart
+				});
+				fs.readJson(filePath, function (err, data) {
+					if (err)
+						defer.resolve({success: false});
+					else {
+						var output = data.concat(entries);
+						fs.writeJson(filePath, output, function (err) {
+							if (err)
+								defer.resolve({success: false});
+							else
+								var favourites = self.commandRouter.checkFavourites({uri: path});
+							defer.resolve(favourites);
+						})
+					}
+				});
+
+			});
 		}
 	});
 

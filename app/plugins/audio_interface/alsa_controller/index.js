@@ -160,9 +160,16 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
 
 
-			if (typeof mixers != "undefined" && mixers != null && mixers.length > 0) {
+			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
 				self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
 				if (activemixer){
+					if(activemixer === 'SoftMaster') {
+						activemixer = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL');
+						self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+							value: "SoftMaster",
+							label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL')
+						});
+					}
 					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
 						value: activemixer,
 						label: activemixer
@@ -181,14 +188,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
 					});
 				}
 
+
 			} else {
-				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-					value: "no",
-					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
-				});
 				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-					value: "no",
-					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
+					value: "SoftMaster",
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL')
 				});
 
 			}
@@ -238,7 +242,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 
@@ -282,7 +286,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			this.config.set('outputdevicename', data.i2sid.label);
 			OutputDeviceNumber = I2SNumber;
 
-			 
+
 		}
 
 	} else {
@@ -519,23 +523,29 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 				var audiodevice = this.config.get('outputdevice')
 			}
 
-			var array = execSync('amixer -c 5 scontents', { encoding: 'utf8' })
+			var array = execSync('amixer -c '+audiodevice+' scontents', { encoding: 'utf8' })
 			var genmixers = array.toString().split("Simple mixer control");
 
-			for (var i in genmixers) {
-				if (genmixers[i].indexOf("Playback") >= 0) {
-					var line = genmixers[i].split('\n');
-					var line2 = line[0].split(',')
-					var mixerspace = line2[0].replace(/'/g,"");
-					var mixer = mixerspace.replace(" ","");
-					mixers.push(mixer);
+
+			if (genmixers) {
+				for (var i in genmixers) {
+					if (genmixers[i].indexOf("Playback") >= 0) {
+						var line = genmixers[i].split('\n');
+						var line2 = line[0].split(',')
+						var mixerspace = line2[0].replace(/'/g, "");
+						var mixer = mixerspace.replace(" ", "");
+						mixers.push(mixer);
+					}
+				}
+				if (mixers[0]) {
+					defaultmixer = mixers[0].toString()
+					self.logger.info('Setting mixer ' + defaultmixer + ' for card ' + currentcardname);
+
+				} else {
+					self.logger.info('Device ' + audiodevice + ' does not have any Mixer Control Available, setting a softvol device');
+					self.enableSoftMixer(audiodevice);
 				}
 			}
-			if (mixers[0]){
-				defaultmixer = mixers[0].toString()
-				self.logger.info('Setting mixer '+ defaultmixer + ' for card ' + currentcardname);
-			}
-
 		} catch (e) {}
 	}
 	if (this.config.has('mixer') == false) {
@@ -548,6 +558,56 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 }
 
+ControllerAlsa.prototype.enableSoftMixer  = function (data) {
+	var self = this;
+
+	self.logger.info('Enable softmixer device for audio device number '+data);
+	var outnum = data;
+	if (this.config.has('softvolumenumber') == false) {
+		self.config.addConfigValue('softvolumenumber', 'string', data);
+		self.updateVolumeSettings();
+	} else {
+		self.setConfigParam({key: 'softvolumenumber', value: data});
+	}
+
+	var asoundcontent = '';
+	asoundcontent += 'pcm.softvolume {\n';
+	asoundcontent += '    type             plug\n';
+	asoundcontent += '    slave.pcm       "softvol"\n';
+	asoundcontent += '}\n';
+	asoundcontent += '\n';
+	asoundcontent += 'pcm.softvol {\n';
+	asoundcontent += '    type            softvol\n';
+	asoundcontent += '    slave {\n';
+	asoundcontent += '        pcm         "plughw:'+data+',0"\n';
+	asoundcontent += '    }\n';
+	asoundcontent += '    control {\n';
+	asoundcontent += '        name        "SoftMaster"\n';
+	asoundcontent += '        card        '+data+'\n';
+	asoundcontent += '        device      0\n';
+	asoundcontent += '    }\n';
+	asoundcontent += 'max_dB 0.0\n';
+	asoundcontent += 'min_dB -50.0\n';
+	asoundcontent += 'resolution 100\n';
+	asoundcontent += '}\n';
+
+	fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
+		if (err) {
+			console.log('Cannot write /etc/asound.conf: '+err)
+		} else {
+			console.log('Asound.conf file written');
+			var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid:1000, gid: 1000, encoding: 'utf8' });
+			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
+			self.setConfigParam({key: 'mixer', value: "SoftMaster"});
+			self.setConfigParam({key: 'outputdevice', value: "softvolume"});
+			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
+			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
+			var apply = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
+			self.updateVolumeSettings();
+		}
+	});
+}
+
 
 ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var self = this;
@@ -557,6 +617,9 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var valdevice = self.config.get('outputdevice');
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
+	if (valmixer === 'SoftMaster') {
+		valdevice = self.config.get('softvolumenumber');
+	}
 	var valvolumestart = self.config.get('volumestart');
 	var valvolumesteps = self.config.get('volumesteps');
 
