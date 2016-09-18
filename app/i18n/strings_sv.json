@@ -24,7 +24,7 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"aktiverad, starta om systemet för att ändringarna ska få effekt",
     "I2S_DAC_DEACTIVATED":"I2S DAC inaktiverad",
     "I2S_DAC_DEACTIVATED_MESSAGE":"inaktiverad, starta om systemet för att ändringarna ska få effekt",
-		"DOP":"DSD över PCM (DoP)"
+    "DOP":"DSD över PCM (DoP)"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Nätverksinställningar",
@@ -42,11 +42,11 @@
     "WIRELESS_RESTART_SUCCESS": "Det trådlösa nätverket startades om korrekt"
   },
   "PLAYLIST":{
-  "ADDED_TITLE":"Lade till",
-  "ADDED_TO_PLAYLIST":" till spellistan ",
-  "ADDED_TO_FAVOURITES":" till favoriter ",
-  "REMOVE_ERROR":"Kan inte ta bort",
-  "REMOVE_SUCCESS":"Borttagen"
+    "ADDED_TITLE":"Lade till",
+    "ADDED_TO_PLAYLIST":" till spellistan ",
+    "ADDED_TO_FAVOURITES":" till favoriter ",
+    "REMOVE_ERROR":"Kan inte ta bort",
+    "REMOVE_SUCCESS":"Borttagen"
   },
   "COMMON":{
     "SAVE":"Spara",
@@ -75,14 +75,15 @@
     "ILLEGAL_CHARACTER_/":"Ta bort det otillåtna tecknet /",
     "FAVOURITES":"Favoriter",
     "PLAYLISTS":"Spellistor",
-    "MUSIC_LIBRARY":"Musikbibliotek"
+    "MUSIC_LIBRARY":"Musikbibliotek",
+    "CANCEL":"Avbryt"
   },
   "APPEARANCE":{
     "APPEARANCE":"Utseende",
-  	"UI_CONFIG_LANGUAGE":"Språk",
-  	"UI_CONFIG_SELECT_LANGUAGE":"Välj språk",
-  	"NEW_LANGUAGE_SET":"Nytt språk valt",
-  	"NEW_BACKGROUND_APPLIED":"Ny bakgrund tillämpad",
+    "UI_CONFIG_LANGUAGE":"Språk",
+    "UI_CONFIG_SELECT_LANGUAGE":"Välj språk",
+    "NEW_LANGUAGE_SET":"Nytt språk valt",
+    "NEW_BACKGROUND_APPLIED":"Ny bakgrund tillämpad",
     "BACKGROUND_DELETED":"Bakgrund borttagen"
   },
   "MAIN_MENU":{
@@ -137,5 +138,13 @@
     "BY_GENRE_RADIOS":"Efter genre",
     "BY_COUNTRY_RADIOS":"Per land",
     "WEBRADIO":"Webbradio"
+  },
+  "PLUGINS":{
+    "CONFIRM_PLUGIN_UNINSTALL":"Bekrädfta avinstallation av plugin",
+    "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Är du säker på att du vill avinstallera detta plugin",
+    "UNINSTALL":"Avinstallera",
+    "UPDATING_PLUGIN":"Uppdaterar plugin",
+    "DOWNLOADING_FROM":"Laddar ner plugin från ",
+    "DOWNLOADING":"Laddar ner plugin"
   }
 }

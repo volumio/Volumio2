@@ -128,12 +128,13 @@ AlarmClock.prototype.applyConf = function(conf) {
 		var schedule = require('node-schedule');
 		var rule = new schedule.RecurrenceRule();
 		rule.minute = d.getMinutes();
-		rule.hours = d.getHours();
+		rule.hour = d.getHours();
+        
 		var func = self.fireAlarm.bind(self);
 		var j = schedule.scheduleJob(rule, function(){
 		  func(item);
 		});
-		self.logger.info("Alarm: Scheduling " + j.name + " at " +rule.hours + ":" + rule.minute) ;
+		self.logger.info("Alarm: Scheduling " + j.name + " at " +rule.hour + ":" + rule.minute) ;
 		self.jobs.push(j);
 	}
 }

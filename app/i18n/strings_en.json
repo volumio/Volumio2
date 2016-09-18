@@ -24,8 +24,8 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"has been enabled, restart the system for changes to take effect",
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
     "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
-	"DOP":"DSD over PCM (DoP)",
-	"SOFTVOL":"Software Volume Control"
+    "DOP":"DSD over PCM (DoP)",
+    "SOFTVOL":"Software Volume Control"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -77,10 +77,14 @@
     "FAVOURITES":"Favourites",
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Music Library",
+<<<<<<< HEAD
     "ARTISTS":"Artists",
     "ALBUMS":"Albums",
     "GENRES":"Genres",
 	"CANCEL":"Cancel"
+=======
+    "CANCEL":"Cancel"
+>>>>>>> master
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -144,11 +148,11 @@
     "WEBRADIO":"Web Radio"
   },
   "PLUGINS":{
-	"CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
-	"CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Are you sure you want to uninstall this Plugin",
-	"UNINSTALL":"Uninstall",
-	"UPDATING_PLUGIN":"Updating Plugin",
-	"DOWNLOADING_FROM":"Downloading Plugin from ",
-	"DOWNLOADING":"Downloading Plugin"
+    "CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
+    "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Are you sure you want to uninstall this Plugin",
+    "UNINSTALL":"Uninstall",
+    "UPDATING_PLUGIN":"Updating Plugin",
+    "DOWNLOADING_FROM":"Downloading Plugin from ",
+    "DOWNLOADING":"Downloading Plugin"
   }
 }
