@@ -77,14 +77,10 @@
     "FAVOURITES":"Favourites",
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Music Library",
-<<<<<<< HEAD
     "ARTISTS":"Artists",
     "ALBUMS":"Albums",
     "GENRES":"Genres",
-	"CANCEL":"Cancel"
-=======
     "CANCEL":"Cancel"
->>>>>>> master
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
