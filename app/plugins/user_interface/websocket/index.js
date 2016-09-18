@@ -180,7 +180,7 @@ function InterfaceWebUI(context) {
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
-						return self.commandRouter.pushToastMessage('success', self.getI18NString('COMMON.PLAY'), str);
+						return self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.PLAY'), str);
 					});
 			});
 

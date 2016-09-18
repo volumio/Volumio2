@@ -140,15 +140,61 @@ ControllerMpd.prototype.addPlay = function (fileName) {
 };
 
 ControllerMpd.prototype.addPlayCue = function (data) {
-	this.commandRouter.pushToastMessage('Success', '', data.uri + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
+	//this.commandRouter.pushToastMessage('Success', '', data.uri + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 
 	//Add playlists and cue with load command
-	this.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri)
+
+    console.log(data);
+    if(data.number!==undefined)
+    {
+        this.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri);
+
+        this.commandRouter.addQueueItems([{
+            uri:'cue://'+data.uri+'@'+data.number,
+            service:'mpd'
+        }]);
+
+        var index=this.commandRouter.stateMachine.playQueue.arrayQueue.length;
+        this.commandRouter.volumioPlay(index);
+    }
+
+
+
+    var items=[];
+
+    /*
+     var cuesheet = parser.parse('/mnt/' + path);
+
+     list.push({
+     service: 'mpd',
+     type: 'song',
+     title: name,
+     icon: 'fa fa-list-ol',
+     uri: s0 + path
+     });
+     var tracks = cuesheet.files[0].tracks;
+     for (var j in tracks) {
+
+     list.push({
+     service: 'mpd',
+     type: 'cuesong',
+     title: tracks[j].title,
+     artist: tracks[j].performer,
+     album: path.substring(path.lastIndexOf("/") + 1),
+     number: tracks[j].number - 1,
+     icon: 'fa fa-music',
+     uri: s0 + path
+     });
+     }*/
+
+
+    /*this.commandRouter.addQueueItems();
+
 	return this.sendMpdCommandArray([
 		{command: 'clear', parameters: []},
 		{command: 'load', parameters: [data.uri]},
 		{command: 'play', parameters: [data.number]}
-	])
+	])*/
 };
 
 
@@ -1437,7 +1483,24 @@ ControllerMpd.prototype.explodeUri = function(uri) {
     var items = [];
     var cmd = libMpd.cmd;
 
-    if(uri.startsWith('search://'))
+    if(uri.startsWith('cue://'))
+    {
+        var splitted=uri.split('@');
+        var index=splitted[1];
+        var path='/mnt/' + splitted[0].substring(6);
+
+            var cuesheet = parser.parse(path);
+
+            var tracks = cuesheet.files[0].tracks;
+
+            defer.resolve({uri:uri,service:'mpd',name: tracks[index].title,
+                artist: tracks[index].performer,
+                album: path.substring(path.lastIndexOf("/") + 1),
+                number: tracks[index].number - 1,
+                albumart:'/albumart'
+            });
+    }
+    else if(uri.startsWith('search://'))
     {
         //exploding search
         var splitted=uri.split('/');
@@ -1666,45 +1729,80 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
     }
     else {
-        var uriPath='/mnt/'+self.sanitizeUri(uri);
-        self.commandRouter.logger.info('----------------------------'+uriPath);
-        var uris=self.scanFolder(uriPath);
-        var response=[];
+        if(uri.endsWith('.cue'))
+        {
+            try {
+                var uriPath='/mnt/'+self.sanitizeUri(uri);
 
-        libQ.all(uris)
-            .then(function(result)
-            {
-                for(var j in result)
-                {
 
-                    self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
+                var cuesheet = parser.parse(uriPath);
 
-                    if(result!==undefined && result[j].uri!==undefined)
-                    {
-                        response.push({
-                            uri: self.fromPathToUri(result[j].uri),
-                            service: 'mpd',
-                            name: result[j].name,
-                            artist: result[j].artist,
-                            album: result[j].album,
-                            type: 'track',
-                            tracknumber: result[j].tracknumber,
-                            albumart: result[j].albumart,
-                            duration: result[j].duration,
-                            samplerate: result[j].samplerate,
-                            bitdepth: result[j].bitdepth,
-                            trackType: result[j].trackType
-                        });
-                    }
+                var tracks = cuesheet.files[0].tracks;
+                var list=[];
+                for (var j in tracks) {
 
+                    list.push({
+                        service: 'mpd',
+                        name: tracks[j].title,
+                        artist: tracks[j].performer,
+                        album: uriPath.substring(uriPath.lastIndexOf("/") + 1),
+                        number: tracks[j].number - 1,
+                        uri: 'cue://'+uri+'@'+j,
+                        albumart:'/albumart'
+                    });
                 }
 
-                defer.resolve(response);
-            }).fail(function(err)
+                defer.resolve(list);
+            } catch (err) {
+                self.logger.info(err);
+                self.logger.info('Cue Parser - Cannot parse ' + uriPath);
+            }
+
+
+        }
+        else
         {
-            self.commandRouter.logger.info("explodeURI: ERROR "+err);
-            defer.resolve([]);
-        });
+            var uriPath='/mnt/'+self.sanitizeUri(uri);
+            self.commandRouter.logger.info('----------------------------'+uriPath);
+            var uris=self.scanFolder(uriPath);
+            var response=[];
+
+            libQ.all(uris)
+                .then(function(result)
+                {
+                    for(var j in result)
+                    {
+
+                        self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
+
+                        if(result!==undefined && result[j].uri!==undefined)
+                        {
+                            response.push({
+                                uri: self.fromPathToUri(result[j].uri),
+                                service: 'mpd',
+                                name: result[j].name,
+                                artist: result[j].artist,
+                                album: result[j].album,
+                                type: 'track',
+                                tracknumber: result[j].tracknumber,
+                                albumart: result[j].albumart,
+                                duration: result[j].duration,
+                                samplerate: result[j].samplerate,
+                                bitdepth: result[j].bitdepth,
+                                trackType: result[j].trackType
+                            });
+                        }
+
+                    }
+
+                    defer.resolve(response);
+                }).fail(function(err)
+            {
+                self.commandRouter.logger.info("explodeURI: ERROR "+err);
+                defer.resolve([]);
+            });
+        }
+
     }
 
     return defer.promise;
@@ -1860,31 +1958,56 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
     var sections = track.uri.split('/');
     var prev = '';
 
-    var uri=self.sanitizeUri(track.uri);
+    if(track.uri.startsWith('cue://'))
+    {
+        var uri1=track.uri.substring(6);
+        var splitted=uri1.split('@');
 
-    /*if (sections.length > 2) {
-        uri ='"'+ sections.slice(2, sections.length).join('/')+'"';
-    }*/
+        var index=splitted[1];
+        var uri=self.sanitizeUri(splitted[0]);
 
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
+        self.logger.info(uri);
+        self.logger.info(index);
 
-    // Clear the queue, add the first track, and start playback
-    var defer = libQ.defer();
-    var cmd = libMpd.cmd;
+        return self.sendMpdCommand('stop',[])
+            .then(function()
+            {
+                return self.sendMpdCommand('clear',[]);
+            })
+            .then(function()
+            {
+                return self.sendMpdCommand('load "'+uri+'"',[]);
+            })
+            .then(function()
+            {
+                return self.sendMpdCommand('play',[index]);
+            });
+    }
+    else{
+        var uri=self.sanitizeUri(track.uri);
 
-    return self.sendMpdCommand('stop',[])
-        .then(function()
-        {
-            return self.sendMpdCommand('clear',[]);
-        })
-        .then(function()
-        {
-            return self.sendMpdCommand('add "'+uri+'"',[]);
-        })
-        .then(function()
-        {
-            return self.sendMpdCommand('play',[]);
-        });
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
+
+        // Clear the queue, add the first track, and start playback
+        var defer = libQ.defer();
+        var cmd = libMpd.cmd;
+
+
+        return self.sendMpdCommand('stop',[])
+            .then(function()
+            {
+                return self.sendMpdCommand('clear',[]);
+            })
+            .then(function()
+            {
+                return self.sendMpdCommand('add "'+uri+'"',[]);
+            })
+            .then(function()
+            {
+                return self.sendMpdCommand('play',[]);
+            });
+    }
+
 };
 
 
