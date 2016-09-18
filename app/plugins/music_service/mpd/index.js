@@ -761,10 +761,13 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			if (err) {
 				return console.log(err);
 			}
-
+			var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
+			if (outdev != 'softvolume' ) {
+				outdev = 'hw:'+outdev+',0';
+			}
 
 			var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
-			var conf2 = conf1.replace("${device}", self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice'));
+			var conf2 = conf1.replace("${device}", outdev);
 			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
 			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
 			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));

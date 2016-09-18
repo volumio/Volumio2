@@ -65,8 +65,11 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 PlatformSpecific.prototype.startupSound = function () {
 	var self = this;
 	var outdev = self.coreCommand.sharedVars.get('alsa.outputdevice');
-	var hwdev = 'hw:' + outdev + ',0';
-	exec('/usr/bin/aplay --device=plug'+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
+	var hwdev = '--device=plughw:' + outdev + ',0';
+	if (outdev === 'softvolume'){
+		hwdev = '-D softvolume';
+	}
+	exec('/usr/bin/aplay '+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log(error);
 		}
