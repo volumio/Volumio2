@@ -2918,3 +2918,16 @@ ControllerMpd.prototype.getAlbumArtPathFromUri = function (uri) {
     return result;
 
 }
+
+ControllerMpd.prototype.prefetch = function (trackBlock) {
+    var self=this;
+    this.logger.info("DOING PREFETCH IN MPD");
+    var uri=this.sanitizeUri(trackBlock.uri);
+    this.logger.info(uri);
+
+    return this.sendMpdCommand('add "'+uri+'"',[])
+        .then(function(){
+            return self.sendMpdCommand('consume 1',[]);
+        });
+}
+
