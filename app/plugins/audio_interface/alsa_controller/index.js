@@ -163,6 +163,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
 				self.configManager.pushUIConfigParam(uiconf, 'sections[2].saveButton.data', 'mixer');
 				if (activemixer){
+					if(activemixer === 'SoftMaster') {
+						activemixer = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL');
+						self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+							value: "SoftMaster",
+							label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL')
+						});
+					}
 					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
 						value: activemixer,
 						label: activemixer
@@ -181,14 +188,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
 					});
 				}
 
+
 			} else {
-				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-					value: "no",
-					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
-				});
 				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-					value: "no",
-					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.No Hardware Mixer Available')
+					value: "SoftMaster",
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL')
 				});
 
 			}
@@ -583,7 +587,7 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 	asoundcontent += '        device      0\n';
 	asoundcontent += '    }\n';
 	asoundcontent += 'max_dB 0.0\n';
-	asoundcontent += 'min_dB -70.0\n';
+	asoundcontent += 'min_dB -50.0\n';
 	asoundcontent += 'resolution 100\n';
 	asoundcontent += '}\n';
 
@@ -592,12 +596,12 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 			console.log('Cannot write /etc/asound.conf: '+err)
 		} else {
 			console.log('Asound.conf file written');
+			var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid:1000, gid: 1000, encoding: 'utf8' });
 			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
 			self.setConfigParam({key: 'mixer', value: "SoftMaster"});
 			self.setConfigParam({key: 'outputdevice', value: "softvolume"});
 			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
 			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
-
 			var apply = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
 			self.updateVolumeSettings();
 		}
