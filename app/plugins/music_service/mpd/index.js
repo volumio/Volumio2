@@ -1060,7 +1060,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					prev: {
 						uri: prev
 					},
-					list: list
+					lists: [{availableListViews:['list'],items:list}]
 				}
 			});
 		});
