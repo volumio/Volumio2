@@ -27,8 +27,6 @@ myVolumio.prototype.onStart = function ()
     var defer = libQ.defer();
     var paths = self.commandRouter.getPluginsConf();
 
-    console.log(paths);
-
     return defer.promise;
 
 }
@@ -81,7 +79,7 @@ myVolumio.prototype.getUIConfig = function ()
 myVolumio.prototype.retrievePlugConfig = function () {
     var self = this;
 
-    return CoreCommandRouter.getPluginsConf();
+    return self.commandRouter.getPluginsConf();
 }
 
 myVolumio.prototype.login = function ()

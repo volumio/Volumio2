@@ -313,21 +313,39 @@ PluginManager.prototype.getPluginNames = function (category) {
 	return names;
 };
 
+PluginManager.prototype.getAllPlugNames = function (category) {
+	var self = this;
+
+	var plugFile = fs.readJsonSync(('/data/configuration/plugins.json'), 'utf-8', {throws: false});
+	var plugins = [];
+	for (var i in plugFile){
+		if (i == category){
+			for (var j in plugFile[i]){
+				plugins.push(j);
+			}
+		}
+	}
+	return plugins;
+}
+
 PluginManager.prototype.getPluginsMatrix = function () {
 	var self = this;
 
-	var plugins = {"categories": []};
+	//plugins = [{"cat": "", "plugs": []}]
+	var plugins = [];
 	var catNames = self.getPluginCategories();
 	for (var i = 0; i < catNames.length; i++){
-		var plugNames = self.getPluginNames(catNames[i]);
-		var catPlugin = {"plugin": []};
+		var cName = catNames[i];
+		var plugNames = self.getAllPlugNames(catNames[i]);
+		//catPlugin = [{"plug": "", "enabled": ""}]
+		var catPlugin = [];
 		for (var j = 0; j < plugNames.length; j++){
 			var name = plugNames[j];
 			var enabled = self.isEnabled(catNames[i], plugNames[j]);
-			catPlugin.plugin.push((name, enabled));
+			catPlugin.push({name, enabled});
 			console.log(catPlugin);
 		}
-		plugins.categories.push((catNames[i], catPlugin));
+		plugins.push({cName, catPlugin});
 		console.log(plugins);
 	}
 	return plugins;
