@@ -42,12 +42,12 @@
     "WIRELESS_RESTART_ERROR": "Erreur lors du redémarrage WiFi: ",
     "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès"
   },
-  "PLAYLIST":{
-  "ADDED_TITLE":"Ajouté",
-  "ADDED_TO_PLAYLIST":" à la playlist ",
-  "ADDED_TO_FAVOURITES":" aux favoris ",
-  "REMOVE_ERROR":"Impossible de supprimer",
-  "REMOVE_SUCCESS":"Supprimé"
+    "PLAYLIST":{
+    "ADDED_TITLE":"Ajouté",
+    "ADDED_TO_PLAYLIST":" à la playlist ",
+    "ADDED_TO_FAVOURITES":" aux favoris ",
+    "REMOVE_ERROR":"Impossible de supprimer",
+    "REMOVE_SUCCESS":"Supprimé"
   },
   "COMMON":{
     "SAVE":"Sauver",
@@ -77,6 +77,9 @@
     "FAVOURITES":"Favoris",
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Bibliothèque musicale",
+    "ARTISTS":"Artistes",
+    "ALBUMS":"Albums",
+    "GENRES":"Genres",
     "CANCEL":"Annuler"
   },
   "APPEARANCE":{
