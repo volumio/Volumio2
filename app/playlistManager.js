@@ -609,7 +609,7 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					prev: {
 						uri: ''
 					},
-					list: []
+					lists: [{availableListViews:['list'],items:[]}]
 				}
 			};
 
@@ -625,7 +625,7 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					uri: ithdata.uri
 				};
 
-				response.navigation.list.push(song);
+				response.navigation.lists[0].items.push(song);
 			}
 
 			defer.resolve(response);
