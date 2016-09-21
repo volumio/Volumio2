@@ -270,7 +270,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
             if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
             {
-                this.logger.info("DOING PREFETCH");
+                this.logger.info("Prefetching next song");
 
                 var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
                 if(plugin.prefetch!==undefined)
@@ -281,11 +281,9 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             }
         }
 
-        this.logger.info("REMAINING TIME: "+remainingTime+" ASKED PREFETCH: "+this.askedForPrefetch+" SIMULATE: "+this.simulateStopStartDone);
         if(remainingTime<=500 && this.askedForPrefetch==true && this.simulateStopStartDone==false)
         {
 
-            this.logger.info("###################################MAGICAL SECTION##############################");
             this.simulateStopStartDone=true;
             this.currentSeek=0;
             this.currentPosition++;
