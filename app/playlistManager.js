@@ -365,7 +365,8 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 				//
 				// Collate new entries
 				//
-				var list = info.navigation.list;
+
+				var list = info.navigation.lists[0].items;
 				var nItems = list.length;
 
 				var entries = [];
@@ -400,6 +401,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 						defer.resolve({success: false});
 					else {
 						var output = data.concat(entries);
+						console.log(filePath)
 						fs.writeJson(filePath, output, function (err) {
 							if (err)
 								defer.resolve({success: false});
