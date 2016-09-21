@@ -2387,8 +2387,21 @@ ControllerMpd.prototype.listAlbums = function () {
     var defer = libQ.defer();
 
     var response = {
-        navigation: {
-            list: []
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": [
+
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "/"
+            }
         }
     };
 
@@ -2409,11 +2422,10 @@ ControllerMpd.prototype.listAlbums = function () {
                     if(albumName!==undefined && albumName!=='')
                     {
                         var artistName=lines[i+1].slice(7).trim();
-                        console.log(artistName);
 
                         var album = {type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
-                        response.navigation.list.push(album);
+                        response.navigation.lists[0].items.push(album);
                     }
                 }
             }
@@ -2435,24 +2447,29 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
 
     var splitted = uri.split('/');
 
-    var albumName = splitted[2];
+    var albumName = nodetools.urlDecode(splitted[2]);
 
-    self.logger.info("SEARCHING ALBUM NAME "+albumName);
+    var response={
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": [
+
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "/"
+            }
+        }
+    };
 
     var cmd = libMpd.cmd;
     self.clientMpd.sendCommand(cmd("find album \""+albumName+"\"", []), function (err, msg) {
-        self.logger.info("ERR "+err);
-        self.logger.info("MSG "+msg);
-
-        var response = {
-            navigation: {
-                prev: {
-                    uri: 'albums://'
-                },
-                list: []
-            }
-        };
-
         if (msg) {
             var path;
             var name;
@@ -2474,7 +2491,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
                     } else {
                         title = name;
                     }
-                    response.navigation.list.push({
+                    response.navigation.lists[0].items.push({
                         uri: 'music-library/'+path,
                         service: 'mpd',
                         title: title,
@@ -2500,84 +2517,6 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
     return defer.promise;
 
 };
-
-/**
- *
- * list album
- */
-/*
-ControllerMpd.prototype.playAlbum = function (curUri) {
-    var self = this;
-
-    var defer = libQ.defer();
-
-    var splitted=curUri.split('/');
-    var albumName="";
-
-    var songArray=[];
-
-    if(splitted.length>2)
-    {
-        //playing single songe
-        songArray.push(curUri.substring(7));
-
-        var playDefer=self.clearAddPlayTrack(songArray);
-
-        playDefer.then(function(){
-            defer.resolve();
-        })
-            .fail(function(){
-                defer.reject(new Error());
-            });
-
-
-    }
-    else
-    {
-        albumName=splitted[1];
-
-        var cmd = libMpd.cmd;
-        self.clientMpd.sendCommand(cmd("find album \""+albumName+"\"", []), function (err, msg) {
-
-            self.logger.info("MSG "+msg);
-            var list = [];
-            if (msg) {
-                var path;
-                var name;
-                var lines = msg.split('\n');
-
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-
-                    if (line.indexOf('file:') === 0) {
-                        var path = line.slice(6);
-                        var name = path.split('/').pop();
-
-                        self.logger.info("PLAYING FILE: "+name);
-
-                        songArray.push(path);
-                    }
-                }
-                var playDefer=self.clearAddPlayTrack(songArray);
-
-                playDefer.then(function(){
-                    defer.resolve();
-                })
-                    .fail(function(){
-                        defer.reject(new Error());
-                    })
-            }
-            else
-            {
-                defer.reject(new Error());
-            }
-        });
-    }
-    return defer.promise;
-
-};*/
-
-
 
 /**
  *
@@ -2949,78 +2888,6 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 
 };
 
-/**
- *
- * list album
- */
-/*ControllerMpd.prototype.playGenre = function (curUri) {
-    var self = this;
-
-    var defer = libQ.defer();
-
-    var splitted=curUri.split('/');
-    var albumName="";
-
-    var songArray = [];
-
-
-    if(splitted.length>2)
-    {
-        //playing single songe
-        songArray.push(curUri.substring(7));
-
-        var playDefer=self.clearAddPlayTrack(songArray);
-
-        playDefer.then(function(){
-            defer.resolve();
-        })
-            .fail(function(){
-                defer.reject(new Error());
-            });
-    }
-    else {
-        var cmd = libMpd.cmd;
-
-        albumName=splitted[1];
-
-        self.clientMpd.sendCommand(cmd("find genre \"" + albumName + "\"", []), function (err, msg) {
-
-            self.logger.info("MSG " + msg);
-            var list = [];
-            if (msg) {
-                var path;
-                var name;
-                var lines = msg.split('\n');
-
-                var songArray = [];
-
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-
-                    if (line.indexOf('file:') === 0) {
-                        var path = line.slice(6);
-                        var name = path.split('/').pop();
-
-                        songArray.push(path);
-                    }
-                }
-                var playDefer = self.clearAddPlayTrack(songArray);
-
-                playDefer.then(function () {
-                    defer.resolve();
-                })
-                    .fail(function () {
-                        defer.reject(new Error());
-                    });
-            }
-            else {
-                defer.reject(new Error());
-            }
-        });
-    }
-    return defer.promise;
-
-};*/
 
 ControllerMpd.prototype.getMixerControls = function () {
     var self = this;
