@@ -882,8 +882,7 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
             "lists": [
                 {
                     "availableListViews": [
-                        "list",
-                        "grid"
+                        "list"
                     ],
                     "items": [
 
@@ -929,8 +928,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
             "lists": [
                 {
                     "availableListViews": [
-                        "list",
-                        "grid"
+                        "list"
                     ],
                     "items": [
 
@@ -942,7 +940,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
             }
         }
     };
-    
+
 	var name = uri.split('/')[1];
 
 	var promise = self.commandRouter.playListManager.getPlaylistContent(name);
@@ -953,7 +951,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 			var song = {
                 service: ithdata.service,
                 type: 'song',
-                title: ithdata.title,
+                title: ithdata.name,
                 artist: ithdata.artist,
                 album: ithdata.album,
                 albumart: ithdata.albumart,
