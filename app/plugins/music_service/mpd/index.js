@@ -877,22 +877,40 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
 
 	var defer = libQ.defer();
 
-	var response = {
-		navigation: {
-			prev: {
-				uri: ''
-			},
-			list: []
-		}
-	};
+	var response={
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": [
+
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "/"
+            }
+        }
+    };
 	var promise = self.commandRouter.playListManager.listPlaylist();
 	promise.then(function (data) {
 		for (var i in data) {
 			var ithdata = data[i];
-			var song = {type: 'playlist', title: ithdata, icon: 'fa fa-list-ol', uri: 'playlists/' + ithdata};
+			var playlist = {
+                "service": "mpd",
+                "type": 'playlist',
+                "title": ithdata,
+                "icon": 'fa fa-list-ol',
+                "uri": 'playlists/' + ithdata
+            };
+            response.navigation.lists[0].items.push(playlist);
 
-			response.navigation.list.push(song);
-		}
+
+            }
+
 
 		defer.resolve(response);
 	});
@@ -906,15 +924,25 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var defer = libQ.defer();
 
-	var response = {
-		navigation: {
-			prev: {
-				uri: 'playlists'
-			},
-			list: []
-		}
-	};
+    var response={
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": [
 
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "playlists"
+            }
+        }
+    };
+    
 	var name = uri.split('/')[1];
 
 	var promise = self.commandRouter.playListManager.getPlaylistContent(name);
@@ -923,19 +951,17 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 		for (var i = 0; i < n; i++) {
 			var ithdata = data[i];
 			var song = {
-				service: ithdata.service,
-				type: 'song',
-				title: ithdata.title,
-				artist: ithdata.artist,
-				album: ithdata.album,
-				albumart: ithdata.albumart,
-				uri: ithdata.uri
-			};
-
-			response.navigation.list.push(song);
+                service: ithdata.service,
+                type: 'song',
+                title: ithdata.title,
+                artist: ithdata.artist,
+                album: ithdata.album,
+                albumart: ithdata.albumart,
+                uri: ithdata.uri
+            };
+            response.navigation.lists[0].items.push(song);
 		}
 
-		//console.log(JSON.stringify(response));
 		defer.resolve(response);
 	});
 
