@@ -2766,85 +2766,6 @@ ControllerMpd.prototype.listArtist = function (curUri) {
 
 };
 
-/**
- *
- * list album
- */
-/*
-ControllerMpd.prototype.playArtist = function (curUri) {
-    var self = this;
-
-    var defer = libQ.defer();
-
-    var splitted=curUri.split('/');
-    var albumName="";
-
-
-    console.log(splitted.length);
-    if(splitted.length>2)
-    {
-        //playing single songe
-        var songArray = [];
-
-        songArray.push(curUri.substring(8));
-
-        var playDefer=self.clearAddPlayTrack(songArray);
-
-        playDefer.then(function(){
-            defer.resolve();
-        })
-            .fail(function(){
-                defer.reject(new Error());
-            });
-    }
-    else {
-        var cmd = libMpd.cmd;
-
-        albumName=splitted[1];
-
-        self.clientMpd.sendCommand(cmd("find artist \"" + albumName + "\"", []), function (err, msg) {
-
-            self.logger.info("MSG " + msg);
-            var list = [];
-
-            if(err)
-            {
-                defer.reject(new Error());
-            }
-            else {
-                var path;
-                var name;
-                var lines = msg.split('\n');
-
-                var songArray = [];
-
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-
-                    if (line.indexOf('file:') === 0) {
-                        var path = line.slice(6);
-                        var name = path.split('/').pop();
-
-                        songArray.push(path);
-                    }
-                }
-                var playDefer = self.clearAddPlayTrack(songArray);
-
-                playDefer.then(function () {
-                    defer.resolve();
-                })
-                    .fail(function () {
-                        defer.reject(new Error());
-                    });
-            }
-        });
-    }
-    return defer.promise;
-
-};*/
-
-
-
 
 /**
  *
@@ -2856,8 +2777,21 @@ ControllerMpd.prototype.listGenres = function () {
     var defer = libQ.defer();
 
     var response = {
-        navigation: {
-            list: []
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": [
+
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "/"
+            }
         }
     };
 
@@ -2876,9 +2810,9 @@ ControllerMpd.prototype.listGenres = function () {
                 {
                     var albumName=splitted[i].substring(7);
                     var albumart=self.getAlbumArt({},undefined,'fa-tags');
-                    var album = {type: 'folder', title: albumName, albumart:albumart, uri: 'genres://' + albumName};
+                    var album = {type: 'folder', title: albumName, albumart:albumart, uri: 'genres://' + nodetools.urlEncode(albumName)};
 
-                    response.navigation.list.push(album);
+                    response.navigation.lists[0].items.push(album);
                 }
             }
             defer.resolve(response);
@@ -2898,7 +2832,44 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     var defer = libQ.defer();
 
     var splitted=curUri.split('/');
-    var albumName=splitted[1];
+    var albumName=nodetools.urlDecode(splitted[1]);
+
+    var response={
+        "navigation": {
+            "lists": [
+                {
+                    "title": "Artists",
+                    "icon": "fa icon",
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": []
+                },
+                {
+                    "title": "Albums",
+                    "icon": "fa icon",
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": []
+                }
+                ,{
+                    "title": "Songs",
+                    "icon": "fa icon",
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": []
+                }
+            ],
+            "prev": {
+                "uri": "/"
+            }
+        }
+    };
 
     self.mpdReady
         .then(function() {
@@ -2930,7 +2901,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             } else {
                                 title = name;
                             }
-                            list.push({
+                            response.navigation.lists[2].items.push({
                                 service: 'mpd',
                                 type: 'song',
                                 title: title,
@@ -2945,12 +2916,16 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             {
                                 albums.push(album);
                                 albumsArt.push(albumart);
+
+                                response.navigation.lists[1].items.push({type: 'folder', title: album, albumart: albumart, uri: 'albums://' + nodetools.urlEncode(album)});
                             }
 
                             if(artists.indexOf(artist)===-1)
                             {
                                 artists.push(artist);
-                                artistArt.push(self.getAlbumArt({artist: artist}, self.getParentFolder('/mnt/' + path),'fa-users'))
+                                artistArt.push()
+
+                                response.navigation.lists[0].items.push({type: 'folder', title: artist, albumart: self.getAlbumArt({artist: artist}, self.getParentFolder('/mnt/' + path),'fa-users'), uri: 'artists://' + nodetools.urlEncode(artist)});
                             }
 
                         }
@@ -2958,27 +2933,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     }
 
 
-                    var result=[];
-
-                    result.push({type:'title',title:'Artists'});
-                    for(var i in artists)
-                        result.push({type: 'folder', title: artists[i], albumart: artistArt[i], uri: 'artists://' + artists[i]});
-
-                    result.push({type:'title',title:'Albums'});
-                    for(var i in albums)
-                        result.push({type: 'folder', title: albums[i], albumart: albumsArt[i], uri: 'albums://' + albums[i]});
-
-                    result.push({type:'title',title:'Songs'});
-                    result=result.concat(list);
-
-                    defer.resolve({
-                        navigation: {
-                            prev: {
-                                uri: 'genres://'
-                            },
-                            list: result
-                        }
-                    });
+                    defer.resolve(response);
 
                 }
                 else
