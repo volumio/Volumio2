@@ -945,13 +945,14 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var promise = self.commandRouter.playListManager.getPlaylistContent(name);
 	promise.then(function (data) {
+		
 		var n = data.length;
 		for (var i = 0; i < n; i++) {
 			var ithdata = data[i];
 			var song = {
                 service: ithdata.service,
                 type: 'song',
-                title: ithdata.name,
+                title: ithdata.title,
                 artist: ithdata.artist,
                 album: ithdata.album,
                 albumart: ithdata.albumart,
