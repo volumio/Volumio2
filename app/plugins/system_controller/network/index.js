@@ -191,7 +191,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 							 break;
 						 case 'WPA':
 
-							 network.security = 'WPA';
+							 network.security = 'wpa2';
 
 							 break;
 						 case 'signal':
