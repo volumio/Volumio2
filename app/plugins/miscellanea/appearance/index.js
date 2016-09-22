@@ -356,8 +356,8 @@ volumioAppearance.prototype.deleteFile = function(filepath){
                     console.log(err);
                 } else {
                     if (filepath.indexOf("thumbnail-") < 0) {
-                        self.commandRouter.pushToastMessage('success', self.getI18NString('appearance_title'),
-                            self.getI18NString('background_deleted'));
+                        self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
+                            self.commandRouter.getI18nString('APPEARANCE.BACKGROUND_DELETED'));
                     } defer.resolve('Done');
                 }
             });

@@ -11,6 +11,9 @@ function CoreStateMachine(commandRouter) {
 
     this.currentPosition=0;
     this.currentConsume=false;
+    this.prefetchDone=false;
+    this.askedForPrefetch=false;
+    this.simulateStopStartDone=false;
 
     this.logger=this.commandRouter.logger;
 
@@ -224,8 +227,17 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
     this.runPlaybackTimer=true;
     this.playbackStart=Date.now();
 
-    setTimeout(this.increasePlaybackTimer.bind(this),250);
+    var trackBlock = this.getTrack(this.currentPosition);
 
+	if(trackBlock){
+		this.currentSongDuration=trackBlock.duration*1000;
+
+
+    this.askedForPrefetch=false;
+    this.simulateStopStartDone=false;
+
+    setTimeout(this.increasePlaybackTimer.bind(this),250);
+	}
     return libQ.resolve();
 };
 
@@ -234,11 +246,14 @@ CoreStateMachine.prototype.stopPlaybackTimer = function () {
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stPlaybackTimer');
 
     this.runPlaybackTimer=false;
+    this.currentSongDuration=0;
+    this.askedForPrefetch=false;
     return libQ.resolve();
 };
 
 // Stop playback timer
 CoreStateMachine.prototype.increasePlaybackTimer = function () {
+    var self=this;
 
     var now=Date.now();
     this.currentSeek+=(now-this.playbackStart);
@@ -246,7 +261,41 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
     if(this.runPlaybackTimer==true)
     {
         this.playbackStart=Date.now();
-        setTimeout(this.increasePlaybackTimer.bind(this),250);
+
+
+        var remainingTime=this.currentSongDuration-this.currentSeek;
+        if(remainingTime<5000 && this.askedForPrefetch==false)
+        {
+            this.askedForPrefetch=true;
+
+            var trackBlock = this.getTrack(this.currentPosition);
+            var nextTrackBlock = this.getTrack(this.currentPosition+1);
+
+            if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
+            {
+                this.logger.info("Prefetching next song");
+
+                var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+                if(plugin.prefetch!==undefined)
+                {
+                    this.prefetchDone=true;
+                    plugin.prefetch(nextTrackBlock);
+                }
+            }
+        }
+
+        if(remainingTime<=500 && this.askedForPrefetch==true && this.simulateStopStartDone==false)
+        {
+
+            this.simulateStopStartDone=true;
+            this.currentSeek=0;
+            this.currentPosition++;
+            this.askedForPrefetch=false;
+            this.pushState.bind(this);
+
+            this.startPlaybackTimer();
+
+        } else setTimeout(this.increasePlaybackTimer.bind(this),250);
     }
 };
 
@@ -385,53 +434,48 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if (this.currentStatus === 'play') {
             this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received an update from plaugin. extracting info from payload');
 
-            if(stateService.seek!==undefined)
-            {
-                this.currentSeek=stateService.seek;
+            //checking if prefetch has been done. In that case the update is sent elsewhere
+            if(this.askedForPrefetch==false) {
+
+
+                if (stateService.seek !== undefined) {
+                    this.currentSeek = stateService.seek;
+                }
+
+                if (stateService.duration !== undefined) {
+                    trackBlock.duration = stateService.duration;
+                }
+
+                if (stateService.samplerate !== undefined && trackBlock.samplerate === undefined) {
+                    trackBlock.samplerate = stateService.samplerate;
+                }
+
+                if (stateService.bitdepth !== undefined && trackBlock.bitdepth === undefined) {
+                    trackBlock.bitdepth = stateService.bitdepth;
+                }
+
+                if (stateService.channels !== undefined && trackBlock.channels === undefined) {
+                    trackBlock.channels = stateService.channels;
+                }
+
+                if (stateService.title !== undefined && trackBlock.name === undefined) {
+                    trackBlock.name = stateService.title;
+                }
+
+                if (stateService.artist !== undefined && trackBlock.artist === undefined) {
+                    trackBlock.artist = stateService.artist;
+                }
+
+                if (stateService.album !== undefined && trackBlock.album === undefined) {
+                    trackBlock.album = stateService.album;
+                }
+
+                if (stateService.albumart !== undefined && trackBlock.albumart === undefined) {
+                    trackBlock.albumart = stateService.albumart;
+                }
+
+                this.pushState().fail(this.pushError.bind(this));
             }
-
-            if(stateService.duration!==undefined)
-            {
-                trackBlock.duration=stateService.duration;
-            }
-
-            if(stateService.samplerate!==undefined)
-            {
-                trackBlock.samplerate=stateService.samplerate;
-            }
-
-            if(stateService.bitdepth!==undefined)
-            {
-                trackBlock.bitdepth=stateService.bitdepth;
-            }
-
-            if(stateService.channels!==undefined)
-            {
-                trackBlock.channels=stateService.channels;
-            }
-
-            if(stateService.title!==undefined)
-            {
-                trackBlock.name=stateService.title;
-            }
-
-            if(stateService.artist!==undefined)
-            {
-                trackBlock.artist=stateService.artist;
-            }
-
-            if(stateService.album!==undefined)
-            {
-                trackBlock.album=stateService.album;
-            }
-
-            if(stateService.albumart!==undefined)
-            {
-                trackBlock.albumart=stateService.albumart;
-            }
-
-
-            this.pushState().fail(this.pushError.bind(this));
         }
 		else if (this.currentStatus === 'stop') {
 
@@ -448,6 +492,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.currentBitDepth = null;
 			this.currentChannels = null;
 			this.currentStatus = 'play';
+
 
            /* if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
@@ -512,14 +557,29 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             if (this.currentPosition >= this.playQueue.arrayQueue.length) {
                 this.commandRouter.logger.info("END OF QUEUE ");
 
-
                 //Queuing following track;
                 if(this.currentRepeat!==undefined && this.currentRepeat===true)
                 {
                     this.currentPosition=0;
-                    this.play()
-                        .then(self.pushState.bind(self))
-                        .fail(this.pushError.bind(this));
+
+                    if(this.prefetchDone==false)
+                    {
+                        this.play()
+                            .then(self.pushState.bind(self))
+                            .fail(this.pushError.bind(this));
+
+                        this.askedForPrefetch=false;
+                        this.simulateStopStartDone=false;
+                    }
+                    else
+                    {
+                        this.prefetchDone=false;
+                        this.askedForPrefetch=false;
+                        this.simulateStopStartDone=false;
+
+                        this.logger.info("Prefetch done, skipping queuing");
+                    }
+
 
                     this.commandRouter.logger.info("Repeating playlist ");
                 }
@@ -534,9 +594,23 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
             } else {
-                this.play()
-                    .then(this.pushState.bind(this))
-                    .fail(this.pushError.bind(this));
+                if(this.prefetchDone==false)
+                {
+                    this.play()
+                        .then(self.pushState.bind(self))
+                        .fail(this.pushError.bind(this));
+
+                    this.askedForPrefetch=false;
+                    this.simulateStopStartDone=false;
+                }
+                else
+                {
+                    this.prefetchDone=false;
+                    this.askedForPrefetch=false;
+                    this.simulateStopStartDone=false;
+                    this.pushState();
+                    this.logger.info("Prefetch done, skipping queuing");
+                }
             }
 
 
@@ -752,6 +826,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 
         this.stopPlaybackTimer();
         this.updateTrackBlock();
+		this.pushState().fail(this.pushError.bind(this));
         return this.serviceStop();
 
     } else if (this.currentStatus === 'pause') {
@@ -761,6 +836,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
         this.updateTrackBlock();
 
         this.stopPlaybackTimer();
+		this.pushState().fail(this.pushError.bind(this));
         return this.serviceStop();
     }
     else return libQ.resolve();

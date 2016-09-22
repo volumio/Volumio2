@@ -19,6 +19,7 @@ function AirPlayInterface(context) {
 AirPlayInterface.prototype.onVolumioStart = function () {
 	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+	this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
 	this.startShairportSync();
 
     return libQ.resolve();
@@ -65,11 +66,13 @@ AirPlayInterface.prototype.setAdditionalConf = function () {
 AirPlayInterface.prototype.startShairportSync = function () {
 	// Loading Configured output device
 	var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
-	var hwdev = 'plughw:' + outdev + ',0';
-	console.log(hwdev);
+	if (outdev != 'softvolume' ) {
+		outdev = 'hw:'+outdev+',0';
+	}
+	var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
+	var name = this.commandRouter.sharedVars.get('system.name');
 
-	var systemController = this.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-	var name = systemController.getConf('playerName');
+
 	var fs = require('fs');
 
 	var self = this;
@@ -77,8 +80,11 @@ AirPlayInterface.prototype.startShairportSync = function () {
 		if (err) {
 			return console.log(err);
 		}
+
 		var conf1 = data.replace("${name}", name);
-		var conf2 = conf1.replace("${device}", hwdev);
+		var conf2 = conf1.replace("${device}", outdev);
+		var conf3 = conf1.replace("${mixer}", mixer);
+
 
 		fs.writeFile("/etc/shairport-sync.conf", conf2, 'utf8', function (err) {
 			if (err) return console.log(err);
@@ -104,3 +110,12 @@ AirPlayInterface.prototype.outputDeviceCallback = function () {
 	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting Shairport Sync');
 	self.startShairportSync()
 }
+
+
+AirPlayInterface.prototype.playerNameCallback = function () {
+	var self = this;
+
+	self.context.coreCommand.pushConsoleMessage('System name has changed, restarting Shairport Sync');
+	self.startShairportSync()
+}
+

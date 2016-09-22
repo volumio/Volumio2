@@ -31,7 +31,7 @@ PlatformSpecific.prototype.reboot = function () {
 
 PlatformSpecific.prototype.networkRestart = function () {
 	var self = this;
-	exec("sudo /bin/systemctl restart networking.service", function (error, stdout, stderr) {
+	exec("/usr/bin/sudo /bin/ip addr flush dev eth0 && /usr/bin/sudo /sbin/ifconfig eth0 down && /usr/bin/sudo /sbin/ifconfig eth0 up", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_TITLE'),
                 self.coreCommand.getI18nString('NETWORK.NETWORK_RESTART_ERROR')+error);
@@ -65,8 +65,11 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 PlatformSpecific.prototype.startupSound = function () {
 	var self = this;
 	var outdev = self.coreCommand.sharedVars.get('alsa.outputdevice');
-	var hwdev = 'hw:' + outdev + ',0';
-	exec('/usr/bin/aplay --device=plug'+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
+	var hwdev = '--device=plughw:' + outdev + ',0';
+	if (outdev === 'softvolume'){
+		hwdev = '-D softvolume';
+	}
+	exec('/usr/bin/aplay '+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log(error);
 		}

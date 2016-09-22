@@ -61,7 +61,7 @@
               "element": "button",
               "label": "TRANSLATE.SYSTEM.FACTORY_RESET",
               "description": "TRANSLATE.SYSTEM.FACTORY_RESET_DESCR",
-              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.FACTORY_RESET_TITLE", "message": "TRANSLATE.SYSTEM.FACTORY_RESET_MESSAGEThis will reset your device to factory settings, all your settings will be lost. The system will automatically restart once reset. Do you want to continue?"}}
+              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.FACTORY_RESET_TITLE", "message": "TRANSLATE.SYSTEM.FACTORY_RESET_MESSAGE"}}
           }
       ]
 

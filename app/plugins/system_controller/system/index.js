@@ -168,6 +168,7 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 	self.setHostname(player_name);
+	self.commandRouter.sharedVars.set('system.name', player_name);
 	defer.resolve({});
 
     for (var i in self.callbacks) {

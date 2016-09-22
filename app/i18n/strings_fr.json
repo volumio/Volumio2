@@ -23,7 +23,8 @@
     "I2S_DAC_ACTIVATED":"DAC I2S activé",
     "I2S_DAC_ACTIVATED_MESSAGE":"a été activé, redémarrage du système pour la prise en compte",
     "I2S_DAC_DEACTIVATED":"DAC I2S DAC Désactivé",
-    "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte"
+    "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte",
+    "DOP":"DSD sur PCM (DoP)"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
@@ -74,14 +75,16 @@
     "ILLEGAL_CHARACTER_/":"Suppression des caractères interdits : /",
     "FAVOURITES":"Favoris",
     "PLAYLISTS":"Playlists",
-    "MUSIC_LIBRARY":"Bibliothèque musicale"
+    "MUSIC_LIBRARY":"Bibliothèque musicale",
+    "CANCEL":"Annuler"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
     "UI_CONFIG_LANGUAGE":"Langue",
     "UI_CONFIG_SELECT_LANGUAGE":"Sélectionner une Langue",
     "NEW_LANGUAGE_SET":"Nouvelle langue appliquée",
-    "NEW_BACKGROUND_APPLIED":"Nouveau fond d'écran appliqué"
+    "NEW_BACKGROUND_APPLIED":"Nouveau fond d'écran appliqué",
+    "BACKGROUND_DELETED":"Fond d'écran supprimé"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
@@ -135,5 +138,13 @@
     "BY_GENRE_RADIOS":"Par genre",
     "BY_COUNTRY_RADIOS":"Par pays",
     "WEBRADIO":"Web Radio"
+  },
+  "PLUGINS":{
+    "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
+    "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Etes vous sûr de vouloir désinstaller ce plugin",
+ 	  "UNINSTALL":"Désinstaller",
+	  "UPDATING_PLUGIN":"Mettre à jour le plugin",
+	  "DOWNLOADING_FROM":"Télécharger le plugin depuis",
+	  "DOWNLOADING":"Téléchargement du Plugin en cours"
   }
 }
