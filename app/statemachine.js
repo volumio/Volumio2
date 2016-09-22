@@ -229,12 +229,15 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 
     var trackBlock = this.getTrack(this.currentPosition);
 
-    this.currentSongDuration=trackBlock.duration*1000;
+	if(trackBlock){
+		this.currentSongDuration=trackBlock.duration*1000;
+
+
     this.askedForPrefetch=false;
     this.simulateStopStartDone=false;
 
     setTimeout(this.increasePlaybackTimer.bind(this),250);
-
+	}
     return libQ.resolve();
 };
 
