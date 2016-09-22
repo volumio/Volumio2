@@ -2455,8 +2455,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri) {
             "lists": [
                 {
                     "availableListViews": [
-                        "list",
-                        "grid"
+                        "list"
                     ],
                     "items": [
 
@@ -2611,8 +2610,7 @@ ControllerMpd.prototype.listArtist = function (curUri) {
                     "title": "Songs",
                     "icon": "fa icon",
                     "availableListViews": [
-                        "list",
-                        "grid"
+                        "list"
                     ],
                     "items": [
 
@@ -2721,8 +2719,7 @@ ControllerMpd.prototype.listGenres = function () {
             "lists": [
                 {
                     "availableListViews": [
-                        "list",
-                        "grid"
+                        "list"
                     ],
                     "items": [
 
@@ -2799,8 +2796,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     "title": "Songs",
                     "icon": "fa icon",
                     "availableListViews": [
-                        "list",
-                        "grid"
+                        "list"
                     ],
                     "items": []
                 }
