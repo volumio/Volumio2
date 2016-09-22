@@ -162,53 +162,94 @@ ControllerNetwork.prototype.setAdditionalConf = function () {
 
 ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 	var self = this;
-
-	var networksarray = [];
-
-	var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", { encoding: 'utf8' });
-	var wirelessnets2 = wirelessnets.split('BSS');
-	for (var i = 0; i < wirelessnets2.length; i++) {
-		var wirelessnets3 = wirelessnets2[i].split("\n")
-			for (var e = 0; e < wirelessnets3.length; e++) {
-				var scanResults = wirelessnets3[e].replace('\t','').replace(' ','').split(":");
-				//	console.log(scan
-				var network = {ssid:'',security:'wep',signal:''}
-
-			switch(scanResults[0]) {
-				case 'SSID':
-					network.ssid = scanResults[1];
-
-					break;
-				case 'WPA':
-					network.security = 'WPA';
-
-					break;
-				case 'signal':
-					var signal= scanResults[1];
-					network.signal = signal;
-
-					break;
-				default:
-					break;
-			}
-				networksarray.push(network)
-			}
-
-
-
-	}
-	console.log(networksarray);
-
 	var defer = libQ.defer();
 
-	/*
-	iwlist.scan('wlan0', function (err, networks) {
-		var self = this;
-		var networksarray = networks;
-		var networkresults = {"available": networksarray}
-		defer.resolve(networkresults);
-	});
-	*/
+
+
+	 iwlist.scan('wlan0', function (err, networks) {
+		 var self = this;
+
+		 if (err) {
+		 	console.log('Cannot use regular scanning, forcing with ap-force')
+			 var networksarray = [];
+			 var arraynumber = 0;
+
+			 var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", { encoding: 'utf8' });
+			 var wirelessnets2 = wirelessnets.split('BSS');
+			 for (var i = 0; i < wirelessnets2.length; i++) {
+				 var network = {};
+				 var wirelessnets3 = wirelessnets2[i].split("\n")
+				 for (var e = 0; e < wirelessnets3.length; e++) {
+					 var scanResults = wirelessnets3[e].replace('\t','').replace(' ','').split(":");
+					 //console.log(scanResults);
+
+					 switch(scanResults[0]) {
+						 case 'SSID':
+
+							 network.ssid = scanResults[1].toString();
+
+							 break;
+						 case 'WPA':
+
+							 network.security = 'WPA';
+
+							 break;
+						 case 'signal':
+
+						 	var signal = '';
+							 var dbmraw= scanResults[1].split('.');
+							 var dbm =Number(dbmraw[0]);
+							 var rel = 100+dbm;
+
+							 if (rel >= 65)
+								 signal = 5;
+							 else if (rel >= 50)
+								 signal = 4;
+							 else if (rel >= 40)
+								 signal = 3;
+							 else if (rel >= 30)
+								 signal = 2;
+							 else if (rel >= 1)
+								 signal = 1;
+
+							 network.signal = signal;
+
+							 break;
+						 default:
+							 break;
+					 }
+
+				 }
+
+				 if (network.ssid) {
+					 //console.log(network)
+					 if (networksarray.length > 0) {
+						 var found = false;
+						 for (var o = 0; o < networksarray.length; o++) {
+							 if (network.ssid == networksarray[o].ssid) {
+								 found = true;
+							 }
+						 }
+						 if (found === false){
+							 networksarray.push(network);
+						 }
+					 } else {
+						 networksarray.push(network);
+					 }
+				 }
+			 }
+
+			 var networkresults = {"available": networksarray}
+			 defer.resolve(networkresults);
+
+		 } else {
+			 var networksarray = networks;
+			 var networkresults = {"available": networksarray}
+			 defer.resolve(networkresults);
+		 }
+
+	 });
+
 	return defer.promise;
 };
 
