@@ -602,7 +602,7 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 			self.setConfigParam({key: 'outputdevice', value: "softvolume"});
 			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
 			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
-			var apply = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
+			var apply2 = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
 			self.updateVolumeSettings();
 		}
 	});
