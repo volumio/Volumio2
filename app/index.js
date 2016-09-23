@@ -738,10 +738,7 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 CoreCommandRouter.prototype.getI18nString = function (key) {
     var splitted=key.split('.');
 
-	console.log(key);
-	console.log(splitted)
-
-    if(splitted.length==1)
+	if(splitted.length==1)
     {
         if(this.i18nStrings[key]!==undefined)
             return this.i18nStrings[key];
