@@ -75,6 +75,9 @@
     "FAVOURITES":"Preferiti",
     "PLAYLISTS":"Playlist",
     "MUSIC_LIBRARY":"Libreria Musicale",
+    "ARTISTS":"Artisti",
+    "ALBUMS":"Album",
+    "GENRES":"Generi",
 	"CANCEL":"Annulla"
   },
   "APPEARANCE": {
