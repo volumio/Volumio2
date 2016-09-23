@@ -163,10 +163,16 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	}
 	catch(ecc)
 	{
+		if (ecc == "Error: dns service error: name conflict") {
+			console.log ("Name conflict due to Shairport Sync, discarding error")
+		} else {
+			setTimeout(function () {
 		console.log("Discovery: ecc "+  ecc);
 		self.forceRename = false;
 		self.callbackTracer = 0;
 		self.startAdvertisement();
+			}, 5000);
+		}
 	}
 }
 
