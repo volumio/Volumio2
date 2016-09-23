@@ -126,15 +126,20 @@ UpnpInterface.prototype.setAdditionalConf = function () {
 	//Perform your installation tasks here
 };
 
+UpnpInterface.prototype.capitalize = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 UpnpInterface.prototype.startUpmpdcli = function() {
 	var self = this;
 
 	var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-	var name = systemController.getConf('playerName');
+	var nameraw = systemController.getConf('playerName');
+	var name = nameraw.charAt(0).toUpperCase() + nameraw.slice(1);
 
 	var upmpdcliconf = __dirname + "/upmpdcli.conf";
 	var upmpdcliconftmpl = __dirname + "/upmpdcli.conf.tmpl";
-	var namestring = 'friendlyname = ' + name + os.EOL;
+	var namestring = 'friendlyname = ' + name.replace(/-/g,' ') + os.EOL;
 	var ipaddress = self.getCurrentIP()
 	ipaddress.then(function (ipaddresspromise) {
 		fs.readFile(__dirname + "/presentation.html.tmpl", 'utf8', function (err, data) {
