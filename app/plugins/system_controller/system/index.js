@@ -78,7 +78,7 @@ ControllerSystem.prototype.getUIConfig = function () {
 		__dirname + '/UIConfig.json')
 		.then(function(uiconf)
 		{
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName'));
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
 			defer.resolve(uiconf);
@@ -90,6 +90,11 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	return defer.promise
 };
+
+
+ControllerSystem.prototype.capitalize = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+}
 
 ControllerSystem.prototype.setUIConfig = function (data) {
     var self = this;
@@ -212,7 +217,7 @@ ControllerSystem.prototype.getData = function (data, key) {
 
 ControllerSystem.prototype.setHostname = function (hostname) {
 	var self = this;
-	var newhostname = hostname.toLowerCase();
+	var newhostname = hostname.toLowerCase().replace(/ /g,'-');
 
 	fs.writeFile('/etc/hostname', newhostname, function (err) {
 		if (err) {
@@ -226,7 +231,16 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
+					exec("/usr/bin/sudo /bin/hostname "+hostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						if (error !== null) {
+							console.log('Cannot set new hostname: ' + error);
+
+						} else {
+							self.logger.info('New hostname set')
+						}
+					});
 				}
+
 
 				fs.writeFile('/etc/hosts', '127.0.0.1       localhost ' + newhostname, function (err) {
 					if (err) {
