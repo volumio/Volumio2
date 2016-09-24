@@ -359,60 +359,80 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 			fs.writeJsonSync(filePath, playlist);
 		}
 		if (service === 'mpd') {
+		    var listingDefer=[];
 
-			var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
-			prms.then(function (info) {
-				//
-				// Collate new entries
-				//
+            if(uri.startsWith("genres://"))
+            {
+                listingDefer=libQ.defer();
 
-				var list = info.navigation.lists[0].items;
-				var nItems = list.length;
+                self.commandRouter.executeOnPlugin('music_service', 'mpd', 'listGenre', uri)
+                    .then(function(entries){
+                    listingDefer.resolve(entries.navigation.lists[2].items);
+                }).fail(function(){
+                    listingDefer.reject(new Error());
+                })
+            }
+		    else {
+                var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
+                prms.then(function (info) {
+                    //
+                    // Collate new entries
+                    //
 
-				var entries = [];
-				for (var i = 0; i < nItems; i++) {
-					var item = list[i];
+                    var list = info.navigation.lists[0].items;
+                    var nItems = list.length;
 
-					if (item.type == 'song') {
-						var artUrl = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getAlbumArt', {
-							artist: item.artist,
-							album: item.album,
-							path: path
-						});
-						if (item.uri.indexOf('music-library/') >= 0) {
-							var itemUri = item.uri.replace('music-library', '');
-						} else var itemUri = item.uri;
+                    var entries = [];
+                    for (var i = 0; i < nItems; i++) {
+                        var item = list[i];
 
-						entries.push({
-							service: service,
-							uri: itemUri,
-							title: item.title,
-							artist: item.artist,
-							album: item.album,
-							albumart: artUrl
-						});
-					} else if (item.type == 'folder') {
-						// TODO: Deal with folders
-					}
-				}
+                        if (item.type == 'song') {
+                            var artUrl = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getAlbumArt', {
+                                artist: item.artist,
+                                album: item.album,
+                                path: path
+                            });
+                            if (item.uri.indexOf('music-library/') >= 0) {
+                                var itemUri = item.uri.replace('music-library', '');
+                            } else var itemUri = item.uri;
 
-				fs.readJson(filePath, function (err, data) {
-					if (err)
-						defer.resolve({success: false});
-					else {
-						var output = data.concat(entries);
-						console.log(filePath)
-						fs.writeJson(filePath, output, function (err) {
-							if (err)
-								defer.resolve({success: false});
-							else
-								var favourites = self.commandRouter.checkFavourites({uri: path});
-							defer.resolve(favourites);
-						})
-					}
-				});
+                            entries.push({
+                                service: service,
+                                uri: itemUri,
+                                title: item.title,
+                                artist: item.artist,
+                                album: item.album,
+                                albumart: artUrl
+                            });
+                        } else if (item.type == 'folder') {
+                            // TODO: Deal with folders
+                        }
+                    }
 
-			});
+                    listingDefer.resolve(entries);
+                });
+            }
+
+
+            listingDefer.then(function(entries)
+            {
+                fs.readJson(filePath, function (err, data) {
+                    if (err)
+                        defer.resolve({success: false});
+                    else {
+                        var output = data.concat(entries);
+                        console.log(filePath)
+                        fs.writeJson(filePath, output, function (err) {
+                            if (err)
+                                defer.resolve({success: false});
+                            else
+                                var favourites = self.commandRouter.checkFavourites({uri: path});
+                            defer.resolve(favourites);
+                        })
+                    }
+                });
+            });
+
 		} else if (service === 'webradio') {
 			fs.readJson(filePath, function (err, data) {
 				if (err)
@@ -650,7 +670,6 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
     var playlist = [];
     var filePath = folder + name;
 
-
     for(var i in data)
     {
         playlist.push({
@@ -665,8 +684,8 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
 
     fs.writeJson(filePath,playlist,function(err)
     {
-        self.logger.info("WRITE FILE "+err);
-        if(err) defer.reject(new Error('Cannot write playlist file'));
+        if(err)
+            defer.reject(new Error('Cannot write playlist file'));
         else defer.resolve();
     });
 
