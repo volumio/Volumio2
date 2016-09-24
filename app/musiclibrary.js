@@ -408,3 +408,8 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 
 }
 
+CoreMusicLibrary.prototype.goto=function(data){
+    var response = this.commandRouter.executeOnPlugin('music_service','mpd','goto',data);
+    return response;
+
+}

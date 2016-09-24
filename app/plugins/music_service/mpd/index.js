@@ -2935,3 +2935,11 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
         });
 }
 
+ControllerMpd.prototype.goto=function(data){
+    if(data.type=='artist')
+        return this.listArtist('artists://'+nodetools.urlEncode(data.value),2,'')
+    else
+        return this.listAlbumSongs("albums://"+nodetools.urlEncode(data.value),2);
+
+}
+
