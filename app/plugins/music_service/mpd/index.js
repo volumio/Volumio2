@@ -1124,7 +1124,7 @@ ControllerMpd.prototype.search = function (query) {
 
                         deferArray[0].resolve([{
                             service: 'mpd',
-                            type: 'song',
+                            type: 'folder',
                             title: artist,
                             uri: 'artists://' + nodetools.urlEncode(artist),
                             albumart: self.getAlbumArt({artist: artist},
@@ -1165,7 +1165,7 @@ ControllerMpd.prototype.search = function (query) {
 
                         deferArray[1].resolve([{
                             service: 'mpd',
-                            type: 'song',
+                            type: 'folder',
                             title: album,
                             artist: artist,
                             album:'',
