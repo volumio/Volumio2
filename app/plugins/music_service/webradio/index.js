@@ -729,8 +729,16 @@ ControllerWebradio.prototype.search = function (query) {
     var self = this;
 
     var defer = libQ.defer();
-    var list = [];
-    list.push({type:'title',title:'Webradios'});
+    var list = {
+        "title": self.commandRouter.getI18nString('WEBRADIO.WEBRADIO'),
+        "icon": "fa icon",
+        "availableListViews": [
+            "list"
+        ],
+        "items": [
+
+        ]
+    };
 
     var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
 
@@ -780,7 +788,7 @@ ControllerWebradio.prototype.search = function (query) {
                         uri: 'http://yp.shoutcast.com' + base+'?id='+id
                     };
 
-                    list.push(category);
+                    list.items.push(category);
                 }
 
             }

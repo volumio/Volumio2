@@ -1125,9 +1125,12 @@ ControllerMpd.prototype.search = function (query) {
                             service: 'mpd',
                             type: 'song',
                             title: artist,
-                            icon: 'fa fa-music',
-                            uri: 'search://artist/' + artist
-                        }]);
+                            uri: 'search://artist/' + artist,
+                            albumart: self.getAlbumArt({artist: artist},
+                                self.getParentFolder('/mnt/' + path),
+                                'fa-tags')
+
+                    }]);
 
                         return;
 					}
@@ -1165,9 +1168,11 @@ ControllerMpd.prototype.search = function (query) {
                             title: album,
                             artist: artist,
                             album:'',
-                            icon: 'fa fa-music',
-                            uri: 'search://album/' + album
-                        }]);
+                            uri: 'search://album/' + album,
+                            albumart: self.getAlbumArt({artist: artist, album: album},
+                                self.getParentFolder('/mnt/' + path),'fa-tags')
+
+                    }]);
 
                         return;
                     }
@@ -1207,9 +1212,11 @@ ControllerMpd.prototype.search = function (query) {
                             title: title,
                             artist: artist,
                             album: album,
-                            icon: 'fa fa-music',
-                            uri: 'music-library/' + path
-                        });
+                            uri: 'music-library/' + path,
+                            albumart : self.getAlbumArt({artist: artist, album: album},
+                                self.getParentFolder('/mnt/' + path),'fa-tags')
+
+                    });
                     }
 
                 }
@@ -1226,21 +1233,54 @@ ControllerMpd.prototype.search = function (query) {
 
 		if(values[0])
 		{
-			list=[{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION')}].
-			concat(values[0]);
+		    list=[
+                {
+                    "title": self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION'),
+                    "icon": "fa icon",
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": []
+                }];
+
+		        list[0].items=list[0].items.concat(values[0]);
 		}
 
 		if(values[1])
 		{
-			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION')}]).
-			concat(values[1]);
+		    var albList=
+                {
+                    "title": self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION'),
+                    "icon": "fa icon",
+                    "availableListViews": [
+                        "list",
+                        "grid"
+                    ],
+                    "items": []
+                };
+            albList.items=values[1];
+
+
+			list.push(albList);
 		}
 
 		if(values[2])
 		{
-			list=list.concat([{type:'title',title:self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION')}]).
-			concat(values[2]);
-		}
+			var songList=
+                {
+                    "title": self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION'),
+                    "icon": "fa icon",
+                    "availableListViews": [
+                        "list"
+                    ],
+                    "items": []
+                };
+            songList.items=values[2];
+
+
+            list.push(songList);
+        }
 
 		list=list.filter(function(v){return !!(v)==true;})
 
