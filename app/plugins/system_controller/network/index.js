@@ -107,7 +107,39 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	//static gateway
 	uiconf.sections[2].content[3].value = config.get('wirelessgateway');
 
-	//console.log(uiconf);
+			if (config.get('enable_hotspot') == undefined) {
+				uiconf.sections[4].content[0].value = true;
+			} else {
+				uiconf.sections[4].content[0].value = config.get('enable_hotspot');
+			}
+
+			if (config.get('hotspot_name') == undefined) {
+				uiconf.sections[4].content[1].value = 'Volumio';
+			} else {
+				uiconf.sections[4].content[1].value = config.get('hotspot_name');
+			}
+
+			if (config.get('hotspot_protection') == undefined) {
+				uiconf.sections[4].content[2].value = false;
+			} else {
+				uiconf.sections[4].content[2].value = config.get('hotspot_protection');
+			}
+
+			if (config.get('hotspot_password') == undefined) {
+				uiconf.sections[4].content[3].value = '';
+			} else {
+				uiconf.sections[4].content[3].value = config.get('hotspot_password');
+			}
+
+			if (config.get('hotspot_channel') == undefined) {
+				uiconf.sections[4].content[4].value.value = 4;
+				uiconf.sections[4].content[4].value.label = '4';
+			} else {
+				uiconf.sections[4].content[4].value.value = Number(config.get('hotspot_channel'));
+				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
+			}
+
+			//console.log(uiconf);
 
 			defer.resolve(uiconf);
 		})
@@ -356,7 +388,125 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 		}
 	});
 };
-;
+
+ControllerNetwork.prototype.saveHotspotSettings = function (data) {
+	var self = this;
+	
+	if(data.hotspot_protection && data.hotspot_password.length < 8) {
+		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.HOTSPOT_CONF_ERROR'), self.commandRouter.getI18nString('NETWORK.HOTSPOT_PW_LENGTH'));
+	} else {
+
+	var hotspot = config.get('enable_hotspot');
+	if (hotspot == undefined) {
+		config.addConfigValue('enable_hotspot', 'boolean', data.enable_hotspot);
+		config.addConfigValue('hotspot_name', 'string', data.hotspot_name);
+		config.addConfigValue('hotspot_protection', 'boolean', data.hotspot_protection);
+		config.addConfigValue('hotspot_password', 'string', data.hotspot_password);
+		config.addConfigValue('hotspot_channel', 'string', data.hotspot_channel.label);
+		self.rebuildHotspotConfig();
+	} else {
+		config.set('enable_hotspot', data.enable_hotspot);
+		config.set('hotspot_name', data.hotspot_name);
+		config.set('hotspot_protection', data.hotspot_protection);
+		config.set('hotspot_password', data.hotspot_password);
+		config.set('hotspot_channel', data.hotspot_channel.label);
+		self.rebuildHotspotConfig();
+	}
+
+
+
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+	}
+};
+
+ControllerNetwork.prototype.rebuildHotspotConfig = function () {
+	var self = this;
+	var hostapdedimax = '/etc/hostapd/hostapd-edimax.conf';
+	var hostapd = '/etc/hostapd/hostapd.conf';
+	var hotspotname = config.get('hotspot_name');
+	var hotspotchannel = config.get('hotspot_channel');
+	var hotspotpassword = config.get('hotspot_password');
+
+	try {
+		fs.accessSync(hostapdedimax, fs.F_OK);
+		exec("/usr/bin/sudo /bin/chmod 777 "+ hostapdedimax, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+			if (error !== null) {
+				console.log('Canot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
+
+			} else {
+				self.logger.info('Permissions for /etc/hostapd/hostapd-edimax.conf')
+
+				try {
+					var ws = fs.createWriteStream(hostapdedimax);
+					ws.cork();
+
+					if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true') {
+						ws.write('interface=wlan0\n');
+						ws.write('ssid='+hotspotname+'\n');
+						ws.write('channel='+hotspotchannel+'\n');
+						ws.write('driver=rtl871xdrv\n');
+						ws.write('hw_mode=g\n');
+						if (config.get('hotspot_protection') == true || config.get('hotspot_protection') == 'true') {
+							ws.write('auth_algs=1\n');
+							ws.write('wpa=2\n');
+							ws.write('wpa_key_mgmt=WPA-PSK\n');
+							ws.write('rsn_pairwise=CCMP\n');
+							ws.write('wpa_passphrase='+hotspotpassword+'\n');
+						}
+					}
+					else {
+						ws.write(' ');
+					}
+
+					ws.end();
+
+				} catch (err) {
+
+				}
+			}
+		});
+	} catch (e) {
+		//No /etd/hostapd/hostapd-edimax.conf
+	}
+
+	exec("/usr/bin/sudo /bin/chmod 777 " + hostapd, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Canot set permissions for /etc/hostapd/hostapd.conf: ' + error);
+
+		} else {
+			self.logger.info('Permissions for /etc/hostapd/hostapd.conf')
+
+			try {
+				var hs = fs.createWriteStream(hostapd);
+				hs.cork();
+
+				if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true') {
+					hs.write('interface=wlan0\n');
+					hs.write('ssid=' + hotspotname + '\n');
+					hs.write('channel=' + hotspotchannel + '\n');
+					hs.write('hw_mode=g\n');
+					if (config.get('hotspot_protection') == true || config.get('hotspot_protection') == 'true') {
+						hs.write('auth_algs=1\n');
+						hs.write('wpa=2\n');
+						hs.write('wpa_key_mgmt=WPA-PSK\n');
+						hs.write('rsn_pairwise=CCMP\n');
+						hs.write('wpa_passphrase=' + hotspotpassword + '\n');
+					}
+				}
+				else {
+					hs.write(' ');
+				}
+
+				hs.end();
+				self.commandRouter.wirelessRestart();
+
+			} catch (err) {
+
+			}
+		}
+	});
+
+};
 
 ControllerNetwork.prototype.wirelessConnect = function (data) {
 	var self = this;

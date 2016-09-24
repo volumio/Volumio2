@@ -75,7 +75,7 @@
         }
       ]
     },
-    { 
+    {
       "id": "section_wireless_network",
       "element": "section",
       "label": "TRANSLATE.NETWORK.WIRELESS_NETWORK",
@@ -146,6 +146,116 @@
         }
       ]
     },
-    {"coreSection":"wifi"}
+    {"coreSection":"wifi"},
+	{
+	  "id": "section_hotspot",
+	  "element": "section",
+	  "label": "TRANSLATE.NETWORK.HOTSPOT_SETTINGS",
+	  "icon": "fa-wifi",
+	  "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveHotspotSettings"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+		  "enable_hotspot",
+		  "hotspot_name",
+		  "hotspot_protection",
+		  "hotspot_password",
+		  "hotspot_channel"
+		]
+	  },
+	  "content": [
+		{
+		  "id": "enable_hotspot",
+		  "element": "switch",
+		  "doc" : "Enable or disable Volumio Hotspot",
+		  "label": "TRANSLATE.NETWORK.ENABLE_HOTSPOT",
+		  "value": true
+		},
+		{
+		  "id": "hotspot_name",
+		  "type": "string",
+		  "element": "input",
+		  "label": "TRANSLATE.NETWORK.HOTSPOT_NAME",
+		  "value": "",
+		  "visibleIf": {
+			"field": "enable_hotspot",
+			"value": true
+		  }
+		},
+		{
+		  "id": "hotspot_protection",
+		  "element": "switch",
+		  "doc" : "Password Protection for Hotspot",
+		  "label": "TRANSLATE.NETWORK.HOTSPOT_PROTECTION",
+		  "value": true,
+		  "visibleIf": {
+			"field": "enable_hotspot",
+			"value": true
+		  }
+		},
+		{
+		  "id": "hotspot_password",
+		  "type": "password",
+		  "element": "input",
+		  "label": "TRANSLATE.NETWORK.HOTSPOT_PASSWORD",
+		  "value": "",
+		  "visibleIf": {
+			"field": "enable_hotspot",
+			"value": true
+		  }
+		},
+		{
+		  "id": "hotspot_channel",
+		  "element": "select",
+		  "label": "TRANSLATE.NETWORK.HOTSPOT_CHANNEL",
+		  "value":  {
+			"value":0,
+			"label": "0"
+		  },
+		  "options": [
+			{
+			"value":1,
+			"label": "1"
+		  },
+			{
+			  "value":2,
+			  "label": "2"
+			},
+			{
+			  "value":3,
+			  "label": "3"
+			},
+			{
+			  "value":4,
+			  "label": "4"
+			},
+			{
+			  "value":5,
+			  "label": "5"
+			},
+			{
+			  "value":6,
+			  "label": "6"
+			},
+			{
+			  "value":7,
+			  "label": "8"
+			},
+			{
+			  "value":9,
+			  "label": "9"
+			},
+			{
+			  "value":10,
+			  "label": "10"
+			}
+		  ],
+		  "visibleIf": {
+			"field": "enable_hotspot",
+			"value": true
+		  }
+		}
+	  ]
+	}
   ]
 }
