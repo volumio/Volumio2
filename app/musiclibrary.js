@@ -351,7 +351,6 @@ CoreMusicLibrary.prototype.search = function(data) {
                         searchResult.navigation.lists=searchResult.navigation.lists.concat(result[i]);
                 }
 
-                console.log(JSON.stringify(searchResult));
                 defer.resolve(searchResult);
             })
             .fail(function (err) {

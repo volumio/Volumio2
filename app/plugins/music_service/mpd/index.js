@@ -1126,7 +1126,7 @@ ControllerMpd.prototype.search = function (query) {
                             service: 'mpd',
                             type: 'song',
                             title: artist,
-                            uri: 'search://artist/' + artist,
+                            uri: 'artists://' + artist,
                             albumart: self.getAlbumArt({artist: artist},
                                 self.getParentFolder('/mnt/' + path),
                                 'fa-tags')
@@ -1169,7 +1169,7 @@ ControllerMpd.prototype.search = function (query) {
                             title: album,
                             artist: artist,
                             album:'',
-                            uri: 'search://album/' + album,
+                            uri: 'albums://' + album,
                             albumart: self.getAlbumArt({artist: artist, album: album},
                                 self.getParentFolder('/mnt/' + path),'fa-tags')
 
