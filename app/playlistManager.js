@@ -381,6 +381,15 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                     listingDefer.reject(new Error());
                 })
             }
+            else if(uri.startsWith("albums://"))
+            {
+                mpdPlugin.listAlbumSongs(uri,2,'')
+                    .then(function(entries){
+                        listingDefer.resolve(entries.navigation.lists[0].items);
+                    }).fail(function(){
+                    listingDefer.reject(new Error());
+                })
+            }
 		    else {
                 var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
                 prms.then(function (info) {
