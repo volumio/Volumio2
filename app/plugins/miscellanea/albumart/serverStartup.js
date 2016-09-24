@@ -8,7 +8,9 @@ if (cluster.isMaster) {
     // Count the machine's CPUs
     var cpuCount = require('os').cpus().length;
 
-
+    if(cpuCount>1)
+        cpuCount=cpuCount-1;
+    
     console.log("Forking "+cpuCount+" albumart workers");
     // Create a worker for each CPU
     for (var i = 0; i < cpuCount; i += 1) {
