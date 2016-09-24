@@ -66,7 +66,7 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
 	var item=this.arrayQueue.splice(nIndex.value, 1);
 
-    this.commandRouter.logger.info(JSON.stringify(item));
+    //this.commandRouter.logger.info(JSON.stringify(item));
     this.saveQueue();
 
     this.commandRouter.pushToastMessage('success',  this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TITLE'),

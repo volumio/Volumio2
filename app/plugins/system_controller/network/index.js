@@ -391,7 +391,7 @@ ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 
 ControllerNetwork.prototype.saveHotspotSettings = function (data) {
 	var self = this;
-	
+
 	if(data.hotspot_protection && data.hotspot_password.length < 8) {
 		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.HOTSPOT_CONF_ERROR'), self.commandRouter.getI18nString('NETWORK.HOTSPOT_PW_LENGTH'));
 	} else {
