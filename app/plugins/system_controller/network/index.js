@@ -211,13 +211,19 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 			 try {
 				 var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", {encoding: 'utf8'});
 
-				 var wirelessnets2 = wirelessnets.split('BSS');
+				 var wirelessnets2 = wirelessnets.split('(on wlan0)');
 				 for (var i = 0; i < wirelessnets2.length; i++) {
 					 var network = {};
 					 var wirelessnets3 = wirelessnets2[i].split("\n")
 					 for (var e = 0; e < wirelessnets3.length; e++) {
 						 var scanResults = wirelessnets3[e].replace('\t', '').replace(' ', '').split(":");
 						 //console.log(scanResults);
+
+						 if (scanResults[1]) {
+							 if ((scanResults[1].indexOf('CCMP') || scanResults[1].indexOf('TKIP')) >= 0) {
+								 network.security = 'wpa2';
+							 }
+						 }
 
 						 switch (scanResults[0]) {
 							 case 'SSID':
