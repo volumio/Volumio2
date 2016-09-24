@@ -1004,6 +1004,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						list.push({
 							type: 'folder',
 							title: name,
+                            service: 'mpd',
 							icon: 'fa fa-folder-open-o',
 							uri: s0 + path
 						});
@@ -1536,10 +1537,6 @@ ControllerMpd.prototype.syncGroupVolume = function (data) {
 
 ControllerMpd.prototype.explodeUri = function(uri) {
     var self = this;
-
-    console.log("EXPLODEURI: "+uri);
-
-
 
     var defer=libQ.defer();
 
