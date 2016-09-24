@@ -342,13 +342,19 @@ var processExpressRequest = function (req, res) {
 
             var stoptime=Date.now();
             logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
+		    res.setHeader('Cache-Control', 'public, max-age=2628000')
 			res.sendFile(filePath);
 		})
 		.fail(function () {
-		    if(icon!==undefined)
+		    if(icon!==undefined){
+
+
+				res.setHeader('Cache-Control', 'public, max-age=2628000')
                 res.sendFile(__dirname + '/icons/'+icon+'.png');
-		    else
+			} else {
+			    res.setHeader('Cache-Control', 'public, max-age=2628000')
 			    res.sendFile(__dirname + '/default.png');
+			}
 		});
 };
 
