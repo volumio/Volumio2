@@ -1500,6 +1500,10 @@ ControllerMpd.prototype.syncGroupVolume = function (data) {
 ControllerMpd.prototype.explodeUri = function(uri) {
     var self = this;
 
+    console.log("EXPLODEURI: "+uri);
+
+
+
     var defer=libQ.defer();
 
     var items = [];
@@ -1639,7 +1643,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         //exploding search
         var splitted = uri.split('/');
 
-        var albumName = splitted[2];
+        var albumName = nodetools.urlDecode(splitted[2]);
 
         var cmd = libMpd.cmd;
         self.clientMpd.sendCommand(cmd("find album \""+albumName+"\"", []), function (err, msg) {
@@ -1690,10 +1694,15 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         });
     }
     else if(uri.startsWith('artists://')) {
-        //exploding search
+        /*
+         artists://AC%2FDC/Rock%20or%20Bust in service mpd
+         */
         var splitted = uri.split('/');
 
-        var artist = splitted[2];
+        if(splitted.length===4)
+            return this.explodeUri('albums://'+splitted[3]);
+
+        var artist = nodetools.urlDecode(splitted[2]);
 
         var cmd = libMpd.cmd;
 
@@ -2361,7 +2370,7 @@ ControllerMpd.prototype.listAlbums = function () {
                     {
                         var artistName=lines[i+1].slice(7).trim();
 
-                        var album = {type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
                         response.navigation.lists[0].items.push(album);
                     }
@@ -2610,6 +2619,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 
                                 response.navigation.lists[0].items.push(
                                     {
+                                        service:'mpd',
                                         type: 'folder',
                                         title: album,
                                         albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o'),
@@ -2679,7 +2689,7 @@ ControllerMpd.prototype.listGenres = function () {
                     if(genreName!=='')
                     {
                         var albumart=self.getAlbumArt({},undefined,'fa-tags');
-                        var album = {type: 'folder', title: genreName, albumart:albumart, uri: 'genres://' + nodetools.urlEncode(genreName)};
+                        var album = {service:'mpd',type: 'folder', title: genreName, albumart:albumart, uri: 'genres://' + nodetools.urlEncode(genreName)};
 
                         response.navigation.lists[0].items.push(album);
                     }
@@ -2791,7 +2801,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                                 albumsArt.push(albumart);
 
                                 if(album!=='')
-                                    response.navigation.lists[1].items.push({type: 'folder', title: album, albumart: albumart,
+                                    response.navigation.lists[1].items.push({service:'mpd',type: 'folder', title: album, albumart: albumart,
                                         uri: 'genres://' + nodetools.urlEncode(genreName)+'//'+nodetools.urlEncode(album)});
                             }
 
@@ -2801,7 +2811,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                                 artistArt.push()
 
                                 if(artist!=='')
-                                    response.navigation.lists[0].items.push({type: 'folder', title: artist, albumart: self.getAlbumArt({artist: artist}, self.getParentFolder('/mnt/' + path),'fa-users'),
+                                    response.navigation.lists[0].items.push({service:'mpd',type: 'folder', title: artist, albumart: self.getAlbumArt({artist: artist}, self.getParentFolder('/mnt/' + path),'fa-users'),
                                         uri: 'genres://' + nodetools.urlEncode(genreName)+'/'+nodetools.urlEncode(artist)});
                             }
 
