@@ -359,16 +359,34 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 			fs.writeJsonSync(filePath, playlist);
 		}
 		if (service === 'mpd') {
-		    var listingDefer=[];
+		    var listingDefer=libQ.defer();;
+
+            var mpdPlugin = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 
             if(uri.startsWith("genres://"))
             {
-                listingDefer=libQ.defer();
-
-                self.commandRouter.executeOnPlugin('music_service', 'mpd', 'listGenre', uri)
+               mpdPlugin.listGenre(uri)
                     .then(function(entries){
                     listingDefer.resolve(entries.navigation.lists[2].items);
                 }).fail(function(){
+                    listingDefer.reject(new Error());
+                })
+            }
+            else if(uri.startsWith("artists://"))
+            {
+                mpdPlugin.listArtist(uri,2,'')
+                    .then(function(entries){
+                        listingDefer.resolve(entries.navigation.lists[1].items);
+                    }).fail(function(){
+                    listingDefer.reject(new Error());
+                })
+            }
+            else if(uri.startsWith("albums://"))
+            {
+                mpdPlugin.listAlbumSongs(uri,2,'')
+                    .then(function(entries){
+                        listingDefer.resolve(entries.navigation.lists[0].items);
+                    }).fail(function(){
                     listingDefer.reject(new Error());
                 })
             }

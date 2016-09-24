@@ -1004,7 +1004,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						list.push({
 							type: 'folder',
 							title: name,
-                            service:'mpd',
+                                                        service:'mpd',
 							icon: 'fa fa-folder-open-o',
 							uri: s0 + path
 						});
@@ -1126,7 +1126,7 @@ ControllerMpd.prototype.search = function (query) {
                             service: 'mpd',
                             type: 'song',
                             title: artist,
-                            uri: 'search://artist/' + artist,
+                            uri: 'artists://' + nodetools.urlEncode(artist),
                             albumart: self.getAlbumArt({artist: artist},
                                 self.getParentFolder('/mnt/' + path),
                                 'fa-tags')
@@ -1169,7 +1169,7 @@ ControllerMpd.prototype.search = function (query) {
                             title: album,
                             artist: artist,
                             album:'',
-                            uri: 'search://album/' + album,
+                            uri: 'albums://' + nodetools.urlEncode(album),
                             albumart: self.getAlbumArt({artist: artist, album: album},
                                 self.getParentFolder('/mnt/' + path),'fa-tags')
 
@@ -1537,10 +1537,6 @@ ControllerMpd.prototype.syncGroupVolume = function (data) {
 
 ControllerMpd.prototype.explodeUri = function(uri) {
     var self = this;
-
-    console.log("EXPLODEURI: "+uri);
-
-
 
     var defer=libQ.defer();
 
