@@ -721,11 +721,21 @@ CoreCommandRouter.prototype.volumioConsume = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
+	var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
 
 	var queueArray=this.stateMachine.getQueue();
-	this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+	var defer=this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
 
+    defer.then(function()
+    {
+        self.pushToastMessage('success', self.getI18nString('COMMON.SAVE_QUEUE_SUCCESS') + name);
+    })
+    .fail(function () {
+        self.pushToastMessage('success', self.getI18nString('COMMON.SAVE_QUEUE_ERROR')+name);
+    });
+
+    return defer;
 };
 
 
@@ -738,15 +748,16 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 CoreCommandRouter.prototype.getI18nString = function (key) {
     var splitted=key.split('.');
 
-	console.log(key);
-	console.log(splitted)
-
-    if(splitted.length==1)
+	if(splitted.length==1)
     {
-        return this.i18nStrings[key];
+        if(this.i18nStrings[key]!==undefined)
+            return this.i18nStrings[key];
+        else return this.i18nStringsDefaults[key];
     }
     else {
-        return this.i18nStrings[splitted[0]][splitted[1]];
+        if(this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
+            return this.i18nStrings[splitted[0]][splitted[1]];
+        else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
     }
 };
 
@@ -757,6 +768,7 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     this.logger.info("Loading i18n strings for locale "+language_code);
 
     this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+    this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
 
     var categories=this.pluginManager.getPluginCategories();
     for(var i in categories)

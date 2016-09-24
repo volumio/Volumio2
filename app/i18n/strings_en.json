@@ -40,7 +40,15 @@
     "NETWORK_RESTART_SUCCESS": "Network successfully restarted",
     "WIRELESS_RESTART_TITLE": "Wireless restart",
     "WIRELESS_RESTART_ERROR": "Error while restarting wireless: ",
-    "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted"
+    "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted",
+    "HOTSPOT_SETTINGS":"Hotspot Settings",
+    "ENABLE_HOTSPOT":"Enable Hotspot",
+    "HOTSPOT_NAME":"Hotspot Name",
+    "HOTSPOT_PROTECTION":"Password Protected Hotspot",
+    "HOTSPOT_PASSWORD":"Hotspot Password",
+    "HOTSPOT_CHANNEL":"Hotspot Channel",
+    "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
+    "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",
@@ -60,6 +68,8 @@
     "REMOVE_QUEUE_TITLE":"Remove",
     "REMOVE_QUEUE_TEXT_1":"Remove ",
     "REMOVE_QUEUE_TEXT_2":" from queue",
+    "SAVE_QUEUE_SUCCESS":"Queue successfully saved to playlist ",
+    "SAVE_QUEUE_ERROR":"Cannot save queue to playlist ",
     "MY_MUSIC":"My Music",
     "CONFIGURATION_UPDATE":"Configuration update",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
@@ -80,6 +90,7 @@
     "ARTISTS":"Artists",
     "ALBUMS":"Albums",
     "GENRES":"Genres",
+    "TRACKS":"Tracks",
     "CANCEL":"Cancel"
   },
   "APPEARANCE":{
