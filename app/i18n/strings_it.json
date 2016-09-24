@@ -38,7 +38,15 @@
     "NETWORK_RESTART_SUCCESS": "Rete riavviata correttamente",
     "WIRELESS_RESTART_TITLE": "Rete Wireless",
     "WIRELESS_RESTART_ERROR": "Errore nel riavviare la rete wireless: ",
-    "WIRELESS_RESTART_SUCCESS": "Rete wireless riavviata correttamente"
+    "WIRELESS_RESTART_SUCCESS": "Rete wireless riavviata correttamente",
+	"HOTSPOT_SETTINGS":"Impostazioni dell'hotspot",
+	"ENABLE_HOTSPOT":"Attiva Hotspot",
+	"HOTSPOT_NAME":"Nome dell'Hotspot",
+	"HOTSPOT_PROTECTION":"Hotspot protetto",
+	"HOTSPOT_PASSWORD":"Password Hotspot",
+	"HOTSPOT_CHANNEL":"Canale Hotspot",
+	"HOTSPOT_CONF_ERROR":"Errore di configurazione dell'Hotspot",
+	"HOTSPOT_PW_LENGTH":"La password dell'hotspot deve contenere almeno 8 caratteri"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Aggiunta",
