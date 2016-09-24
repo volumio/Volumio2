@@ -650,7 +650,6 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
     var playlist = [];
     var filePath = folder + name;
 
-
     for(var i in data)
     {
         playlist.push({
@@ -665,8 +664,8 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
 
     fs.writeJson(filePath,playlist,function(err)
     {
-        self.logger.info("WRITE FILE "+err);
-        if(err) defer.reject(new Error('Cannot write playlist file'));
+        if(err)
+            defer.reject(new Error('Cannot write playlist file'));
         else defer.resolve();
     });
 

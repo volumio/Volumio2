@@ -1798,7 +1798,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                                 trackType: path.split('.').pop()
                             });
                         }
-                        
+
                     }
 
                 }

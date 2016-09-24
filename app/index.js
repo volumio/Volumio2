@@ -721,11 +721,21 @@ CoreCommandRouter.prototype.volumioConsume = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
+	var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
 
 	var queueArray=this.stateMachine.getQueue();
-	this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+	var defer=this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
 
+    defer.then(function()
+    {
+        self.pushToastMessage('success', self.getI18nString('COMMON.SAVE_QUEUE_SUCCESS') + name);
+    })
+    .fail(function () {
+        self.pushToastMessage('success', self.getI18nString('COMMON.SAVE_QUEUE_ERROR')+name);
+    });
+
+    return defer;
 };
 
 
