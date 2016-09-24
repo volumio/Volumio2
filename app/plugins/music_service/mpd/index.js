@@ -1237,7 +1237,6 @@ ControllerMpd.prototype.search = function (query) {
 		    list=[
                 {
                     "title": self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION'),
-                    "icon": "fa icon",
                     "availableListViews": [
                         "list",
                         "grid"
@@ -1253,7 +1252,6 @@ ControllerMpd.prototype.search = function (query) {
 		    var albList=
                 {
                     "title": self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION'),
-                    "icon": "fa icon",
                     "availableListViews": [
                         "list",
                         "grid"
@@ -1271,7 +1269,6 @@ ControllerMpd.prototype.search = function (query) {
 			var songList=
                 {
                     "title": self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION'),
-                    "icon": "fa icon",
                     "availableListViews": [
                         "list"
                     ],
