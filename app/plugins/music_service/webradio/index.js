@@ -745,10 +745,16 @@ ControllerWebradio.prototype.search = function (query) {
     memoryCache.wrap(uri, function (cacheCallback) {
         var promise=libQ.defer();
 
-        unirest.get(uri)
-            .end(function(xml)
+        var request= unirest.get(uri);
+
+        request.timeout(1000);
+        request.end(function(xml)
             {
-                if(xml.ok)
+                if(xml.error)
+                {
+                    promise.resolve(xml);
+                }
+                else if(xml.ok)
                 {
                     memoryCache.set(uri,xml);
                     promise.resolve(xml);
