@@ -647,19 +647,22 @@ CoreStateMachine.prototype.checkFavourites = function (state) {
 	};
 
 	if (state.uri != undefined && state.uri != null) {
-		var promise = this.commandRouter.playListManager.listFavourites();
+	    var promise = this.commandRouter.playListManager.listFavourites();
 		var self = this;
 		promise.then(function (favList) {
-			/**
+		    /**
 			 * WARNING: The favourites section uses music-library/ to start each uri
 			 * This is not used in mpd uris, so we are adding it at the beginning of each uri
 			 */
-			var list = favList.navigation.list;
+			var list = favList.navigation.lists[0].items;
 			var nFavs = list.length;
 			for (var i = 0; i < nFavs; i++) {
-				var match = state.uri;
-				if (match == favList.navigation.list[i].uri) {
+				var match = self.sanitizeUri(state.uri);
+                var listUri= self.sanitizeUri(list[i].uri);
+
+                if (match === listUri) {
 					response.favourite = true;
+                    break;
 				}
 			}
 			self.emitFavourites(response);
@@ -974,4 +977,8 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value) {
 
 
 
+}
+
+CoreStateMachine.prototype.sanitizeUri = function (uri) {
+    return uri.replace('music-library/', '').replace('mnt/', '');
 }
