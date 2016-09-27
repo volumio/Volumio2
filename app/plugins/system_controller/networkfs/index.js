@@ -134,14 +134,21 @@ ControllerNetworkfs.prototype.initShares = function () {
 	var keys = config.getKeys('NasMounts');
 	for (var i in keys) {
 		var key = keys[i];
-		self.mountShare(key);
+		self.mountShare({init:true, key:key});
 	}
 };
 
-ControllerNetworkfs.prototype.mountShare = function (shareid) {
+ControllerNetworkfs.prototype.mountShare = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
+	var shareid = data.key;
+	if (data.trial) {
+		trial = data.trial;
+	} else {
+		var trial = 0;
+	}
+
 
 	var sharename = config.get('NasMounts.' + shareid + '.name');
 	var fstype = config.get('NasMounts.' + shareid + '.fstype');
@@ -191,6 +198,17 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 			}
 			responsemessage = {status:"fail", reason:result.error}
 			defer.resolve(responsemessage);
+			if (data.init) {
+			if (trial < 4) {
+				trial++
+				self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
+				setTimeout(function () {
+				self.mountShare({init:true, key:data.key, trial:trial});
+				}, 5000);
+			} else {
+				self.logger.info("Cannot mount NAS at system boot, trial number "+trial+" ,stopping");
+			}
+			}
 		} else {
 			responsemessage = {status:"success"}
 			defer.resolve(responsemessage);
