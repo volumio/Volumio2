@@ -120,13 +120,13 @@ ControllerNetwork.prototype.getUIConfig = function () {
 			}
 
 			if (config.get('hotspot_protection') == undefined) {
-				uiconf.sections[4].content[2].value = false;
+				uiconf.sections[4].content[2].value = true;
 			} else {
 				uiconf.sections[4].content[2].value = config.get('hotspot_protection');
 			}
 
 			if (config.get('hotspot_password') == undefined) {
-				uiconf.sections[4].content[3].value = '';
+				uiconf.sections[4].content[3].value = 'volumio2';
 			} else {
 				uiconf.sections[4].content[3].value = config.get('hotspot_password');
 			}
