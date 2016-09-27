@@ -6,6 +6,7 @@ var config = new (require('v-conf'))();
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
 var crypto = require('crypto');
+var calltrials = 0;
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -471,7 +472,13 @@ ControllerSystem.prototype.callHome = function () {
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
-					self.logger.info('Cannot call home: '+error);
+					if (calltrials < 3) {
+					setTimeout(function () {
+						self.logger.info('Cannot call home: '+error+ ' retrying in 5 seconds, trial '+calltrials);
+						calltrials++
+						self.callHome();
+					}, 10000);
+					}
 				}
 				else self.logger.info('Volumio called home');
 
