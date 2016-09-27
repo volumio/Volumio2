@@ -18,6 +18,7 @@ function ControllerAlsa(context) {
 }
 
 ControllerAlsa.prototype.onVolumioStart = function () {
+	var self = this;
 
 	var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
 
@@ -35,11 +36,17 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
 	var client1 = io.connect(socketURL, options);
 
-	var self = this;
-	client1.on('connect', function (data) {
-		self.logger.info("Setting volume on startup at " + volumeval);
-		client1.emit('volume', volumeval);
+
+
+	setTimeout(function () {
+	exec('/volumio/app/plugins/system_controller/volumio_command_line_client/volumio.sh volume '+volumeval, { uid:1000, gid:1000, encoding: 'utf8' }, function (error, stdout, stderr) {
+		if (error) {
+			self.logger.error('Cannot set startup volume: '+error);
+		} else {
+			self.logger.info("Setting volume on startup at " + volumeval);
+		}
 	});
+	}, 5000);
 
 
 	if (this.config.has('outputdevice') == false) {
