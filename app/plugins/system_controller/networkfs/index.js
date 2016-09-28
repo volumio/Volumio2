@@ -324,7 +324,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
 
 		saveshare.then(function () {
-		var mountshare = self.mountShare(uuid);
+		var mountshare = self.mountShare({key:uuid});
 		if (mountshare != undefined) {
 			mountshare.then(function (data) {
 				var responsemessage = {};
