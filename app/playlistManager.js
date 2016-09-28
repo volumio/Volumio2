@@ -61,9 +61,14 @@ PlaylistManager.prototype.deletePlaylist = function (name) {
 			defer.resolve({success: false, reason: 'Playlist does not exist'});
 		else {
 			fs.unlink(filePath, function (err) {
-				if (err)
+				if (err) {
 					defer.resolve({success: false});
-				else defer.resolve({success: true});
+				} else {
+					var playlists = self.listPlaylist();
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'),
+						name + ' ' +  self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'));
+					defer.resolve(playlists);
+				}
 			});
 		}
 

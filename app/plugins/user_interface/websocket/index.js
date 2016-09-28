@@ -633,8 +633,20 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.deletePlaylist(data.value);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushDeletePlaylist', data);
+					selfConnWebSocket.emit('pushListPlaylist', data);
+					var response=self.musicLibrary.executeBrowseSource('playlists');
+
+					if (response != undefined) {
+						response.then(function (result) {
+							selfConnWebSocket.emit('pushBrowseLibrary', result);
+						})
+							.fail(function () {
+								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							});
+					}
 				});
+
+
 
 
 			});
