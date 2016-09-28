@@ -163,7 +163,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	var mountid = mountidraw.replace(/ /g,"\\ ");
 
 	if (fstype == "cifs") {
-		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
+		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path.replace(' ', '\ ');;
 		//Password-protected mount
 		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
 			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
@@ -177,7 +177,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 		}
 
 	} else { // nfs
-		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
+		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path.replace(' ', '\ ');;
 		if (options) {
 			fsopts ="ro,soft,noauto,"+options;
 		} else {
@@ -755,13 +755,4 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	return defer.promise;
 };
 
-ControllerNetworkfs.prototype.shareCredentialCheck = function (data) {
-	var self = this;
-
-	//TODO FINISH
-
-	var sharename = config.get('NasMounts.' + shareid + '.name');
-
-	var shares = execSync("/bin/echo volumio | echo volumio | smbclient //DISKSTATION/flac", { uid: 1000, gid: 1000, encoding: 'utf8' });
-}
 
