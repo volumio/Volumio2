@@ -284,7 +284,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             }
         }
 
-        if(remainingTime<=500 && this.askedForPrefetch==true && this.simulateStopStartDone==false)
+        if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
         {
 
             this.simulateStopStartDone=true;
@@ -442,38 +442,45 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     this.currentSeek = stateService.seek;
                 }
 
-                if (stateService.duration !== undefined) {
-                    trackBlock.duration = stateService.duration;
+                if(trackBlock!==undefined)
+                {
+                    if (stateService.duration !== undefined) {
+                        trackBlock.duration = stateService.duration;
+                    }
+
+                    if (stateService.samplerate !== undefined && trackBlock.samplerate === undefined) {
+                        trackBlock.samplerate = stateService.samplerate;
+                    }
+
+                    if (stateService.bitdepth !== undefined && trackBlock.bitdepth === undefined) {
+                        trackBlock.bitdepth = stateService.bitdepth;
+                    }
+
+                    if (stateService.channels !== undefined && trackBlock.channels === undefined) {
+                        trackBlock.channels = stateService.channels;
+                    }
+
+                    if (stateService.title !== undefined)
+                    {
+                        if(trackBlock.service==='webradio'  || trackBlock.name === undefined)
+                            trackBlock.name = stateService.title;
+
+                    }
+
+                    if (stateService.artist !== undefined && trackBlock.artist === undefined) {
+                        trackBlock.artist = stateService.artist;
+                    }
+
+                    if (stateService.album !== undefined && trackBlock.album === undefined) {
+                        trackBlock.album = stateService.album;
+                    }
+
+                    if (stateService.albumart !== undefined && trackBlock.albumart === undefined) {
+                        trackBlock.albumart = stateService.albumart;
+                    }
                 }
 
-                if (stateService.samplerate !== undefined && trackBlock.samplerate === undefined) {
-                    trackBlock.samplerate = stateService.samplerate;
-                }
-
-                if (stateService.bitdepth !== undefined && trackBlock.bitdepth === undefined) {
-                    trackBlock.bitdepth = stateService.bitdepth;
-                }
-
-                if (stateService.channels !== undefined && trackBlock.channels === undefined) {
-                    trackBlock.channels = stateService.channels;
-                }
-
-                if (stateService.title !== undefined && trackBlock.name === undefined) {
-                    trackBlock.name = stateService.title;
-                }
-
-                if (stateService.artist !== undefined && trackBlock.artist === undefined) {
-                    trackBlock.artist = stateService.artist;
-                }
-
-                if (stateService.album !== undefined && trackBlock.album === undefined) {
-                    trackBlock.album = stateService.album;
-                }
-
-                if (stateService.albumart !== undefined && trackBlock.albumart === undefined) {
-                    trackBlock.albumart = stateService.albumart;
-                }
-
+                this.currentStatus='play';
                 this.pushState().fail(this.pushError.bind(this));
             }
         }
@@ -530,24 +537,27 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
-
-            if(this.currentConsume!==undefined && this.currentConsume==true)
+            if(trackBlock!==undefined && trackBlock.service!=='webradio')
             {
-                this.playQueue.removeQueueItem(this.currentPosition);
-            }
-            else
-            {
-                if(this.currentRandom!==undefined && this.currentRandom===true)
+                if(this.currentConsume!==undefined && this.currentConsume==true)
                 {
-                    this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
-                    this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                    this.playQueue.removeQueueItem(this.currentPosition);
                 }
-                else {
-                    if(this.currentPosition ==null || this.currentPosition===undefined)
-                        this.currentPosition=0;
-                    else this.currentPosition++;
+                else
+                {
+                    if(this.currentRandom!==undefined && this.currentRandom===true)
+                    {
+                        this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
+                        this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                    }
+                    else {
+                        if(this.currentPosition ==null || this.currentPosition===undefined)
+                            this.currentPosition=0;
+                        else this.currentPosition++;
+                    }
                 }
             }
+
 
             this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
