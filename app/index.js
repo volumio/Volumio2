@@ -397,11 +397,72 @@ CoreCommandRouter.prototype.playPlaylist = function (data) {
 
 // Utility functions ---------------------------------------------------------------------------------------------
 
+/**
+ * Returns as an object the configuration file for a given plugin
+ * @param category
+ * @param plugin
+ * @returns {*|string}
+ */
+CoreCommandRouter.prototype.getPlugConf = function (category, plugin) {
+	var cName = category;
+	var name = plugin;
+	try{
+		var config = fs.readJsonSync(("/data/configuration/" + cName + "/" +
+			name + "/" + "config.json"), 'utf-8',
+			{throws: false});
+	}
+	catch(e) {
+		var config ="";
+	}
+	return config;
+}
+
+/**
+ * Returns an array of plugins with status and configuration included, given a category
+ * @param category
+ * @param array
+ * @returns {Array}
+ */
+CoreCommandRouter.prototype.catPluginsConf = function (category, array) {
+	var self = this;
+	var plugins = array;
+	var plugConf = [];
+	for (var j = 0; j < plugins.length; j++) {
+		var name = plugins[j].name;
+		var status = plugins[j].enabled;
+		var config = self.getPlugConf(category, name);
+		plugConf.push({name, status, config});
+	}
+	return plugConf;
+}
+
+/**
+ * Returns the configuration of every plugins, sorted by category
+ * @returns {Array}
+ */
 CoreCommandRouter.prototype.getPluginsConf = function () {
 	var self = this;
 	var paths = self.pluginManager.getPluginsMatrix();
+	var confs = [];
+	for (var i = 0; i < paths.length; i++){
+		var cName = paths[i].cName;
+		var plugins = paths[i].catPlugin;
+		var plugConf = self.catPluginsConf(cName, plugins);
+		confs.push({cName, plugConf});
+	}
+	return confs;
+}
 
-	return paths;
+/**
+ * Writes the configuration of every plugin into a json file
+ */
+CoreCommandRouter.prototype.writePluginsConf = function () {
+	var self = this;
+	var confs = self.getPluginsConf();
+
+	var file = "/data/configuration/generalConfig.json";
+	fs.outputJson(file, confs, function (err) {
+		console.log(err)})
 }
 
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {

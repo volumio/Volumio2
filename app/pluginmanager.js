@@ -313,6 +313,11 @@ PluginManager.prototype.getPluginNames = function (category) {
 	return names;
 };
 
+/**
+ * returns an array of plugin's names, given their category
+ * @param category
+ * @returns {Array}
+ */
 PluginManager.prototype.getAllPlugNames = function (category) {
 	var self = this;
 
@@ -328,6 +333,10 @@ PluginManager.prototype.getAllPlugNames = function (category) {
 	return plugins;
 }
 
+/**
+ * Returns an array of plugins with status, sorted by category
+ * @returns {Array}
+ */
 PluginManager.prototype.getPluginsMatrix = function () {
 	var self = this;
 
@@ -343,10 +352,8 @@ PluginManager.prototype.getPluginsMatrix = function () {
 			var name = plugNames[j];
 			var enabled = self.isEnabled(catNames[i], plugNames[j]);
 			catPlugin.push({name, enabled});
-			console.log(catPlugin);
 		}
 		plugins.push({cName, catPlugin});
-		console.log(plugins);
 	}
 	return plugins;
 }

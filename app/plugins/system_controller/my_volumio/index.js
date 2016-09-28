@@ -25,7 +25,7 @@ myVolumio.prototype.onStart = function ()
 {
     var self = this;
     var defer = libQ.defer();
-    var paths = self.commandRouter.getPluginsConf();
+    self.commandRouter.writePluginsConf();
 
     return defer.promise;
 
