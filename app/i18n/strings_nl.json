@@ -22,7 +22,7 @@
     "MIXER_CONTROLS_UPDATE":"Mixer Controls instellingen aangepast",
     "I2S_DAC_ACTIVATED":"I2S DAC ingeschakeld",
     "I2S_DAC_ACTIVATED_MESSAGE":"is ingeschakeld, herstart het systeem om de verandering in werking te laten treden",
-    "I2S_DAC_DEACTIVATED":"I2S DAC Uit Gezet",
+    "I2S_DAC_DEACTIVATED":"I2S DAC uitgeschakeld",
     "I2S_DAC_DEACTIVATED_MESSAGE":"is uitgeschakeld, herstart het systeem om de verandering in werking te laten treden"
   },
   "NETWORK": {
