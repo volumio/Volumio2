@@ -2463,7 +2463,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
                     var title = self.searchFor(lines, i + 1, 'Title:');
-                    var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle');
+                    var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-dot-circle');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
                     if (title) {
@@ -2623,7 +2623,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
                             var title = self.searchFor(lines, i + 1, 'Title:');
-                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o');
+                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-dot-circle-o');
 
                             if (title) {
                                 title = title;
@@ -2656,7 +2656,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                                         service:'mpd',
                                         type: 'folder',
                                         title: album,
-                                        albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o'),
+                                        albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-dot-circle-o'),
                                         uri: uri
                                     });
                             }
@@ -2808,7 +2808,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
                             var title = self.searchFor(lines, i + 1, 'Title:');
-                            var albumart = self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags');
+                            var albumart = self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-tags');
 
                             if (title) {
                                 title = title;
