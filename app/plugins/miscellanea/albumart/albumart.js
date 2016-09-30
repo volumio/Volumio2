@@ -237,13 +237,12 @@ var processRequest = function (web, path) {
 	}
 
 	if (path != undefined) {
-
+        path=nodetools.urlDecode(path);
         if(path.startsWith('/'))
             path = '/mnt' + path;
 		else path = '/mnt/' + path;
 
-        logger.info(path);
-		if (fs.existsSync(path)) {
+        if (fs.existsSync(path)) {
             var stats = fs.statSync(path);
             var isFolder=false;
             var imageSize='extralarge';
