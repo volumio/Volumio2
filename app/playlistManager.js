@@ -446,11 +446,12 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         var output = data.concat(entries);
                         console.log(filePath)
                         fs.writeJson(filePath, output, function (err) {
-                            if (err)
+                            if (err!==undefined && err!==null)
                                 defer.resolve({success: false});
-                            else
+                            else {
                                 var favourites = self.commandRouter.checkFavourites({uri: path});
-                            defer.resolve(favourites);
+                                defer.resolve({});
+                            }
                         })
                     }
                 });

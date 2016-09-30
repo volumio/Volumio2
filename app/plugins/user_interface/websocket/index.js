@@ -622,6 +622,7 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.createPlaylist(data.name);
 				returnedData.then(function (data) {
+                    selfConnWebSocket.emit('pushListPlaylist', data);
 					selfConnWebSocket.emit('pushCreatePlaylist', data);
 				});
 
@@ -663,11 +664,16 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addToPlaylist', function (data) {
-				var selfConnWebSocket = this;
+			    var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
+                var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushAddToPlaylist', data);
+                    var returnedListData = self.commandRouter.playListManager.listPlaylist();
+                    returnedListData.then(function (listdata) {
+                        selfConnWebSocket.emit('pushListPlaylist', listdata);
+                    });
+
+                    selfConnWebSocket.emit('pushAddToPlaylist', data);
 				});
 
 			});
