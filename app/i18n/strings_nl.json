@@ -20,9 +20,9 @@
     "NO_HARDWARE_MIXER":"Geen Hardware Mixer Beschikbaar",
     "MIXER_CONTROLS":"Mixer Controls",
     "MIXER_CONTROLS_UPDATE":"Mixer Controls instellingen aangepast",
-    "I2S_DAC_ACTIVATED":"I2S DAC Aan Gezet",
-    "I2S_DAC_ACTIVATED_MESSAGE":"is aangezet, herstart het systeem om de verandering in werking te laten treden",
-    "I2S_DAC_DEACTIVATED":"I2S DAC Uit Gezet",
+    "I2S_DAC_ACTIVATED":"I2S DAC ingeschakeld",
+    "I2S_DAC_ACTIVATED_MESSAGE":"is ingeschakeld, herstart het systeem om de verandering in werking te laten treden",
+    "I2S_DAC_DEACTIVATED":"I2S DAC uitgeschakeld",
     "I2S_DAC_DEACTIVATED_MESSAGE":"is uitgeschakeld, herstart het systeem om de verandering in werking te laten treden"
   },
   "NETWORK": {
@@ -44,12 +44,12 @@
   "ADDED_TITLE":"Toegevoegd",
   "ADDED_TO_PLAYLIST":" aan Afspeellijst ",
   "ADDED_TO_FAVOURITES":" aan Favorieten ",
-  "REMOVE_ERROR":"Kan niet verwijderen",
+  "REMOVE_ERROR":"Kon niet verwijderd worden",
   "REMOVE_SUCCESS":"Verwijderd"
   },
   "COMMON":{
     "SAVE":"Opslaan",
-    "DISABLED":"Uitgeschakelt",
+    "DISABLED":"Gedeaktiveerd",
     "PLAY_TITLE":"Afspelen",
     "PLAY_TEXT":"Begonnen met afspelen van ",
     "ADD_QUEUE_TITLE":"Toegevoegd aan wachtrij",

@@ -39,8 +39,8 @@ var searchOnline = function (defer, web) {
 
 	var artist, album, resolution;
 
-	if (web != undefined) {
-		var splitted = nodetools.urlDecode(web).split('/');
+    if (web != undefined) {
+		var splitted = web.split('/');
 
 		if (splitted.length < 3) {
 			defer.reject(new Error('The web link ' + web + ' is malformed'));
@@ -82,11 +82,13 @@ var searchOnline = function (defer, web) {
 	var stats = fs.statSync(infoPath)
 	var fileSizeInBytes = stats["size"]
 
-	if (fileSizeInBytes > 0)
+    if (fileSizeInBytes > 0)
 		infoJson = fs.readJsonSync(infoPath, {throws: false})
 
-	if (infoJson[resolution] == undefined) {
-		albumart(artist, album, resolution, function (err, url) {
+
+    if (infoJson[resolution] == undefined) {
+
+		albumart(nodetools.urlDecode(artist), nodetools.urlDecode(album), nodetools.urlDecode(resolution), function (err, url) {
 			if (err) {
 				albumart(artist, function (err, url) {
 					if (err) {
@@ -235,13 +237,12 @@ var processRequest = function (web, path) {
 	}
 
 	if (path != undefined) {
-
+        path=nodetools.urlDecode(path);
         if(path.startsWith('/'))
             path = '/mnt' + path;
 		else path = '/mnt/' + path;
 
-        logger.info(path);
-		if (fs.existsSync(path)) {
+        if (fs.existsSync(path)) {
             var stats = fs.statSync(path);
             var isFolder=false;
             var imageSize='extralarge';
@@ -331,9 +332,23 @@ var processRequest = function (web, path) {
  *    To achieve this assign this function to a path like /:artist/:album/:resolution
  **/
 var processExpressRequest = function (req, res) {
+    var rawQuery=req._parsedUrl.query;
+
 	var web = req.query.web;
 	var path = req.query.path;
     var icon = req.query.icon;
+
+    var splitted=rawQuery.split('&');
+    for(var i in splitted)
+    {
+        var itemSplitted=splitted[i].split('=');
+        if(itemSplitted[0]==='web')
+            web=itemSplitted[1];
+        else if(itemSplitted[0]==='path')
+            path=itemSplitted[1];
+        else if(itemSplitted[0]==='icon')
+            icon=itemSplitted[1];
+    }
 
     var starttime=Date.now();
 	var promise = processRequest(web, path);

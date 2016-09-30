@@ -1388,7 +1388,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path,icon) {
 	var artist, album;
 
 	if (data != undefined && data.path != undefined) {
-		path = data.path;
+		path = this.sanitizeUri(data.path);
 	}
 
 	var web;
