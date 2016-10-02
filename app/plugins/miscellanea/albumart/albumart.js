@@ -372,7 +372,7 @@ var processExpressRequest = function (req, res) {
 
 
 				res.setHeader('Cache-Control', 'public, max-age=2628000')
-                res.sendFile(__dirname + '/icons/'+icon+'.png');
+                res.sendFile(__dirname + '/icons/'+icon+'.jpg');
 			} else {
 			    res.setHeader('Cache-Control', 'public, max-age=2628000')
 			    res.sendFile(__dirname + '/default.png');
