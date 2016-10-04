@@ -611,6 +611,7 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
 			var apply2 = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
 			self.updateVolumeSettings();
+			var apply3 = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
 		}
 	});
 }
