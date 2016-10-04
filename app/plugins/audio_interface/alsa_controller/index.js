@@ -161,10 +161,66 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			var mixers = self.getMixerControls(value);
 			var activemixer = self.config.get('mixer');
+			var activemixer_type = self.config.get('mixer_type');
 
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].id', 'mixer');
+			console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'+activemixer_type)
+
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', 'Mixer Control');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
+
+			if (activemixer_type === 'Hardware') {
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					value: 'Hardware',
+					label: 'Hardware'
+				});
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+					value: 'Hardware',
+					label: 'Hardware'
+				});
+
+
+			}
+			if (activemixer_type === 'Software') {
+
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					value: 'None',
+					label: 'None'
+				});
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					value: 'Software',
+					label: 'Software'
+				});
+
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+					value: 'Software',
+					label: 'Software'
+				});
+
+			}
+			if (activemixer_type === 'None') {
+
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					value: 'None',
+					label: self.commandRouter.getI18nString('COMMON.NONE')
+				});
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+					value: 'None',
+					label: self.commandRouter.getI18nString('COMMON.NONE')
+				});
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					value: 'Software',
+					label: 'Software'
+				});
+
+
+
+			}
+
+
+
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].id', 'mixer');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].element', 'select');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_CONTROL_NAME'));
 
 
 			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
@@ -172,24 +228,24 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				if (activemixer){
 					if(activemixer === 'SoftMaster') {
 						activemixer = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL');
-						self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+						self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[1].options', {
 							value: "SoftMaster",
 							label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL')
 						});
 					}
-					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value', {
 						value: activemixer,
 						label: activemixer
 					});
 				} else {
-					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+					self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value', {
 						value: mixers[0],
 						label: mixers[0]
 					});
 				}
 
 				for(var i in mixers) {
-					self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+					self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[1].options', {
 						value: mixers[i],
 						label: mixers[i]
 					});
@@ -197,7 +253,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 
 			} else {
-				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[1].options', {
 					value: "SoftMaster",
 					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTVOL')
 				});
@@ -223,20 +279,20 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[1].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[1].content[3].options'), value));
 
 			value = self.config.get('volumestart');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
-
-			value = self.config.get('volumemax');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-			value = self.config.get('volumesteps');
+			value = self.config.get('volumemax');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
-			value = self.config.get('volumecurvemode');
+			value = self.config.get('volumesteps');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+
+			value = self.config.get('volumecurvemode');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
 			defer.resolve(uiconf);
 		})
 		.fail(function()
@@ -363,6 +419,8 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	var self = this;
 
+	console.log(data)
+
 	var defer = libQ.defer();
 
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
@@ -370,6 +428,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
 	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
+	self.setConfigParam({key: 'mixer_type', value: data.mixer_type.value});
 
 	self.logger.info('Volume configurations have been set');
 	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', data.mixer.value);
@@ -547,10 +606,19 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 				if (mixers[0]) {
 					defaultmixer = mixers[0].toString()
 					self.logger.info('Setting mixer ' + defaultmixer + ' for card ' + currentcardname);
+					if (this.config.has('mixer_type') == false) {
+						this.config.addConfigValue('mixer_type', 'string', 'Hardware');
+					} else {
+						self.setConfigParam({key: 'mixer_type', value: 'Hardware'});
+					}
 
 				} else {
 					self.logger.info('Device ' + audiodevice + ' does not have any Mixer Control Available, setting a softvol device');
-					self.enableSoftMixer(audiodevice);
+					if (this.config.has('mixer_type') == false) {
+						this.config.addConfigValue('mixer_type', 'string', 'Software');
+					} else {
+						self.setConfigParam({key: 'mixer_type', value: 'Software'});
+					}
 				}
 			}
 		} catch (e) {}

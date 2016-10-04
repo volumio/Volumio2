@@ -25,7 +25,9 @@
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
     "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
     "DOP":"DSD over PCM (DoP)",
-    "SOFTVOL":"Software Volume Control"
+    "SOFTVOL":"Software Volume Control",
+    "MIXER_CONTROL_NAME":"Mixer Control Name",
+    "MIXER_TYPE":"Mixer Type"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -91,7 +93,8 @@
     "ALBUMS":"Albums",
     "GENRES":"Genres",
     "TRACKS":"Tracks",
-    "CANCEL":"Cancel"
+    "CANCEL":"Cancel",
+    "NONE":"None"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
