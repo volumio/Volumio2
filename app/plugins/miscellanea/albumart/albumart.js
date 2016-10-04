@@ -238,6 +238,9 @@ var processRequest = function (web, path) {
 
 	if (path != undefined) {
         path=nodetools.urlDecode(path);
+
+        path=sanitizeUri(path);
+
         if(path.startsWith('/'))
             path = '/mnt' + path;
 		else path = '/mnt/' + path;
@@ -338,17 +341,21 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
 
-    var splitted=rawQuery.split('&');
-    for(var i in splitted)
+    if(rawQuery!==undefined)
     {
-        var itemSplitted=splitted[i].split('=');
-        if(itemSplitted[0]==='web')
-            web=itemSplitted[1];
-        else if(itemSplitted[0]==='path')
-            path=itemSplitted[1];
-        else if(itemSplitted[0]==='icon')
-            icon=itemSplitted[1];
+        var splitted=rawQuery.split('&');
+        for(var i in splitted)
+        {
+            var itemSplitted=splitted[i].split('=');
+            if(itemSplitted[0]==='web')
+                web=itemSplitted[1];
+            else if(itemSplitted[0]==='path')
+                path=itemSplitted[1];
+            else if(itemSplitted[0]==='icon')
+                icon=itemSplitted[1];
+        }
     }
+
 
     var starttime=Date.now();
 	var promise = processRequest(web, path);
@@ -365,13 +372,17 @@ var processExpressRequest = function (req, res) {
 
 
 				res.setHeader('Cache-Control', 'public, max-age=2628000')
-                res.sendFile(__dirname + '/icons/'+icon+'.png');
+                res.sendFile(__dirname + '/icons/'+icon+'.jpg');
 			} else {
 			    res.setHeader('Cache-Control', 'public, max-age=2628000')
 			    res.sendFile(__dirname + '/default.png');
 			}
 		});
 };
+
+var sanitizeUri = function (uri) {
+    return uri.replace('music-library/', '').replace('mnt/', '');
+}
 
 
 module.exports.processExpressRequest = processExpressRequest;

@@ -10,6 +10,7 @@ var convert = require('convert-seconds');
 var pidof = require('pidof');
 var parser = require('cue-parser');
 var mm = require('musicmetadata');
+var os = require('os');
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -808,8 +809,14 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 				return console.log(err);
 			}
 			var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
+			var mixer = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mixer');
+			var mixerdev = '';
+			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
+				mixerdev = 'hw:'+outdev;
 				outdev = 'hw:'+outdev+',0';
+			} else {
+				mixerdev = 'SoftMaster';
 			}
 
 			var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
@@ -824,7 +831,17 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 			var conf6 = conf5.replace("${dop}", dop);
 
-			fs.writeFile("/etc/mpd.conf", conf6, 'utf8', function (err) {
+
+			if (mixer) {
+				if (mixer.length > 0) {
+					mixerstrings = 'mixer_device    "'+ mixerdev + '"' + os.EOL + '                mixer_control   "'+ mixer +'"'+ os.EOL + '                mixer_type      "hardware"'+ os.EOL;
+				}
+			}
+
+
+			var conf7 = conf6.replace("${mixer}", mixerstrings);
+
+			fs.writeFile("/etc/mpd.conf", conf7, 'utf8', function (err) {
 				if (err) return console.log(err);
 			});
 		});
@@ -942,7 +959,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var promise = self.commandRouter.playListManager.getPlaylistContent(name);
 	promise.then(function (data) {
-		
+
 		var n = data.length;
 		for (var i = 0; i < n; i++) {
 			var ithdata = data[i];
@@ -2463,7 +2480,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
                     var title = self.searchFor(lines, i + 1, 'Title:');
-                    var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle');
+                    var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-dot-circle');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
                     if (title) {
@@ -2623,7 +2640,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
                             var title = self.searchFor(lines, i + 1, 'Title:');
-                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o');
+                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-dot-circle-o');
 
                             if (title) {
                                 title = title;
@@ -2656,7 +2673,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                                         service:'mpd',
                                         type: 'folder',
                                         title: album,
-                                        albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path),'fa-dot-circle-o'),
+                                        albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-dot-circle-o'),
                                         uri: uri
                                     });
                             }
@@ -2808,7 +2825,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
                             var title = self.searchFor(lines, i + 1, 'Title:');
-                            var albumart = self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags');
+                            var albumart = self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'fa-tags');
 
                             if (title) {
                                 title = title;
