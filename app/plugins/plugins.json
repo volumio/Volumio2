@@ -39,6 +39,16 @@
         "type": "string",
         "value": "STOPPED"
       }
+    },
+    "last_100": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "audio_interface": {
