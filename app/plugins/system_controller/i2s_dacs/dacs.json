@@ -6,6 +6,7 @@
     {"id":"aoide-dacii","name":"Aoide DACII","overlay":"aoide-dacii","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dacplus","name":"Hifiberry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"HiFiBerry DAC+","i2c_address":"4d","needsreboot":"no"},
+	{"id":"hifiberry-dacpro","name":"Hifiberry DAC Pro","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
     {"id":"hifiberry-dac","name":"Hifiberry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-amp","name":"Hifiberry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-digi","name":"Hifiberry DIGI","overlay":"hifiberry-digi","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
