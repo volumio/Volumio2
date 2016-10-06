@@ -569,10 +569,12 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var self = this;
 
+
 	var mixers = [];
 	var currentcardname = '';
 	var defaultmixer = '';
 	var match = '';
+	var mixertpye = '';
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
@@ -600,20 +602,16 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 			if (cardname == currentcardname){
 				defaultmixer = carddata.cards[n].defaultmixer;
 				self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+
 			}
 		}
 	}
 	if (defaultmixer) {
-
+		this.mixertype = 'Hardware';
 	} else {
 		try {
-			if (this.config.has('outputdevice') == false) {
-				var audiodevice = "0";
-			} else {
-				var audiodevice = this.config.get('outputdevice')
-			}
 
-			var array = execSync('amixer -c '+audiodevice+' scontents', { encoding: 'utf8' })
+			var array = execSync('amixer -c '+device+' scontents', { encoding: 'utf8' })
 			var genmixers = array.toString().split("Simple mixer control");
 
 
@@ -630,24 +628,22 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 				if (mixers[0] && mixers[0] != 'SoftMaster') {
 					defaultmixer = mixers[0].toString()
 					self.logger.info('Setting mixer ' + defaultmixer + ' for card ' + currentcardname);
-					if (this.config.has('mixer_type') == false) {
-						this.config.addConfigValue('mixer_type', 'string', 'Hardware');
-					} else {
-						self.setConfigParam({key: 'mixer_type', value: 'Hardware'});
-					}
+					this.mixertype = 'Hardware';
+
 
 				} else {
-					self.logger.info('Device ' + audiodevice + ' does not have any Mixer Control Available, setting a softvol device');
-					if (this.config.has('mixer_type') == false) {
-						this.config.addConfigValue('mixer_type', 'string', 'Software');
-					} else {
-						self.setConfigParam({key: 'mixer_type', value: 'Software'});
-					}
+					self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
+					this.mixertype = 'Software';
 					defaultmixer = 'SoftMaster';
-					self.enableSoftMixer(audiodevice);
+					self.enableSoftMixer(device);
 				}
 			}
 		} catch (e) {}
+	}
+	if (this.config.has('mixer_type') == false) {
+		this.config.addConfigValue('mixer_type', 'string', this.mixertype);
+	} else {
+		self.setConfigParam({key: 'mixer_type', value: this.mixertype});
 	}
 	if (this.config.has('mixer') == false) {
 		this.config.addConfigValue('mixer', 'string', defaultmixer);
