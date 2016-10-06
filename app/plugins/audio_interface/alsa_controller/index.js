@@ -69,6 +69,8 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
 
+	self.checkMixer();
+
 	return libQ.resolve();
 };
 
@@ -94,6 +96,8 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			value = self.config.get('outputdevice');
 			if (value == undefined){
 				value = 0;
+			} else if (value == 'softvolume') {
+				value = self.config.get('softvolumenumber');
 			}
 
 
@@ -426,8 +430,6 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	var self = this;
 
-	console.log(data)
-
 	var defer = libQ.defer();
 
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
@@ -655,6 +657,45 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 }
 
+ControllerAlsa.prototype.checkMixer  = function () {
+	var self = this;
+
+	var mixer_tpye = self.config.get('mixer_type');
+	var outputdevice = self.config.get('outputdevice');
+
+
+
+	if (mixer_tpye === 'Hardware') {
+		var mixers = self.getMixerControls(outputdevice);
+
+		if (mixers.length > 0) {
+
+			if  (mixers[0] === 'SoftMaster') {
+				self.logger.info('Hardware Mixer mismatch, hardware mixer type but softmixer selected, correcting ');
+				self.setConfigParam({key: 'mixer_type', value: 'Software'});
+				self.setConfigParam({key: 'mixer', value: 'SoftMaster'});
+				self.setConfigParam({key: 'mixer_type', value: 'Software'});
+				if (this.config.has('softvolumenumber') == false) {
+					self.config.addConfigValue('softvolumenumber', 'string', outputdevice);
+				} else {
+					self.setConfigParam({key: 'softvolumenumber', value: outputdevice});
+				}
+				self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'SoftMaster');
+				self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
+				self.updateVolumeSettings();
+				//Restarting MPD, this seems needed only on first boot
+				setTimeout(function () {
+					self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+				}, 1500);
+			}
+		} else {
+			self.logger.info('Hardware Mixer selected but no Hardware mixer available, detecting default mixer');
+			self.setDefaultMixer(outputdevice);
+		}
+
+	}
+}
+
 ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 	var self = this;
 
@@ -691,9 +732,9 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 
 	fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
 		if (err) {
-			console.log('Cannot write /etc/asound.conf: '+err)
+			self.logger.info('Cannot write /etc/asound.conf: '+err)
 		} else {
-			console.log('Asound.conf file written');
+			self.logger.info('Asound.conf file written');
 			var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid:1000, gid: 1000, encoding: 'utf8' });
 			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
 			self.setConfigParam({key: 'mixer', value: "SoftMaster"});
@@ -703,6 +744,10 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
 			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
 			self.updateVolumeSettings();
+			//Restarting MPD, this seems needed only on first boot
+			setTimeout(function () {
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+			}, 1500);
 		}
 	});
 }
@@ -718,9 +763,9 @@ ControllerAlsa.prototype.disableSoftMixer  = function (data) {
 
 	fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
 		if (err) {
-			console.log('Cannot write /etc/asound.conf: '+err)
+			self.logger.info('Cannot write /etc/asound.conf: '+err)
 		} else {
-			console.log('Asound.conf file written');
+			self.logger.info('Asound.conf file written');
 			var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid:1000, gid: 1000, encoding: 'utf8' });
 			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
 			self.updateVolumeSettings();
@@ -843,11 +888,9 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 			i2sarray.push(i2scard)
 		}
 		var response = {'devices':{'active':outdevicename,'available':devicesarray},'i2s':{'enabled':i2sstatus.enabled,'active':i2sdevice,'available':i2sarray}};
-		console.log(response)
 		defer.resolve(response);
 	} else {
 		var response = {'devices':devicesarray}
-		console.log(response)
 		defer.resolve(response);
 	}
 
