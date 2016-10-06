@@ -289,9 +289,15 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 				}
 
 				fs.writeJson(filePath, data, function (err) {
-					if (err)
+					if (err) {
+						self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
 						defer.resolve({success: false});
-					else defer.resolve({success: true});
+					}
+
+					else {
+						defer.resolve({success: true});
+						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
+					}
 				})
 			}
 		});
