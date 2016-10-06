@@ -397,6 +397,8 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 
 // Define a method to clear, add, and play an array of tracks
 ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
+
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+track)
     var self = this;
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerWebradio::clearAddPlayTrack');
 
@@ -654,6 +656,8 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
             var song = {
                 service: 'webradio',
                 type: 'mywebradio',
+				artist: '',
+				album: '',
                 title: ithdata.name,
                 uri: ithdata.uri,
                 icon: 'fa fa-microphone'
