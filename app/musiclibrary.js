@@ -404,7 +404,8 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
     self.browseSources[3].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
     self.browseSources[4].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
     self.browseSources[5].name = self.commandRouter.getI18nString('COMMON.GENRES');
-	self.browseSources[6].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+	self.browseSources[6].name = self.commandRouter.getI18nString('COMMON.LAST_100');
+	self.browseSources[7].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
 
 }
 

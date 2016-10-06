@@ -94,7 +94,8 @@
     "GENRES":"Genres",
     "TRACKS":"Tracks",
     "CANCEL":"Cancel",
-    "NONE":"None"
+    "NONE":"None",
+    "LAST_100":"last 100"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
