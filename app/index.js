@@ -3,7 +3,7 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs = require('fs-extra');
-var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 var winston = require('winston');
 var vconf = require('v-conf');
 
@@ -33,36 +33,41 @@ function CoreCommandRouter(server) {
 	this.logger.info("-----          System startup          ----");
 	this.logger.info("-------------------------------------------");
 
-	// Start the music library
-	this.musicLibrary = new (require('./musiclibrary.js'))(this);
+    //Checking for system updates
+    this.checkAndPerformSystemUpdates()
+        // Start the music library
+        this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
-	// Start plugins
-	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
-	this.pluginManager.checkIndex();
-	this.pluginManager.pluginFolderCleanup();
-	this.pluginManager.loadPlugins();
-	this.pluginManager.startPlugins();
+        // Start plugins
+        this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+        this.pluginManager.checkIndex();
+        this.pluginManager.pluginFolderCleanup();
+        this.pluginManager.loadPlugins();
+        this.pluginManager.startPlugins();
 
-    this.loadI18nStrings();
-	this.musicLibrary.updateBrowseSourcesLang();
+        this.loadI18nStrings();
+        this.musicLibrary.updateBrowseSourcesLang();
 
-	// Start the state machine
-	this.stateMachine = new (require('./statemachine.js'))(this);
+        // Start the state machine
+        this.stateMachine = new (require('./statemachine.js'))(this);
 
 
-	// Start the volume controller
-	this.volumeControl = new (require('./volumecontrol.js'))(this);
+        // Start the volume controller
+        this.volumeControl = new (require('./volumecontrol.js'))(this);
 
-	// Start the playListManager.playPlaylistlist FS
-	//self.playlistFS = new (require('./playlistfs.js'))(self);
+        // Start the playListManager.playPlaylistlist FS
+        //self.playlistFS = new (require('./playlistfs.js'))(self);
 
-	this.playListManager = new (require('./playlistManager.js'))(this);
+        this.playListManager = new (require('./playlistManager.js'))(this);
 
-	this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
+        this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
-	this.pushConsoleMessage('BOOT COMPLETED');
+        this.pushConsoleMessage('BOOT COMPLETED');
 
-	this.startupSound();
+        this.startupSound();
+
+
+
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -880,4 +885,50 @@ CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
 	var self=this;
 
 	return this.musicLibrary.updateBrowseSourcesLang();
+}
+
+
+/**
+ * This function checks if update files are placed in the update folder
+ */
+CoreCommandRouter.prototype.checkAndPerformSystemUpdates = function () {
+    //var defer=libQ.defer();
+    var self=this;
+
+    var updateFolder='/volumio/update';
+    var files=fs.readdirSync(updateFolder);
+
+    if(files!==undefined && files.length>0)
+    {
+        self.logger.info("Updating system");
+
+        try {
+            for(var i in files)
+            {
+                var file=files[i];
+
+                if(file.endsWith(".sh"))
+                {
+                    var output = execSync('sh '+updateFolder+'/'+file, { encoding: 'utf8' });
+                }
+
+
+            }
+
+            for(var i in files)
+            {
+                var file=files[i];
+
+                fs.unlinkSync(updateFolder+'/'+file);
+            }
+        }
+        catch(err)
+        {
+            self.logger.error("An error occurred when updating Volumio. Details: "+err);
+
+            //TODO: decide what to do in case of errors when updating
+        }
+
+
+    }
 }
