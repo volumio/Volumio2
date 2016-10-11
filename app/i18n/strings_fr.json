@@ -25,7 +25,9 @@
     "I2S_DAC_DEACTIVATED":"DAC I2S DAC Désactivé",
     "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte",
     "DOP":"DSD sur PCM (DoP)",
-    "SOFTVOL":"Contrôle logiciel du Volume"
+    "SOFTVOL":"Contrôle logiciel du Volume",
+    "MIXER_CONTROLE_NAME":"Nom du mixeur",
+    "MIXER_TYPE":"Type de mixeur"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
@@ -68,6 +70,8 @@
     "REMOVE_QUEUE_TITLE":"Supprimé",
     "REMOVE_QUEUE_TEXT_1":"Supprimé ",
     "REMOVE_QUEUE_TEXT_2":" de la queue",
+    "SAVE_QUEUE_SUCCESS":"File d'attente enregistrée dans la playlist avec succès",
+    "SAVE_QUEUE_ERROR":"Impossible de sauver la playlist",
     "MY_MUSIC":"Ma Musique",
     "CONFIGURATION_UPDATE":"Mise à jour de la configuration",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration mise à jour avec succès",
@@ -88,7 +92,10 @@
     "ARTISTS":"Artistes",
     "ALBUMS":"Albums",
     "GENRES":"Genres",
-    "CANCEL":"Annuler"
+    "TRACKS":"Pistes",
+    "CANCEL":"Annuler",
+    "NONE":"Aucune",
+    "LAST_100":"100 dernières"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -132,7 +139,7 @@
     "DELETE_USER_DATA":"Effacer les données utilisateur",
     "DELETE_USER_DATA_DESCR":"Effacer tous vos réglages",
     "DELETE_USER_DATA_TITLE":"Confirmer la suppression des données utilisateur",
-    "DELETE_USER_DATA_MESSAGE":"Vos réglages, favoris et playlist vont être éffacés (Les contenus USB et NAS music ne sont pas éffacés. Le sytème va redémarrer aprês l'éffacement des données. Voulez vous continuer?",
+    "DELETE_USER_DATA_MESSAGE":"Vos réglages, favoris et playlist vont être éffacés (Les contenus USB et NAS ne sont pas éffacés). Le sytème va redémarrer aprês l'éffacement des données. Voulez vous continuer?",
     "FACTORY_RESET":"Remise en état d'origine",
     "FACTORY_RESET_DESCR":"Remettre votre système dans l'état d'origine",
     "FACTORY_RESET_TITLE":"Confirmer la remise à zéro",
@@ -154,9 +161,9 @@
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Etes vous sûr de vouloir désinstaller ce plugin",
- 	  "UNINSTALL":"Désinstaller",
-	  "UPDATING_PLUGIN":"Mettre à jour le plugin",
-	  "DOWNLOADING_FROM":"Télécharger le plugin depuis",
-	  "DOWNLOADING":"Téléchargement du Plugin en cours"
+    "UNINSTALL":"Désinstaller",
+    "UPDATING_PLUGIN":"Mettre à jour le plugin",
+    "DOWNLOADING_FROM":"Télécharger le plugin depuis",
+    "DOWNLOADING":"Téléchargement du Plugin en cours"
   }
 }
