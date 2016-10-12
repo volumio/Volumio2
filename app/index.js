@@ -34,40 +34,40 @@ function CoreCommandRouter(server) {
 	this.logger.info("-------------------------------------------");
 
     //Checking for system updates
-    this.checkAndPerformSystemUpdates()
-        // Start the music library
-        this.musicLibrary = new (require('./musiclibrary.js'))(this);
+    this.checkAndPerformSystemUpdates();
 
-        // Start plugins
-        this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
-        this.pluginManager.checkIndex();
-        this.pluginManager.pluginFolderCleanup();
-        this.pluginManager.loadPlugins();
-        this.pluginManager.startPlugins();
+    this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
-        this.loadI18nStrings();
-        this.musicLibrary.updateBrowseSourcesLang();
+    // Start the music library
+    this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
-        // Start the state machine
-        this.stateMachine = new (require('./statemachine.js'))(this);
+    // Start plugins
+    this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+    this.pluginManager.checkIndex();
+    this.pluginManager.pluginFolderCleanup();
+    this.pluginManager.loadPlugins();
+    this.pluginManager.startPlugins();
+
+    this.loadI18nStrings();
+    this.musicLibrary.updateBrowseSourcesLang();
+
+    // Start the state machine
+    this.stateMachine = new (require('./statemachine.js'))(this);
 
 
-        // Start the volume controller
-        this.volumeControl = new (require('./volumecontrol.js'))(this);
+    // Start the volume controller
+    this.volumeControl = new (require('./volumecontrol.js'))(this);
 
-        // Start the playListManager.playPlaylistlist FS
-        //self.playlistFS = new (require('./playlistfs.js'))(self);
+    // Start the playListManager.playPlaylistlist FS
+    //self.playlistFS = new (require('./playlistfs.js'))(self);
 
-        this.playListManager = new (require('./playlistManager.js'))(this);
-
-        this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
-
-        this.pushConsoleMessage('BOOT COMPLETED');
-
-        this.startupSound();
+    this.playListManager = new (require('./playlistManager.js'))(this);
 
 
 
+    this.pushConsoleMessage('BOOT COMPLETED');
+
+    this.startupSound();
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
