@@ -773,7 +773,7 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 		else {
 			self.logger.info("Executing install.sh");
-			exec(installScript+' > /tmp/installog', {uid:1000, gid:1000},function(error, stdout, stderr) {
+			exec(installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
 				if (error!==undefined && error!==null) {
 					console.log(stdout);
 					console.log(stderr);
