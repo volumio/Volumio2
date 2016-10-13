@@ -52,7 +52,7 @@
 	"DISABLED":"Deaktiviert",
 	"PLAY_TITLE":"Wiedergeben",
 	"PLAY_TEXT":"Wiedergabe gestartet von ",
-	"ADD_QUEUE_TITLE":"Zu Warteschlange hinzugügen",
+	"ADD_QUEUE_TITLE":"Zu Warteschlange hinzufügen",
 	"ADD_QUEUE_TEXT_1":"Hinzugefügt ",
 	"ADD_QUEUE_TEXT_2":" zu Warteschlange",
 	"REMOVE_QUEUE_TITLE":"Entfernen",
@@ -92,7 +92,7 @@
 	"PLUGINS":"Plugins",
 	"ALARM":"Wecker",
 	"SLEEP":"Schlaffunktion",
-	"CREDITS":"Miwirkende",
+	"CREDITS":"Mitwirkende",
 	"SHUTDOWN":"Herunterfahren"
   },
   "ALARM":{
