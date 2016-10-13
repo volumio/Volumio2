@@ -1096,6 +1096,10 @@ function InterfaceWebUI(context) {
 				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
 			});
 
+			connWebSocket.on('updateDb', function (data) {
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', '');
+			});
+
 
 			/**
 			 * New share APIs

@@ -1527,6 +1527,12 @@ ControllerMpd.prototype.rescanDb = function () {
 	return self.sendMpdCommand('rescan', []);
 };
 
+ControllerMpd.prototype.updateDb = function () {
+	var self = this;
+
+	return self.sendMpdCommand('update', []);
+};
+
 
 ControllerMpd.prototype.getGroupVolume = function () {
 	var self = this;
