@@ -461,7 +461,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 						}
 					}
 					else {
-						ws.write(' ');
+						ws.write('# hotspot disabled\n');
 					}
 
 					ws.end();
@@ -500,7 +500,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 					}
 				}
 				else {
-					hs.write(' ');
+					hs.write('# hotspot disabled\n');
 				}
 
 				hs.end();
