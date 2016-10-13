@@ -11,6 +11,7 @@ var pidof = require('pidof');
 var parser = require('cue-parser');
 var mm = require('musicmetadata');
 var os = require('os');
+var execSync = require('child_process').execSync;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -678,7 +679,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 		 self.sendMpdCommand('status', [])
 			.then(function (objState) {
 				var state = self.parseState(objState);
-
+				execSync("/bin/sync", { uid: 1000, gid: 1000});
 				return self.commandRouter.fileUpdate(state.updatedb);
 			});
 	});

@@ -1,6 +1,7 @@
 'use strict';
 
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 
 var dbUpdateState = false;
 
@@ -13,6 +14,7 @@ function PlatformSpecific(coreCommand) {
 
 PlatformSpecific.prototype.shutdown = function () {
 	var self = this;
+	execSync("/bin/sync", { uid: 1000, gid: 1000});
 	exec("sudo /sbin/shutdown -h now", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.coreCommand.pushConsoleMessage(error);
@@ -22,6 +24,7 @@ PlatformSpecific.prototype.shutdown = function () {
 
 PlatformSpecific.prototype.reboot = function () {
 	var self = this;
+	execSync("/bin/sync", { uid: 1000, gid: 1000});
 	exec("sudo /sbin/reboot", function (error, stdout, stderr) {
 		if (error !== null) {
 			self.coreCommand.pushConsoleMessage(error);
