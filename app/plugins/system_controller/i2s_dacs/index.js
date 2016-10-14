@@ -205,6 +205,7 @@ ControllerI2s.prototype.i2cDetect = function () {
 
 	function readI2S(i2cbus) {
 	try {
+	var i2cAddr = '';
 	var cmd = '/usr/bin/sudo /usr/sbin/i2cdetect -y ' + i2cbus;
 	exec(cmd, function(err, stdout, stderr) {
 		if(err) {
@@ -218,11 +219,12 @@ ControllerI2s.prototype.i2cDetect = function () {
 				items.shift();
 				items.forEach(function(item) {
 					if((item != '') && (item != '--')) {
-						var i2cAddr = (item);
-						defer.resolve({i2c:i2cAddr});
+						i2cAddr = (item);
+
 					}
 				});
 			});
+			defer.resolve({i2c:i2cAddr});
 		}
 	});
 	} catch (err) {
