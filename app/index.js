@@ -35,9 +35,6 @@ function CoreCommandRouter(server) {
 
     //Checking for system updates
     this.checkAndPerformSystemUpdates();
-
-    this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
-
     // Start the music library
     this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
@@ -63,7 +60,7 @@ function CoreCommandRouter(server) {
 
     this.playListManager = new (require('./playlistManager.js'))(this);
 
-
+    this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
     this.pushConsoleMessage('BOOT COMPLETED');
 
