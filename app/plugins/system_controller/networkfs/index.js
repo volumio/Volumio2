@@ -291,8 +291,20 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	var defer = libQ.defer();
 
 	var name = data['name'];
-	var nameStr = S(name);
+	/*
+	 * A name is required. In the ui this field is called 'alias'.
+	 */
+	if (name == undefined) name = '';
+	var blankname_regex = /^\s*$/;
+	var matches = blankname_regex.exec(name);
+	if (matches) {
+		self.logger.info("Share alias is blank");
+		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('NETWORKFS.ALIAS_DOC'));
+		defer.reject(new Error('Shares must have an alias'));
+		return defer.promise;
+	}
 
+	var nameStr = S(name);
 
 	/**
 	 * Check special characters

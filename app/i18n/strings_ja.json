@@ -40,6 +40,9 @@
     "WIRELESS_RESTART_ERROR": "無線ネットワーク再起動中にエラー発生: ",
     "WIRELESS_RESTART_SUCCESS": "無線ネットワーク再起動に成功"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"NAS マウントに表示されるエイリアスの選択"
+  },
   "PLAYLIST":{
   "ADDED_TITLE":"追加済み",
   "ADDED_TO_PLAYLIST":" プレイリストに ",

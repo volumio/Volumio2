@@ -40,6 +40,9 @@
     "WIRELESS_RESTART_ERROR": "Error bij herstarten draadloos netwerk: ",
     "WIRELESS_RESTART_SUCCESS": "Draadloos netwerk succesvol herstart"
   },
+  "NETWORK":{
+    "ALIAS_DOC":"Kies een Alias die weergegeven wordt in NAS Mounts"
+  },
   "PLAYLIST":{
   "ADDED_TITLE":"Toegevoegd",
   "ADDED_TO_PLAYLIST":" aan Afspeellijst ",

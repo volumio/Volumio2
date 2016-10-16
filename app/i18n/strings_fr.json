@@ -52,6 +52,9 @@
     "HOTSPOT_CONF_ERROR":"Erreur de configuration du Hotspot",
     "HOTSPOT_PW_LENGTH":"Le mot de passe du Hotspot doit faire au moins 8 caractètres"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Choisir un le nom qui sera affiché dans les disques NAS montés"
+  },
     "PLAYLIST":{
     "ADDED_TITLE":"Ajouté",
     "ADDED_TO_PLAYLIST":" à la playlist ",

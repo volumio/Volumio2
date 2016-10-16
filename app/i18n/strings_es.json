@@ -40,6 +40,9 @@
     "WIRELESS_RESTART_ERROR": "Error al reiniciar la red: ",
     "WIRELESS_RESTART_SUCCESS": "Adaptador WiFi reiniciado con éxito"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Elige el alias para esta ruta que se mostrará en la biblioteca"
+  },
   "PLAYLIST":{
   "ADDED_TITLE":"Añadido",
   "ADDED_TO_PLAYLIST":" a la lista de reproducción ",

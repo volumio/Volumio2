@@ -41,6 +41,9 @@
     "WIRELESS_RESTART_ERROR": "重启无线网络发生错误: ",
     "WIRELESS_RESTART_SUCCESS": "成功重启无线网络"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"选择一个别名显示在NAS的挂载点中"
+  },
   "PLAYLIST":{
   "ADDED_TITLE":"已添加",
   "ADDED_TO_PLAYLIST":" 到播放列表 ",
