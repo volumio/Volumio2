@@ -298,7 +298,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	 * Check special characters
 	 */
 	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('ILLEGAL_CHARACTER_/'));
+		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.ILLEGAL_CHARACTER_/'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return defer.promise;
 	}
