@@ -49,7 +49,7 @@
     "socket.io": "^1.5.0",
     "socket.io-client": "^1.4.8",
     "sort-on": "^1.3.0",
-    "spotify-web-api-node": "^2.3.5",
+    "spotify-web-api-node": "^2.3.6",
     "string": "^3.3.3",
     "tail": "^1.2.1",
     "telnet": "0.0.1",
@@ -58,7 +58,7 @@
     "v-conf": "^0.10.0",
     "winston": "^2.2.0",
     "wireless-tools": "^0.15.0",
-    "yargs": "^6.0.0"
+    "yargs": "^6.1.1"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
