@@ -225,6 +225,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
 	{
 		if(plugin.onStart!==undefined)
 		{
+		    console.log("PLUGIN START: "+name);
 			var deferStart=plugin.onStart();
 			deferStart.then(function(){
 				self.config.set(category + '.' + name + '.status', "STARTED");

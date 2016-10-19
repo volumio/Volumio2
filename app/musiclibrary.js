@@ -397,15 +397,24 @@ function flattenArrayToCSV(arrayInput) {
 CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 	var self = this;
 
-	console.log('Updating browse sources language')
-	self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
-	self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
-	self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
-    self.browseSources[3].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
-    self.browseSources[4].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
-    self.browseSources[5].name = self.commandRouter.getI18nString('COMMON.GENRES');
-	self.browseSources[6].name = self.commandRouter.getI18nString('COMMON.LAST_100');
-	self.browseSources[7].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+	console.log('Updating browse sources language');
+
+    if(self.browseSources[0]!==undefined)
+	    self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
+    if(self.browseSources[1]!==undefined)
+         self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
+    if(self.browseSources[2]!==undefined)
+        self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+    if(self.browseSources[3]!==undefined)
+        self.browseSources[3].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
+    if(self.browseSources[4]!==undefined)
+        self.browseSources[4].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
+    if(self.browseSources[5]!==undefined)
+        self.browseSources[5].name = self.commandRouter.getI18nString('COMMON.GENRES');
+    if(self.browseSources[6]!==undefined)
+        self.browseSources[6].name = self.commandRouter.getI18nString('COMMON.LAST_100');
+    if(self.browseSources[7]!==undefined)
+        self.browseSources[7].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
 
 }
 

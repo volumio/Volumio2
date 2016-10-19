@@ -341,7 +341,7 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
 
-    if(rawQuery!==undefined)
+    if(rawQuery !== undefined && rawQuery !== null)
     {
         var splitted=rawQuery.split('&');
         for(var i in splitted)
