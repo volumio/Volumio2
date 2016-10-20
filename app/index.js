@@ -896,7 +896,12 @@ CoreCommandRouter.prototype.checkAndPerformSystemUpdates = function () {
     var self=this;
 
     var updateFolder='/volumio/update';
-    var files=fs.readdirSync(updateFolder);
+	try {
+		var files = fs.readdirSync(updateFolder);
+	} catch (e)
+	{
+		//Nothing to do
+	}
 
     if(files!==undefined && files.length>0)
     {
