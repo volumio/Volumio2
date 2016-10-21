@@ -24,7 +24,10 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"has been enabled, restart the system for changes to take effect",
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
     "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
-	"DOP":"DSD over PCM (DoP)"
+    "DOP":"DSD over PCM (DoP)",
+    "SOFTVOL":"Software Volume Control",
+    "MIXER_CONTROL_NAME":"Mixer Control Name",
+    "MIXER_TYPE":"Mixer Type"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -39,7 +42,15 @@
     "NETWORK_RESTART_SUCCESS": "Network successfully restarted",
     "WIRELESS_RESTART_TITLE": "Wireless restart",
     "WIRELESS_RESTART_ERROR": "Error while restarting wireless: ",
-    "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted"
+    "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted",
+    "HOTSPOT_SETTINGS":"Hotspot Settings",
+    "ENABLE_HOTSPOT":"Enable Hotspot",
+    "HOTSPOT_NAME":"Hotspot Name",
+    "HOTSPOT_PROTECTION":"Password Protected Hotspot",
+    "HOTSPOT_PASSWORD":"Hotspot Password",
+    "HOTSPOT_CHANNEL":"Hotspot Channel",
+    "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
+    "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",
@@ -59,6 +70,8 @@
     "REMOVE_QUEUE_TITLE":"Remove",
     "REMOVE_QUEUE_TEXT_1":"Remove ",
     "REMOVE_QUEUE_TEXT_2":" from queue",
+    "SAVE_QUEUE_SUCCESS":"Queue successfully saved to playlist ",
+    "SAVE_QUEUE_ERROR":"Cannot save queue to playlist ",
     "MY_MUSIC":"My Music",
     "CONFIGURATION_UPDATE":"Configuration update",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration Updated Successfully",
@@ -76,7 +89,13 @@
     "FAVOURITES":"Favourites",
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Music Library",
-	"CANCEL":"Cancel"
+    "ARTISTS":"Artists",
+    "ALBUMS":"Albums",
+    "GENRES":"Genres",
+    "TRACKS":"Tracks",
+    "CANCEL":"Cancel",
+    "NONE":"None",
+    "LAST_100":"last 100"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -140,11 +159,11 @@
     "WEBRADIO":"Web Radio"
   },
   "PLUGINS":{
-	"CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
-	"CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Are you sure you want to uninstall this Plugin",
-	"UNINSTALL":"Uninstall",
-	"UPDATING_PLUGIN":"Updating Plugin",
-	"DOWNLOADING_FROM":"Downloading Plugin from ",
-	"DOWNLOADING":"Downloading Plugin"
+    "CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
+    "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Are you sure you want to uninstall this Plugin",
+    "UNINSTALL":"Uninstall",
+    "UPDATING_PLUGIN":"Updating Plugin",
+    "DOWNLOADING_FROM":"Downloading Plugin from ",
+    "DOWNLOADING":"Downloading Plugin"
   }
 }

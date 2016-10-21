@@ -43,7 +43,12 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
 	// jpa hack workaround for now....
 	var goodIndex = Math.min(this.arrayQueue.length - 1, nStartIndex);
-	var sTargetService = this.arrayQueue[goodIndex].service;
+    if (this.arrayQueue[goodIndex]) {
+        var sTargetService = this.arrayQueue[goodIndex].service;
+    } else {
+        return {service: 'mpd', uris: '', startindex: ''};
+    }
+
 	var nEndIndex = goodIndex;
 	var nToCheck = this.arrayQueue.length - 1;
 
@@ -66,7 +71,7 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
 	var item=this.arrayQueue.splice(nIndex.value, 1);
 
-    this.commandRouter.logger.info(JSON.stringify(item));
+    //this.commandRouter.logger.info(JSON.stringify(item));
     this.saveQueue();
 
     this.commandRouter.pushToastMessage('success',  this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TITLE'),

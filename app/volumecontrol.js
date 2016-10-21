@@ -15,6 +15,7 @@ var volumesteps = '';
 var currentvolume = '';
 var currentmute = false;
 var premutevolume = '';
+var mixertype = '';
 
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
@@ -27,11 +28,15 @@ function CoreVolumeController(commandRouter) {
 
 
 	device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
+	if (device === 'softvolume') {
+		device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
+	}
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
 	mixer = '"'+mixerdev+'"';
 	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
 	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
 	volumesteps = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumesteps');
+	mixertype = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer_type');
 
 	var amixer = function (args, cb) {
 
@@ -141,6 +146,7 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	maxvolume = data.maxvolume;
 	volumecurve = data.volumecurve;
 	volumesteps = data.volumesteps;
+	mixertype = data.mixertype
 }
 
 
@@ -189,6 +195,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					if (VolumeInteger > maxvolume){
 						VolumeInteger = maxvolume;
 					}
+					if (mixertype === 'None') {
+						VolumeInteger = 100;
+					}
 					self.setVolume(VolumeInteger, function (err) {
 						Volume.vol = VolumeInteger
 						Volume.mute = false;
@@ -209,6 +218,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 				if (VolumeInteger > maxvolume){
 					VolumeInteger = maxvolume;
 				}
+				if (mixertype === 'None') {
+					VolumeInteger = 100;
+				}
 				self.setVolume(VolumeInteger, function (err) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
 					Volume.vol = VolumeInteger
@@ -221,6 +233,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			// Set the Volume with numeric value 0-100
 			if (VolumeInteger > maxvolume){
 				VolumeInteger = maxvolume;
+			}
+			if (mixertype === 'None') {
+				VolumeInteger = 100;
 			}
 				self.setVolume(VolumeInteger, function (err) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
@@ -248,6 +263,9 @@ CoreVolumeController.prototype.retrievevolume = function () {
                         }
 			Volume.vol = vol;
 			Volume.mute = mute;
+			if (mixertype === 'None') {
+				Volume.vol = 100;
+			}
 			return libQ.resolve(Volume)
 				.then(function (Volume) {
 					self.commandRouter.volumioupdatevolume(Volume);

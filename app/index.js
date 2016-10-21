@@ -3,7 +3,7 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs = require('fs-extra');
-var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 var winston = require('winston');
 var vconf = require('v-conf');
 
@@ -33,36 +33,38 @@ function CoreCommandRouter(server) {
 	this.logger.info("-----          System startup          ----");
 	this.logger.info("-------------------------------------------");
 
-	// Start the music library
-	this.musicLibrary = new (require('./musiclibrary.js'))(this);
+    //Checking for system updates
+    this.checkAndPerformSystemUpdates();
+    // Start the music library
+    this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
-	// Start plugins
-	this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
-	this.pluginManager.checkIndex();
-	this.pluginManager.pluginFolderCleanup();
-	this.pluginManager.loadPlugins();
-	this.pluginManager.startPlugins();
+    // Start plugins
+    this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+    this.pluginManager.checkIndex();
+    this.pluginManager.pluginFolderCleanup();
+    this.pluginManager.loadPlugins();
+    this.pluginManager.startPlugins();
 
     this.loadI18nStrings();
-	this.musicLibrary.updateBrowseSourcesLang();
+    this.musicLibrary.updateBrowseSourcesLang();
 
-	// Start the state machine
-	this.stateMachine = new (require('./statemachine.js'))(this);
+    // Start the state machine
+    this.stateMachine = new (require('./statemachine.js'))(this);
 
 
-	// Start the volume controller
-	this.volumeControl = new (require('./volumecontrol.js'))(this);
+    // Start the volume controller
+    this.volumeControl = new (require('./volumecontrol.js'))(this);
 
-	// Start the playListManager.playPlaylistlist FS
-	//self.playlistFS = new (require('./playlistfs.js'))(self);
+    // Start the playListManager.playPlaylistlist FS
+    //self.playlistFS = new (require('./playlistfs.js'))(self);
 
-	this.playListManager = new (require('./playlistManager.js'))(this);
+    this.playListManager = new (require('./playlistManager.js'))(this);
 
-	this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
+    this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
-	this.pushConsoleMessage('BOOT COMPLETED');
+    this.pushConsoleMessage('BOOT COMPLETED');
 
-	this.startupSound();
+    this.startupSound();
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -684,6 +686,9 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
 // Volumio Play
 CoreCommandRouter.prototype.volumioPlay = function (N) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
+
+    this.stateMachine.unSetVolatile();
+
 	if(N===undefined)
 		return this.stateMachine.play();
 	else
@@ -835,11 +840,21 @@ CoreCommandRouter.prototype.volumioConsume = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
+	var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');
 
 	var queueArray=this.stateMachine.getQueue();
-	this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
+	var defer=this.playListManager.commonAddItemsToPlaylist(this.playListManager.playlistFolder,name,queueArray);
 
+    defer.then(function()
+    {
+        self.pushToastMessage('success', self.getI18nString('COMMON.SAVE_QUEUE_SUCCESS') + name);
+    })
+    .fail(function () {
+        self.pushToastMessage('success', self.getI18nString('COMMON.SAVE_QUEUE_ERROR')+name);
+    });
+
+    return defer;
 };
 
 
@@ -852,15 +867,16 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 CoreCommandRouter.prototype.getI18nString = function (key) {
     var splitted=key.split('.');
 
-	console.log(key);
-	console.log(splitted)
-
-    if(splitted.length==1)
+	if(splitted.length==1)
     {
-        return this.i18nStrings[key];
+        if(this.i18nStrings[key]!==undefined)
+            return this.i18nStrings[key];
+        else return this.i18nStringsDefaults[key];
     }
     else {
-        return this.i18nStrings[splitted[0]][splitted[1]];
+        if(this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
+            return this.i18nStrings[splitted[0]][splitted[1]];
+        else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
     }
 };
 
@@ -871,6 +887,7 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     this.logger.info("Loading i18n strings for locale "+language_code);
 
     this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+    this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
 
     var categories=this.pluginManager.getPluginCategories();
     for(var i in categories)
@@ -982,4 +999,55 @@ CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
 	var self=this;
 
 	return this.musicLibrary.updateBrowseSourcesLang();
+}
+
+
+/**
+ * This function checks if update files are placed in the update folder
+ */
+CoreCommandRouter.prototype.checkAndPerformSystemUpdates = function () {
+    //var defer=libQ.defer();
+    var self=this;
+
+    var updateFolder='/volumio/update';
+	try {
+		var files = fs.readdirSync(updateFolder);
+	} catch (e)
+	{
+		//Nothing to do
+	}
+
+    if(files!==undefined && files.length>0)
+    {
+        self.logger.info("Updating system");
+
+        try {
+            for(var i in files)
+            {
+                var file=files[i];
+
+                if(file.endsWith(".sh"))
+                {
+                    var output = execSync('sh '+updateFolder+'/'+file, { encoding: 'utf8' });
+                }
+
+
+            }
+
+            for(var i in files)
+            {
+                var file=files[i];
+
+                fs.unlinkSync(updateFolder+'/'+file);
+            }
+        }
+        catch(err)
+        {
+            self.logger.error("An error occurred when updating Volumio. Details: "+err);
+
+            //TODO: decide what to do in case of errors when updating
+        }
+
+
+    }
 }

@@ -24,7 +24,10 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"a été activé, redémarrage du système pour la prise en compte",
     "I2S_DAC_DEACTIVATED":"DAC I2S DAC Désactivé",
     "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte",
-    "DOP":"DSD sur PCM (DoP)"
+    "DOP":"DSD sur PCM (DoP)",
+    "SOFTVOL":"Contrôle logiciel du Volume",
+    "MIXER_CONTROLE_NAME":"Nom du mixeur",
+    "MIXER_TYPE":"Type de mixeur"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
@@ -39,14 +42,22 @@
     "NETWORK_RESTART_SUCCESS": "Réseau redémarré avec succès",
     "WIRELESS_RESTART_TITLE": "Redémarrage WiFi",
     "WIRELESS_RESTART_ERROR": "Erreur lors du redémarrage WiFi: ",
-    "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès"
+    "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès",
+    "HOTSPOT_SETTINGS":"Configuration du Hotspot WiFi",
+    "ENABLE_HOTSPOT":"Activer le Hotspot",
+    "HOTSPOT_NAME":"Nom du Hotspot",
+    "HOTSPOT_PROTECTION":"Protection par mot de passe du Hotspot",
+    "HOTSPOT_PASSWORD":"Mot de passe du Hotspot",
+    "HOTSPOT_CHANNEL":"Canal du Hotspot",
+    "HOTSPOT_CONF_ERROR":"Erreur de configuration du Hotspot",
+    "HOTSPOT_PW_LENGTH":"Le mot de passe du Hotspot doit faire au moins 8 caractètres"
   },
-  "PLAYLIST":{
-  "ADDED_TITLE":"Ajouté",
-  "ADDED_TO_PLAYLIST":" à la playlist ",
-  "ADDED_TO_FAVOURITES":" aux favoris ",
-  "REMOVE_ERROR":"Impossible de supprimer",
-  "REMOVE_SUCCESS":"Supprimé"
+    "PLAYLIST":{
+    "ADDED_TITLE":"Ajouté",
+    "ADDED_TO_PLAYLIST":" à la playlist ",
+    "ADDED_TO_FAVOURITES":" aux favoris ",
+    "REMOVE_ERROR":"Impossible de supprimer",
+    "REMOVE_SUCCESS":"Supprimé"
   },
   "COMMON":{
     "SAVE":"Sauver",
@@ -59,6 +70,8 @@
     "REMOVE_QUEUE_TITLE":"Supprimé",
     "REMOVE_QUEUE_TEXT_1":"Supprimé ",
     "REMOVE_QUEUE_TEXT_2":" de la queue",
+    "SAVE_QUEUE_SUCCESS":"File d'attente enregistrée dans la playlist avec succès",
+    "SAVE_QUEUE_ERROR":"Impossible de sauver la playlist",
     "MY_MUSIC":"Ma Musique",
     "CONFIGURATION_UPDATE":"Mise à jour de la configuration",
     "CONFIGURATION_UPDATE_DESCRIPTION":"Configuration mise à jour avec succès",
@@ -76,7 +89,13 @@
     "FAVOURITES":"Favoris",
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Bibliothèque musicale",
-    "CANCEL":"Annuler"
+    "ARTISTS":"Artistes",
+    "ALBUMS":"Albums",
+    "GENRES":"Genres",
+    "TRACKS":"Pistes",
+    "CANCEL":"Annuler",
+    "NONE":"Aucune",
+    "LAST_100":"100 dernières"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -120,7 +139,7 @@
     "DELETE_USER_DATA":"Effacer les données utilisateur",
     "DELETE_USER_DATA_DESCR":"Effacer tous vos réglages",
     "DELETE_USER_DATA_TITLE":"Confirmer la suppression des données utilisateur",
-    "DELETE_USER_DATA_MESSAGE":"Vos réglages, favoris et playlist vont être éffacés (Les contenus USB et NAS music ne sont pas éffacés. Le sytème va redémarrer aprês l'éffacement des données. Voulez vous continuer?",
+    "DELETE_USER_DATA_MESSAGE":"Vos réglages, favoris et playlist vont être éffacés (Les contenus USB et NAS ne sont pas éffacés). Le sytème va redémarrer aprês l'éffacement des données. Voulez vous continuer?",
     "FACTORY_RESET":"Remise en état d'origine",
     "FACTORY_RESET_DESCR":"Remettre votre système dans l'état d'origine",
     "FACTORY_RESET_TITLE":"Confirmer la remise à zéro",
@@ -142,9 +161,9 @@
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Etes vous sûr de vouloir désinstaller ce plugin",
- 	  "UNINSTALL":"Désinstaller",
-	  "UPDATING_PLUGIN":"Mettre à jour le plugin",
-	  "DOWNLOADING_FROM":"Télécharger le plugin depuis",
-	  "DOWNLOADING":"Téléchargement du Plugin en cours"
+    "UNINSTALL":"Désinstaller",
+    "UPDATING_PLUGIN":"Mettre à jour le plugin",
+    "DOWNLOADING_FROM":"Télécharger le plugin depuis",
+    "DOWNLOADING":"Téléchargement du Plugin en cours"
   }
 }

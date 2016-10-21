@@ -168,6 +168,7 @@
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
+          "mixer_type",
           "mixer",
           "volumestart",
           "volumemax",
@@ -177,10 +178,24 @@
       },
       "content": [
         {
-          "id": "",
+          "id": "mixer_type",
+          "element": "select",
+          "doc" : "Mixer Type Selector ",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_TYPE",
+          "value":  {
+            "value":"",
+            "label": ""
+          },
+          "options": [
+
+          ]
+
+        },
+        {
+          "id": "mixer",
           "element": "select",
           "doc" : "Mixer Selector ",
-          "label": "",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
             "value":"",
             "label": ""

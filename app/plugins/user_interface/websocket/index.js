@@ -180,7 +180,7 @@ function InterfaceWebUI(context) {
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
-						return self.commandRouter.pushToastMessage('success', self.getI18NString('COMMON.PLAY'), str);
+						return self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.PLAY'), str);
 					});
 			});
 
@@ -557,7 +557,7 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('goTo', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.musicLibrary.search(data);
+				var returnedData = self.musicLibrary.goto(data);
 				returnedData.then(function (result) {
 					selfConnWebSocket.emit('pushBrowseLibrary', result);
 				});
@@ -622,6 +622,7 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.createPlaylist(data.name);
 				returnedData.then(function (data) {
+                    selfConnWebSocket.emit('pushListPlaylist', data);
 					selfConnWebSocket.emit('pushCreatePlaylist', data);
 				});
 
@@ -633,8 +634,20 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.deletePlaylist(data.value);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushDeletePlaylist', data);
+					selfConnWebSocket.emit('pushListPlaylist', data);
+					var response=self.musicLibrary.executeBrowseSource('playlists');
+
+					if (response != undefined) {
+						response.then(function (result) {
+							selfConnWebSocket.emit('pushBrowseLibrary', result);
+						})
+							.fail(function () {
+								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							});
+					}
 				});
+
+
 
 
 			});
@@ -651,11 +664,16 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addToPlaylist', function (data) {
-				var selfConnWebSocket = this;
+			    var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
+                var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('pushAddToPlaylist', data);
+                    var returnedListData = self.commandRouter.playListManager.listPlaylist();
+                    returnedListData.then(function (listdata) {
+                        selfConnWebSocket.emit('pushListPlaylist', listdata);
+                    });
+
+                    selfConnWebSocket.emit('pushAddToPlaylist', data);
 				});
 
 			});
@@ -1076,6 +1094,10 @@ function InterfaceWebUI(context) {
 			 */
 			connWebSocket.on('rescanDb', function (data) {
 				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
+			});
+
+			connWebSocket.on('updateDb', function (data) {
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', '');
 			});
 
 
@@ -1681,8 +1703,7 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
-
-    self.logger.info(JSON.stringify(queue));
+	
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushQueue', queue);

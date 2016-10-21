@@ -225,6 +225,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
 	{
 		if(plugin.onStart!==undefined)
 		{
+		    console.log("PLUGIN START: "+name);
 			var deferStart=plugin.onStart();
 			deferStart.then(function(){
 				self.config.set(category + '.' + name + '.status', "STARTED");
@@ -251,10 +252,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	if(plugin!==undefined)
 	{
 		var deferStart=plugin.onStop();
-		deferStart.then(function(){
-			self.config.set(category + '.' + name + '.status', "STOPPED");
 			defer.resolve();
-		})
 	} else defer.resolve();
 
 
@@ -818,7 +816,7 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 		else {
 			self.logger.info("Executing install.sh");
-			exec(installScript+' > /tmp/installog', {uid:1000, gid:1000},function(error, stdout, stderr) {
+			exec('echo volumio | sudo -S sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
 				if (error!==undefined && error!==null) {
 					console.log(stdout);
 					console.log(stderr);

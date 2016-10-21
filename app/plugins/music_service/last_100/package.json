@@ -1,15 +1,15 @@
 {
-  "name": "volumiodiscovery",
+  "name": "last_100",
   "version": "1.0.0",
-  "description": "mDNS discorvery plugin for Volumio2",
+  "description": "last 100 song listened",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Volumio",
+  "author": "Giuliano Gambacorta",
   "license": "ISC",
   "volumio_info": {
-    "plugin_type": "system_controller",
+    "plugin_type": "music_service",
     "boot_priority":10
   }
 }

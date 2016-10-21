@@ -134,14 +134,21 @@ ControllerNetworkfs.prototype.initShares = function () {
 	var keys = config.getKeys('NasMounts');
 	for (var i in keys) {
 		var key = keys[i];
-		self.mountShare(key);
+		self.mountShare({init:true, key:key});
 	}
 };
 
-ControllerNetworkfs.prototype.mountShare = function (shareid) {
+ControllerNetworkfs.prototype.mountShare = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
+	var shareid = data.key;
+	if (data.trial) {
+		trial = data.trial;
+	} else {
+		var trial = 0;
+	}
+
 
 	var sharename = config.get('NasMounts.' + shareid + '.name');
 	var fstype = config.get('NasMounts.' + shareid + '.fstype');
@@ -156,7 +163,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 	var mountid = mountidraw.replace(/ /g,"\\ ");
 
 	if (fstype == "cifs") {
-		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
+		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path.replace(' ', '\ ');;
 		//Password-protected mount
 		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
 			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
@@ -170,7 +177,7 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 		}
 
 	} else { // nfs
-		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
+		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path.replace(' ', '\ ');;
 		if (options) {
 			fsopts ="ro,soft,noauto,"+options;
 		} else {
@@ -191,6 +198,17 @@ ControllerNetworkfs.prototype.mountShare = function (shareid) {
 			}
 			responsemessage = {status:"fail", reason:result.error}
 			defer.resolve(responsemessage);
+			if (data.init) {
+			if (trial < 4) {
+				trial++
+				self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
+				setTimeout(function () {
+				self.mountShare({init:true, key:data.key, trial:trial});
+				}, 5000);
+			} else {
+				self.logger.info("Cannot mount NAS at system boot, trial number "+trial+" ,stopping");
+			}
+			}
 		} else {
 			responsemessage = {status:"success"}
 			defer.resolve(responsemessage);
@@ -280,7 +298,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	 * Check special characters
 	 */
 	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('ILLEGAL_CHARACTER_/'));
+		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.ILLEGAL_CHARACTER_/'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return defer.promise;
 	}
@@ -306,7 +324,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
 
 		saveshare.then(function () {
-		var mountshare = self.mountShare(uuid);
+		var mountshare = self.mountShare({key:uuid});
 		if (mountshare != undefined) {
 			mountshare.then(function (data) {
 				var responsemessage = {};
@@ -737,13 +755,4 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	return defer.promise;
 };
 
-ControllerNetworkfs.prototype.shareCredentialCheck = function (data) {
-	var self = this;
-
-	//TODO FINISH
-
-	var sharename = config.get('NasMounts.' + shareid + '.name');
-
-	var shares = execSync("/bin/echo volumio | echo volumio | smbclient //DISKSTATION/flac", { uid: 1000, gid: 1000, encoding: 'utf8' });
-}
 
