@@ -404,4 +404,7 @@ volumioAppearance.prototype.getAvailableLanguages = function() {
 }
 
 
-
+volumioAppearance.prototype.getConfigParam = function (key) {
+    var self = this;
+    return config.get(key);
+};
