@@ -52,6 +52,7 @@ CoreStateMachine.prototype.getState = function () {
             mute: this.currentMute,
             stream: false,
             updatedb: false,
+			volatile: true,
             service: this.volatileState.service
         };
     }
@@ -110,6 +111,7 @@ CoreStateMachine.prototype.getState = function () {
                 mute: this.currentMute,
                 stream: trackBlock.trackType,
                 updatedb: this.currentUpdate,
+				volatile: false,
                 service: trackBlock.service
             };
         }
