@@ -49,7 +49,7 @@ last_100.prototype.listenState = function () {
     socket.on('pushState', function(data) {
 
         var newlastStates = [];
-        if (data.status != 'stop' && data.service != 'webradio' && data.service != 'analogin'){
+        if (data.status != 'stop' && data.service != 'webradio' && data.volatile != true){
             if (data.uri != currentSong.uri){
                 currentSong.uri = data.uri;
                 var currentsong = {uri:data.uri, service:data.service,title:data.title,

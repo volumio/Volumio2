@@ -52,6 +52,7 @@ CoreStateMachine.prototype.getState = function () {
             mute: this.currentMute,
             stream: false,
             updatedb: false,
+			volatile: true,
             service: this.volatileState.service
         };
     }
@@ -110,6 +111,7 @@ CoreStateMachine.prototype.getState = function () {
                 mute: this.currentMute,
                 stream: trackBlock.trackType,
                 updatedb: this.currentUpdate,
+				volatile: false,
                 service: trackBlock.service
             };
         }
@@ -922,7 +924,10 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 CoreStateMachine.prototype.serviceStop = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceStop');
 	var trackBlock = this.getTrack(this.currentPosition);
-	return this.commandRouter.serviceStop(trackBlock.service);
+	if (trackBlock && trackBlock.service){
+		return this.commandRouter.serviceStop(trackBlock.service);
+	}
+
 };
 
 
