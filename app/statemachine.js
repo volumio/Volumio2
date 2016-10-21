@@ -922,7 +922,10 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 CoreStateMachine.prototype.serviceStop = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::serviceStop');
 	var trackBlock = this.getTrack(this.currentPosition);
-	return this.commandRouter.serviceStop(trackBlock.service);
+	if (trackBlock && trackBlock.service){
+		return this.commandRouter.serviceStop(trackBlock.service);
+	}
+
 };
 
 
