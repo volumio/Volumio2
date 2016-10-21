@@ -422,6 +422,7 @@ CoreStateMachine.prototype.pushError = function (sReason) {
 // Sync state from service status announcement
 // Input state object has the form {status: sStatus, position: nPosition, seek: nSeek, duration: nDuration, samplerate: nSampleRate, bitdepth: nBitDepth, channels: nChannels, dynamictitle: sTitle}
 CoreStateMachine.prototype.syncState = function (stateService, sService) {
+	var  self = this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 
     this.logger.info("CONTROLLONE: "+stateService);
