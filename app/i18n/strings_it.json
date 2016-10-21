@@ -48,6 +48,9 @@
 	"HOTSPOT_CONF_ERROR":"Errore di configurazione dell'Hotspot",
 	"HOTSPOT_PW_LENGTH":"La password dell'hotspot deve contenere almeno 8 caratteri"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Scegli un alias che verrà mostrato alla voce NAS"
+  },
   "PLAYLIST":{
     "ADDED_TITLE":"Aggiunta",
     "ADDED_TO_PLAYLIST":" alla Playlist ",

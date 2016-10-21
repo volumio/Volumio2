@@ -52,6 +52,9 @@
     "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
     "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts"
+  },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",
     "ADDED_TO_PLAYLIST":" to playlist ",

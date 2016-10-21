@@ -40,6 +40,9 @@
 	"WIRELESS_RESTART_ERROR": "Błąd podczas restartu usług komunikacji bezprzewodowej: ",
 	"WIRELESS_RESTART_SUCCESS": "Usługi komunikacji bezprzewodowej uruchomione poprawnie"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Nadaj nazwę zasobu"
+  },
   "PLAYLIST":{
 	"ADDED_TITLE":"Dodane",
 	"ADDED_TO_PLAYLIST":" do listy odtwarzania ",

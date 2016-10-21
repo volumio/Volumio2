@@ -40,6 +40,9 @@
     "WIRELESS_RESTART_ERROR": "Fejl ved genstart af trådløst netværk: ",
     "WIRELESS_RESTART_SUCCESS": "Genstart af trådløst netværk lykkedes"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Vælg et alias som vil blive vist i menupunktet NAS mounts"
+  },
   "PLAYLIST":{
   "ADDED_TITLE":"Tilføjet",
   "ADDED_TO_PLAYLIST":" til afspilningsliste ",
