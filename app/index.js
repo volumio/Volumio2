@@ -468,49 +468,68 @@ CoreCommandRouter.prototype.writePluginsConf = function () {
 }
 
 /**
- * Gets the playlists and their content, returns all in an array
- * @returns {Array}
+ * writes the playlists and their content in a json
  */
-CoreCommandRouter.prototype.getPlaylistsData = function () {
+CoreCommandRouter.prototype.writePlaylistsBackup = function () {
 	var self = this;
 
 	//data=[{"name": "", "content": []}]
 	var data = [];
-	var playlists = [];
+	var playlists = self.playListManager.retrievePlaylists();
 
-	try{
-		playlists = self.playListManager.retrievePlaylits();
-	} catch(e){
-		console.log("no playlists available");
-	}
-
-	for (i in playlists){
-		var name = i;
-		var songs = self.playListManager.getPlaylistContent(name);
+	for (var i = 0; i < playlists.length; i++){
+		var name = playlists[i];
+		var path = self.playListManager.playlistFolder + "/" + name;
+		var songs = fs.readJsonSync(path, {throws: false});
 		data.push({"name": name, "content": songs});
 	}
-	
-	return data;
-}
 
-/**
- * Writes an array containing all playlists and content into a json
- */
-CoreCommandRouter.prototype.writePlaylistsBackup = function () {
-	var self = this;
-	var playlists = self.getPlaylistsData();
 	var file = "/data/configuration/playlistsBackup.json";
-	fs.outputJson(file, playlists, function (err) {
-		console.log(err)
-	})
+	fs.outputJsonSync(file, data);
 }
 
+/* !!!!!!!!!!!!!!!!!!!!!!!!
+CoreCommandRouter.prototype.restorePlaylistBackup = function () {
+	var self = this;
+	var backup = [];
+
+	try{
+		backup = readJsonSync("/data/configuration/playlistsBackup.json");
+		for(var i = 0; i < backup.length; i++){
+			name = backup[i].name;
+			self.playListManager.createPlaylist(name);
+			for(var j = 0; j < backup[i].content.length; j++){
+
+			}
+		}
+	} catch (e){
+		console.log("======== no playlists backup available! ==========");
+	}
+}
+*/
+/**
+ * writes radio and songs favourites in a json
+*/
 CoreCommandRouter.prototype.writeFavouritesBackup = function () {
 	var self = this;
-}
 
-CoreCommandRouter.prototype.getFavouritesBackup = function () {
-	var self = this;
+	var path = self.playListManager.favouritesPlaylistFolder;
+	var data = [];
+	var radio = [];
+	try{
+		data = fs.readJsonSync(path + "favourites", {throws: false});
+	}catch(e){
+		data = "No songs in favourites";
+	};
+	try{
+		radio = fs.readJsonSync(path + "radio-favourites", {throws: false});
+	}catch(e){
+		radio = "No radios in favourites";
+	};
+	var favourites = [{"songs": data, "radios": radio}];
+
+	var file = "/data/configuration/favouritesBackup.json";
+	fs.outputJsonSync(file, favourites);
 }
 
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {

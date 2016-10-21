@@ -31,7 +31,9 @@ myVolumio.prototype.onStart = function ()
     setTimeout(function () {
         self.commandRouter.writePlaylistsBackup();
     }, 10000);
-
+    setTimeout(function () {
+        self.commandRouter.writeFavouritesBackup();
+    }, 10000);
     return defer.promise;
 
 }

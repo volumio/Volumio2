@@ -94,9 +94,7 @@ PlaylistManager.prototype.retrievePlaylists = function () {
 	var self = this;
 	var content = [];
 
-	fs.readdir(this.playlistFolder, function(err,folderContents) {
-		content = folderContents;
-	});
+	content = fs.readdirSync(this.playlistFolder);
 
 	return content;
 }
