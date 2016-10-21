@@ -85,6 +85,18 @@ PlaylistManager.prototype.listPlaylist = function () {
 	return defer.promise;
 };
 
+PlaylistManager.prototype.retrievePlaylists = function () {
+	var self = this;
+	var content = [];
+
+	fs.readdir(this.playlistFolder, function(err,folderContents) {
+		content = folderContents;
+	});
+
+	return content;
+}
+
+
 PlaylistManager.prototype.getPlaylistContent = function (name) {
 	var self = this;
 

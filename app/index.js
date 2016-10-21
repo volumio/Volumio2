@@ -465,6 +465,52 @@ CoreCommandRouter.prototype.writePluginsConf = function () {
 		console.log(err)})
 }
 
+/**
+ * Gets the playlists and their content, returns all in an array
+ * @returns {Array}
+ */
+CoreCommandRouter.prototype.getPlaylistsData = function () {
+	var self = this;
+
+	//data=[{"name": "", "content": []}]
+	var data = [];
+	var playlists = [];
+
+	try{
+		playlists = self.playListManager.retrievePlaylits();
+	} catch(e){
+		console.log("no playlists available");
+	}
+
+	for (i in playlists){
+		var name = i;
+		var songs = self.playListManager.getPlaylistContent(name);
+		data.push({"name": name, "content": songs});
+	}
+	
+	return data;
+}
+
+/**
+ * Writes an array containing all playlists and content into a json
+ */
+CoreCommandRouter.prototype.writePlaylistsBackup = function () {
+	var self = this;
+	var playlists = self.getPlaylistsData();
+	var file = "/data/configuration/playlistsBackup.json";
+	fs.outputJson(file, playlists, function (err) {
+		console.log(err)
+	})
+}
+
+CoreCommandRouter.prototype.writeFavouritesBackup = function () {
+	var self = this;
+}
+
+CoreCommandRouter.prototype.getFavouritesBackup = function () {
+	var self = this;
+}
+
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {
 	this.pushConsoleMessage('CoreCommandRouter::executeOnPlugin: ' + name + ' , ' + method);
 

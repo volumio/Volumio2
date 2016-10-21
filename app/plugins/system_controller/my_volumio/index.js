@@ -1,6 +1,7 @@
 'use strict';
 
 var libQ = require('kew');
+var fs = require('fs-extra');
 
 module.exports = myVolumio;
 
@@ -11,6 +12,7 @@ function myVolumio(context)
     self.context = context;
     self.commandRouter = self.context.coreCommand;
 }
+
 myVolumio.prototype.onVolumioStart = function ()
 {
     var self = this;
@@ -26,6 +28,9 @@ myVolumio.prototype.onStart = function ()
     var self = this;
     var defer = libQ.defer();
     self.commandRouter.writePluginsConf();
+    setTimeout(function () {
+        self.commandRouter.writePlaylistsBackup();
+    }, 10000);
 
     return defer.promise;
 
@@ -51,24 +56,21 @@ myVolumio.prototype.onUninstall = function () {
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.getUIConfig = function ()
-{
+myVolumio.prototype.getUIConfig = function () {
     var self = this;
     var defer = libQ.defer();
     var lang_code = this.commandRouter.sharedVars.get("language_code");
     self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
         __dirname+'/../../../i18n/strings_en.json',
         __dirname + '/UIConfig.json')
-        .then(function(uiconf)
-        {
+        .then(function(uiconf) {
 
             //uiconf.sections[0].content[0].value = self.config.get('username');
             //uiconf.sections[0].content[1].value = self.config.get('password');
 
             defer.resolve(uiconf);
         })
-        .fail(function ()
-        {
+        .fail(function () {
            defer.reject(new Error());
         });
 
@@ -82,8 +84,7 @@ myVolumio.prototype.retrievePlugConfig = function () {
     return self.commandRouter.getPluginsConf();
 }
 
-myVolumio.prototype.login = function ()
-{
+myVolumio.prototype.login = function () {
     var self = this;
 }
 
