@@ -16,7 +16,7 @@ function CoreStateMachine(commandRouter) {
 	this.simulateStopStartDone=false;
     this.volatileService="";
     this.volatileState={};
-	this.isVolatile = undefined;
+	this.isVolatile = false;
 
 	this.logger=this.commandRouter.logger;
 
@@ -33,7 +33,7 @@ CoreStateMachine.prototype.getState = function () {
     {
 		// Here we are in volatile state mode, so we do not take playback informations from the queue but rather from the volatileState
         return {
-            status: this.currentStatus,
+            status: this.volatileState.status,
             title: this.volatileState.title,
             artist: this.volatileState.artist,
             album: this.volatileState.album,
@@ -425,9 +425,10 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	var  self = this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 
-    this.logger.info("CONTROLLONE: "+stateService);
+    this.logger.info("CONTROLLONE: "+JSON.stringify(stateService));
 
-    this.logger.info("CONTROLLONE: "+this.volatileState);
+    this.logger.info("CONTROLLONE: "+JSON.stringify(this.volatileState));
+    this.logger.info("CONTROLLONE: "+this.isVolatile);
     if (this.isVolatile && stateService.status == 'play') {
 	    this.logger.info("DENTRO");
 		this.volatileService = sService;
@@ -456,7 +457,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if(this.consumeUpdateService!=sService)
 
 		{
-			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification.');
+			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification. Current '+this.consumeUpdateService+" Received "+sService);
 			return;
 		}
 	} else
@@ -464,7 +465,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 		if(trackBlock!=undefined && trackBlock.service!==sService)
 		{
-			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.');
+			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
 			return;
 		}
 
@@ -1069,7 +1070,7 @@ CoreStateMachine.prototype.setVolatile = function (data) {
     this.isVolatile=true;
 
     /**
-     * This fucnction will be called on volatile stop
+     * This function will be called on volatile stop
      */
     this.volatileCallback=data.callback;
 };
@@ -1079,7 +1080,7 @@ CoreStateMachine.prototype.unSetVolatile = function () {
     console.log("UNSET VOLATILE");
 
     /**
-     * This fucnction will be called on volatile stop
+     * This function will be called on volatile stop
      */
     if(this.volatileCallback!==undefined)
     {
