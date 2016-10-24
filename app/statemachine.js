@@ -304,7 +304,16 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
-			var nextTrackBlock = this.getTrack(this.currentPosition+1);
+
+            var nextIndex=this.currentPosition+1;
+
+            if(this.currentRandom)
+            {
+                nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                this.nextRandomIndex=nextIndex;
+            }
+
+            var nextTrackBlock = this.getTrack(nextIndex);
 
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
@@ -324,8 +333,15 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
-			this.currentPosition++;
-			this.askedForPrefetch=false;
+
+            if(this.currentRandom)
+                this.currentPosition=this.nextRandomIndex;
+            else
+			    this.currentPosition++;
+
+            this.nextRandomIndex=undefined;
+
+            this.askedForPrefetch=false;
 			this.pushState.bind(this);
 
 			this.startPlaybackTimer();
@@ -425,13 +441,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	var  self = this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 
-    this.logger.info("CONTROLLONE: "+JSON.stringify(stateService));
 
-    this.logger.info("CONTROLLONE: "+JSON.stringify(this.volatileState));
-    this.logger.info("CONTROLLONE: "+this.isVolatile);
     if (this.isVolatile && stateService.status == 'play') {
-	    this.logger.info("DENTRO");
-		this.volatileService = sService;
+	    this.volatileService = sService;
         this.currentStatus='play';
         this.volatileState=stateService;
         this.pushState().fail(this.pushError.bind(this));
@@ -601,7 +613,10 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 			this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
-			if(trackBlock!==undefined && trackBlock.service!=='webradio')
+
+            console.log("RANDOM: "+this.currentRandom+ ' OBJ '+JSON.stringify(trackBlock));
+
+            if(trackBlock!==undefined && trackBlock.service!=='webradio')
 			{
 				if(this.currentConsume!==undefined && this.currentConsume==true)
 				{
@@ -609,10 +624,19 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 				}
 				else
 				{
-					if(this.currentRandom!==undefined && this.currentRandom===true)
+                    if(this.currentRandom!==undefined && this.currentRandom===true)
 					{
-						this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
-						this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                        var nextSongIndex=0;
+
+
+                        /**
+                         * Using nextRandomIndex because prefetch may have picked one sone randomly
+                         * from another service (thus not prefetched). This way we use the same index
+                         */
+                        if(this.nextRandomIndex)
+                            this.currentPosition=this.nextRandomIndex;
+                        else
+                            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
 					}
 					else {
 						if(this.currentPosition ==null || this.currentPosition===undefined)
