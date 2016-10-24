@@ -1056,6 +1056,18 @@ CoreStateMachine.prototype.setConsume = function (value) {
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
 
+    if(from< this.currentPosition && to > this.currentPosition)
+    {
+        this.currentPosition--;
+    }
+    else if(from> this.currentPosition && to < this.currentPosition)
+    {
+        this.currentPosition++;
+    }
+    else if(from==this.currentPosition)
+        this.currentPosition=to;
+
+    this.pushState();
 	return this.playQueue.moveQueueItem(from,to);
 };
 
