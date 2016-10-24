@@ -334,10 +334,17 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
 
-            if(this.currentRandom)
-                this.currentPosition=this.nextRandomIndex;
+            if(this.currentConsume)
+            {
+                this.playQueue.removeQueueItem({value:this.currentPosition});
+            }
             else
-			    this.currentPosition++;
+            {
+                if(this.currentRandom)
+                    this.currentPosition=this.nextRandomIndex;
+                else
+                    this.currentPosition++;
+            }
 
             this.nextRandomIndex=undefined;
 
