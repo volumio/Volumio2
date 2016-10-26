@@ -20,7 +20,7 @@
 	{"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"piano-dac-plus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
     {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
-    {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
+    {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"st400-dac-amp","name":"ST400 Dac (PCM5122) - Amp","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"}
   ]},
   {"name":"Odroid C1+","data":[
