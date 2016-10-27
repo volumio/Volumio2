@@ -488,25 +488,33 @@ CoreCommandRouter.prototype.writePlaylistsBackup = function () {
 	fs.outputJsonSync(file, data);
 }
 
-/* !!!!!!!!!!!!!!!!!!!!!!!!
+/**
+ * Restores the playlist from the available backup file
+ */
 CoreCommandRouter.prototype.restorePlaylistBackup = function () {
 	var self = this;
 	var backup = [];
+	var path = self.playListManager.playlistFolder;
+	var isbackup = false;
 
 	try{
-		backup = readJsonSync("/data/configuration/playlistsBackup.json");
-		for(var i = 0; i < backup.length; i++){
-			name = backup[i].name;
-			self.playListManager.createPlaylist(name);
-			for(var j = 0; j < backup[i].content.length; j++){
-
-			}
-		}
+		backup = fs.readJsonSync("/data/configuration/playlistsBackup.json");
+		isbackup = true;
 	} catch (e){
-		console.log("======== no playlists backup available! ==========");
+		self.logger.info("Backup: no playlists backup available");
+	};
+
+	if(isbackup){
+		self.logger.info("Backup: restoring playlists");
+		for (var i = 0; i < backup.length; i++){
+			var name = backup[i].name;
+			var songs = backup[i].content;
+			self.playListManager.createPlaylist(name);
+			self.playListManager.commonAddItemsToPlaylist(path, name, songs);
+		}
 	}
 }
-*/
+
 /**
  * writes radio and songs favourites in a json
 */
@@ -526,10 +534,133 @@ CoreCommandRouter.prototype.writeFavouritesBackup = function () {
 	}catch(e){
 		radio = "No radios in favourites";
 	};
-	var favourites = [{"songs": data, "radios": radio}];
+	var favourites = {"songs": data, "radios": radio};
 
 	var file = "/data/configuration/favouritesBackup.json";
 	fs.outputJsonSync(file, favourites);
+}
+
+/**
+ * Restores favourites songs from the available backup
+ */
+CoreCommandRouter.prototype.restoreFavouritesSongsBackup = function () {
+	var self = this;
+
+	var backup = [];
+	var song = [];
+	var isbackup = false;
+	var path = self.playListManager.favouritesPlaylistFolder;
+	try{
+		backup = fs.readJsonSync("/data/configuration/favouritesBackup.json");
+		song = backup.songs;
+		isbackup = true;
+	}catch(e){
+		self.logger.info("Backup: no favourites backup available");
+	};
+
+	if(isbackup){
+		try{
+			var fav = fs.readJsonSync(path + 'favourites');
+			for (var i = 0; i < fav.length; i++){
+				var isthere = false;
+				for (var j = 0; j < song.length; j++) {
+					if (fav[i].uri == song[j].uri){
+						isthere = true;
+					}
+				}
+				if(!isthere) {
+					song.push(fav[i]);
+				}
+			}
+		}catch(e){
+			self.logger.info("Backup: no previous favourite songs");
+		}
+		self.logger.info("Backup: restoring song favourites");
+		fs.outputJsonSync(path + 'favourites', song);
+	}
+}
+
+/**
+ * Restores favourites radios from the available backup
+ */
+CoreCommandRouter.prototype.restoreFavouritesRadiosBackup = function () {
+	var self = this;
+
+	var backup = [];
+	var radio = [];
+	var isbackup = false;
+	var path = self.playListManager.favouritesPlaylistFolder;
+	try{
+		backup = fs.readJsonSync("/data/configuration/favouritesBackup.json");
+		radio = backup.radios;
+		isbackup = true;
+	}catch(e){
+		self.logger.info("Backup: no favourites backup available");
+	};
+
+	if(isbackup){
+		try{
+			var fav = fs.readJsonSync(path + 'radio-favourites');
+			for (var i = 0; i < fav.length; i++){
+				var isthere = false;
+				for (var j = 0; j < radio.length; j++) {
+					if (fav[i].uri == radio[j].uri){
+						isthere = true;
+					}
+				}
+				if(!isthere) {
+					radio.push(fav[i]);
+				}
+			}
+		}catch(e){
+			self.logger.info("Backup: no previous favourite radios");
+		}
+		self.logger.info("Backup: restoring radios favourites");
+		fs.outputJsonSync(path + 'radio-favourites', radio);
+	}
+}
+
+CoreCommandRouter.prototype.managePlaylists = function (value) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	if (value == 0){
+		setTimeout(function () {
+			self.writePlaylistsBackup();
+			defer.resolve();
+		}, 10000);
+	}else{
+		setTimeout(function () {
+			self.restorePlaylistBackup();
+			defer.resolve();
+		}, 10000);
+	}
+
+	return defer.promise;
+}
+
+CoreCommandRouter.prototype.manageFavourites = function (value) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	if (value == 0){
+		setTimeout(function () {
+			self.writeFavouritesBackup();
+			defer.resolve();
+		}, 10000);
+	}else{
+		setTimeout(function () {
+			self.restoreFavouritesSongsBackup();
+		}, 10000);
+		setTimeout(function () {
+			self.restoreFavouritesRadiosBackup();
+			defer.resolve();
+		}, 10000);
+	}
+
+	return defer.promise;
 }
 
 CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data) {
@@ -746,6 +877,7 @@ CoreCommandRouter.prototype.updatePlugin = function (data) {
 	{
 		defer.resolve();
 	}).fail(function(e){
+		self.logger.info("Error: "+e);
 		self.logger.info("Error: "+e);
 		defer.reject(new Error('Cannot Update plugin. Error: '+e));
 	});

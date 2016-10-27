@@ -545,6 +545,21 @@ function InterfaceWebUI(context) {
 
 			});
 
+			// TO DO: ADD TRANSLATIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			connWebSocket.on('manageBackup', function (data) {
+				var selfConnWebSocket = this;
+
+				var value = data;
+
+				var response;
+
+				response=self.commandRouter.managePlaylists(value)
+					.then(self.commandRouter.manageFavourites(value))
+					.fail(function () {
+						self.printToastMessage('error', "Backup error", 'An error occurred while managing backups');
+					});
+			});
+
 			connWebSocket.on('search', function (data) {
 				var selfConnWebSocket = this;
 

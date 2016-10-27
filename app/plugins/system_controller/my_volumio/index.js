@@ -28,14 +28,8 @@ myVolumio.prototype.onStart = function ()
     var self = this;
     var defer = libQ.defer();
     self.commandRouter.writePluginsConf();
-    setTimeout(function () {
-        self.commandRouter.writePlaylistsBackup();
-    }, 10000);
-    setTimeout(function () {
-        self.commandRouter.writeFavouritesBackup();
-    }, 10000);
-    return defer.promise;
 
+    return defer.promise;
 }
 
 myVolumio.prototype.onStop = function () {
