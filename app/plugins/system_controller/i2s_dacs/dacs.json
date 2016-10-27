@@ -17,8 +17,6 @@
     {"id":"justboom-amp","name":"JustBoom Amp Boards","overlay":"justboom-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"JustBoom Amp HAT","needsreboot":"yes"},
     {"id":"justboom-digi","name":"JustBoom Digi Boards","overlay":"justboom-digi","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":"JustBoom Digi HAT","needsreboot":"yes"},
     {"id":"mamboberry-dac","name":"Mamboberry HiFi DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
-	{"id":"piano-dac","name":"Allo Piano","overlay":"piano-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
-	{"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"piano-dac-plus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
     {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
