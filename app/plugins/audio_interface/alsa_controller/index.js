@@ -286,6 +286,21 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
 			defer.resolve(uiconf);
+
+			value = self.config.get('resampling', false);
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[0].options'), value));
+			defer.resolve(uiconf);
+
+			value = self.config.get('resampling_target_bitdepth', '*');
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[1].options'), value));
+			defer.resolve(uiconf);
+
+			value = self.config.get('resampling_target_samplerate', '*');
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), value));
+			defer.resolve(uiconf);
 		})
 		.fail(function()
 		{

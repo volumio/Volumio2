@@ -377,6 +377,109 @@
         }
 
       ]
-    }
+    },
+	{
+	  "id": "advanced_twaaks",
+	  "element": "section",
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_AUDIO_TWEAKS",
+	  "icon": "fa-microchip",
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveAdvancedTweaks"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+		  "resampling",
+		  "resampling_target_bitdepth",
+		  "resampling_target_samplerate",
+		  "resampling_quality",
+		  "resampling_threads"
+		]
+	  },
+	  "content": [
+		{
+		  "id": "resampling",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+		  "value": false
+		},
+		{
+		  "id": "resampling_target_bitdepth",
+		  "element": "select",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.TARGET_BITDEPTH",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.TARGET_BITDEPTH",
+		  "value":  {
+			"value":"*",
+			"label": "TRANSLATE.PLAYBACK_OPTIONS.NATIVE"
+		  },
+		  "visibleIf": {
+			"field": "resampling",
+			"value": true
+		  },
+		  "options": [
+
+			{
+			  "value":"16",
+			  "label": "16"
+			},
+			{
+			  "value":"24",
+			  "label": "24"
+			},
+			{
+			  "value":"32",
+			  "label": "32"
+			}
+		  ]
+
+		},
+		{
+		  "id": "resampling_target_samplerate",
+		  "element": "select",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.TARGET_SAMPLERATE",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.TARGET_SAMPLERATE",
+		  "value":  {
+			"value":"*",
+			"label": "TRANSLATE.PLAYBACK_OPTIONS.NATIVE"
+		  },
+		  "visibleIf": {
+			"field": "resampling",
+			"value": true
+		  },
+		  "options": [
+
+			{
+			  "value":"44100",
+			  "label": "44.1 kHz"
+			},
+			{
+			  "value":"48000",
+			  "label": "48 kHz"
+			},
+			{
+			  "value":"88200",
+			  "label": "88,2 kHz"
+			},
+			{
+			  "value":"96000",
+			  "label": "96 kHz"
+			},
+			{
+			  "value":"176400",
+			  "label": "176,4 kHz"
+			},
+			{
+			  "value":"192000",
+			  "label": "192 kHz"
+			},
+			{
+			  "value":"352800",
+			  "label": "352,8 kHz"
+			}
+		  ]
+
+		}
+
+	  ]
+	}
   ]
 }
