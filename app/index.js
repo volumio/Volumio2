@@ -462,10 +462,61 @@ CoreCommandRouter.prototype.writePluginsConf = function () {
 	var self = this;
 	var confs = self.getPluginsConf();
 
-	var file = "/data/configuration/generalConfig.json";
+	var file = "/data/configuration/generalConfig";
 	fs.outputJson(file, confs, function (err) {
 		console.log(err)})
 }
+
+/* TO FINISH !!!!!!!!!!!!!!!!!!!!!
+CoreCommandRouter.prototype.restorePluginsConf = function () {
+	var self = this;
+
+	var backup = fs.readJsonSync("/data/configuration/generalConfig");
+	var current = self.pluginManager.getPluginsMatrix();
+	var usefulConfs = [];
+
+	for(var i = 0; i < current.length; i++){
+		availPlugins = current[i].catPlugin;
+		var backPlugins = [];
+		var catName = "";
+		var max = self.max(current.length, backup.length);
+		var j = 0;
+		while(current[i].cName != backup[j].cName && j < max){
+			j++;
+		}
+		if(j < max) {
+			catName = backup[j].name;
+			backPlugins = backup[j].plugConf;
+			j = 0;
+			max = self.max(availPlugins.length, backPlugins.length);
+			var existingPlug = [];
+			for (var k = 0; k < availPlugins.length; k++) {
+				while (availPlugins[k].name != backPlugins[j].name && j < max) {
+					j++;
+				}
+				if(j < max){
+					existingPlug.push(backPlugins[j]);
+				}
+			}
+			usefulConfs.push({"cName":catName, "plugConf": existingPlug);
+		}
+	}
+
+	for(var i = 0; i < usefulConfs.length; i++){
+		for(var j = 0; j < usefulConfs[i].plugConf.length){
+			var path = "/data/configuration/" + usefulConfs[i].cName +
+				usefulConfs[i].plugConf[j].name + "config.json";
+			fs.outputJsonSync(path, usefulConfs[i].plugConf[j].config);
+		}
+	}
+}
+
+CoreCommandRouter.prototype.max = function (a, b) {
+	if (a < b)
+		return b;
+	else
+		return a;
+}*/
 
 /**
  * writes the playlists and their content in a json
@@ -479,12 +530,12 @@ CoreCommandRouter.prototype.writePlaylistsBackup = function () {
 
 	for (var i = 0; i < playlists.length; i++){
 		var name = playlists[i];
-		var path = self.playListManager.playlistFolder + "/" + name;
+		var path = self.playListManager.playlistFolder + name;
 		var songs = fs.readJsonSync(path, {throws: false});
 		data.push({"name": name, "content": songs});
 	}
 
-	var file = "/data/configuration/playlistsBackup.json";
+	var file = "/data/configuration/playlists";
 	fs.outputJsonSync(file, data);
 }
 
@@ -493,24 +544,17 @@ CoreCommandRouter.prototype.writePlaylistsBackup = function () {
  */
 CoreCommandRouter.prototype.restorePlaylistBackup = function () {
 	var self = this;
-	var backup = [];
+	var check = self.checkBackup("playlists");
 	var path = self.playListManager.playlistFolder;
-	var isbackup = false;
-
-	try{
-		backup = fs.readJsonSync("/data/configuration/playlistsBackup.json");
-		isbackup = true;
-	} catch (e){
-		self.logger.info("Backup: no playlists backup available");
-	};
+	var isbackup = check[0];
+	var backup = check[1];
 
 	if(isbackup){
 		self.logger.info("Backup: restoring playlists");
 		for (var i = 0; i < backup.length; i++){
 			var name = backup[i].name;
 			var songs = backup[i].content;
-			self.playListManager.createPlaylist(name);
-			self.playListManager.commonAddItemsToPlaylist(path, name, songs);
+			fs.outputJsonSync(path + name, songs);
 		}
 	}
 }
@@ -527,54 +571,83 @@ CoreCommandRouter.prototype.writeFavouritesBackup = function () {
 	try{
 		data = fs.readJsonSync(path + "favourites", {throws: false});
 	}catch(e){
-		data = "No songs in favourites";
+		self.logger.info("No songs in favourites");
 	};
 	try{
 		radio = fs.readJsonSync(path + "radio-favourites", {throws: false});
 	}catch(e){
-		radio = "No radios in favourites";
+		self.logger.info("No radios in favourites");
 	};
 	var favourites = {"songs": data, "radios": radio};
 
-	var file = "/data/configuration/favouritesBackup.json";
+	var file = "/data/configuration/favourites";
 	fs.outputJsonSync(file, favourites);
 }
 
+/**
+ * check if there's a backup for the given playlist, returns a boolean and the file
+ * @param backup
+ * @returns {*[]}
+ */
+CoreCommandRouter.prototype.checkBackup = function (backup) {
+	var self = this;
+	var isbackup = false;
+	var file = [];
+	var path = "/data/configuration/" + backup;
+
+	try{
+		file = fs.readJsonSync(path);
+		isbackup = true;
+	}catch(e){
+		self.logger.info("Backup: no " + backup + " backup available");
+	};
+
+	return [isbackup, file];
+}
+
+/**
+ * merges the backup with the current existing playlist, returns the whole
+ * @param recent
+ * @param old
+ * @returns {*}
+ */
+CoreCommandRouter.prototype.mergePlaylists = function (recent, old) {
+	var self = this;
+	var backup = recent;
+	var current = old;
+
+	for (var i = 0; i < current.length; i++){
+		var isthere = false;
+		for (var j = 0; j < backup.length; j++){
+			if (current[i].uri == backup[j].uri) {
+				isthere = true;
+			}
+		}
+		if (!isthere) {
+			backup.push(current[i]);
+		}
+	}
+
+	return backup;
+}
 /**
  * Restores favourites songs from the available backup
  */
 CoreCommandRouter.prototype.restoreFavouritesSongsBackup = function () {
 	var self = this;
 
-	var backup = [];
-	var song = [];
-	var isbackup = false;
+	var backup = self.checkBackup("favourites");
+	var isbackup = backup[0];
 	var path = self.playListManager.favouritesPlaylistFolder;
-	try{
-		backup = fs.readJsonSync("/data/configuration/favouritesBackup.json");
-		song = backup.songs;
-		isbackup = true;
-	}catch(e){
-		self.logger.info("Backup: no favourites backup available");
-	};
 
 	if(isbackup){
+		var song = backup[1].songs;
 		try{
 			var fav = fs.readJsonSync(path + 'favourites');
-			for (var i = 0; i < fav.length; i++){
-				var isthere = false;
-				for (var j = 0; j < song.length; j++) {
-					if (fav[i].uri == song[j].uri){
-						isthere = true;
-					}
-				}
-				if(!isthere) {
-					song.push(fav[i]);
-				}
-			}
+			song = self.mergePlaylists(song, fav);
 		}catch(e){
 			self.logger.info("Backup: no previous favourite songs");
-		}
+		};
 		self.logger.info("Backup: restoring song favourites");
 		fs.outputJsonSync(path + 'favourites', song);
 	}
@@ -586,40 +659,28 @@ CoreCommandRouter.prototype.restoreFavouritesSongsBackup = function () {
 CoreCommandRouter.prototype.restoreFavouritesRadiosBackup = function () {
 	var self = this;
 
-	var backup = [];
-	var radio = [];
-	var isbackup = false;
+	var backup = self.checkBackup("favourites");
+	var isbackup = backup[0];
 	var path = self.playListManager.favouritesPlaylistFolder;
-	try{
-		backup = fs.readJsonSync("/data/configuration/favouritesBackup.json");
-		radio = backup.radios;
-		isbackup = true;
-	}catch(e){
-		self.logger.info("Backup: no favourites backup available");
-	};
 
 	if(isbackup){
+		var radio = backup[1].radios;
 		try{
 			var fav = fs.readJsonSync(path + 'radio-favourites');
-			for (var i = 0; i < fav.length; i++){
-				var isthere = false;
-				for (var j = 0; j < radio.length; j++) {
-					if (fav[i].uri == radio[j].uri){
-						isthere = true;
-					}
-				}
-				if(!isthere) {
-					radio.push(fav[i]);
-				}
-			}
+			radio = self.mergePlaylists(radio, fav);
 		}catch(e){
 			self.logger.info("Backup: no previous favourite radios");
-		}
+		};
 		self.logger.info("Backup: restoring radios favourites");
 		fs.outputJsonSync(path + 'radio-favourites', radio);
 	}
 }
 
+/**
+ * manages the backup for playlists, saves or restores it
+ * @param value
+ * @returns {*}
+ */
 CoreCommandRouter.prototype.managePlaylists = function (value) {
 	var self = this;
 
@@ -640,6 +701,11 @@ CoreCommandRouter.prototype.managePlaylists = function (value) {
 	return defer.promise;
 }
 
+/**
+ * manages the backup for favourites, saves or restores it
+ * @param value
+ * @returns {*}
+ */
 CoreCommandRouter.prototype.manageFavourites = function (value) {
 	var self = this;
 
