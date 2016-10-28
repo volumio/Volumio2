@@ -40,6 +40,9 @@
 	"WIRELESS_RESTART_ERROR": "Fehler beim Neustarten des Funknetzwerks: ",
 	"WIRELESS_RESTART_SUCCESS": "Funknetzwerk erfolgreich neu gestartet"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Name auswählen der in den NAS-Mounts angezeigt wird"
+  },
   "PLAYLIST":{
 	"ADDED_TITLE":"Hinzugefügt",
 	"ADDED_TO_PLAYLIST":" zu Wiedergabeliste ",

@@ -172,58 +172,36 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].element', 'select');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
 
-			if (activemixer_type === 'Hardware') {
-				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
+				value: activemixer_type,
+				label: activemixer_type
+			});
+
+			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
+				if (mixers[0] == 'SoftMaster' || activemixer == 'SoftMaster') {
+					if  (mixers.length > 0 ) {
+						self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+							value: 'Hardware',
+							label: 'Hardware'
+						});
+					}
+				} else {
+					self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
 					value: 'Hardware',
 					label: 'Hardware'
-				});
-				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-					value: 'Hardware',
-					label: 'Hardware'
-				});
-
+					});
+				}
 
 			}
-			if (activemixer_type === 'Software') {
+			self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+				value: 'Software',
+				label: 'Software'
+			});
 
-				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-					value: 'Software',
-					label: 'Software'
-				});
-
-				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-					value: 'None',
-					label: 'None'
-				});
-
-
-				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-					value: 'Software',
-					label: 'Software'
-				});
-
-			}
-			if (activemixer_type === 'None') {
-
-				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-					value: 'None',
-					label: self.commandRouter.getI18nString('COMMON.NONE')
-				});
-				self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
-					value: 'Software',
-					label: 'Software'
-				});
-				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
-					value: 'None',
-					label: self.commandRouter.getI18nString('COMMON.NONE')
-				});
-
-
-
-
-			}
-
-
+			self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
+				value: 'None',
+				label: self.commandRouter.getI18nString('COMMON.NONE')
+			});
 
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].id', 'mixer');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].element', 'select');
@@ -243,7 +221,10 @@ ControllerAlsa.prototype.getUIConfig = function () {
 						label: mixers[0]
 					});
 				}
-
+				var index = mixers.indexOf('SoftMaster');
+				if (index > -1) {
+					mixers.splice(index, 1);
+				}
 				for(var i in mixers) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[1].options', {
 						value: mixers[i],
@@ -437,6 +418,20 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
 	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
 	if (data.mixer_type.value === 'Hardware') {
+	if (data.mixer.value == 'SoftMaster'){
+		var value = self.config.get('outputdevice');
+		if (value == undefined){
+			value = 0;
+		} else if (value == 'softvolume') {
+			value = self.config.get('softvolumenumber');
+		}
+		var mixers = self.getMixerControls(value);
+		var index = mixers.indexOf('SoftMaster');
+		if (index > -1) {
+			mixers.splice(index, 1);
+			data.mixer.value = mixers[0];
+		}
+	}
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
@@ -551,6 +546,9 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 
 	var mixers = [];
 	var outdev = this.config.get('outputdevice');
+	if (outdev == 'softvolume'){
+		outdev = this.config.get('softvolumenumber');
+	}
 	try {
 		var array = execSync('amixer -c '+ outdev +' scontents', { encoding: 'utf8' })
 		var genmixers = array.toString().split("Simple mixer control");
@@ -700,6 +698,22 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 	var self = this;
 
 	self.logger.info('Enable softmixer device for audio device number '+data);
+
+
+	self.writeSoftMixerFile(data)
+		.then(self.setSoftParams.bind(self))
+		.then(self.apply1.bind(self))
+		.then(self.apply2.bind(self))
+		.then(self.setSoftConf.bind(self))
+		.then(self.setSoftVolConf.bind(self))
+		.then(self.restartMpd.bind(self))
+
+}
+ControllerAlsa.prototype.writeSoftMixerFile  = function (data) {
+	var self = this;
+	var defer = libQ.defer();
+
+	self.logger.info('Enable softmixer device for audio device number '+data);
 	var outnum = data;
 	self.commandRouter.volumioStop();
 	if (this.config.has('softvolumenumber') == false) {
@@ -737,20 +751,82 @@ ControllerAlsa.prototype.enableSoftMixer  = function (data) {
 			self.logger.info('Asound.conf file written');
 			var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid:1000, gid: 1000, encoding: 'utf8' });
 			var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
-			self.setConfigParam({key: 'mixer', value: "SoftMaster"});
-			self.setConfigParam({key: 'outputdevice', value: "softvolume"});
-			var apply2 = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
-			var apply3 = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
-			self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
-			self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
-			self.updateVolumeSettings();
-			//Restarting MPD, this seems needed only on first boot
-			setTimeout(function () {
-				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
-			}, 1500);
+			defer.resolve();
+
 		}
 	});
-}
+
+	return defer.promise;
+};
+
+ControllerAlsa.prototype.setSoftParams  = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	self.setConfigParam({key: 'mixer', value: "SoftMaster"});
+	self.setConfigParam({key: 'outputdevice', value: "softvolume"});
+
+	defer.resolve();
+	return defer.promise;
+};
+
+ControllerAlsa.prototype.apply1  = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	try {
+		var apply2 = execSync('/usr/bin/aplay -D softvolume /volumio/app/silence.wav', { encoding: 'utf8' });
+	} catch (e) {
+
+	}
+
+	defer.resolve();
+	return defer.promise;
+};
+
+ControllerAlsa.prototype.apply2  = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	var apply3 = execSync('/usr/sbin/alsactl -L -R nrestore', { uid:1000, gid: 1000, encoding: 'utf8' });
+	defer.resolve();
+	return defer.promise;
+};
+
+ControllerAlsa.prototype.setSoftConf  = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', "SoftMaster");
+	self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
+
+	defer.resolve();
+	return defer.promise;
+};
+
+
+ControllerAlsa.prototype.setSoftVolConf  = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	self.updateVolumeSettings();
+	defer.resolve();
+	return defer.promise;
+};
+
+ControllerAlsa.prototype.restartMpd  = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+	setTimeout(function () {
+		self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '')
+		defer.resolve();
+	}, 1500);
+
+	return defer.promise;
+};
+
+
 
 ControllerAlsa.prototype.disableSoftMixer  = function (data) {
 	var self = this;

@@ -41,6 +41,9 @@
     "WIRELESS_RESTART_ERROR": "Ett fel inträffade när det trådlösa nätverket startades om: ",
     "WIRELESS_RESTART_SUCCESS": "Det trådlösa nätverket startades om korrekt"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Välj ett  Alias som kommer att visas i NAS listan"
+  },
   "PLAYLIST":{
     "ADDED_TITLE":"Lade till",
     "ADDED_TO_PLAYLIST":" till spellistan ",

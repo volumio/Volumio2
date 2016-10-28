@@ -18,12 +18,13 @@ play
 pause
 next
 previous
+stop
 
 
 [[VOLUMIO SERVICE CONTROL]]
 
 start                               Starts Volumio Service
-stop                                Stops Volumio Service
+vstop                                Stops Volumio Service
 restart                             Restarts Volumio Service
 "
 
@@ -66,7 +67,7 @@ function start {
 systemctl start volumio.service
 }
 
-function stop {
+function vstop {
 systemctl stop volumio.service
 }
 
@@ -90,6 +91,10 @@ case "$1" in
             playbackcommand=$1
             playback
             ;;
+        stop)
+            playbackcommand=$1
+            playback
+            ;;
         start)
             start
             ;;
@@ -97,7 +102,7 @@ case "$1" in
             start
             ;;
 
-        stop)
+        vstop)
             stop
             ;;
 

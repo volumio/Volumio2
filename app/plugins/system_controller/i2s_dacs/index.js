@@ -36,6 +36,8 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	if (i2sdac == null || i2sdac.length === 0 ) {
 		self.logger.info('I2S DAC not set, start Auto-detection');
 		self.i2sDetect();
+	} else {
+		self.execDacScript();
 	}
 
 
@@ -450,7 +452,7 @@ ControllerI2s.prototype.hotAddI2SDAC = function (data) {
 
 	var overlay = data.overlay.split(',');
 
-	dtcommand(overlay[0]);
+	//dtcommand(overlay[0]);
 
 	if (data.script) {
 		exec(__dirname + '/scripts/'+data.script,{uid:1000, gid:1000}, function(err, stdout, stderr) {
@@ -508,3 +510,37 @@ ControllerI2s.prototype.revomeAllDtOverlays = function () {
 	}
 
 }
+
+ControllerI2s.prototype.execDacScript = function () {
+	var self = this;
+	var dacname = self.getConfigParam('i2s_dac');
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+
+				if(dacdata.devices[num].data[i].name === dacname) {
+					
+					if (dacdata.devices[num].data[i].script && dacdata.devices[num].data[i].script.length > 0 ) {
+						self.logger.info('Executing start script for DAC '+dacname);
+						exec(__dirname + '/scripts/'+dacdata.devices[num].data[i].script,{uid:1000, gid:1000}, function(err, stdout, stderr) {
+							if(err) {
+								self.logger.error('Cannot execute DAC script: '+err);
+							} else {
+								self.logger.info('Data script executed');
+							}
+						});
+					}
+
+				}
+
+			}
+		}
+	}
+};
+
