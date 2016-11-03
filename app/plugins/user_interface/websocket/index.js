@@ -1866,7 +1866,11 @@ InterfaceWebUI.prototype.emitFavourites = function (value) {
 };
 
 InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
-    this.libSocketIO.sockets.emit(emit,payload);
+	if(emit.msg && emit.value) {
+		this.libSocketIO.sockets.emit(emit.msg,emit.value);
+	} else {
+		this.libSocketIO.sockets.emit(emit,payload);
+	}
 };
 
 
