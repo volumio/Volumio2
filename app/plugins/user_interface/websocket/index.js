@@ -560,6 +560,22 @@ function InterfaceWebUI(context) {
 					});
 			});
 
+			connWebSocket.on('getBackup', function (data) {
+				var selfConnWebSocket = this;
+
+				var response = self.commandRouter.loadBackup(data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+						selfConnWebSocket.emit('pushBackup', result);
+					})
+						.fail(function () {
+							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+						});
+				}
+
+			});
+
 			connWebSocket.on('search', function (data) {
 				var selfConnWebSocket = this;
 
