@@ -90,6 +90,16 @@ PlaylistManager.prototype.listPlaylist = function () {
 	return defer.promise;
 };
 
+PlaylistManager.prototype.retrievePlaylists = function () {
+	var self = this;
+	var content = [];
+
+	content = fs.readdirSync(this.playlistFolder);
+
+	return content;
+}
+
+
 PlaylistManager.prototype.getPlaylistContent = function (name) {
 	var self = this;
 

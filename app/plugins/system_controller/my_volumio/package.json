@@ -1,0 +1,17 @@
+{
+  "name": "my_volumio",
+  "version": "1.0.0",
+  "description": "send your data",
+  "main": "index.js",
+  "scripts":
+  {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ghembs",
+  "license": "GPL",
+  "volumio_info":
+  {
+    "plugin_type": "system_controller",
+    "boot_priority":10
+  }
+}

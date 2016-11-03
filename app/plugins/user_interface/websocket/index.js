@@ -545,6 +545,37 @@ function InterfaceWebUI(context) {
 
 			});
 
+			// TO DO: ADD TRANSLATIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			connWebSocket.on('manageBackup', function (data) {
+				var selfConnWebSocket = this;
+
+				var value = data;
+
+				var response;
+
+				response=self.commandRouter.managePlaylists(value)
+					.then(self.commandRouter.manageFavourites(value))
+					.fail(function () {
+						self.printToastMessage('error', "Backup error", 'An error occurred while managing backups');
+					});
+			});
+
+			connWebSocket.on('getBackup', function (data) {
+				var selfConnWebSocket = this;
+
+				var response = self.commandRouter.loadBackup(data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+						selfConnWebSocket.emit('pushBackup', result);
+					})
+						.fail(function () {
+							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+						});
+				}
+
+			});
+
 			connWebSocket.on('search', function (data) {
 				var selfConnWebSocket = this;
 
