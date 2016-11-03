@@ -1,10 +1,11 @@
 { "devices":[
   {"name":"Raspberry PI","data":[
+	{"id":"503hta-hybrid","name":"503HTA Hybrid Tube Amp","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"aoide-kazoo-dac","name":"Aoide Kazoo DAC","overlay":"aoide-kazoo-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"aoide-zero-dacplus","name":"Aoide Zero DAC+","overlay":"aoide-zero-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"aoide-zero-digiplus","name":"Aoide Zero Digi+","overlay":"aoide-zero-digiplus","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"aoide-dacii","name":"Aoide DACII","overlay":"aoide-dacii","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
-    {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
+    {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dacplus","name":"Hifiberry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"HiFiBerry DAC+","i2c_address":"4d","needsreboot":"no"},
 	{"id":"hifiberry-dacpro","name":"Hifiberry DAC Pro","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
     {"id":"hifiberry-dac","name":"Hifiberry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
@@ -15,12 +16,10 @@
     {"id":"justboom-dac","name":"JustBoom DAC Boards","overlay":"justboom-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"JustBoom DAC HAT","needsreboot":"no"},
     {"id":"justboom-amp","name":"JustBoom Amp Boards","overlay":"justboom-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"JustBoom Amp HAT","needsreboot":"yes"},
     {"id":"justboom-digi","name":"JustBoom Digi Boards","overlay":"justboom-digi","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":"JustBoom Digi HAT","needsreboot":"yes"},
-    {"id":"mamboberry-dac","name":"Mamboberry HiFi DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
-	{"id":"piano-dac","name":"Allo Piano","overlay":"piano-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
-	{"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"piano-dac-plus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
+    {"id":"mamboberry-dac","name":"Mamboberry HiFi DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
-    {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
+    {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"st400-dac-amp","name":"ST400 Dac (PCM5122) - Amp","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"}
   ]},
   {"name":"Odroid C1+","data":[

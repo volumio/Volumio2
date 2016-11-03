@@ -41,6 +41,9 @@
 	"WIRELESS_RESTART_ERROR": "Virhe käynnistettäessä langatonta verkkoa: ",
 	"WIRELESS_RESTART_SUCCESS": "Langattoman uudelleenkäynnistys onnistui"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Valitse käytettävän verkkoaseman alias."
+  },
   "PLAYLIST":{
 	"ADDED_TITLE":"Lisätty",
 	"ADDED_TO_PLAYLIST":" soittolistaan ",

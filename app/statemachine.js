@@ -16,7 +16,7 @@ function CoreStateMachine(commandRouter) {
 	this.simulateStopStartDone=false;
     this.volatileService="";
     this.volatileState={};
-	this.isVolatile = undefined;
+	this.isVolatile = false;
 
 	this.logger=this.commandRouter.logger;
 
@@ -33,7 +33,7 @@ CoreStateMachine.prototype.getState = function () {
     {
 		// Here we are in volatile state mode, so we do not take playback informations from the queue but rather from the volatileState
         return {
-            status: this.currentStatus,
+            status: this.volatileState.status,
             title: this.volatileState.title,
             artist: this.volatileState.artist,
             album: this.volatileState.album,
@@ -236,7 +236,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentDuration = 0;
 			self.currentTrackBlock = [];
 			self.timeLastServiceStateUpdate = 0;
-			this.currentTrackType = null;
+			self.currentTrackType = null;
 			self.timerPlayback = null;
 			self.currentTitle = null;
 			self.currentArtist = null;
@@ -304,7 +304,16 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
-			var nextTrackBlock = this.getTrack(this.currentPosition+1);
+
+            var nextIndex=this.currentPosition+1;
+
+            if(this.currentRandom)
+            {
+                nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                this.nextRandomIndex=nextIndex;
+            }
+
+            var nextTrackBlock = this.getTrack(nextIndex);
 
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
@@ -324,8 +333,22 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
-			this.currentPosition++;
-			this.askedForPrefetch=false;
+
+            if(this.currentConsume)
+            {
+                this.playQueue.removeQueueItem({value:this.currentPosition});
+            }
+            else
+            {
+                if(this.currentRandom)
+                    this.currentPosition=this.nextRandomIndex;
+                else
+                    this.currentPosition++;
+            }
+
+            this.nextRandomIndex=undefined;
+
+            this.askedForPrefetch=false;
 			this.pushState.bind(this);
 
 			this.startPlaybackTimer();
@@ -422,14 +445,12 @@ CoreStateMachine.prototype.pushError = function (sReason) {
 // Sync state from service status announcement
 // Input state object has the form {status: sStatus, position: nPosition, seek: nSeek, duration: nDuration, samplerate: nSampleRate, bitdepth: nBitDepth, channels: nChannels, dynamictitle: sTitle}
 CoreStateMachine.prototype.syncState = function (stateService, sService) {
+	var  self = this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 
-    this.logger.info("CONTROLLONE: "+stateService);
 
-    this.logger.info("CONTROLLONE: "+this.volatileState);
     if (this.isVolatile && stateService.status == 'play') {
-	    this.logger.info("DENTRO");
-		this.volatileService = sService;
+	    this.volatileService = sService;
         this.currentStatus='play';
         this.volatileState=stateService;
         this.pushState().fail(this.pushError.bind(this));
@@ -455,7 +476,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if(this.consumeUpdateService!=sService)
 
 		{
-			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification.');
+			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification. Current '+this.consumeUpdateService+" Received "+sService);
 			return;
 		}
 	} else
@@ -463,7 +484,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 		if(trackBlock!=undefined && trackBlock.service!==sService)
 		{
-			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.');
+			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
 			return;
 		}
 
@@ -599,7 +620,10 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 			this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
-			if(trackBlock!==undefined && trackBlock.service!=='webradio')
+
+            console.log("RANDOM: "+this.currentRandom+ ' OBJ '+JSON.stringify(trackBlock));
+
+            if(trackBlock!==undefined && trackBlock.service!=='webradio')
 			{
 				if(this.currentConsume!==undefined && this.currentConsume==true)
 				{
@@ -607,10 +631,19 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 				}
 				else
 				{
-					if(this.currentRandom!==undefined && this.currentRandom===true)
+                    if(this.currentRandom!==undefined && this.currentRandom===true)
 					{
-						this.commandRouter.logger.info("RANDOM: "+this.currentRandom);
-						this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+                        var nextSongIndex=0;
+
+
+                        /**
+                         * Using nextRandomIndex because prefetch may have picked one sone randomly
+                         * from another service (thus not prefetched). This way we use the same index
+                         */
+                        if(this.nextRandomIndex)
+                            this.currentPosition=this.nextRandomIndex;
+                        else
+                            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
 					}
 					else {
 						if(this.currentPosition ==null || this.currentPosition===undefined)
@@ -1023,6 +1056,18 @@ CoreStateMachine.prototype.setConsume = function (value) {
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
 
+    if(from< this.currentPosition && to > this.currentPosition)
+    {
+        this.currentPosition--;
+    }
+    else if(from> this.currentPosition && to < this.currentPosition)
+    {
+        this.currentPosition++;
+    }
+    else if(from==this.currentPosition)
+        this.currentPosition=to;
+
+    this.pushState();
 	return this.playQueue.moveQueueItem(from,to);
 };
 
@@ -1068,7 +1113,7 @@ CoreStateMachine.prototype.setVolatile = function (data) {
     this.isVolatile=true;
 
     /**
-     * This fucnction will be called on volatile stop
+     * This function will be called on volatile stop
      */
     this.volatileCallback=data.callback;
 };
@@ -1078,7 +1123,7 @@ CoreStateMachine.prototype.unSetVolatile = function () {
     console.log("UNSET VOLATILE");
 
     /**
-     * This fucnction will be called on volatile stop
+     * This function will be called on volatile stop
      */
     if(this.volatileCallback!==undefined)
     {

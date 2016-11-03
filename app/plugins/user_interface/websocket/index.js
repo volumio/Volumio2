@@ -663,7 +663,7 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('deletePlaylist', function (data) {
 				var selfConnWebSocket = this;
 
-				var returnedData = self.commandRouter.playListManager.deletePlaylist(data.value);
+				var returnedData = self.commandRouter.playListManager.deletePlaylist(data.name);
 				returnedData.then(function (data) {
 					selfConnWebSocket.emit('pushListPlaylist', data);
 					var response=self.musicLibrary.executeBrowseSource('playlists');

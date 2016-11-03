@@ -50,6 +50,9 @@
     "HOTSPOT_CONF_ERROR":"Erro na configuração do Hotspot",
     "HOTSPOT_PW_LENGTH":"Palavra Chave do Hotspot tem de ter pelo menos 8 caracteres"
   },
+  "NETWORKFS":{
+    "ALIAS_DOC":"Escolher um Pseudónimo para mostrar nas NAS montadas"
+  },
   "PLAYLIST":{
     "ADDED_TITLE":"Adicionada",
     "ADDED_TO_PLAYLIST":" á Lista de Reprodução ",

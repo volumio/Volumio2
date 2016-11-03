@@ -90,27 +90,43 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 	//Wireless
 
+	var wirelessenabled = false;
+		try {
+		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/operstate", { uid: 1000, gid: 1000, encoding: 'utf8'});
+			var wirelessstatus = wirelessstatusraw.replace(/\r?\n/g, '');
+		if ( wirelessstatus == 'up') {
+			wirelessenabled = true;
+			}
+			}catch (e) {
+
+			}
+
+	uiconf.sections[2].content[0].value = wirelessenabled;
+
 	//dhcp
-	  //dhcp
-        if (config.get('wirelessdhcp') == undefined) {
-            uiconf.sections[2].content[0].value = true;
-        } else {
-            uiconf.sections[2].content[0].value = config.get('wirelessdhcp');
-        }
+
+    if (config.get('wirelessdhcp') == undefined) {
+    	uiconf.sections[2].content[1].value = true;
+	} else {
+        uiconf.sections[2].content[1].value = config.get('wirelessdhcp');
+    }
 
 	//static ip
-	uiconf.sections[2].content[1].value = config.get('wirelessip');
+	uiconf.sections[2].content[2].value = config.get('wirelessip');
 
 	//static netmask
-	uiconf.sections[2].content[2].value = config.get('wirelessnetmask');
+	uiconf.sections[2].content[3].value = config.get('wirelessnetmask');
 
 	//static gateway
-	uiconf.sections[2].content[3].value = config.get('wirelessgateway');
+	uiconf.sections[2].content[4].value = config.get('wirelessgateway');
 
 			if (config.get('enable_hotspot') == undefined) {
 				uiconf.sections[4].content[0].value = true;
 			} else {
 				uiconf.sections[4].content[0].value = config.get('enable_hotspot');
+			}
+			if (!wirelessenabled) {
+				uiconf.sections[4].content[0].value = false;
 			}
 
 			if (config.get('hotspot_name') == undefined) {
@@ -328,12 +344,21 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 
 	var defer = libQ.defer();
 
+	var wireless_enabled = data['wireless_enabled'];
 	var dhcp = data['wireless_dhcp'];
 	var static_ip = data['wireless_static_ip'];
 	var static_netmask = data['wireless_static_netmask'];
 	var static_gateway = data['wireless_static_gateway'];
 
 	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
+
+	var wireless_enabled_setting = config.get('wireless_enabled');
+	if (wireless_enabled_setting == undefined) {
+		config.addConfigValue('wireless_enabled', 'boolean', wireless_enabled);
+	} else {
+		config.set('wireless_enabled', wireless_enabled);
+	}
+	
 	var wirelessdhcp = config.get('wirelessdhcp');
 	if (wirelessdhcp == undefined) {
 		config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
