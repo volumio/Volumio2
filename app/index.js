@@ -518,7 +518,6 @@ CoreCommandRouter.prototype.max = function (a, b) {
 		return a;
 }*/
 
-
 /**
  * loads the backup for the selected playlist, according to request, returns it
  * @param request
@@ -570,6 +569,26 @@ CoreCommandRouter.prototype.loadPlaylistsBackup = function () {
 }
 
 /**
+ * load backup for the selected playlist in favourites
+ * @param type
+ * @returns {Array}
+ */
+CoreCommandRouter.prototype.loadFavBackup = function (type) {
+	var self = this;
+
+	var path = self.playListManager.favouritesPlaylistFolder;
+	var data = [];
+
+	try{
+		data = fs.readJsonSync(path + type, {throws: false});
+	}catch(e){
+		self.logger.info("No "+ type + " in favourites folder");
+	};
+
+	return data;
+}
+
+/**
  * writes the playlists and their content in a json
  */
 CoreCommandRouter.prototype.writePlaylistsBackup = function () {
@@ -579,6 +598,22 @@ CoreCommandRouter.prototype.writePlaylistsBackup = function () {
 
 	var file = "/data/configuration/playlists";
 	fs.outputJsonSync(file, data);
+}
+
+/**
+ * writes radio and songs favourites in a json
+ */
+CoreCommandRouter.prototype.writeFavouritesBackup = function () {
+	var self = this;
+
+	var data = self.loadFavBackup("favourites");
+	var radio = self.loadFavBackup("radio-favourites");
+	var myRadio = self.loadFavBackup("my-web-radio");
+
+	var favourites = {"songs": data, "radios": radio, "myRadios": myRadio};
+
+	var file = "/data/configuration/favourites";
+	fs.outputJsonSync(file, favourites);
 }
 
 /**
@@ -601,40 +636,26 @@ CoreCommandRouter.prototype.restorePlaylistBackup = function () {
 	}
 }
 
-/**
- * load backup for the selected playlist in favourites
- * @param type
- * @returns {Array}
- */
-CoreCommandRouter.prototype.loadFavBackup = function (type) {
+CoreCommandRouter.prototype.restoreFavouritesBackup = function (type) {
 	var self = this;
 
+	var backup = self.checkBackup("favourites");
+	var isbackup = backup[0];
 	var path = self.playListManager.favouritesPlaylistFolder;
-	var data = [];
+	var kind = self.checkFavouritesType(type, backup[1]);
+	var file = kind[0];
+	var data = kind[1];
 
-	try{
-		data = fs.readJsonSync(path + type, {throws: false});
-	}catch(e){
-		self.logger.info("No "+ type + " in favourites folder");
-	};
-
-	return data;
-}
-
-/**
- * writes radio and songs favourites in a json
-*/
-CoreCommandRouter.prototype.writeFavouritesBackup = function () {
-	var self = this;
-
-	var data = self.loadFavBackup("favourites");
-	var radio = self.loadFavBackup("radio-favourites");
-	var myRadio = self.loadFavBackup("my-web-radio");
-
-	var favourites = {"songs": data, "radios": radio, "myRadios": myRadio};
-
-	var file = "/data/configuration/favourites";
-	fs.outputJsonSync(file, favourites);
+	if(isbackup){
+		try{
+			var fav = fs.readJsonSync(path + file);
+			data = self.mergePlaylists(data, fav);
+		}catch(e){
+			self.logger.info("Backup: no previous favourite " + type);
+		};
+		self.logger.info("Backup: restoring " + type + " favourites");
+		fs.outputJsonSync(path + file, data);
+	}
 }
 
 /**
@@ -656,6 +677,29 @@ CoreCommandRouter.prototype.checkBackup = function (backup) {
 	};
 
 	return [isbackup, file];
+}
+
+CoreCommandRouter.prototype.checkFavouritesType = function (type, backup) {
+	var self = this;
+	var data = [];
+	var file = "";
+
+	if(type == "songs") {
+		data = backup.songs;
+		file = "favourites";
+	}
+	else if(type == "radios") {
+		data = backup.radios;
+		file = "radio-favourites";
+	}
+	else if(type == "myRadios") {
+		data = backup.myRadios;
+		file = "my-web-radio";
+	}
+	else
+		self.logger.info("Error: category non existent");
+
+	return [file, data];
 }
 
 /**
@@ -682,74 +726,6 @@ CoreCommandRouter.prototype.mergePlaylists = function (recent, old) {
 	}
 
 	return backup;
-}
-/**
- * Restores favourites songs from the available local backup
- */
-CoreCommandRouter.prototype.restoreFavouritesSongsBackup = function () {
-	var self = this;
-
-	var backup = self.checkBackup("favourites");
-	var isbackup = backup[0];
-	var path = self.playListManager.favouritesPlaylistFolder;
-
-	if(isbackup){
-		var song = backup[1].songs;
-		try{
-			var fav = fs.readJsonSync(path + 'favourites');
-			song = self.mergePlaylists(song, fav);
-		}catch(e){
-			self.logger.info("Backup: no previous favourite songs");
-		};
-		self.logger.info("Backup: restoring song favourites");
-		fs.outputJsonSync(path + 'favourites', song);
-	}
-}
-
-/**
- * Restores favourites radios from the available local backup
- */
-CoreCommandRouter.prototype.restoreFavouritesRadiosBackup = function () {
-	var self = this;
-
-	var backup = self.checkBackup("favourites");
-	var isbackup = backup[0];
-	var path = self.playListManager.favouritesPlaylistFolder;
-
-	if(isbackup){
-		var radio = backup[1].radios;
-		try{
-			var fav = fs.readJsonSync(path + 'radio-favourites');
-			radio = self.mergePlaylists(radio, fav);
-		}catch(e){
-			self.logger.info("Backup: no previous favourite radios");
-		};
-		self.logger.info("Backup: restoring radios favourites");
-		fs.outputJsonSync(path + 'radio-favourites', radio);
-	}
-}
-
-/**
- * Restores personal radios from the available  local backup
- */
-CoreCommandRouter.prototype.restorePersonalRadiosBackup = function () {
-	var self = this;
-
-	var backup = self.checkBackup("favourites");
-	var isbackup = backup[0];
-	var path = self.playListManager.favouritesPlaylistFolder;
-
-	if(isbackup){
-		var myRadio = backup[1].myRadios;
-		try{
-			var fav = fs.readJsonSync(path + 'my-web-radio');
-			radio = self.mergePlaylists(myRadio, fav);
-		}catch(e){
-			self.logger.info("Backup: no previous personal radios");
-		};
-		self.logger.info("Backup: restoring personal radios backup");
-		fs.outputJsonSync(path + 'my-web-radio', myRadio);
-	}
 }
 
 /**
@@ -794,13 +770,13 @@ CoreCommandRouter.prototype.manageFavourites = function (value) {
 		}, 10000);
 	}else{
 		setTimeout(function () {
-			self.restoreFavouritesSongsBackup();
+			self.restoreFavouritesBackup("songs");
 		}, 10000);
 		setTimeout(function () {
-			self.restoreFavouritesRadiosBackup();
+			self.restoreFavouritesBackup("radios");
 		}, 10000);
 		setTimeout(function () {
-			self.restorePersonalRadiosBackup();
+			self.restoreFavouritesBackup("myRadios");
 			defer.resolve();
 		}, 10000);
 	}
