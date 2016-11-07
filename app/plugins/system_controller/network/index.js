@@ -600,17 +600,27 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     //cycling through configured network in config file
     var index=0;
 
-    var netstring='';
+    var netstring='ctrl_interface=/var/run/wpa_supplicant' + os.EOL ;
+
+    //searching network
+    if (data.pass.length <= 13) {
+        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}'+os.EOL;
+    } else {
+        netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + '}' + os.EOL ;
+    }
 
     while(config.has('wirelessNetworksSSID['+index+']'))
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
-        var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
+        if(data.ssid!=configuredSSID)
+        {
+            var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 
-        if (configuredPASS.length <= 13) {
-            netstring += 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}\n';
-        } else {
-            netstring += 'ctrl_interface=/var/run/wpa_supplicant' + os.EOL + 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + '}' + os.EOL +"\n";
+            if (configuredPASS.length <= 13) {
+                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + '}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + '}'+os.EOL;
+            } else {
+                netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + '}' + os.EOL ;
+            }
         }
 
         index++;
