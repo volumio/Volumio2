@@ -160,14 +160,15 @@ volumioAppearance.prototype.getUiSettings = function()
     var language = config.get('language_code');
     var theme = config.get('theme');
     var background_type = config.get('background_type');
+    var metatitle = config.get('metatitle', 'Volumio - Audiophile Music Player');
 
     if (background_type === 'background') {
         var background_title = config.get('background_title');
         var background_path = config.get('background_path');
-        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme}
+        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme, "meta-title":metatitle}
     } else {
         var background_color = config.get('background_color');
-        var UiSettings = {"color":background_color, "language":language, "theme":theme}
+        var UiSettings = {"color":background_color, "language":language, "theme":theme, "meta-title":metatitle}
     }
 
     defer.resolve(UiSettings);
