@@ -541,7 +541,7 @@ CoreCommandRouter.prototype.loadBackup = function (request) {
 		defer.resolve(data);
 	} else{
 		self.logger.info("Backup: request not accepted, unexisting category");
-		defer.resolve();
+		defer.resolve(undefined);
 	}
 
 	return defer.promise;

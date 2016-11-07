@@ -1,6 +1,6 @@
 var express = require('express');
 var libQ = require('kew');
-var app = require('./index.js')
+var app = require('./index.js');
 var bodyParser = require('body-parser');
 var ip = require('ip');
 var api = express.Router();
@@ -49,18 +49,5 @@ api.get('/host', function(req, res) {
             } }); self.host = ip.address();
         res.json({ host: 'http://'+self.host});
 });
-
-api.get('/host', function(req, res) {
-    var self =this;
-
-    ifconfig.status('wlan0', function(err, status) {
-        if (status != undefined) {
-            if (status.ipv4_address != undefined) {
-                self.host = status.ipv4_address;
-            } else self.host = ip.address();
-        } }); self.host = ip.address();
-    res.json({ host: 'http://'+self.host});
-});
-
 
 module.exports = api;
