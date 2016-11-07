@@ -165,10 +165,10 @@ volumioAppearance.prototype.getUiSettings = function()
     if (background_type === 'background') {
         var background_title = config.get('background_title');
         var background_path = config.get('background_path');
-        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme, "metaTitle":metatitle}
+        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme, "pageTitle":metatitle}
     } else {
         var background_color = config.get('background_color');
-        var UiSettings = {"color":background_color, "language":language, "theme":theme, "metaTitle":metatitle}
+        var UiSettings = {"color":background_color, "language":language, "theme":theme, "pageTitle":metatitle}
     }
 
     defer.resolve(UiSettings);
