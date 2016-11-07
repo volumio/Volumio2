@@ -1708,6 +1708,21 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
 
+			connWebSocket.on('checkPassword', function (data) {
+				var selfConnWebSocket = this;
+
+
+				var check = self.commandRouter.executeOnPlugin('system_controller', 'system', 'checkPassword', data);
+
+				if (check != undefined) {
+					check.then(function (data) {
+						selfConnWebSocket.emit('checkPassword', data);
+					});
+				}
+
+
+			});
+
 
 
 
