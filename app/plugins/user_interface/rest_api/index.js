@@ -40,6 +40,19 @@ function interfaceApi(context) {
         });
 
     api.use('/v1', api);
+
+    api.route('/getstate')
+        .get(function (req, res) {
+
+
+            var response = self.commandRouter.volumioGetState();;
+
+            if (response != undefined)
+                res.json(response);
+            else
+                res.json(notFound);
+        });
+
 }
 
 /*
@@ -63,3 +76,14 @@ interfaceApi.prototype.onVolumioStart = function ()
 
 */
 
+interfaceApi.prototype.pushQueue = function ()
+{
+    var self = this;
+
+};
+
+interfaceApi.prototype.pushState = function ()
+{
+    var self = this;
+
+};
