@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
+var bodyParser = require('body-parser');
 
 module.exports = interfaceApi;
 
@@ -12,7 +13,8 @@ function interfaceApi(context) {
     self.context = context;
     self.commandRouter = self.context.coreCommand;
     self.musicLibrary = self.commandRouter.musicLibrary;
-    var notFound = {'Error': "Error 404: playlist not found"};
+    var notFound = {'Error': "Error 404: resource not found"};
+    var success = {'Message': "Succesfully restored resource"};
 
     self.logger = self.commandRouter.logger;
 
@@ -28,24 +30,45 @@ function interfaceApi(context) {
             else
                 res.json(notFound);
         });
-    api.route('backup/config')
+
+    api.route('/backup/config/')
         .get(function (req, res) {
-            var self = this;
+            var response = self.commandRouter.getPluginsConf();
+            console.log(response);
+
+            if (response != undefined)
+                res.json(response);
+            else
+                res.json(notFound);
         });
 
+    //to complete with the parsing of the json
+    api.route('/restore/playlists/')
+        .post(function (req, res) {
+            var response = {'Error': "Error: impossible to restore given data"};
 
-    api.route('/restore/playlists/:type')
+            try{
+                self.commandRouter.restorePlaylist({'type': req.body.type, 'path': req.body.path,
+                    'backup': req.body.data});
+                res.json(success);
+            }catch(e){
+                res.json(response)
+            }
+        });
+
+    api.route('/restore/config/')
         .post(function (req, res) {
             var self = this;
         });
 
     api.use('/v1', api);
+    api.use(bodyParser.json());
 
     api.route('/getstate')
         .get(function (req, res) {
 
 
-            var response = self.commandRouter.volumioGetState();;
+            var response = self.commandRouter.volumioGetState();
 
             if (response != undefined)
                 res.json(response);

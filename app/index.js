@@ -624,38 +624,79 @@ CoreCommandRouter.prototype.restorePlaylistBackup = function () {
 	var check = self.checkBackup("playlists");
 	var path = self.playListManager.playlistFolder;
 	var isbackup = check[0];
-	var backup = check[1];
 
 	if(isbackup){
+		/*
+		var backup = check[1];
 		self.logger.info("Backup: restoring playlists");
 		for (var i = 0; i < backup.length; i++){
 			var name = backup[i].name;
 			var songs = backup[i].content;
 			fs.outputJsonSync(path + name, songs);
-		}
+		}*/
+		self.restorePlaylist({'type': "playlist", 'backup': backup});
 	}
 }
 
+/**
+ * restores the default playlist specified in type, from the avilable local backup
+ * @param type
+ */
 CoreCommandRouter.prototype.restoreFavouritesBackup = function (type) {
 	var self = this;
 
 	var backup = self.checkBackup("favourites");
 	var isbackup = backup[0];
 	var path = self.playListManager.favouritesPlaylistFolder;
-	var kind = self.checkFavouritesType(type, backup[1]);
-	var file = kind[0];
-	var data = kind[1];
 
 	if(isbackup){
-		try{
+		var kind = self.checkFavouritesType(type, backup[1]);
+		var file = kind[0];
+		var data = kind[1];
+		/*try{
 			var fav = fs.readJsonSync(path + file);
 			data = self.mergePlaylists(data, fav);
 		}catch(e){
 			self.logger.info("Backup: no previous favourite " + type);
 		};
 		self.logger.info("Backup: restoring " + type + " favourites");
-		fs.outputJsonSync(path + file, data);
+		fs.outputJsonSync(path + file, data);*/
+		self.restorePlaylist({'type': type, 'path': file, 'backup': data});
 	}
+}
+
+/**
+ * restores the playlist specified in req.type, given the data in req.backup and the eventual
+ * path (for default playlists) in req.path
+ * @param req
+ */
+CoreCommandRouter.prototype.restorePlaylist = function (req) {
+	var self = this;
+	var path = "";
+	var backup = req.backup;
+
+	if (req.type == "playlist") {
+		path = self.playListManager.playlistFolder;
+		self.logger.info("Backup: restoring playlists");
+		for (var i = 0; i < backup.length; i++) {
+			var name = backup[i].name;
+			var songs = backup[i].content;
+			fs.outputJsonSync(path + name, songs);
+		}
+	}
+	else if(req.type == "songs" || req.type == "radios" || req.type == "myRadios"){
+		path = self.playListManager.favouritesPlaylistFolder + req.path;
+		try{
+			var fav = fs.readJsonSync(path);
+			backup = self.mergePlaylists(backup, fav);
+		}catch(e){
+			self.logger.info("Backup: no previous favourite " + req.type);
+		};
+		self.logger.info("Backup: restoring " + req.type + " favourites");
+		fs.outputJsonSync(path, backup);
+	}
+	else
+		self.logger.info("Backup: impossible to restore data");
 }
 
 /**
@@ -679,6 +720,13 @@ CoreCommandRouter.prototype.checkBackup = function (backup) {
 	return [isbackup, file];
 }
 
+/**
+ * selects the type of a default playlist from a json, returns the path and a json with
+ * the correspondent data
+ * @param type
+ * @param backup
+ * @returns {*[]}
+ */
 CoreCommandRouter.prototype.checkFavouritesType = function (type, backup) {
 	var self = this;
 	var data = [];
