@@ -633,9 +633,9 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 				} else {
 					self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
-					this.mixertype = 'Software';
-					defaultmixer = 'SoftMaster';
-					self.enableSoftMixer(device);
+					this.mixertype = 'None';
+					//defaultmixer = 'SoftMaster';
+					//self.enableSoftMixer(device);
 				}
 			}
 		} catch (e) {}
