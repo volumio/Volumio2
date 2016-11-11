@@ -252,6 +252,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	if(plugin!==undefined)
 	{
 		var deferStart=plugin.onStop();
+		self.config.set(category + '.' + name + '.status', "STOPPED");
 			defer.resolve();
 	} else defer.resolve();
 
