@@ -457,8 +457,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
         return;
 	}
 	else if (this.volatileState && stateService.status == 'stop'){
-		this.volatileService = undefined;
-        this.currentStatus='stop';
+        this.volatileService = undefined;
+        //this.currentStatus='stop';
 		var trackBlock = this.getTrack(this.currentPosition);
 	}
 	else {
