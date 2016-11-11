@@ -24,8 +24,12 @@ stop
 [[VOLUMIO SERVICE CONTROL]]
 
 start                               Starts Volumio Service
-vstop                                Stops Volumio Service
+vstop                               Stops Volumio Service
 restart                             Restarts Volumio Service
+
+[[VOLUMIO DEVELOPMENT]]
+
+pull                               Pull latest github status on master
 "
 
 }
@@ -64,14 +68,23 @@ echo $var
 #VOLUMIO SERVICE CONTROLS
 
 function start {
-systemctl start volumio.service
+echo volumio | sudo -S systemctl start volumio.service
 }
 
 function vstop {
-systemctl stop volumio.service
+echo volumio | sudo -S systemctl stop volumio.service
 }
 
+#VOLUMIO DEVELOPMENT
 
+function pull {
+echo "Stopping Volumio"
+echo volumio | sudo -S systemctl stop volumio.service
+echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+echo "Pull completed, restarting Volumio"
+echo volumio | sudo -S systemctl start volumio.service
+echo "Done"
+}
 
 
 case "$1" in
@@ -122,7 +135,9 @@ case "$1" in
                 volumeget
             fi
             ;;
-
+		pull)
+            pull
+            ;;
         *)
             doc
             exit 1
