@@ -176,10 +176,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				value: activemixer_type,
 				label: activemixer_type
 			});
-
+			console.log(mixers)
+			console.log(mixers.length)
 			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
-				if (mixers[0] == 'SoftMaster' || activemixer == 'SoftMaster') {
-					if  (mixers.length > 0 ) {
+				if (mixers[0] == 'SoftMaster' || activemixer == 'SoftMaster' ) {
+					if  (mixers.length > 1 ) {
 						self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
 							value: 'Hardware',
 							label: 'Hardware'
