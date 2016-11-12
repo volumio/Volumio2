@@ -324,7 +324,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveDSPOptions = function (data) {
 	var self = this;
-	console.log(data)
+	//console.log(data)
 
 	var value = self.config.get('outputdevice');
 	if (value == undefined){
@@ -342,8 +342,8 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
 	for(var i in data ) {
 		//console.log(data[i])
 		//console.log(i)
-		console.log("/usr/bin/amixer -c " + value + " set  '" + i + "' '" + data[i].value)
-		exec("/usr/bin/amixer -c " + value + " set '" + i + "' '" + data[i].value+"'", {uid:1000, gid:1000},function(error, stdout, stderr) {
+		//console.log("/usr/bin/amixer -c " + value + " set  '" + i + "' '" + data[i].value.replace('  ', ''))
+		exec("/usr/bin/amixer -c " + value + " set '" + i + "' '" + data[i].value.replace('  ', '')+"'", {uid:1000, gid:1000},function(error, stdout, stderr) {
 			if (error) {
 				self.logger.info('ERROR Cannot set DSP ' + i + ' for card ' + value +': '+error);
 			} else {
