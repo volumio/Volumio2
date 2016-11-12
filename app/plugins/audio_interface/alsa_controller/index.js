@@ -295,13 +295,16 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				self.configManager.setUIConfigParam(uiconf, 'sections[1].label', outdevicename + ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS'));
 				self.configManager.setUIConfigParam(uiconf, 'sections[1].hidden', false);
 				for (var w = 0; w < dspoptions.length; w++) {
-					console.log(dspoptions[w].name)
-					//uiconf.sections[1].content[w].id = dspoptions[w].name
-					//self.configManager.pushUIConfigParam(uiconf, 'sections[1].saveButton.data', dspoptions[w].name);
-					//self.configManager.setUIConfigParam(uiconf, 'sections[1].content[w].id', dspoptions[w].name);
-					self.configManager.pushUIConfigParam(uiconf, 'sections[1].content[w].element', 'select');
-					//self.configManager.pushUIConfigParam(uiconf, 'sections[1].content[w].label', dspoptions[w].name);
-					//self.configManager.setUIConfigParam(uiconf, 'sections[1].content[2].label', 'DAC Model');
+					self.configManager.pushUIConfigParam(uiconf, 'sections[1].saveButton.data', dspoptions[w].name);
+					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
+					self.configManager.pushUIConfigParam(uiconf, 'sections[1].content', dspconf);
+
+					for (var r in dspoptions[w].options) {
+						self.configManager.pushUIConfigParam(uiconf, 'sections[1].content['+w+'].options', {
+							value:dspoptions[w].options[r],
+							label:dspoptions[w].options[r]
+						});
+					}
 
 				}
 			}
@@ -316,6 +319,59 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 	return defer.promise
 };
+
+
+
+ControllerAlsa.prototype.saveDSPOptions = function (data) {
+	var self = this;
+	console.log(data)
+
+	var value = self.config.get('outputdevice');
+	if (value == undefined){
+		value = 0;
+	} else if (value == 'softvolume') {
+		value = self.config.get('softvolumenumber');
+	}
+
+	var outdevicename = self.config.get('outputdevicename');
+	if (outdevicename) {
+	} else {
+		outdevicename = self.getLabelForSelectedCard(cards, value);
+	}
+
+	for(var i in data ) {
+		//console.log(data[i])
+		//console.log(i)
+		console.log("/usr/bin/amixer -c " + value + " set  '" + i + "' '" + data[i].value)
+		exec("/usr/bin/amixer -c " + value + " set '" + i + "' '" + data[i].value+"'", {uid:1000, gid:1000},function(error, stdout, stderr) {
+			if (error) {
+				self.logger.info('ERROR Cannot set DSP ' + i + ' for card ' + value +': '+error);
+			} else {
+				self.logger.info('Successfully set DSP ' + i + ' for card ' + value );
+			}
+		});
+
+	}
+
+	if (outdevicename == 'Allo Piano 2.1') {
+		var responseData = {
+			title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'),
+			message: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_REBOOT'),
+			size: 'lg',
+			buttons: [
+				{
+					name: self.commandRouter.getI18nString('COMMON.RESTART'),
+					class: 'btn btn-info',
+					emit:'reboot',
+					payload:''
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
+	}
+}
+
 
 ControllerAlsa.prototype.getDSPDACOptions = function (data) {
 	var self = this;
@@ -344,12 +400,12 @@ ControllerAlsa.prototype.getDSPDACOptions = function (data) {
 						var dspname = dspspace.replace(" ", "");
 						if (dspdata.cards[e].dsp_options.indexOf(dspname) > -1) {
 							//console.log(dspname)
-							var dspoptsarray = line[2].replace(/Items:/g, "").replace(/ /g, "").split("'").filter(function (val) {
+							var dspoptsarray = line[2].replace(/Items:/g, "").replace(" ", "").split("'").filter(function (val) {
 								return val.length > 0;
 							});
 							//var dspoptsarray = dspoptraw;
 							//console.log(dspoptsarray)
-							var dspvalue = line[3].replace(/Item0:/g, "").replace(/ /g, "").replace(/\'/g, "");
+							var dspvalue = line[3].replace(/Item0:/g, "").replace(" ", "").replace(/\'/g, "");
 							//console.log(dspvalue)
 							dspcontrols.push({"name": dspname, "options": dspoptsarray, "value": dspvalue});
 						}

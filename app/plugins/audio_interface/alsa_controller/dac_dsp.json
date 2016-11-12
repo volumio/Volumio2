@@ -1,5 +1,5 @@
 {
   "cards": [
-	{"name": "Allo Piano 2.1", "dsp_options":["DSP Program","Analogue Playback Boost","Subwoofer mode"]}
+	{"name": "Allo Piano 2.1", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]}
   ]
 }
