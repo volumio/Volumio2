@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd /home/volumio
 echo "Backing Up current Volumio folder in /volumio-current"
 mv /volumio /volumio-current
 echo "Cloning Volumio Backend repo"
