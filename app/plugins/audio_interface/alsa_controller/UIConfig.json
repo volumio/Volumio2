@@ -61,6 +61,26 @@
 
       ]
     },
+	{
+	  "id": "dac_dsp_options",
+	  "element": "section",
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS",
+	  "icon": "fa-microchip",
+	  "hidden": true,
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveDSPOptions"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+
+		]
+	  },
+	  "value":  {
+		"value": "",
+		"label": ""
+	  },
+	  "content": [
+	  ]
+	},
     {
       "id": "playback_options",
       "element": "section",
