@@ -264,13 +264,21 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
+			value = self.getAdditionalConf('music_service', 'mpd', 'replaygain', 'off');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
+			value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_preamp', '0');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+
+			value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+
+			value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
 
 			value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
