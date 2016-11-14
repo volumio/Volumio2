@@ -7,6 +7,7 @@
     "ENABLE_I2S_DAC":"Enable I2S DACs",
     "GAPLESS_MP3_PLAYBACK":"Gapless MP3 playback",
     "VOLUME_NORMALIZATION":"Volume normalization",
+    "REPLAYGAIN_ENABLED":"Enable ReplayGain",
     "REPLAYGAIN_MODE":"ReplayGain Mode",
     "REPLAYGAIN_PREAMP":"ReplayGain PreAmp",
     "REPLAYGAIN_LIMIT":"ReplayGain Limit",
