@@ -326,6 +326,9 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
 	var self = this;
 	//console.log(data)
 
+	var pre = '';
+	var reboot = false;
+
 	var value = self.config.get('outputdevice');
 	if (value == undefined){
 		value = 0;
@@ -333,10 +336,17 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
 		value = self.config.get('softvolumenumber');
 	}
 
+
 	var outdevicename = self.config.get('outputdevicename');
 	if (outdevicename) {
 	} else {
 		outdevicename = self.getLabelForSelectedCard(cards, value);
+	}
+
+	if (outdevicename == 'Allo Piano 2.1') {
+		var preraw = execSync("amixer get -c 1 'Subwoofer mode' | grep Item0", {encoding: 'utf8'});
+		var preraw2 = preraw.split("'");
+		pre = preraw2[1];
 	}
 
 	for(var i in data ) {
@@ -348,28 +358,32 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
 				self.logger.info('ERROR Cannot set DSP ' + i + ' for card ' + value +': '+error);
 			} else {
 				self.logger.info('Successfully set DSP ' + i + ' for card ' + value );
+				if ((outdevicename == 'Allo Piano 2.1') && (i == 'Subwoofer mode') && (pre != data[i].value.replace('  ', ''))) {
+
+					var responseData = {
+						title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'),
+						message: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_REBOOT'),
+						size: 'lg',
+						buttons: [
+							{
+								name: self.commandRouter.getI18nString('COMMON.RESTART'),
+								class: 'btn btn-info',
+								emit:'reboot',
+								payload:''
+							}
+						]
+					}
+
+					self.commandRouter.broadcastMessage("openModal", responseData);
+
+				}
+
 			}
 		});
 
 	}
 
-	if (outdevicename == 'Allo Piano 2.1') {
-		var responseData = {
-			title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'),
-			message: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_REBOOT'),
-			size: 'lg',
-			buttons: [
-				{
-					name: self.commandRouter.getI18nString('COMMON.RESTART'),
-					class: 'btn btn-info',
-					emit:'reboot',
-					payload:''
-				}
-			]
-		}
-
-		self.commandRouter.broadcastMessage("openModal", responseData);
-	}
+	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS'), self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'));
 }
 
 
