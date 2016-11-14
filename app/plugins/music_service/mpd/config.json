@@ -7,6 +7,10 @@
     "type": "boolean",
     "value": false
   },
+  "replaygain_enabled":{
+    "type": "boolean",
+    "value": false
+  },
   "replaygain_mode":{
     "type": "string",
     "value": "off"
