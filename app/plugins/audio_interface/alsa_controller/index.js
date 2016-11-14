@@ -268,9 +268,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-			if (self.config.get('replaygain_enabled') {
-				value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_mode', 'auto');
-				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
+			if (self.config.get('replaygain_enabled')) {
+				// set replaygain_mode to 'auto'
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', 'auto');
 				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
 				value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_preamp', '0');
