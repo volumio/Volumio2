@@ -1,6 +1,7 @@
 {
   "cards": [
 	{"name": "Allo Piano 2.1", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]},
-	{"name": "PianoDACPlus", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]}
+	{"name": "PianoDACPlus", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]},
+	{"name": "Hifiberry DAC Plus", "dsp_options":["DSP Program","Clock Missing Period"]}
   ]
 }
