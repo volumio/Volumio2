@@ -268,17 +268,31 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_mode', 'off');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+			if (self.config.get('replaygain_enabled') {
+				value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_mode', 'auto');
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_preamp', '0');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+				value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_preamp', '0');
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_limit', 'true');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
+				value = self.getAdditionalConf('music_service', 'mpd', 'replaygain_limit', 'true');
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value', value);
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
+			} else {
+				// set replaygain_mode to 'off'
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', 'off');
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+
+				// set replaygain_preamp to '0'
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', '0');
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+
+				//set replaygain_limit to false
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value', 'false');
+				self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
+			}
 
 			value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value.value', value);
