@@ -92,8 +92,9 @@
         "data": [
           "dop",
           "volume_normalization",
-          "replaygain",
+          "replaygain_mode",
           "replaygain_preamp",
+          "replaygain_limit",
           "audio_buffer_size",
           "buffer_before_play"
         ]
@@ -117,10 +118,10 @@
         },
 
         {
-          "id": "replaygain",
+          "id": "replaygain_mode",
           "element": "select",
-          "doc":"If specified, mpd will adjust the volume of songs played using ReplayGain tags",
-          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN",
+          "doc":"If specified, Volumio will adjust the volume of songs played using ReplayGain tags",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN_MODE",
           "value":  {
             "value":"off",
             "label": "off"
@@ -160,6 +161,22 @@
               "label": "-15"
             },
             {
+              "value":-14,
+              "label": "-14"
+            },
+            {
+              "value":-13,
+              "label": "-13"
+            },
+            {
+              "value":-12,
+              "label": "-12"
+            },
+            {
+              "value":-11,
+              "label": "-11"
+            },
+            {
               "value":-10,
               "label": "-10"
             },
@@ -168,22 +185,94 @@
               "label": "-5"
             },
             {
+              "value":-4,
+              "label": "-4"
+            },
+            {
+              "value":-3,
+              "label": "-3"
+            },
+            {
+              "value":-2,
+              "label": "-2"
+            },
+            {
+              "value":-1,
+              "label": "-1"
+            },
+            {
               "value":0,
               "label": "0"
+            },
+            {
+              "value":1,
+              "label": "1"
+            },
+            {
+              "value":2,
+              "label": "2"
+            },
+            {
+              "value":3,
+              "label": "3"
+            },
+            {
+              "value":4,
+              "label": "4"
             },
             {
               "value":5,
               "label": "5"
             },
             {
+              "value":6,
+              "label": "6"
+            },
+            {
+              "value":7,
+              "label": "7"
+            },
+            {
+              "value":8,
+              "label": "8"
+            },
+            {
+              "value":9,
+              "label": "9"
+            },
+            {
               "value":10,
               "label": "10"
+            },
+            {
+              "value":11,
+              "label": "11"
+            },
+            {
+              "value":12,
+              "label": "12"
+            },
+            {
+              "value":13,
+              "label": "13"
+            },
+            {
+              "value":14,
+              "label": "14"
             },
             {
               "value":15,
               "label": "15"
             }
           ]
+        },
+
+        {
+          "id": "replaygain_limit",
+          "element": "switch",
+          "doc":"If enabled Volumio will never amplify an audio signal above its original level. Default is On.",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN_LIMIT",
+          "value":true
         },
 
         {
