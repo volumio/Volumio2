@@ -994,14 +994,20 @@ ControllerAlsa.prototype.disableSoftMixer  = function (data) {
 ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var self = this;
 
+	var outdevicename = '';
 	var cards = self.getAlsaCards();
 	var valvolumecurvemode = self.config.get('volumecurvemode');
 	var valdevice = self.config.get('outputdevice');
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
 	var valmixertype = self.config.get('mixer_type');
+
+
 	if (valdevice != 'softvolume') {
-		var outdevicename = cards[valdevice].name;
+		if (cards[valdevice]!= undefined){
+			var outdevicename = cards[valdevice].name;
+		}
+
 	} else {
 		var outdevicename = 'softvolume';
 	}
