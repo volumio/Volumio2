@@ -404,7 +404,11 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 					//Restarting MPD, this seems needed only on first boot
 					setTimeout(function () {
 						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+						self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
 					}, 1500);
+
+
+
 					response = {'reboot':reboot}
 					defer.resolve(response);
 				}

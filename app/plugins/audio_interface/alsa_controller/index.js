@@ -177,7 +177,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				value: activemixer_type,
 				label: activemixer_type
 			});
-			
+
 			if ((typeof mixers != "undefined") || ( mixers != null )) {
 				if ((mixers.length > 1 ) && (mixers[0] == 'SoftMaster' || activemixer == 'SoftMaster' )) {
 
@@ -1000,13 +1000,11 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
 	var valmixertype = self.config.get('mixer_type');
-	if (valdevice =! 'softvolume') {
+	if (valdevice != 'softvolume') {
 		var outdevicename = cards[valdevice].name;
 	} else {
 		var outdevicename = 'softvolume';
 	}
-
-
 
 	if (valmixertype === 'Software') {
 		valdevice = self.config.get('softvolumenumber');
