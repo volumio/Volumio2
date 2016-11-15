@@ -177,16 +177,16 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				value: activemixer_type,
 				label: activemixer_type
 			});
+			
+			if ((typeof mixers != "undefined") || ( mixers != null )) {
+				if ((mixers.length > 1 ) && (mixers[0] == 'SoftMaster' || activemixer == 'SoftMaster' )) {
 
-			if ((typeof mixers != "undefined") || ( mixers != null ) || (mixers.length > 0)) {
-				if (mixers[0] == 'SoftMaster' || activemixer == 'SoftMaster' ) {
-					if  (mixers.length > 1 ) {
 						self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 							value: 'Hardware',
 							label: 'Hardware'
 						});
-					}
-				} else {
+
+				} else if ((mixers.length > 0 ) && (mixers[0] != 'SoftMaster') && (activemixer != 'SoftMaster' )) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 					value: 'Hardware',
 					label: 'Hardware'
