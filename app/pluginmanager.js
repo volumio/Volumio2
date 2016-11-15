@@ -252,6 +252,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	if(plugin!==undefined)
 	{
 		var deferStart=plugin.onStop();
+		self.config.set(category + '.' + name + '.status', "STOPPED");
 			defer.resolve();
 	} else defer.resolve();
 
@@ -515,11 +516,11 @@ PluginManager.prototype.installPlugin = function (url) {
 					self.tempCleanup();
 				})
 				.fail(function (e) {
-					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
+					currentMessage = 'The following error occurred when installing the plugin: ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The folowing error occurred when installing the plugin: ' + e,
+						'message': 'The following error occurred when installing the plugin: ' + e,
 						'title' : modaltitle+' Error',
 						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
 						'advancedLog': advancedlog
@@ -641,11 +642,11 @@ PluginManager.prototype.updatePlugin = function (data) {
 					self.enablePlugin(category,name);
 				})
 				.fail(function (e) {
-					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
+					currentMessage = 'The following error occurred when installing the plugin: ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The folowing error occurred when installing the plugin: ' + e,
+						'message': 'The following error occurred when installing the plugin: ' + e,
 						'title' : modaltitle+' Error',
 						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
 						'advancedLog': advancedlog

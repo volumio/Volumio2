@@ -404,7 +404,11 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 					//Restarting MPD, this seems needed only on first boot
 					setTimeout(function () {
 						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+						self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
 					}, 1500);
+
+
+
 					response = {'reboot':reboot}
 					defer.resolve(response);
 				}
@@ -452,7 +456,7 @@ ControllerI2s.prototype.hotAddI2SDAC = function (data) {
 
 	var overlay = data.overlay.split(',');
 
-	//dtcommand(overlay[0]);
+	dtcommand(overlay[0]);
 
 	if (data.script) {
 		exec(__dirname + '/scripts/'+data.script,{uid:1000, gid:1000}, function(err, stdout, stderr) {
@@ -525,7 +529,7 @@ ControllerI2s.prototype.execDacScript = function () {
 			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
 
 				if(dacdata.devices[num].data[i].name === dacname) {
-					
+
 					if (dacdata.devices[num].data[i].script && dacdata.devices[num].data[i].script.length > 0 ) {
 						self.logger.info('Executing start script for DAC '+dacname);
 						exec(__dirname + '/scripts/'+dacdata.devices[num].data[i].script,{uid:1000, gid:1000}, function(err, stdout, stderr) {
