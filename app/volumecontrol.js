@@ -34,7 +34,10 @@ function CoreVolumeController(commandRouter) {
 		devicename = 'softvolume';
 	} else {
 		var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
-		devicename = cards[device].name;
+		if ((cards[device] != undefined) && (cards[device].name != undefined)) {
+			devicename = cards[device].name;
+		}
+
 	}
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
 	mixer = '"'+mixerdev+'"';
