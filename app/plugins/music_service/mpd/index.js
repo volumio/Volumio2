@@ -1821,66 +1821,78 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         //exploding search
         var splitted = uri.split('/');
 
-        var genreName = nodetools.urlDecode(splitted[2]);
+        if(splitted.length==4)
+        {
+            return self.explodeUri('artists://'+splitted[3]);
+        }
+        else if(splitted.length==5)
+        {
+            return self.explodeUri('albums://'+splitted[4])
+        }
+        else {
+            var genreName = nodetools.urlDecode(splitted[2]);
 
-        var cmd = libMpd.cmd;
+            var cmd = libMpd.cmd;
 
-        self.clientMpd.sendCommand(cmd("find genre \"" + genreName + "\"", []), function (err, msg) {
-            var list = [];
-            var albums=[],albumarts=[];
-            if (msg) {
-                var path;
-                var name;
-                var lines = msg.split('\n');
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-                    if (line.indexOf('file:') === 0) {
-                        var path = line.slice(6);
-                        var name = path.split('/').pop();
+            self.clientMpd.sendCommand(cmd("find genre \"" + genreName + "\"", []), function (err, msg) {
+                var list = [];
+                var albums=[],albumarts=[];
+                if (msg) {
+                    var path;
+                    var name;
+                    var lines = msg.split('\n');
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i];
+                        if (line.indexOf('file:') === 0) {
+                            var path = line.slice(6);
+                            var name = path.split('/').pop();
 
-                        var artist = self.searchFor(lines, i + 1, 'Artist:');
-                        var album = self.searchFor(lines, i + 1, 'Album:');
-                        var title = self.searchFor(lines, i + 1, 'Title:');
-                        var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
-                        var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                            var artist = self.searchFor(lines, i + 1, 'Artist:');
+                            var album = self.searchFor(lines, i + 1, 'Album:');
+                            var title = self.searchFor(lines, i + 1, 'Title:');
+                            var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
+                            var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
-                        if (title) {
-                            title = title;
-                        } else {
-                            title = name;
-                        }
+                            if (title) {
+                                title = title;
+                            } else {
+                                title = name;
+                            }
 
-                        if(title!=='')
-                        {
-                            list.push({
-                                uri: 'music-library/'+path,
-                                service: 'mpd',
-                                name: title,
-                                artist: artist,
-                                album: album,
-                                type: 'track',
-                                tracknumber: 0,
-                                albumart: albumart,
-                                duration: time,
-                                trackType: path.split('.').pop()
-                            });
+                            if(title!=='')
+                            {
+                                list.push({
+                                    uri: 'music-library/'+path,
+                                    service: 'mpd',
+                                    name: title,
+                                    artist: artist,
+                                    album: album,
+                                    type: 'track',
+                                    tracknumber: 0,
+                                    albumart: albumart,
+                                    duration: time,
+                                    trackType: path.split('.').pop()
+                                });
+                            }
+
                         }
 
                     }
 
+
+                    defer.resolve(list);
+
+
                 }
+                else
+                {
+                    self.logger.info(err);
+                    defer.reject(new Error());
+                }
+            });
+        }
 
 
-                defer.resolve(list);
-
-
-            }
-            else
-            {
-                self.logger.info(err);
-                defer.reject(new Error());
-            }
-        });
 
     }
     else {
