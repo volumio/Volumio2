@@ -576,6 +576,16 @@ function InterfaceWebUI(context) {
 
 			});
 
+			connWebSocket.on('restoreConfig', function (data) {
+				var selfConnWebSocket = this;
+
+				var response = self.commandRouter.restorePluginsConf()
+					.then(self.commandRouter.restorePluginsConf())
+					.fail(function () {
+							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+						});
+			});
+
 			connWebSocket.on('search', function (data) {
 				var selfConnWebSocket = this;
 

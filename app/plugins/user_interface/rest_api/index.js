@@ -34,7 +34,6 @@ function interfaceApi(context) {
     api.route('/backup/config/')
         .get(function (req, res) {
             var response = self.commandRouter.getPluginsConf();
-            console.log(response);
 
             if (response != undefined)
                 res.json(response);
@@ -42,24 +41,33 @@ function interfaceApi(context) {
                 res.json(notFound);
         });
 
-    //to complete with the parsing of the json
+
     api.route('/restore/playlists/')
         .post(function (req, res) {
             var response = {'Error': "Error: impossible to restore given data"};
 
             try{
                 self.commandRouter.restorePlaylist({'type': req.body.type, 'path': req.body.path,
-                    'backup': req.body.data});
+                    'backup': JSON.parse(req.body.data)});
                 res.json(success);
             }catch(e){
                 res.json(response)
             }
         });
 
+    /*TO FINISH !!!!!!!!!!!
     api.route('/restore/config/')
         .post(function (req, res) {
-            var self = this;
-        });
+            var response = {'Error': "Error: impossible to restore configurations"};
+
+            try{
+                var bobby = JSON.parse(req.body.config);
+                self.commandRouter.restorePluginsConf(bobby);
+                res.json(success);
+            }catch(e){
+                res.json(response);
+            }
+        });*/
 
     api.use('/v1', api);
     api.use(bodyParser.json());

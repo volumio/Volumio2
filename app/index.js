@@ -467,25 +467,27 @@ CoreCommandRouter.prototype.writePluginsConf = function () {
 		console.log(err)})
 }
 
-/* TO FINISH !!!!!!!!!!!!!!!!!!!!!
+//TO FINISH!!!!!!!!!!!!!!!!!!!!!!
 CoreCommandRouter.prototype.restorePluginsConf = function () {
 	var self = this;
 
-	var backup = fs.readJsonSync("/data/configuration/generalConfig");
+	var defer = libQ.defer();
+	var backup = fs.readJsonSync("/data/configuration/generalConf");
 	var current = self.pluginManager.getPluginsMatrix();
 	var usefulConfs = [];
+	var catName = "";
+	var backPlugins = [];
+	var availPlugins = [];
 
 	for(var i = 0; i < current.length; i++){
 		availPlugins = current[i].catPlugin;
-		var backPlugins = [];
-		var catName = "";
 		var max = self.max(current.length, backup.length);
 		var j = 0;
 		while(current[i].cName != backup[j].cName && j < max){
 			j++;
 		}
 		if(j < max) {
-			catName = backup[j].name;
+			catName = backup[j].cName;
 			backPlugins = backup[j].plugConf;
 			j = 0;
 			max = self.max(availPlugins.length, backPlugins.length);
@@ -498,17 +500,22 @@ CoreCommandRouter.prototype.restorePluginsConf = function () {
 					existingPlug.push(backPlugins[j]);
 				}
 			}
-			usefulConfs.push({"cName":catName, "plugConf": existingPlug);
+			usefulConfs.push({"cName":catName, "plugConf": existingPlug});
 		}
 	}
 
+	defer.resolve(usefulConfs);
+
 	for(var i = 0; i < usefulConfs.length; i++){
-		for(var j = 0; j < usefulConfs[i].plugConf.length){
-			var path = "/data/configuration/" + usefulConfs[i].cName +
-				usefulConfs[i].plugConf[j].name + "config.json";
-			fs.outputJsonSync(path, usefulConfs[i].plugConf[j].config);
+		for(var j = 0; j < usefulConfs[i].plugConf.length; j++){
+			if (usefulConfs[i].plugConf[j].config != "") {
+				var path = "/data/configuration/" + usefulConfs[i].cName + "/" +
+					usefulConfs[i].plugConf[j].name + "/config.json";
+				fs.outputJsonSync(path, usefulConfs[i].plugConf[j].config);
+			}
 		}
 	}
+	return defer.promise;
 }
 
 CoreCommandRouter.prototype.max = function (a, b) {
@@ -516,7 +523,7 @@ CoreCommandRouter.prototype.max = function (a, b) {
 		return b;
 	else
 		return a;
-}*/
+}
 
 /**
  * loads the backup for the selected playlist, according to request, returns it
@@ -626,14 +633,6 @@ CoreCommandRouter.prototype.restorePlaylistBackup = function () {
 	var isbackup = check[0];
 
 	if(isbackup){
-		/*
-		var backup = check[1];
-		self.logger.info("Backup: restoring playlists");
-		for (var i = 0; i < backup.length; i++){
-			var name = backup[i].name;
-			var songs = backup[i].content;
-			fs.outputJsonSync(path + name, songs);
-		}*/
 		self.restorePlaylist({'type': "playlist", 'backup': backup});
 	}
 }
@@ -653,14 +652,6 @@ CoreCommandRouter.prototype.restoreFavouritesBackup = function (type) {
 		var kind = self.checkFavouritesType(type, backup[1]);
 		var file = kind[0];
 		var data = kind[1];
-		/*try{
-			var fav = fs.readJsonSync(path + file);
-			data = self.mergePlaylists(data, fav);
-		}catch(e){
-			self.logger.info("Backup: no previous favourite " + type);
-		};
-		self.logger.info("Backup: restoring " + type + " favourites");
-		fs.outputJsonSync(path + file, data);*/
 		self.restorePlaylist({'type': type, 'path': file, 'backup': data});
 	}
 }
