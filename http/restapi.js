@@ -50,7 +50,12 @@ api.get('/host', function(req, res) {
 			}
 
 			if (i === interfacesarray.length) {
-				return res.json({ host: hostsarray});
+				if(hostsarray.length > 1) {
+					return res.json({ host: hostsarray[0], host2: hostsarray[1]});
+				} else {
+					return res.json({ host: hostsarray[0]});
+				}
+
 			}
 			i++
 		});
