@@ -403,7 +403,7 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 	} else {
 		config.set('wireless_enabled', wireless_enabled);
 	}
-	
+
 	var wirelessdhcp = config.get('wirelessdhcp');
 	if (wirelessdhcp == undefined) {
 		config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
@@ -604,22 +604,22 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
     //searching network
     if (data.pass.length <= 13) {
-        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority = 1'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority = 1'+os.EOL+'}'+os.EOL;
+        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
     } else {
-        netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority = 1'+os.EOL+'}' + os.EOL ;
+        netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
     }
 
     while(config.has('wirelessNetworksSSID['+index+']'))
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
-        if(data.ssid!=configuredSSID)
+        if(data.ssid!=configuredSSID && configuredSSID.length > 0)
         {
             var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 
             if (configuredPASS.length <= 13) {
-                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority = 0'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority = 0'+os.EOL + '}'+os.EOL;
+                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0'+os.EOL + '}'+os.EOL;
             } else {
-                netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority = 0'+os.EOL + '}' + os.EOL ;
+                netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL + '}' + os.EOL ;
             }
         }
 
