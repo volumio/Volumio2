@@ -666,7 +666,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				}
 
 
-				var mountshare = self.mountShare(id);
+				var mountshare = self.mountShare({key:id});
 				if (mountshare != undefined) {
 					mountshare.then(function (data) {
 						console.log(data)
