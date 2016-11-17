@@ -3,5 +3,6 @@
   {"name":"Raspberry PI", "cpuid":"BCM2708"},
   {"name":"Odroid-C", "cpuid":"ODROIDC"},
   {"name":"Odroid-C2", "cpuid":"ODROID-C2"},
-  {"name":"Sparky", "cpuid":"gs705a"}
+  {"name":"Sparky", "cpuid":"gs705a"},
+  {"name":"Pine64", "cpuid":"sun50iw1p1"}
 ]}
