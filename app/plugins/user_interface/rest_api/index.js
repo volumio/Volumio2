@@ -55,19 +55,19 @@ function interfaceApi(context) {
             }
         });
 
-    /*TO FINISH !!!!!!!!!!!
+
     api.route('/restore/config/')
         .post(function (req, res) {
             var response = {'Error': "Error: impossible to restore configurations"};
 
             try{
                 var bobby = JSON.parse(req.body.config);
-                self.commandRouter.restorePluginsConf(bobby);
+                self.commandRouter.restorePluginsConf(JSON.parse(req.body.config));
                 res.json(success);
             }catch(e){
-                res.json(response);
+                res.json(response + e);
             }
-        });*/
+        });
 
     api.use('/v1', api);
     api.use(bodyParser.json());

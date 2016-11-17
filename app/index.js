@@ -467,45 +467,78 @@ CoreCommandRouter.prototype.writePluginsConf = function () {
 		console.log(err)})
 }
 
-//TO FINISH!!!!!!!!!!!!!!!!!!!!!!
-CoreCommandRouter.prototype.restorePluginsConf = function () {
+/**
+ * restores plugins configuration, given in the request, returns a promise
+ * @param request
+ * @returns {*}
+ */
+CoreCommandRouter.prototype.restorePluginsConf = function (request) {
 	var self = this;
 
 	var defer = libQ.defer();
-	var backup = fs.readJsonSync("/data/configuration/generalConf");
+	var backup = request;
 	var current = self.pluginManager.getPluginsMatrix();
 	var usefulConfs = [];
-	var catName = "";
-	var backPlugins = [];
-	var availPlugins = [];
 
 	for(var i = 0; i < current.length; i++){
-		availPlugins = current[i].catPlugin;
-		var max = self.max(current.length, backup.length);
 		var j = 0;
-		while(current[i].cName != backup[j].cName && j < max){
+		while(j < backup.length && current[i].cName != backup[j].cName){
 			j++;
 		}
-		if(j < max) {
-			catName = backup[j].cName;
-			backPlugins = backup[j].plugConf;
-			j = 0;
-			max = self.max(availPlugins.length, backPlugins.length);
-			var existingPlug = [];
-			for (var k = 0; k < availPlugins.length; k++) {
-				while (availPlugins[k].name != backPlugins[j].name && j < max) {
-					j++;
-				}
-				if(j < max){
-					existingPlug.push(backPlugins[j]);
-				}
-			}
-			usefulConfs.push({"cName":catName, "plugConf": existingPlug});
+		if(j < backup.length) {
+			var availPlugins = current[i].catPlugin;
+			var backPlugins = backup[j];
+			usefulConfs.push(self.usefulBackupConfs(availPlugins, backPlugins));
 		}
 	}
 
 	defer.resolve(usefulConfs);
+	self.writeConfs(usefulConfs);
+	return defer.promise;
+}
 
+/**
+ * check in the backups for plugins already installed, if it remains with plugins in the backup
+ * not installed in the device, it calls the proper function
+ * @param currArray is the array of existing plugins
+ * @param backArray is the array of backed up plugins
+ * @returns {{cName: *, plugConf: Array}}
+ */
+CoreCommandRouter.prototype.usefulBackupConfs = function (currArray, backArray) {
+	var self = this;
+	var availPlugins = currArray;
+	var catName = backArray.cName;
+	var backPlugins = backArray.plugConf;
+	var backNum = backPlugins.length;
+	var i = 0;
+
+	var existingPlug = [];
+	while (i < availPlugins.length && backNum > 0) {
+		var j = 0;
+		while (j < backPlugins.length && availPlugins[i].name != backPlugins[j].name) {
+			j++;
+		}
+		if(j < backPlugins.length){
+			existingPlug.push(backPlugins[j]);
+			backNum--;
+			backPlugins.splice(j, 1);
+		}
+		i++;
+	}
+	if (backNum > 0){
+		self.installBackupPlugins(catName, backPlugins);
+	}
+	return {'cName': catName, 'plugConf': existingPlug};
+}
+
+/**
+ * writes each config.json in the appropriate folder
+ * @param data is a json with useful plugin's configuration files, sorted by category
+ */
+CoreCommandRouter.prototype.writeConfs = function (data) {
+	var self = this;
+
+	var usefulConfs = data;
 	for(var i = 0; i < usefulConfs.length; i++){
 		for(var j = 0; j < usefulConfs[i].plugConf.length; j++){
 			if (usefulConfs[i].plugConf[j].config != "") {
@@ -515,14 +548,57 @@ CoreCommandRouter.prototype.restorePluginsConf = function () {
 			}
 		}
 	}
-	return defer.promise;
 }
 
-CoreCommandRouter.prototype.max = function (a, b) {
+/**
+ * self explanatory
+ * @param a
+ * @param b
+ * @returns {*}
+ */
+CoreCommandRouter.prototype.min = function (a, b) {
+	var self = this;
+
 	if (a < b)
-		return b;
-	else
 		return a;
+	else
+		return b;
+}
+
+/**
+ * checks if remaining backed up plugins are available for installation, installs them if found
+ * @param name category name
+ * @param array array of plugins
+ */
+CoreCommandRouter.prototype.installBackupPlugins = function (name, array) {
+	var self = this;
+
+	var availablePlugins = self.pluginManager.getAvailablePlugins();
+	var cat = [];
+	availablePlugins.then(function (available) {
+		cat = available.categories;
+		var plug = [];
+
+		for (var i = 0; i < cat.length; i++) {
+			if (cat[i].name == name) {
+				plug = cat[i].plugins;
+			}
+		}
+
+		if (plug.length > 0) {
+			for (var j = 0; j < array.length; j++) {
+				var k = 0;
+				while (k < plug.length && array[j].name != plug[k].name) {
+					k++;
+				}
+				if (k < plug.length) {
+					self.logger.info("Backup: installing plugin: " + plug[k].name);
+					self.pluginManager.installPlugin(plug[k].url);
+				}
+			}
+			self.writeConfs([{'cName': name, 'plugConf': array}]);
+		}
+	});
 }
 
 /**
