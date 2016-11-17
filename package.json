@@ -44,7 +44,7 @@
     "onoff": "^1.1.1",
     "pidof": "^1.0.2",
     "random-string": "^0.1.2",
-    "serve-favicon": "^2.3.0",
+    "serve-favicon": "^2.3.2",
     "shelljs": "^0.7.5",
     "socket.io": "^1.5.1",
     "socket.io-client": "^1.5.1",
