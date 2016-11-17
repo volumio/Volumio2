@@ -4,6 +4,7 @@
 	{"name": "PianoDACPlus", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]},
 	{"name": "Hifiberry DAC Plus", "dsp_options":["DSP Program","Clock Missing Period"]},
 	{"name": "JustBoom DAC Boards", "dsp_options":["DSP Program","Clock Missing Period"]},
-	{"name": "JustBoom Digi Boards", "dsp_options":["Tx Source"]}
+	{"name": "JustBoom Digi Boards", "dsp_options":["Tx Source"]},
+	{"name": "HDMI Out", "dsp_options":["hdmi audio format Function"]}
   ]
 }
