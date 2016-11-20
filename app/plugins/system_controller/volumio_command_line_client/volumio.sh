@@ -30,6 +30,7 @@ restart                             Restarts Volumio Service
 [[VOLUMIO DEVELOPMENT]]
 
 pull                               Pull latest github status on master
+kernelsource                       Get Current Kernel source (Raspberry PI only)
 "
 
 }
@@ -86,6 +87,10 @@ echo volumio | sudo -S systemctl start volumio.service
 echo "Done"
 }
 
+function kernelsource {
+echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+}
+
 
 case "$1" in
         play)
@@ -135,8 +140,11 @@ case "$1" in
                 volumeget
             fi
             ;;
-		pull)
+	pull)
             pull
+            ;;
+	kernelsource)
+	    kernelsource
             ;;
         *)
             doc
