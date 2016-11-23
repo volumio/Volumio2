@@ -1,0 +1,14 @@
+{
+  "name": "rest_api",
+  "version": "1.0.0",
+  "description": "api plugin for VOlumio2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Volumio",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "user_interface"
+  }
+}
