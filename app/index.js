@@ -1084,7 +1084,7 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 };
 
 
-// Volumio Play
+// Volumio Seek
 CoreCommandRouter.prototype.volumioSeek = function (position) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
 	return this.stateMachine.seek(position);

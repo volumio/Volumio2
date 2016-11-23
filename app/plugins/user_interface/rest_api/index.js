@@ -65,7 +65,98 @@ function interfaceApi(context) {
                 self.commandRouter.restorePluginsConf(JSON.parse(req.body.config));
                 res.json(success);
             }catch(e){
-                res.json(response + e);
+                res.json(response);
+            }
+        });
+
+    api.route('/commands')
+        .get(function (req, res) {
+            var response = {'Error': "Error: impossible to execute command"};
+
+            try{
+                if(req.query.cmd == "play"){
+                    var timeStart = Date.now();
+                    if (req.query.N == undefined) {
+                        self.logStart('Client requests Volumio play')
+                            .then(self.commandRouter.volumioPlay.bind(self.commandRouter))
+                            .fail(self.pushError.bind(self))
+                            .done(function () {
+                                res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                            });
+                    } else {
+                        var N = parseInt(req.query.N);
+                        self.logStart('Client requests Volumio play at index '+ N)
+                            .then(self.commandRouter.volumioPlay.bind(self.commandRouter,N))
+                            .done(function () {
+                                res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                            });
+                    }
+                }
+                else if (req.query.cmd == "stop"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio stop')
+                        .then(self.commandRouter.volumioStop.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if (req.query.cmd == "pause"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio pause')
+                        .then(self.commandRouter.volumioPause.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if (req.query.cmd == "clearQueue"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio Clear Queue')
+                        .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "prev"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio previous')
+                        .then(self.commandRouter.volumioPrevious.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "next"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio next')
+                        .then(self.commandRouter.volumioNext.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "volume"){
+                    var VolumeInteger = req.query.volume;
+                    if (VolumeInteger != "mute" && VolumeInteger != "unmute")
+                        var VolumeInteger = parseInt(VolumeInteger);
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volume ' + VolumeInteger)
+                        .then(function () {
+                            return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else{
+                    res.json({'Error': "command not recognized"});
+                }
+            } catch(e){
+                self.commandRouter.logger.info("Error executing command");
+                res.json(response);
             }
         });
 
