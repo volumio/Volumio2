@@ -1,5 +1,4 @@
 var express = require('express');
-var libQ = require('kew');
 var app = require('./index.js');
 var bodyParser = require('body-parser');
 var ip = require('ip');
@@ -41,13 +40,26 @@ api.get('/', function(req, res) {
 api.get('/host', function(req, res) {
     var self =this;
 
-        ifconfig.status('wlan0', function(err, status) {
-            if (status != undefined) {
-                if (status.ipv4_address != undefined) {
-                    self.host = status.ipv4_address;
-                } else self.host = ip.address();
-            } }); self.host = ip.address();
-        res.json({ host: 'http://'+self.host});
+    var hostsarray = [];
+    var interfacesarray = ['eth0','wlan0'];
+
+    for (var i in interfacesarray){
+        ifconfig.status(interfacesarray[i], function(err, status) {
+            if (status != undefined && status.ipv4_address != undefined) {
+                hostsarray.push('http://'+status.ipv4_address);
+            }
+
+            if (i === interfacesarray.length) {
+                if(hostsarray.length > 1) {
+                    return res.json({ host: hostsarray[0], host2: hostsarray[1]});
+                } else {
+                    return res.json({ host: hostsarray[0]});
+                }
+
+            }
+            i++
+        });
+    }
 });
 
 module.exports = api;
