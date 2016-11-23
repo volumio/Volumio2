@@ -1,5 +1,5 @@
 var express = require('express');
-var app = require('./index.js');
+var app = require('./index.js')
 var bodyParser = require('body-parser');
 var ip = require('ip');
 var api = express.Router();
@@ -40,26 +40,28 @@ api.get('/', function(req, res) {
 api.get('/host', function(req, res) {
     var self =this;
 
-    var hostsarray = [];
-    var interfacesarray = ['eth0','wlan0'];
+	var hostsarray = [];
+	var interfacesarray = ['eth0','wlan0'];
 
-    for (var i in interfacesarray){
-        ifconfig.status(interfacesarray[i], function(err, status) {
-            if (status != undefined && status.ipv4_address != undefined) {
-                hostsarray.push('http://'+status.ipv4_address);
-            }
+	for (var i in interfacesarray){
+		ifconfig.status(interfacesarray[i], function(err, status) {
+			if (status != undefined && status.ipv4_address != undefined) {
+				hostsarray.push('http://'+status.ipv4_address);
+			}
 
-            if (i === interfacesarray.length) {
-                if(hostsarray.length > 1) {
-                    return res.json({ host: hostsarray[0], host2: hostsarray[1]});
-                } else {
-                    return res.json({ host: hostsarray[0]});
-                }
+			if (i === interfacesarray.length) {
+				if(hostsarray.length > 1) {
+					return res.json({ host: hostsarray[0], host2: hostsarray[1]});
+				} else {
+					return res.json({ host: hostsarray[0]});
+				}
 
-            }
-            i++
-        });
-    }
+			}
+			i++
+		});
+	}
 });
+
+
 
 module.exports = api;

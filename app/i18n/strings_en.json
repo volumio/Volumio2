@@ -27,7 +27,10 @@
     "DOP":"DSD over PCM (DoP)",
     "SOFTVOL":"Software Volume Control",
     "MIXER_CONTROL_NAME":"Mixer Control Name",
-    "MIXER_TYPE":"Mixer Type"
+    "MIXER_TYPE":"Mixer Type",
+	"ADVANCED_DAC_DSP_OPTIONS": "DSP Options",
+	"DSP_PROGRAM_ENABLED": "DSP Program Enabled",
+	"DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

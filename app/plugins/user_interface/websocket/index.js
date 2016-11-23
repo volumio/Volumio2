@@ -1718,6 +1718,21 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
 
+			connWebSocket.on('checkPassword', function (data) {
+				var selfConnWebSocket = this;
+
+
+				var check = self.commandRouter.executeOnPlugin('system_controller', 'system', 'checkPassword', data);
+
+				if (check != undefined) {
+					check.then(function (data) {
+						selfConnWebSocket.emit('checkPassword', data);
+					});
+				}
+
+
+			});
+
 
 
 
@@ -1876,7 +1891,11 @@ InterfaceWebUI.prototype.emitFavourites = function (value) {
 };
 
 InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
-    this.libSocketIO.sockets.emit(emit,payload);
+	if(emit.msg && emit.value) {
+		this.libSocketIO.sockets.emit(emit.msg,emit.value);
+	} else {
+		this.libSocketIO.sockets.emit(emit,payload);
+	}
 };
 
 

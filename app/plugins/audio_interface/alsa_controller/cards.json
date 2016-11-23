@@ -4,6 +4,9 @@
     {"name": "sndrpihifiberry", "prettyname": "Hifiberry DAC", "type":"i2S"},
     {"name": "IQaudIODAC", "prettyname": "IQaudIO DAC", "type":"i2S"},
     {"name": "sndrpijustboomd", "prettyname": "JustBoom DAC Boards", "type":"i2S"},
-    {"name": "atm7059link", "prettyname": "Audio Out", "defaultmixer": "Digital","type":"integrated"}
+    {"name": "atm7059link", "prettyname": "Audio Out", "defaultmixer": "Digital","type":"integrated"},
+	{"name": "PianoDACPlus", "prettyname": "Allo Piano 2.1", "defaultmixer": "Digital","type":"i2S"},
+    {"name": "sndhdmi", "prettyname": "HDMI Out", "defaultmixer": "","type":"integrated"},
+    {"name": "audiocodec", "prettyname": "Analog Audio Out", "defaultmixer": "headphone volume","type":"integrated"}
   ]
 }

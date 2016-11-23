@@ -241,9 +241,15 @@ var processRequest = function (web, path) {
 
         path=sanitizeUri(path);
 
-        if(path.startsWith('/'))
-            path = '/mnt' + path;
-		else path = '/mnt/' + path;
+        if(path.startsWith('/')){
+        	if (path.startsWith('/tmp/')){
+
+			} else {
+				path = '/mnt' + path;
+			}
+		} else {
+			path = '/mnt/' + path;
+		}
 
         if (fs.existsSync(path)) {
             var stats = fs.statSync(path);
