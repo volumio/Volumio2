@@ -402,7 +402,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 	if (config.has(key)) {
 
 		var mountpoint = '/mnt/NAS/' + config.get(key + '.name');
-		var mountedshare = mountutil.isMounted(mountpoint, true);
+		var mountedshare = mountutil.isMounted(mountpoint, false);
 		if (mountedshare.mounted) {
 
 
