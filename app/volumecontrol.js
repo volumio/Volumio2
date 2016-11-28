@@ -212,6 +212,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 						vol =  currentvolume
 					}
 					VolumeInteger = Number(vol)+Number(volumesteps);
+					if (VolumeInteger < 0){
+						VolumeInteger = 0;
+					}
 					if (VolumeInteger > maxvolume){
 						VolumeInteger = maxvolume;
 					}
@@ -235,6 +238,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					vol =  currentvolume
 				}
 				VolumeInteger = Number(vol)-Number(volumesteps);
+				if (VolumeInteger < 0){
+					VolumeInteger = 0;
+				}
 				if (VolumeInteger > maxvolume){
 					VolumeInteger = maxvolume;
 				}
