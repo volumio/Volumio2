@@ -400,6 +400,24 @@ CoreCommandRouter.prototype.playPlaylist = function (data) {
 // Utility functions ---------------------------------------------------------------------------------------------
 
 /**
+ * Returns informations about device and current time
+ * @returns {{name: *, uuid: *, time: string}}
+ */
+CoreCommandRouter.prototype.getId = function () {
+	var self = this;
+
+	var file = fs.readJsonSync("data/configuration/system_controller/system/config.json");
+
+	var name = file.playerName.value;
+	var uuid = file.uuid.value;
+	var date = new Date();
+	var time = date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear() + " - " +
+			date.getHours() + ":" + date.getMinutes();
+
+	return {'name': name, 'uuid': uuid, 'time': time};
+}
+
+/**
  * Returns as an object the configuration file for a given plugin
  * @param category
  * @param plugin
@@ -452,6 +470,8 @@ CoreCommandRouter.prototype.getPluginsConf = function () {
 		var plugConf = self.catPluginsConf(cName, plugins);
 		confs.push({cName, plugConf});
 	}
+
+	var identification = self.getId();
 	return confs;
 }
 
@@ -616,11 +636,13 @@ CoreCommandRouter.prototype.loadBackup = function (request) {
 	self.logger.info("Backup: retrieving "+ request.type + " backup");
 
 	if(request.type == "playlist"){
-		data = self.loadPlaylistsBackup();
+		var identification = self.getId();
+		data = {'id' : identification, 'backup': self.loadPlaylistsBackup()};
 		defer.resolve(data);
 	}else if (request.type == "radio-favourites" || request.type == "favourites"
 	|| request.type == "my-web-radio"){
-		data = self.loadFavBackup(request.type);
+		var identification = self.getId();
+		data = {'id' : identification, 'backup': self.loadFavBackup(request.type)};
 		defer.resolve(data);
 	} else{
 		self.logger.info("Backup: request not accepted, unexisting category");
