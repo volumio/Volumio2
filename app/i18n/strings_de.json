@@ -12,7 +12,7 @@
 	"VOLUME_OPTIONS":"Lautstärkeoptionen",
 	"DEFAULT_STARTUP_VOLUME":"Start-Lautstärke",
 	"MAX_VOLUME_LEVEL":"Maximale Lautstärke",
-	"ONE_CLICK_VOLUME_STEPS":"1-Klick Lautstärke-Schritt",
+	"ONE_CLICK_VOLUME_STEPS":"Lautstärke-Schritt pro Klick",
 	"VOLUME_CURVE_MODE":"Lautstärkekurve",
 	"NATURAL":"Natürlich",
 	"LINEAR":"Linear",
@@ -23,7 +23,8 @@
 	"I2S_DAC_ACTIVATED":"I2S DAC Aktiv",
 	"I2S_DAC_ACTIVATED_MESSAGE":"wurde aktiviert; wirksam nach Systemneustart",
 	"I2S_DAC_DEACTIVATED":"I2S DAC Inaktiv",
-	"I2S_DAC_DEACTIVATED_MESSAGE":"wurde deaktiviert; wirksam nach Systemneustart"
+	"I2S_DAC_DEACTIVATED_MESSAGE":"wurde deaktiviert; wirksam nach Systemneustart",
+	"MIXER_TYPE":"Art des Mischers"
   },
   "NETWORK": {
 	"NETWORK_SETTINGS":"Netzwerkeinstellungen",
@@ -41,7 +42,7 @@
 	"WIRELESS_RESTART_SUCCESS": "Funknetzwerk erfolgreich neu gestartet"
   },
   "NETWORKFS":{
-    "ALIAS_DOC":"Name auswählen der in den NAS-Mounts angezeigt wird"
+    "ALIAS_DOC":"Alias für das Netzwerklaufwerk vergeben"
   },
   "PLAYLIST":{
 	"ADDED_TITLE":"Hinzugefügt",
