@@ -92,7 +92,7 @@ var searchOnline = function (defer, web) {
 			if (err) {
 				albumart(artist, function (err, url) {
 					if (err) {
-						console.log("ERRORE: " + err);
+						console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
 						defer.reject(new Error(err));
 						return defer.promise;
 					}
