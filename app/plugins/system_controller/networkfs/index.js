@@ -401,50 +401,26 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 
 	if (config.has(key)) {
 
-		var mountpoint = '/mnt/NAS/' + config.get(key + '.name');
-		var mountedshare = mountutil.isMounted(mountpoint, true);
+		var sharename = config.get(key + '.name');
+		var mountpoint = '/mnt/NAS/' + sharename;
+		var mountedshare = mountutil.isMounted(mountpoint, false);
 		if (mountedshare.mounted) {
 
-
-			try {
-				exec("echo volumio | sudo -S /bin/umount -l " + mountpoint, {
-					uid: 1000,
-					gid: 1000
-				}, function (error, stdout, stderr) {
-					if (error !== null) {
-						responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
-						self.logger.error("Mount point cannot be removed, won't appear next boot. Error: " + error);
-						defer.resolve(responsemessage);
-					}
-					else {
-						setTimeout(function () {
-						exec('/bin/rmdir ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
-							if (error !== null) {
-								responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
-								self.logger.error("Cannot Delete Folder. Error: " + error);
-								defer.resolve(responsemessage);
-							}
-							else {
-								responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
-								defer.resolve(responsemessage);
-							}
-						});
-						}, 3000);
-					}
-				});
-
-
-				setTimeout(function () {
-
-					self.scanDatabase();
-				}, 3000);
-			}
-			catch (err) {
-				responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
-				defer.resolve(responsemessage);
-			}
-
-
+			mountutil.umount(mountpoint, false, {"removeDir": true}, function (result) {
+				if (result.error) {
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
+					self.logger.error("Mount point cannot be removed, won't appear next boot. Error: " + result.error);
+					defer.resolve(responsemessage);
+				}
+				else {
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
+					self.logger.info("Share " + sharename + " successfully unmounted");
+					defer.resolve(responsemessage);
+				}
+			});
+			setTimeout(function () {
+				self.scanDatabase();
+			}, 3000);
 
 	} else {
 			exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
