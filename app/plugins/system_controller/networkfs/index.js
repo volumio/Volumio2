@@ -416,6 +416,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
 					self.logger.info("Share " + sharename + " successfully unmounted");
 					defer.resolve(responsemessage);
+					config.delete(key);
 				}
 			});
 			setTimeout(function () {
@@ -431,10 +432,10 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 				} else {
 					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
 					defer.resolve(responsemessage);
+					config.delete(key);
 				}
 			});
 		}
-		config.delete(key);
 	} else {
 		responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'This Share is not configured'}};
 		defer.resolve(responsemessage);
