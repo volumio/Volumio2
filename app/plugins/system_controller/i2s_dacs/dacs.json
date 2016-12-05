@@ -1,5 +1,7 @@
 { "devices":[
   {"name":"Raspberry PI","data":[
+	{"id":"dionaudio-loco","name":"Dion Audio LOCO","overlay":"dionaudio-loco","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":"LOCO DAC-AMP","needsreboot":"yes"},
+	{"id":"dionaudio-loco-v2","name":"Dion Audio LOCO V2","overlay":"dionaudio-loco-v2","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"LOCO-V2 DAC-AMP","i2c_address":"4d","needsreboot":"no"},
 	{"id":"503hta-hybrid","name":"503HTA Hybrid Tube Amp","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"aoide-kazoo-dac","name":"Aoide Kazoo DAC","overlay":"aoide-kazoo-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"aoide-zero-dacplus","name":"Aoide Zero DAC+","overlay":"aoide-zero-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
