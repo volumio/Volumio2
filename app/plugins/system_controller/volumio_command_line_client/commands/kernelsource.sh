@@ -51,7 +51,7 @@ echo volumio | sudo -S gunzip -c /proc/config.gz >.config
 echo "Copying modules symverse"
 if [ "$ARCH" = armv7l ]; then
  echo volumio | sudo -S cp /home/volumio/Module7.symvers Module.symvers
- else
+else
  echo volumio | sudo -S cp /home/volumio/Module.symvers Module.symvers
 fi
 echo volumio | sudo -S make modules_prepare
