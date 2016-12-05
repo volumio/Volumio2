@@ -392,7 +392,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 			}
 			var device={
 				id:key,
-				host:'http://'+address,
+				host:'http://'+address.toString(),
 				name:osname.capitalize(),
 				isSelf:isSelf,
 				state: {
@@ -401,7 +401,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					mute: mute,
 					artist: artist,
 					track: track,
-					albumart: albumartstring
+					albumart: albumartstring.toString()
 				}
 			};
 
