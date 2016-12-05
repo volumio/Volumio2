@@ -140,18 +140,15 @@ case "$1" in
                 volumeget
             fi
             ;;
-	pull)
+		pull)
             pull
             ;;
-	kernelsource)
-	    kernelsource
+		kernelsource)
+		    kernelsource
             ;;
-        *)
+		*)
             doc
             exit 1
-
+            ;;
 esac
-
-
-
 
