@@ -57,7 +57,7 @@ fi
 echo volumio | sudo -S make modules_prepare
 echo "Linking Modules"
 echo volumio | sudo -S ln -sv /usr/src/rpi-linux /lib/modules/$(uname -r)/build
-echo Â" "
+echo " "
 echo "Done, you can now build and install out of kernel modules"
 }
 
