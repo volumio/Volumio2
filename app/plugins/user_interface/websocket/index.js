@@ -1759,7 +1759,7 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
-	
+
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushQueue', queue);
@@ -1806,9 +1806,11 @@ InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 	var self = this;
 	//console.log("pushMultiroom 2");
 	var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
+	if (volumiodiscovery) {
 	var response = volumiodiscovery.getDevices();
 	if(response != undefined){
 	selfConnWebSocket.emit('pushMultiRoomDevices', response);
+	}
 	}
 }
 
