@@ -653,7 +653,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 				ws.cork();
 				staticconf.cork();
-				//ws.write('auto wlan0\n');
+				ws.write('auto wlan0\n');
 				ws.write('auto lo\n');
 				ws.write('iface lo inet loopback\n');
 				ws.write('\n');
