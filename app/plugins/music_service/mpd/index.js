@@ -770,6 +770,36 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 };
 
+ControllerMpd.prototype.saveResampleOptions = function (data) {
+	var self = this;
+
+	var defer = libQ.defer();
+
+	self.createMPDFile(function (error) {
+		if (error !== undefined && error !== null) {
+			//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_configuration_update_error'));
+			defer.resolve({});
+		}
+		else {
+			//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_configuration_update'), self.commandRouter.getI18nString('mpd_playback_configuration_error'));
+
+			self.restartMpd(function (error) {
+				if (error !== null && error != undefined) {
+					self.logger.error('Cannot restart MPD: ' + error);
+					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
+				}
+				else
+				//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
+
+					defer.resolve({});
+			});
+		}
+	});
+
+	return defer.promise;
+
+};
+
 
 ControllerMpd.prototype.restartMpd = function (callback) {
 	var self = this;
@@ -811,6 +841,9 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 			var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
 			var mixer = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mixer');
+			var resampling = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling');
+			var resampling_bitdepth = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_bitdepth');
+			var resampling_samplerate = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_samplerate');
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
@@ -842,7 +875,13 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 			var conf7 = conf6.replace("${mixer}", mixerstrings);
 
-			fs.writeFile("/etc/mpd.conf", conf7, 'utf8', function (err) {
+			if(resampling){
+				var conf8 = conf7.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
+			} else {
+				var conf8 = conf7.replace("${format}", "");
+			}
+
+			fs.writeFile("/etc/mpd.conf", conf8, 'utf8', function (err) {
 				if (err) return console.log(err);
 			});
 		});

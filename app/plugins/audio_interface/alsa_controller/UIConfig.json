@@ -383,7 +383,7 @@
 	  "element": "section",
 	  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
 	  "icon": "fa-tachometer",
-	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveAdvancedTweaks"},
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveResamplingOpts"},
 	  "saveButton": {
 		"label": "TRANSLATE.COMMON.SAVE",
 		"data": [
@@ -416,7 +416,10 @@
 			"value": true
 		  },
 		  "options": [
-
+			{
+			  "value":"*",
+			  "label": "Native"
+			},
 			{
 			  "value":"16",
 			  "label": "16"
@@ -446,7 +449,10 @@
 			"value": true
 		  },
 		  "options": [
-
+			{
+			  "value":"*",
+			  "label": "Native"
+			},
 			{
 			  "value":"44100",
 			  "label": "44.1 kHz"

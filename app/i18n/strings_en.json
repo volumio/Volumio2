@@ -30,6 +30,7 @@
     "MIXER_TYPE":"Mixer Type",
 	"ADVANCED_AUDIO_TWEAKS":"Advanced Audio Tweaks",
 	"AUDIO_RESAMPLING":"Audio Resampling",
+	"AUDIO_RESAMPLING_SETTINGS_SAVED":"Audio Resampling Settings saved",
 	"TARGET_BITDEPTH":"Target bit depth",
 	"TARGET_SAMPLERATE":"Target sample rate",
 	"NATIVE":"Native"
