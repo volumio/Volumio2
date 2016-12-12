@@ -665,7 +665,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 	var regex = /card(\d+)/;
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
-	var soundFiles = fs.readdirSync(soundCardDir);
+	try {
+		var soundFiles = fs.readdirSync(soundCardDir);
+
+
 
 	for (var i = 0; i < soundFiles.length; i++) {
 		var fileName = soundFiles[i];
@@ -684,6 +687,9 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			} cards.push({id: id, name: name});
 
 		}
+	}
+	} catch (e) {
+		cards.push({id: '', name: 'No Audio Device Available'});
 	}
 
 	return cards;
