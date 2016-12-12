@@ -44,6 +44,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
 	self.deviceDetect();
 	self.callHome();
+	self.getDisks();
 
     return libQ.resolve();
 };
@@ -526,3 +527,136 @@ ControllerSystem.prototype.checkPassword = function (data) {
 	return defer.promise;
 }
 
+
+ControllerSystem.prototype.getDisks = function () {
+	var self = this;
+	var defer = libQ.defer();
+	var availablearray = [];
+
+	var currentdiskRaw = execSync('/bin/mount | head -n 1 | cut -d " " -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+	var currentdisk = currentdiskRaw.replace(/[0-9]/g, '').replace('/dev/', '').replace(/\n/,'');
+
+
+	var disksraw = execSync('/bin/lsblk -P -o KNAME,SIZE,MODEL -d', { uid: 1000, gid: 1000, encoding: 'utf8'});
+	var disks = disksraw.split("\n");
+
+
+
+	for (var i = 0; i < disks.length; i++) {
+
+		if ((disks[i].indexOf(currentdisk) >= 0) || (disks[i].indexOf('loop') >= 0)) {
+
+		} else {
+			var disksarray = disks[i].split(' ');
+
+			var diskinfo = {'device': '', 'name': '', 'size': ''};
+			var count = 0;
+			for (var a = 0; a < disksarray.length; a++) {
+				count++
+				if (disksarray[a].indexOf('KNAME') >= 0) {
+					diskinfo.device = disksarray[a].replace('KNAME=', '').replace(/"/g, '');
+				}
+				if (disksarray[a].indexOf('SIZE') >= 0) {
+					diskinfo.size = disksarray[a].replace('SIZE=', '').replace(/"/g, '');
+				}
+				if (disksarray[a].indexOf('MODEL') >= 0) {
+					diskinfo.name = disksarray[a].replace('MODEL=', '').replace(/"/g, '');
+				}
+
+				if (count === 4) {
+
+					if ( diskinfo.device && diskinfo.size) {
+						availablearray.push(diskinfo);
+						diskinfo = {'device': '', 'name': '', 'size': ''};
+					}
+					count = 0;
+				}
+
+			}
+		}
+	}
+	var final = {'current': currentdisk, 'available': availablearray}
+	defer.resolve(final);
+	//console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBB'+JSON.stringify(final))
+
+	return defer.promise;
+}
+
+ControllerSystem.prototype.installToDisk = function () {
+	var self = this;
+	var defer = libQ.defer();
+	var copymessage = self.commandRouter.getI18nString('SYSTEM.COPYING_TO_DISK_MESSAGE');
+	var modaltitle = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
+
+	self.startInstall()
+		.then(self.pushMessage.bind(self, 'installPluginStatus', {
+			'progress': 5,
+			'message': copymessage,
+			'title' : modaltitle
+		}))
+		.then(self.ddToDisk.bind(self))
+		.then(function (e) {
+			currentMessage = 'Unpacking plugin';
+			advancedlog = advancedlog + "<br>" + currentMessage;
+			self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
+			return e;
+		})
+
+
+
+	return defer.promise;
+}
+
+ControllerSystem.prototype.ddToDisk = function (currentdisk, targetdisk) {
+	var self = this;
+	var defer=libQ.defer();
+	var time = 0;
+	var currentMessage = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_MESSAGE');
+	var modaltitle = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
+	var progress = 10
+
+	self.pushMessage('volumioInstallStatus', {'progress': 1, 'message': currentMessage, 'title' : modaltitle})
+	setTimeout(function () {
+		progress++
+		self.pushMessage('volumioInstallStatus', {'progress': progress, 'message': currentMessage, 'title' : modaltitle});
+	}, 5000)
+
+	exec('echo volumio | sudo -S /bin/dd if=/dev/'+currentdisk+ ' of=/dev/'+targetdisk+' bs=1M',{uid:1000,gid:1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log(error);
+			self.logger.info('Cannot copy selected partition');
+		} else {
+			self.logger.info('Volumio system installed successfully');
+			return defer.promise;
+		}
+	});
+
+
+
+}
+
+ControllerSystem.prototype.startInstall = function () {
+	var self = this;
+	var defer=libQ.defer();
+	var time = 0;
+	var currentMessage = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_MESSAGE');
+	var modaltitle = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
+
+	self.pushMessage('volumioInstallStatus', {'progress': 1, 'message': currentMessage, 'title' : modaltitle})
+	setTimeout(function () {
+		defer.resolve();
+	}, 5000)
+
+
+	return defer.promise;
+}
+
+ControllerSystem.prototype.pushMessage = function (emit,payload) {
+	var self = this;
+	var defer=libQ.defer();
+
+	self.coreCommand.broadcastMessage(emit,payload);
+
+	defer.resolve();
+	return defer.promise;
+}
