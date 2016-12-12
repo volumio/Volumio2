@@ -381,8 +381,8 @@
 	{
 	  "id": "advanced_twaaks",
 	  "element": "section",
-	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_AUDIO_TWEAKS",
-	  "icon": "fa-microchip",
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+	  "icon": "fa-tachometer",
 	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveAdvancedTweaks"},
 	  "saveButton": {
 		"label": "TRANSLATE.COMMON.SAVE",
