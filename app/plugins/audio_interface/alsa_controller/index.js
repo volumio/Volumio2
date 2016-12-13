@@ -638,26 +638,29 @@ ControllerAlsa.prototype.setAdditionalConf = function (type, controller, data) {
 };
 
 ControllerAlsa.prototype.getLabelForSelectedCard = function (cards, key) {
+	var self=this;
 	var n = cards.length;
 	for (var i = 0; i < n; i++) {
 		if (cards[i].id == key)
 			return cards[i].name;
 	}
 
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
+	return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 };
 
 ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
+	var self=this;
 	var n = options.length;
 	for (var i = 0; i < n; i++) {
 		if (options[i].value == key)
 			return options[i].label;
 	}
 
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
+	return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SETTING_ERROR');
 };
 
 ControllerAlsa.prototype.getAlsaCards = function () {
+	var self=this;
 	var cards = [];
 
 	var soundCardDir = '/proc/asound/';
@@ -689,7 +692,8 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 		}
 	}
 	} catch (e) {
-		cards.push({id: '', name: 'No Audio Device Available'});
+		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
+		cards.push({id: '', name: namestring});
 	}
 
 	return cards;

@@ -30,7 +30,9 @@
     "MIXER_TYPE":"Mixer Type",
 	"ADVANCED_DAC_DSP_OPTIONS": "DSP Options",
 	"DSP_PROGRAM_ENABLED": "DSP Program Enabled",
-	"DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required"
+	"DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required",
+	"NO_AUDIO_DEVICE_AVAILABLE": "No Audio Device Available",
+	"SETTING_ERROR":"Error"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
