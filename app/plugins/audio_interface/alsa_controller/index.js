@@ -645,7 +645,7 @@ ControllerAlsa.prototype.getLabelForSelectedCard = function (cards, key) {
 			return cards[i].name;
 	}
 
-	return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
+	return 'No Audio Device Available';
 };
 
 ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
@@ -656,7 +656,7 @@ ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
 			return options[i].label;
 	}
 
-	return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SETTING_ERROR');
+	return 'Error';
 };
 
 ControllerAlsa.prototype.getAlsaCards = function () {
@@ -692,7 +692,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 		}
 	}
 	} catch (e) {
-		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
+		var namestring = 'No Audio Device Available';
 		cards.push({id: '', name: namestring});
 	}
 
