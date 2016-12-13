@@ -399,23 +399,41 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 
 	console.log('Updating browse sources language');
 
-    if(self.browseSources[0]!==undefined)
-	    self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
-    if(self.browseSources[1]!==undefined)
-         self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
-    if(self.browseSources[2]!==undefined)
-        self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
-    if(self.browseSources[3]!==undefined)
-        self.browseSources[3].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
-    if(self.browseSources[4]!==undefined)
-        self.browseSources[4].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
-    if(self.browseSources[5]!==undefined)
-        self.browseSources[5].name = self.commandRouter.getI18nString('COMMON.GENRES');
-    if(self.browseSources[6]!==undefined)
-        self.browseSources[6].name = self.commandRouter.getI18nString('COMMON.LAST_100');
-    if(self.browseSources[7]!==undefined)
-        self.browseSources[7].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+	for (var i in  self.browseSources) {
 
+		if(self.browseSources[i]!==undefined) {
+			
+		switch(self.browseSources[i].uri) {
+			case 'favourites':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
+				break;
+			case 'playlists':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
+				break;
+			case 'music-library':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+				break;
+			case 'artists://':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
+				break;
+			case 'albums://':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
+				break;
+			case 'genres://':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.GENRES');
+				break;
+			case 'radio':
+				self.browseSources[i].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+				break;
+			case 'Last_100':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.LAST_100');
+				break;
+			default:
+			console.log('Cannot find translation for source'+self.browseSources[i].name)
+		}
+
+		}
+	}
 }
 
 CoreMusicLibrary.prototype.goto=function(data){
