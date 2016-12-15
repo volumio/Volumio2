@@ -124,10 +124,10 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	uiconf.sections[2].content[2].value = config.get('wirelessip');
 
 	//static netmask
-	uiconf.sections[2].content[3].value = config.get('wirelessnetmask');
+	uiconf.sections[2].content[3].value = config.get('wirelessnetmask', '255.255.255.0');
 
 	//static gateway
-	uiconf.sections[2].content[4].value = config.get('wirelessgateway');
+	uiconf.sections[2].content[4].value = config.get('wirelessgateway', '192.168.1.1');
 
 			if (config.get('enable_hotspot') == undefined) {
 				uiconf.sections[4].content[0].value = true;
@@ -362,40 +362,58 @@ ControllerNetwork.prototype.saveWiredNet = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
+	if ((data.confirm) || (data.dhcp != false)) {
+		var dhcp = data['dhcp'];
+		var static_ip = data['static_ip'];
+		var static_netmask = data['static_netmask'];
+		var static_gateway = data['static_gateway'];
 
-	var dhcp = data['dhcp'];
-	var static_ip = data['static_ip'];
-	var static_netmask = data['static_netmask'];
-	var static_gateway = data['static_gateway'];
+		//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
 
-	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
-
-	config.set('dhcp', dhcp);
-	config.set('ethip', static_ip);
-	config.set('ethnetmask', static_netmask);
-	config.set('ethgateway', static_gateway);
-
-
-	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+		config.set('dhcp', dhcp);
+		config.set('ethip', static_ip);
+		config.set('ethnetmask', static_netmask);
+		config.set('ethgateway', static_gateway);
 
 
-	defer.resolve({});
-	return defer.promise;
+		self.rebuildNetworkConfig();
+		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+
+
+		defer.resolve({});
+		return defer.promise;
+	} else {
+		var responseData = {
+			title: self.commandRouter.getI18nString('NETWORK.STATIC_IP'),
+			message: self.commandRouter.getI18nString('NETWORK.STATIC_IP_WARNING'),
+			size: 'lg',
+			buttons: [
+				{
+					name: self.commandRouter.getI18nString('COMMON.CANCEL'),
+					class: 'btn btn-cancel',
+					emit:'',
+					payload:''
+				},
+				{
+					name: self.commandRouter.getI18nString('COMMON.CONTINUE'),
+					class: 'btn btn-info',
+					emit:'callMethod',
+					payload:{'endpoint':'system_controller/network','method':'saveWiredNet','data':{'confirm':true,'dhcp':data.dhcp,'static_ip':data.static_ip,'static_netmask':data.static_netmask,'static_gateway':data.static_gateway}}
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
+	}
+
+
 };
 
 ControllerNetwork.prototype.saveWirelessNet = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
-
 	var wireless_enabled = data['wireless_enabled'];
-	var dhcp = data['wireless_dhcp'];
-	var static_ip = data['wireless_static_ip'];
-	var static_netmask = data['wireless_static_netmask'];
-	var static_gateway = data['wireless_static_gateway'];
-
-	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
 
 	var wireless_enabled_setting = config.get('wireless_enabled');
 	if (wireless_enabled_setting == undefined) {
@@ -404,25 +422,60 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 		config.set('wireless_enabled', wireless_enabled);
 	}
 
-	var wirelessdhcp = config.get('wirelessdhcp');
-	if (wirelessdhcp == undefined) {
-		config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
-		config.addConfigValue('wirelessip', 'string', static_ip);
-		config.addConfigValue('wirelessnetmask', 'string', static_netmask);
-		config.addConfigValue('wirelessgateway', 'string', static_gateway);
+	var dhcp = data['wireless_dhcp'];
+	var static_ip = data['wireless_static_ip'];
+	var static_netmask = data['wireless_static_netmask'];
+	var static_gateway = data['wireless_static_gateway'];
+
+
+	if ((data.confirm) || (dhcp != false)) {
+
+		//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
+
+		var wirelessdhcp = config.get('wirelessdhcp');
+		if (wirelessdhcp == undefined) {
+			config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
+			config.addConfigValue('wirelessip', 'string', static_ip);
+			config.addConfigValue('wirelessnetmask', 'string', static_netmask);
+			config.addConfigValue('wirelessgateway', 'string', static_gateway);
+		} else {
+			config.set('wirelessdhcp', dhcp);
+			config.set('wirelessip', static_ip);
+			config.set('wirelessnetmask', static_netmask);
+			config.set('wirelessgateway', static_gateway);
+		}
+
+
+		self.rebuildNetworkConfig();
+		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+
+
+		defer.resolve({});
+		return defer.promise;
 	} else {
-		config.set('wirelessdhcp', dhcp);
-		config.set('wirelessip', static_ip);
-		config.set('wirelessnetmask', static_netmask);
-		config.set('wirelessgateway', static_gateway);
+		var responseData = {
+			title: self.commandRouter.getI18nString('NETWORK.STATIC_IP'),
+			message: self.commandRouter.getI18nString('NETWORK.STATIC_IP_WARNING'),
+			size: 'lg',
+			buttons: [
+				{
+					name: self.commandRouter.getI18nString('COMMON.CANCEL'),
+					class: 'btn btn-cancel',
+					emit:'',
+					payload:''
+				},
+				{
+					name: self.commandRouter.getI18nString('COMMON.CONTINUE'),
+					class: 'btn btn-info',
+					emit:'callMethod',
+					payload:{'endpoint':'system_controller/network','method':'saveWirelessNet','data':{'confirm':true,'wireless_dhcp':dhcp,'wireless_static_ip':static_ip,'wireless_static_netmask':static_netmask,'wireless_static_gateway':static_gateway, 'wireless_enabled':wireless_enabled}}
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
 	}
 
-	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
-
-
-	defer.resolve({});
-	return defer.promise;
 };
 
 
