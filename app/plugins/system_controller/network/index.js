@@ -741,7 +741,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 				ws.write('iface wlan0 inet manual\n');
 
 				if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
-				} else {
+				} else if (config.get('wirelessdhcp') == false || config.get('wirelessdhcp') == 'false'){
 					staticconf.write('interface wlan0\n');
 					staticconf.write('static ip_address=' + config.get('wirelessip') + '/24\n');
 					staticconf.write('static routers=' + config.get('wirelessgateway') + '\n');
