@@ -37,7 +37,10 @@ updater_comm.prototype.onVolumioStart = function () {
 		socket.on("factoryReset", function (msg, data) {
 				var there = require("socket.io-client")("http://localhost:3006");
 				there.emit("factoryReset", msg);
-				// exec("/usr/bin/sudo /bin/systemctl restart volumio-remote-updater@factoryReset")
+				try {
+					exec("/usr/bin/sudo /bin/systemctl stop avahi-daemon")
+				} catch(e){
+				}
 			}
 		);
 
