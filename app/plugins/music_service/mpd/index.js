@@ -514,17 +514,22 @@ ControllerMpd.prototype.parseState = function (objState) {
 		var objMetrics = objState.audio.split(':');
 		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
 
+
 			if (nSampleRateRaw === 352.8){
 				var nSampleRateRaw = 2.82+' MHz';
+				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 705.6) {
 				var nSampleRateRaw = 5.64+' MHz';
+				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 1411.2) {
 				var nSampleRateRaw = 11.2+' MHz';
+				nBitDepth = '1 bit'
 			}else {
 				var nSampleRateRaw = nSampleRateRaw+' KHz';
+				nBitDepth = Number(objMetrics[1])+' bit';
 			}
 		nSampleRate = nSampleRateRaw;
-		nBitDepth = Number(objMetrics[1])+' bit';
+
 		nChannels = Number(objMetrics[2]);
 	}
 
