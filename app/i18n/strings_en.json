@@ -56,7 +56,8 @@
     "HOTSPOT_CHANNEL":"Hotspot Channel",
     "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
     "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long",
-	"WIRELESS_ENABLED":"Wireless Networking"
+	"WIRELESS_ENABLED":"Wireless Networking",
+	"STATIC_IP_WARNING":"Warning, please make sure Static IP Settings are correct. A wrong configuration might render your device unreachable"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts"
@@ -104,7 +105,8 @@
     "TRACKS":"Tracks",
     "CANCEL":"Cancel",
     "NONE":"None",
-    "LAST_100":"last 100"
+    "LAST_100":"last 100",
+	"CONTINUE":"Continue"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
