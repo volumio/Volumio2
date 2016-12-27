@@ -282,6 +282,11 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
     if (curUri.startsWith('favourites')) {
         return self.commandRouter.playListManager.listFavourites(curUri);
     }
+    else if (curUri.startsWith('search')) {
+        var splitted=curUri.split('/');
+
+        return this.search({"value":splitted[2]});
+    }
     else {
         for(var i in self.browseSources)
         {
