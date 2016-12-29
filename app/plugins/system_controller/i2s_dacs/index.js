@@ -36,6 +36,8 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	if (i2sdac == null || i2sdac.length === 0 ) {
 		self.logger.info('I2S DAC not set, start Auto-detection');
 		self.i2sDetect();
+	} else {
+		self.execDacScript();
 	}
 
 
@@ -205,6 +207,7 @@ ControllerI2s.prototype.i2cDetect = function () {
 
 	function readI2S(i2cbus) {
 	try {
+	var i2cAddr = '';
 	var cmd = '/usr/bin/sudo /usr/sbin/i2cdetect -y ' + i2cbus;
 	exec(cmd, function(err, stdout, stderr) {
 		if(err) {
@@ -218,11 +221,12 @@ ControllerI2s.prototype.i2cDetect = function () {
 				items.shift();
 				items.forEach(function(item) {
 					if((item != '') && (item != '--')) {
-						var i2cAddr = (item);
-						defer.resolve({i2c:i2cAddr});
+						i2cAddr = (item);
+
 					}
 				});
 			});
+			defer.resolve({i2c:i2cAddr});
 		}
 	});
 	} catch (err) {
@@ -372,35 +376,52 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var response =  '';
 
 	var outdevicename = data;
+	console.log('PROC')
 
-	for(var i = 0; i < dacdata.devices.length; i++)
+	for(var k = 0; k < dacdata.devices.length; k++)
 	{
-		if(dacdata.devices[i].name == devicename)
-		{ var num = i;
-			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+		if(dacdata.devices[k].name === devicename)
+		{ var num = k;
 
-				if(dacdata.devices[num].data[i].name == outdevicename) {
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+			
+				if(dacdata.devices[num].data[i].name === outdevicename) {
+
 					var dac = dacdata.devices[num].data[i];
 					var overlay = dac.overlay;
 					var num = dac.alsanum;
 					var reboot = dac.needsreboot;
 					var script = dac.script;
-					self.revomeAllDtOverlays();
-					self.writeI2SDAC(overlay);
-					if (script){
-						self.hotAddI2SDAC({'overlay':overlay,'script':script});
+					var modules = dac.modules;
+					var id = dac.id;
+
+					if (modules){
+						this.config.set("i2s_id", id);
+						self.writeModulesFile(modules);
 					} else {
-						self.hotAddI2SDAC({'overlay':overlay});
+						self.revomeAllDtOverlays();
+						self.writeI2SDAC(overlay);
+						if (script){
+							self.hotAddI2SDAC({'overlay':overlay,'script':script});
+						} else {
+							self.hotAddI2SDAC({'overlay':overlay});
+						}
+						this.config.set("i2s_id", overlay);
 					}
+
 
 					this.config.set("i2s_enabled", true);
 					this.config.set("i2s_dac", outdevicename);
-					this.config.set("i2s_id", overlay);
+
 					self.commandRouter.sharedVars.set('alsa.outputdevice', num);
 					//Restarting MPD, this seems needed only on first boot
 					setTimeout(function () {
 						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+						self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
 					}, 1500);
+
+
+
 					response = {'reboot':reboot}
 					defer.resolve(response);
 				}
@@ -482,8 +503,15 @@ ControllerI2s.prototype.revomeAllDtOverlays = function () {
 	var self = this;
 
 	var defer = libQ.defer();
-	var overlaysRaw = execSync("/usr/bin/sudo /usr/bin/dtoverlay -l", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 5000 });
-	var overlaysLine = overlaysRaw.split('\n');
+	try {
+		var overlaysRaw = execSync("/usr/bin/sudo /usr/bin/dtoverlay -l", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 5000 });
+		var overlaysLine = overlaysRaw.split('\n');
+	} catch(e) {
+		self.logger.info('Cannot Remove all dtoverlays');
+		var overlaysLine = [];
+	}
+
+
 
 
 	if (overlaysLine.length > 2) {
@@ -504,5 +532,61 @@ ControllerI2s.prototype.revomeAllDtOverlays = function () {
 		self.logger.info('No Overlays Loaded')
 		defer.resolve('');
 	}
+
+}
+
+ControllerI2s.prototype.execDacScript = function () {
+	var self = this;
+	var dacname = self.getConfigParam('i2s_dac');
+
+	var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'),  'utf8', {throws: false});
+	var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+
+	for(var i = 0; i < dacdata.devices.length; i++)
+	{
+		if(dacdata.devices[i].name == devicename)
+		{ var num = i;
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+
+				if(dacdata.devices[num].data[i].name === dacname) {
+
+					if (dacdata.devices[num].data[i].script && dacdata.devices[num].data[i].script.length > 0 ) {
+						self.logger.info('Executing start script for DAC '+dacname);
+						exec(__dirname + '/scripts/'+dacdata.devices[num].data[i].script,{uid:1000, gid:1000}, function(err, stdout, stderr) {
+							if(err) {
+								self.logger.error('Cannot execute DAC script: '+err);
+							} else {
+								self.logger.info('Data script executed');
+							}
+						});
+					}
+
+				}
+
+			}
+		}
+	}
+};
+
+ControllerI2s.prototype.writeModulesFile = function (modules) {
+	var self = this;
+	var modulesfile = '/etc/modules'
+	var moduleslist = modules;
+
+
+	exec("/usr/bin/sudo /bin/chmod 777 "+ modulesfile, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Canot set permissions for /etc/modules: ' + error);
+
+		} else {
+			var ws = fs.createWriteStream(modulesfile);
+			ws.cork();
+			for(var i = 0; i < moduleslist.length; i++) {
+				ws.write(moduleslist[i]+'\n');
+			}
+			ws.end()
+		}
+	});
+
 
 }

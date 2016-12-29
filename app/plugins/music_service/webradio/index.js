@@ -397,6 +397,8 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 
 // Define a method to clear, add, and play an array of tracks
 ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
+
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+track)
     var self = this;
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerWebradio::clearAddPlayTrack');
 
@@ -496,11 +498,7 @@ ControllerWebradio.prototype.listRadioCountries = function () {
         //we sort datas alphabetically by name of country
         data.sort(
             function (a, b) {
-                if (a.name < b.name)
-                    return -1;
-                if (a.name > b.name)
-                    return 1;
-                return 0;
+                return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
             }
         );
         for (var i in data) {
@@ -577,11 +575,7 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
                 //we sort datas alphabetically by name of station
                 pageData.sort(
                     function (a, b) {
-                        if (a.name < b.name)
-                            return -1;
-                        if (a.name > b.name)
-                            return 1;
-                        return 0;
+                        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
                     }
                 );
 
@@ -631,6 +625,13 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
     var promise = self.commandRouter.playListManager.getMyWebRadioContent()
     promise.then(function (data) {
         //console.log(data);
+
+        data.sort(
+            function (a, b) {
+                return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+            }
+        );
+
         var response = {
             "navigation": {
                 "lists": [
@@ -654,6 +655,8 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
             var song = {
                 service: 'webradio',
                 type: 'mywebradio',
+				artist: '',
+				album: '',
                 title: ithdata.name,
                 uri: ithdata.uri,
                 icon: 'fa fa-microphone'
@@ -681,6 +684,13 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
     var promise = self.commandRouter.playListManager.getRadioFavouritesContent();
     promise.then(function (data) {
         //console.log(data);
+
+        data.sort(
+            function (a, b) {
+                return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+            }
+        );
+
         var response = {
             "navigation": {
                 "lists": [

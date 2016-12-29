@@ -510,3 +510,19 @@ ControllerSystem.prototype.enableSSH = function (data) {
     });
 }
 
+ControllerSystem.prototype.checkPassword = function (data) {
+	var self = this;
+	var defer = libQ.defer();
+
+	var currentpass = self.config.get('system_password', 'volumio');
+
+	if (data.password === currentpass) {
+		defer.resolve(true);
+	} else {
+		defer.resolve(false)
+	}
+
+
+	return defer.promise;
+}
+

@@ -369,12 +369,12 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 
 
 		var addresses=foundVolumioInstances.get(key+'.addresses');
-
+		
 		for(var j in addresses)
 		{
 			var address=addresses[j];
 			if (isSelf){
-				
+
 				ifconfig.status('wlan0', function(err, status) {
 					if (status != undefined) {
 						if (status.ipv4_address != undefined) {
@@ -390,9 +390,14 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 			} else {
 				var albumartstring = 'http://'+address+'/albumart';
 			}
+
+			if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
+				address = addresses[0].value[0].value;
+			}
+
 			var device={
 				id:key,
-				host:'http://'+address,
+				host:'http://'+address.toString(),
 				name:osname.capitalize(),
 				isSelf:isSelf,
 				state: {
@@ -401,7 +406,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					mute: mute,
 					artist: artist,
 					track: track,
-					albumart: albumartstring
+					albumart: albumartstring.toString()
 				}
 			};
 

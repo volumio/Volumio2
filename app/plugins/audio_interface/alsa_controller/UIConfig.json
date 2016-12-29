@@ -61,6 +61,26 @@
 
       ]
     },
+	{
+	  "id": "dac_dsp_options",
+	  "element": "section",
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS",
+	  "icon": "fa-microchip",
+	  "hidden": true,
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveDSPOptions"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+
+		]
+	  },
+	  "value":  {
+		"value": "",
+		"label": ""
+	  },
+	  "content": [
+	  ]
+	},
     {
       "id": "playback_options",
       "element": "section",
@@ -168,6 +188,7 @@
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
+          "mixer_type",
           "mixer",
           "volumestart",
           "volumemax",
@@ -177,10 +198,24 @@
       },
       "content": [
         {
-          "id": "",
+          "id": "mixer_type",
+          "element": "select",
+          "doc" : "Mixer Type Selector ",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_TYPE",
+          "value":  {
+            "value":"",
+            "label": ""
+          },
+          "options": [
+
+          ]
+
+        },
+        {
+          "id": "mixer",
           "element": "select",
           "doc" : "Mixer Selector ",
-          "label": "",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
             "value":"",
             "label": ""

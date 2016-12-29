@@ -291,14 +291,26 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	var defer = libQ.defer();
 
 	var name = data['name'];
-	var nameStr = S(name);
+	/*
+	 * A name is required. In the ui this field is called 'alias'.
+	 */
+	if (name == undefined) name = '';
+	var blankname_regex = /^\s*$/;
+	var matches = blankname_regex.exec(name);
+	if (matches) {
+		self.logger.info("Share alias is blank");
+		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('NETWORKFS.ALIAS_DOC'));
+		defer.reject(new Error('Shares must have an alias'));
+		return defer.promise;
+	}
 
+	var nameStr = S(name);
 
 	/**
 	 * Check special characters
 	 */
 	if (nameStr.contains('/')) {
-		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('ILLEGAL_CHARACTER_/'));
+		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.ILLEGAL_CHARACTER_/'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return defer.promise;
 	}
@@ -654,7 +666,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				}
 
 
-				var mountshare = self.mountShare(id);
+				var mountshare = self.mountShare({key:id});
 				if (mountshare != undefined) {
 					mountshare.then(function (data) {
 						console.log(data)

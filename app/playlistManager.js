@@ -90,6 +90,16 @@ PlaylistManager.prototype.listPlaylist = function () {
 	return defer.promise;
 };
 
+PlaylistManager.prototype.retrievePlaylists = function () {
+	var self = this;
+	var content = [];
+
+	content = fs.readdirSync(this.playlistFolder);
+
+	return content;
+}
+
+
 PlaylistManager.prototype.getPlaylistContent = function (name) {
 	var self = this;
 
@@ -289,9 +299,15 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 				}
 
 				fs.writeJson(filePath, data, function (err) {
-					if (err)
+					if (err) {
+						self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
 						defer.resolve({success: false});
-					else defer.resolve({success: true});
+					}
+
+					else {
+						defer.resolve({success: true});
+						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
+					}
 				})
 			}
 		});
@@ -446,11 +462,12 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         var output = data.concat(entries);
                         console.log(filePath)
                         fs.writeJson(filePath, output, function (err) {
-                            if (err)
+                            if (err!==undefined && err!==null)
                                 defer.resolve({success: false});
-                            else
+                            else {
                                 var favourites = self.commandRouter.checkFavourites({uri: path});
-                            defer.resolve(favourites);
+                                defer.resolve({});
+                            }
                         })
                     }
                 });

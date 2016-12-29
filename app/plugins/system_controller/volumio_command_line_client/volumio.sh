@@ -18,13 +18,19 @@ play
 pause
 next
 previous
+stop
 
 
 [[VOLUMIO SERVICE CONTROL]]
 
 start                               Starts Volumio Service
-stop                                Stops Volumio Service
+vstop                               Stops Volumio Service
 restart                             Restarts Volumio Service
+
+[[VOLUMIO DEVELOPMENT]]
+
+pull                               Pull latest github status on master
+kernelsource                       Get Current Kernel source (Raspberry PI only)
 "
 
 }
@@ -63,14 +69,27 @@ echo $var
 #VOLUMIO SERVICE CONTROLS
 
 function start {
-systemctl start volumio.service
+echo volumio | sudo -S systemctl start volumio.service
 }
 
-function stop {
-systemctl stop volumio.service
+function vstop {
+echo volumio | sudo -S systemctl stop volumio.service
 }
 
+#VOLUMIO DEVELOPMENT
 
+function pull {
+echo "Stopping Volumio"
+echo volumio | sudo -S systemctl stop volumio.service
+echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+echo "Pull completed, restarting Volumio"
+echo volumio | sudo -S systemctl start volumio.service
+echo "Done"
+}
+
+function kernelsource {
+echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+}
 
 
 case "$1" in
@@ -90,6 +109,10 @@ case "$1" in
             playbackcommand=$1
             playback
             ;;
+        stop)
+            playbackcommand=$1
+            playback
+            ;;
         start)
             start
             ;;
@@ -97,7 +120,7 @@ case "$1" in
             start
             ;;
 
-        stop)
+        vstop)
             stop
             ;;
 
@@ -117,7 +140,12 @@ case "$1" in
                 volumeget
             fi
             ;;
-
+	pull)
+            pull
+            ;;
+	kernelsource)
+	    kernelsource
+            ;;
         *)
             doc
             exit 1

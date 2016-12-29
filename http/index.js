@@ -147,6 +147,8 @@ app.route('/backgrounds-upload')
 plugin.use(express.static(path.join(plugindir)));
 background.use(express.static(path.join(backgrounddir)));
 app.use('/backgrounds', express.static('/data/backgrounds/'));
+app.use('/cover-art', express.static('/var/lib/mpd/music/'));
+app.use('/music', express.static('/'));
 
 
 module.exports.app = app;
