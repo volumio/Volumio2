@@ -943,7 +943,12 @@ InterfaceMPD.prototype.handleVolume = function(sCommand, sParam, client) {
 	self.logStart('Client requests Volume ' + vol)
 	.then(libFast.bind(self.commRouter.volumioGetState, self.commRouter))
 	.then(function (state) {
-		return self.commRouter.volumiosetvolume.call(self.commRouter, state.volume + vol);
+		var newvolume = state.volume + vol;
+		if(newvolume > 100)
+			newvolume = 100;
+		if(newvolume < 0)
+			newvolume = 0;
+		return self.commRouter.volumiosetvolume.call(self.commRouter, newvolume);
 	})
 	.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
 	.done(function () {
