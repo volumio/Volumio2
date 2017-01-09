@@ -622,6 +622,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 					hs.write('interface=wlan0\n');
 					hs.write('ssid=' + hotspotname + '\n');
 					hs.write('channel=' + hotspotchannel + '\n');
+					ws.write('driver=nl80211\n');
 					hs.write('hw_mode=g\n');
 					if (config.get('hotspot_protection') == true || config.get('hotspot_protection') == 'true') {
 						hs.write('auth_algs=1\n');
