@@ -45,7 +45,7 @@
     "pidof": "^1.0.2",
     "random-string": "^0.1.2",
     "serve-favicon": "^2.3.2",
-    "shelljs": "^0.7.5",
+    "shelljs": "^0.7.6",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.0",
     "sort-on": "^1.3.0",
