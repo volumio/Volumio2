@@ -40,6 +40,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
 
+    this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
 	self.deviceDetect();
