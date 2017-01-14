@@ -23,7 +23,17 @@ function InterfaceWebUI(context) {
 	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
 		try {
+            connWebSocket.on('getDeviceInfo', function () {
+                var uuid=self.commandRouter.sharedVars.get('system.uuid');
+                var name=self.commandRouter.sharedVars.get('system.name');
 
+                var data={
+                    "uuid":uuid,
+                    "name":name
+                };
+                connWebSocket.emit('pushDeviceInfo', data);
+
+            });
 
 			/** Request Volumio State
 			 * It returns an array definining the Playback state, Volume and other amenities
