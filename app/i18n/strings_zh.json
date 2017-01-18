@@ -78,7 +78,10 @@
     "ILLEGAL_CHARACTER_/":"删除禁用的字符 /",
     "FAVOURITES":"收藏夹",
     "PLAYLISTS":"播放列表",
-    "MUSIC_LIBRARY":"音乐库"
+    "MUSIC_LIBRARY":"音乐库",
+    "ARTISTS":"艺术家",
+    "ALBUMS":"专辑",
+    "GENRES":"音乐题材"
   },
   "APPEARANCE":{
     "APPEARANCE":"外观",
