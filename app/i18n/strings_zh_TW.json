@@ -78,7 +78,10 @@
     "ILLEGAL_CHARACTER_/":"刪除禁用的字元 /",
     "FAVOURITES":"收藏夾",
     "PLAYLISTS":"播放列表",
-    "MUSIC_LIBRARY":"音樂庫"
+    "MUSIC_LIBRARY":"音樂庫",
+    "ARTISTS":"演出者",
+    "ALBUMS":"專輯",
+    "GENRES":"音樂分類"
   },
   "APPEARANCE":{
     "APPEARANCE":"外觀",
