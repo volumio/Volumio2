@@ -2445,7 +2445,8 @@ ControllerMpd.prototype.listAlbums = function () {
                     {
                         var artistName=lines[i+1].slice(7).trim();
 
-                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                        var codedAlbumName = nodetools.urlEncode(albumName);
+                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + codedAlbumName};
 
                         response.navigation.lists[0].items.push(album);
                     }
