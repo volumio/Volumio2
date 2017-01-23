@@ -12,6 +12,7 @@ var parser = require('cue-parser');
 var mm = require('musicmetadata');
 var os = require('os');
 var execSync = require('child_process').execSync;
+var ignoreupdate = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -650,26 +651,35 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
-        self.logger.info('Mpd Status Update: '+status);
-		self.logStart('MPD announces state update')
-			.then(self.getState.bind(self))
-			.then(self.pushState.bind(self))
-			.fail(self.pushError.bind(self))
-			.done(function () {
-				return self.logDone(timeStart);
-			});
+		if (!ignoreupdate) {
+			self.logger.info('Mpd Status Update: '+status);
+			self.logStart('MPD announces state update')
+				.then(self.getState.bind(self))
+				.then(self.pushState.bind(self))
+				.fail(self.pushError.bind(self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
+
 	});
 
 
 	self.clientMpd.on('system-playlist', function () {
 		var timeStart = Date.now();
 
+		if (!ignoreupdate) {
 		self.logStart('MPD announces system state update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
 				return self.logDone(timeStart);
 			});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
 	});
 
 	//Notify that The mpd DB has changed
@@ -680,13 +690,16 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 
 	self.clientMpd.on('system-update', function () {
-
+		if (!ignoreupdate) {
 		 self.sendMpdCommand('status', [])
 			.then(function (objState) {
 				var state = self.parseState(objState);
 				execSync("/bin/sync", { uid: 1000, gid: 1000});
 				return self.commandRouter.fileUpdate(state.updatedb);
 			});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
 	});
 };
 
@@ -2985,3 +2998,6 @@ ControllerMpd.prototype.goto=function(data){
 
 }
 
+ControllerMpd.prototype.ignoreUpdate=function(data){
+	ignoreupdate = data;
+}
