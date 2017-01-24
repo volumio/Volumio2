@@ -306,15 +306,19 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			var trackBlock = this.getTrack(this.currentPosition);
 
             var nextIndex=this.currentPosition+1;
-
-            if(this.currentRandom)
+// First check if Repeat mode is on, note that Random and Consume overides Repeat
+						if(this.currentRepeat && ((this.playQueue.arrayQueue.length-1)==this.currentPosition)!== this.currentConsume)
+							{
+								nextIndex=0;
+							}
+// Then check if Random mode is on - Random mode overrides Repeat mode by this
+						if(this.currentRandom)
             {
                 nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
                 this.nextRandomIndex=nextIndex;
             }
 
             var nextTrackBlock = this.getTrack(nextIndex);
-
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
 				this.logger.info("Prefetching next song");
@@ -343,7 +347,13 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                 if(this.currentRandom)
                     this.currentPosition=this.nextRandomIndex;
                 else
-                    this.currentPosition++;
+								// Handles if repeat mode is on and Consume is not on
+									if(this.currentRepeat && ((this.playQueue.arrayQueue.length-1)==this.currentPosition) !== this.currentConsume)
+										{
+											this.currentPosition=0;
+										}
+										else
+										this.currentPosition++;
             }
 
             this.nextRandomIndex=undefined;
