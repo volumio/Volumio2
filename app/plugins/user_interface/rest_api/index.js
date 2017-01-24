@@ -47,11 +47,10 @@ function interfaceApi(context) {
             var response = {'Error': "Error: impossible to restore given data"};
 
             try{
-                self.commandRouter.restorePlaylist({'type': req.body.type, 'path': req.body.path,
-                    'backup': JSON.parse(req.body.data)});
+                self.commandRouter.restorePlaylist({'type': req.body.type, 'backup': JSON.parse(req.body.data)});
                 res.json(success);
             }catch(e){
-                res.json(response)
+                res.json(response);
             }
         });
 
@@ -144,7 +143,8 @@ function interfaceApi(context) {
                     var timeStart = Date.now();
                     self.logStart('Client requests Volume ' + VolumeInteger)
                         .then(function () {
-                            return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+                            return self.commandRouter.volumiosetvolume.call(self.commandRouter,
+                                VolumeInteger);
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {
