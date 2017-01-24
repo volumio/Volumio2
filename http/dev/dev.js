@@ -115,6 +115,12 @@ socket.on('printConsoleMessage', function(sMessage) {
 	printConsoleMessage(sMessage);
 });
 
+socket.on('pushSendBugReport', function(data) {
+	console.log(data);
+	printConsoleMessage(data);
+});
+
+
 // Define internal functions ----------------------------------------------
 function clearConsole() {
 	var nodeConsole = document.getElementById('console');
@@ -507,3 +513,15 @@ function emitEvent(sEvent, sParam1, sParam2) {
 	socket.emit(sEvent, sParam1, sParam2);
 	printConsoleMessage('[Event]: ' + sEvent + ' [Parameters]:' + JSON.stringify(sParam1) + ', ' + JSON.stringify(sParam2));
 }
+
+document.querySelector('form.bug-form').addEventListener('submit', function (e) {
+	//prevent the normal submission of the form
+	var inputBugDesc = document.getElementById('bug-form-description');
+	e.preventDefault();
+	// Emit first and second input value
+	var obj = {
+		text : inputBugDesc.value
+	};
+	socket.emit('callMethod',  {endpoint:'system_controller/system',method:'sendBugReport',data:obj});
+
+});
