@@ -23,7 +23,18 @@
     "I2S_DAC_ACTIVATED":"I2S DAC dttivato",
     "I2S_DAC_ACTIVATED_MESSAGE":"è stato attivato, riavvia il sistema per rendere effettivi i cambiamenti",
     "I2S_DAC_DEACTIVATED":"I2S DAC disattivato",
-    "I2S_DAC_DEACTIVATED_MESSAGE":"è stato disattivato, riavvia il sistema per rendere effettivi i cambiamenti"
+    "I2S_DAC_DEACTIVATED_MESSAGE":"è stato disattivato, riavvia il sistema per rendere effettivi i cambiamenti",
+	"DOP":"DSD over PCM (DoP)",
+	"SOFTVOL":"Controllo di Volume software",
+	"MIXER_CONTROL_NAME":"Nome del mixer",
+	"MIXER_TYPE":"Tipo di Mixer",
+	"ADVANCED_DAC_DSP_OPTIONS": "Opzioni DSP",
+	"DSP_PROGRAM_ENABLED": "Programma DSP attivato",
+	"DSP_PROGRAM_REBOOT": "Per attivare questo programma DSP è richiesto un riavvio del sistema",
+	"NO_AUDIO_DEVICE_AVAILABLE": "Nessuna periferica audio disponibile",
+	"SETTING_ERROR":"Errore",
+	"PERSISTENT_QUEUE":"Coda di Riproduzione persistente",
+	"PERSISTENT_QUEUE_DOC":"Se attivata, la coda di riproduzione sarà mantenuta al riavvio del sistema. Se disattivata, la coda di riproduzione sarà azzerata ad ogni avvio del sistema"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
@@ -90,7 +101,9 @@
     "ALBUMS":"Album",
     "GENRES":"Generi",
     "TRACKS":"Canzoni",
-	"CANCEL":"Annulla"
+	"CANCEL":"Annulla",
+	"SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
+	"SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

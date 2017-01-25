@@ -762,6 +762,12 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 		self.config.set('dop', data['dop']);
 	}
 
+	if (self.config.get('persistent_queue') == null) {
+		self.config.addConfigValue('persistent_queue', 'boolean', true);
+	} else {
+		self.config.set('persistent_queue', data['persistent_queue']);
+	}
+
 
 	self.createMPDFile(function (error) {
 		if (error !== undefined && error !== null) {
@@ -774,11 +780,12 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.error('Cannot restart MPD: ' + error);
-					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
+					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVE_ERROR'));
 				}
-				else
-					//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
-
+				else{
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+				}
+				
 				defer.resolve({});
 			});
 		}
