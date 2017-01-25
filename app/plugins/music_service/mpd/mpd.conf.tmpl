@@ -56,8 +56,11 @@ audio_output {
 
 
 samplerate_converter "soxr very high"
-#replaygain			"album"
-#replaygain_preamp		"0"
+
+# Normalization automatic volume adjustments ##################################
+replaygain			"${replaygain_mode}"
+replaygain_preamp		"${replaygain_preamp}"
+replaygain_limit		"${replaygain_limit}"
 volume_normalization		"${volume_normalization}"
 ###############################################################################
 

@@ -752,6 +752,9 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	var defer = libQ.defer();
 
 	self.config.set('volume_normalization', data['volume_normalization']);
+	self.config.set('replaygain_mode', data['replaygain_mode'].value);
+	self.config.set('replaygain_preamp', data['replaygain_preamp'].value);
+	self.config.set('replaygain_limit', data['replaygain_limit']);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
 
@@ -841,14 +844,17 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
 			var conf2 = conf1.replace("${device}", outdev);
 			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
-			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
-			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
+			var conf4 = conf3.replace("${replaygain_mode}", self.config.get('replaygain_mode'));
+			var conf5 = conf4.replace("${replaygain_preamp}", self.config.get('replaygain_preamp'));
+			var conf6 = conf5.replace("${replaygain_limit}", self.checkTrue('replaygain_limit'));
+			var conf7 = conf6.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
+			var conf8 = conf7.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
 			if (self.config.get('dop')){
 				var dop = 'yes';
 			} else {
 				var dop = 'no';
 			}
-			var conf6 = conf5.replace("${dop}", dop);
+			var conf9 = conf8.replace("${dop}", dop);
 
 
 			if (mixer) {
@@ -858,9 +864,9 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 
 
-			var conf7 = conf6.replace("${mixer}", mixerstrings);
+			var conf10 = conf9.replace("${mixer}", mixerstrings);
 
-			fs.writeFile("/etc/mpd.conf", conf7, 'utf8', function (err) {
+			fs.writeFile("/etc/mpd.conf", conf10, 'utf8', function (err) {
 				if (err) return console.log(err);
 			});
 		});

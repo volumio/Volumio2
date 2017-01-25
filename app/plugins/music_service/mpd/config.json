@@ -7,6 +7,22 @@
     "type": "boolean",
     "value": false
   },
+  "replaygain_enabled":{
+    "type": "boolean",
+    "value": false
+  },
+  "replaygain_mode":{
+    "type": "string",
+    "value": "off"
+  },
+  "replaygain_preamp":{
+    "type": "number",
+    "value": 0
+  },
+  "replaygain_limit":{
+    "type": "boolean",
+    "value": true
+  },
   "audio_buffer_size":{
     "type": "number",
     "value": 8192

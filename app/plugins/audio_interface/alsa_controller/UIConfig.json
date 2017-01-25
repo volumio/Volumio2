@@ -92,6 +92,10 @@
         "data": [
           "dop",
           "volume_normalization",
+          "replaygain_enabled",
+          "replaygain_mode",
+          "replaygain_preamp",
+          "replaygain_limit",
           "audio_buffer_size",
           "buffer_before_play"
         ]
@@ -112,6 +116,184 @@
           "doc":"If turned On Volumio will normalize the volume of tracks as they play. Default is Off.",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION",
           "value":false
+        },
+
+        {
+          "id": "replaygain_enabled",
+          "element": "switch",
+          "doc":"If turned On Volumio will ReplayGain information from Tags. Default is Off.",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN_ENABLED",
+          "value":false
+        },
+
+        {
+          "id": "replaygain_mode",
+          "element": "select",
+          "doc":"If specified, Volumio will adjust the volume of songs played using ReplayGain tags",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN_MODE",
+          "value":  {
+            "value":"off",
+            "label": "off"
+          },
+          "visibleIf": {
+            "field": "replaygain_enabled",
+            "value": true
+          },
+          "options": [
+            {
+              "value":"off",
+              "label": "off"
+            },
+            {
+              "value":"album",
+              "label": "album"
+            },
+            {
+              "value":"track",
+              "label": "track"
+            },
+            {
+              "value":"auto",
+              "label": "auto"
+            }
+          ]
+        },
+
+        {
+          "id": "replaygain_preamp",
+          "element": "select",
+          "doc":"This is the gain (in dB) applied to songs with ReplayGain tags.",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN_PREAMP",
+          "value":  {
+            "value":0,
+            "label": "0"
+          },
+          "visibleIf": {
+            "field": "replaygain_enabled",
+            "value": true
+          },
+          "options": [
+            {
+              "value":-15,
+              "label": "-15"
+            },
+            {
+              "value":-14,
+              "label": "-14"
+            },
+            {
+              "value":-13,
+              "label": "-13"
+            },
+            {
+              "value":-12,
+              "label": "-12"
+            },
+            {
+              "value":-11,
+              "label": "-11"
+            },
+            {
+              "value":-10,
+              "label": "-10"
+            },
+            {
+              "value":-5,
+              "label": "-5"
+            },
+            {
+              "value":-4,
+              "label": "-4"
+            },
+            {
+              "value":-3,
+              "label": "-3"
+            },
+            {
+              "value":-2,
+              "label": "-2"
+            },
+            {
+              "value":-1,
+              "label": "-1"
+            },
+            {
+              "value":0,
+              "label": "0"
+            },
+            {
+              "value":1,
+              "label": "1"
+            },
+            {
+              "value":2,
+              "label": "2"
+            },
+            {
+              "value":3,
+              "label": "3"
+            },
+            {
+              "value":4,
+              "label": "4"
+            },
+            {
+              "value":5,
+              "label": "5"
+            },
+            {
+              "value":6,
+              "label": "6"
+            },
+            {
+              "value":7,
+              "label": "7"
+            },
+            {
+              "value":8,
+              "label": "8"
+            },
+            {
+              "value":9,
+              "label": "9"
+            },
+            {
+              "value":10,
+              "label": "10"
+            },
+            {
+              "value":11,
+              "label": "11"
+            },
+            {
+              "value":12,
+              "label": "12"
+            },
+            {
+              "value":13,
+              "label": "13"
+            },
+            {
+              "value":14,
+              "label": "14"
+            },
+            {
+              "value":15,
+              "label": "15"
+            }
+          ]
+        },
+
+        {
+          "id": "replaygain_limit",
+          "element": "switch",
+          "doc":"If enabled Volumio will never amplify an audio signal above its original level. Default is On.",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.REPLAYGAIN_LIMIT",
+          "value":true,
+          "visibleIf": {
+            "field": "replaygain_enabled",
+            "value": true
+          }
         },
 
         {
