@@ -608,6 +608,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 		}
 	});
 
+
     return libQ.resolve();
 };
 
@@ -1428,46 +1429,18 @@ ControllerMpd.prototype.updateQueue = function () {
 
 ControllerMpd.prototype.getAlbumArt = function (data, path,icon) {
 
-	var artist, album;
-
-	if (data != undefined && data.path != undefined) {
-		path = this.sanitizeUri(data.path);
-	}
-
-	var web;
-
-	if (data != undefined && data.artist != undefined) {
-		artist = data.artist;
-		if (data.album != undefined)
-			album = data.album;
-		else album = data.artist;
-
-		web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
-	}
-
-	var url = '/albumart';
-
-	if (web != undefined)
-		url = url + web;
-
-	if (web != undefined && path != undefined)
-		url = url + '&';
-	else if (path != undefined)
-		url = url + '?';
-
-	if (path != undefined)
-		url = url + 'path=' + nodetools.urlEncode(path);
-
-    if(icon!==undefined)
+    if(this.albumArtPlugin==undefined)
     {
-        if(url==='/albumart')
-            url=url+'?icon='+icon;
-        else url=url+'&icon='+icon;
+        //initialization, skipped from second call
+        this.albumArtPlugin=  this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
     }
 
-
-
-    return url;
+    if(this.albumArtPlugin)
+        return this.albumArtPlugin.getAlbumArt(data,path,icon);
+    else
+    {
+        return "/albumart";
+    }
 };
 
 
