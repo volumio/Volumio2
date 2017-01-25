@@ -757,13 +757,13 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	//fixing dop
 	if (self.config.get('dop') == null) {
-		self.config.addConfigValue('dop', 'boolean', true);
+		self.config.addConfigValue('dop', 'boolean', data['dop']);
 	} else {
 		self.config.set('dop', data['dop']);
 	}
 
 	if (self.config.get('persistent_queue') == null) {
-		self.config.addConfigValue('persistent_queue', 'boolean', true);
+		self.config.addConfigValue('persistent_queue', 'boolean', data['persistent_queue']);
 	} else {
 		self.config.set('persistent_queue', data['persistent_queue']);
 	}
