@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var execSync = require('child_process').execSync;
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
@@ -17,16 +18,30 @@ function CorePlayQueue(commandRouter, stateMachine) {
     this.defaultChannels=0;
 
     //trying to read play queue from file
-    fs.readJson('/data/queue', function (err, queue) {
-        if(err)
-            self.commandRouter.logger.info("Cannot read play queue form file");
-        else
-        {
-            self.commandRouter.logger.info("Reloading queue from file");
-            //self.commandRouter.logger.info(queue);
-            self.arrayQueue=queue;
-        }
-    })
+	var persistentqueue = this.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'persistent_queue');
+	if (persistentqueue == undefined) {
+		persistentqueue = true;
+	}
+
+	if (persistentqueue) {
+		fs.readJson('/data/queue', function (err, queue) {
+			if(err)
+				self.commandRouter.logger.info("Cannot read play queue form file");
+			else
+			{
+				self.commandRouter.logger.info("Reloading queue from file");
+				//self.commandRouter.logger.info(queue);
+				self.arrayQueue=queue;
+			}
+		})
+	} else {
+		exec('echo "" > /data/queue', function (error, stdout, stderr) {
+			if (error !== null) {
+				console.log('Cannot empty queue');
+			}
+		});
+	}
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------

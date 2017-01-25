@@ -12,6 +12,7 @@ var parser = require('cue-parser');
 var mm = require('musicmetadata');
 var os = require('os');
 var execSync = require('child_process').execSync;
+var ignoreupdate = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -650,26 +651,35 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
-        self.logger.info('Mpd Status Update: '+status);
-		self.logStart('MPD announces state update')
-			.then(self.getState.bind(self))
-			.then(self.pushState.bind(self))
-			.fail(self.pushError.bind(self))
-			.done(function () {
-				return self.logDone(timeStart);
-			});
+		if (!ignoreupdate) {
+			self.logger.info('Mpd Status Update: '+status);
+			self.logStart('MPD announces state update')
+				.then(self.getState.bind(self))
+				.then(self.pushState.bind(self))
+				.fail(self.pushError.bind(self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
+
 	});
 
 
 	self.clientMpd.on('system-playlist', function () {
 		var timeStart = Date.now();
 
+		if (!ignoreupdate) {
 		self.logStart('MPD announces system state update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
 				return self.logDone(timeStart);
 			});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
 	});
 
 	//Notify that The mpd DB has changed
@@ -680,13 +690,16 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 
 	self.clientMpd.on('system-update', function () {
-
+		if (!ignoreupdate) {
 		 self.sendMpdCommand('status', [])
 			.then(function (objState) {
 				var state = self.parseState(objState);
 				execSync("/bin/sync", { uid: 1000, gid: 1000});
 				return self.commandRouter.fileUpdate(state.updatedb);
 			});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
 	});
 };
 
@@ -744,9 +757,15 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	//fixing dop
 	if (self.config.get('dop') == null) {
-		self.config.addConfigValue('dop', 'boolean', true);
+		self.config.addConfigValue('dop', 'boolean', data['dop']);
 	} else {
 		self.config.set('dop', data['dop']);
+	}
+
+	if (self.config.get('persistent_queue') == null) {
+		self.config.addConfigValue('persistent_queue', 'boolean', data['persistent_queue']);
+	} else {
+		self.config.set('persistent_queue', data['persistent_queue']);
 	}
 
 
@@ -761,11 +780,12 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.error('Cannot restart MPD: ' + error);
-					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
+					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVE_ERROR'));
 				}
-				else
-					//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
-
+				else{
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+				}
+				
 				defer.resolve({});
 			});
 		}
@@ -2445,7 +2465,8 @@ ControllerMpd.prototype.listAlbums = function () {
                     {
                         var artistName=lines[i+1].slice(7).trim();
 
-                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                        var codedAlbumName = nodetools.urlEncode(albumName);
+                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + codedAlbumName};
 
                         response.navigation.lists[0].items.push(album);
                     }
@@ -2984,3 +3005,6 @@ ControllerMpd.prototype.goto=function(data){
 
 }
 
+ControllerMpd.prototype.ignoreUpdate=function(data){
+	ignoreupdate = data;
+}

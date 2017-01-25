@@ -32,6 +32,14 @@ CoreStateMachine.prototype.getState = function () {
     if(this.isVolatile)
     {
 		// Here we are in volatile state mode, so we do not take playback informations from the queue but rather from the volatileState
+		if (this.volatileState.stream === undefined) {
+			this.volatileState.stream = false;
+		}
+
+		if (this.volatileState.trackType === undefined) {
+			this.volatileState.trackType = '';
+		}
+
         return {
             status: this.volatileState.status,
             title: this.volatileState.title,
@@ -50,9 +58,10 @@ CoreStateMachine.prototype.getState = function () {
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
-            stream: false,
+            stream: this.volatileState.stream,
             updatedb: false,
 			volatile: true,
+			trackType: this.volatileState.trackType,
             service: this.volatileState.service
         };
     }

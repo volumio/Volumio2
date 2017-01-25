@@ -385,11 +385,27 @@ ControllerSystem.prototype.setTestSystem = function (data) {
 
 
 ControllerSystem.prototype.sendBugReport = function (message) {
-    for (var key in message) {
-        console.log("BUG: " + key + " - " + message[key]);
-        fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
-    }
-    exec('sudo systemctl start logondemand');
+	var self = this;
+
+	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
+		message.text = 'No info available';
+	}
+	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
+	exec('/usr/local/bin/node /volumio/logsubmit.js "'+ message.text+'"', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			self.logger.info('Canot send bug report: ' + error);
+		} else {
+			self.logger.info('Log sent successfully, reply: '+stdout);
+			//if (stdout != undefined && stdout.status != undefined && stdout.status == 'OK' && stdout.link != undefined ) {
+				return self.commandRouter.broadcastMessage('pushSendBugReport', stdout);
+			//}
+
+
+
+
+		}
+	});
+
 };
 
 ControllerSystem.prototype.deleteUserData = function () {

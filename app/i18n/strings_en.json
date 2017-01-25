@@ -32,7 +32,9 @@
 	"DSP_PROGRAM_ENABLED": "DSP Program Enabled",
 	"DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required",
 	"NO_AUDIO_DEVICE_AVAILABLE": "No Audio Device Available",
-	"SETTING_ERROR":"Error"
+	"SETTING_ERROR":"Error",
+	"PERSISTENT_QUEUE":"Persistent queue",
+	"PERSISTENT_QUEUE_DOC":"If enabled the Playqueue will be stored accross reboot, if disabled the play queue will be cleared at every system start"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -106,7 +108,9 @@
     "CANCEL":"Cancel",
     "NONE":"None",
     "LAST_100":"last 100",
-	"CONTINUE":"Continue"
+	"CONTINUE":"Continue",
+	"SETTINGS_SAVED_SUCCESSFULLY":"Settings saved successfully",
+	"SETTINGS_SAVE_ERROR":"Error in saving settings"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
