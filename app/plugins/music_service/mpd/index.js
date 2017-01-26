@@ -2424,7 +2424,7 @@ ControllerMpd.prototype.listAlbums = function () {
     };
 
     var cmd = libMpd.cmd;
-    self.clientMpd.sendCommand(cmd("list", ["album","group","artist"]), function (err, msg) {
+    self.clientMpd.sendCommand(cmd("list", ["album","group","albumartist"]), function (err, msg) {
         if(err)
             defer.reject(new Error('Cannot list albums'));
         else
@@ -2439,7 +2439,7 @@ ControllerMpd.prototype.listAlbums = function () {
 
                     if(albumName!==undefined && albumName!=='')
                     {
-                        var artistName=lines[i+1].slice(7).trim();
+                        var artistName=lines[i+1].slice(13).trim();
 
                         var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
 
