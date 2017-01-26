@@ -299,6 +299,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
+		var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
@@ -306,8 +307,8 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			var trackBlock = this.getTrack(this.currentPosition);
 
             var nextIndex=this.currentPosition+1;
-// First check if Repeat mode is on, note that Random and Consume overides Repeat
-						if(this.currentRepeat && ((this.playQueue.arrayQueue.length-1)==this.currentPosition)!== this.currentConsume)
+// Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
+						if(this.currentRepeat && isLastTrack !== this.currentConsume)
 							{
 								nextIndex=0;
 							}
@@ -347,8 +348,8 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                 if(this.currentRandom)
                     this.currentPosition=this.nextRandomIndex;
                 else
-								// Handles if repeat mode is on and Consume is not on
-									if(this.currentRepeat && ((this.playQueue.arrayQueue.length-1)==this.currentPosition) !== this.currentConsume)
+						//if repeat mode is on and the last track is playing and Consume is not on
+									if(this.currentRepeat && isLastTrack !== this.currentConsume)
 										{
 											this.currentPosition=0;
 										}
