@@ -275,6 +275,14 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
+			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue', true);
+			if (value == undefined) {
+				value = true
+			}
+			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+
 			value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), value));
@@ -299,8 +307,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				self.configManager.setUIConfigParam(uiconf, 'sections[1].hidden', false);
 				for (var w = 0; w < dspoptions.length; w++) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].saveButton.data', dspoptions[w].name);
-					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
+					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , hidden:false, value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].content', dspconf);
+					if ((dspoptions[w].name == 'Subwoofer mode') && (dspoptions[w].value == '  2.0')) {
+						uiconf.sections[1].content[0].hidden = true;
+					}
 
 					for (var r in dspoptions[w].options) {
 						self.configManager.pushUIConfigParam(uiconf, 'sections[1].content['+w+'].options', {
@@ -311,7 +322,6 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 				}
 			}
-
 
 			defer.resolve(uiconf);
 		})
@@ -444,7 +454,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 	if (data.output_device.label != undefined) {
 		data.output_device.label = data.output_device.label.replace('USB: ', '');
 	}
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 

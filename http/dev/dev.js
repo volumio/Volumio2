@@ -57,18 +57,12 @@ socket.on('disconnect', function() {
 
 	libraryHistory = new Array();
 	nLibraryHistoryPosition = 0;
-	updateLibraryHistoryButtons();
-
 	playlistHistory = new Array();
 	nPlaylistHistoryPosition = 0;
-	updatePlaylistHistoryButtons();
-
-	disableControls();
 	clearPlayQueue();
 	clearBrowseView();
 	clearPlaylistView();
 	clearPlayerStateDisplay();
-	stopPlaybackTimer();
 });
 
 socket.on('pushState', function(state) {
@@ -79,7 +73,6 @@ socket.on('pushState', function(state) {
 	if (state.status === 'play') {
 		startPlaybackTimer(state.seek);
 	} else {
-		stopPlaybackTimer();
 	}
 
 });
@@ -114,6 +107,18 @@ socket.on('pushPlaylistListing', function(objBrowseData) {
 socket.on('printConsoleMessage', function(sMessage) {
 	printConsoleMessage(sMessage);
 });
+
+socket.on('pushSendBugReport', function(data) {
+
+	var json = JSON.parse(data);
+	document.getElementById('bug-form-description').value = json.link;
+	var btn = document.getElementById('bug-form-button');
+	document.getElementById("bug-form-button").style.display = "none";
+	document.getElementById("copy-button").style.display = "inline";
+	document.getElementById("log-message").innerHTML = "Log successfully sent, this is the link to your log file";
+
+});
+
 
 // Define internal functions ----------------------------------------------
 function clearConsole() {
@@ -399,111 +404,33 @@ function clearPlaylistView() {
 	}
 }
 
-function updateLibraryHistoryButtons() {
-	var nHistoryItems = libraryHistory.length;
-
-	if (nHistoryItems <= 1) {
-		document.getElementById('button-libraryback').disabled = true;
-		document.getElementById('button-libraryforward').disabled = true;
-	} else if (nLibraryHistoryPosition <= 0) {
-		document.getElementById('button-libraryback').disabled = true;
-		document.getElementById('button-libraryforward').disabled = false;
-	} else if (nLibraryHistoryPosition >= nHistoryItems - 1) {
-		document.getElementById('button-libraryback').disabled = false;
-		document.getElementById('button-libraryforward').disabled = true;
-	} else {
-		document.getElementById('button-libraryback').disabled = false;
-		document.getElementById('button-libraryforward').disabled = false;
-	}
-}
-
-function libraryForward() {
-	var nHistoryItems = libraryHistory.length;
-
-	if (nHistoryItems <= 1) {
-		nLibraryHistoryPosition = 0;
-	} else if (nLibraryHistoryPosition <= 0) {
-		nLibraryHistoryPosition = 1;
-	} else if (nLibraryHistoryPosition >= nHistoryItems - 1) {
-		nLibraryHistoryPosition = nHistoryItems - 1;
-	} else {
-		nLibraryHistoryPosition++;
-	}
-
-	updateBrowseView(libraryHistory[nLibraryHistoryPosition]);
-	updateLibraryHistoryButtons();
-}
-
-function libraryBack() {
-	var nHistoryItems = libraryHistory.length;
-
-	if (nHistoryItems <= 1) {
-		nLibraryHistoryPosition = 0;
-	} else if (nLibraryHistoryPosition <= 0) {
-		nLibraryHistoryPosition = 0;
-	} else if (nLibraryHistoryPosition >= nHistoryItems - 1) {
-		nLibraryHistoryPosition = nHistoryItems - 2;
-	} else {
-		nLibraryHistoryPosition--;
-	}
-
-	updateBrowseView(libraryHistory[nLibraryHistoryPosition]);
-	updateLibraryHistoryButtons();
-}
-
-function updatePlaylistHistoryButtons() {
-	var nHistoryItems = playlistHistory.length;
-
-	if (nHistoryItems <= 1) {
-		document.getElementById('button-playlistback').disabled = true;
-		document.getElementById('button-playlistforward').disabled = true;
-	} else if (nPlaylistHistoryPosition <= 0) {
-		document.getElementById('button-playlistback').disabled = true;
-		document.getElementById('button-playlistforward').disabled = false;
-	} else if (nPlaylistHistoryPosition >= nHistoryItems - 1) {
-		document.getElementById('button-playlistback').disabled = false;
-		document.getElementById('button-playlistforward').disabled = true;
-	} else {
-		document.getElementById('button-playlistback').disabled = false;
-		document.getElementById('button-playlistforward').disabled = false;
-	}
-}
-
-function playlistForward() {
-	var nHistoryItems = playlistHistory.length;
-
-	if (nHistoryItems <= 1) {
-		nPlaylistHistoryPosition = 0;
-	} else if (nPlaylistHistoryPosition <= 0) {
-		nPlaylistHistoryPosition = 1;
-	} else if (nPlaylistHistoryPosition >= nHistoryItems - 1) {
-		nPlaylistHistoryPosition = nHistoryItems - 1;
-	} else {
-		nPlaylistHistoryPosition++;
-	}
-
-	updatePlaylistView(playlistHistory[nPlaylistHistoryPosition]);
-	updatePlaylistHistoryButtons();
-}
-
-function playlistBack() {
-	var nHistoryItems = playlistHistory.length;
-
-	if (nHistoryItems <= 1) {
-		nPlaylistHistoryPosition = 0;
-	} else if (nPlaylistHistoryPosition <= 0) {
-		nPlaylistHistoryPosition = 0;
-	} else if (nPlaylistHistoryPosition >= nHistoryItems - 1) {
-		nPlaylistHistoryPosition = nHistoryItems - 2;
-	} else {
-		nPlaylistHistoryPosition--;
-	}
-
-	updatePlaylistView(playlistHistory[nPlaylistHistoryPosition]);
-	updatePlaylistHistoryButtons();
-}
-
 function emitEvent(sEvent, sParam1, sParam2) {
 	socket.emit(sEvent, sParam1, sParam2);
 	printConsoleMessage('[Event]: ' + sEvent + ' [Parameters]:' + JSON.stringify(sParam1) + ', ' + JSON.stringify(sParam2));
 }
+
+document.querySelector('form.bug-form').addEventListener('submit', function (e) {
+	//prevent the normal submission of the form
+	var inputBugDesc = document.getElementById('bug-form-description');
+	e.preventDefault();
+	// Emit first and second input value
+	var obj = {
+		text : inputBugDesc.value
+	};
+	socket.emit('callMethod',  {endpoint:'system_controller/system',method:'sendBugReport',data:obj});
+
+});
+
+var clipboardDemos = new Clipboard('[data-clipboard-demo]');
+clipboardDemos.on('success', function(e) {
+	e.clearSelection();
+});
+
+var btns = document.querySelectorAll('.btn');
+for (var i = 0; i < btns.length; i++) {
+	btns[i].addEventListener('mouseleave', function(e) {
+		e.currentTarget.setAttribute('class', 'btn');
+		e.currentTarget.removeAttribute('aria-label');
+	});
+}
+

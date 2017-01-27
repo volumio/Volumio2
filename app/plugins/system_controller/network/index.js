@@ -622,6 +622,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 					hs.write('interface=wlan0\n');
 					hs.write('ssid=' + hotspotname + '\n');
 					hs.write('channel=' + hotspotchannel + '\n');
+					hs.write('driver=nl80211\n');
 					hs.write('hw_mode=g\n');
 					if (config.get('hotspot_protection') == true || config.get('hotspot_protection') == 'true') {
 						hs.write('auth_algs=1\n');
@@ -810,7 +811,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				if (status.ipv4_address == '192.168.211.1') {
-					var wlanstatus = {type: "Wireless", ssid: 'Volumio Hotspot', signal: 5, ip:'192.168.211.1', online: oll}
+					var wlanstatus = {type: "Wireless", ssid: 'Hotspot', signal: 5, ip:'192.168.211.1', online: oll}
 				} else {
 					wlanip = status.ipv4_address;
 					var wlanstatus = {type: "Wireless", ssid: ssid, signal: wirelessquality,ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}

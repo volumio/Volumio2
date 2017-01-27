@@ -12,12 +12,25 @@ var vconf = require('v-conf');
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
 
-	fs.ensureFileSync('/var/log/volumio.log');
+	var logfile = '/var/log/volumio.log';
+
+	fs.ensureFileSync(logfile);
+	fs.watchFile(logfile, function () {
+		fs.stat(logfile, function (err, stats) {
+			if (stats.size > 15728640) {
+				var now = new Date();
+				console.log('******** LOG FILE REACHED 15MB IN SIZE, CLEANING IT ********');
+				fs.writeFile(logfile, '------------------- Log Cleaned at '+ now + ' -------------------', function(){
+					console.log('******** LOG FILE SUCCESSFULLY CLEANED ********');
+				})
+			}
+		});
+	});
 	this.logger = new (winston.Logger)({
 		transports: [
 			new (winston.transports.Console)(),
 			new (winston.transports.File)({
-				filename: '/var/log/volumio.log',
+				filename: logfile,
 				json: false
 			})
 		]
@@ -756,7 +769,6 @@ CoreCommandRouter.prototype.restoreFavouritesBackup = function (type) {
 
 /**
  * restores the playlist specified in req.type, given the data in req.backup and the eventual
- * path (for default playlists) in req.path
  * @param req
  */
 CoreCommandRouter.prototype.restorePlaylist = function (req) {
@@ -773,19 +785,30 @@ CoreCommandRouter.prototype.restorePlaylist = function (req) {
 			fs.outputJsonSync(path + name, songs);
 		}
 	}
-	else if(req.type == "songs" || req.type == "radios" || req.type == "myRadios"){
-		path = self.playListManager.favouritesPlaylistFolder + req.path;
+	else if(req.type == "favourites" || req.type == "radio-favourites" ||
+		req.type == "my-web-radio"){
+		path = self.playListManager.favouritesPlaylistFolder + req.type;
 		try{
 			var fav = fs.readJsonSync(path);
 			backup = self.mergePlaylists(backup, fav);
 		}catch(e){
-			self.logger.info("Backup: no previous favourite " + req.type);
+			self.logger.info("Backup: no existing playlist for selected category");
 		};
-		self.logger.info("Backup: restoring " + req.type + " favourites");
+		self.logger.info("Backup: restoring " + req.type + "!");
 		fs.outputJsonSync(path, backup);
 	}
 	else
 		self.logger.info("Backup: impossible to restore data");
+}
+
+CoreCommandRouter.prototype.getPath = function (type){
+	if(type == "songs")
+		return "favourites";
+	else if (type == "radios")
+		return "radio-favourites";
+	else if (type == "myRadios")
+		return "my-web-radio";
+	return "";
 }
 
 /**
