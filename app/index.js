@@ -1261,9 +1261,9 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
 	return this.stateMachine.setRandom(data);
 };
 
-CoreCommandRouter.prototype.volumioRepeat = function (data) {
+CoreCommandRouter.prototype.volumioRepeat = function (repeat,repeatSingle) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
-	return this.stateMachine.setRepeat(data);
+	return this.stateMachine.setRepeat(repeat,repeatSingle);
 };
 
 CoreCommandRouter.prototype.volumioConsume = function (data) {
