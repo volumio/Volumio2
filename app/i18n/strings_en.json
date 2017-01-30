@@ -163,7 +163,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"System settings updated successfully",
     "SYSTEM_NAME":"System Name",
     "SYSTEM_NAME_ERROR":"Cannot change system name",
-    "SYSTEM_NAME_NOW":"System name is now"
+    "SYSTEM_NAME_NOW":"System name is now",
+	"UPDATE_ALREADY_LATEST_VERSION":"You're already on the latest version",
+	"NO_UPDATE_AVAILABLE":"No Updates Available"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
