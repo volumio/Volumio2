@@ -32,7 +32,9 @@
     "DSP_PROGRAM_ENABLED": "DSP activé",
     "DSP_PROGRAM_REBOOT": "Modifcation DSP,un redémarrrage est  nécéssaire",
     "NO_AUDIO_DEVICE_AVAILABLE": "Aucun périphérique adio disponible",
-    "SETTING_ERROR":"Erreur"
+    "SETTING_ERROR":"Erreur",
+    "PERSISTENT_QUEUE":"File d'attente persistante",
+  	"PERSISTENT_QUEUE_DOC":"Si activé, la file d'attente sera conservéé après un reboot, sinon elle sera éffacée"
   	  },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
@@ -106,7 +108,9 @@
     "CANCEL":"Annuler",
     "NONE":"Aucun",
     "LAST_100":"100 dernières",
-    "CONTINUE":"Continuer"
+    "CONTINUE":"Continuer",
+    "SETTINGS_SAVED_SUCCESSFULLY":"Réglages sauvés avec succcès",
+    "SETTINGS_SAVE_ERROR":"Erreur en sauvant les réglages"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -159,7 +163,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"Systeme mis à jour avec succès",
     "SYSTEM_NAME":"Nom du système",
     "SYSTEM_NAME_ERROR":"Impossible de changer le nom du système",
-    "SYSTEM_NAME_NOW":"Le nom du système est désormais"
+    "SYSTEM_NAME_NOW":"Le nom du système est désormais",
+    "UPDATE_ALREADY_LATEST_VERSION":"Vous avez déja la dernière version",
+    "NO_UPDATE_AVAILABLE":"Pas de mise à jour disponible"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
