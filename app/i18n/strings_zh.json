@@ -81,7 +81,14 @@
     "MUSIC_LIBRARY":"音乐库",
     "ARTISTS":"艺术家",
     "ALBUMS":"专辑",
-    "GENRES":"音乐题材"
+    "GENRES":"音乐题材",
+    "TRACKS":"Tracks",
+    "CANCEL":"取消",
+    "NONE":"无",
+    "LAST_100":"last 100",
+	  "CONTINUE":"继续",
+	  "SETTINGS_SAVED_SUCCESSFULLY":"保存设置成功",
+	  "SETTINGS_SAVE_ERROR":"保存设置时发生错误"
   },
   "APPEARANCE":{
     "APPEARANCE":"外观",
@@ -133,7 +140,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"系统配置成功更新",
     "SYSTEM_NAME":"系统名称",
     "SYSTEM_NAME_ERROR":"无法更改系统名称",
-    "SYSTEM_NAME_NOW":"系统名称已更改"
+    "SYSTEM_NAME_NOW":"系统名称已更改",
+    "UPDATE_ALREADY_LATEST_VERSION":"您的设备已经是最新版本。",
+	  "NO_UPDATE_AVAILABLE":"无法升级"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"我的网络电台",
