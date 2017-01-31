@@ -132,7 +132,7 @@
     "SLEEP_MODE_IN":"in",
     "SLEEP_MODE_MINUTE":"minuti",
     "SLEEP_MODE_HOUR":"ore",
-    "STOP_MUSIC":"fermerà la musica",
+    "STOP_MUSIC":"Ferma la musica",
     "TURN_OFF":"Spegni"
   },
   "SYSTEM":{
