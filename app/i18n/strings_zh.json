@@ -80,15 +80,17 @@
     "PLAYLISTS":"播放列表",
     "MUSIC_LIBRARY":"音乐库",
     "ARTISTS":"艺术家",
+    "ARTIST":"艺术家",
     "ALBUMS":"专辑",
+    "ALBUM":"专辑",
     "GENRES":"音乐题材",
-    "TRACKS":"Tracks",
+    "TRACKS":"曲目",
     "CANCEL":"取消",
     "NONE":"无",
     "LAST_100":"last 100",
-	  "CONTINUE":"继续",
-	  "SETTINGS_SAVED_SUCCESSFULLY":"保存设置成功",
-	  "SETTINGS_SAVE_ERROR":"保存设置时发生错误"
+    "CONTINUE":"继续",
+    "SETTINGS_SAVED_SUCCESSFULLY":"保存设置成功",
+    "SETTINGS_SAVE_ERROR":"保存设置时发生错误"
   },
   "APPEARANCE":{
     "APPEARANCE":"外观",
