@@ -32,6 +32,14 @@ CoreStateMachine.prototype.getState = function () {
     if(this.isVolatile)
     {
 		// Here we are in volatile state mode, so we do not take playback informations from the queue but rather from the volatileState
+		if (this.volatileState.stream === undefined) {
+			this.volatileState.stream = false;
+		}
+
+		if (this.volatileState.trackType === undefined) {
+			this.volatileState.trackType = '';
+		}
+
         return {
             status: this.volatileState.status,
             title: this.volatileState.title,
@@ -50,9 +58,10 @@ CoreStateMachine.prototype.getState = function () {
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
-            stream: false,
+            stream: this.volatileState.stream,
             updatedb: false,
 			volatile: true,
+			trackType: this.volatileState.trackType,
             service: this.volatileState.service
         };
     }
@@ -300,29 +309,38 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
 		var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
+
 		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
+			var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
+			var isLastTrack=(this.playQueue.arrayQueue.length-1) == this.currentPosition;
 
             var nextIndex=this.currentPosition+1;
-// Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
-						if(this.currentRepeat && isLastTrack !== this.currentConsume)
+//if Repeat mode is on and last track is played, then next track will be the first track
+						if(!this.currentRandom && this.currentRepeat && isLastTrack)
 							{
 								nextIndex=0;
 							}
-// Then check if Random mode is on - Random mode overrides Repeat mode by this
+// if Random mode is on - Random mode overrides Repeat mode by this
 						if(this.currentRandom)
-            {
-                nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+              {
+								nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+								// if random() picks current track, better to pick another one, also because otherwise Consume mode will delete the track that is going to be played
+								while((nextIndex == this.currentPosition) && !isOnlyTrack)
+								{
+									nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+								}
                 this.nextRandomIndex=nextIndex;
-            }
+	            }
 
             var nextTrackBlock = this.getTrack(nextIndex);
-			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
+
+				if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
-				this.logger.info("Prefetching next song");
+        this.logger.info("Prefetching next song");
 
 				var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 				if(plugin.prefetch!==undefined)
@@ -338,18 +356,48 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
+			var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
+			var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 
             if(this.currentConsume)
             {
-                this.playQueue.removeQueueItem({value:this.currentPosition});
-            }
-            else
+             if (isOnlyTrack)
+             {
+							 // Current queue holds one track only, stop and remove, Consume is done
+              this.stop();
+              this.playQueue.removeQueueItem({value:this.currentPosition});
+             }
+						 else
+						 {
+               var deletePosition=this.currentPosition
+
+							 this.playQueue.removeQueueItem({value:this.currentPosition});
+
+							 if(!this.currentRandom && this.currentRepeat && isLastTrack)
+							 	{
+									this.currentPosition=0;
+								}
+ 							if(this.currentRandom)
+ 							 {
+ 								if (this.nextRandomIndex < deletePosition)
+								  { //removed track is after next track in queue, index okay
+									this.currentPosition=this.nextRandomIndex;
+								  }
+								else
+								  {//removed track is before next track, need to adjust the index
+								  this.currentPosition=this.nextRandomIndex-1;
+								  }
+						    }
+					     }
+				      }
+				 else
             {
+							// if Random mode only is on set current position to random value, overides Repeat mode
                 if(this.currentRandom)
                     this.currentPosition=this.nextRandomIndex;
                 else
-						//if repeat mode is on and the last track is playing and Consume is not on
-									if(this.currentRepeat && isLastTrack !== this.currentConsume)
+						  //if Repeat mode only is on and the last track was playing set current position to first track
+									if(this.currentRepeat && isLastTrack)
 										{
 											this.currentPosition=0;
 										}
@@ -361,7 +409,6 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
             this.askedForPrefetch=false;
 			this.pushState.bind(this);
-
 			this.startPlaybackTimer();
 
 		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
@@ -1029,12 +1076,12 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 };
 
 CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
 
 	if(this.currentPosition==nIndex)
 	{
 		this.next();
 		this.currentPosition--;
+		this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
 	}
 
 	return this.playQueue.removeQueueItem(nIndex);
