@@ -11,10 +11,19 @@ var libQ = require('kew');
 
 function updater_comm(context) {
 	var self = this;
+
+	// Save a reference to the parent commandRouter
+	self.context = context;
+	self.commandRouter = self.context.coreCommand;
+	self.configManager=self.context.configManager;
+	self.logger = self.context.logger;
 }
 
 
 updater_comm.prototype.onVolumioStart = function () {
+	var self=this;
+	var lang_code = self.commandRouter.sharedVars.get('language_code');
+
 	io.sockets.on('connection', function (socket) {
 		var sachet = socket
 		socket.on("update", function (msg, data) {
@@ -66,6 +75,10 @@ updater_comm.prototype.onVolumioStart = function () {
 					if (arr.length > 1) {
 						var message = arr[0];
 						var obj = JSON.parse(arr[1]);
+						if (obj != undefined && obj.updateavailable != undefined && !obj.updateavailable) {
+							obj.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
+							obj.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
+						}
 						sachet.emit(message, obj)
 					}
 				});

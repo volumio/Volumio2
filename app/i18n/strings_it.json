@@ -132,7 +132,7 @@
     "SLEEP_MODE_IN":"in",
     "SLEEP_MODE_MINUTE":"minuti",
     "SLEEP_MODE_HOUR":"ore",
-    "STOP_MUSIC":"fermerà la musica",
+    "STOP_MUSIC":"Ferma la musica",
     "TURN_OFF":"Spegni"
   },
   "SYSTEM":{
@@ -155,7 +155,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"Impostazioni di sistema aggiornate",
     "SYSTEM_NAME":"Nome di sistema",
     "SYSTEM_NAME_ERROR":"Impossibile cambiare il nome di sistema",
-    "SYSTEM_NAME_NOW":"Il nome del sistema è ora"
+    "SYSTEM_NAME_NOW":"Il nome del sistema è ora",
+	"UPDATE_ALREADY_LATEST_VERSION":"La versione attuale è la più recente",
+	"NO_UPDATE_AVAILABLE":"Nessun aggiornamento disponibile"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",
