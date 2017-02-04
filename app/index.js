@@ -1271,6 +1271,20 @@ CoreCommandRouter.prototype.volumioConsume = function (data) {
 	return this.stateMachine.setConsume(data);
 };
 
+/**
+ * This method implements Fast Forward and Rewind, depending on the sign of method parameter.
+ * Return a promise
+ */
+CoreCommandRouter.prototype.volumioFFWDRew = function (millisecs) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioFFWDRew '+millisecs);
+
+    return this.stateMachine.ffwdRew(millisecs);
+};
+
+
+
+
+
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
 	var self=this;
     this.pushConsoleMessage('CoreCommandRouter::volumioSaveQueueToPlaylist');

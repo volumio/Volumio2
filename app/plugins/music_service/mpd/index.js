@@ -3008,3 +3008,36 @@ ControllerMpd.prototype.goto=function(data){
 ControllerMpd.prototype.ignoreUpdate=function(data){
 	ignoreupdate = data;
 }
+
+
+ControllerMpd.prototype.ffwdRew=function(millisecs){
+    var self = this;
+
+    var defer = libQ.defer();
+
+    var cmd = libMpd.cmd;
+    var delta=millisecs/1000;
+
+    var param;
+
+    if(delta>0)
+    {
+        param='+'+delta;
+    }
+    else
+    {
+        param=delta;
+    }
+
+    console.log("PARAM: "+param);
+
+    self.clientMpd.sendCommand(cmd("seekcur", [param]), function (err, msg) {
+        if(err)
+            defer.reject(new Error('Cannot seek '+millisecs));
+        else
+        {
+            defer.resolve();
+        }
+    });
+    return defer.promise;
+};
