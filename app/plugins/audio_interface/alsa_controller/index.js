@@ -186,20 +186,20 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 						self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 							value: 'Hardware',
-							label: 'Hardware'
+							label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE')
 						});
 
 				} else if ((mixers.length > 0 ) && (mixers[0] != 'SoftMaster') && (activemixer != 'SoftMaster' )) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 					value: 'Hardware',
-					label: 'Hardware'
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE')
 					});
 				}
 
 			}
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 				value: 'Software',
-				label: 'Software'
+				label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
 			});
 
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {

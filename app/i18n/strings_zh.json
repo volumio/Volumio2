@@ -24,7 +24,11 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"已经启用, 重新启动生效",
     "I2S_DAC_DEACTIVATED":"禁用I2S DAC",
     "I2S_DAC_DEACTIVATED_MESSAGE":"已经禁用, 重新启动生效",
-	"DOP":"DSD over PCM (DoP)"
+	  "DOP":"DSD over PCM (DoP)",
+    "SOFTVOL":"软件控制",
+    "MIXER_CONTROL_NAME":"调节控制名e",
+    "MIXER_TYPE":"调节类型",
+    "SOFTWARE":"软件控制"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"网络设定",
