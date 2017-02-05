@@ -362,9 +362,9 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('setRepeat', function (data) {
 				//TODO add proper service handler
 				var timeStart = Date.now();
-				self.logStart('Client requests Volumio Repeat ' + data.value)
+				self.logStart('Client requests Volumio Repeat ' + data.value+' single '+data.repeatSingle)
 					.then(function () {
-                        return self.commandRouter.volumioRepeat(data.value);
+                        return self.commandRouter.volumioRepeat(data.value,data.repeatSingle);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
