@@ -972,6 +972,20 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 	}
 };
 
+CoreStateMachine.prototype.ffwdRew = function (millisecs) {
+
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::ffwdRew');
+
+    var trackBlock = this.getTrack(this.currentPosition);
+
+
+    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+    if(thisPlugin && thisPlugin.ffwdRew)
+        return thisPlugin.ffwdRew(millisecs);
+    else libQ.resolve();
+};
+
+
 // Pause the current track block playback
 CoreStateMachine.prototype.servicePause = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::servicePause');
