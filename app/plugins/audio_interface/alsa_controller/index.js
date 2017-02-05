@@ -175,10 +175,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].element', 'select');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
-
+			if (activemixer_type == 'None') {
+				var activemixer_type_lang = self.commandRouter.getI18nString('COMMON.NONE');
+			} else if (activemixer_type == 'Software'){
+				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE');
+			} else if (activemixer_type == 'Hardware'){
+				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE');
+			} else {
+				var activemixer_type_lang = activemixer_type;
+			}
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', {
 				value: activemixer_type,
-				label: activemixer_type
+				label: activemixer_type_lang
 			});
 
 			if ((typeof mixers != "undefined") || ( mixers != null )) {
