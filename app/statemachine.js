@@ -170,7 +170,7 @@ CoreStateMachine.prototype.clearQueue = function () {
 
 
 // Volumio Stop Command
-CoreStateMachine.prototype.stop = function (promisedResponse) {
+/*CoreStateMachine.prototype.stop = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
 
 	if (this.currentStatus === 'play') {
@@ -188,7 +188,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		return this.serviceStop();
 	}
 	else return libQ.resolve();
-};
+};*/
 
 // Volumio Pause Command
 CoreStateMachine.prototype.pause = function (promisedResponse) {
@@ -856,11 +856,11 @@ CoreStateMachine.prototype.getTrack = function (position) {
 CoreStateMachine.prototype.play = function (index) {
 	var self=this;
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play index '+index);
 
-	if (index) {
-		self.currentPosition=index;
-	}
+	//if (index) {
+	//	self.currentPosition=index;
+	//}
 
 	return self.setConsumeUpdateService(undefined)
 		.then(function()
@@ -986,6 +986,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
 
 	self.setConsumeUpdateService(undefined);
+	self.unSetVolatile();
 
 	if (this.currentStatus === 'play') {
 		// Play -> Stop transition

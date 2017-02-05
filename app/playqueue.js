@@ -161,7 +161,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
                 if(self.arrayQueue.length>0)
                 {
-                    if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
+                    //if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
                         self.arrayQueue = self.arrayQueue.concat(content[j]);
                 }
                 else  self.arrayQueue = self.arrayQueue.concat(content[j]);
