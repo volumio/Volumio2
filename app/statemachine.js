@@ -10,7 +10,10 @@ function CoreStateMachine(commandRouter) {
 	this.commandRouter = commandRouter;
 
 	this.currentPosition=0;
+	this.nextIndex=undefined;
 	this.currentConsume=false;
+    this.currentRepeat=false;
+    this.currentRepeatSingleSong=false;
 	this.prefetchDone=false;
 	this.askedForPrefetch=false;
 	this.simulateStopStartDone=false;
@@ -55,6 +58,7 @@ CoreStateMachine.prototype.getState = function () {
             channels: this.volatileState.channels,
             random: false,
             repeat: false,
+            repeatSingle:false,
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
@@ -89,6 +93,7 @@ CoreStateMachine.prototype.getState = function () {
                 mute: this.currentMute,
                 random:this.currentRandom,
                 repeat: this.currentRepeat,
+                repeatSingle: this.currentRepeatSingleSong,
                 updatedb: this.currentUpdate,
                 consume: this.currentConsume
             };
@@ -115,6 +120,7 @@ CoreStateMachine.prototype.getState = function () {
                 channels: trackBlock.channels,
                 random: this.currentRandom,
                 repeat: this.currentRepeat,
+                repeatSingle: this.currentRepeatSingleSong,
                 consume: this.currentConsume,
                 volume: this.currentVolume,
                 mute: this.currentMute,
@@ -165,7 +171,7 @@ CoreStateMachine.prototype.clearQueue = function () {
 
 
 // Volumio Stop Command
-CoreStateMachine.prototype.stop = function (promisedResponse) {
+/*CoreStateMachine.prototype.stop = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
 
 	if (this.currentStatus === 'play') {
@@ -183,7 +189,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		return this.serviceStop();
 	}
 	else return libQ.resolve();
-};
+};*/
 
 // Volumio Pause Command
 CoreStateMachine.prototype.pause = function (promisedResponse) {
@@ -257,6 +263,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentChannels = null;
 			self.currentRandom = null;
 			self.currentRepeat = null;
+			this.currentRepeatSingleSong = null;
 			self.currentVolume = null;
 			self.currentMute = null;
 			self.currentUpdate = false;
@@ -308,39 +315,43 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
-
 		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
-			var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
-			var isLastTrack=(this.playQueue.arrayQueue.length-1) == this.currentPosition;
+			var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 
-            var nextIndex=this.currentPosition+1;
-//if Repeat mode is on and last track is played, then next track will be the first track
-						if(!this.currentRandom && this.currentRepeat && isLastTrack)
+			//default play mode, sequentially played, next track is the next one in the queue
+			this.nextIndex=this.currentPosition+1;
+
+			// Repeat play mode: if the last track is played the next track has to be the first
+			if(this.currentRepeat && isLastTrack)
 							{
-								nextIndex=0;
+								this.nextIndex=0;
 							}
-// if Random mode is on - Random mode overrides Repeat mode by this
-						if(this.currentRandom)
-              {
-								nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-								// if random() picks current track, better to pick another one, also because otherwise Consume mode will delete the track that is going to be played
-								while((nextIndex == this.currentPosition) && !isOnlyTrack)
-								{
-									nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-								}
-                this.nextRandomIndex=nextIndex;
-	            }
 
-            var nextTrackBlock = this.getTrack(nextIndex);
+			//Random play mode: Consume mode will work better if the same track is not picked twice in a row
+			if(this.currentRandom)
+						{
+							var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
+							var newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+							while((newIndex == this.currentPosition) && !isOnlyTrack)
+							{
+								newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+							}
+							this.nextRandomIndex=newIndex;// also used by syncState
+							this.nextIndex=newIndex;// only used in this method
+						}
 
-				if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
+			//Repeat of a single track play mode: (a new mode) next track is the same track as played
+			if(this.currentRepeat && this.currentRepeatSingleSong)
+										this.nextIndex=this.currentPosition;
+
+            var nextTrackBlock = this.getTrack(this.nextIndex);
+			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
-        this.logger.info("Prefetching next song");
+				this.logger.info("Prefetching next song");
 
 				var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 				if(plugin.prefetch!==undefined)
@@ -356,60 +367,50 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
-			var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
-			var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 
-            if(this.currentConsume)
-            {
-             if (isOnlyTrack)
-             {
-							 // Current queue holds one track only, stop and remove, Consume is done
-              this.stop();
-              this.playQueue.removeQueueItem({value:this.currentPosition});
-             }
-						 else
-						 {
-               var deletePosition=this.currentPosition
+			// Consume play mode: a) important that the removed track and the next track are not the same
+			// b) if the removed track is before the next track to be played the currentPosition has to be adjusted
+			if(this.currentConsume)
+			{
+				var deletePosition=this.currentPosition;
+				var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
+				var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
 
-							 this.playQueue.removeQueueItem({value:this.currentPosition});
+				 if (isOnlyTrack || this.currentRepeatSingleSong )
+				 { // current queue holds one track only, stop and remove, Consume is done,
+					 // or if the track is single repeated it will be removed, and the player stops
+					this.stop();
+					this.playQueue.removeQueueItem({value:this.currentPosition});
+					}
+					else
+						{
 
-							 if(!this.currentRandom && this.currentRepeat && isLastTrack)
-							 	{
-									this.currentPosition=0;
-								}
- 							if(this.currentRandom)
- 							 {
- 								if (this.nextRandomIndex < deletePosition)
-								  { //removed track is after next track in queue, index okay
-									this.currentPosition=this.nextRandomIndex;
-								  }
-								else
-								  {//removed track is before next track, need to adjust the index
-								  this.currentPosition=this.nextRandomIndex-1;
-								  }
-						    }
-					     }
-				      }
-				 else
-            {
-							// if Random mode only is on set current position to random value, overides Repeat mode
-                if(this.currentRandom)
-                    this.currentPosition=this.nextRandomIndex;
-                else
-						  //if Repeat mode only is on and the last track was playing set current position to first track
-									if(this.currentRepeat && isLastTrack)
-										{
-											this.currentPosition=0;
-										}
+							this.playQueue.removeQueueItem({value:this.currentPosition});
+
+						if(this.currentRepeat && isLastTrack)
+									this.currentPosition=this.nextIndex;
+
+						if(this.currentRandom)
+							{
+							if (deletePosition < this.nextIndex)
+										this.currentPosition=this.nextIndex-1;
 										else
-										this.currentPosition++;
-            }
+											this.currentPosition=this.nextIndex;
+							}
+						}
+					}
 
-            this.nextRandomIndex=undefined;
 
-            this.askedForPrefetch=false;
-			this.pushState.bind(this);
-			this.startPlaybackTimer();
+       else // no track is removed, set next track according to the one picked in the prefetch phase
+						this.currentPosition=this.nextIndex;
+
+        this.nextRandomIndex=undefined;
+				this.nextIndex=undefined;
+
+        this.askedForPrefetch=false;
+			  this.pushState.bind(this);
+
+			  this.startPlaybackTimer();
 
 		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
 	}
@@ -715,68 +716,89 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			this.commandRouter.logger.info("CURRENT POSITION "+this.currentPosition);
 
 			this.currentStatus = 'stop';
-			//this.consumeUpdateService=undefined;
 
-			if (this.currentPosition >= this.playQueue.arrayQueue.length) {
-				this.commandRouter.logger.info("END OF QUEUE ");
+			//Checking repeat status
+            if(this.currentRepeat && this.currentRepeatSingleSong)
+            {
+                if(this.prefetchDone==false)
+                {
+                    this.play(this.currentPosition)
+                        .then(self.pushState.bind(self))
+                        .fail(this.pushError.bind(this));
 
-				//Queuing following track;
-				if(this.currentRepeat!==undefined && this.currentRepeat===true)
-				{
-					this.currentPosition=0;
+                    this.askedForPrefetch=false;
+                    this.simulateStopStartDone=false;
+                }
+                else
+                {
+                    this.prefetchDone=false;
+                    this.askedForPrefetch=false;
+                    this.simulateStopStartDone=false;
 
-					if(this.prefetchDone==false)
-					{
-						this.play()
-							.then(self.pushState.bind(self))
-							.fail(this.pushError.bind(this));
+                    this.logger.info("Prefetch done, skipping queuing");
+                }
+            }
+            else
+            {
+                if (this.currentPosition >= this.playQueue.arrayQueue.length) {
+                    this.commandRouter.logger.info("END OF QUEUE ");
 
-						this.askedForPrefetch=false;
-						this.simulateStopStartDone=false;
-					}
-					else
-					{
-						this.prefetchDone=false;
-						this.askedForPrefetch=false;
-						this.simulateStopStartDone=false;
+                    //Queuing following track;
+                    if(this.currentRepeat!==undefined && this.currentRepeat===true)
+                    {
+                        this.currentPosition=0;
 
-						this.logger.info("Prefetch done, skipping queuing");
-					}
+                        if(this.prefetchDone==false)
+                        {
+                            this.play()
+                                .then(self.pushState.bind(self))
+                                .fail(this.pushError.bind(this));
 
+                            this.askedForPrefetch=false;
+                            this.simulateStopStartDone=false;
+                        }
+                        else
+                        {
+                            this.prefetchDone=false;
+                            this.askedForPrefetch=false;
+                            this.simulateStopStartDone=false;
 
-					this.commandRouter.logger.info("Repeating playlist ");
-				}
-				else
-				{
-					this.currentPosition=0;
-					this.pushEmptyState().fail(this.pushError.bind(this));
-
-					return this.stopPlaybackTimer();
-				}
-
-
-
-			} else {
-				if(this.prefetchDone==false)
-				{
-					this.play()
-						.then(self.pushState.bind(self))
-						.fail(this.pushError.bind(this));
-
-					this.askedForPrefetch=false;
-					this.simulateStopStartDone=false;
-				}
-				else
-				{
-					this.prefetchDone=false;
-					this.askedForPrefetch=false;
-					this.simulateStopStartDone=false;
-					this.pushState();
-					this.logger.info("Prefetch done, skipping queuing");
-				}
-			}
+                            this.logger.info("Prefetch done, skipping queuing");
+                        }
 
 
+                        this.commandRouter.logger.info("Repeating playlist ");
+                    }
+                    else
+                    {
+                        this.currentPosition=0;
+                        this.pushEmptyState().fail(this.pushError.bind(this));
+
+                        return this.stopPlaybackTimer();
+                    }
+
+
+
+                } else {
+                    if(this.prefetchDone==false)
+                    {
+                        this.play()
+                            .then(self.pushState.bind(self))
+                            .fail(this.pushError.bind(this));
+
+                        this.askedForPrefetch=false;
+                        this.simulateStopStartDone=false;
+                    }
+                    else
+                    {
+                        this.prefetchDone=false;
+                        this.askedForPrefetch=false;
+                        this.simulateStopStartDone=false;
+                        this.pushState();
+                        this.logger.info("Prefetch done, skipping queuing");
+                    }
+                }
+            }
 
 		} else if (this.currentStatus === 'stop') {
 			this.pushState().fail(this.pushError.bind(this));
@@ -857,11 +879,11 @@ CoreStateMachine.prototype.getTrack = function (position) {
 CoreStateMachine.prototype.play = function (index) {
 	var self=this;
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play');
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::play index '+index);
 
-	if (index) {
-		self.currentPosition=index;
-	}
+	//if (index) {
+	//	self.currentPosition=index;
+	//}
 
 	return self.setConsumeUpdateService(undefined)
 		.then(function()
@@ -973,6 +995,20 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 	}
 };
 
+CoreStateMachine.prototype.ffwdRew = function (millisecs) {
+
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::ffwdRew');
+
+    var trackBlock = this.getTrack(this.currentPosition);
+
+
+    var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+    if(thisPlugin && thisPlugin.ffwdRew)
+        return thisPlugin.ffwdRew(millisecs);
+    else libQ.resolve();
+};
+
+
 // Pause the current track block playback
 CoreStateMachine.prototype.servicePause = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::servicePause');
@@ -987,6 +1023,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::stop');
 
 	self.setConsumeUpdateService(undefined);
+	self.unSetVolatile();
 
 	if (this.currentStatus === 'play') {
 		// Play -> Stop transition
@@ -1095,10 +1132,13 @@ CoreStateMachine.prototype.setRandom = function (value) {
 	this.pushState().fail(this.pushError.bind(this));
 };
 
-CoreStateMachine.prototype.setRepeat = function (value) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setRepeat '+value);
+CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setRepeat '+value+ ' single '+repeatSingle);
 
 	this.currentRepeat=value;
+
+	if(repeatSingle!=undefined)
+	    this.currentRepeatSingleSong=repeatSingle;
 
 	this.pushState().fail(this.pushError.bind(this));
 };
