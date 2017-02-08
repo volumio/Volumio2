@@ -175,10 +175,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].element', 'select');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
-
+			if (activemixer_type == 'None') {
+				var activemixer_type_lang = self.commandRouter.getI18nString('COMMON.NONE');
+			} else if (activemixer_type == 'Software'){
+				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE');
+			} else if (activemixer_type == 'Hardware'){
+				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE');
+			} else {
+				var activemixer_type_lang = activemixer_type;
+			}
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', {
 				value: activemixer_type,
-				label: activemixer_type
+				label: activemixer_type_lang
 			});
 
 			if ((typeof mixers != "undefined") || ( mixers != null )) {
@@ -186,20 +194,20 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 						self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 							value: 'Hardware',
-							label: 'Hardware'
+							label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE')
 						});
 
 				} else if ((mixers.length > 0 ) && (mixers[0] != 'SoftMaster') && (activemixer != 'SoftMaster' )) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 					value: 'Hardware',
-					label: 'Hardware'
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE')
 					});
 				}
 
 			}
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 				value: 'Software',
-				label: 'Software'
+				label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
 			});
 
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
@@ -274,6 +282,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+
+			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue');
+			if (value == undefined) {
+				value = true
+			}
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
 			value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);

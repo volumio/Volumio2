@@ -404,6 +404,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
        else // no track is removed, set next track according to the one picked in the prefetch phase
 						this.currentPosition=this.nextIndex;
 
+
         this.nextRandomIndex=undefined;
 				this.nextIndex=undefined;
 

@@ -81,7 +81,14 @@
     "MUSIC_LIBRARY":"音樂庫",
     "ARTISTS":"演出者",
     "ALBUMS":"專輯",
-    "GENRES":"音樂分類"
+    "GENRES":"音樂分類",
+    "TRACKS":"Tracks",
+    "CANCEL":"取消",
+    "NONE":"無",
+    "LAST_100":"最後 100 個",
+    "CONTINUE":"繼續",
+    "SETTINGS_SAVED_SUCCESSFULLY":"成功儲存設定",
+    "SETTINGS_SAVE_ERROR":"儲存設定時發生錯誤"
   },
   "APPEARANCE":{
     "APPEARANCE":"外觀",
@@ -133,7 +140,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"系統設定成功更新",
     "SYSTEM_NAME":"系統名稱",
     "SYSTEM_NAME_ERROR":"無法更改系統名稱",
-    "SYSTEM_NAME_NOW":"系統名稱已更改"
+    "SYSTEM_NAME_NOW":"系統名稱已更改",
+    "UPDATE_ALREADY_LATEST_VERSION":"已經是最新版本",
+    "NO_UPDATE_AVAILABLE":"沒有更新"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"我的網路電台",

@@ -28,11 +28,15 @@
     "SOFTVOL":"Software Volume Control",
     "MIXER_CONTROL_NAME":"Mixer Control Name",
     "MIXER_TYPE":"Mixer Type",
-	"ADVANCED_DAC_DSP_OPTIONS": "DSP Options",
-	"DSP_PROGRAM_ENABLED": "DSP Program Enabled",
-	"DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required",
-	"NO_AUDIO_DEVICE_AVAILABLE": "No Audio Device Available",
-	"SETTING_ERROR":"Error"
+	  "ADVANCED_DAC_DSP_OPTIONS": "DSP Options",
+	  "DSP_PROGRAM_ENABLED": "DSP Program Enabled",
+	  "DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required",
+	  "NO_AUDIO_DEVICE_AVAILABLE": "No Audio Device Available",
+	  "SETTING_ERROR":"Error",
+	  "PERSISTENT_QUEUE":"Persistent queue",
+	  "PERSISTENT_QUEUE_DOC":"If enabled the Playqueue will be stored accross reboot, if disabled the play queue will be cleared at every system start",
+    "HARDWARE":"Hardware",
+    "SOFTWARE":"Software"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -100,13 +104,17 @@
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Music Library",
     "ARTISTS":"Artists",
+    "ARTIST":"Artist",
     "ALBUMS":"Albums",
+    "ALBUM":"Album",
     "GENRES":"Genres",
     "TRACKS":"Tracks",
     "CANCEL":"Cancel",
     "NONE":"None",
     "LAST_100":"last 100",
-	"CONTINUE":"Continue"
+	"CONTINUE":"Continue",
+	"SETTINGS_SAVED_SUCCESSFULLY":"Settings saved successfully",
+	"SETTINGS_SAVE_ERROR":"Error in saving settings"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -159,7 +167,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"System settings updated successfully",
     "SYSTEM_NAME":"System Name",
     "SYSTEM_NAME_ERROR":"Cannot change system name",
-    "SYSTEM_NAME_NOW":"System name is now"
+    "SYSTEM_NAME_NOW":"System name is now",
+	"UPDATE_ALREADY_LATEST_VERSION":"You're already on the latest version",
+	"NO_UPDATE_AVAILABLE":"No Updates Available"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
