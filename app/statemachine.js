@@ -10,6 +10,7 @@ function CoreStateMachine(commandRouter) {
 	this.commandRouter = commandRouter;
 
 	this.currentPosition=0;
+	this.nextIndex=undefined;
 	this.currentConsume=false;
     this.currentRepeat=false;
     this.currentRepeatSingleSong=false;
@@ -262,6 +263,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentChannels = null;
 			self.currentRandom = null;
 			self.currentRepeat = null;
+			this.currentRepeatSingleSong = null;
 			self.currentVolume = null;
 			self.currentMute = null;
 			self.currentUpdate = false;
@@ -313,35 +315,40 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
+			var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 
-            var nextIndex=this.currentPosition+1;
-            // Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
-            if(this.currentRepeat)
-            {
-                if(this.currentRepeatSingleSong)
-                    nextIndex=this.currentPosition;
-                else nextIndex=0;
-            }
+			//default play mode, sequentially played, next track is the next one in the queue
+			this.nextIndex=this.currentPosition+1;
 
-            if(isLastTrack !== this.currentConsume)
-            {
-                nextIndex=0;
-            }
+			// Repeat play mode: if the last track is played the next track has to be the first
+			if(this.currentRepeat && isLastTrack)
+							{
+								this.nextIndex=0;
+							}
 
-            // Then check if Random mode is on - Random mode overrides Repeat mode by this
-            if(this.currentRandom)
-            {
-                nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-                this.nextRandomIndex=nextIndex;
-            }
+			//Random play mode: Consume mode will work better if the same track is not picked twice in a row
+			if(this.currentRandom)
+						{
+							var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
+							var newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+							while((newIndex == this.currentPosition) && !isOnlyTrack)
+							{
+								newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+							}
+							this.nextRandomIndex=newIndex;// also used by syncState
+							this.nextIndex=newIndex;// only used in this method
+						}
 
-            var nextTrackBlock = this.getTrack(nextIndex);
+			//Repeat of a single track play mode: (a new mode) next track is the same track as played
+			if(this.currentRepeat && this.currentRepeatSingleSong)
+										this.nextIndex=this.currentPosition;
+
+            var nextTrackBlock = this.getTrack(this.nextIndex);
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
 				this.logger.info("Prefetching next song");
@@ -361,33 +368,50 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
 
-            if(this.currentConsume)
-            {
-                this.playQueue.removeQueueItem({value:this.currentPosition});
-            }
-            else
-            {
-                if(this.currentRandom)
-                    this.currentPosition=this.nextRandomIndex;
-                else
-                if(this.currentRepeat)
-                {
-                    if(!this.currentRepeatSingleSong)
-                        this.currentPosition++;
-                }
+			// Consume play mode: a) important that the removed track and the next track are not the same
+			// b) if the removed track is before the next track to be played the currentPosition has to be adjusted
+			if(this.currentConsume)
+			{
+				var deletePosition=this.currentPosition;
+				var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
+				var isOnlyTrack=(this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
 
-                if(isLastTrack !== this.currentConsume)
-                {
-                    this.currentPosition=0;
-                }
-            }
+				 if (isOnlyTrack || this.currentRepeatSingleSong )
+				 { // current queue holds one track only, stop and remove, Consume is done,
+					 // or if the track is single repeated it will be removed, and the player stops
+					this.stop();
+					this.playQueue.removeQueueItem({value:this.currentPosition});
+					}
+					else
+						{
 
-            this.nextRandomIndex=undefined;
+							this.playQueue.removeQueueItem({value:this.currentPosition});
 
-            this.askedForPrefetch=false;
-			this.pushState.bind(this);
+						if(this.currentRepeat && isLastTrack)
+									this.currentPosition=this.nextIndex;
 
-			this.startPlaybackTimer();
+						if(this.currentRandom)
+							{
+							if (deletePosition < this.nextIndex)
+										this.currentPosition=this.nextIndex-1;
+										else
+											this.currentPosition=this.nextIndex;
+							}
+						}
+					}
+
+
+       else // no track is removed, set next track according to the one picked in the prefetch phase
+						this.currentPosition=this.nextIndex;
+
+
+        this.nextRandomIndex=undefined;
+				this.nextIndex=undefined;
+
+        this.askedForPrefetch=false;
+			  this.pushState.bind(this);
+
+			  this.startPlaybackTimer();
 
 		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
 	}
