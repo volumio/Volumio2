@@ -368,17 +368,23 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             else
             {
                 if(this.currentRandom)
+                {
                     this.currentPosition=this.nextRandomIndex;
-                else
-                if(this.currentRepeat)
+                }
+                else if(this.currentRepeat)
                 {
                     if(!this.currentRepeatSingleSong)
+                    {
                         this.currentPosition++;
+                    }
                 }
 
                 if(isLastTrack !== this.currentConsume)
                 {
                     this.currentPosition=0;
+                }
+                else {
+                    this.currentPosition++;
                 }
             }
 
