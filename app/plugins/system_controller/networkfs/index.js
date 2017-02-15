@@ -149,16 +149,20 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 		var trial = 0;
 	}
 
-
 	var fstype = config.get('NasMounts.' + shareid + '.fstype');
 	var options = config.get('NasMounts.' + shareid + '.options');
+	var pathraw = config.get('NasMounts.' + shareid + '.path');
+	var mountidraw = config.get('NasMounts.' + shareid + '.name');
+	// Check we have sane data - operating on undefined values will crash us
+	if (fstype === 'undefined' || pathraw === 'undefined') {
+		console.log('Unable to retrieve config for share '  + shareid + ', returning early');
+		return defer.promise;
+	}
 	var pointer;
 	var fsopts;
 	var credentials;
 	var responsemessage = {status:""};
-	var pathraw = config.get('NasMounts.' + shareid + '.path');
 	var path = pathraw.replace(/ /g,"\\ ");
-	var mountidraw = config.get('NasMounts.' + shareid + '.name');
 	// The local mountpoint path must not contain these characters, because
 	// they get specially encoded in /etc/mtab and cause mount/umount failures.
 	// See getmntent(7).
