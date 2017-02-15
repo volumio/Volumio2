@@ -638,7 +638,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 					reason: 'Cannot unmount share'
 				});
 			} else {
-				self.logger.info("Share " + config.get('NasMounts.' + data['id'] + '.name') + " successfully unmounted");
+				self.logger.info("Share " + mountidraw + " successfully unmounted");
 				var key = 'NasMounts.' + data['id'] + '.';
 
 				var oldpath = config.get(key + 'path');
