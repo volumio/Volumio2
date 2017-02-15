@@ -510,7 +510,9 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 		var realsize = '';
 		var key = 'NasMounts.' + share + '.';
 		var name = config.get(key + 'name');
-		var mountpoint = '/mnt/NAS/' + name;
+		var mountidraw = name;
+		var mountid    = mountidraw.replace(/[\s\n\\]/g,"_");
+		var mountpoint = '/mnt/NAS/' + mountid;
 		var mounted = mountutil.isMounted(mountpoint, false);
 		var respShare = {
 			path: config.get(key + 'path'),
