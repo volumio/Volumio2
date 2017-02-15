@@ -368,17 +368,23 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             else
             {
                 if(this.currentRandom)
+                {
                     this.currentPosition=this.nextRandomIndex;
-                else
-                if(this.currentRepeat)
+                }
+                else if(this.currentRepeat)
                 {
                     if(!this.currentRepeatSingleSong)
+                    {
                         this.currentPosition++;
+                    }
                 }
 
                 if(isLastTrack !== this.currentConsume)
                 {
                     this.currentPosition=0;
+                }
+                else {
+                    this.currentPosition++;
                 }
             }
 
@@ -1092,10 +1098,16 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
 
-	if(this.currentPosition==nIndex)
+	var index = nIndex.value;
+
+	if(this.currentPosition==index)
 	{
-		this.next();
-		this.currentPosition--;
+		this.stop()
+			.then(function () {
+		if (this.currentPosition > 0) {
+			this.currentPosition--;
+		} });
+
 	}
 
 	return this.playQueue.removeQueueItem(nIndex);
