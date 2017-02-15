@@ -159,7 +159,10 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	var pathraw = config.get('NasMounts.' + shareid + '.path');
 	var path = pathraw.replace(/ /g,"\\ ");
 	var mountidraw = config.get('NasMounts.' + shareid + '.name');
-	var mountid = mountidraw.replace(/ /g,"\\ ");
+	// The local mountpoint path must not contain these characters, because
+	// they get specially encoded in /etc/mtab and cause mount/umount failures.
+	// See getmntent(7).
+	var mountid = mountidraw.replace(/[\s\n\\]/g,"_");
 
 	if (fstype == "cifs") {
 		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path.replace(' ', '\ ');;
@@ -400,7 +403,9 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 
 	if (config.has(key)) {
 
-		var mountpoint = '/mnt/NAS/' + config.get(key + '.name');
+		var mountidraw = config.get(key + '.name');
+		var mountid = mountidraw.replace(/[\s\n\\]/g,"_");
+		var mountpoint = '/mnt/NAS/' + mountid;
 		var mountedshare = mountutil.isMounted(mountpoint, true);
 		if (mountedshare.mounted) {
 
@@ -622,7 +627,10 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 	}
 
 	if (config.has('NasMounts.' + data['id'])) {
-		var mountpoint = '/mnt/NAS/' + config.get('NasMounts.' + data['id'] + '.name');
+
+		var mountidraw = config.get('NasMounts.' + data['id'] + '.name');
+		var mountid    = mountidraw.replace(/[\s\n\\]/g,"_");
+		var mountpoint = '/mnt/NAS/' + mountid;
 		mountutil.umount(mountpoint, false, {"removeDir": true}, function (result) {
 			if (result.error) {
 				defer.resolve({
