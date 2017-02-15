@@ -150,7 +150,6 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	}
 
 
-	var sharename = config.get('NasMounts.' + shareid + '.name');
 	var fstype = config.get('NasMounts.' + shareid + '.fstype');
 	var options = config.get('NasMounts.' + shareid + '.options');
 	var pointer;
