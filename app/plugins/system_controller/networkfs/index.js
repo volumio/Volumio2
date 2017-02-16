@@ -402,7 +402,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 	if (config.has(key)) {
 
 		var mountpoint = '/mnt/NAS/' + config.get(key + '.name');
-		var mountedshare = mountutil.isMounted(mountpoint, true);
+		var mountedshare = mountutil.isMounted(mountpoint, false);
 		if (mountedshare.mounted) {
 
 
@@ -445,20 +445,20 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 			}
 
 
-
-	} else {
-			exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
-				if (error !== null) {
-					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
-					self.logger.error("Cannot Delete Folder. Error: " + error);
-					defer.resolve(responsemessage);
-				} else {
-					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
-					defer.resolve(responsemessage);
-				}
-			});
+		} else {
+				exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+					if (error !== null) {
+						responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
+						self.logger.error("Cannot Delete Folder. Error: " + error);
+						defer.resolve(responsemessage);
+					} else {
+						responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
+						defer.resolve(responsemessage);
+					}
+				});
 		}
 		config.delete(key);
+
 	} else {
 		responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'This Share is not configured'}};
 		defer.resolve(responsemessage);
