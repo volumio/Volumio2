@@ -29,9 +29,13 @@
     "MIXER_CONTROL_NAME":"Nom du mixeur",
     "MIXER_TYPE":"Type de mixeur",
     "ADVANCED_DAC_DSP_OPTIONS": "Options DSP",
-  	"DSP_PROGRAM_ENABLED": "DSP activé",
-  	"DSP_PROGRAM_REBOOT": "Un redémarrage est nécéssaire pour activer le DSP"
-  },
+    "DSP_PROGRAM_ENABLED": "DSP activé",
+    "DSP_PROGRAM_REBOOT": "Modifcation DSP,un redémarrrage est  nécéssaire",
+    "NO_AUDIO_DEVICE_AVAILABLE": "Aucun périphérique adio disponible",
+    "SETTING_ERROR":"Erreur",
+    "PERSISTENT_QUEUE":"File d'attente persistante",
+  	"PERSISTENT_QUEUE_DOC":"Si activé, la file d'attente sera conservéé après un reboot, sinon elle sera éffacée"
+  	  },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau cablé",
@@ -54,7 +58,8 @@
     "HOTSPOT_CHANNEL":"Canal du Hotspot",
     "HOTSPOT_CONF_ERROR":"Erreur de configuration du Hotspot",
     "HOTSPOT_PW_LENGTH":"Le mot de passe du Hotspot doit faire au moins 8 caractètres",
-    "WIRELESS_ENABLED":"Réseau sans fil (WiFi)"
+    "WIRELESS_ENABLED":"Réseau sans fil (WiFi)",
+    "STATIC_IP_WARNING":"Attention, assurez-vous d'avoir entré des paramètres corrects. Une mauvaise configuration peut rendre votre appareil injoignable"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Choisir un le nom qui sera affiché dans les disques NAS montés"
@@ -102,7 +107,10 @@
     "TRACKS":"Pistes",
     "CANCEL":"Annuler",
     "NONE":"Aucun",
-    "LAST_100":"100 dernières"
+    "LAST_100":"100 dernières",
+    "CONTINUE":"Continuer",
+    "SETTINGS_SAVED_SUCCESSFULLY":"Réglages sauvés avec succcès",
+    "SETTINGS_SAVE_ERROR":"Erreur en sauvant les réglages"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -155,7 +163,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"Systeme mis à jour avec succès",
     "SYSTEM_NAME":"Nom du système",
     "SYSTEM_NAME_ERROR":"Impossible de changer le nom du système",
-    "SYSTEM_NAME_NOW":"Le nom du système est désormais"
+    "SYSTEM_NAME_NOW":"Le nom du système est désormais",
+    "UPDATE_ALREADY_LATEST_VERSION":"Vous avez déja la dernière version",
+    "NO_UPDATE_AVAILABLE":"Pas de mise à jour disponible"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",

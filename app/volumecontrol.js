@@ -121,7 +121,7 @@ function CoreVolumeController(commandRouter) {
 				cb(err);
 			});
 			if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1') {
-				amixer(['-M', 'set', '-c', device, 'Subwoofer Digital', val + '%'], function (err) {
+				amixer(['-M', 'set', '-c', device, 'Subwoofer', val + '%'], function (err) {
 					cb(err);
 				});
 			}
@@ -130,7 +130,7 @@ function CoreVolumeController(commandRouter) {
 				cb(err);
 			});
 			if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1') {
-				amixer(['set', '-c', device, 'Subwoofer Digital', val + '%'], function (err) {
+				amixer(['set', '-c', device, 'Subwoofer', val + '%'], function (err) {
 					cb(err);
 				});
 			}
@@ -163,6 +163,7 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	device = data.device;
 	mixer = '"'+data.mixer+'"';
 	maxvolume = data.maxvolume;
+	console.log('MAXX'+maxvolume)
 	volumecurve = data.volumecurve;
 	volumesteps = data.volumesteps;
 	mixertype = data.mixertype
@@ -212,6 +213,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 						vol =  currentvolume
 					}
 					VolumeInteger = Number(vol)+Number(volumesteps);
+					if (VolumeInteger > 100){
+						VolumeInteger = 100;
+					}
 					if (VolumeInteger > maxvolume){
 						VolumeInteger = maxvolume;
 					}
@@ -235,6 +239,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					vol =  currentvolume
 				}
 				VolumeInteger = Number(vol)-Number(volumesteps);
+				if (VolumeInteger < 0){
+					VolumeInteger = 0;
+				}
 				if (VolumeInteger > maxvolume){
 					VolumeInteger = maxvolume;
 				}
@@ -251,6 +258,12 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			break;
 		default:
 			// Set the Volume with numeric value 0-100
+			if (VolumeInteger < 0){
+				VolumeInteger = 0;
+			}
+			if (VolumeInteger > 100){
+				VolumeInteger = 100;
+			}
 			if (VolumeInteger > maxvolume){
 				VolumeInteger = maxvolume;
 			}

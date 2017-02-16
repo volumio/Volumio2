@@ -12,12 +12,25 @@ var vconf = require('v-conf');
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
 
-	fs.ensureFileSync('/var/log/volumio.log');
+	var logfile = '/var/log/volumio.log';
+
+	fs.ensureFileSync(logfile);
+	fs.watchFile(logfile, function () {
+		fs.stat(logfile, function (err, stats) {
+			if (stats.size > 15728640) {
+				var now = new Date();
+				console.log('******** LOG FILE REACHED 15MB IN SIZE, CLEANING IT ********');
+				fs.writeFile(logfile, '------------------- Log Cleaned at '+ now + ' -------------------', function(){
+					console.log('******** LOG FILE SUCCESSFULLY CLEANED ********');
+				})
+			}
+		});
+	});
 	this.logger = new (winston.Logger)({
 		transports: [
 			new (winston.transports.Console)(),
 			new (winston.transports.File)({
-				filename: '/var/log/volumio.log',
+				filename: logfile,
 				json: false
 			})
 		]
@@ -400,6 +413,24 @@ CoreCommandRouter.prototype.playPlaylist = function (data) {
 // Utility functions ---------------------------------------------------------------------------------------------
 
 /**
+ * Returns informations about device and current time
+ * @returns {{name: *, uuid: *, time: string}}
+ */
+CoreCommandRouter.prototype.getId = function () {
+	var self = this;
+
+	var file = fs.readJsonSync("data/configuration/system_controller/system/config.json");
+
+	var name = file.playerName.value;
+	var uuid = file.uuid.value;
+	var date = new Date();
+	var time = date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear() + " - " +
+			date.getHours() + ":" + date.getMinutes();
+
+	return {'name': name, 'uuid': uuid, 'time': time};
+}
+
+/**
  * Returns as an object the configuration file for a given plugin
  * @param category
  * @param plugin
@@ -452,6 +483,8 @@ CoreCommandRouter.prototype.getPluginsConf = function () {
 		var plugConf = self.catPluginsConf(cName, plugins);
 		confs.push({cName, plugConf});
 	}
+
+	var identification = self.getId();
 	return confs;
 }
 
@@ -616,11 +649,13 @@ CoreCommandRouter.prototype.loadBackup = function (request) {
 	self.logger.info("Backup: retrieving "+ request.type + " backup");
 
 	if(request.type == "playlist"){
-		data = self.loadPlaylistsBackup();
+		var identification = self.getId();
+		data = {'id' : identification, 'backup': self.loadPlaylistsBackup()};
 		defer.resolve(data);
 	}else if (request.type == "radio-favourites" || request.type == "favourites"
 	|| request.type == "my-web-radio"){
-		data = self.loadFavBackup(request.type);
+		var identification = self.getId();
+		data = {'id' : identification, 'backup': self.loadFavBackup(request.type)};
 		defer.resolve(data);
 	} else{
 		self.logger.info("Backup: request not accepted, unexisting category");
@@ -734,7 +769,6 @@ CoreCommandRouter.prototype.restoreFavouritesBackup = function (type) {
 
 /**
  * restores the playlist specified in req.type, given the data in req.backup and the eventual
- * path (for default playlists) in req.path
  * @param req
  */
 CoreCommandRouter.prototype.restorePlaylist = function (req) {
@@ -751,19 +785,30 @@ CoreCommandRouter.prototype.restorePlaylist = function (req) {
 			fs.outputJsonSync(path + name, songs);
 		}
 	}
-	else if(req.type == "songs" || req.type == "radios" || req.type == "myRadios"){
-		path = self.playListManager.favouritesPlaylistFolder + req.path;
+	else if(req.type == "favourites" || req.type == "radio-favourites" ||
+		req.type == "my-web-radio"){
+		path = self.playListManager.favouritesPlaylistFolder + req.type;
 		try{
 			var fav = fs.readJsonSync(path);
 			backup = self.mergePlaylists(backup, fav);
 		}catch(e){
-			self.logger.info("Backup: no previous favourite " + req.type);
+			self.logger.info("Backup: no existing playlist for selected category");
 		};
-		self.logger.info("Backup: restoring " + req.type + " favourites");
+		self.logger.info("Backup: restoring " + req.type + "!");
 		fs.outputJsonSync(path, backup);
 	}
 	else
 		self.logger.info("Backup: impossible to restore data");
+}
+
+CoreCommandRouter.prototype.getPath = function (type){
+	if(type == "songs")
+		return "favourites";
+	else if (type == "radios")
+		return "radio-favourites";
+	else if (type == "myRadios")
+		return "my-web-radio";
+	return "";
 }
 
 /**
@@ -1084,7 +1129,7 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 };
 
 
-// Volumio Play
+// Volumio Seek
 CoreCommandRouter.prototype.volumioSeek = function (position) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioSeek');
 	return this.stateMachine.seek(position);
@@ -1216,15 +1261,29 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
 	return this.stateMachine.setRandom(data);
 };
 
-CoreCommandRouter.prototype.volumioRepeat = function (data) {
+CoreCommandRouter.prototype.volumioRepeat = function (repeat,repeatSingle) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
-	return this.stateMachine.setRepeat(data);
+	return this.stateMachine.setRepeat(repeat,repeatSingle);
 };
 
 CoreCommandRouter.prototype.volumioConsume = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');
 	return this.stateMachine.setConsume(data);
 };
+
+/**
+ * This method implements Fast Forward and Rewind, depending on the sign of method parameter.
+ * Return a promise
+ */
+CoreCommandRouter.prototype.volumioFFWDRew = function (millisecs) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioFFWDRew '+millisecs);
+
+    return this.stateMachine.ffwdRew(millisecs);
+};
+
+
+
+
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
 	var self=this;

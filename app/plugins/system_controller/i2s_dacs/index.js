@@ -376,30 +376,43 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var response =  '';
 
 	var outdevicename = data;
+	console.log('PROC')
 
-	for(var i = 0; i < dacdata.devices.length; i++)
+	for(var k = 0; k < dacdata.devices.length; k++)
 	{
-		if(dacdata.devices[i].name == devicename)
-		{ var num = i;
-			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+		if(dacdata.devices[k].name === devicename)
+		{ var num = k;
 
-				if(dacdata.devices[num].data[i].name == outdevicename) {
+			for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+			
+				if(dacdata.devices[num].data[i].name === outdevicename) {
+
 					var dac = dacdata.devices[num].data[i];
 					var overlay = dac.overlay;
 					var num = dac.alsanum;
 					var reboot = dac.needsreboot;
 					var script = dac.script;
-					self.revomeAllDtOverlays();
-					self.writeI2SDAC(overlay);
-					if (script){
-						self.hotAddI2SDAC({'overlay':overlay,'script':script});
+					var modules = dac.modules;
+					var id = dac.id;
+
+					if (modules){
+						this.config.set("i2s_id", id);
+						self.writeModulesFile(modules);
 					} else {
-						self.hotAddI2SDAC({'overlay':overlay});
+						self.revomeAllDtOverlays();
+						self.writeI2SDAC(overlay);
+						if (script){
+							self.hotAddI2SDAC({'overlay':overlay,'script':script});
+						} else {
+							self.hotAddI2SDAC({'overlay':overlay});
+						}
+						this.config.set("i2s_id", overlay);
 					}
+
 
 					this.config.set("i2s_enabled", true);
 					this.config.set("i2s_dac", outdevicename);
-					this.config.set("i2s_id", overlay);
+
 					self.commandRouter.sharedVars.set('alsa.outputdevice', num);
 					//Restarting MPD, this seems needed only on first boot
 					setTimeout(function () {
@@ -424,7 +437,7 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
 
-	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL + 'max_usb_current=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL + 'dtparam=i2c_arm=on' + os.EOL + 'dtoverlay='+data;
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'max_usb_current=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL + 'dtparam=i2c_arm=on' + os.EOL + 'dtoverlay='+data;
 
 	fs.writeFile('/boot/config.txt', bootstring, function (err) {
 		if (err) {
@@ -440,7 +453,7 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 
 	this.config.set("i2s_enabled", false);
 
-	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'force_turbo=1' + os.EOL + 'max_usb_current=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL + 'dtparam=i2c_arm=on';
+	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'max_usb_current=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL + 'dtparam=i2c_arm=on';
 
 	fs.writeFile('/boot/config.txt', bootstring, function (err) {
 		if (err) {
@@ -490,8 +503,15 @@ ControllerI2s.prototype.revomeAllDtOverlays = function () {
 	var self = this;
 
 	var defer = libQ.defer();
-	var overlaysRaw = execSync("/usr/bin/sudo /usr/bin/dtoverlay -l", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 5000 });
-	var overlaysLine = overlaysRaw.split('\n');
+	try {
+		var overlaysRaw = execSync("/usr/bin/sudo /usr/bin/dtoverlay -l", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 5000 });
+		var overlaysLine = overlaysRaw.split('\n');
+	} catch(e) {
+		self.logger.info('Cannot Remove all dtoverlays');
+		var overlaysLine = [];
+	}
+
+
 
 
 	if (overlaysLine.length > 2) {
@@ -548,3 +568,25 @@ ControllerI2s.prototype.execDacScript = function () {
 	}
 };
 
+ControllerI2s.prototype.writeModulesFile = function (modules) {
+	var self = this;
+	var modulesfile = '/etc/modules'
+	var moduleslist = modules;
+
+
+	exec("/usr/bin/sudo /bin/chmod 777 "+ modulesfile, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Canot set permissions for /etc/modules: ' + error);
+
+		} else {
+			var ws = fs.createWriteStream(modulesfile);
+			ws.cork();
+			for(var i = 0; i < moduleslist.length; i++) {
+				ws.write(moduleslist[i]+'\n');
+			}
+			ws.end()
+		}
+	});
+
+
+}

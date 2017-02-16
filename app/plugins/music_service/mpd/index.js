@@ -12,6 +12,7 @@ var parser = require('cue-parser');
 var mm = require('musicmetadata');
 var os = require('os');
 var execSync = require('child_process').execSync;
+var ignoreupdate = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -514,17 +515,22 @@ ControllerMpd.prototype.parseState = function (objState) {
 		var objMetrics = objState.audio.split(':');
 		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
 
+
 			if (nSampleRateRaw === 352.8){
 				var nSampleRateRaw = 2.82+' MHz';
+				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 705.6) {
 				var nSampleRateRaw = 5.64+' MHz';
+				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 1411.2) {
 				var nSampleRateRaw = 11.2+' MHz';
+				nBitDepth = '1 bit'
 			}else {
 				var nSampleRateRaw = nSampleRateRaw+' KHz';
+				nBitDepth = Number(objMetrics[1])+' bit';
 			}
 		nSampleRate = nSampleRateRaw;
-		nBitDepth = Number(objMetrics[1])+' bit';
+
 		nChannels = Number(objMetrics[2]);
 	}
 
@@ -602,6 +608,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 		}
 	});
 
+
     return libQ.resolve();
 };
 
@@ -645,26 +652,35 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
-        self.logger.info('Mpd Status Update: '+status);
-		self.logStart('MPD announces state update')
-			.then(self.getState.bind(self))
-			.then(self.pushState.bind(self))
-			.fail(self.pushError.bind(self))
-			.done(function () {
-				return self.logDone(timeStart);
-			});
+		if (!ignoreupdate) {
+			self.logger.info('Mpd Status Update: '+status);
+			self.logStart('MPD announces state update')
+				.then(self.getState.bind(self))
+				.then(self.pushState.bind(self))
+				.fail(self.pushError.bind(self))
+				.done(function () {
+					return self.logDone(timeStart);
+				});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
+
 	});
 
 
 	self.clientMpd.on('system-playlist', function () {
 		var timeStart = Date.now();
 
+		if (!ignoreupdate) {
 		self.logStart('MPD announces system state update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
 				return self.logDone(timeStart);
 			});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
 	});
 
 	//Notify that The mpd DB has changed
@@ -675,13 +691,16 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 
 	self.clientMpd.on('system-update', function () {
-
+		if (!ignoreupdate) {
 		 self.sendMpdCommand('status', [])
 			.then(function (objState) {
 				var state = self.parseState(objState);
 				execSync("/bin/sync", { uid: 1000, gid: 1000});
 				return self.commandRouter.fileUpdate(state.updatedb);
 			});
+		} else {
+			self.logger.info('Ignoring MPD Status Update');
+		}
 	});
 };
 
@@ -739,9 +758,15 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	//fixing dop
 	if (self.config.get('dop') == null) {
-		self.config.addConfigValue('dop', 'boolean', true);
+		self.config.addConfigValue('dop', 'boolean', data['dop']);
 	} else {
 		self.config.set('dop', data['dop']);
+	}
+
+	if (self.config.get('persistent_queue') == null) {
+		self.config.addConfigValue('persistent_queue', 'boolean', data['persistent_queue']);
+	} else {
+		self.config.set('persistent_queue', data['persistent_queue']);
 	}
 
 
@@ -756,11 +781,12 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 			self.restartMpd(function (error) {
 				if (error !== null && error != undefined) {
 					self.logger.error('Cannot restart MPD: ' + error);
-					//self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_error'));
+					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVE_ERROR'));
 				}
 				else
-					//self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('mpd_player_restart'), self.commandRouter.getI18nString('mpd_player_restart_success'));
-
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+				
+				
 				defer.resolve({});
 			});
 		}
@@ -1403,46 +1429,18 @@ ControllerMpd.prototype.updateQueue = function () {
 
 ControllerMpd.prototype.getAlbumArt = function (data, path,icon) {
 
-	var artist, album;
-
-	if (data != undefined && data.path != undefined) {
-		path = this.sanitizeUri(data.path);
-	}
-
-	var web;
-
-	if (data != undefined && data.artist != undefined) {
-		artist = data.artist;
-		if (data.album != undefined)
-			album = data.album;
-		else album = data.artist;
-
-		web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/large'
-	}
-
-	var url = '/albumart';
-
-	if (web != undefined)
-		url = url + web;
-
-	if (web != undefined && path != undefined)
-		url = url + '&';
-	else if (path != undefined)
-		url = url + '?';
-
-	if (path != undefined)
-		url = url + 'path=' + nodetools.urlEncode(path);
-
-    if(icon!==undefined)
+    if(this.albumArtPlugin==undefined)
     {
-        if(url==='/albumart')
-            url=url+'?icon='+icon;
-        else url=url+'&icon='+icon;
+        //initialization, skipped from second call
+        this.albumArtPlugin=  this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
     }
 
-
-
-    return url;
+    if(this.albumArtPlugin)
+        return this.albumArtPlugin.getAlbumArt(data,path,icon);
+    else
+    {
+        return "/albumart";
+    }
 };
 
 
@@ -2440,7 +2438,8 @@ ControllerMpd.prototype.listAlbums = function () {
                     {
                         var artistName=lines[i+1].slice(7).trim();
 
-                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + albumName};
+                        var codedAlbumName = nodetools.urlEncode(albumName);
+                        var album = {service:'mpd',type: 'folder', title: albumName,  artist:artistName,albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + codedAlbumName};
 
                         response.navigation.lists[0].items.push(album);
                     }
@@ -2979,3 +2978,39 @@ ControllerMpd.prototype.goto=function(data){
 
 }
 
+ControllerMpd.prototype.ignoreUpdate=function(data){
+	ignoreupdate = data;
+}
+
+
+ControllerMpd.prototype.ffwdRew=function(millisecs){
+    var self = this;
+
+    var defer = libQ.defer();
+
+    var cmd = libMpd.cmd;
+    var delta=millisecs/1000;
+
+    var param;
+
+    if(delta>0)
+    {
+        param='+'+delta;
+    }
+    else
+    {
+        param=delta;
+    }
+
+    console.log("PARAM: "+param);
+
+    self.clientMpd.sendCommand(cmd("seekcur", [param]), function (err, msg) {
+        if(err)
+            defer.reject(new Error('Cannot seek '+millisecs));
+        else
+        {
+            defer.resolve();
+        }
+    });
+    return defer.promise;
+};

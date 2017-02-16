@@ -27,7 +27,6 @@ myVolumio.prototype.onStart = function ()
 {
     var self = this;
     var defer = libQ.defer();
-    self.commandRouter.writePluginsConf();
 
     return defer.promise;
 }

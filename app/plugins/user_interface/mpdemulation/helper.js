@@ -265,7 +265,7 @@ module.exports = {
 				service: track.service,
 				trackid: track.trackid,
 				metadata: {
-					title: track.metadata.title
+					title: track.name
 				}
 			};
 			positionNr++;
@@ -304,4 +304,3 @@ function logStart(sCommand) {
 	return libQ.resolve();
 }
 // END OF INTERNAL FUNCTIONS
-

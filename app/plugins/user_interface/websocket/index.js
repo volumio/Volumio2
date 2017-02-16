@@ -23,7 +23,17 @@ function InterfaceWebUI(context) {
 	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
 		try {
+            connWebSocket.on('getDeviceInfo', function () {
+                var uuid=self.commandRouter.sharedVars.get('system.uuid');
+                var name=self.commandRouter.sharedVars.get('system.name');
 
+                var data={
+                    "uuid":uuid,
+                    "name":name
+                };
+                connWebSocket.emit('pushDeviceInfo', data);
+
+            });
 
 			/** Request Volumio State
 			 * It returns an array definining the Playback state, Volume and other amenities
@@ -352,9 +362,9 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('setRepeat', function (data) {
 				//TODO add proper service handler
 				var timeStart = Date.now();
-				self.logStart('Client requests Volumio Repeat ' + data.value)
+				self.logStart('Client requests Volumio Repeat ' + data.value+' single '+data.repeatSingle)
 					.then(function () {
-                        return self.commandRouter.volumioRepeat(data.value);
+                        return self.commandRouter.volumioRepeat(data.value,data.repeatSingle);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
@@ -1759,7 +1769,7 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
-	
+
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushQueue', queue);
@@ -1806,9 +1816,11 @@ InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 	var self = this;
 	//console.log("pushMultiroom 2");
 	var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
+	if (volumiodiscovery) {
 	var response = volumiodiscovery.getDevices();
 	if(response != undefined){
 	selfConnWebSocket.emit('pushMultiRoomDevices', response);
+	}
 	}
 }
 

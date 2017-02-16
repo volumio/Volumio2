@@ -175,10 +175,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].element', 'select');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
-
+			if (activemixer_type == 'None') {
+				var activemixer_type_lang = self.commandRouter.getI18nString('COMMON.NONE');
+			} else if (activemixer_type == 'Software'){
+				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE');
+			} else if (activemixer_type == 'Hardware'){
+				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE');
+			} else {
+				var activemixer_type_lang = activemixer_type;
+			}
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', {
 				value: activemixer_type,
-				label: activemixer_type
+				label: activemixer_type_lang
 			});
 
 			if ((typeof mixers != "undefined") || ( mixers != null )) {
@@ -186,20 +194,20 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 						self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 							value: 'Hardware',
-							label: 'Hardware'
+							label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE')
 						});
 
 				} else if ((mixers.length > 0 ) && (mixers[0] != 'SoftMaster') && (activemixer != 'SoftMaster' )) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 					value: 'Hardware',
-					label: 'Hardware'
+					label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE')
 					});
 				}
 
 			}
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 				value: 'Software',
-				label: 'Software'
+				label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
 			});
 
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
@@ -275,6 +283,13 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
 
+			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue');
+			if (value == undefined) {
+				value = true
+			}
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+
 			value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), value));
@@ -299,8 +314,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				self.configManager.setUIConfigParam(uiconf, 'sections[1].hidden', false);
 				for (var w = 0; w < dspoptions.length; w++) {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].saveButton.data', dspoptions[w].name);
-					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
+					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , hidden:false, value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].content', dspconf);
+					if ((dspoptions[w].name == 'Subwoofer mode') && (dspoptions[w].value == '  2.0')) {
+						uiconf.sections[1].content[0].hidden = true;
+					}
 
 					for (var r in dspoptions[w].options) {
 						self.configManager.pushUIConfigParam(uiconf, 'sections[1].content['+w+'].options', {
@@ -311,7 +329,6 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 				}
 			}
-
 
 			defer.resolve(uiconf);
 		})
@@ -444,7 +461,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 	if (data.output_device.label != undefined) {
 		data.output_device.label = data.output_device.label.replace('USB: ', '');
 	}
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
 	var self = this;
 
@@ -638,26 +655,29 @@ ControllerAlsa.prototype.setAdditionalConf = function (type, controller, data) {
 };
 
 ControllerAlsa.prototype.getLabelForSelectedCard = function (cards, key) {
+	var self=this;
 	var n = cards.length;
 	for (var i = 0; i < n; i++) {
 		if (cards[i].id == key)
 			return cards[i].name;
 	}
 
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
+	return 'No Audio Device Available';
 };
 
 ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
+	var self=this;
 	var n = options.length;
 	for (var i = 0; i < n; i++) {
 		if (options[i].value == key)
 			return options[i].label;
 	}
 
-	return 'VALUE NOT FOUND BETWEEN SELECT OPTIONS!';
+	return 'Error';
 };
 
 ControllerAlsa.prototype.getAlsaCards = function () {
+	var self=this;
 	var cards = [];
 
 	var soundCardDir = '/proc/asound/';
@@ -665,7 +685,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 	var regex = /card(\d+)/;
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
-	var soundFiles = fs.readdirSync(soundCardDir);
+	try {
+		var soundFiles = fs.readdirSync(soundCardDir);
+
+
 
 	for (var i = 0; i < soundFiles.length; i++) {
 		var fileName = soundFiles[i];
@@ -684,6 +707,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			} cards.push({id: id, name: name});
 
 		}
+	}
+	} catch (e) {
+		var namestring = 'No Audio Device Available';
+		cards.push({id: '', name: namestring});
 	}
 
 	return cards;
