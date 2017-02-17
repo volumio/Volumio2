@@ -129,7 +129,7 @@ AlarmClock.prototype.applyConf = function(conf) {
 		var rule = new schedule.RecurrenceRule();
 		rule.minute = d.getMinutes();
 		rule.hour = d.getHours();
-        
+
 		var func = self.fireAlarm.bind(self);
 		var j = schedule.scheduleJob(rule, function(){
 		  func(item);
@@ -220,13 +220,13 @@ AlarmClock.prototype.getSleep = function()
 	if (sleepTask.sleep_action){
 	var sleep_action = sleepTask.sleep_action;
 		if (sleepTask.sleep_action == "stop") {
-			var sleep_actionText = 'Stop Music';
+			var sleep_actionText = self.commandRouter.getI18nString('ALARM.STOP_MUSIC');
 		} else if (sleepTask.sleep_action == "poweroff"){
-			var sleep_actionText = 'Power Off';
+			var sleep_actionText = self.commandRouter.getI18nString('ALARM.TURN_OFF');
 		}
 	} else {
 		var sleep_action = "stop"
-		var sleep_actionText = 'Stop Music';
+		var sleep_actionText = self.commandRouter.getI18nString('ALARM.STOP_MUSIC');
 	}
 	var when = new Date(sleepTask.sleep_requestedat);
 	var now = moment(new Date());
@@ -252,7 +252,7 @@ AlarmClock.prototype.setSleepConf = function (conf) {
 	self.sleep = conf;
 }
 
-AlarmClock.prototype.getSleepConf = function () {	
+AlarmClock.prototype.getSleepConf = function () {
 
 	var self = this;
 	return self.sleep;

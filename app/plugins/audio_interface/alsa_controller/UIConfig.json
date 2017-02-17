@@ -61,6 +61,26 @@
 
       ]
     },
+	{
+	  "id": "dac_dsp_options",
+	  "element": "section",
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS",
+	  "icon": "fa-microchip",
+	  "hidden": true,
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveDSPOptions"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+
+		]
+	  },
+	  "value":  {
+		"value": "",
+		"label": ""
+	  },
+	  "content": [
+	  ]
+	},
     {
       "id": "playback_options",
       "element": "section",
@@ -73,7 +93,8 @@
           "dop",
           "volume_normalization",
           "audio_buffer_size",
-          "buffer_before_play"
+          "buffer_before_play",
+		  "persistent_queue"
         ]
       },
       "content": [
@@ -156,7 +177,14 @@
             }
           ]
 
-        }
+        },
+		{
+		  "id": "persistent_queue",
+		  "element": "switch",
+		  "doc":"TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE_DOC",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE",
+		  "value":true
+		}
       ]
     },
     {

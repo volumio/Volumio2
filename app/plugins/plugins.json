@@ -125,6 +125,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "rest_api": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "system_controller":{
@@ -194,6 +204,16 @@
       }
     },
     "volumio_command_line_client": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
+    "my_volumio":  {
       "enabled": {
         "type": "boolean",
         "value": true

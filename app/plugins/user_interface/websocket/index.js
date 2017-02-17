@@ -23,7 +23,17 @@ function InterfaceWebUI(context) {
 	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
 		try {
+            connWebSocket.on('getDeviceInfo', function () {
+                var uuid=self.commandRouter.sharedVars.get('system.uuid');
+                var name=self.commandRouter.sharedVars.get('system.name');
 
+                var data={
+                    "uuid":uuid,
+                    "name":name
+                };
+                connWebSocket.emit('pushDeviceInfo', data);
+
+            });
 
 			/** Request Volumio State
 			 * It returns an array definining the Playback state, Volume and other amenities
@@ -352,9 +362,9 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('setRepeat', function (data) {
 				//TODO add proper service handler
 				var timeStart = Date.now();
-				self.logStart('Client requests Volumio Repeat ' + data.value)
+				self.logStart('Client requests Volumio Repeat ' + data.value+' single '+data.repeatSingle)
 					.then(function () {
-                        return self.commandRouter.volumioRepeat(data.value);
+                        return self.commandRouter.volumioRepeat(data.value,data.repeatSingle);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
@@ -543,6 +553,47 @@ function InterfaceWebUI(context) {
 						});
 				}
 
+			});
+
+			// TO DO: ADD TRANSLATIONS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			connWebSocket.on('manageBackup', function (data) {
+				var selfConnWebSocket = this;
+
+				var value = data;
+
+				var response;
+
+				response=self.commandRouter.managePlaylists(value)
+					.then(self.commandRouter.manageFavourites(value))
+					.fail(function () {
+						self.printToastMessage('error', "Backup error", 'An error occurred while managing backups');
+					});
+			});
+
+			connWebSocket.on('getBackup', function (data) {
+				var selfConnWebSocket = this;
+
+				var response = self.commandRouter.loadBackup(data);
+
+				if (response != undefined) {
+					response.then(function (result) {
+						selfConnWebSocket.emit('pushBackup', result);
+					})
+						.fail(function () {
+							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+						});
+				}
+
+			});
+
+			connWebSocket.on('restoreConfig', function (data) {
+				var selfConnWebSocket = this;
+
+				var response = self.commandRouter.restorePluginsConf()
+					.then(self.commandRouter.restorePluginsConf())
+					.fail(function () {
+							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+						});
 			});
 
 			connWebSocket.on('search', function (data) {
@@ -1677,6 +1728,21 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
 
+			connWebSocket.on('checkPassword', function (data) {
+				var selfConnWebSocket = this;
+
+
+				var check = self.commandRouter.executeOnPlugin('system_controller', 'system', 'checkPassword', data);
+
+				if (check != undefined) {
+					check.then(function (data) {
+						selfConnWebSocket.emit('checkPassword', data);
+					});
+				}
+
+
+			});
+
 
 
 
@@ -1703,7 +1769,7 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
-	
+
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushQueue', queue);
@@ -1750,9 +1816,11 @@ InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 	var self = this;
 	//console.log("pushMultiroom 2");
 	var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
+	if (volumiodiscovery) {
 	var response = volumiodiscovery.getDevices();
 	if(response != undefined){
 	selfConnWebSocket.emit('pushMultiRoomDevices', response);
+	}
 	}
 }
 
@@ -1835,7 +1903,11 @@ InterfaceWebUI.prototype.emitFavourites = function (value) {
 };
 
 InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
-    this.libSocketIO.sockets.emit(emit,payload);
+	if(emit.msg && emit.value) {
+		this.libSocketIO.sockets.emit(emit.msg,emit.value);
+	} else {
+		this.libSocketIO.sockets.emit(emit,payload);
+	}
 };
 
 

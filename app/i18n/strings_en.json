@@ -33,7 +33,16 @@
 	"AUDIO_RESAMPLING_SETTINGS_SAVED":"Audio Resampling Settings saved",
 	"TARGET_BITDEPTH":"Target bit depth",
 	"TARGET_SAMPLERATE":"Target sample rate",
-	"NATIVE":"Native"
+	"NATIVE":"Native",
+    "ADVANCED_DAC_DSP_OPTIONS": "DSP Options",
+    "DSP_PROGRAM_ENABLED": "DSP Program Enabled",
+    "DSP_PROGRAM_REBOOT": "In order to activate this DSP Program, a reboot is required",
+    "NO_AUDIO_DEVICE_AVAILABLE": "No Audio Device Available",
+    "SETTING_ERROR":"Error",
+    "PERSISTENT_QUEUE":"Persistent queue",
+    "PERSISTENT_QUEUE_DOC":"If enabled the Playqueue will be stored accross reboot, if disabled the play queue will be cleared at every system start",
+    "HARDWARE":"Hardware",
+    "SOFTWARE":"Software"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -56,7 +65,9 @@
     "HOTSPOT_PASSWORD":"Hotspot Password",
     "HOTSPOT_CHANNEL":"Hotspot Channel",
     "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
-    "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long"
+    "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long",
+	"WIRELESS_ENABLED":"Wireless Networking",
+	"STATIC_IP_WARNING":"Warning, please make sure Static IP Settings are correct. A wrong configuration might render your device unreachable"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts"
@@ -99,12 +110,17 @@
     "PLAYLISTS":"Playlists",
     "MUSIC_LIBRARY":"Music Library",
     "ARTISTS":"Artists",
+    "ARTIST":"Artist",
     "ALBUMS":"Albums",
+    "ALBUM":"Album",
     "GENRES":"Genres",
     "TRACKS":"Tracks",
     "CANCEL":"Cancel",
     "NONE":"None",
-    "LAST_100":"last 100"
+    "LAST_100":"last 100",
+	"CONTINUE":"Continue",
+	"SETTINGS_SAVED_SUCCESSFULLY":"Settings saved successfully",
+	"SETTINGS_SAVE_ERROR":"Error in saving settings"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -157,7 +173,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"System settings updated successfully",
     "SYSTEM_NAME":"System Name",
     "SYSTEM_NAME_ERROR":"Cannot change system name",
-    "SYSTEM_NAME_NOW":"System name is now"
+    "SYSTEM_NAME_NOW":"System name is now",
+	"UPDATE_ALREADY_LATEST_VERSION":"You're already on the latest version",
+	"NO_UPDATE_AVAILABLE":"No Updates Available"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

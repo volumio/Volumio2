@@ -56,7 +56,7 @@ last_100.prototype.listenState = function () {
                     artist:data.artist, album:data.album, albumart:data.albumart, type:'song'};
                 newlastStates.push(currentsong);
                 try {
-                    var lastStates = fs.readJsonSync('/data/laststates.json', {throws: false});
+                    var lastStates = fs.readJsonSync('/data/laststates.json', {throws: true});
                 } catch (e) {
                     var lastStates = [];
                 }
@@ -96,7 +96,7 @@ last_100.prototype.handleBrowseUri = function (curUri) {
     var defer = libQ.defer();
 
     try {
-        lastPlayed = fs.readJsonSync('/data/laststates.json', {throws: false});
+        lastPlayed = fs.readJsonSync('/data/laststates.json', {throws: true});
         lastPlayed = self.rewriteForUri(lastPlayed);
         response = {
             navigation: {

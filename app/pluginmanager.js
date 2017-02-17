@@ -252,6 +252,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	if(plugin!==undefined)
 	{
 		var deferStart=plugin.onStop();
+		self.config.set(category + '.' + name + '.status', "STOPPED");
 			defer.resolve();
 	} else defer.resolve();
 
@@ -310,6 +311,51 @@ PluginManager.prototype.getPluginNames = function (category) {
 
 	return names;
 };
+
+/**
+ * returns an array of plugin's names, given their category
+ * @param category
+ * @returns {Array}
+ */
+PluginManager.prototype.getAllPlugNames = function (category) {
+	var self = this;
+
+	var plugFile = fs.readJsonSync(('/data/configuration/plugins.json'), 'utf-8', {throws: false});
+	var plugins = [];
+	for (var i in plugFile){
+		if (i == category){
+			for (var j in plugFile[i]){
+				plugins.push(j);
+			}
+		}
+	}
+	return plugins;
+}
+
+/**
+ * Returns an array of plugins with status, sorted by category
+ * @returns {Array}
+ */
+PluginManager.prototype.getPluginsMatrix = function () {
+	var self = this;
+
+	//plugins = [{"cat": "", "plugs": []}]
+	var plugins = [];
+	var catNames = self.getPluginCategories();
+	for (var i = 0; i < catNames.length; i++){
+		var cName = catNames[i];
+		var plugNames = self.getAllPlugNames(catNames[i]);
+		//catPlugin = [{"plug": "", "enabled": ""}]
+		var catPlugin = [];
+		for (var j = 0; j < plugNames.length; j++){
+			var name = plugNames[j];
+			var enabled = self.isEnabled(catNames[i], plugNames[j]);
+			catPlugin.push({name, enabled});
+		}
+		plugins.push({cName, catPlugin});
+	}
+	return plugins;
+}
 
 PluginManager.prototype.onVolumioStart = function () {
 	var self = this;
@@ -470,11 +516,11 @@ PluginManager.prototype.installPlugin = function (url) {
 					self.tempCleanup();
 				})
 				.fail(function (e) {
-					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
+					currentMessage = 'The following error occurred when installing the plugin: ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The folowing error occurred when installing the plugin: ' + e,
+						'message': 'The following error occurred when installing the plugin: ' + e,
 						'title' : modaltitle+' Error',
 						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
 						'advancedLog': advancedlog
@@ -596,11 +642,11 @@ PluginManager.prototype.updatePlugin = function (data) {
 					self.enablePlugin(category,name);
 				})
 				.fail(function (e) {
-					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
+					currentMessage = 'The following error occurred when installing the plugin: ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The folowing error occurred when installing the plugin: ' + e,
+						'message': 'The following error occurred when installing the plugin: ' + e,
 						'title' : modaltitle+' Error',
 						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
 						'advancedLog': advancedlog

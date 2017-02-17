@@ -84,6 +84,7 @@
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
+		  "wireless_enabled",
           "wireless_dhcp",
           "wireless_static_ip",
           "wireless_static_netmask",
@@ -91,6 +92,13 @@
         ]
       },
       "content": [
+		{
+		  "id": "wireless_enabled",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.NETWORK.WIRELESS_ENABLED",
+		  "label": "TRANSLATE.NETWORK.WIRELESS_ENABLED",
+		  "value": true
+		},
         {
           "id": "wireless_dhcp",
           "element": "switch",
