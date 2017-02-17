@@ -287,19 +287,19 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
 
 
+
 			value = self.config.get('resampling', false);
-			console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+value)
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[0].options'), value));
 
 
 			value = self.config.get('resampling_target_bitdepth', '*');
-			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[1].options'), value));
 
 
 			value = self.config.get('resampling_target_samplerate', '*');
-			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), value));
 			defer.resolve(uiconf);
 		})
@@ -483,7 +483,6 @@ ControllerAlsa.prototype.saveResamplingOpts = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
-
 	self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', data);
 
 

@@ -390,8 +390,7 @@
 		  "resampling",
 		  "resampling_target_bitdepth",
 		  "resampling_target_samplerate",
-		  "resampling_quality",
-		  "resampling_threads"
+		  "resampling_quality"
 		]
 	  },
 	  "content": [
