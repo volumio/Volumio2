@@ -1320,7 +1320,8 @@ CoreCommandRouter.prototype.getI18nString = function (key) {
         else return this.i18nStringsDefaults[key];
     }
     else {
-        if(this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
+        if(this.i18nStrings[splitted[0]]!==undefined &&
+           this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
             return this.i18nStrings[splitted[0]][splitted[1]];
         else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
     }
