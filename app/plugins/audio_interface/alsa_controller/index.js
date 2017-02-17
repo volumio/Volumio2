@@ -303,8 +303,23 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[4].options'), value));
 
 			value = self.config.get('volumecurvemode');
-			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].value.value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[5].options'), value));
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[5].options'), value));
+
+			value = self.config.get('resampling', false);
+			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[0].options'), value));
+
+
+			value = self.config.get('resampling_target_bitdepth', '*');
+            self.configManager.setUIConfigParam(uiconf, 'sections[4].content[1].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[1].options'), value));
+
+
+			value = self.config.get('resampling_target_samplerate', '*');
+            self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[2].options'), value));
+
 
 			var  payload = {"number":cardnum,"name":outdevicename}
 
@@ -626,6 +641,28 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	return defer.promise;
 
 };
+
+ControllerAlsa.prototype.saveResamplingOpts = function (data) {
+	var self = this;
+
+	var defer = libQ.defer();
+	self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', data);
+
+
+
+	self.setConfigParam({key: 'resampling', value: data.resampling});
+	self.setConfigParam({key: 'resampling_target_bitdepth', value: data.resampling_target_bitdepth.value});
+	self.setConfigParam({key: 'resampling_target_samplerate', value: data.resampling_target_samplerate.value});
+
+
+	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('PLAYBACK_OPTIONS.AUDIO_RESAMPLING'), self.commandRouter.getI18nString('PLAYBACK_OPTIONS.AUDIO_RESAMPLING_SETTINGS_SAVED'));
+
+	defer.resolve({});
+
+	return defer.promise;
+
+};
+
 
 ControllerAlsa.prototype.outputDeviceCallback = function (value) {
 	this.config.set('outputdevice', value);
