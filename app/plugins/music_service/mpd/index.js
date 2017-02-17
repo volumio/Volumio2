@@ -147,7 +147,7 @@ ControllerMpd.prototype.addPlayCue = function (data) {
 
 	//Add playlists and cue with load command
 
-    console.log(data);
+    //console.log(data);
     if(data.number!==undefined)
     {
         this.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri);
@@ -632,14 +632,14 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.mpdReady = libQ.nfcall(self.clientMpd.on.bind(self.clientMpd), 'ready');
 	// Catch and log errors
 	self.clientMpd.on('error', function (err) {
-		console.log('MPD error: ' + err);
+		self.logger.error('MPD error: ' + err);
 		if (err = "{ [Error: This socket has been ended by the other party] code: 'EPIPE' }") {
 			// Wait 5 seconds before trying to reconnect
 			setTimeout(function () {
 				self.mpdEstablish();
 			}, 5000);
 		} else {
-			console.log(err);
+            self.logger.error(err);
 		}
 	});
 
@@ -863,7 +863,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 		fs.readFile(__dirname + "/mpd.conf.tmpl", 'utf8', function (err, data) {
 			if (err) {
-				return console.log(err);
+				return self.logger.error(err);
 			}
 			var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
 			var mixer = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mixer');
@@ -908,7 +908,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 
 			fs.writeFile("/etc/mpd.conf", conf8, 'utf8', function (err) {
-				if (err) return console.log(err);
+				if (err) return self.logger.error(err);
 			});
 		});
 
@@ -1613,12 +1613,16 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             var cuesheet = parser.parse(path);
 
             var tracks = cuesheet.files[0].tracks;
+            var cueartist = tracks[index].performer;
+			var cuealbum =	path.substring(path.lastIndexOf("/") + 1);
+			var cuenumber = tracks[index].number - 1;
+			var path = uri.substring(0, uri.lastIndexOf("/") + 1).replace('cue:/','');
 
             defer.resolve({uri:uri,service:'mpd',name: tracks[index].title,
-                artist: tracks[index].performer,
-                album: path.substring(path.lastIndexOf("/") + 1),
-                number: tracks[index].number - 1,
-                albumart:'/albumart'
+                artist: cueartist,
+                album: cuealbum,
+                number: cuenumber,
+                albumart:self.getAlbumArt({artist:cueartist,album: cuealbum},path)
             });
     }
     else if(uri.startsWith('search://'))
@@ -2352,7 +2356,7 @@ ControllerMpd.prototype.getGroupVolume = function () {
         .then(function (objState) {
 
             if (objState.volume) {
-                console.log(objState.volume);
+                //console.log(objState.volume);
                 defer.resolve(objState.volume);
             }
 
@@ -2951,10 +2955,10 @@ ControllerMpd.prototype.getMixerControls = function () {
     var cards = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getMixerControls', '1');
 
     cards.then(function (data) {
-        console.log(data);
+        //console.log(data);
     })
         .fail(function () {
-            console.log(data);
+            //console.log(data);
         });
 
     //console.log(cards)
@@ -3041,7 +3045,7 @@ ControllerMpd.prototype.ffwdRew=function(millisecs){
         param=delta;
     }
 
-    console.log("PARAM: "+param);
+    //console.log("PARAM: "+param);
 
     self.clientMpd.sendCommand(cmd("seekcur", [param]), function (err, msg) {
         if(err)
