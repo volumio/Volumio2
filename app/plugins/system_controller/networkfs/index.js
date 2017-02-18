@@ -511,7 +511,6 @@ ControllerNetworkfs.prototype.listShares = function (data) {
 
 ControllerNetworkfs.prototype.getMountSize = function (share) {
 	return new Promise(function (resolve, reject) {
-		var realsize = '';
 		var key = 'NasMounts.' + share + '.';
 		var name = config.get(key + 'name');
 		var mountidraw = name;
@@ -528,17 +527,17 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 			password: config.get(key + 'password'),
 			options: config.get(key + 'options'),
 			mounted: mounted.mounted,
-			size: realsize
+			size: ''
 		};
-		var cmd="df -BM "+mountpoint+" | awk '{print $3}'";
+		// cmd returns size in bytes with no units and no header line
+		var cmd="df -B1 --output=used '"+mountpoint+"' | tail -1";
 		var promise = libQ.ncall(exec,respShare,cmd).then(function (stdout){
 
 
 			var splitted=stdout.split('\n');
-			var sizeStr=splitted[1];
+			var sizeStr=splitted[0];
 
-			var size=parseInt(sizeStr.substring(0,sizeStr.length-1));
-
+			var size=parseInt(sizeStr) / 1024 / 1024;
 			var unity = 'MB';
 			if (size > 1024) {
 				size = size / 1024;
@@ -548,8 +547,7 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 					unity = 'TB';
 				}
 			}
-			realsize = size.toFixed(2);
-			respShare.size = realsize + " " + unity ;
+			respShare.size = size.toFixed(2) + " " + unity ;
 			resolve(respShare);
 
 		}).fail(function (e){
