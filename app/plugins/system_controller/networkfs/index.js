@@ -481,7 +481,6 @@ ControllerNetworkfs.prototype.listShares = function (data) {
 
 	var response = [];
 	var size = '';
-	var unity = '';
 	var defer = libQ.defer();
 
 	var shares = config.getKeys('NasMounts');
@@ -509,9 +508,31 @@ ControllerNetworkfs.prototype.listShares = function (data) {
 	return defer.promise;
 };
 
+// Library function based on
+// http://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-by
+// tes-to-kb-mb-gb-in-javascript
+// http://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
+ControllerNetworkfs.prototype.formatBytes = function (bytes, decimals, SIunits) {
+	if ( isNaN(bytes) ) return 'NaN';
+	var dm = Math.abs(decimals) + 0 || 3;
+	var thresh = SIunits ? 1000 : 1024;
+	if (Math.abs(bytes) < thresh) {
+	    return bytes.toFixed(dm) + ' B';
+	}
+	var units = SIunits
+	    ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+	    : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+	var u = -1;
+	do {
+	    bytes /= thresh;
+	    ++u;
+	} while(Math.abs(bytes) >= thresh && u < units.length - 1);
+	return bytes.toFixed(dm) + ' ' + units[u];
+};
+
 ControllerNetworkfs.prototype.getMountSize = function (share) {
+	var self = this;
 	return new Promise(function (resolve, reject) {
-		var realsize = '';
 		var key = 'NasMounts.' + share + '.';
 		var name = config.get(key + 'name');
 		var mountidraw = name;
@@ -528,28 +549,18 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 			password: config.get(key + 'password'),
 			options: config.get(key + 'options'),
 			mounted: mounted.mounted,
-			size: realsize
+			size: ''
 		};
-		var cmd="df -BM "+mountpoint+" | awk '{print $3}'";
+		// cmd returns size in bytes with no units and no header line
+		var cmd="df -B1 --output=used '"+mountpoint+"' | tail -1";
 		var promise = libQ.ncall(exec,respShare,cmd).then(function (stdout){
 
+			var splitted = stdout.split('\n');
+			var sizeStr = splitted[0];
 
-			var splitted=stdout.split('\n');
-			var sizeStr=splitted[1];
-
-			var size=parseInt(sizeStr.substring(0,sizeStr.length-1));
-
-			var unity = 'MB';
-			if (size > 1024) {
-				size = size / 1024;
-				unity = 'GB';
-				if (size > 1024) {
-					size = size / 1024;
-					unity = 'TB';
-				}
-			}
-			realsize = size.toFixed(2);
-			respShare.size = realsize + " " + unity ;
+			var bytes = parseInt(sizeStr);
+			// format with 2 decimal places and binary units
+			respShare.size = self.formatBytes(bytes, 2, false);
 			resolve(respShare);
 
 		}).fail(function (e){
