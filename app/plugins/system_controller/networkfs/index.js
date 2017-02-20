@@ -332,6 +332,14 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	if (password == undefined) password = '';
 	if (options == undefined) options = '';
 
+	if (fstype == 'cifs') {
+		/* when the share is mounted the ip and path are joined with '/'.
+		 * mount.cifs can fail if given '//server//path', so let's avoid that.
+		 */
+		path = path.replace(/\/+/g,'/');
+		path = path.replace(/^\//,'');
+	}
+
 	var uuid = self.getShare(name, ip, path);
 	var response;
 	if (uuid == undefined) {
