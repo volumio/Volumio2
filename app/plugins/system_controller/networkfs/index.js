@@ -417,7 +417,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 			mountutil.umount(mountpoint, false, {"removeDir": true}, function (result) {
 				if (result.error) {
 					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
-					self.logger.error("Mount point '" + mountpoint + "' cannot be removed, won't appear next boot. Error: " + result.error);
+					self.logger.error("Mount point '" + mountpoint + "' cannot be removed. Error: " + result.error);
 					defer.resolve(responsemessage);
 				}
 				else {
