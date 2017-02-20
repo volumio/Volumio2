@@ -60,7 +60,13 @@
 	"HOTSPOT_PW_LENGTH":"La password dell'hotspot deve contenere almeno 8 caratteri"
   },
   "NETWORKFS":{
-    "ALIAS_DOC":"Scegli un alias che verrà mostrato alla voce NAS"
+    "ALIAS_DOC":"Scegli un alias che verrà mostrato alla voce NAS",
+	"ERROR_UMOUNT":"Rimozione del disco di rete fallito",
+	"REMOVED":"Disco di rete rimosso correttamente",
+	"NETWORK_DRIVE":"Disco di rete",
+	"SHARE_NOT_CONFIGURED":"Disco di rete non configurato",
+	"SHARE_MOUNT_SUCCESS":"Disco di rete aggiunto correttamente",
+	"MOUNT_SHARE_ERROR":"Errore nell'aggiungere il disco di rete"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Aggiunta",
@@ -103,7 +109,8 @@
     "TRACKS":"Canzoni",
 	"CANCEL":"Annulla",
 	"SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
-	"SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni"
+	"SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
+	"ERROR":"Errore"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

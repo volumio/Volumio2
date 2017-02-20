@@ -70,7 +70,13 @@
 	"STATIC_IP_WARNING":"Warning, please make sure Static IP Settings are correct. A wrong configuration might render your device unreachable"
   },
   "NETWORKFS":{
-    "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts"
+    "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts",
+	"ERROR_UMOUNT":"Cannot remove Share",
+	"REMOVED":"Share successfully removed",
+	"NETWORK_DRIVE":"Network Drive",
+	"SHARE_NOT_CONFIGURED":"This Share is not configured",
+	"SHARE_MOUNT_SUCCESS":"Network Drive Added successfully",
+	"MOUNT_SHARE_ERROR":"Error in adding network drive"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",
@@ -120,7 +126,8 @@
     "LAST_100":"last 100",
 	"CONTINUE":"Continue",
 	"SETTINGS_SAVED_SUCCESSFULLY":"Settings saved successfully",
-	"SETTINGS_SAVE_ERROR":"Error in saving settings"
+	"SETTINGS_SAVE_ERROR":"Error in saving settings",
+	"ERROR":"Error"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",

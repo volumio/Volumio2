@@ -416,13 +416,13 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 
 			mountutil.umount(mountpoint, false, {"removeDir": true}, function (result) {
 				if (result.error) {
-					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: self.commandRouter.getI18nString('COMMON.ERROR'), message: self.commandRouter.getI18nString('NETWORKFS.ERROR_UMOUNT')}};
 					self.logger.error("Mount point '" + mountpoint + "' cannot be removed. Error: " + result.error);
 					defer.resolve(responsemessage);
 				}
 				else {
-					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
-					self.logger.info("Share " + sharename + " successfully unmounted");
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: self.commandRouter.getI18nString('NETWORKFS.NETWORK_DRIVE'), message: self.commandRouter.getI18nString('NETWORKFS.REMOVED')}};
+					self.logger.info("Share " + mountid + " successfully unmounted");
 					defer.resolve(responsemessage);
 					config.delete(key);
 				}
@@ -435,18 +435,18 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 		} else {
 			exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 				if (error !== null) {
-					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: self.commandRouter.getI18nString('COMMON.ERROR'), message: self.commandRouter.getI18nString('NETWORKFS.ERROR_UMOUNT')}};
 					self.logger.error("Cannot Delete Folder. Error: " + error);
 					defer.resolve(responsemessage);
 				} else {
-					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Network Drives', message: 'Share successfully removed'}};
+					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: self.commandRouter.getI18nString('NETWORKFS.NETWORK_DRIVE'), message: self.commandRouter.getI18nString('NETWORKFS.REMOVED')}};
 					defer.resolve(responsemessage);
 					config.delete(key);
 				}
 			});
 		}
 	} else {
-		responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'This Share is not configured'}};
+		responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: self.commandRouter.getI18nString('COMMON.ERROR'), message: self.commandRouter.getI18nString('NETWORKFS.SHARE_NOT_CONFIGURED')}};
 		defer.resolve(responsemessage);
 	}
 
@@ -662,7 +662,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 						console.log(data.status);
 						if (data.status == 'success') {
 							self.scanDatabase();
-							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Success', message: 'Share mounted successfully'}};
+							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: self.commandRouter.getI18nString('NETWORKFS.NETWORK_DRIVE'), message: self.commandRouter.getI18nString('NETWORKFS.SHARE_MOUNT_SUCCESS')}};
 							defer.resolve(responsemessageedit);
 
 						} else if (data.status === 'fail') {
@@ -680,7 +680,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 									responsemessageedit = {emit: 'nasCredentialsCheck', data:{ 'id': id, 'name': name, 'username': username, 'password':password }};
 									defer.resolve(responsemessageedit);
 								} else {
-									responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'warning', title: 'Error in mounting share ', message: data.reason}};
+									responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'warning', title: self.commandRouter.getI18nString('NETWORKFS.MOUNT_SHARE_ERROR'), message: data.reason}};
 									defer.resolve(responsemessageedit);
 								}
 
