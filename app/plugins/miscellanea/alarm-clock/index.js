@@ -196,14 +196,24 @@ AlarmClock.prototype.getAlarms=function()
 	return defer.promise;
 };
 
-AlarmClock.prototype.saveAlarm=function(data)
-{
+AlarmClock.prototype.saveAlarm=function(data) {
 	var self = this;
-
 	var defer = libQ.defer();
 
-	self.setConf(data);
-	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_TITLE'), self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_SAVE'));
+	for (var i in data) {
+		if (!data[i].time) {
+			var error = true;
+			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_TITLE'), self.commandRouter.getI18nString('ALARM.TIME_SELECT_ERROR'));
+		} else if (!data[i].playlist) {
+			var error = true;
+			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_TITLE'), self.commandRouter.getI18nString('ALARM.PLAYLIST_SELECT_ERROR'));
+		}
+	}
+
+	if (!error){
+		self.setConf(data);
+		self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_TITLE'), self.commandRouter.getI18nString('ALARM.ALARM_CLOCK_SAVE'));
+	}
 
 
 	defer.resolve({});

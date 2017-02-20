@@ -140,7 +140,9 @@
     "SLEEP_MODE_MINUTE":"minuti",
     "SLEEP_MODE_HOUR":"ore",
     "STOP_MUSIC":"Ferma la musica",
-    "TURN_OFF":"Spegni"
+    "TURN_OFF":"Spegni",
+	"TIME_SELECT_ERROR":"Seleziona l'ora di avvio",
+	"PLAYLIST_SELECT_ERROR":"Seleziona almeno una playlist"
   },
   "SYSTEM":{
     "SYSTEM_SETTINGS":"Impostazioni di sistema",

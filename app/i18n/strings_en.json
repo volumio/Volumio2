@@ -158,7 +158,9 @@
     "SLEEP_MODE_MINUTE":" minute (s)",
     "SLEEP_MODE_HOUR":"hour(s)",
     "STOP_MUSIC":"Stop Music",
-    "TURN_OFF":"Turn off"
+    "TURN_OFF":"Turn off",
+	"TIME_SELECT_ERROR":"Please select an alarm start time",
+	"PLAYLIST_SELECT_ERROR":"Please select a Playlist"
   },
   "SYSTEM":{
     "SYSTEM_SETTINGS":"System Settings",
