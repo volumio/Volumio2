@@ -431,7 +431,7 @@ ControllerNetworkfs.prototype.deleteShare = function (data) {
 				self.scanDatabase();
 			}, 3000);
 
-	} else {
+		} else {
 			exec('rm -rf ' + mountpoint + ' ', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 				if (error !== null) {
 					responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error', message: 'Cannot remove Share'}};
