@@ -351,14 +351,20 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 
 	var uuid = self.getShare(name, ip, path);
 	var response;
-	if (uuid == undefined) {
-		uuid = libUUID.v4();
-		var key = "NasMounts." + uuid + ".";
-		self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
+	if (uuid != undefined) {
+		defer.resolve({
+			success: false,
+			reason: 'This share has already been configured'
+		});
+	}
 
-		var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
+	uuid = libUUID.v4();
+	var key = "NasMounts." + uuid + ".";
+	self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
 
-		saveshare.then(function () {
+	var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
+
+	saveshare.then(function () {
 		var mountshare = self.mountShare({key:uuid});
 		if (mountshare != undefined) {
 			mountshare.then(function (data) {
@@ -380,20 +386,17 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 						}
 
 
+					} else {
+						responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error in mounting share '+name, message: 'Unknown error'}};
+						self.logger.info("Unknown error mounting  " + name + " on IP " + ip);
+						defer.resolve(responsemessage);
 					}
 				}
 
 
 			});
 		}
-		});
-	}
-	else {
-		defer.resolve({
-			success: false,
-			reason: 'This share has already been configured'
-		});
-	}
+	});
 
 	return defer.promise;
 };
