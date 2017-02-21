@@ -371,6 +371,10 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 						}
 
 
+					} else {
+						responsemessage = {emit: 'pushToastMessage', data:{ type: 'error', title: 'Error in mounting share '+name, message: 'Unknown error'}};
+						self.logger.info("Unknown error mounting  " + name + " on IP " + ip);
+						defer.resolve(responsemessage);
 					}
 				}
 
