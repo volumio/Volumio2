@@ -349,13 +349,13 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		});
 	}
 
-		uuid = libUUID.v4();
-		var key = "NasMounts." + uuid + ".";
-		self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
+	uuid = libUUID.v4();
+	var key = "NasMounts." + uuid + ".";
+	self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
 
-		var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
+	var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
 
-		saveshare.then(function () {
+	saveshare.then(function () {
 		var mountshare = self.mountShare({key:uuid});
 		if (mountshare != undefined) {
 			mountshare.then(function (data) {
@@ -387,7 +387,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 
 			});
 		}
-		});
+	});
 
 	return defer.promise;
 };
