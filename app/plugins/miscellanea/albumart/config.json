@@ -1,4 +1,6 @@
 {
   "port":{"value":3001,"type":"number"},
-  "folder":{"value":"/data/albumart","type":"string"}
+  "folder":{"value":"/data/albumart","type":"string"},
+  "enableweb":{"value":true,"type":"boolean"},
+  "defaultwebsize":{"value":"large","type":"string"}
 }

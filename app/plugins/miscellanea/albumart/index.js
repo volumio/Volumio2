@@ -3,6 +3,8 @@
 var exec = require('child_process').exec;
 var libQ = require('kew');
 var nodetools = require('nodetools');
+var enableweb = true;
+var defaultwebsize = 'large';
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -13,15 +15,20 @@ function AlbumArt(context) {
 	// Save a reference to the parent commandRouter
 	self.context=context;
 	self.commandRouter = self.context.coreCommand;
+	self.configManager = self.context.configManager;
 
 }
 
 AlbumArt.prototype.onVolumioStart = function() {
 	var self = this;
 
-	self.config= new (require('v-conf'))();
-	var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
+	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
+
+	self.config = new (require('v-conf'))();
 	self.config.loadFile(configFile);
+
+	enableweb = self.config.get('enableweb', true);
+	defaultwebsize = self.config.get('defaultwebsize', 'large');
 
 	//Starting server
 	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
@@ -84,7 +91,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 
     var web;
 
-    if (data != undefined && data.artist != undefined) {
+    if (data != undefined && data.artist != undefined && enableweb) {
         //performing decode since we cannot assume client will pass decoded strings
 
         artist = nodetools.urlDecode(data.artist);
@@ -93,9 +100,11 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
             album = nodetools.urlDecode(data.album);
         else album =artist;
 
-        if(data.size)
-            size=data.size;
-        else size='large';
+        if (data.size) {
+			size=data.size;
+		} else {
+			size=defaultwebsize;
+		}
 
         web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
     }
@@ -123,4 +132,31 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 
 
     return url;
+};
+
+AlbumArt.prototype.getConfigParam = function (key) {
+	var self = this;
+	return self.config.get(key);
+};
+
+AlbumArt.prototype.setConfigParam = function (data) {
+	var self = this;
+
+	self.config.set(data.key, data.value);
+};
+
+AlbumArt.prototype.saveAlbumartOptions = function (data) {
+	var self = this;
+	
+	if (data.enable_web != undefined) {
+		self.config.set('enableweb', data['enable_web']);
+		enableweb = data.enable_web;
+	}
+
+	if (data.web_quality != undefined) {
+		self.config.set('defaultwebsize', data['web_quality'].value);
+		defaultwebsize = data.web_quality.value;
+	}
+
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 };

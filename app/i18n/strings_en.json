@@ -135,7 +135,17 @@
     "UI_CONFIG_SELECT_LANGUAGE":"Select Language",
     "NEW_LANGUAGE_SET":"New language set",
     "NEW_BACKGROUND_APPLIED":"New Background applied",
-    "BACKGROUND_DELETED":"Background deleted"
+    "BACKGROUND_DELETED":"Background deleted",
+	"ALBUMART_SETTINGS":"Albumart Settings",
+	"WEB_ALBUMART_ENABLE_DOC":"Enable retrieval of Albumart from Web, if no image is found in the file folder",
+	"WEB_ALBUMART_ENABLE":"Web Albumart",
+	"WEB_ALBUMART_SIZE_DOC":"Choose the size of Albumart downloaded from web: higher the quality, higher is the load time. If you experience slow browsing try to lower this setting",
+	"WEB_ALBUMART_SIZE":"Web Albumart Size",
+	"SMALL":"Small",
+	"MEDIUM":"Medium",
+	"LARGE":"Large",
+	"EXTRALARGE":"Extralarge",
+	"MEGA":"Mega"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",

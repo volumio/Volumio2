@@ -4,5 +4,65 @@
   },
   "sections": [
     {"coreSection":"my-music"},
-{"coreSection":"network-drives"}
+	{"coreSection":"network-drives"},
+	{
+	  "id": "albumart_settings",
+	  "element": "section",
+	  "label": "TRANSLATE.APPEARANCE.ALBUMART_SETTINGS",
+	  "icon": "fa-file-image-o",
+	  "onSave": {"type":"controller", "endpoint":"miscellanea/albumart", "method":"saveAlbumartOptions"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+		  "enable_web",
+		  "web_quality"
+		]
+	  },
+	  "content": [
+		{
+		  "id": "enable_web",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.APPEARANCE.WEB_ALBUMART_ENABLE_DOC",
+		  "label": "TRANSLATE.APPEARANCE.WEB_ALBUMART_ENABLE",
+		  "value": true
+		},
+		{
+		  "id": "web_quality",
+		  "element": "select",
+		  "doc" : "TRANSLATE.APPEARANCE.WEB_ALBUMART_SIZE_DOC",
+		  "label": "TRANSLATE.APPEARANCE.WEB_ALBUMART_SIZE",
+		  "value":  {
+			"value":"large",
+			"label": "TRANSLATE.APPEARANCE.LARGE"
+		  },
+		  "visibleIf": {
+			"field": "enable_web",
+			"value": true
+		  },
+		  "options": [
+			{
+			  "value":"small",
+			  "label": "TRANSLATE.APPEARANCE.SMALL"
+			},
+			{
+			  "value":"medium",
+			  "label": "TRANSLATE.APPEARANCE.MEDIUM"
+			},
+			{
+			  "value":"large",
+			  "label": "TRANSLATE.APPEARANCE.LARGE"
+			},
+			{
+			  "value":"extralarge",
+			  "label": "TRANSLATE.APPEARANCE.EXTRALARGE"
+			},
+			{
+			  "value":"mega",
+			  "label": "TRANSLATE.APPEARANCE.MEGA"
+			}
+		  ]
+
+		}
+	  ]
+	}
 ]}

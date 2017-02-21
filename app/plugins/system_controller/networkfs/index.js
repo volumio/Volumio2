@@ -19,6 +19,7 @@ function ControllerNetworkfs(context) {
 	self.context = context;
 	self.commandRouter = self.context.coreCommand;
 	self.logger = self.commandRouter.logger;
+	self.configManager = self.context.configManager;
 
 
 }
@@ -78,6 +79,14 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
 		__dirname + '/UIConfig.json')
 		.then(function(uiconf)
 		{
+			var enableweb = self.getAdditionalConf('miscellanea', 'albumart', 'enableweb', true);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', enableweb);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), enableweb));
+
+			var websize = self.getAdditionalConf('miscellanea', 'albumart', 'defaultwebsize', 'large');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', websize);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), websize));
+
 			defer.resolve(uiconf);
 		})
 		.fail(function()
@@ -765,3 +774,23 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 };
 
 
+ControllerNetworkfs.prototype.getAdditionalConf = function (type, controller, data, def) {
+	var self = this;
+	var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+	if (setting == undefined) {
+		setting = def;
+	}
+	return setting
+};
+
+ControllerNetworkfs.prototype.getLabelForSelect = function (options, key) {
+	var self=this;
+	var n = options.length;
+	for (var i = 0; i < n; i++) {
+		if (options[i].value == key)
+			return options[i].label;
+	}
+
+	return 'Error';
+};
