@@ -514,26 +514,28 @@ ControllerMpd.prototype.parseState = function (objState) {
 	if ('audio' in objState) {
 		var objMetrics = objState.audio.split(':');
 		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
+		nBitDepth = Number(objMetrics[1])+' bit';
 
-
-			if (nSampleRateRaw === 352.8){
-				var nSampleRateRaw = 2.82+' MHz';
+		if (objMetrics[1] == 'dsd') {
+			if (nSampleRateRaw === 352.8) {
+				var nSampleRateRaw = 2.82 + ' MHz';
 				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 705.6) {
-				var nSampleRateRaw = 5.64+' MHz';
+				var nSampleRateRaw = 5.64 + ' MHz';
 				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 1411.2) {
-				var nSampleRateRaw = 11.2+' MHz';
+				var nSampleRateRaw = 11.2 + ' MHz';
 				nBitDepth = '1 bit'
-			}else {
-				var nSampleRateRaw = nSampleRateRaw+' KHz';
-				nBitDepth = Number(objMetrics[1])+' bit';
+			} else {
+				var nSampleRateRaw = nSampleRateRaw + ' KHz';
 			}
+		} else {
+			var nSampleRateRaw = nSampleRateRaw + ' KHz';
+		}
 		nSampleRate = nSampleRateRaw;
 
 		nChannels = Number(objMetrics[2]);
 	}
-
 	var random = null;
 	if ('random' in objState) {
 		random = objState.random == 1;
