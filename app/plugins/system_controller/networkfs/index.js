@@ -342,7 +342,13 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 
 	var uuid = self.getShare(name, ip, path);
 	var response;
-	if (uuid == undefined) {
+	if (uuid != undefined) {
+		defer.resolve({
+			success: false,
+			reason: 'This share has already been configured'
+		});
+	}
+
 		uuid = libUUID.v4();
 		var key = "NasMounts." + uuid + ".";
 		self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
@@ -382,13 +388,6 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 			});
 		}
 		});
-	}
-	else {
-		defer.resolve({
-			success: false,
-			reason: 'This share has already been configured'
-		});
-	}
 
 	return defer.promise;
 };
