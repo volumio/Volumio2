@@ -28,7 +28,7 @@ AlbumArt.prototype.onVolumioStart = function() {
 	self.config.loadFile(configFile);
 
 	enableweb = self.config.get('enableweb', true);
-	defaultwebsize = self.config.get('defaultwebsize', 'large');
+	defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
 
 	//Starting server
 	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
@@ -147,7 +147,7 @@ AlbumArt.prototype.setConfigParam = function (data) {
 
 AlbumArt.prototype.saveAlbumartOptions = function (data) {
 	var self = this;
-	
+
 	if (data.enable_web != undefined) {
 		self.config.set('enableweb', data['enable_web']);
 		enableweb = data.enable_web;
