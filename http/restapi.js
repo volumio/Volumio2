@@ -44,25 +44,27 @@ api.get('/host', function(req, res) {
 	var hostsarray = [];
 	var interfacesarray = ['eth0','wlan0'];
 
-	for (var i in interfacesarray){
-		ifconfig.status(interfacesarray[i], function(err, status) {
-			if (primaryhost != undefined ) {
-				hostsarray.push(primaryhost);
-			}
-			if (status != undefined && status.ipv4_address != undefined) {
-				hostsarray.push('http://'+status.ipv4_address);
-			}
+	if (primaryhost != undefined ) {
+		return res.json({ host: primaryhost});
+	} else {
+		for (var i in interfacesarray) {
+			ifconfig.status(interfacesarray[i], function (err, status) {
 
-			if (i === interfacesarray.length) {
-				if(hostsarray.length > 1) {
-					return res.json({ host: hostsarray[0], host2: hostsarray[1]});
-				} else {
-					return res.json({ host: hostsarray[0]});
+				if (status != undefined && status.ipv4_address != undefined) {
+					hostsarray.push('http://' + status.ipv4_address);
 				}
 
-			}
-			i++
-		});
+				if (i === interfacesarray.length) {
+					if (hostsarray.length > 1) {
+						return res.json({host: hostsarray[0], host2: hostsarray[1]});
+					} else {
+						return res.json({host: hostsarray[0]});
+					}
+
+				}
+				i++
+			});
+		}
 	}
 });
 
