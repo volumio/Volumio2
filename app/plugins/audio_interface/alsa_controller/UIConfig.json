@@ -65,6 +65,7 @@
 	  "id": "dac_dsp_options",
 	  "element": "section",
 	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS",
+	  "doc":"TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS_DOC",
 	  "icon": "fa-microchip",
 	  "hidden": true,
 	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveDSPOptions"},
@@ -101,7 +102,7 @@
         {
           "id": "dop",
           "element": "switch",
-          "doc": "DSD Over PCM",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.DOP_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP",
           "value":false
         },
@@ -110,7 +111,7 @@
         {
           "id": "volume_normalization",
           "element": "switch",
-          "doc":"If turned On Volumio will normalize the volume of tracks as they play. Default is Off.",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION",
           "value":false
         },
@@ -118,7 +119,7 @@
         {
           "id": "audio_buffer_size",
           "element": "select",
-          "doc":"This specifies the size of the audio buffer. The default is 2 MB, large enough for nearly 12 seconds of CD-quality audio.",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.AUDIO_BUFFER_SIZE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_BUFFER_SIZE",
           "value":  {
             "value":8192,
@@ -152,7 +153,7 @@
         {
           "id": "buffer_before_play",
           "element": "select",
-          "doc": "This specifies how much of the audio buffer should be filled before playing a track. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.BUFFER_BEFORE_PLAY_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.BUFFER_BEFORE_PLAY",
           "value":  {
             "value":"20%",
@@ -208,7 +209,7 @@
         {
           "id": "mixer_type",
           "element": "select",
-          "doc" : "Mixer Type Selector ",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_TYPE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_TYPE",
           "value":  {
             "value":"",
@@ -222,7 +223,7 @@
         {
           "id": "mixer",
           "element": "select",
-          "doc" : "Mixer Selector ",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
             "value":"",
@@ -236,7 +237,7 @@
         {
           "id": "volumestart",
           "element": "select",
-          "doc" : "This is the default volume that is set at system startup.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME",
           "value":  {
             "value":"disabled",
@@ -294,7 +295,7 @@
         {
           "id": "volumemax",
           "element": "select",
-          "doc" : "This is the maximum volume of the system.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL",
           "value":  {
             "value":"100",
@@ -347,7 +348,7 @@
         {
           "id": "volumesteps",
           "element": "select",
-          "doc" : "This is the maximum volume of the system.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS",
           "value":  {
             "value":"10",
@@ -385,7 +386,7 @@
         {
           "id": "volumecurvemode",
           "element": "select",
-          "doc" : "This is the volume curve used by the system, most DACs will use a logarithmic curve.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE",
           "value":  {
             "value":"logarithmic",
