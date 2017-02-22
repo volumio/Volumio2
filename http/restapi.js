@@ -73,7 +73,9 @@ api.post('/host', function(req, res) {
 
 	if (req.body.host) {
 	primaryhost = req.body.host;
+	res.send(200);
 	}
+
 });
 
 
