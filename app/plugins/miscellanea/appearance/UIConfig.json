@@ -22,7 +22,7 @@
         {
           "id": "language",
           "element": "select",
-          "doc": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
+          "doc": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE_DOC",
           "label": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
           "value":  {
             "value":0,

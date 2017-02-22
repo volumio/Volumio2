@@ -23,7 +23,7 @@
         {
           "id": "dhcp",
           "element": "switch",
-          "doc" : "Choose between DHCP and Static IP configuration.",
+          "doc" : "TRANSLATE.NETWORK.AUTOMATIC_IP_DOC",
           "label": "TRANSLATE.NETWORK.AUTOMATIC_IP",
           "value": true
         },
@@ -95,14 +95,14 @@
 		{
 		  "id": "wireless_enabled",
 		  "element": "switch",
-		  "doc" : "TRANSLATE.NETWORK.WIRELESS_ENABLED",
+		  "doc" : "TRANSLATE.NETWORK.WIRELESS_ENABLED_DOC",
 		  "label": "TRANSLATE.NETWORK.WIRELESS_ENABLED",
 		  "value": true
 		},
         {
           "id": "wireless_dhcp",
           "element": "switch",
-          "doc" : "Choose between DHCP and Static IP configuration.",
+		  "doc" : "TRANSLATE.NETWORK.AUTOMATIC_IP_DOC",
           "label": "TRANSLATE.NETWORK.AUTOMATIC_IP",
           "value": true
         },
@@ -206,6 +206,7 @@
 		  "type": "password",
 		  "element": "input",
 		  "label": "TRANSLATE.NETWORK.HOTSPOT_PASSWORD",
+		  "doc": "TRANSLATE.NETWORK.HOTSPOT_PASSWORD_DOC",
 		  "value": "",
 		  "visibleIf": {
 			"field": "enable_hotspot",
@@ -216,6 +217,7 @@
 		  "id": "hotspot_channel",
 		  "element": "select",
 		  "label": "TRANSLATE.NETWORK.HOTSPOT_CHANNEL",
+		  "doc": "TRANSLATE.NETWORK.HOTSPOT_CHANNEL_DOC",
 		  "value":  {
 			"value":0,
 			"label": "0"
