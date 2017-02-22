@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var ip = require('ip');
 var api = express.Router();
 var ifconfig = require('wireless-tools/ifconfig');
+var primaryhost = undefined;
 
 function apiInterface(server, commandRouter) {
 
@@ -45,6 +46,9 @@ api.get('/host', function(req, res) {
 
 	for (var i in interfacesarray){
 		ifconfig.status(interfacesarray[i], function(err, status) {
+			if (primaryhost != undefined ) {
+				hostsarray.push(primaryhost);
+			}
 			if (status != undefined && status.ipv4_address != undefined) {
 				hostsarray.push('http://'+status.ipv4_address);
 			}
@@ -59,6 +63,14 @@ api.get('/host', function(req, res) {
 			}
 			i++
 		});
+	}
+});
+
+api.post('/host', function(req, res) {
+	var self =this;
+
+	if (req.body.host) {
+	primaryhost = req.body.host;
 	}
 });
 
