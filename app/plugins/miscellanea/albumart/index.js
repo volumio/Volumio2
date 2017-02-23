@@ -90,7 +90,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
     }
 
     var web;
-
+	try {
     if (data != undefined && data.artist != undefined && enableweb) {
         //performing decode since we cannot assume client will pass decoded strings
 
@@ -108,7 +108,9 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 
         web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
     }
-
+	} catch (e) {
+	console.log('Cannot compose Albumart path')
+	}
     var url = '/albumart';
 
     if (web != undefined)
