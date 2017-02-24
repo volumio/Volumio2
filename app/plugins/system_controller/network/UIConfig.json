@@ -175,7 +175,7 @@
 		{
 		  "id": "enable_hotspot",
 		  "element": "switch",
-		  "doc" : "Enable or disable Volumio Hotspot",
+		  "doc" : "TRANSLATE.NETWORK.ENABLE_HOTSPOT_DOC",
 		  "label": "TRANSLATE.NETWORK.ENABLE_HOTSPOT",
 		  "value": true
 		},

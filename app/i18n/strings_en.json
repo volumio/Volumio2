@@ -72,6 +72,7 @@
     "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted",
     "HOTSPOT_SETTINGS":"Hotspot Settings",
     "ENABLE_HOTSPOT":"Enable Hotspot",
+	"ENABLE_HOTSPOT_DOC":"If Hotspot is enabled when connection to Wireless Network is dropped (or if no Wireless network has been configured), the system will start Hotspot automatically. Disable ONLY if you don't want such behaviour",
     "HOTSPOT_NAME":"Hotspot Name",
     "HOTSPOT_PROTECTION":"Password Protected Hotspot",
     "HOTSPOT_PASSWORD":"Hotspot Password",
