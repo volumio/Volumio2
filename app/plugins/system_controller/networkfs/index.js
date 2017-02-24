@@ -729,7 +729,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 	var defer = libQ.defer();
 	var sharesjson = {"nas":[]};
 	try {
-		var shares = execSync("/bin/echo volumio | /usr/bin/smbtree", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
+		var shares = execSync("/usr/bin/smbtree -N", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
 	} catch (err) {
 		var shares = err.stdout;
 	}
