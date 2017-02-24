@@ -734,39 +734,73 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		var shares = err.stdout;
 	}
 	//console.log(shares);
-	var allshares = shares.split("\n");
-	var num = allshares.length;
-	var progress = 0;
+	var lines = shares.split("\n");
 
+	/*
+	    smbtree returns a tab-separated 'tree' diagram;
+
+	    <domain>
+	    \t\\<nas1>   \t\t<description>
+	    \t\t\\<nas1>\<share1>\t<description1>
+	    \t\t\\<nas1>\<share2>\t<description2>
+	    \t\\<nas2>    \t\t<description>
+	    \t\t\\<nas2>\IPC$	  \t<description>
+
+        The NAS name field is padded with trailing spaces,
+        as are hidden shares. Non-hidden shares are not.
+	 */
 	try {
-	for (var i = 0; i < allshares.length; i++) {
-		progress++
-		var asd = allshares[i];
-		var asd2 = asd.replace('\t\t\\\\','');
-		if (asd2.indexOf('\t\\\\') >= 0) {
-			var cleaned = asd.split(' ');
-			var final1 = cleaned[0].replace('\t\\\\','');
-			var final2 = final1.split('\t');
-			var final = final2[0];
-			if (final != 'VOLUMIO') {
-				sharesjson.nas.push({"name":final,"shares":[]});
+
+		var i, j, n, fields, nas, nasname, share, key;
+		var backslash = /^\\/;
+		var nas_slashes = /^\\\\/;
+		var excludednas = { 'VOLUMIO':true };
+
+		// collate nas names as keys in an object (for easier referencing)
+		var nasobj = { };
+		for (i = 0; i < lines.length; i++) {
+			fields = lines[i].split("\t");
+
+			if ( fields.length < 2 ) continue;
+
+			// parse nas name line
+			if ( nas_slashes.test( fields[1] ) > 0 ) {
+				// strip trailing spaces - not allowed in nas names
+				nas = fields[1].replace(/\s*$/,'');
+				// remove leading backslashes
+				nasname = nas.replace(nas_slashes,'');
+				if (nasname in excludenas) continue;
+				nasobj[nasname] = {"shares":[]};
+				continue;
 			}
-		} else  {
-			var clean2 = asd2.split(' ');
-			for (var e = 0; e < sharesjson.nas.length; e++) {
-				if (asd2.indexOf(sharesjson.nas[e].name) >= 0) {
-					var sharenamearray = clean2[0].split("\\");
-					var sharename = sharenamearray[1];
-					if(sharename.indexOf('$') < 0) {
-						sharesjson.nas[e].shares.push({"sharename": sharename, "path": sharename});
-					}
+
+			// parse share name line
+			if ( nas_slashes.test( fields[2] ) > 0 ) {
+				// remove the \\nasname\ prefix
+				share = fields[2].replace(nas,'');
+				share = share.replace(backslash,'');
+				// ignore hidden shares
+				if ( share.indexOf('$') >= 0 ) continue;
+				if (nasobj[nasname]) {
+					nasobj[nasname].shares.push( share );
 				}
 			}
 		}
-		if (progress === num) {
-			defer.resolve(sharesjson);
+
+		// create return object
+		var sharesjson = { "nas":[] };
+		for (nas in nasobj) {
+			n = nasobj[nas].shares.length;
+			sharesjson.nas.push( { "name":nas, "shares":[] } );
+			i = sharesjson.nas.length - 1;
+			for (j=0; j < n; j++) {
+				share = nasobj[nas].shares[j];
+				sharesjson.nas[i].shares.push( { "sharename": share, "path": share } );
+			}
 		}
-	}
+
+		defer.resolve(sharesjson);
+
 	} catch (e) {
 		sharesjson = {"nas":[]};
 		defer.resolve(sharesjson);
