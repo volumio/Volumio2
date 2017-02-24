@@ -173,7 +173,7 @@
     "ALARM":"Alarme",
     "SLEEP":"Sommeil",
     "CREDITS":"Credits",
-    "SHUTDOWN":"Arrêt",
+    "SHUTDOWN":"Arrêt"
       },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Réveil",
