@@ -754,7 +754,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		var i, j, n, fields, nas, nasname, share, key;
 		var backslash = /^\\/;
 		var nas_slashes = /^\\\\/;
-		var excludednas = { 'VOLUMIO':true };
+		var nas_ignore  = { 'VOLUMIO':true };
 
 		// collate nas names as keys in an object (for easier referencing)
 		var nasobj = { };
@@ -769,7 +769,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 				nas = fields[1].replace(/\s*$/,'');
 				// remove leading backslashes
 				nasname = nas.replace(nas_slashes,'');
-				if (nasname in excludenas) continue;
+				if (nasname in nas_ignore) continue;
 				nasobj[nasname] = {"shares":[]};
 				continue;
 			}
