@@ -164,6 +164,11 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
 			}
 
+			uiconf.sections[5].content[0].value = config.get('enable_custom_dns', false);
+			uiconf.sections[5].content[1].value = config.get('primary_dns', '8.8.8.8');
+			uiconf.sections[5].content[2].value = config.get('secondary_dns', '8.8.4.4');
+
+
 			//console.log(uiconf);
 
 			defer.resolve(uiconf);
@@ -827,4 +832,34 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 //console.log(response);
 	return defer.promise;
 };
+ControllerNetwork.prototype.saveDnsSettings = function (data) {
+	var self = this;
 
+	console.log(data);
+	if (data.enable_custom_dns && (data.primary_dns.length < 7 || data.secondary_dns.length < 7)) {
+		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
+	} else {
+		config.set('enable_custom_dns', data.enable_custom_dns);
+		config.set('primary_dns', data.primary_dns);
+		config.set('secondary_dns', data.secondary_dns);
+	}
+
+	var dnsfile = '##custom DNS' + os.EOL + 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns;
+	exec("/usr/bin/sudo /bin/chmod 777 /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Canot set permissions for /etc/resolv.conf.tail: ' + error);
+		} else {
+			self.logger.info('Permissions for /etc/resolv.conf.tail')
+			fs.writeFile('/etc/resolv.conf.tail', dnsfile, function (err) {
+				if (err) {
+					self.logger.error('Cannot write wpasupplicant.conf ' + error);
+				} else {
+					self.commandRouter.wirelessRestart();
+					self.commandRouter.networkRestart();
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+				}
+			});
+		}
+	});
+
+};

@@ -266,6 +266,54 @@
 		  }
 		}
 	  ]
+	},
+	{
+	  "id": "dns_settings",
+	  "element": "section",
+	  "label": "TRANSLATE.NETWORK.DNS_SETTINGS",
+	  "icon": "fa-book",
+	  "onSave": {"type":"controller", "endpoint":"system_controller/network", "method":"saveDnsSettings"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+		  "enable_custom_dns",
+		  "primary_dns",
+		  "secondary_dns"
+		]
+	  },
+	  "content": [
+		{
+		  "id": "enable_custom_dns",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.NETWORK.ENABLE_CUSTOM_DNS_DOC",
+		  "label": "TRANSLATE.NETWORK.ENABLE_CUSTOM_DNS",
+		  "value": false
+		},
+		{
+		  "id": "primary_dns",
+		  "type": "ip",
+		  "element": "input",
+		  "label": "TRANSLATE.NETWORK.PRIMARY_DNS",
+		  "doc": "TRANSLATE.NETWORK.PRIMARY_DNS_DOC",
+		  "value": "",
+		  "visibleIf": {
+			"field": "enable_custom_dns",
+			"value": true
+		  }
+		},
+		{
+		  "id": "secondary_dns",
+		  "type": "ip",
+		  "element": "input",
+		  "label": "TRANSLATE.NETWORK.SECONDARYY_DNS",
+		  "doc": "TRANSLATE.NETWORK.SECONDARY_DNS_DOC",
+		  "value": "",
+		  "visibleIf": {
+			"field": "enable_custom_dns",
+			"value": true
+		  }
+		}
+	  ]
 	}
   ]
 }
