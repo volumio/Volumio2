@@ -741,13 +741,13 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 
 	    <domain>
 	    \t\\<nas1>   \t\t<description>
-	    \t\t\\<nas1>\<share1>\t<description1>
-	    \t\t\\<nas1>\<share2>\t<description2>
+	    \t\t\\<nas1>\<share1> \t<description1>
+	    \t\t\\<nas1>\<share2> \t<description2>
 	    \t\\<nas2>    \t\t<description>
 	    \t\t\\<nas2>\IPC$	  \t<description>
 
-        The NAS name field is padded with trailing spaces,
-        as are hidden shares. Non-hidden shares are not.
+        Field names shorter than 16 characters are padded with trailing
+        spaces, to 16 characters. Longer names are not padded.
 	 */
 	try {
 
@@ -779,6 +779,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 				// remove the \\nasname\ prefix
 				share = fields[2].replace(nas,'');
 				share = share.replace(backslash,'');
+				share = share.replace(/\s*$/,'');
 				// ignore hidden shares
 				if ( share.indexOf('$') >= 0 ) continue;
 				if (nasobj[nasname]) {
