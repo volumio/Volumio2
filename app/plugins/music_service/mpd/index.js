@@ -1,6 +1,6 @@
 'use strict';
 
-var libMpd = require('mpd');
+var libMpd = require('./lib/mpd.js');
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
@@ -786,7 +786,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 				else{
 					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 				}
-				
+
 				defer.resolve({});
 			});
 		}
