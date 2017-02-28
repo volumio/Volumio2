@@ -352,10 +352,12 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	var uuid = self.getShare(name, ip, path);
 	var response;
 	if (uuid != undefined) {
+		self.logger.info("Share " + name + " has already been configured, with uuid " + uuid);
 		defer.resolve({
 			success: false,
 			reason: 'This share has already been configured'
 		});
+		return defer.promise;
 	}
 
 	uuid = libUUID.v4();
