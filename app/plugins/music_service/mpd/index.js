@@ -2061,7 +2061,12 @@ ControllerMpd.prototype.scanFolder=function(uri)
     var self=this;
     var uris=[];
 
-    var stat=libFsExtra.statSync(uri);
+    try {
+        var stat=libFsExtra.statSync(uri);
+    } catch(err) {
+        console.log("scanFolder - failure to stat '" + uri + "'");
+        return uris;
+    }
 
     if(stat.isDirectory())
     {
