@@ -138,8 +138,18 @@ function interfaceApi(context) {
                 }
                 else if(req.query.cmd == "volume"){
                     var VolumeInteger = req.query.volume;
-                    if (VolumeInteger != "mute" && VolumeInteger != "unmute")
-                        var VolumeInteger = parseInt(VolumeInteger);
+ 
+                    if (VolumeInteger == "plus") {
+                        VolumeInteger = '+';
+                    } else if (VolumeInteger == "minus"){
+                        VolumeInteger = '-';
+                    }
+                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute") {
+
+                    } else {
+                        VolumeInteger = parseInt(VolumeInteger);
+                    }
+
                     var timeStart = Date.now();
                     self.logStart('Client requests Volume ' + VolumeInteger)
                         .then(function () {
