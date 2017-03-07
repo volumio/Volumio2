@@ -329,7 +329,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                 else nextIndex=0;
             }
 
-            if(isLastTrack !== this.currentConsume)
+            if(isLastTrack && this.currentConsume)
             {
                 nextIndex=0;
             }
@@ -441,7 +441,7 @@ CoreStateMachine.prototype.pushState = function () {
 };
 
 CoreStateMachine.prototype.pushEmptyState = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushState');
+	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushEmptyState');
 
 	var promise = libQ.defer();
 

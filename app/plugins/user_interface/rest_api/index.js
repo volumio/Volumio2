@@ -138,13 +138,36 @@ function interfaceApi(context) {
                 }
                 else if(req.query.cmd == "volume"){
                     var VolumeInteger = req.query.volume;
-                    if (VolumeInteger != "mute" && VolumeInteger != "unmute")
-                        var VolumeInteger = parseInt(VolumeInteger);
+
+                    if (VolumeInteger == "plus") {
+                        VolumeInteger = '+';
+                    } else if (VolumeInteger == "minus"){
+                        VolumeInteger = '-';
+                    }
+                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute") {
+
+                    } else {
+                        VolumeInteger = parseInt(VolumeInteger);
+                    }
+
                     var timeStart = Date.now();
                     self.logStart('Client requests Volume ' + VolumeInteger)
                         .then(function () {
                             return self.commandRouter.volumiosetvolume.call(self.commandRouter,
                                 VolumeInteger);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "playplaylist"){
+                    var playlistName = req.query.name;
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio Play Playlist '+playlistName)
+                        .then(function () {
+                            return self.commandRouter.playPlaylist.call(self.commandRouter,
+                                playlistName);
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {
@@ -173,6 +196,24 @@ function interfaceApi(context) {
                 res.json(response);
             else
                 res.json(notFound);
+        });
+
+    api.route('/listplaylists')
+        .get(function (req, res) {
+
+            var response = self.commandRouter.playListManager.listPlaylist();
+
+            var response = self.commandRouter.playListManager.listPlaylist();
+            response.then(function (data) {
+                if (data != undefined) {
+                    res.json(data);
+                } else {
+                    res.json(notFound);
+                }
+            });
+
+
+
         });
 
 }
