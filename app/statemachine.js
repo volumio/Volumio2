@@ -318,7 +318,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
-      var isLastTrack = (this.playQueue.arrayQueue.length - 1) == this.currentPosition;
+                        var isLastTrack = (this.playQueue.arrayQueue.length - 1) == this.currentPosition;
 
 			this.nextIndex = this.currentPosition + 1;
 
@@ -326,21 +326,21 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			  this.nextIndex = 0; //End of queue, next track first track in queue
 			}
 
-      if (this.currentRandom) {
-        var isOnlyTrack = (this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
-        var newIndex  = Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-				//Avoids same track being played twice in a row, Consume will work better then
-        while((newIndex == this.currentPosition) && !isOnlyTrack) {
-          newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
-				}
-        this.nextRandomIndex = newIndex;// also used by this.syncState()
-        this.nextIndex = newIndex;
+                        if (this.currentRandom) {
+                          var isOnlyTrack = (this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
+                          var newIndex  = Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+			  //Avoids same track being played twice in a row, Consume will work better then.
+                          while((newIndex == this.currentPosition) && !isOnlyTrack) {
+                            newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
+			  }
+                          this.nextRandomIndex = newIndex;     // also used by this.syncState()
+                          this.nextIndex = newIndex;
 			}
 
-      if (this.currentRepeatSingleSong)
+                       if (this.currentRepeatSingleSong)
 			  this.nextIndex = this.currentPosition;
 
-            var nextTrackBlock = this.getTrack(this.nextIndex);
+                       var nextTrackBlock = this.getTrack(this.nextIndex);
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
 				this.logger.info("Prefetching next song");
@@ -370,7 +370,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             }
 
             this.nextRandomIndex=undefined;
-						this.nextIndex = undefined;
+	    this.nextIndex = undefined;
 
             this.askedForPrefetch=false;
 			this.pushState.bind(this);
