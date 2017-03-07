@@ -51,7 +51,7 @@
     "NO_AUDIO_DEVICE_AVAILABLE": "No Audio Device Available",
     "SETTING_ERROR":"Error",
     "PERSISTENT_QUEUE":"Persistent queue",
-    "PERSISTENT_QUEUE_DOC":"If enabled the Playqueue will be stored across reboot, if disabled the play queue will be cleared at every system start",
+    "PERSISTENT_QUEUE_DOC":"If enabled the Playqueue will be retained post reboot, if disabled the play queue will be cleared at every system start",
     "HARDWARE":"Hardware",
     "SOFTWARE":"Software"
   },
