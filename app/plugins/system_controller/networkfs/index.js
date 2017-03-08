@@ -160,10 +160,10 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 
 	var fstype = config.get('NasMounts.' + shareid + '.fstype');
 	var options = config.get('NasMounts.' + shareid + '.options');
-	var pathraw = config.get('NasMounts.' + shareid + '.path');
+	var path = config.get('NasMounts.' + shareid + '.path');
 	var mountidraw = config.get('NasMounts.' + shareid + '.name');
 	// Check we have sane data - operating on undefined values will crash us
-	if (fstype === 'undefined' || pathraw === 'undefined') {
+	if (fstype === 'undefined' || path === 'undefined') {
 		console.log('Unable to retrieve config for share '  + shareid + ', returning early');
 		return defer.promise;
 	}
@@ -171,14 +171,13 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	var fsopts;
 	var credentials;
 	var responsemessage = {status:""};
-	var path = pathraw.replace(/ /g,"\\ ");
 	// The local mountpoint path must not contain these characters, because
 	// they get specially encoded in /etc/mtab and cause mount/umount failures.
 	// See getmntent(7).
 	var mountid = mountidraw.replace(/[\s\n\\]/g,"_");
 
 	if (fstype == "cifs") {
-		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path.replace(' ', '\ ');;
+		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
 		//Password-protected mount
 		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
 			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
@@ -192,7 +191,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 		}
 
 	} else { // nfs
-		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path.replace(' ', '\ ');;
+		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
 		if (options) {
 			fsopts ="ro,soft,noauto,"+options;
 		} else {
@@ -529,8 +528,9 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 			mounted: mounted.mounted,
 			size: ''
 		};
+		var quotedmount = quotePath(mountpoint);
 		// cmd returns size in bytes with no units and no header line
-		var cmd="df -B1 --output=used '"+mountpoint+"' | tail -1";
+		var cmd="df -B1 --output=used " + quotedmount + " | tail -1";
 		var promise = libQ.ncall(exec,respShare,cmd).then(function (stdout){
 
 
@@ -556,6 +556,20 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 		});
 	});
 };
+
+// Properly single-quote a path that will be handed to a shell exec.
+var quotePath = function (path) {
+	var self = this;
+	var output = '';
+
+	var pieces = path.split("'");
+	var n = pieces.length;
+	for (var i=0; i<n; i++) {
+		output = output + "'" + pieces[i] + "'";
+		if (i< (n-1)) output = output + "\\'";
+	}
+	return output;
+}
 
 /**
  * {
