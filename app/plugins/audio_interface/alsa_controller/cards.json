@@ -8,6 +8,8 @@
     {"name": "PianoDACPlus", "prettyname": "Allo Piano 2.1", "defaultmixer": "Digital","type":"i2S"},
     {"name": "BossDAC", "prettyname": "Allo BOSS", "defaultmixer": "Digital","type":"i2S"},
     {"name": "sndhdmi", "prettyname": "HDMI Out", "defaultmixer": "","type":"integrated"},
-    {"name": "audiocodec", "prettyname": "Analog Audio Out", "defaultmixer": "headphone volume","type":"integrated"}
+    {"name": "audiocodec", "prettyname": "Analog Audio Out", "defaultmixer": "headphone volume","type":"integrated"},
+    {"name": "imxvt1613audio", "prettyname": "Analog Audio Out", "defaultmixer": "Speaker","type":"integrated"},
+    {"name": "imxhdmisoc", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"}
   ]
 }
