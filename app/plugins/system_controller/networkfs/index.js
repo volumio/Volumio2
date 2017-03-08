@@ -208,7 +208,8 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 				result.error = 'Permission denied';
 			} else {
 				var splitreason = result.error.split('mount error');
-				result.error = splitreason[1]
+				// if the split does not match, splitreason[1] is undefined
+				if (splitreason.length > 1) result.error = splitreason[1];
 			}
 			responsemessage = {status:"fail", reason:result.error}
 			defer.resolve(responsemessage);
