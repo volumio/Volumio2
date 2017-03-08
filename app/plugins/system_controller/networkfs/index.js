@@ -214,15 +214,15 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 			responsemessage = {status:"fail", reason:result.error}
 			defer.resolve(responsemessage);
 			if (data.init) {
-			if (trial < 4) {
-				trial++
-				self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
-				setTimeout(function () {
-				self.mountShare({init:true, key:data.key, trial:trial});
-				}, 5000);
-			} else {
-				self.logger.info("Cannot mount NAS at system boot, trial number "+trial+" ,stopping");
-			}
+				if (trial < 4) {
+					trial++
+					self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
+					setTimeout(function () {
+						self.mountShare({init:true, key:data.key, trial:trial});
+					}, 5000);
+				} else {
+					self.logger.info("Cannot mount NAS at system boot, trial number "+trial+" ,stopping");
+				}
 			}
 		} else {
 			responsemessage = {status:"success"}
