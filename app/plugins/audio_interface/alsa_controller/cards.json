@@ -10,6 +10,7 @@
     {"name": "sndhdmi", "prettyname": "HDMI Out", "defaultmixer": "","type":"integrated"},
     {"name": "audiocodec", "prettyname": "Analog Audio Out", "defaultmixer": "headphone volume","type":"integrated"},
     {"name": "imxvt1613audio", "prettyname": "Analog Audio Out", "defaultmixer": "Speaker","type":"integrated"},
-    {"name": "imxhdmisoc", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"}
+    {"name": "imxhdmisoc", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
+    {"name": "imxaudiotda1998", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"}
   ]
 }
