@@ -593,16 +593,16 @@ ControllerNetworkfs.prototype.infoShare = function (data) {
 	var defer = libQ.defer();
 
 	if (config.has('NasMounts.' + data['id'])) {
-		var key = 'NasMounts.' + data['id'] + '.';
+		var key = 'NasMounts.' + data['id'];
 		var response = {
-			path: config.get(key + 'path'),
-			name: config.get(key + 'name'),
+			path: config.get(key + '.path'),
+			name: config.get(key + '.name'),
 			id: data['id'],
-			ip: config.get(key + 'ip'),
-			fstype: config.get(key + 'fstype'),
-			username: config.get(key + 'user'),
-			password: config.get(key + 'password'),
-			options: config.get(key + 'options')
+			ip: config.get(key + '.ip'),
+			fstype: config.get(key + '.fstype'),
+			username: config.get(key + '.user'),
+			password: config.get(key + '.password'),
+			options: config.get(key + '.options')
 		};
 
 		defer.resolve(response);
