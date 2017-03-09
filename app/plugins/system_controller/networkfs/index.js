@@ -158,10 +158,11 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 		var trial = 0;
 	}
 
-	var fstype = config.get('NasMounts.' + shareid + '.fstype');
-	var options = config.get('NasMounts.' + shareid + '.options');
-	var path = config.get('NasMounts.' + shareid + '.path');
-	var mountidraw = config.get('NasMounts.' + shareid + '.name');
+	var key = 'NasMounts.' + shareid;
+	var fstype = config.get(key + '.fstype');
+	var options = config.get(key + '.options');
+	var path = config.get(key + '.path');
+	var mountidraw = config.get(key + '.name');
 	// Check we have sane data - operating on undefined values will crash us
 	if (fstype === 'undefined' || path === 'undefined') {
 		console.log('Unable to retrieve config for share '  + shareid + ', returning early');
@@ -179,8 +180,8 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	if (fstype == "cifs") {
 		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
 		//Password-protected mount
-		if (config.get('NasMounts.' + shareid + '.user') !== 'undefined' && config.get('NasMounts.' + shareid + '.user') !== '') {
-			credentials = 'username=' + config.get('NasMounts.' + shareid + '.user') + ',' + 'password=' + config.get('NasMounts.' + shareid + '.password') + ",";
+		if (config.get(key + '.user') !== 'undefined' && config.get(key + '.user') !== '') {
+			credentials = 'username=' + config.get(key + '.user') + ',' + 'password=' + config.get(key + '.password') + ",";
 		} else {
 			credentials = 'guest,';
 		}
