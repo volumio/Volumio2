@@ -520,12 +520,12 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
 		var respShare = {
 			path: config.get(key + '.path'),
 			ip: config.get(key + '.ip'),
-			id: share,
-			name: name,
+			name: config.get(key + '.name'),
 			fstype: config.get(key + '.fstype'),
 			username: config.get(key + '.user'),
 			password: config.get(key + '.password'),
 			options: config.get(key + '.options'),
+			id: share,
 			mounted: mounted.mounted,
 			size: ''
 		};
@@ -597,12 +597,12 @@ ControllerNetworkfs.prototype.infoShare = function (data) {
 		var response = {
 			path: config.get(key + '.path'),
 			name: config.get(key + '.name'),
-			id: data['id'],
 			ip: config.get(key + '.ip'),
 			fstype: config.get(key + '.fstype'),
 			username: config.get(key + '.user'),
 			password: config.get(key + '.password'),
-			options: config.get(key + '.options')
+			options: config.get(key + '.options'),
+			id: data['id']
 		};
 
 		defer.resolve(response);
