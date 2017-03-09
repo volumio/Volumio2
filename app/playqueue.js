@@ -197,6 +197,8 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
 	this.arrayQueue = [];
     this.saveQueue();
+
+    this.commandRouter.stateMachine.pushEmptyState();
 	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
