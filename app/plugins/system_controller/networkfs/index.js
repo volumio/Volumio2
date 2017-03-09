@@ -362,10 +362,9 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	}
 
 	uuid = libUUID.v4();
-	var key = "NasMounts." + uuid + ".";
 	self.logger.info("No correspondence found in configuration for share " + name + " on IP " + ip);
 
-	var saveshare = self.saveShareConf(key, uuid, name, ip, path, fstype, username, password, options);
+	var saveshare = self.saveShareConf('NasMounts', uuid, name, ip, path, fstype, username, password, options);
 
 	saveshare.then(function () {
 		var mountshare = self.mountShare({key:uuid});
@@ -404,17 +403,18 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	return defer.promise;
 };
 
-ControllerNetworkfs.prototype.saveShareConf = function (key, uuid, name, ip, path, fstype, username, password, options) {
+ControllerNetworkfs.prototype.saveShareConf = function (parent, uuid, name, ip, path, fstype, username, password, options) {
 	var self = this;
 
 	var defer = libQ.defer();
-	config.addConfigValue(key + 'name', 'string', name);
-	config.addConfigValue(key + 'ip', 'string', ip);
-	config.addConfigValue(key + 'path', 'string', path);
-	config.addConfigValue(key + 'fstype', 'string', fstype);
-	config.addConfigValue(key + 'user', 'string', username);
-	config.addConfigValue(key + 'password', 'string', password);
-	config.addConfigValue(key + 'options', 'string', options);
+	var key = parent + '.' + uuid;
+	config.addConfigValue(key + '.name', 'string', name);
+	config.addConfigValue(key + '.ip', 'string', ip);
+	config.addConfigValue(key + '.path', 'string', path);
+	config.addConfigValue(key + '.fstype', 'string', fstype);
+	config.addConfigValue(key + '.user', 'string', username);
+	config.addConfigValue(key + '.password', 'string', password);
+	config.addConfigValue(key + '.options', 'string', options);
 
 	defer.resolve('ok')
 	return defer.promise;
