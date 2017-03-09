@@ -511,21 +511,21 @@ ControllerNetworkfs.prototype.listShares = function (data) {
 
 ControllerNetworkfs.prototype.getMountSize = function (share) {
 	return new Promise(function (resolve, reject) {
-		var key = 'NasMounts.' + share + '.';
-		var name = config.get(key + 'name');
+		var key = 'NasMounts.' + share;
+		var name = config.get(key + '.name');
 		var mountidraw = name;
 		var mountid    = mountidraw.replace(/[\s\n\\]/g,"_");
 		var mountpoint = '/mnt/NAS/' + mountid;
 		var mounted = mountutil.isMounted(mountpoint, false);
 		var respShare = {
-			path: config.get(key + 'path'),
-			ip: config.get(key + 'ip'),
+			path: config.get(key + '.path'),
+			ip: config.get(key + '.ip'),
 			id: share,
 			name: name,
-			fstype: config.get(key + 'fstype'),
-			username: config.get(key + 'user'),
-			password: config.get(key + 'password'),
-			options: config.get(key + 'options'),
+			fstype: config.get(key + '.fstype'),
+			username: config.get(key + '.user'),
+			password: config.get(key + '.password'),
+			options: config.get(key + '.options'),
 			mounted: mounted.mounted,
 			size: ''
 		};
