@@ -658,37 +658,37 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				});
 			} else {
 				self.logger.info("Share " + mountidraw + " successfully unmounted");
-				var key = 'NasMounts.' + data['id'] + '.';
+				var key = 'NasMounts.' + data['id'];
 
-				var oldpath = config.get(key + 'path');
-				var oldname = config.get(key + 'name');
-				var oldip = config.get(key + 'ip');
-				var oldfstype = config.get(key + 'fstype');
-				var oldusername = config.get(key + 'user');
-				var oldpassword = config.get(key + 'password');
-				var oldoptions = config.get(key + 'options');
+				var oldpath = config.get(key + '.path');
+				var oldname = config.get(key + '.name');
+				var oldip = config.get(key + '.ip');
+				var oldfstype = config.get(key + '.fstype');
+				var oldusername = config.get(key + '.user');
+				var oldpassword = config.get(key + '.password');
+				var oldoptions = config.get(key + '.options');
 
 
 				if (data['name']) {
-				config.set(key + 'name', data['name']);
+				config.set(key + '.name', data['name']);
 				}
 				if(data['path']){
-				config.set(key + 'path', data['path']);
+				config.set(key + '.path', data['path']);
 				}
 				if(data['ip']) {
-					config.set(key + 'ip', data['ip']);
+					config.set(key + '.ip', data['ip']);
 				}
 				if (data['fstype']) {
-				config.set(key + 'fstype', data['fstype']);
+				config.set(key + '.fstype', data['fstype']);
 				}
 				if (data['username']) {
-					config.set(key + 'user', data['username']);
+					config.set(key + '.user', data['username']);
 				}
 				if (data['password']) {
-					config.set(key + 'password', data['password']);
+					config.set(key + '.password', data['password']);
 				}
 				if (data['options']) {
-					config.set(key + 'options', data['options']);
+					config.set(key + '.options', data['options']);
 				}
 
 
@@ -706,13 +706,13 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 							if(data.reason) {
 
 								self.logger.info("An error occurred mounting the new share. Rolling back configuration");
-								config.set(key + 'name', oldname);
-								config.set(key + 'path', oldpath);
-								config.set(key + 'ip', oldip);
-								config.set(key + 'fstype', oldfstype);
-								config.set(key + 'user', oldusername);
-								config.set(key + 'password', oldpassword);
-								config.set(key + 'options', oldoptions);
+								config.set(key + '.name', oldname);
+								config.set(key + '.path', oldpath);
+								config.set(key + '.ip', oldip);
+								config.set(key + '.fstype', oldfstype);
+								config.set(key + '.user', oldusername);
+								config.set(key + '.password', oldpassword);
+								config.set(key + '.options', oldoptions);
 								if (data.reason === 'Permission denied') {
 									responsemessageedit = {emit: 'nasCredentialsCheck', data:{ 'id': id, 'name': name, 'username': username, 'password':password }};
 									defer.resolve(responsemessageedit);
