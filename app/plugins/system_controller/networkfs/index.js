@@ -646,9 +646,10 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 		var password= data['password'];
 	}
 
-	if (config.has('NasMounts.' + data['id'])) {
+	var key = 'NasMounts.' + data['id'];
+	if (config.has(key)) {
 
-		var mountidraw = config.get('NasMounts.' + data['id'] + '.name');
+		var mountidraw = config.get(key + '.name');
 		var mountid    = mountidraw.replace(/[\s\n\\]/g,"_");
 		var mountpoint = '/mnt/NAS/' + mountid;
 		mountutil.umount(mountpoint, false, {"removeDir": true}, function (result) {
@@ -659,7 +660,6 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				});
 			} else {
 				self.logger.info("Share " + mountidraw + " successfully unmounted");
-				var key = 'NasMounts.' + data['id'];
 
 				var oldpath = config.get(key + '.path');
 				var oldname = config.get(key + '.name');
