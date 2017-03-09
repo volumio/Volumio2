@@ -973,6 +973,23 @@ CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
  }
  */
 
+
+/**
+ * This method shall be used to push debug messages
+ * @param sMessage The debug message to push
+ */
+CoreCommandRouter.prototype.pushDebugConsoleMessage = function (sMessage) {
+    this.logger.info(sMessage);
+};
+
+/**
+ * This method shall be used to push error messages
+ * @param sMessage The error message to push
+ */
+CoreCommandRouter.prototype.pushErrorConsoleMessage = function (sMessage) {
+    this.logger.error(sMessage);
+};
+
 CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
 	this.logger.info(sMessage);
 	/*
