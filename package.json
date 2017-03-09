@@ -30,7 +30,7 @@
     "json-query": "^2.2.0",
     "kew": "^0.7.0",
     "libxmljs": "^0.18.4",
-    "linux-mountutils": "^1.0.0",
+    "linux-mountutils": "^1.0.2",
     "lwip": "0.0.9",
     "mdns": "^2.3.3",
     "moment": "^2.17.1",
