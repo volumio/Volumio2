@@ -844,15 +844,15 @@ ControllerNetwork.prototype.saveDnsSettings = function (data) {
 		config.set('secondary_dns', data.secondary_dns);
 	}
 
-	var dnsfile = '##custom DNS' + os.EOL + 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns;
-	exec("/usr/bin/sudo /bin/chmod 777 /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	var dnsfile = '##custom DNS' + os.EOL + 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns + os.EOL;
+	exec("/usr/bin/sudo /bin/chmod 666 /etc/resolv.conf.head", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/resolv.conf.tail: ' + error);
+			console.log('Canot set permissions for /etc/resolv.conf.head: ' + error);
 		} else {
-			self.logger.info('Permissions for /etc/resolv.conf.tail')
-			fs.writeFile('/etc/resolv.conf.tail', dnsfile, function (err) {
+			self.logger.info('Permissions for /etc/resolv.conf.head')
+			fs.writeFile('/etc/resolv.conf.head', dnsfile, function (err) {
 				if (err) {
-					self.logger.error('Cannot write wpasupplicant.conf ' + error);
+					self.logger.error('Cannot write DNS File' + error);
 				} else {
 					self.commandRouter.wirelessRestart();
 					self.commandRouter.networkRestart();
