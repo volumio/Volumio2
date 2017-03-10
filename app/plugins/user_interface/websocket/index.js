@@ -1021,20 +1021,12 @@ function InterfaceWebUI(context) {
 
 			//Updater
 			connWebSocket.on('updateCheck', function () {
-				var selfConnWebSocket = this;
 
-				self.logger.info("Sending updateCheck to server");
+                self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				};
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('updateCheck', 'search-for-upgrade');
-
+                //self.libSocketIO.sockets.emit('ClientUpdateCheck', 'search-for-upgrade');
+                console.log('ClientUpdateCheck')
+/*
 				client.on('updateReady', function (message) {
 					self.logger.info("Update Ready: " + message);
 					selfConnWebSocket.emit('updateReady', message);
@@ -1043,8 +1035,16 @@ function InterfaceWebUI(context) {
 				client.on('updateCheck-error', function (message) {
 					self.logger.info("Update Check error: " + message);
 					selfConnWebSocket.emit('updateCheck-error', message);
-				});
+				});*/
 			});
+
+            connWebSocket.on('ClientUpdateReady', function (message) {
+                var selfConnWebSocket = this;
+
+				 self.logger.info("Update Ready: " + message);
+
+				 selfConnWebSocket.emit('updateReady', message);
+            });
 
 
 			connWebSocket.on('update', function (data) {
