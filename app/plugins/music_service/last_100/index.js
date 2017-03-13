@@ -48,6 +48,7 @@ last_100.prototype.listenState = function () {
 
     socket.on('pushState', function(data) {
 
+        var stateFile     = '/data/laststates.json';
         var newlastStates = [];
         if (data.status != 'stop' && data.service != 'webradio' && data.volatile != true){
             if (data.uri != currentSong.uri){
@@ -56,11 +57,12 @@ last_100.prototype.listenState = function () {
                     artist:data.artist, album:data.album, albumart:data.albumart, type:'song'};
                 newlastStates.push(currentsong);
                 try {
-                    var lastStates = fs.readJsonSync('/data/laststates.json', {throws: true});
+                    // This may not always return an array
+                    var lastStates = fs.readJsonSync(stateFile, {throws: true});
                 } catch (e) {
                     var lastStates = [];
                 }
-                if(lastStates.length > 0) {
+                if (Array.isArray(lastStates) && lastStates.length > 0) {
                     var j = 0;
                     for (var i in lastStates) {
                         if ((lastStates[i].uri != currentSong.uri) && j < 99) {
@@ -70,7 +72,11 @@ last_100.prototype.listenState = function () {
 
                     }
                 }
-                fs.outputJsonSync("/data/laststates.json", newlastStates);
+                try {
+                    fs.outputJsonSync(stateFile, newlastStates);
+                } catch (e) {
+                    console.log('Error saving last played file: '+e);
+                }
             }
 
 
@@ -94,9 +100,10 @@ last_100.prototype.handleBrowseUri = function (curUri) {
     var response = [];
     var lastPlayed = [];
     var defer = libQ.defer();
+    var stateFile = '/data/laststates.json';
 
     try {
-        lastPlayed = fs.readJsonSync('/data/laststates.json', {throws: true});
+        lastPlayed = fs.readJsonSync(stateFile, {throws: true});
         lastPlayed = self.rewriteForUri(lastPlayed);
         response = {
             navigation: {
