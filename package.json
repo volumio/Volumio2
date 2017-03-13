@@ -4,7 +4,8 @@
   "private": false,
   "scripts": {
     "preinstall": "",
-    "start": "nodejs ./index.js"
+    "start": "nodejs ./index.js",
+    "test": "npm install --only=dev && ./node_modules/.bin/mocha --reporter spec"
   },
   "dependencies": {
     "album-art": "^1.0.2",
@@ -59,6 +60,10 @@
     "winston": "^2.3.1",
     "wireless-tools": "^0.19.0",
     "yargs": "^7.0.2"
+  },
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "fs-extra": "^2.0.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
