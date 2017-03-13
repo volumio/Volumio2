@@ -9,12 +9,12 @@ Volume.mute = null;
 
 var device = '';
 var mixer = '';
-var maxvolume = '';
+var maxvolume = 0;
 var volumecurve = '';
-var volumesteps = '';
-var currentvolume = '';
+var volumesteps = 0;
+var currentvolume = 0;
 var currentmute = false;
-var premutevolume = '';
+var premutevolume = 0;
 var mixertype = '';
 var devicename = '';
 
@@ -41,9 +41,15 @@ function CoreVolumeController(commandRouter) {
 	}
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
 	mixer = '"'+mixerdev+'"';
-	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
-	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
-	volumesteps = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumesteps');
+	
+        maxvolume = Number(this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax'));
+        if(isNaN(maxvolume)) maxvolume = 100;
+	
+        volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
+
+	volumesteps = Number(this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumesteps'));
+        if(isNaN(volumesteps)) volumesteps = 10;
+
 	mixertype = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer_type');
 
 
@@ -69,40 +75,25 @@ function CoreVolumeController(commandRouter) {
 
 	var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
 	var getInfo = function (cb) {
-		if (volumecurve === 'logarithmic'){
-			amixer(['-M', 'get', '-c', device , mixer], function (err, data) {
-				if (err) {
-					cb(err);
-				} else {
-					var res = reInfo.exec(data);
-					if (res === null) {
-						cb(new Error('Alsa Mixer Error: failed to parse output'));
-					} else {
-						cb(null, {
-							volume: parseInt(res[1], 10),
-							muted: (res[2] == 'off')
-						});
-					}
-				}
-			});
-
-		} else {
-				amixer(['get', '-c', device , mixer], function (err, data) {
-					if (err) {
-						cb(err);
-					} else {
-						var res = reInfo.exec(data);
-						if (res === null) {
-							cb(new Error('Alsa Mixer Error: failed to parse output'));
-						} else {
-							cb(null, {
-								volume: parseInt(res[1], 10),
-								muted: (res[2] == 'off')
-							});
-						}
-					}
-				});
+                var command = ['get', '-c', device, mixer];
+                if (volumecurve === 'logarithmic'){
+			command.unshift('-M');
 		}
+		amixer(['get', '-c', device , mixer], function (err, data) {
+			if (err) {
+				cb(err);
+			} else {
+				var res = reInfo.exec(data);
+				if (res === null) {
+					cb(new Error('Alsa Mixer Error: failed to parse output'));
+				} else {
+					cb(null, {
+						volume: parseInt(res[1], 10),
+						muted: (res[2] == 'off')
+					});
+				}
+			}
+		});
 	};
 
 	self.getVolume = function (cb) {
@@ -116,25 +107,19 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setVolume = function (val, cb) {
-		if (volumecurve === 'logarithmic') {
-			amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
+                        currentvolume = val;
+                        var command = ['set', '-c', device, mixer, val + '%'];
+                        if (volumecurve === 'logarithmic'){
+                            command.unshift('-M');
+                        }
+			amixer(command, function (err) {
 				cb(err);
 			});
 			if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1') {
-				amixer(['-M', 'set', '-c', device, 'Subwoofer', val + '%'], function (err) {
+				amixer(command, function (err) {
 					cb(err);
 				});
 			}
-		} else {
-			amixer(['set', '-c', device, mixer, val + '%'], function (err) {
-				cb(err);
-			});
-			if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1') {
-				amixer(['set', '-c', device, 'Subwoofer', val + '%'], function (err) {
-					cb(err);
-				});
-			}
-		}
 	};
 
 	self.getMuted = function (cb) {
@@ -162,20 +147,37 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Name: '+ data.name +' Mixer: '+ data.mixer + ' Max Vol: ' + data.maxvolume + ' Vol Curve; ' + data.volumecurve + ' Vol Steps: ' + data.volumesteps);
 	device = data.device;
 	mixer = '"'+data.mixer+'"';
-	maxvolume = data.maxvolume;
-	console.log('MAXX'+maxvolume)
+	maxvolume = Number(data.maxvolume);
 	volumecurve = data.volumecurve;
-	volumesteps = data.volumesteps;
+	volumesteps = Number(data.volumesteps);
 	mixertype = data.mixertype
 	devicename = data.name;
 }
 
 
 // Public methods -----------------------------------------------------------------------------------
-CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
+CoreVolumeController.prototype.alsavolume = function (CommandString) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::SetAlsaVolume' + VolumeInteger);
-	switch (VolumeInteger) {
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::SetAlsaVolume ' + CommandString);
+
+        // Bail out if there's no device to control
+	if(mixertype === 'None'){
+            return;
+        }
+
+        // Try to cast CommandString to an integer volume
+        var VolumeInteger = Number(CommandString);
+
+        // Check for invalid integer, and set a default
+        if(isNaN(VolumeInteger)){
+            VolumeInteger = 100;
+        }
+        else // In the case of an integer CommandString, assume an implicit 'set' command
+        {
+            CommandString = 'set';
+        }
+
+	switch (CommandString) {
 		case 'mute':
 			//Mute or Unmute, depending on state
 			self.getVolume(function (err, vol) {
@@ -194,16 +196,15 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			break;
 		case 'unmute':
 			//UnMute
-					currentmute = false;
-					self.setVolume(premutevolume, function (err) {
-						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
-						//Log Volume Control
-						Volume.vol = premutevolume;
-						Volume.mute = false;
-						currentvolume = premutevolume;
-						self.commandRouter.volumioupdatevolume(Volume);
-
-					});
+			currentmute = false;
+			self.setVolume(premutevolume, function (err) {
+				self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + premutevolume);
+				//Log Volume Control
+				Volume.vol = premutevolume;
+				Volume.mute = false;
+				currentvolume = premutevolume;
+				self.commandRouter.volumioupdatevolume(Volume);
+			});
 			break;
 		case '+':
 			//Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
@@ -212,20 +213,17 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					if (vol == null) {
 						vol =  currentvolume
 					}
-					VolumeInteger = Number(vol)+Number(volumesteps);
-					if (VolumeInteger > 100){
-						VolumeInteger = 100;
+					VolumeInteger = Number(vol)+volumesteps;
+					if (VolumeInteger < 0){
+						VolumeInteger = 0;
 					}
 					if (VolumeInteger > maxvolume){
 						VolumeInteger = maxvolume;
 					}
-					if (mixertype === 'None') {
-						VolumeInteger = 100;
-					}
 					self.setVolume(VolumeInteger, function (err) {
 						Volume.vol = VolumeInteger
 						Volume.mute = false;
-						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
 						self.commandRouter.volumioupdatevolume(Volume);
 
 					});
@@ -238,46 +236,38 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 				if (vol == null) {
 					vol =  currentvolume
 				}
-				VolumeInteger = Number(vol)-Number(volumesteps);
+				VolumeInteger = Number(vol)-volumesteps;
 				if (VolumeInteger < 0){
 					VolumeInteger = 0;
 				}
 				if (VolumeInteger > maxvolume){
 					VolumeInteger = maxvolume;
 				}
-				if (mixertype === 'None') {
-					VolumeInteger = 100;
-				}
 				self.setVolume(VolumeInteger, function (err) {
-					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
 					Volume.vol = VolumeInteger
 					Volume.mute = false;
 					self.commandRouter.volumioupdatevolume(Volume);
 				});
 			});
 			break;
-		default:
-			// Set the Volume with numeric value 0-100
-			if (VolumeInteger < 0){
-				VolumeInteger = 0;
-			}
-			if (VolumeInteger > 100){
-				VolumeInteger = 100;
-			}
+                case 'set':
+                        // Set a specific volume
 			if (VolumeInteger > maxvolume){
 				VolumeInteger = maxvolume;
 			}
-			if (mixertype === 'None') {
-				VolumeInteger = 100;
-			}
-				self.setVolume(VolumeInteger, function (err) {
-					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
-					//Log Volume Control
-					Volume.vol = VolumeInteger;
-					Volume.mute = false;
-					currentvolume = VolumeInteger;
-					self.commandRouter.volumioupdatevolume(Volume);
+			self.setVolume(VolumeInteger, function (err) {
+				self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+				//Log Volume Control
+				Volume.vol = VolumeInteger;
+				Volume.mute = false;
+				currentvolume = VolumeInteger;
+				self.commandRouter.volumioupdatevolume(Volume);
 			});
+                        break;
+		default:
+                        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume Unhandled Command: ' + CommandString);
+                        new Error('Unhandled command: ' + CommandString);
 	}
 
 };
