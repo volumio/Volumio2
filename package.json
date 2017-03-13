@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "",
     "start": "nodejs ./index.js",
-    "test": "npm install --only=dev && ./node_modules/.bin/mocha --reporter spec"
+    "test": "npm install fs-extra && npm install --only=dev && ./node_modules/.bin/mocha --reporter spec"
   },
   "dependencies": {
     "album-art": "^1.0.2",
