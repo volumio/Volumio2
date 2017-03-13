@@ -71,7 +71,11 @@ last_100.prototype.listenState = function () {
 
                     }
                 }
-                fs.outputJsonSync("/data/laststates.json", newlastStates);
+                try {
+                    fs.outputJsonSync(stateFile, newlastStates);
+                } catch (e) {
+                    console.log("last_100 listenState failed to write " + stateFile);
+                }
             }
 
 
