@@ -75,7 +75,7 @@ last_100.prototype.listenState = function () {
                 try {
                     fs.outputJsonSync(stateFile, newlastStates);
                 } catch (e) {
-                    console.log("last_100 listenState failed to write " + stateFile);
+                    console.log('Error saving last played file: '+e);
                 }
             }
 
