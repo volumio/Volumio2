@@ -210,7 +210,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			self.setMuted(false, function (err) {
 				self.getVolume(function (err, vol) {
 					if (vol == null) {
-						vol =  currentvolume
+						vol =  currentvolume;
 					}
 					VolumeInteger = Number(vol)+Number(volumesteps);
 					if (VolumeInteger > 100){
@@ -225,6 +225,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					self.setVolume(VolumeInteger, function (err) {
 						Volume.vol = VolumeInteger
 						Volume.mute = false;
+                        currentvolume = VolumeInteger;
 						self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
 						self.commandRouter.volumioupdatevolume(Volume);
 
@@ -252,6 +253,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
 					Volume.vol = VolumeInteger
 					Volume.mute = false;
+                    currentvolume = VolumeInteger;
 					self.commandRouter.volumioupdatevolume(Volume);
 				});
 			});
