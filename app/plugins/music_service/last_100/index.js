@@ -48,6 +48,7 @@ last_100.prototype.listenState = function () {
 
     socket.on('pushState', function(data) {
 
+        var stateFile     = '/data/laststates.json';
         var newlastStates = [];
         if (data.status != 'stop' && data.service != 'webradio' && data.volatile != true){
             if (data.uri != currentSong.uri){
@@ -56,7 +57,7 @@ last_100.prototype.listenState = function () {
                     artist:data.artist, album:data.album, albumart:data.albumart, type:'song'};
                 newlastStates.push(currentsong);
                 try {
-                    var lastStates = fs.readJsonSync('/data/laststates.json', {throws: true});
+                    var lastStates = fs.readJsonSync(stateFile, {throws: true});
                 } catch (e) {
                     var lastStates = [];
                 }
@@ -94,9 +95,10 @@ last_100.prototype.handleBrowseUri = function (curUri) {
     var response = [];
     var lastPlayed = [];
     var defer = libQ.defer();
+    var stateFile = '/data/laststates.json';
 
     try {
-        lastPlayed = fs.readJsonSync('/data/laststates.json', {throws: true});
+        lastPlayed = fs.readJsonSync(stateFile, {throws: true});
         lastPlayed = self.rewriteForUri(lastPlayed);
         response = {
             navigation: {
