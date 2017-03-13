@@ -313,35 +313,34 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
+      var isLastTrack = (this.playQueue.arrayQueue.length - 1) == this.currentPosition;
 
-            var nextIndex=this.currentPosition+1;
-            // Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
-            if(this.currentRepeat)
-            {
-                if(this.currentRepeatSingleSong)
-                    nextIndex=this.currentPosition;
-                else nextIndex=0;
-            }
+			this.nextIndex = this.currentPosition + 1;
 
-            if(isLastTrack && this.currentConsume)
-            {
-                nextIndex=0;
-            }
+			if (this.currentRepeat && isLastTrack) {
+			  this.nextIndex = 0; //End of queue, next track first track in queue
+			}
 
-            // Then check if Random mode is on - Random mode overrides Repeat mode by this
-            if(this.currentRandom)
-            {
-                nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-                this.nextRandomIndex=nextIndex;
-            }
+      if (this.currentRandom) {
+        var isOnlyTrack = (this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
+        var newIndex  = Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+				//Avoids same track being played twice in a row, Consume will work better then
+        while((newIndex == this.currentPosition) && !isOnlyTrack) {
+          newIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
+				}
+        this.nextRandomIndex = newIndex;// also used by this.syncState()
+        this.nextIndex = newIndex;
+			}
 
-            var nextTrackBlock = this.getTrack(nextIndex);
+      if (this.currentRepeatSingleSong)
+			  this.nextIndex = this.currentPosition;
+
+            var nextTrackBlock = this.getTrack(this.nextIndex);
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
 			{
 				this.logger.info("Prefetching next song");
@@ -358,47 +357,49 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 		if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
 		{
 
-			this.simulateStopStartDone=true;
-			this.currentSeek=0;
+      this.simulateStopStartDone=true;
+      this.currentSeek=0;
 
-            if(this.currentConsume)
-            {
-                this.playQueue.removeQueueItem({value:this.currentPosition});
-            }
-            else
-            {
-                if(this.currentRandom)
-                {
-                    this.currentPosition=this.nextRandomIndex;
-                }
-                else if(this.currentRepeat)
-                {
-                    if(!this.currentRepeatSingleSong)
-                    {
-                        this.currentPosition++;
-                    }
-                }
+      if(this.currentConsume) {
+        var deletePosition = this.currentPosition;
+        var isLastTrack = (this.playQueue.arrayQueue.length - 1) == this.currentPosition;
+        var isOnlyTrack = (this.playQueue.arrayQueue.length == 1) || (this.playQueue.arrayQueue.length == 0);
 
-                if(isLastTrack !== this.currentConsume)
-                {
-                    this.currentPosition=0;
-                }
-                else {
-                    this.currentPosition++;
-                }
-            }
+        if (isOnlyTrack || this.currentRepeatSingleSong) {
+          this.stop();
+          this.playQueue.removeQueueItem({value:this.currentPosition});
+          }
+          else {
 
-            this.nextRandomIndex=undefined;
+						this.playQueue.removeQueueItem({value:this.currentPosition});
 
-            this.askedForPrefetch=false;
-			this.pushState.bind(this);
+						if(this.currentRepeat && isLastTrack)
+									this.currentPosition = 0;
 
-			this.startPlaybackTimer();
+            if(this.currentRandom)
+              if (deletePosition < this.nextIndex)
+                this.currentPosition = this.nextIndex-1;
+              else
+                this.currentPosition = this.nextIndex;
 
-		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
-	}
-};
+						}
+					}
 
+
+      else
+        this.currentPosition = this.nextIndex;
+
+      this.nextRandomIndex=undefined;
+      this.nextIndex=undefined;
+
+				this.askedForPrefetch=false;
+				this.pushState.bind(this);
+
+				this.startPlaybackTimer();
+
+				} else setTimeout(this.increasePlaybackTimer.bind(this),250);
+		}
+ };
 
 
 
