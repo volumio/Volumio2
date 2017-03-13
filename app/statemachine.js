@@ -387,9 +387,14 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             // Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
             if(this.currentRepeat)
             {
-                if(this.currentRepeatSingleSong)
-                    nextIndex=this.currentPosition;
-                else nextIndex=0;
+                if(this.currentRepeatSingleSong) {
+					nextIndex=this.currentPosition;
+				} else if (isLastTrack) {
+					nextIndex=0;
+				}
+
+
+
             }
 
             if(isLastTrack && this.currentConsume)
@@ -445,9 +450,6 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                 if(isLastTrack !== this.currentConsume)
                 {
                     this.currentPosition=0;
-                }
-                else {
-                    this.currentPosition++;
                 }
             }
 
