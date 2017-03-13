@@ -57,11 +57,12 @@ last_100.prototype.listenState = function () {
                     artist:data.artist, album:data.album, albumart:data.albumart, type:'song'};
                 newlastStates.push(currentsong);
                 try {
+                    // This may not always return an array
                     var lastStates = fs.readJsonSync(stateFile, {throws: true});
                 } catch (e) {
                     var lastStates = [];
                 }
-                if(lastStates.length > 0) {
+                if (Array.isArray(lastStates) && lastStates.length > 0) {
                     var j = 0;
                     for (var i in lastStates) {
                         if ((lastStates[i].uri != currentSong.uri) && j < 99) {
