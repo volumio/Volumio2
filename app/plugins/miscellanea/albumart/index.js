@@ -97,8 +97,13 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
         artist = nodetools.urlDecode(data.artist);
 
         if(data.album)
+        {
             album = nodetools.urlDecode(data.album);
-        else album =artist;
+        }
+        else
+        {
+            album ='';
+        }
 
         if (data.size) {
 			size=data.size;
