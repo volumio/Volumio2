@@ -208,6 +208,10 @@ UpnpInterface.prototype.stopUpnpPlayback = function () {
     var self = this;
 
     self.logger.info("Stopping playback through UPNP");
-	self.commandRouter.volumioStop();
+    if(this.commandRouter.stateMachine.isConsume)
+    {
+        self.logger.info("Stopping service currently in playback since Volumio is in Consume mode");
+        self.commandRouter.volumioStop();
+    }
     this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
 };
