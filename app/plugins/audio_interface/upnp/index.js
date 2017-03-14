@@ -201,12 +201,13 @@ UpnpInterface.prototype.startUpnpPlayback = function () {
 
     self.logger.info("Starting playback through UPNP");
     this.commandRouter.stateMachine.setConsumeUpdateService('mpd');
-    
+
 };
 
 UpnpInterface.prototype.stopUpnpPlayback = function () {
     var self = this;
 
     self.logger.info("Stopping playback through UPNP");
+	self.commandRouter.volumioStop();
     this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
 };

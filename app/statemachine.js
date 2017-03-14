@@ -626,6 +626,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                             album:consumeAlbum
                         });
                 }
+				if (stateService.service == undefined ) {
+					stateService.service = 'mpd';
+				}
 
                 this.consumeState={
                     status:stateService.status,
@@ -752,7 +755,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION "+this.currentPosition);
 
 
-            console.log("RANDOM: "+this.currentRandom+ ' OBJ '+JSON.stringify(trackBlock));
+           // console.log("RANDOM: "+this.currentRandom+ ' OBJ '+JSON.stringify(trackBlock));
 
             if(trackBlock!==undefined && trackBlock.service!=='webradio')
 			{
@@ -1021,7 +1024,7 @@ CoreStateMachine.prototype.seek = function (position) {
 	var self=this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::seek');
 
-	self.setConsumeUpdateService(undefined);
+	//self.setConsumeUpdateService(undefined);
 
 	var trackBlock = this.getTrack(this.currentPosition);
 	if (trackBlock !== undefined)
@@ -1044,7 +1047,12 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	var self=this;
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::next');
 
-	self.setConsumeUpdateService(undefined);
+	//self.setConsumeUpdateService(undefined);
+
+	if (this.isConsume && this.consumeState.service != undefined) {
+		var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
+		thisPlugin.next();
+	} else {
 
 	this.stop()
 		.then(function()
@@ -1063,6 +1071,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 		})
 		.then(self.play.bind(self))
 		.then(self.updateTrackBlock.bind(self));
+	}
 };
 
 
@@ -1071,7 +1080,7 @@ CoreStateMachine.prototype.pause = function (promisedResponse) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pause');
 
-	this.setConsumeUpdateService(undefined);
+	//this.setConsumeUpdateService(undefined);
 
 	if (this.currentStatus === 'play') {
 		this.currentStatus = 'pause';
@@ -1148,8 +1157,9 @@ CoreStateMachine.prototype.serviceStop = function () {
 CoreStateMachine.prototype.previous = function (promisedResponse) {
 	var self=this;
 
-	self.setConsumeUpdateService(undefined);
+	//self.setConsumeUpdateService(undefined);
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::previous');
+
 
 	if (this.currentStatus === 'stop') {
 		// Stop -> Previous transition
@@ -1165,22 +1175,25 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		}
 
 	} else if (this.currentStatus === 'play') {
-		if(this.currentRandom!==undefined && this.currentRandom===true)
-		{
-			this.stop();
-			setTimeout(function() {
-				self.currentPosition=Math.floor(Math.random() * (self.playQueue.arrayQueue.length));
-				self.play();
-			},500);
-		}
-		else if (this.currentPosition > 0) {
-			this.stop();
-			setTimeout(function()
-			{
-				self.currentPosition--;
-				self.play();
-			},500);
+		if (this.isConsume && this.consumeState.service != undefined) {
+			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
+			thisPlugin.previous();
+		} else {
+			if (this.currentRandom !== undefined && this.currentRandom === true) {
+				this.stop();
+				setTimeout(function () {
+					self.currentPosition = Math.floor(Math.random() * (self.playQueue.arrayQueue.length));
+					self.play();
+				}, 500);
+			}
+			else if (this.currentPosition > 0) {
+				this.stop();
+				setTimeout(function () {
+					self.currentPosition--;
+					self.play();
+				}, 500);
 
+			}
 		}
 	} else if (this.currentStatus === 'pause') {
 		// Pause -> Previous transition
@@ -1285,6 +1298,7 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value) {
 
 	this.consumeUpdateService = value;
 	this.isConsume = value!=undefined;
+	this.consumeState.service = value;
 
 	return defer.promise;
 
