@@ -66,7 +66,17 @@ var searchOnline = function (defer, web) {
 	/**
 	 * Loading album art from network
 	 */
-	var folder = albumArtRootFolder + artist + '/' + album + '/';
+	var folder;
+
+	if(album)
+    {
+        folder= albumArtRootFolder + artist + '/' + album + '/';
+    }
+    else
+    {
+        folder= albumArtRootFolder + artist + '/';
+    }
+
 	var fileName = resolution;
 
 	fs.ensureDirSync(folder);
@@ -79,25 +89,30 @@ var searchOnline = function (defer, web) {
 		fs.writeJsonSync(infoPath, infoJson);
 	}
 
-	var stats = fs.statSync(infoPath)
-	var fileSizeInBytes = stats["size"]
+	var stats = fs.statSync(infoPath);
+	var fileSizeInBytes = stats["size"];
 
     if (fileSizeInBytes > 0)
 		infoJson = fs.readJsonSync(infoPath, {throws: false})
 
 
     if (infoJson[resolution] == undefined) {
+        var decodedArtist=nodetools.urlDecode(artist);
+        var decodedAlbum=nodetools.urlDecode(album);
+        var decodedResolution
+
+
 
 		albumart(nodetools.urlDecode(artist), nodetools.urlDecode(album), nodetools.urlDecode(resolution), function (err, url) {
 			if (err) {
-				albumart(artist, function (err, url) {
+                albumart(nodetools.urlDecode(artist), function (err, url) {
 					if (err) {
-						console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
+					    console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
 						defer.reject(new Error(err));
 						return defer.promise;
 					}
 					else {
-						if (url != undefined && url != '') {
+					    if (url != undefined && url != '') {
 							var splitted = url.split('.');
 							var fileExtension = splitted[splitted.length - 1];
 							var diskFileName = uuid.v4() + '.' + fileExtension;
@@ -109,8 +124,13 @@ var searchOnline = function (defer, web) {
 
 							//console.log("URL: " + url);
 							download(url, options, function (err) {
-								if (err) defer.reject(new Error(err));
-								else defer.resolve(folder + diskFileName);
+							    if (err) defer.reject(new Error(err));
+								else {
+								    //waiting 2 secodns to flush data on disk. Should use a better method
+								    setTimeout(function(){
+                                        defer.resolve(folder + diskFileName);
+                                    },500);
+                                }
 							});
 
 							infoJson[resolution] = diskFileName;
