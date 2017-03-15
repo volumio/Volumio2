@@ -363,6 +363,40 @@ CoreStateMachine.prototype.stopPlaybackTimer = function () {
 	return libQ.resolve();
 };
 
+
+
+CoreStateMachine.prototype.getNextIndex = function () {
+    var nextIndex=this.currentPosition+1;
+
+    var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
+    
+    // Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
+    if(this.currentRepeat)
+    {
+        if(this.currentRepeatSingleSong) {
+            nextIndex=this.currentPosition;
+        } else if (isLastTrack) {
+            nextIndex=0;
+        }
+
+    }
+
+    if(isLastTrack && this.currentConsume)
+    {
+        nextIndex=0;
+    }
+
+    // Then check if Random mode is on - Random mode overrides Repeat mode by this
+    if(this.currentRandom)
+    {
+        nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+        this.nextRandomIndex=nextIndex;
+    }
+
+    return nextIndex;
+};
+
+
 // Stop playback timer
 CoreStateMachine.prototype.increasePlaybackTimer = function () {
 	var self=this;
@@ -376,38 +410,13 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		var isLastTrack=(this.playQueue.arrayQueue.length-1)==this.currentPosition;
 		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
 			var trackBlock = this.getTrack(this.currentPosition);
 
-            var nextIndex=this.currentPosition+1;
-            // Check if Repeat mode is on and last track is played, note that Random and Consume overides Repeat
-            if(this.currentRepeat)
-            {
-                if(this.currentRepeatSingleSong) {
-					nextIndex=this.currentPosition;
-				} else if (isLastTrack) {
-					nextIndex=0;
-				}
-
-
-
-            }
-
-            if(isLastTrack && this.currentConsume)
-            {
-                nextIndex=0;
-            }
-
-            // Then check if Random mode is on - Random mode overrides Repeat mode by this
-            if(this.currentRandom)
-            {
-                nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
-                this.nextRandomIndex=nextIndex;
-            }
+            var nextIndex=this.getNextIndex();
 
             var nextTrackBlock = this.getTrack(nextIndex);
 			if(nextTrackBlock!==undefined && nextTrackBlock!==null && nextTrackBlock.service==trackBlock.service)
@@ -429,31 +438,17 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.simulateStopStartDone=true;
 			this.currentSeek=0;
 
-            if(this.currentConsume)
+
+			if(this.currentRandom)
             {
-                this.playQueue.removeQueueItem({value:this.currentPosition});
+                this.currentPosition=this.nextRandomIndex;
             }
             else
             {
-                if(this.currentRandom)
-                {
-                    this.currentPosition=this.nextRandomIndex;
-                }
-                else if(this.currentRepeat)
-                {
-                    if(!this.currentRepeatSingleSong)
-                    {
-                        this.currentPosition++;
-                    }
-                }
-
-                if(isLastTrack !== this.currentConsume)
-                {
-                    this.currentPosition=0;
-                }
+                this.currentPosition=this.getNextIndex();
             }
 
-            this.nextRandomIndex=undefined;
+			this.nextRandomIndex=undefined;
 
             this.askedForPrefetch=false;
 			this.pushState.bind(this);
