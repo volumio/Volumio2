@@ -28,6 +28,18 @@ myVolumio.prototype.onStart = function ()
     var self = this;
     var defer = libQ.defer();
 
+    var token = self.config.get('token');
+    var uuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
+    var device = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'device');
+    var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'playerName');
+    console.log('aaaaaaaaaaaaaaaaaaaa'+ name +' '  + uuid);
+
+    if (token == undefined) {
+        var username = self.config.get('username');
+        var username = self.config.get('password');
+
+    }
+
     return defer.promise;
 }
 
