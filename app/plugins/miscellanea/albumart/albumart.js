@@ -93,83 +93,98 @@ var searchOnline = function (defer, web) {
 	var fileSizeInBytes = stats["size"];
 
     if (fileSizeInBytes > 0)
-		infoJson = fs.readJsonSync(infoPath, {throws: false})
+    {
+        infoJson = fs.readJsonSync(infoPath, {throws: false});
+    }
 
 
     if (infoJson[resolution] == undefined) {
         var decodedArtist=nodetools.urlDecode(artist);
         var decodedAlbum=nodetools.urlDecode(album);
-        var decodedResolution
+        var decodedResolution=nodetools.urlDecode(resolution);
 
+        if(decodedAlbum==='')
+        {
+            albumart(decodedArtist, function (err, url) {
+                if (err) {
+                    console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
+                    defer.reject(new Error(err));
+                    return defer.promise;
+                }
+                else {
+                    if (url != undefined && url != '') {
+                        var splitted = url.split('.');
+                        var fileExtension = splitted[splitted.length - 1];
+                        var diskFileName = uuid.v4() + '.' + fileExtension;
 
+                        var options = {
+                            directory: folder,
+                            filename: diskFileName
+                        };
 
-		albumart(nodetools.urlDecode(artist), nodetools.urlDecode(album), nodetools.urlDecode(resolution), function (err, url) {
-			if (err) {
-                albumart(nodetools.urlDecode(artist), function (err, url) {
-					if (err) {
-					    console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
-						defer.reject(new Error(err));
-						return defer.promise;
-					}
-					else {
-					    if (url != undefined && url != '') {
-							var splitted = url.split('.');
-							var fileExtension = splitted[splitted.length - 1];
-							var diskFileName = uuid.v4() + '.' + fileExtension;
+                        //console.log("URL: " + url);
+                        download(url, options, function (err) {
+                            if (err) defer.reject(new Error(err));
+                            else {
+                                //waiting 2 secodns to flush data on disk. Should use a better method
+                                setTimeout(function(){
+                                    defer.resolve(folder + diskFileName);
+                                },500);
+                            }
+                        });
 
-							var options = {
-								directory: folder,
-								filename: diskFileName
-							}
+                        infoJson[resolution] = diskFileName;
+                    }
+                    else {
+                        defer.reject(new Error('No albumart URL'));
+                        return defer.promise;
+                    }
+                }
 
-							//console.log("URL: " + url);
-							download(url, options, function (err) {
-							    if (err) defer.reject(new Error(err));
-								else {
-								    //waiting 2 secodns to flush data on disk. Should use a better method
-								    setTimeout(function(){
-                                        defer.resolve(folder + diskFileName);
-                                    },500);
-                                }
-							});
+                fs.writeJsonSync(infoPath, infoJson);
+            });
+        }
+        else
+        {
+            albumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
+                if (err) {
+                    defer.reject(new Error('No albumart URL'));
+                }
+                else {
+                    if (url != undefined && url != '') {
+                        var splitted = url.split('.');
+                        var fileExtension = splitted[splitted.length - 1];
+                        var diskFileName = uuid.v4() + '.' + fileExtension;
 
-							infoJson[resolution] = diskFileName;
-						}
-						else {
-							defer.reject(new Error('No albumart URL'));
-							return defer.promise;
-						}
-					}
+                        var options = {
+                            directory: folder,
+                            filename: diskFileName
+                        };
 
-					fs.writeJsonSync(infoPath, infoJson);
-				});
-			}
-			else {
-				if (url != undefined && url != '') {
-					var splitted = url.split('.');
-					var fileExtension = splitted[splitted.length - 1];
-					var diskFileName = uuid.v4() + '.' + fileExtension;
+                        download(url, options, function (err) {
+                            if (err)
+                            {
+                                defer.reject(new Error(err));
+                            }
+                            else {
+                                setTimeout(function(){
+                                    defer.resolve(folder + diskFileName);
+                                },500);
+                            }
+                        });
+                    }
+                    else {
+                        defer.reject(new Error('No albumart URL'));
+                        return defer.promise;
+                    }
 
-					var options = {
-						directory: folder,
-						filename: diskFileName
-					}
-					download(url, options, function (err) {
-						if (err) defer.reject(new Error(err));
-						else defer.resolve(folder + diskFileName);
-					});
-				}
-				else {
-					defer.reject(new Error('No albumart URL'));
-					return defer.promise;
-				}
+                    infoJson[resolution] = diskFileName;
 
-				infoJson[resolution] = diskFileName;
+                }
 
-			}
-
-			fs.writeJsonSync(infoPath, infoJson);
-		});
+                fs.writeJsonSync(infoPath, infoJson);
+            });
+        }
 	}
 	else {
 		defer.resolve(folder + infoJson[resolution]);
