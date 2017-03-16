@@ -1645,6 +1645,18 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushWizardSteps', wizardSteps);
 			});
 
+            connWebSocket.on('getWizardUiConfig', function (data) {
+                var selfConnWebSocket = this;
+
+                var wizardConfig = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardConfig', data);
+
+                if (wizardConfig != undefined) {
+                    wizardConfig.then(function (data) {
+                        selfConnWebSocket.emit('pushUIConfig', data);
+                    });
+                }
+            });
+
 			connWebSocket.on('getAvailableLanguages', function () {
 				var selfConnWebSocket = this;
 

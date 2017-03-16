@@ -1,0 +1,47 @@
+{
+  "page": {
+    "label": "Spotify Configuration"
+  },
+  "sections": [
+    {
+      "id": "section_account",
+      "element": "section",
+      "label": "Spotify Account",
+      "icon": "fa-plug",
+      "onSave": {"type":"controller", "endpoint":"music_service/spop", "method":"saveSpotifyAccount"},
+      "saveButton": {
+        "label": "Save",
+        "data": [
+          "username",
+          "password",
+          "bitrate"
+        ]
+      },
+      "content": [
+        {
+          "id": "username",
+          "type":"text",
+          "element": "input",
+          "doc": "This is the username of your Spotify account",
+          "label": "Username",
+          "value": ""
+        },
+        {
+          "id": "password",
+          "type":"password",
+          "element": "input",
+          "doc": "This is the password of your Spotify account",
+          "label": "Password",
+          "value": ""
+        },
+        {
+          "id":"bitrate",
+          "element": "switch",
+          "doc": "High bitrate",
+          "label": "High Bitrate",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

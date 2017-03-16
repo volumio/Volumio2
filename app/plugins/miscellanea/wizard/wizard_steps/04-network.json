@@ -1,1 +1,1 @@
-{"id":"network","prettyName":"Network", "show":true}
+{"name":"network", "type":"core", "show":true}

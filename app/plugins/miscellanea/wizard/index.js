@@ -138,11 +138,13 @@ volumioWizard.prototype.getWizardSteps = function () {
     netJson = {};
 
     for (var i in steps) {
-        var step = fs.readJsonSync((__dirname + '/wizard_steps/' + steps[i]),  'utf8', {throws: false});
-        if (step.show){
-            stepsArray.push(step.id);
+        console.log(steps[i])
+        if (steps[i].indexOf("conf") <= -1)  {
+            var step = fs.readJsonSync((__dirname + '/wizard_steps/' + steps[i]),  'utf8', {throws: false});
+                if (step.show){
+                        stepsArray.push(step);
+                }
         }
-
     }
     return  stepsArray
 };
@@ -199,4 +201,29 @@ volumioWizard.prototype.reportWirelessConnection = function () {
         }
     });
 
+};
+
+volumioWizard.prototype.getWizardConfig = function (data) {
+    var self = this;
+
+    var defer = libQ.defer();
+
+    var lang_code = this.commandRouter.sharedVars.get('language_code');
+    var conf = __dirname + '/wizard_steps/conf/' + data.page+'.json';
+
+    self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+        __dirname+'/../../../i18n/strings_en.json',
+        conf)
+        .then(function(uiconf)
+        {
+
+
+            defer.resolve(uiconf);
+        })
+        .fail(function()
+        {
+            defer.reject(new Error());
+        })
+
+    return defer.promise
 };
