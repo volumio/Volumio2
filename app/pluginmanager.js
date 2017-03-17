@@ -679,7 +679,7 @@ PluginManager.prototype.rmDir = function (folder) {
 
 	var defer=libQ.defer();
 	fs.remove('/tmp/downloaded_plugin', function (err) {
-		if (err) defere.reject(new Error("Cannot delete folder "+folder));
+		if (err) defer.reject(new Error("Cannot delete folder "+folder));
 
 		self.logger.info("Folder "+folder+" removed");
 		defer.resolve(folder);
@@ -1015,7 +1015,7 @@ PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
 	var isEnabled=self.config.get(key+'.enabled');
 
 	if(isEnabled==false)
-		defere.reject(new Error());
+		defer.reject(new Error());
 	else
 	{
 		self.logger.info("Changing plugin "+name+" status to "+status);
