@@ -11,6 +11,8 @@
     {"name": "audiocodec", "prettyname": "Analog Audio Out", "defaultmixer": "headphone volume","type":"integrated"},
     {"name": "imxvt1613audio", "prettyname": "Analog Audio Out", "defaultmixer": "Speaker","type":"integrated"},
     {"name": "imxhdmisoc", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
-    {"name": "imxaudiotda1998", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"}
+    {"name": "imxaudiotda1998", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
+    {"name": "ODROIDDAC2", "prettyname": "HiFi Shield 2", "defaultmixer": "Digital","type":"i2S"},
+    {"name": "ODROIDDAC", "prettyname": "HiFi Shield/Shield+", "defaultmixer": "","type":"integrated"}
   ]
 }
