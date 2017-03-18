@@ -1,4 +1,60 @@
 {
+  "split_artists_by_starting_letter": {
+    "type": "boolean",
+    "value": true
+  },
+  "split_albums_by_starting_letter": {
+    "type": "boolean",
+    "value": true
+  },
+  "split_genres_by_starting_letter": {
+    "type": "boolean",
+    "value": true
+  },
+
+  "list_only_artists_with_min_entries": {
+    "type": "number",
+    "value": 0
+  },
+
+  "list_only_albums_with_min_entries": {
+    "type": "number",
+    "value": 0
+  },
+
+  "list_only_genres_with_min_entries": {
+    "type": "number",
+    "value": 0
+  },
+
+
+
+  "ignore_leading_article": {
+    "type": "boolean",
+    "value": true
+  },
+
+
+  "ignored_leading_article_list": {
+    "value": ["THE ","DER ","DIE ","DAS "]
+  },
+
+  "internal_sorting_of_results": {
+    "type": "boolean",
+    "value": true
+  },
+  "skip_double_tracks_in_artist_list": {
+    "type": "boolean",
+    "value": true
+  },
+  "skip_double_tracks_in_album_list": {
+    "type": "boolean",
+    "value": true
+  },
+
+
+
+
   "gapless_mp3_playback":{
     "type": "boolean",
     "value": false
@@ -57,5 +113,3 @@
   }
 
 }
-
-
