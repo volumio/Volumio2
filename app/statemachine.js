@@ -1217,10 +1217,28 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
 		} });
-
 	}
+	else
+    {
 
-	return this.playQueue.removeQueueItem(nIndex);
+        if (this.currentPosition > index) {
+            console.log("removing 1 from index");
+            this.currentPosition--;
+        }
+    }
+
+	var defer=libQ.defer();
+    this.playQueue.removeQueueItem(nIndex)
+        .then(function()
+        {
+            console.log("CHECCACCHIOPORCAPALETTA");
+            return self.commandRouter.stateMachine.pushState();
+        })
+        .then(function(){
+            defer.resolve();
+        });
+
+	return defer.promise;
 };
 
 CoreStateMachine.prototype.setRandom = function (value) {
@@ -1251,7 +1269,8 @@ CoreStateMachine.prototype.setConsume = function (value) {
 };
 
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
+	var self=this;
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
 
     if(from< this.currentPosition && to > this.currentPosition)
     {
@@ -1264,8 +1283,16 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
     else if(from==this.currentPosition)
         this.currentPosition=to;
 
-    this.pushState();
-	return this.playQueue.moveQueueItem(from,to);
+    var defer=libQ.defer();
+    this.playQueue.moveQueueItem(from,to).then(function(){
+        return self.pushState();
+    }).then(function(){
+        defer.resolve({});
+    }).fail(function(err){
+       defer.reject(new Error(err));
+    });
+
+    return defer.promise;
 };
 
 CoreStateMachine.prototype.setConsumeUpdateService = function (value) {

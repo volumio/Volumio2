@@ -83,6 +83,8 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 // Removes one item from the queue
 CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
+    var self=this;
+
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
 	var item=this.arrayQueue.splice(nIndex.value, 1);
 
@@ -94,7 +96,15 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
         item[0].name+
         this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_2'));
 
-    return this.commandRouter.volumioPushQueue(this.arrayQueue);
+    var defer=libQ.defer();
+    this.commandRouter.volumioPushQueue(this.arrayQueue)
+      .then(function(){
+        defer.resolve({});
+    }).fail(function(err){
+        defer.reject(new Error(err));
+    });
+
+    return defer.promise;
 };
 
 // Add one item to the queue
@@ -220,7 +230,7 @@ CorePlayQueue.prototype.moveQueueItem = function (from,to) {
         this.arrayQueue.splice(to,0,this.arrayQueue.splice(from,1)[0]);
         return this.commandRouter.volumioPushQueue(this.arrayQueue);
     }
-    else return;
+    else return defer.resolve();
 };
 
 
