@@ -22,7 +22,7 @@
     {"id":"mamboberry-dac","name":"Mamboberry LS DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"phat-dac","name":"pHAT DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"picade-hat","name":"Picade HAT","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes","eeprom_name":["Picade HAT"]},
-    {"id":"pisound","name":"PiSound","overlay":"pisound","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"no"},
+    {"id":"pisound","name":"pisound","overlay":"pisound","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"no"},
     {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
