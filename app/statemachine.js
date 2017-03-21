@@ -555,7 +555,10 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
         //this.currentStatus='stop';
 		var trackBlock = this.getTrack(this.currentPosition);
 	}
-	else {
+    else if (this.isConsume){
+		console.log('In conaume mode')
+
+    } else {
         this.volatileService = undefined;
 
         var trackBlock = this.getTrack(this.currentPosition);
@@ -571,7 +574,13 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 		{
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification. Current '+this.consumeUpdateService+" Received "+sService);
-			return;
+			if (this.consumeUpdateService == 'upnp') {
+                this.consumeUpdateService = 'mpd';
+                sService = 'mpd';
+			} else {
+                return;
+			}
+
 		}
 	} else
 	{
