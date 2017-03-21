@@ -631,7 +631,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 				}
 
 				if (this.consumeIgnoreMetadata != undefined && this.consumeIgnoreMetadata) {
-					console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 					this.consumeState={
 						status:stateService.status,
 						title:trackBlock.name,
@@ -648,7 +647,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 						stream:stateService.isStreaming
 					};
 				} else {
-					console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
+
 					this.consumeState={
 						status:stateService.status,
 						title:stateService.title,
@@ -665,7 +664,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 						stream:stateService.isStreaming,
 						service:stateService.service
 					};
-					console.log(consumeState)
+
 				}
 
             }
@@ -1289,7 +1288,7 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
 
 CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setConsumeUpdateService '+value);
-	console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE '+value)
+
 	var defer;
 
 	/*if(value==undefined && this.consumeUpdateService!==undefined)
@@ -1318,7 +1317,7 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta
 	} else {
 		this.consumeIgnoreMetadata = false;
 	}
-	console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE '+value)
+
 	return defer.promise;
 
 
