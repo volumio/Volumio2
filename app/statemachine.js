@@ -42,6 +42,8 @@ function CoreStateMachine(commandRouter) {
 	*/
 	this.consumeIgnoreMetadata = false;
 
+    this.isUpnp = false;
+
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
 }
@@ -555,8 +557,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
         //this.currentStatus='stop';
 		var trackBlock = this.getTrack(this.currentPosition);
 	}
-    else if (this.isConsume){
-		console.log('In conaume mode')
+    else if (this.isUpnp){
+		console.log('In UPNP mode')
 
     } else {
         this.volatileService = undefined;
@@ -1295,7 +1297,7 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
 	return this.playQueue.moveQueueItem(from,to);
 };
 
-CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta) {
+CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta, upnp) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setConsumeUpdateService '+value);
 
 	var defer;
@@ -1326,6 +1328,12 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta
 	} else {
 		this.consumeIgnoreMetadata = false;
 	}
+
+    if (upnp != undefined) {
+        this.isUpnp = upnp;
+    } else {
+        this.isUpnp = false;
+    }
 
 	return defer.promise;
 
