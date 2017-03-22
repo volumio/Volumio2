@@ -105,7 +105,7 @@ app.route('/plugin-upload')
                 console.log('Cannot Create Plugin DIR ')
             }
             //Path where image will be uploaded
-            fstream = fs.createWriteStream('/tmp/plugins/' + filename);
+            fstream = fs.createWriteStream(plugindir + filename);
             file.pipe(fstream);
             fstream.on('close', function () {
                 console.log("Upload Finished of " + filename);
