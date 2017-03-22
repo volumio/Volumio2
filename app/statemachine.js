@@ -1207,6 +1207,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
+    var self=this;
 
 	var index = nIndex.value;
 
@@ -1220,9 +1221,7 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 	}
 	else
     {
-
         if (this.currentPosition > index) {
-            console.log("removing 1 from index");
             this.currentPosition--;
         }
     }
@@ -1231,8 +1230,7 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
     this.playQueue.removeQueueItem(nIndex)
         .then(function()
         {
-            console.log("CHECCACCHIOPORCAPALETTA");
-            return self.commandRouter.stateMachine.pushState();
+            return self.commandRouter.volumioPushState(self.getState());
         })
         .then(function(){
             defer.resolve();
