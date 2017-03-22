@@ -1084,6 +1084,8 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	if (this.isConsume && this.consumeState.service != undefined) {
 		var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
 		thisPlugin.next();
+	} else if (this.isUpnp){
+		console.log('UPNP Next');
 	} else {
 
 	this.stop()
