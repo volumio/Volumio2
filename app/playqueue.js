@@ -189,7 +189,10 @@ CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
     this.arrayQueue = this.arrayQueue.concat(arrayItems);
     this.saveQueue();
 
-    this.commandRouter.serviceClearAddPlayTracks(arrayItems,arrayItems[0].service);
+    if(arrayItems && arrayItems.length>0)
+    {
+        this.commandRouter.serviceClearAddPlayTracks(arrayItems,arrayItems[0].service);
+    }
     return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 

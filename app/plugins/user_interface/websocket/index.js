@@ -120,10 +120,10 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('replaceAndPlay', function (data) {
 				var timeStart = Date.now();
 
-				self.commandRouter.replaceAndPlay(data)
-				.then(function(e){
+				self.commandRouter.replaceAndPlay(data);
+				/*.then(function(e){
 					return self.commandRouter.volumioPlay(e.firstItemIndex);
-				});
+				});*/
 			});
 
 			connWebSocket.on('addPlay', function (data) {
