@@ -408,24 +408,23 @@ PluginManager.prototype.checkRequiredConfigurationParameters = function (require
 	configJson.save();
 };
 
-PluginManager.prototype.installPlugin = function (url) {
+PluginManager.prototype.installPlugin = function (data) {
 	var self=this;
 	var defer=libQ.defer();
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
+    var sourcefile = data.sourcefile;
 
 
-	var currentMessage = "Downloading plugin at "+url;
+	var currentMessage = "Downloaded plugin is at "+sourcefile;
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
-	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
+	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloaded plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
-
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
-
+	exec("/bin/mv -f " + sourcefile + " /tmp/downloaded_plugin.zip", function (error, stdout, stderr) {
 		if (error !== null) {
-			currentMessage = "Cannot download file "+url+ ' - ' + error;
+			currentMessage = "Cannot handle file "+sourcefile+ ' - ' + error;
 			self.logger.info(currentMessage);
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			defer.reject(new Error(error));
