@@ -693,6 +693,7 @@ PluginManager.prototype.tempCleanup = function () {
 
 	self.rmDir('/tmp/downloaded_plugin');
 	self.rmDir('/tmp/downloaded_plugin.zip');
+	self.rmDir('/tmp/downloadedPlugin');
 }
 
 PluginManager.prototype.createFolder = function (folder) {
