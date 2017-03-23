@@ -184,16 +184,24 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 };
 
 CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
+    var self=this;
     this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearAddPlayQueue');
     this.arrayQueue = [];
     this.arrayQueue = this.arrayQueue.concat(arrayItems);
     this.saveQueue();
 
-    if(arrayItems && arrayItems.length>0)
-    {
-        this.commandRouter.serviceClearAddPlayTracks(arrayItems,arrayItems[0].service);
-    }
-    return this.commandRouter.volumioPushQueue(this.arrayQueue);
+    var defer=libQ.defer();
+
+    this.commandRouter.volumioPushQueue(this.arrayQueue)
+        .then(function(){
+            self.commandRouter.volumioPlay();
+            defer.resolve();
+        })
+        .fail(function(err)
+        {
+            defer.reject(new Error(err));
+        });
+    return defer.promise;
 };
 
 CorePlayQueue.prototype.clearPlayQueue = function () {
