@@ -1274,7 +1274,7 @@ CoreStateMachine.prototype.moveQueueItem = function (from,to) {
     {
         this.currentPosition--;
     }
-    else if(from> this.currentPosition && to < this.currentPosition)
+    else if(from> this.currentPosition && to <= this.currentPosition)
     {
         this.currentPosition++;
     }
