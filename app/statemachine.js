@@ -1249,6 +1249,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::removeQueueItem');
+    var self=this;
 
 	var index = nIndex.value;
 
@@ -1259,10 +1260,25 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 		if (this.currentPosition > 0) {
 			this.currentPosition--;
 		} });
-
 	}
+	else
+    {
+        if (this.currentPosition > index) {
+            this.currentPosition--;
+        }
+    }
 
-	return this.playQueue.removeQueueItem(nIndex);
+	var defer=libQ.defer();
+    this.playQueue.removeQueueItem(nIndex)
+        .then(function()
+        {
+            return self.commandRouter.volumioPushState(self.getState());
+        })
+        .then(function(){
+            defer.resolve();
+        });
+
+	return defer.promise;
 };
 
 CoreStateMachine.prototype.setRandom = function (value) {
@@ -1293,21 +1309,30 @@ CoreStateMachine.prototype.setConsume = function (value) {
 };
 
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
+	var self=this;
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::moveQueueItem '+from+' '+to);
 
     if(from< this.currentPosition && to > this.currentPosition)
     {
         this.currentPosition--;
     }
-    else if(from> this.currentPosition && to < this.currentPosition)
+    else if(from> this.currentPosition && to <= this.currentPosition)
     {
         this.currentPosition++;
     }
     else if(from==this.currentPosition)
         this.currentPosition=to;
 
-    this.pushState();
-	return this.playQueue.moveQueueItem(from,to);
+    var defer=libQ.defer();
+    this.playQueue.moveQueueItem(from,to).then(function(){
+        return self.pushState();
+    }).then(function(){
+        defer.resolve({});
+    }).fail(function(err){
+       defer.reject(new Error(err));
+    });
+
+    return defer.promise;
 };
 
 CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta, upnp) {
