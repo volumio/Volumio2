@@ -412,6 +412,15 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                 })
             }
 		    else {
+
+                if(!uri.startsWith('mnt/'))
+                {
+                    uri='mnt/'+uri;
+                    path=uri;
+                }
+                console.log("URIIIIII "+uri);
+
+
                 var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
                 prms.then(function (info) {
                     //
@@ -588,7 +597,8 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 				if (err)
 					defer.resolve({success: false});
 				else {
-					self.commandRouter.volumioClearQueue();
+					//self.commandRouter.volumioClearQueue();
+                    var queue=self.commandRouter.volumioGetQueue();
 
 					var uris = [];
 					for (var i in data) {
@@ -614,7 +624,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                     self.commandRouter.addQueueItems(uris)
                         .then(function()
                         {
-                            self.commandRouter.volumioPlay();
+                            self.commandRouter.volumioPlay(queue.length);
                             defer.resolve();
                         })
                         .fail(function()

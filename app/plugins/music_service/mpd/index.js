@@ -1071,6 +1071,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 	var cmd = libMpd.cmd;
 
+	console.log("COMMAND: "+command);
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			var list = [];

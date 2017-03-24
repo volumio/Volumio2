@@ -230,6 +230,14 @@ CoreStateMachine.prototype.clearQueue = function () {
 };
 
 
+// Add array of items to queue
+CoreStateMachine.prototype.clearAddPlayQueue = function (items) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::clearAddPlayQueue');
+
+    return this.playQueue.clearAddPlayQueue(items);
+
+};
+
 
 
 
