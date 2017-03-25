@@ -101,11 +101,11 @@
 	  "MOUNT_SHARE_ERROR":"Chyba v přidávání síťového disku"
   },
   "PLAYLIST":{
-    "ADDED_TITLE":"Added",
-    "ADDED_TO_PLAYLIST":" to playlist ",
-    "ADDED_TO_FAVOURITES":" to Favorites ",
-    "REMOVE_ERROR":"Cannot Remove",
-    "REMOVE_SUCCESS":"Removed"
+    "ADDED_TITLE":"Přidáno",
+    "ADDED_TO_PLAYLIST":" do seznamu ",
+    "ADDED_TO_FAVOURITES":" do Oblíbených ",
+    "REMOVE_ERROR":"Nelze odstranit",
+    "REMOVE_SUCCESS":"Odstraněno"
   },
   "COMMON":{
     "SAVE":"Save",
