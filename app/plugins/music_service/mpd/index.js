@@ -517,8 +517,9 @@ ControllerMpd.prototype.parseState = function (objState) {
 		var objMetrics = objState.audio.split(':');
 		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
 		nBitDepth = Number(objMetrics[1])+' bit';
-
-		if (objMetrics[1] == 'dsd') {
+		if (objMetrics[1] == 'f')
+			nBitDepth = '32f bit';
+		else if (objMetrics[1] == 'dsd') {
 			if (nSampleRateRaw === 352.8) {
 				var nSampleRateRaw = 2.82 + ' MHz';
 				nBitDepth = '1 bit'
