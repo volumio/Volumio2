@@ -370,7 +370,9 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 			// If there's an error show an alert on UI
 			if ('error' in respobject) {
 				self.commandRouter.broadcastToastMessage('error', 'Error', respobject.error)
-				//console.log(respobject.error);
+				
+                self.sendMpdCommand('clearerror', [])
+
 			}
 			return libQ.resolve(respobject);
 		});
