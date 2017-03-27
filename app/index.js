@@ -386,7 +386,12 @@ CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
-	return this.stateMachine.addQueueItems(arrayItems);
+
+    if (arrayItems.uri.indexOf('playlists/') >= 0) {
+        return this.playPlaylist(arrayItems.title)
+    } else  {
+        return this.stateMachine.addQueueItems(arrayItems);
+    }
 };
 
 
