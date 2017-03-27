@@ -120,18 +120,10 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('replaceAndPlay', function (data) {
 				var timeStart = Date.now();
 
-				self.commandRouter.volumioStop()
-                    .then(function(){
-                        return self.commandRouter.stateMachine.playQueue.clearPlayQueue();
-                    })
-                    .then(function(){
-                        console.log("DATA::::" +JSON.stringify(data));
-                        self.commandRouter.playPlaylist(data.title);
-                    });
-
-				/*.then(function(e){
+				self.commandRouter.replaceAndPlay(data)
+				.then(function(e){
 					return self.commandRouter.volumioPlay(e.firstItemIndex);
-				});*/
+				});
 			});
 
 			connWebSocket.on('addPlay', function (data) {
