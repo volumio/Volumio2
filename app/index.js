@@ -385,22 +385,8 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
-	var self=this;
-
-	var defer=libQ.defer();
-
-	//this.stateMachine.clearQueue();
-    this.stateMachine.clearAddPlayQueue(arrayItems)
-        .then(function()
-        {
-           //self.volumioPlay(0);
-           defer.resolve();
-        })
-        .fail(function(err){
-            defer.reject(new Error(err));
-        });
-
-    return defer.promise;
+	this.stateMachine.clearQueue();
+	return this.stateMachine.addQueueItems(arrayItems);
 };
 
 
