@@ -2,18 +2,23 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var Promise = require('bluebird');
+var wipeer = require('wipeer');
+var myvolumio = require('myvolumio');
 
-module.exports = myVolumio;
+module.exports = myVolumioController;
 
-function myVolumio(context)
+function myVolumioController(context)
 {
     var self = this;
 
     self.context = context;
     self.commandRouter = self.context.coreCommand;
+    self.logger = self.context.logger;
+    var backend;
 }
 
-myVolumio.prototype.onVolumioStart = function ()
+myVolumioController.prototype.onVolumioStart = function ()
 {
     var self = this;
     var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,
@@ -23,7 +28,7 @@ myVolumio.prototype.onVolumioStart = function ()
 };
 
 
-myVolumio.prototype.onStart = function ()
+myVolumioController.prototype.onStart = function ()
 {
     var self = this;
     var defer = libQ.defer();
@@ -32,38 +37,40 @@ myVolumio.prototype.onStart = function ()
     var uuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
     var device = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'device');
     var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'playerName');
-    console.log('aaaaaaaaaaaaaaaaaaaa'+ name +' '  + uuid);
+
 
     if (token == undefined) {
         var username = self.config.get('username');
-        var username = self.config.get('password');
+        var password = self.config.get('password');
 
-    }
+    };
+
+    self.cloudLink();
 
     return defer.promise;
 }
 
-myVolumio.prototype.onStop = function () {
+myVolumioController.prototype.onStop = function () {
     var self = this;
     //Perform startup tasks here
 };
 
-myVolumio.prototype.onRestart = function () {
+myVolumioController.prototype.onRestart = function () {
     var self = this;
     //Perform startup tasks here
 };
 
-myVolumio.prototype.onInstall = function () {
+myVolumioController.prototype.onInstall = function () {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.onUninstall = function () {
+myVolumioController.prototype.onUninstall = function () {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.getUIConfig = function () {
+myVolumioController.prototype.getUIConfig = function () {
     var self = this;
     var defer = libQ.defer();
     var lang_code = this.commandRouter.sharedVars.get("language_code");
@@ -85,48 +92,84 @@ myVolumio.prototype.getUIConfig = function () {
 };
 
 //manage parameters from config.json file of every plugin
-myVolumio.prototype.retrievePlugConfig = function () {
+myVolumioController.prototype.retrievePlugConfig = function () {
     var self = this;
 
     return self.commandRouter.getPluginsConf();
 }
 
-myVolumio.prototype.login = function () {
+myVolumioController.prototype.login = function () {
     var self = this;
 }
 
-myVolumio.prototype.setUIConfig = function (data) {
+myVolumioController.prototype.setUIConfig = function (data) {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.getConf = function (varName) {
+myVolumioController.prototype.getConf = function (varName) {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.setConf = function (varName, varValue) {
+myVolumioController.prototype.setConf = function (varName, varValue) {
     var self = this;
     //Perform your installation tasks here
 };
 
 //Optional functions exposed for making development easier and more clear
-myVolumio.prototype.getSystemConf = function (pluginName, varName) {
+myVolumioController.prototype.getSystemConf = function (pluginName, varName) {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.setSystemConf = function (pluginName, varName) {
+myVolumioController.prototype.setSystemConf = function (pluginName, varName) {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.getAdditionalConf = function () {
+myVolumioController.prototype.getAdditionalConf = function () {
     var self = this;
     //Perform your installation tasks here
 };
 
-myVolumio.prototype.setAdditionalConf = function () {
+myVolumioController.prototype.setAdditionalConf = function () {
     var self = this;
     //Perform your installation tasks here
 };
+
+myVolumioController.prototype.connectToCloud = function () {
+    var self = this;
+
+    var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'playerName');
+    var username = self.config.get('username');
+    var password = self.config.get('password');
+
+    var conf = {
+        url: 'wss://dev-my.volumio.org/',
+            name: name,
+            type: wipeer.client.type.NODEJS,
+            credentials: {
+            username: 'account1',
+            password: 'password1'
+        }
+    }
+
+    return new Promise((resolve) => {
+        self.logger.info('Establishing MyVolumio Cloud Connection')
+        this.backend = new myvolumio.Backend(conf)
+        this.backend.events.on('started', resolve)
+        this.backend.start()
+        this.backend.events.on('linked', resolve)
+        this.backend.link('http://localhost:3000')
+})
+
+};
+
+myVolumioController.prototype.cloudLink = function () {
+    var self = this;
+    return self.connectToCloud()
+            .catch((e) => {
+            self.logger.error('Volumio Cloud Backend error: '+ e)
+})
+}
