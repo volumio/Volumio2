@@ -1042,8 +1042,8 @@ function InterfaceWebUI(context) {
                 var selfConnWebSocket = this;
 
 				 self.logger.info("Update Ready: " + message);
-
-				 selfConnWebSocket.emit('updateReady', message);
+				 var asd = JSON.parse(message)
+                self.commandRouter.broadcastMessage('updateReady', asd);
             });
 
 
