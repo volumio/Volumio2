@@ -1078,7 +1078,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			var list = [];
 			if (msg) {
-				var s0 = sections[0] + '/';
+                var s0 = sections[0] + '/';
 				var path;
 				var name;
 				var lines = msg.split('\n');
@@ -1146,6 +1146,31 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						var album = self.searchFor(lines, i + 1, 'Album:');
 						var title = self.searchFor(lines, i + 1, 'Title:');
 
+						var year,albumart,tracknumber,duration,composer,genre;
+						if(self.commandRouter.sharedVars.get('extendedMetas'))
+                        {
+                            year = self.searchFor(lines, i + 1, 'Date:');
+                            if(year)
+                            {
+                                year=parseInt(year);
+                            }
+
+                            albumart = self.getAlbumArt({artist: artist, album: album},
+                                self.getParentFolder('/mnt/' + path),'fa-tags');
+                            tracknumber = self.searchFor(lines, i + 1, 'Track:');
+
+                            if(tracknumber)
+                            {
+                                var split=tracknumber.split('/');
+                                tracknumber=parseInt(split[0]);
+                            }
+
+                            duration = self.searchFor(lines, i + 1, 'Time:');
+                            composer=artist;
+                            genre = self.searchFor(lines, i + 1, 'Genre:');
+                        }
+
+
 						if (title) {
 							title = title;
 						} else {
@@ -1158,7 +1183,13 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 							artist: artist,
 							album: album,
 							icon: 'fa fa-music',
-							uri: s0 + path
+							uri: s0 + path,
+                            year:year,
+                            albumart:albumart,
+                            genre:genre,
+                            tracknumber:tracknumber,
+                            duration:duration,
+                            composer:composer
 						});
 					}
 
