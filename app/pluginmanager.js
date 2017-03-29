@@ -430,7 +430,7 @@ PluginManager.prototype.installPlugin = function (data) {
 			defer.reject(new Error(error));
 		}
 		else {
-			currentMessage = "END DOWNLOAD: "+url;
+			currentMessage = "END DOWNLOAD: "+sourcefile;
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			self.logger.info(currentMessage);
 			currentMessage = 'Creating folder on disk';
