@@ -413,7 +413,15 @@ PluginManager.prototype.installPlugin = function (data) {
 	var defer=libQ.defer();
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
-	var sourcefile = data.sourcefile;
+	var sourcefile = '';
+	if ( data != undefined && data.sourcefile != undefined ) {
+		sourcefile = data.sourcefile;
+	} else {
+		var message = "Unable to locate uploaded plugin file";
+		self.logger.info(message);
+		defer.reject(new Error());
+		return defer.promise
+	}
 
 
 	var currentMessage = "Downloaded plugin is at "+sourcefile;
