@@ -414,17 +414,27 @@ PluginManager.prototype.installPlugin = function (data) {
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
 	var sourcefile = '';
+	var currentMessage = '';
+
 	if ( data != undefined && data.sourcefile != undefined ) {
 		sourcefile = data.sourcefile;
 	} else {
-		var message = "Unable to locate uploaded plugin file";
-		self.logger.info(message);
+		currentMessage = "Unable to locate downloaded plugin file";
+		advancedlog = advancedlog + "<br>" + currentMessage;
+		self.logger.info(currentMessage);
+		self.pushMessage('installPluginStatus',
+							{'progress': 0,
+							 'message': 'Download failure',
+							 'title' : modaltitle,
+							 'advancedLog': advancedlog,
+							 'buttons':[{'name':'Close','class': 'btn btn-warning'}]
+							});
 		defer.reject(new Error());
-		return defer.promise
+		return defer.promise;
 	}
 
 
-	var currentMessage = "Downloaded plugin is at "+sourcefile;
+	currentMessage = "Downloaded plugin is at "+sourcefile;
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
