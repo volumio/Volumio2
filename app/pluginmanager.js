@@ -413,7 +413,7 @@ PluginManager.prototype.installPlugin = function (data) {
 	var defer=libQ.defer();
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
-    var sourcefile = data.sourcefile;
+	var sourcefile = data.sourcefile;
 
 
 	var currentMessage = "Downloaded plugin is at "+sourcefile;
