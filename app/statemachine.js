@@ -92,9 +92,19 @@ CoreStateMachine.prototype.getState = function () {
     }
     else if(this.isConsume)
     {
+        // checking consumeState or the below code will throw an exception
         if(this.consumeState)
         {
-            // checking consumeState or the below code will throw an exception
+        	//we identify a webradio stream from its duration which is zero
+        if(this.consumeState.duration == '0') {
+            this.consumeState.stream = true;
+            this.consumeState.service = 'webradio';
+            this.consumeState.trackType = 'webradio';
+            this.consumeState.samplerate = '';
+            this.consumeState.bitdepth =  '';
+        }
+
+
             return {
                 status: this.consumeState.status,
                 title: this.consumeState.title,
