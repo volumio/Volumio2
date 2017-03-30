@@ -614,7 +614,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                     self.commandRouter.addQueueItems(uris)
                         .then(function()
                         {
-                            self.commandRouter.volumioPlay();
+                            self.commandRouter.volumioPlay(0);
                             defer.resolve();
                         })
                         .fail(function()
