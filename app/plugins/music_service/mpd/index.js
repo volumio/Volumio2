@@ -2709,8 +2709,8 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
             var cmd = libMpd.cmd;
 
             self.clientMpd.sendCommand(cmd("find artist \""+artist+"\"", []), function (err, msg) {
-                console.log("ERR: "+err);
-                console.log("MSG: "+msg+ " "+(msg=='')+ " "+(msg==' '));
+                //console.log("ERR: "+err);
+                //console.log("MSG: "+msg+ " "+(msg=='')+ " "+(msg==' '));
 
                 if(msg=='')
                 {
@@ -2740,7 +2740,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
         var name;
         var lines = msg.split('\n');
 
-        console.log("LINES: "+lines.length);
+        //console.log("LINES: "+lines.length);
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
             if (line.indexOf('file:') === 0) {
