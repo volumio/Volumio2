@@ -2757,6 +2757,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                 } else {
                     title = name;
                 }
+
                 response.navigation.lists[1].items.push({
                     service: 'mpd',
                     type: 'song',
@@ -2764,7 +2765,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                     artist: artist,
                     album: album,
                     albumart: albumart,
-                    uri: path
+                    uri: 'music-library/'+path
                 });
 
                 if(albums.indexOf(album)===-1)
