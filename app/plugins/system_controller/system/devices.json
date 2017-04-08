@@ -1,4 +1,7 @@
 {"devices":[
+  {"name":"Raspberry PI", "cpuid":"BCM2835"},
+  {"name":"Raspberry PI", "cpuid":"BCM2836"},
+  {"name":"Raspberry PI", "cpuid":"BCM2837"},
   {"name":"Raspberry PI", "cpuid":"BCM2709"},
   {"name":"Raspberry PI", "cpuid":"BCM2708"},
   {"name":"Odroid-C", "cpuid":"ODROIDC"},
