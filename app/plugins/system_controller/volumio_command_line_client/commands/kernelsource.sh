@@ -1,8 +1,6 @@
 #!/bin/bash
 
 
-HARDWARE_REV=`cat /proc/cpuinfo | grep "Hardware" | awk -F: '{print $NF}'`
-
 function kernelinstall {
 
 echo " ---- VOLUMIO RASPBERRY PI KERNEL SOURCE DOWNLOADER ----"
@@ -62,7 +60,7 @@ echo "Done, you can now build and install out of kernel modules"
 }
 
 
-if [ "$HARDWARE_REV" = " BCM2709" ] || [ "$HARDWARE_REV" = " BCM2708" ]; then
+if (cat /proc/cpuinfo | grep "BCM2" > /dev/null); then
  kernelinstall
 else
  echo "This tool is available only for Raspberry PI, exiting"
