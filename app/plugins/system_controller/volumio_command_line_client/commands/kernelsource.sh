@@ -60,7 +60,7 @@ echo "Done, you can now build and install out of kernel modules"
 }
 
 
-if (cat /proc/cpuinfo | grep "BCM2" > /dev/null); then
+if (cat /proc/cpuinfo | grep '^Hardware.*BCM2[78][03][5-9].*' > /dev/null); then
  kernelinstall
 else
  echo "This tool is available only for Raspberry PI, exiting"
