@@ -44,7 +44,7 @@
     "nodetools": "^1.0.0",
     "onoff": "^1.1.2",
     "pidof": "^1.0.2",
-    "random-string": "^0.1.2",
+    "random-string": "^0.2.0",
     "serve-favicon": "^2.4.1",
     "shelljs": "^0.7.7",
     "socket.io": "^1.7.2",
