@@ -40,9 +40,6 @@
     "WIRELESS_RESTART_ERROR":"Error en reiniciar la xarxa:",
     "WIRELESS_RESTART_SUCCESS":"Adaptador WiFi reiniciat amb èxit"
   },
-  "NETWORKFS":{
-    "ALIAS_DOC":"Triar un àlies que es mostrarà en muntar NAS"
-  },
   "PLAYLIST":{
     "ADDED_TITLE":"Afegit",
     "ADDED_TO_PLAYLIST":" a la llista de reproducció",
