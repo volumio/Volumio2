@@ -1212,7 +1212,6 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 ControllerMpd.prototype.search = function (query) {
 	var self = this;
-
 	var defer = libQ.defer();
 	var commandArtist = 'search artist '+' "' + query.value + '"';
     var commandAlbum = 'search album '+' "' + query.value + '"';
@@ -1223,106 +1222,89 @@ ControllerMpd.prototype.search = function (query) {
     deferArray.push(libQ.defer());
 
     var cmd = libMpd.cmd;
-
+//ARTIST
     self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(commandArtist, []), function (err, msg) {
             var subList=[];
-
-            if (msg) {
-
-				var lines = msg.split('\n');
-                for (var i = 0; i < lines.length; i++) {
+            if (msg) {		
+				var lines = msg.split('\n');  //var lines is now an array
+				var artistsfound = [];					
+				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
-
 					if (line.startsWith('file:')) {
-                        var path = line.slice(5).trimLeft();
-                        var name = path.split('/');
-                        var count = name.length;
-
-                        var artist = self.searchFor(lines, i + 1, 'Artist:');
-
-                        deferArray[0].resolve([{
-                            service: 'mpd',
-                            type: 'folder',
-                            title: artist,
-                            uri: 'artists://' + nodetools.urlEncode(artist),
-                            albumart: self.getAlbumArt({artist: artist},
-                                self.getParentFolder('/mnt/' + path),
-                                'fa-tags')
-
-                    }]);
-
-                        return;
+						var path = line.slice(5).trimLeft();
+						var artist = self.searchFor(lines, i + 1, 'Artist:');
+						//**********Check if artist is already found and exists in 'artistsfound' array
+						if (artistsfound.indexOf(artist) <0 ) { //Artist is not in 'artistsfound' array
+							artistsfound.push(artist);
+							subList.push({	
+								service: 'mpd',
+								type: 'folder',
+								title: artist,
+								uri: 'artists://' + nodetools.urlEncode(artist),
+								albumart: self.getAlbumArt({artist: artist},
+								self.getParentFolder('/mnt/' + path),'fa-tags')
+							});
+						}
 					}
-
 				}
-
-
+                deferArray[0].resolve(subList);
 			}
 			else if(err)  deferArray[0].reject(new Error('Artist:' +err));
             else deferArray[0].resolve();
 		});
 	});
-
+//ALBUM
     self.mpdReady.then(function () {
         self.clientMpd.sendCommand(cmd(commandAlbum, []), function (err, msg) {
             var subList=[];
 
             if (msg) {
-
                 var lines = msg.split('\n');
-                for (var i = 0; i < lines.length; i++) {
+				var albumsfound=[];
+				for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
-
-                    if (line.startsWith('file:')) {
+                    if (line.startsWith('file:')) {	
                         var path = line.slice(5).trimLeft();
-                        var name = path.split('/');
-                        var count = name.length;
-
                         var album = self.searchFor(lines, i + 1, 'Album:');
-                        var artist = self.searchFor(lines, i + 1, 'Artist:');
-
-                        deferArray[1].resolve([{
+                        var artist = self.searchFor	(lines, i + 1, 'Artist:');
+						//********Check if album is already found and exists in 'albumsfound' array
+						if (albumsfound.indexOf(album) <0 ) { //Album is not in 'albumsfound' array
+							albumsfound.push(album);
+							subList.push({
                             service: 'mpd',
                             type: 'folder',
                             title: album,
                             artist: artist,
                             album:'',
                             uri: 'albums://' + nodetools.urlEncode(album),
-                            albumart: self.getAlbumArt({artist: artist, album: album},
-                                self.getParentFolder('/mnt/' + path),'fa-tags')
+                            albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
+							});
+						}
+					}
 
-                    }]);
-
-                        return;
-                    }
-
-                }
-            }
+				}
+			deferArray[1].resolve(subList);
+			}
             else if(err)  deferArray[1].reject(new Error('Album:' +err));
             else deferArray[1].resolve();
         });
     });
-
+//SONG
     self.mpdReady.then(function () {
         self.clientMpd.sendCommand(cmd(commandSong, []), function (err, msg) {
             var subList=[];
-
-            if (msg) {
-
+			if (msg) {
                 var lines = msg.split('\n');
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
-
                     if (line.startsWith('file:')) {
                         var path = line.slice(5).trimLeft();
                         var name = path.split('/');
                         var count = name.length;
-
                         var artist = self.searchFor(lines, i + 1, 'Artist:');
                         var album = self.searchFor(lines, i + 1, 'Album:');
                         var title = self.searchFor(lines, i + 1, 'Title:');
-
                         if (title == undefined) {
                             title = name[count - 1];
                         }
@@ -1333,14 +1315,10 @@ ControllerMpd.prototype.search = function (query) {
                             artist: artist,
                             album: album,
                             uri: 'music-library/' + path,
-                            albumart : self.getAlbumArt({artist: artist, album: album},
-                                self.getParentFolder('/mnt/' + path),'fa-tags')
-
-                    });
+                            albumart : self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
+						});
                     }
-
                 }
-
                 deferArray[2].resolve(subList);
             }
             else if(err)  deferArray[2].reject(new Error('Song:' +err));
