@@ -83,7 +83,13 @@
     "HOTSPOT_PW_LENGTH":"Le mot de passe du Hotspot doit faire au moins 8 caractères",
     "WIRELESS_ENABLED":"Réseau sans fil (WiFi)",
     	"WIRELESS_ENABLED_DOC":"Active ou désactive le WiFi",
-    "STATIC_IP_WARNING":"Attention, assurez-vous d'avoir entré des paramètres corrects. Une mauvaise configuration peut rendre votre appareil injoignable"
+    "STATIC_IP_WARNING":"Attention, assurez-vous d'avoir entré des paramètres corrects. Une mauvaise configuration peut rendre votre appareil injoignable",
+    "DNS_SETTINGS":"Réglage serveurs DNS",
+    "ENABLE_CUSTOM_DNS_DOC":"Permet de règler des serveurs DNS personnalisés. Utile si votre système ne peut joindre internet ou jouer les web radios ou faire les mises à jour",
+    "ENABLE_CUSTOM_DNS":"Activer les serveurs DNS personnalisés",
+    "PRIMARY_DNS":"DNS primaire",
+    "SECONDARYY_DNS":"DNS Secondaire",
+    "DNS_ERROR_INFO":"Remplisser les adresses IP des DNS correctement"
   },
   "NETWORKFS":{
   "ALIAS_DOC":"Choisir un le nom qui sera affiché dans les disques NAS montés",
