@@ -289,7 +289,8 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 	var res = libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-			return thisInterface.pushState(state);
+			if (typeof thisInterface.pushState === "function")
+				return thisInterface.pushState(state);
 		})
 	);
 	self.callCallback("volumioPushState", state);
@@ -309,7 +310,8 @@ CoreCommandRouter.prototype.volumioPushQueue = function (queue) {
 	return libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-			return thisInterface.pushQueue(queue);
+			if (typeof thisInterface.pushQueue === "function")
+				return thisInterface.pushQueue(queue);
 		})
 	);
 };
