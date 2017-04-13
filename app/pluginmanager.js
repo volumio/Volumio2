@@ -362,6 +362,7 @@ PluginManager.prototype.onVolumioStart = function () {
 
 	self.plugins.forEach(function (value, key) {
 		var plugin = value.instance;
+		
 		if (plugin.onVolumioStart != undefined)
 			plugin.onVolumioStart();
 	});
@@ -385,7 +386,6 @@ PluginManager.prototype.onVolumioReboot = function () {
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin = value.instance;
-
 			if (plugin.onVolumioReboot != undefined)
 				plugin.onVolumioReboot();
 		}
