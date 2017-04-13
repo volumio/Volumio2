@@ -1084,10 +1084,12 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 // Platform specific & Hardware related options, they can be found in platformSpecific.js
 // This allows to change system commands across different devices\environments
 CoreCommandRouter.prototype.shutdown = function () {
+	this.pluginManager.onVolumioShutdown();
 	this.platformspecific.shutdown();
 };
 
 CoreCommandRouter.prototype.reboot = function () {
+	this.pluginManager.onVolumioReboot();
 	this.platformspecific.reboot();
 };
 
