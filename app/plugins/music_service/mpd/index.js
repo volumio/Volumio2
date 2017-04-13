@@ -788,7 +788,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 					self.logger.error('Cannot restart MPD: ' + error);
 					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVE_ERROR'));
 				}
-				else
+				else {
 					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 				}
 				defer.resolve({});
