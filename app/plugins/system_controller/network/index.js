@@ -832,25 +832,33 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 //console.log(response);
 	return defer.promise;
 };
+
 ControllerNetwork.prototype.saveDnsSettings = function (data) {
-	var self = this;
+	var self = this;	
+	var customdnsfile = '';
 
 	console.log(data);
-	if (data.enable_custom_dns && (data.primary_dns.length < 7 || data.secondary_dns.length < 7)) {
-		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
+	if (data.enable_custom_dns)  {
+		if (data.primary_dns.length < 7 || data.secondary_dns.length < 7) {
+			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
+		} else {
+			config.set('enable_custom_dns', data.enable_custom_dns);
+			config.set('primary_dns', data.primary_dns);
+			config.set('secondary_dns', data.secondary_dns);
+			var customdnsfile = 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns + os.EOL;
+		}
+	
 	} else {
 		config.set('enable_custom_dns', data.enable_custom_dns);
-		config.set('primary_dns', data.primary_dns);
-		config.set('secondary_dns', data.secondary_dns);
 	}
 
-	var dnsfile = '##custom DNS' + os.EOL + 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns + os.EOL;
+	
 	exec("/usr/bin/sudo /bin/chmod 666 /etc/resolv.conf.head", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log('Canot set permissions for /etc/resolv.conf.head: ' + error);
 		} else {
 			self.logger.info('Permissions for /etc/resolv.conf.head')
-			fs.writeFile('/etc/resolv.conf.head', dnsfile, function (err) {
+			fs.writeFile('/etc/resolv.conf.head', customdnsfile, function (err) {
 				if (err) {
 					self.logger.error('Cannot write DNS File' + error);
 				} else {
