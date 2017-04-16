@@ -371,13 +371,13 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		if (mountshare != undefined) {
 			mountshare.then(function (data) {
 				var responsemessage = {};
-				if (data.status == 'success') {
+				if (data.status === 'success') {
 					responsemessage = {emit: 'pushToastMessage', data:{ type: 'success', title: 'Success', message: name + ' mounted successfully'}};
 					defer.resolve(responsemessage);
 					self.scanDatabase();
 				} else if (data.status === 'fail') {
 					if(data.reason) {
-						if (data.reason == 'Permission denied') {
+						if (data.reason === 'Permission denied') {
 							responsemessage = {emit: 'nasCredentialsCheck', data:{ 'id': uuid, 'title': 'Network Drive Authentication', 'message': 'This drive requires password', 'name': name, 'username': username, 'password':password }};
 							self.logger.info("Permission denied for " + name + " on IP " + ip);
 							defer.resolve(responsemessage);
@@ -698,7 +698,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 					mountshare.then(function (data) {
 						console.log(data)
 						console.log(data.status);
-						if (data.status == 'success') {
+						if (data.status === 'success') {
 							self.scanDatabase();
 							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: self.commandRouter.getI18nString('NETWORKFS.NETWORK_DRIVE'), message: self.commandRouter.getI18nString('NETWORKFS.SHARE_MOUNT_SUCCESS')}};
 							defer.resolve(responsemessageedit);
