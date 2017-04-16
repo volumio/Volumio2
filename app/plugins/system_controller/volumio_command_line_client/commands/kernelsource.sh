@@ -14,7 +14,7 @@ echo "Checking if build essential is installed"
 if [ $(dpkg-query -W -f='${Status}' make 2>/dev/null | grep -c "ok installed") -eq 0 ];
 then
   echo "Installing build essential"
-  echo volumio | sudo -S apt-get update && apt-get install -y build-essential bc;
+  sudo apt-get update && sudo apt-get install -y build-essential bc;
 fi
 
 cd /home/volumio
@@ -39,7 +39,7 @@ echo "creating /usr/src/rpi-linux folder"
 echo volumio | sudo -S mkdir /usr/src/rpi-linux
 
 echo "Extracting Kernel"
-echo volumio | sudo -S tar --strip-components 1 -xf rpi-linux.tar.gz -C /usr/src/rpi-linux
+sudo tar --strip-components 1 -xf rpi-linux.tar.gz -C /usr/src/rpi-linux
 cd /usr/src/rpi-linux
 
 echo "Cloning current config"
@@ -49,13 +49,13 @@ echo volumio | sudo -S gunzip -c /proc/config.gz >.config
 echo "Copying modules symverse"
 if [ "$ARCH" = armv7l ]; then
  echo volumio | sudo -S cp /home/volumio/Module7.symvers Module.symvers
- else
+else
  echo volumio | sudo -S cp /home/volumio/Module.symvers Module.symvers
 fi
 echo volumio | sudo -S make modules_prepare
 echo "Linking Modules"
 echo volumio | sudo -S ln -sv /usr/src/rpi-linux /lib/modules/$(uname -r)/build
-echo Â" "
+echo " "
 echo "Done, you can now build and install out of kernel modules"
 }
 
