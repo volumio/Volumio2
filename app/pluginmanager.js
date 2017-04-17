@@ -118,17 +118,21 @@ PluginManager.prototype.loadPlugin = function (folder) {
 		self.initializeConfiguration(package_json, pluginInstance, folder);
 
 
-		if (pluginInstance.onVolumioStart != undefined)
-			pluginInstance.onVolumioStart();
+		if (pluginInstance.onVolumioStart !== undefined)
+		{	
+			var deferStart=pluginInstance.onVolumioStart();
+			deferStart.then(function(){
+				var pluginData = {
+					name: name,
+					category: category,
+					folder: folder,
+					instance: pluginInstance
+				};
 
-		var pluginData = {
-			name: name,
-			category: category,
-			folder: folder,
-			instance: pluginInstance
-		};
-
-		self.plugins.set(key, pluginData);
+				self.plugins.set(key, pluginData);
+				defer.resolve();
+			});
+		}
 	}
 	else self.logger.info("Plugin " + name + " is not enabled");
 
