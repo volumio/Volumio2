@@ -13,6 +13,8 @@
     {"name": "imxhdmisoc", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
     {"name": "imxaudiotda1998", "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
     {"name": "ODROIDDAC2", "prettyname": "HiFi Shield 2", "defaultmixer": "Digital","type":"i2S"},
-    {"name": "ODROIDDAC", "prettyname": "HiFi Shield/Shield+", "defaultmixer": "","type":"integrated"}
+    {"name": "ODROIDDAC", "prettyname": "HiFi Shield/Shield+", "defaultmixer": "","type":"integrated"},
+    {"name": "sndspdif", "prettyname": "PINE64 ES9023 Audio DAC (spdif)", "defaultmixer": "","type":"integrated"},
+    {"name": "snddaudio0", "prettyname": "PINE64 ES9023 Audio DAC (rca)", "defaultmixer": "","type":"integrated"}
   ]
 }
