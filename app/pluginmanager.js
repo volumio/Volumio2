@@ -117,22 +117,22 @@ PluginManager.prototype.loadPlugin = function (folder) {
 
 		self.initializeConfiguration(package_json, pluginInstance, folder);
 
-
 		if (pluginInstance.onVolumioStart !== undefined)
 		{	
 			var deferStart=pluginInstance.onVolumioStart();
 			deferStart.then(function(){
-				var pluginData = {
-					name: name,
-					category: category,
-					folder: folder,
-					instance: pluginInstance
-				};
-
-				self.plugins.set(key, pluginData);
 				defer.resolve();
 			});
 		}
+
+		var pluginData = {
+			name: name,
+			category: category,
+			folder: folder,
+			instance: pluginInstance
+		};
+
+		self.plugins.set(key, pluginData);
 	}
 	else self.logger.info("Plugin " + name + " is not enabled");
 
@@ -188,16 +188,13 @@ PluginManager.prototype.loadPlugins = function () {
 
 	}
 
-	for (i = 1; i < 101; i++) {
-		var plugin_array = priority_array.get(i);
+	priority_array.forEach(function(plugin_array) {
 		if (plugin_array != undefined) {
-			for (var j in plugin_array) {
-				var folder = plugin_array[j];
+			plugin_array.forEach(function(folder) {
 				self.loadPlugin(folder);
-			}
+			});
 		}
-
-	}
+	});
 };
 
 PluginManager.prototype.getPackageJson = function (folder) {
