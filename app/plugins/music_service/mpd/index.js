@@ -871,6 +871,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 			var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
 			var mixer = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mixer');
+
 			var resampling = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling');
 			var resampling_bitdepth = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_bitdepth');
 			var resampling_samplerate = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_samplerate');
@@ -881,6 +882,11 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 				outdev = 'hw:'+outdev+',0';
 			} else {
 				mixerdev = 'SoftMaster';
+			}
+
+            var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');
+			if (mpdvolume == undefined) {
+                mpdvolume = false;
 			}
 
 			var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
@@ -897,11 +903,10 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 
 			if (mixer) {
-				if (mixer.length > 0) {
+				if (mixer.length > 0 && mpdvolume) {
 					mixerstrings = 'mixer_device    "'+ mixerdev + '"' + os.EOL + '                mixer_control   "'+ mixer +'"'+ os.EOL + '                mixer_type      "hardware"'+ os.EOL;
 				}
 			}
-
 
 			var conf7 = conf6.replace("${mixer}", mixerstrings);
 
