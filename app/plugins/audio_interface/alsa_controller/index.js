@@ -600,7 +600,14 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
 	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
-    self.setConfigParam({key: 'mpdvolume', value: data.mpdvolume.value});
+
+    var mpdvalue = self.config.get('mpdvolume', false)
+    if (mpdvalue != data.mpdvolume) {
+        self.setConfigParam({key: 'mpdvolume', value: data.mpdvolume});
+        self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', '');
+    }
+
+
 	if (data.mixer_type.value === 'Hardware') {
 	if (data.mixer.value == 'SoftMaster'){
 		var value = self.config.get('outputdevice');
@@ -627,6 +634,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		self.disableSoftMixer(outdevice);
 	}
 	self.setConfigParam({key: 'mixer_type', value: data.mixer_type.value});
+
+
 
 	self.logger.info('Volume configurations have been set');
 	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', data.mixer.value);
