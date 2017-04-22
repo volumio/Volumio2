@@ -53,7 +53,9 @@
 	  "PERSISTENT_QUEUE":"Coda di Riproduzione persistente",
 	  "PERSISTENT_QUEUE_DOC":"Se attivata, la coda di riproduzione sarà mantenuta al riavvio del sistema. Se disattivata, la coda di riproduzione sarà azzerata ad ogni avvio del sistema",
     "HARDWARE":"Hardware",
-    "SOFTWARE":"Software"
+    "SOFTWARE":"Software",
+    "MPD_VOLUME":"Controllo volume da Client MPD",
+    "MPD_VOLUME_DOC":"Permetti ai client MPD di controllare il volume, questo renderà il controllo di volume meno reattivo"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
