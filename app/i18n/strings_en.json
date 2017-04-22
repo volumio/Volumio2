@@ -53,7 +53,9 @@
     "PERSISTENT_QUEUE":"Persistent queue",
     "PERSISTENT_QUEUE_DOC":"If enabled the Playqueue will be retained post reboot, if disabled the play queue will be cleared at every system start",
     "HARDWARE":"Hardware",
-    "SOFTWARE":"Software"
+    "SOFTWARE":"Software",
+    "MPD_VOLUME":"MPD Clients Volume Control",
+    "MPD_VOLUME_DOC":"Allow MPD Clients to change Volume, this will negatively impact Volume change speed"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

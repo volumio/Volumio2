@@ -306,6 +306,10 @@ ControllerAlsa.prototype.getUIConfig = function () {
             self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].value.value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[5].options'), value));
 
+            value = self.config.get('mpdvolume', false);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[6].value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[6].options'), value));
+
 			value = self.config.get('resampling', false);
 			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[0].options'), value));
@@ -596,6 +600,14 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
 	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
+
+    var mpdvalue = self.config.get('mpdvolume', false)
+    if (mpdvalue != data.mpdvolume) {
+        self.setConfigParam({key: 'mpdvolume', value: data.mpdvolume});
+        self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', '');
+    }
+
+
 	if (data.mixer_type.value === 'Hardware') {
 	if (data.mixer.value == 'SoftMaster'){
 		var value = self.config.get('outputdevice');
@@ -622,6 +634,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		self.disableSoftMixer(outdevice);
 	}
 	self.setConfigParam({key: 'mixer_type', value: data.mixer_type.value});
+
+
 
 	self.logger.info('Volume configurations have been set');
 	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', data.mixer.value);

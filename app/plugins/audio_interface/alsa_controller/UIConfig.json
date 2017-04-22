@@ -202,7 +202,8 @@
           "volumestart",
           "volumemax",
           "volumesteps",
-          "volumecurvemode"
+          "volumecurvemode",
+          "mpdvolume"
         ]
       },
       "content": [
@@ -403,6 +404,13 @@
             }
           ]
 
+        },
+        {
+          "id": "mpdvolume",
+          "element": "switch",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME",
+          "value":false
         }
 
       ]
