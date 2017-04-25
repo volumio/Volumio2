@@ -417,8 +417,7 @@
     },
 	{
 	  "id": "advanced_twaaks",
-	  "element": "section",
-	  "hidden":true,	
+	  "element": "section",	
 	  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
 	  "icon": "fa-tachometer",
 	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveResamplingOpts"},
