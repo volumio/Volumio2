@@ -164,10 +164,23 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
 			}
 
-			uiconf.sections[5].content[0].value = config.get('enable_custom_dns', false);
-			uiconf.sections[5].content[1].value = config.get('primary_dns', '208.67.222.222');
-			uiconf.sections[5].content[2].value = config.get('secondary_dns', '208.67.220.220');
+			if (config.get('enable_custom_dns') == undefined) {
+				uiconf.sections[5].content[0].value = false;
+			} else {
+				uiconf.sections[5].content[0].value = config.get('enable_custom_dns');
+			}
+			
+			if (config.get('primary_dns') == undefined) {
+				uiconf.sections[5].content[1].value = '208.67.222.222';
+			} else {
+				uiconf.sections[5].content[1].value = config.get('primary_dns');
+			}
 
+			if (config.get('secondary_dns') == undefined) {
+				uiconf.sections[5].content[2].value = '208.67.220.220';
+			} else {
+				uiconf.sections[5].content[2].value = config.get('secondary_dns');
+			}
 
 			//console.log(uiconf);
 
