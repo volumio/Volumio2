@@ -875,6 +875,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var resampling = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling');
 			var resampling_bitdepth = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_bitdepth');
 			var resampling_samplerate = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_samplerate');
+            var resampling_quality = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_quality');
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
@@ -911,12 +912,16 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var conf7 = conf6.replace("${mixer}", mixerstrings);
 
 			if(resampling){
-				var conf8 = conf7.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
+                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL +'}');
+				var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
+
 			} else {
-				var conf8 = conf7.replace("${format}", "");
+                var conf8 = conf7.replace("${sox}", "");
+				var conf9 = conf8.replace("${format}", "");
+
 			}
 
-			fs.writeFile("/etc/mpd.conf", conf8, 'utf8', function (err) {
+			fs.writeFile("/etc/mpd.conf", conf9, 'utf8', function (err) {
 				if (err) return self.logger.error(err);
 			});
 		});

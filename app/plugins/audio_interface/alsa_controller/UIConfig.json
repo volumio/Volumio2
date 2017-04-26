@@ -519,7 +519,40 @@
 			}
 		  ]
 
-		}
+		},
+        {
+          "id": "resampling_quality",
+          "element": "select",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.RESAMPLING_ALG_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.RESAMPLING_ALG",
+          "value":  {
+            "value":"high",
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.HIGH"
+          },
+          "visibleIf": {
+            "field": "resampling",
+            "value": true
+          },
+          "options": [
+            {
+              "value":"very high",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.VERY_HIGH"
+            },
+            {
+              "value":"high",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.HIGH"
+            },
+            {
+              "value":"medium",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.MEDIUM"
+            },
+            {
+              "value":"low",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.LOW"
+            }
+          ]
+
+        }
 
 	  ]
 	}

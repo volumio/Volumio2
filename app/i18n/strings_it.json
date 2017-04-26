@@ -55,7 +55,13 @@
     "HARDWARE":"Hardware",
     "SOFTWARE":"Software",
     "MPD_VOLUME":"Controllo volume da Client MPD",
-    "MPD_VOLUME_DOC":"Permetti ai client MPD di controllare il volume, questo renderà il controllo di volume meno reattivo"
+    "MPD_VOLUME_DOC":"Permetti ai client MPD di controllare il volume, questo renderà il controllo di volume meno reattivo",
+    "RESAMPLING_ALG":"Qualità dell'algoritmo di Resampling",
+    "RESAMPLING_ALG_DOC":"Questo settaggio permette di impostare l'algoritmo di resampling ideale. Qualità superiori richiedono molta capacità di calcolo, su dispositivi poco potenti questo può comportare difetti nella riproduzione. Se è questo il caso provare a diminuire la qualità del resampling fino ad ottenere una riproduzione ottimale",
+    "VERY_HIGH":"Molto alta",
+    "HIGH":"Aigh",
+    "MEDIUM":"Media",
+    "LOW":"Bassa"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",

@@ -324,6 +324,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
             self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[2].options'), value));
 
+            value = self.config.get('resampling_quality', 'high');
+            self.configManager.setUIConfigParam(uiconf, 'sections[4].content[3].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[4].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[3].options'), value));
 
 			var  payload = {"number":cardnum,"name":outdevicename}
 
@@ -667,6 +670,7 @@ ControllerAlsa.prototype.saveResamplingOpts = function (data) {
 	self.setConfigParam({key: 'resampling', value: data.resampling});
 	self.setConfigParam({key: 'resampling_target_bitdepth', value: data.resampling_target_bitdepth.value});
 	self.setConfigParam({key: 'resampling_target_samplerate', value: data.resampling_target_samplerate.value});
+    self.setConfigParam({key: 'resampling_quality', value: data.resampling_quality.value});
 
 
 	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('PLAYBACK_OPTIONS.AUDIO_RESAMPLING'), self.commandRouter.getI18nString('PLAYBACK_OPTIONS.AUDIO_RESAMPLING_SETTINGS_SAVED'));
