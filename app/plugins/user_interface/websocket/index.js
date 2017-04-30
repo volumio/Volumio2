@@ -1743,6 +1743,11 @@ function InterfaceWebUI(context) {
 
 			});
 
+			connWebSocket.on('getShareHandlers', function (data) {
+				var selfConnWebSocket = this;
+				selfConnWebSocket.emit('pushShareHandlers', self.commandRouter.shareMachine.handlers);
+			});
+
 
 
 
@@ -1909,6 +1914,3 @@ InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
 		this.libSocketIO.sockets.emit(emit,payload);
 	}
 };
-
-
-

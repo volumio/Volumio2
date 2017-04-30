@@ -51,6 +51,10 @@ function CoreCommandRouter(server) {
     // Start the music library
     this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
+		// Start the share machine
+		this.shareMachine = new (require('./sharemachine.js'))(this);
+
+
     // Start plugins
     this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
     this.pluginManager.checkIndex();
@@ -63,7 +67,6 @@ function CoreCommandRouter(server) {
 
     // Start the state machine
     this.stateMachine = new (require('./statemachine.js'))(this);
-
 
     // Start the volume controller
     this.volumeControl = new (require('./volumecontrol.js'))(this);
