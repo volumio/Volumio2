@@ -1054,9 +1054,9 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
 
-                self.commandRouter.broadcastMessage('factoryReset', '');
+                self.commandRouter.executeOnPlugin('system_controller', 'system', 'factoryReset', '');
 			});
-			
+
 			connWebSocket.on('getSystemVersion', function () {
 				var selfConnWebSocket = this;
 				self.logger.info("Received Get System Version");
