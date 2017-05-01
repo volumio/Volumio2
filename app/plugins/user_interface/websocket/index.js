@@ -1024,26 +1024,14 @@ function InterfaceWebUI(context) {
 
                 self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
 
-                //self.libSocketIO.sockets.emit('ClientUpdateCheck', 'search-for-upgrade');
-                console.log('ClientUpdateCheck')
-/*
-				client.on('updateReady', function (message) {
-					self.logger.info("Update Ready: " + message);
-					selfConnWebSocket.emit('updateReady', message);
-				});
-
-				client.on('updateCheck-error', function (message) {
-					self.logger.info("Update Check error: " + message);
-					selfConnWebSocket.emit('updateCheck-error', message);
-				});*/
 			});
 
             connWebSocket.on('ClientUpdateReady', function (message) {
                 var selfConnWebSocket = this;
 
-				 self.logger.info("Update Ready: " + message);
-				 var asd = JSON.parse(message)
-                self.commandRouter.broadcastMessage('updateReady', asd);
+                var updateMessage = JSON.parse(message)
+				self.logger.info("Update Ready: " + updateMessage);
+                self.commandRouter.broadcastMessage('updateReady', updateMessage);
             });
 
 
@@ -1066,29 +1054,9 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('factoryReset', '');
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+                self.commandRouter.broadcastMessage('factoryReset', '');
 			});
-
-			//factory reset
-
+			
 			connWebSocket.on('getSystemVersion', function () {
 				var selfConnWebSocket = this;
 				self.logger.info("Received Get System Version");
