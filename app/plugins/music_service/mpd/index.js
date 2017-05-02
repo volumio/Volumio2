@@ -517,9 +517,18 @@ ControllerMpd.prototype.parseState = function (objState) {
 		var objMetrics = objState.audio.split(':');
 		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
 		nBitDepth = Number(objMetrics[1])+' bit';
-		if (objMetrics[1] == 'f')
-			nBitDepth = '32f bit';
-		else if (objMetrics[1] == 'dsd') {
+        nChannels = Number(objMetrics[2]);
+		if (objMetrics[1] == 'f') {
+            nBitDepth = '32f bit';
+		} else if (objMetrics[0] == 'dsd64') {
+            var nSampleRateRaw = 2.82 + ' MHz';
+            nBitDepth = '1 bit';
+            nChannels = 2;
+        } else if (objMetrics[0] == 'dsd128') {
+            var nSampleRateRaw = 5.64 + ' MHz';
+            nBitDepth = '1 bit';
+            nChannels = 2;
+        } else if (objMetrics[1] == 'dsd') {
 			if (nSampleRateRaw === 352.8) {
 				var nSampleRateRaw = 2.82 + ' MHz';
 				nBitDepth = '1 bit'
@@ -537,7 +546,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 		}
 		nSampleRate = nSampleRateRaw;
 
-		nChannels = Number(objMetrics[2]);
+
 	}
 	var random = null;
 	if ('random' in objState) {
