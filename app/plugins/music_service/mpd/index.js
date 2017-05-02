@@ -916,7 +916,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 				var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
 
 			} else {
-                var conf8 = conf7.replace("${sox}", "");
+                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL +'}');
 				var conf9 = conf8.replace("${format}", "");
 
 			}
