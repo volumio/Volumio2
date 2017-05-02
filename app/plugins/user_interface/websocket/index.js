@@ -405,15 +405,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('volume', function (VolumeInteger) {
-				var timeStart = Date.now();
-				self.logStart('Client requests Volume ' + VolumeInteger)
-					.then(function () {
-						return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
-					})
-					.fail(self.pushError.bind(self))
-					.done(function () {
-						return self.logDone(timeStart);
-					});
+                return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
 			});
 
 			connWebSocket.on('mute', function () {
