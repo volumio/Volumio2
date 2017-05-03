@@ -528,6 +528,10 @@ ControllerMpd.prototype.parseState = function (objState) {
             var nSampleRateRaw = 5.64 + ' MHz';
             nBitDepth = '1 bit';
             nChannels = 2;
+        } else if (objMetrics[0] == 'dsd256') {
+        var nSampleRateRaw = 11.2 + ' MHz';
+        nBitDepth = '1 bit';
+        nChannels = 2;
         } else if (objMetrics[1] == 'dsd') {
 			if (nSampleRateRaw === 352.8) {
 				var nSampleRateRaw = 2.82 + ' MHz';
