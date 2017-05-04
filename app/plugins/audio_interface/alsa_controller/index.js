@@ -152,6 +152,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				}
 
 				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].id', 'i2s');
+                self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].hidden', false);
 				self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2s');
 				self.configManager.pushUIConfigParam(uiconf, 'sections[0].saveButton.data', 'i2sid');
 				self.configManager.setUIConfigParam(uiconf, 'sections[0].content[1].label', 'I2S DAC');
