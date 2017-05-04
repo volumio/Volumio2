@@ -32,7 +32,7 @@
     "I2S_DAC_DEACTIVATED":"I2S DAC disattivato",
     "I2S_DAC_DEACTIVATED_MESSAGE":"è stato disattivato, riavvia il sistema per rendere effettivi i cambiamenti",
 	  "DOP":"DSD over PCM (DoP)",
-    "DOP_DOC":"Se attivato, lo stream DSD verrà incapsulato in formato PCM (DoP)",
+    "DOP_DOC":"Se DoP è disabilitato, verrà utilizzato automaticamente lo stream DSD diretto, qualora compatibile con il DAC in uso, utilizzando una conversione PCM nel caso il DAC non sia compatibile. Se DoP è attivato, lo stream DSD verrà incapsulato in 24 bit PCM. DoP necessita di un DAC compatibile.",
 	  "SOFTVOL":"Controllo di Volume software",
 	  "MIXER_CONTROL_NAME":"Nome del mixer",
     "MIXER_CONTROL_NAME_DOC":"Cambia il mixer del controolo Volume. Utile quando la vostra periferica audio dispone di più controlli di Volume. I valori predefiniti sono generalmente corretti, in caso il volume non variasse alla pressione dei tasti volume è possibile selezionare un altro controllo volume per ovviare al problema",
