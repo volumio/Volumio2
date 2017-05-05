@@ -32,7 +32,7 @@
     "I2S_DAC_DEACTIVATED":"I2S DAC Disabled",
     "I2S_DAC_DEACTIVATED_MESSAGE":"has been disabled, restart the system for changes to take effect",
     "DOP":"DSD over PCM (DoP)",
-	  "DOP_DOC":"If DoP is disabled, Native DSD playback is used automatically if available on your DAC, DSD to PCM conversion is the fallback if DSD cannot be used directly. If DoP is enabled, DSD streams will be encapsulated in 24 bits PCM (DoP Standard). DoP requires a compatible DAC to work properly",
+	  "DOP_DOC":"DoP (DSD over PCM) requires a compatible DAC to work properly. If enabled, DSD streams will be encapsulated in 24 bits PCM (as per DoP Standard). If disabled, native DSD playback is used if the DAC supports it; otherwise DSD is converted to PCM",
     "SOFTVOL":"Software Volume Control",
     "MIXER_CONTROL_NAME":"Mixer Control Name",
 	  "MIXER_CONTROL_NAME_DOC":"Change the mixer control, useful when your Audio device has more volume controls. Default values are usually fine, change only if your volume level does not change after an action on the UI",
