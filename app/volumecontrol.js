@@ -43,7 +43,13 @@ function CoreVolumeController(commandRouter) {
 
 	}
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
-	mixer = '"'+mixerdev+'"';
+
+    if (mixerdev.indexOf(',') >= 0) {
+    	var mixerarr = mixerdev.split(',');
+        mixer = mixerarr[0]+','+mixerarr[1];
+    } else {
+        mixer = '"'+mixerdev+'"';
+	}
 	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
 	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
 	volumesteps = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumesteps');
@@ -122,6 +128,7 @@ function CoreVolumeController(commandRouter) {
 		console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
 		if (volumecurve === 'logarithmic') {
 			amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
+				console.log(err)
 				cb(err);
 			});
 			if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1') {
@@ -170,8 +177,13 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
         device = device.charAt(0);
     }
 	mixer = '"'+data.mixer+'"';
+    if (data.mixer.indexOf(',') >= 0) {
+        var mixerarr = mixerdev.split(',');
+        mixer = mixerarr[0]+','+mixerarr[1];
+    } else {
+        mixer = '"'+data.mixer+'"';
+    }
 	maxvolume = data.maxvolume;
-	console.log('MAXX'+maxvolume)
 	volumecurve = data.volumecurve;
 	volumesteps = data.volumesteps;
 	mixertype = data.mixertype
