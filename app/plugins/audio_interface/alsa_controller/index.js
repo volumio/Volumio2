@@ -480,7 +480,7 @@ ControllerAlsa.prototype.getDSPDACOptions = function (data) {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 	if (data.output_device.label != undefined) {
 		data.output_device.label = data.output_device.label.replace('USB: ', '');
 	}
@@ -794,6 +794,9 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 	if (outdev == 'softvolume'){
 		outdev = this.config.get('softvolumenumber');
 	}
+    if (outdev.indexOf(',') >= 0) {
+        outdev = outdev.charAt(0);
+    }
 	try {
 		var array = execSync('amixer -c '+ outdev +' scontents', { encoding: 'utf8' })
 		var genmixers = array.toString().split("Simple mixer control");
@@ -804,10 +807,16 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 				var line2 = line[0].split(',')
 				var mixerspace = line2[0].replace(/'/g,"").toString();
 				var mixer = mixerspace.replace(" ", "")
+                for (var i in mixers) {
+					if (mixers[i] == mixer) {
+						mixer = mixer + ',1';
+					}
+				}
 				mixers.push(mixer);
 			}
 		}
 	} catch (e) {}
+
 	return mixers
 }
 
@@ -827,10 +836,8 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 	for (var i in cards) {
 		var devnum = device.toString();
-		console.log('devnum            '+devnum)
 		if ( devnum == cards[i].id) {
 			currentcardname = cards[i].name;
-			console.log('currentcardname                 '+currentcardname)
 		}
 	}
 
@@ -844,23 +851,42 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 	} else {
 		for (var n = 0; n < carddata.cards.length; n++){
-			var cardname = carddata.cards[n].prettyname.toString().trim();
+			if (carddata.cards[n].multidevice) {
+                for (var j = 0; j < carddata.cards[n].devices.length; j++){
+                    var cardname = carddata.cards[n].devices[j].toString().trim();
+                    if (cardname == currentcardname){
 
-			if (cardname == currentcardname){
-				defaultmixer = carddata.cards[n].defaultmixer;
-				self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+                        defaultmixer = carddata.cards[n].defaultmixer;
+                        self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
 
+                    }
+				}
+
+
+			} else {
+                var cardname = carddata.cards[n].prettyname.toString().trim();
+                if (cardname == currentcardname){
+
+                    defaultmixer = carddata.cards[n].defaultmixer;
+                    self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+
+                }
 			}
+
+
+
 		}
 	}
 	if (defaultmixer) {
 		this.mixertype = 'Hardware';
 	} else {
 		try {
+            if (device.indexOf(',') >= 0) {
+            	device = device.charAt(0);
 
+            }
 			var array = execSync('amixer -c '+device+' scontents', { encoding: 'utf8' })
 			var genmixers = array.toString().split("Simple mixer control");
-
 
 			if (genmixers) {
 				for (var i in genmixers) {

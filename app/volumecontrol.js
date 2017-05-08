@@ -33,6 +33,9 @@ function CoreVolumeController(commandRouter) {
 		device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
 		devicename = 'softvolume';
 	} else {
+        if (device.indexOf(',') >= 0) {
+            device = device.charAt(0);
+        }
 		var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
 		if ((cards[device] != undefined) && (cards[device].name != undefined)) {
 			devicename = cards[device].name;
@@ -116,6 +119,7 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setVolume = function (val, cb) {
+		console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
 		if (volumecurve === 'logarithmic') {
 			amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
 				cb(err);
@@ -160,7 +164,11 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 
 
 	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Name: '+ data.name +' Mixer: '+ data.mixer + ' Max Vol: ' + data.maxvolume + ' Vol Curve; ' + data.volumecurve + ' Vol Steps: ' + data.volumesteps);
+
 	device = data.device;
+    if (device.indexOf(',') >= 0) {
+        device = device.charAt(0);
+    }
 	mixer = '"'+data.mixer+'"';
 	maxvolume = data.maxvolume;
 	console.log('MAXX'+maxvolume)
