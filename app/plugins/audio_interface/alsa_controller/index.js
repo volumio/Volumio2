@@ -997,26 +997,52 @@ ControllerAlsa.prototype.writeSoftMixerFile  = function (data) {
 		self.setConfigParam({key: 'softvolumenumber', value: data});
 	}
 
-	var asoundcontent = '';
-	asoundcontent += 'pcm.softvolume {\n';
-	asoundcontent += '    type             plug\n';
-	asoundcontent += '    slave.pcm       "softvol"\n';
-	asoundcontent += '}\n';
-	asoundcontent += '\n';
-	asoundcontent += 'pcm.softvol {\n';
-	asoundcontent += '    type            softvol\n';
-	asoundcontent += '    slave {\n';
-	asoundcontent += '        pcm         "plughw:'+data+',0"\n';
-	asoundcontent += '    }\n';
-	asoundcontent += '    control {\n';
-	asoundcontent += '        name        "SoftMaster"\n';
-	asoundcontent += '        card        '+data+'\n';
-	asoundcontent += '        device      0\n';
-	asoundcontent += '    }\n';
-	asoundcontent += 'max_dB 0.0\n';
-	asoundcontent += 'min_dB -50.0\n';
-	asoundcontent += 'resolution 100\n';
-	asoundcontent += '}\n';
+    var asoundcontent = '';
+    if (data.indexOf(',') >= 0) {
+		var dataarr = data.split(',');
+		var card = dataarr[0];
+		var device = dataarr[1];
+
+        asoundcontent += 'pcm.softvolume {\n';
+        asoundcontent += '    type             plug\n';
+        asoundcontent += '    slave.pcm       "softvol"\n';
+        asoundcontent += '}\n';
+        asoundcontent += '\n';
+        asoundcontent += 'pcm.softvol {\n';
+        asoundcontent += '    type            softvol\n';
+        asoundcontent += '    slave {\n';
+		asoundcontent += '        pcm         "plughw:' + data + '"\n';
+		asoundcontent += '    }\n';
+        asoundcontent += '    control {\n';
+        asoundcontent += '        name        "SoftMaster"\n';
+		asoundcontent += '        card        ' + card + '\n';
+		asoundcontent += '        device      ' + device + '\n';
+        asoundcontent += '    }\n';
+        asoundcontent += 'max_dB 0.0\n';
+        asoundcontent += 'min_dB -50.0\n';
+        asoundcontent += 'resolution 100\n';
+        asoundcontent += '}\n';
+    } else {
+        asoundcontent += 'pcm.softvolume {\n';
+        asoundcontent += '    type             plug\n';
+        asoundcontent += '    slave.pcm       "softvol"\n';
+        asoundcontent += '}\n';
+        asoundcontent += '\n';
+        asoundcontent += 'pcm.softvol {\n';
+        asoundcontent += '    type            softvol\n';
+        asoundcontent += '    slave {\n';
+		asoundcontent += '        pcm         "plughw:' + data + ',0"\n';
+        asoundcontent += '    }\n';
+        asoundcontent += '    control {\n';
+        asoundcontent += '        name        "SoftMaster"\n';
+		asoundcontent += '        card        ' + data + '\n';
+		asoundcontent += '        device      0\n';
+        asoundcontent += '    }\n';
+        asoundcontent += 'max_dB 0.0\n';
+        asoundcontent += 'min_dB -50.0\n';
+        asoundcontent += 'resolution 100\n';
+        asoundcontent += '}\n';
+	}
 
 	fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
 		if (err) {
