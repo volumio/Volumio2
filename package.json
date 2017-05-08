@@ -47,7 +47,7 @@
     "random-string": "^0.2.0",
     "serve-favicon": "^2.4.1",
     "shelljs": "^0.7.7",
-    "socket.io": "^1.7.2",
+    "socket.io": "^2.0.0",
     "socket.io-client": "^1.7.3",
     "sort-on": "^2.0.0",
     "spotify-web-api-node": "^2.3.6",
