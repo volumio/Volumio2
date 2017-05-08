@@ -480,7 +480,7 @@ ControllerAlsa.prototype.getDSPDACOptions = function (data) {
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
-	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 	if (data.output_device.label != undefined) {
 		data.output_device.label = data.output_device.label.replace('USB: ', '');
 	}
@@ -739,6 +739,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 	var soundCardDir = '/proc/asound/';
 	var idFile = '/id';
 	var regex = /card(\d+)/;
+	var multi = false;
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
 	try {
@@ -758,9 +759,24 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			for (var n = 0; n < carddata.cards.length; n++){
 				var cardname = carddata.cards[n].name.toString().trim();
 				if (cardname === rawname){
-					var name = carddata.cards[n].prettyname;
+					if(carddata.cards[n].multidevice) {
+                        multi = true;
+                        var card = carddata.cards[n];
+                        for (var j = 0; j < card.devices.length; j++) {
+                        	var subdevice = carddata.cards[n].devices[j].number;
+                            name = carddata.cards[n].devices[j].prettyname;
+                            cards.push({id: id + ',' + subdevice, name: name});
+                        }
+
+					} else {
+                        multi = false;
+                        name = carddata.cards[n].prettyname;
+					}
+
 				}
-			} cards.push({id: id, name: name});
+			} if (!multi){
+				cards.push({id: id, name: name});
+            }
 
 		}
 	}
@@ -768,7 +784,6 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 		var namestring = 'No Audio Device Available';
 		cards.push({id: '', name: namestring});
 	}
-
 	return cards;
 };
 
@@ -812,8 +827,10 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 	for (var i in cards) {
 		var devnum = device.toString();
+		console.log('devnum            '+devnum)
 		if ( devnum == cards[i].id) {
 			currentcardname = cards[i].name;
+			console.log('currentcardname                 '+currentcardname)
 		}
 	}
 
