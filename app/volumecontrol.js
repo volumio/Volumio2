@@ -33,6 +33,9 @@ function CoreVolumeController(commandRouter) {
 		device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
 		devicename = 'softvolume';
 	} else {
+        if (device.indexOf(',') >= 0) {
+            device = device.charAt(0);
+        }
 		var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
 		if ((cards[device] != undefined) && (cards[device].name != undefined)) {
 			devicename = cards[device].name;
@@ -40,7 +43,13 @@ function CoreVolumeController(commandRouter) {
 
 	}
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
-	mixer = '"'+mixerdev+'"';
+
+    if (mixerdev.indexOf(',') >= 0) {
+    	var mixerarr = mixerdev.split(',');
+        mixer = mixerarr[0]+','+mixerarr[1];
+    } else {
+        mixer = '"'+mixerdev+'"';
+	}
 	maxvolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumemax');
 	volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
 	volumesteps = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumesteps');
@@ -116,8 +125,10 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setVolume = function (val, cb) {
+		console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
 		if (volumecurve === 'logarithmic') {
 			amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
+				console.log(err)
 				cb(err);
 			});
 			if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1') {
@@ -160,10 +171,19 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 
 
 	self.logger.info('Updating Volume Controller Parameters: Device: '+ data.device + ' Name: '+ data.name +' Mixer: '+ data.mixer + ' Max Vol: ' + data.maxvolume + ' Vol Curve; ' + data.volumecurve + ' Vol Steps: ' + data.volumesteps);
+
 	device = data.device;
+    if (device.indexOf(',') >= 0) {
+        device = device.charAt(0);
+    }
 	mixer = '"'+data.mixer+'"';
+    if (data.mixer.indexOf(',') >= 0) {
+        var mixerarr = data.mixer.split(',');
+        mixer = mixerarr[0]+','+mixerarr[1];
+    } else {
+        mixer = '"'+data.mixer+'"';
+    }
 	maxvolume = data.maxvolume;
-	console.log('MAXX'+maxvolume)
 	volumecurve = data.volumecurve;
 	volumesteps = data.volumesteps;
 	mixertype = data.mixertype

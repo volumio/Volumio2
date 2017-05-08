@@ -896,8 +896,14 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
-				mixerdev = 'hw:'+outdev;
-				outdev = 'hw:'+outdev+',0';
+                if (outdev.indexOf(',') >= 0) {
+                    mixerdev = 'hw:'+outdev;
+                    outdev = 'hw:'+outdev;
+                } else {
+                    mixerdev = 'hw:'+outdev;
+                    outdev = 'hw:'+outdev+',0';
+				}
+
 			} else {
 				mixerdev = 'SoftMaster';
 			}
