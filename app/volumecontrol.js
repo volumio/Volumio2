@@ -178,7 +178,7 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
     }
 	mixer = '"'+data.mixer+'"';
     if (data.mixer.indexOf(',') >= 0) {
-        var mixerarr = mixerdev.split(',');
+        var mixerarr = data.mixer.split(',');
         mixer = mixerarr[0]+','+mixerarr[1];
     } else {
         mixer = '"'+data.mixer+'"';

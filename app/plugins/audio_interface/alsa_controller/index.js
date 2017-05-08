@@ -853,10 +853,11 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		for (var n = 0; n < carddata.cards.length; n++){
 			if (carddata.cards[n].multidevice) {
                 for (var j = 0; j < carddata.cards[n].devices.length; j++){
-                    var cardname = carddata.cards[n].devices[j].toString().trim();
+                    var cardname = carddata.cards[n].devices[j].prettyname.toString().trim();
+
                     if (cardname == currentcardname){
 
-                        defaultmixer = carddata.cards[n].defaultmixer;
+                        defaultmixer = carddata.cards[n].devices[j].defaultmixer;
                         self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
 
                     }

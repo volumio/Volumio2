@@ -17,6 +17,6 @@
     {"name": "sndspdif", "multidevice": false, "prettyname": "PINE64 ES9023 Audio DAC (spdif)", "defaultmixer": "","type":"integrated"},
     {"name": "snddaudio0", "multidevice": false, "prettyname": "PINE64 ES9023 Audio DAC (rca)", "defaultmixer": "","type":"integrated"},
     {"name": "rockchipminiarm", "multidevice": false, "prettyname": "HDMI Audio Out", "defaultmixer": "","type":"integrated"},
-    {"name": "TinkerAudio", "multidevice": true, "devices":[{"number":1, "prettyname": "SPDIF", "defaultmixer": ""}, {"number":2, "prettyname": "Audio Jack Out", "defaultmixer": "Headphone 1"}],"type":"integrated"}
+    {"name": "TinkerAudio", "multidevice": true, "devices":[{"number":1, "prettyname": "SPDIF", "defaultmixer": "SPDIF"}, {"number":2, "prettyname": "Audio Jack Out", "defaultmixer": "Headphone,1"}],"type":"integrated"}
   ]
 }
