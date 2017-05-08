@@ -84,10 +84,10 @@ AirPlayInterface.prototype.startShairportSync = function () {
 
 		var conf1 = data.replace("${name}", name);
 		var conf2 = conf1.replace("${device}", outdev);
-		var conf3 = conf1.replace("${mixer}", mixer);
+		var conf3 = conf2.replace("${mixer}", mixer);
 
 
-		fs.writeFile("/etc/shairport-sync.conf", conf2, 'utf8', function (err) {
+		fs.writeFile("/etc/shairport-sync.conf", conf3, 'utf8', function (err) {
 			if (err) return console.log(err);
 			startAirPlay(self);
 		});
