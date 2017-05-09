@@ -117,19 +117,21 @@ PluginManager.prototype.loadPlugin = function (folder) {
 
 		self.initializeConfiguration(package_json, pluginInstance, folder);
 
-		if (pluginInstance.onVolumioStart !== undefined)
-			defer.promise=pluginInstance.onVolumioStart();
-		else
-			defer.resolve();
-			
 		var pluginData = {
 			name: name,
 			category: category,
 			folder: folder,
 			instance: pluginInstance
 		};
-		
+
 		self.plugins.set(key, pluginData);
+
+		if (pluginInstance.onVolumioStart !== undefined){
+			defer.resolve();
+			return pluginInstance.onVolumioStart();
+		}
+		else
+			defer.resolve();
 
 	}
 	else
@@ -238,8 +240,9 @@ PluginManager.prototype.startPlugin = function (category, name) {
 		if(plugin.onStart!==undefined)
 		{
 		    self.logger.info("PLUGIN START: "+name);
-			defer.promise=plugin.onStart();
 			self.config.set(category + '.' + name + '.status', "STARTED");
+			defer.resolve();
+			return plugin.onStart();
 		}
 		else
 		{
@@ -263,8 +266,9 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 		if(plugin.onStop!==undefined)
 		{
 			self.logger.info("PLUGIN STOP: "+name);
-			defer.promise=plugin.onStop();
 			self.config.set(category + '.' + name + '.status', "STOPPED");					
+			defer.resolve();
+			return plugin.onStop();
 		}
 		else
 		{
