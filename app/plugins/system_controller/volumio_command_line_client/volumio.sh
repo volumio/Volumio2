@@ -70,6 +70,9 @@ case "$1" in
         play)
             /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=play"
             ;;
+        toggle)
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=toggle"
+            ;;
         pause)
             /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=pause"
             ;;

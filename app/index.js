@@ -1154,6 +1154,22 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 	}
 };
 
+// Volumio Toggle
+CoreCommandRouter.prototype.volumioToggle = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioToggle');
+
+    var state=this.stateMachine.getState();
+
+	if (state.status != undefined) {
+		if(state.status==='stop' || state.status==='pause')
+		{
+        		return this.stateMachine.play();
+    		} else {
+        		return this.stateMachine.pause();
+		}
+    }
+};
+
 
 // Volumio Seek
 CoreCommandRouter.prototype.volumioSeek = function (position) {

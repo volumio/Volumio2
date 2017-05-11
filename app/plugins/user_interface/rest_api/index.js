@@ -91,6 +91,15 @@ function interfaceApi(context) {
                             });
                     }
                 }
+                else if (req.query.cmd == "toggle"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio toggle')
+                        .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
                 else if (req.query.cmd == "stop"){
                     var timeStart = Date.now();
                     self.logStart('Client requests Volumio stop')
@@ -138,7 +147,6 @@ function interfaceApi(context) {
                 }
                 else if(req.query.cmd == "volume"){
                     var VolumeInteger = req.query.volume;
-                    console.log(req.query)
                     if (VolumeInteger == "plus") {
                         VolumeInteger = '+';
                     } else if (VolumeInteger == "minus"){
