@@ -94,24 +94,19 @@ echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command
 
 case "$1" in
         play)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=play
             ;;
         pause)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=pause
             ;;
         next)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=next
             ;;
         previous)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=prev
             ;;
         stop)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=stop
             ;;
         start)
             start
