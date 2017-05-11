@@ -10,6 +10,10 @@ Usage : volumio <argument1> <argument2>
 status                             Gives Playback status information
 volume                             Gives Current Volume Information
 volume <desired volume>            Sets Volume at desired level 0-100
+volume mute                        Mute
+volume unmute                      Unmute
+volume plus                        Increse Volume of one step
+volume minus                       Decrease Volume of one step
 
 
 [[PLAYBACK CONTROL]]
@@ -35,37 +39,6 @@ kernelsource                       Get Current Kernel source (Raspberry PI only)
 "
 
 }
-
-volumeval="0"
-playbackcommand="play"
-
-
-#PLAYBACK STATUS CONTROLS
-
-function status {
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/status.js
-echo $var
-}
-
-function volumeget {
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/getvolume.js
-echo $var
-}
-
-function volumeset {
-echo "Setting Volume "$volumeval""
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/setvolume.js "$volumeval"
-echo $var
-}
-
-#PLAYBACK CONTROLS
-
-function playback {
-echo "Sending "$playbackcommand" "
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/playback.js "$playbackcommand"
-echo $var
-}
-
 
 #VOLUMIO SERVICE CONTROLS
 
@@ -95,22 +68,22 @@ echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command
 
 case "$1" in
         play)
-            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=play
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=play"
             ;;
         pause)
-            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=pause
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=pause"
             ;;
         next)
-            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=next
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=next"
             ;;
         previous)
-            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=prev
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=prev"
             ;;
         stop)
-            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=stop
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stop"
             ;;
         clear)
-            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=clearQueue
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=clearQueue"
             ;;
         start)
             start
@@ -129,14 +102,13 @@ case "$1" in
             ;;
 
         status)
-            status
+            /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.'
             ;;
         volume)
             if [ "$2" != "" ]; then
-                volumeval=$2
-                volumeset
+               /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=volume&volume=$2"
             else
-                volumeget
+               /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.volume'
             fi
             ;;
 	pull)

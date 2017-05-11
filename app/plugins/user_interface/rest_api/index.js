@@ -138,7 +138,7 @@ function interfaceApi(context) {
                 }
                 else if(req.query.cmd == "volume"){
                     var VolumeInteger = req.query.volume;
-
+                    console.log(req.query)
                     if (VolumeInteger == "plus") {
                         VolumeInteger = '+';
                     } else if (VolumeInteger == "minus"){
