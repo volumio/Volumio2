@@ -19,6 +19,7 @@ pause
 next
 previous
 stop
+clear
 
 
 [[VOLUMIO SERVICE CONTROL]]
@@ -107,6 +108,9 @@ case "$1" in
             ;;
         stop)
             /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=stop
+            ;;
+        clear)
+            /usr/bin/curl http://127.0.0.1:3000/api/v1/commands/?cmd=clearQueue
             ;;
         start)
             start
