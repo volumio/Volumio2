@@ -9,6 +9,8 @@ var os = require('os');
 var libQ = require('kew');
 var util = require('util');
 
+var i2sOverlayBanner = '#### Volumio i2s setting below: do not alter ####' + os.EOL
+
 // Define the ControllerSystem class
 module.exports = ControllerI2s;
 
@@ -39,7 +41,6 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	} else {
 		self.execDacScript();
 	}
-
 
     return libQ.resolve();
 };
@@ -232,8 +233,8 @@ ControllerI2s.prototype.i2cDetect = function () {
 	} catch (err) {
 		self.logger.error('Cannot read i2c bus')
 	}
-	}
-
+	};
+	
 	return defer.promise;
 };
 
@@ -436,32 +437,51 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
-
-	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'max_usb_current=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL + 'dtparam=i2c_arm=on' + os.EOL + 'dtoverlay='+data;
-
-	fs.writeFile('/boot/config.txt', bootstring, function (err) {
-		if (err) {
-			self.logger.error('Cannot write config.txt file: '+err);
-		}
-
+	var bootstring = 'dtoverlay='+ data + os.EOL + os.EOL;
+	var searchexp = new RegExp('dtoverlay=.*' + os.EOL + os.EOL);
+	
+	fs.readFile('/boot/config.txt', 'utf8', function (err,data) {
+  		if (err) {
+			self.logger.error('Cannot read config.txt file: '+err);
+  		}
+  		else {
+  			var index = data.search(i2sOverlayBanner);
+  			var result;
+  			
+  			if (index == -1) {
+  				result = data + os.EOL + i2sOverlayBanner + bootstring;
+ 			}			
+  			else {
+  				result = data.substring(0,index) + data.substring(index).replace(searchexp,bootstring);
+			}
+  			fs.writeFile('/boot/config.txt', result, 'utf8', function (err) {
+				if (err) self.logger.error('Cannot write config.txt file: '+err);
+  			});
+  		}	
 	});
 
-}
+};
 
 ControllerI2s.prototype.disableI2SDAC = function () {
 	var self = this;
+	var searchexp = new RegExp(os.EOL + i2sOverlayBanner + 'dtoverlay=.*' + os.EOL + os.EOL);
 
 	this.config.set("i2s_enabled", false);
 
-	var bootstring = 'initramfs volumio.initrd' + os.EOL + 'gpu_mem=16' + os.EOL + 'max_usb_current=1' + os.EOL + 'disable_splash=1'+ os.EOL + 'dtparam=audio=on' + os.EOL + 'dtparam=i2c_arm=on';
+	fs.readFile('/boot/config.txt', 'utf8', function (err,data) {
+  		if (err) {
+			self.logger.error('Cannot read config.txt file: '+err);
+  		}
+  		else {
+  			data = data.replace(searchexp,"");
 
-	fs.writeFile('/boot/config.txt', bootstring, function (err) {
-		if (err) {
-			self.logger.error('Cannot write config.txt file: '+error);
-		}
-		self.revomeAllDtOverlays();
+ 			fs.writeFile('/boot/config.txt', data, 'utf8', function (err) {
+				if (err) self.logger.error('Cannot write config.txt file: '+err);
+  			});
+  			
+  			self.revomeAllDtOverlays();
+  		}	
 	});
-
 };
 
 ControllerI2s.prototype.hotAddI2SDAC = function (data) {
@@ -486,7 +506,7 @@ ControllerI2s.prototype.hotAddI2SDAC = function (data) {
 	function dtcommand(parameter) {
 	exec('/usr/bin/sudo /usr/bin/dtoverlay '+parameter,{uid:1000, gid:1000}, function(err, stdout, stderr) {
 		if(err) {
-			self.logger.error('Cannot write config.txt file: '+err);
+			self.logger.error('Cannot enable I2S Param: '+err);
 		} else {
 			self.logger.info('I2S Param ' + data + ' successfully enabled');
 		}
