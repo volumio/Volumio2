@@ -10,10 +10,15 @@ Usage : volumio <argument1> <argument2>
 status                             Gives Playback status information
 volume                             Gives Current Volume Information
 volume <desired volume>            Sets Volume at desired level 0-100
-volume mute                        Mute
-volume unmute                      Unmute
-volume plus                        Increse Volume of one step
-volume minus                       Decrease Volume of one step
+volume mute                        Mutes
+volume unmute                      Unmutes
+volume plus                        Increases Volume of one step
+volume minus                       Decreases Volume of one step
+seek plus                          Forwards 10 seconds in the song
+seek minus                         Backwards 10 seconds in the song
+seek <seconds>                     Plays song from selected time
+repeat                             Toggles repetition of queue
+random                             Toggles randomization of queue
 
 
 [[PLAYBACK CONTROL]]
@@ -34,8 +39,12 @@ restart                             Restarts Volumio Service
 
 [[VOLUMIO DEVELOPMENT]]
 
-pull                               Pull latest github status on master
-kernelsource                       Get Current Kernel source (Raspberry PI only)
+pull                               Pulls latest github status on master
+kernelsource                       Gets Current Kernel source (Raspberry PI only)
+plugin init                        Creates a new plugin
+plugin refresh                     updates plugin in the system
+plugin zip                         compresses the plugin
+plugin publish                     publishes the plugin on git
 "
 
 }
@@ -64,7 +73,6 @@ echo "Done"
 function kernelsource {
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
-
 
 case "$1" in
         play)
@@ -135,11 +143,18 @@ case "$1" in
                /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.volume'
             fi
             ;;
-	pull)
+	    pull)
             pull
             ;;
-	kernelsource)
-	    kernelsource
+	    kernelsource)
+	        kernelsource
+            ;;
+        plugin)
+            if [ "$2" != "" ]; then
+               /usr/local/bin/node /volumio/pluginhelper.js $2
+            else
+               /usr/local/bin/node /volumio/pluginhelper.js
+            fi
             ;;
         *)
             doc
