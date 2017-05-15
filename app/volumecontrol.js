@@ -225,6 +225,15 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 
 					});
 			break;
+		case 'toggle':
+			// mute or unmute, depending on cases
+			if (Volume.mute){
+				self.alsavolume('unmute');
+			}
+			else {
+				self.alsavolume('mute');
+			}
+			break;
 		case '+':
 			//Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
 			self.setMuted(false, function (err) {

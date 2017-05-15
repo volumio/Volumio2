@@ -152,7 +152,7 @@ function interfaceApi(context) {
                     } else if (VolumeInteger == "minus"){
                         VolumeInteger = '-';
                     }
-                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute") {
+                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute" || VolumeInteger == "toggle") {
 
                     } else {
                         VolumeInteger = parseInt(VolumeInteger);
@@ -176,6 +176,28 @@ function interfaceApi(context) {
                         .then(function () {
                             return self.commandRouter.playPlaylist.call(self.commandRouter,
                                 playlistName);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd="seek"){
+                    var position = req.query.position;
+                    if(position == "plus") {
+                        position = '+';
+                    }
+                    else if (position == "minus"){
+                        position = '-';
+                    }
+                    else {
+                        position = parseInt(position);
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Position ' + position)
+                        .then(function () {
+                            return self.commandRouter.volumioSeek(position);
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {

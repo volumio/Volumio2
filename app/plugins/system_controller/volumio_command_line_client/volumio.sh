@@ -88,6 +88,13 @@ case "$1" in
         clear)
             /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=clearQueue"
             ;;
+        seek)
+            if [ "$2" != "" ]; then
+                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=seek&position=$2"
+            else
+               /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.seek'
+            fi
+            ;;
         start)
             start
             ;;
