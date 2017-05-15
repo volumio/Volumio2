@@ -1303,10 +1303,39 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
 	return this.stateMachine.setRandom(data);
 };
 
+CoreCommandRouter.prototype.randomToggle = function(){
+	var self = this;
+
+	var state = self.stateMachine.getState();
+
+	if(state.random){
+		return self.stateMachine.setRandom(false);
+	}
+	else{
+		return self.stateMachine.setRandom(true);
+	}
+}
+
 CoreCommandRouter.prototype.volumioRepeat = function (repeat,repeatSingle) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
 	return this.stateMachine.setRepeat(repeat,repeatSingle);
 };
+
+CoreCommandRouter.prototype.repeatToggle = function () {
+	var self = this;
+
+	var state = self.stateMachine.getState();
+
+	console.log(state.repeat);
+
+	if(state.repeat){
+		return self.stateMachine.setRepeat(false, false);
+	}
+	else{
+		return self.stateMachine.setRepeat(true, false);
+	}
+
+}
 
 CoreCommandRouter.prototype.volumioConsume = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');

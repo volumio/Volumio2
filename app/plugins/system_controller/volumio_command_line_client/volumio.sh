@@ -95,6 +95,20 @@ case "$1" in
                /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.seek'
             fi
             ;;
+        repeat)
+            if [ "$2" != "" ]; then
+                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=repeat&value=$2"
+            else
+               /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=repeat"
+            fi
+            ;;
+        random)
+            if [ "$2" != "" ]; then
+                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random&value=$2"
+            else
+               /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random"
+            fi
+            ;;
         start)
             start
             ;;

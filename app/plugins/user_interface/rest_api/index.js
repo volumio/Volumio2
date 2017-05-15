@@ -182,7 +182,7 @@ function interfaceApi(context) {
                             res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                         });
                 }
-                else if(req.query.cmd="seek"){
+                else if(req.query.cmd=="seek"){
                     var position = req.query.position;
                     if(position == "plus") {
                         position = '+';
@@ -198,6 +198,54 @@ function interfaceApi(context) {
                     self.logStart('Client requests Position ' + position)
                         .then(function () {
                             return self.commandRouter.volumioSeek(position);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "repeat"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Repeat ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioRepeat(value, false);
+                            }
+                            else{
+                                return self.commandRouter.repeatToggle();
+                            }
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "random"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Random ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioRandom(value);
+                            }
+                            else{
+                                return self.commandRouter.randomToggle();
+                            }
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {
