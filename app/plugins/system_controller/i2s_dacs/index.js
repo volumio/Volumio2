@@ -41,6 +41,8 @@ ControllerI2s.prototype.onVolumioStart = function () {
 	} else {
 		self.execDacScript();
 	}
+	
+	self.forceConfigTxtBannerCompat();
 
     return libQ.resolve();
 };
@@ -165,7 +167,7 @@ ControllerI2s.prototype.i2sDetect = function () {
 		});
 
 
-}
+};
 
 ControllerI2s.prototype.eepromDetect = function () {
 	var self = this;
@@ -190,7 +192,7 @@ ControllerI2s.prototype.eepromDetect = function () {
 		//self.i2cDetect();
 	}
 	return defer.promise;
-}
+};
 
 ControllerI2s.prototype.i2cDetect = function () {
 	var self = this;
@@ -318,7 +320,7 @@ ControllerI2s.prototype.getI2sStatus = function () {
 	}
 
 	return status
-}
+};
 
 ControllerI2s.prototype.getI2SNumber = function (data) {
 	var self = this;
@@ -341,7 +343,7 @@ ControllerI2s.prototype.getI2SNumber = function (data) {
 	}
 
 	return number
-}
+};
 
 ControllerI2s.prototype.getI2SMixer = function (data) {
 	var self = this;
@@ -366,7 +368,7 @@ ControllerI2s.prototype.getI2SMixer = function (data) {
 	}
 
 	return mixer
-}
+};
 
 ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var self = this;
@@ -433,7 +435,7 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 
 
 	return defer.promise;
-}
+};
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
@@ -484,6 +486,54 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 	});
 };
 
+
+ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
+	var self = this;
+	
+	fs.readFile('/boot/config.txt', 'utf8', function (err,data) {
+  		if (err) {
+			self.logger.error('Cannot read config.txt file: '+err);
+  		}
+  		else {
+  			var index = data.search(i2sOverlayBanner);
+  			
+  			if (index == -1) {
+  				//there is no Banner in config.txt; check if DAC dtoverlay is present (for backward compatibility)  
+				
+				fs.readFile('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json', 'utf8', function (err,dacdata) {
+  					if (err) {
+						self.logger.error('Cannot read dacs.json file: '+err);
+  					}
+  					else {
+						var entries = data.split(/dtoverlay=/);
+						var searchexp;
+				
+						entries.forEach(function(str) {
+							str = str.split(/[^a-zA-Z0-9-]/)[0];     // take first word only (candidate overlay name)
+							if (dacdata.includes(str)) {      		// we found current dtoverlay name within .json database => is an i2s!
+								searchexp = new RegExp('dtoverlay=' + str + os.EOL);
+							}  
+						});
+
+  						if (searchexp !== undefined) { // we found older config file with valid DAC dtoverlay set and no Banner
+  							// we add Banner before found dtoverlay i2s entry and rewrite file
+  							data = data.replace(searchexp,os.EOL + i2sOverlayBanner + searchexp.source + os.EOL);
+
+  							fs.writeFile('/boot/config.txt', data, 'utf8', function (err) {
+								if (err) self.logger.error('Cannot write config.txt file: '+err);
+  							});
+						}	
+ 					}			
+  				});
+  			}
+  		}	
+	});
+	
+	return libQ.resolve();
+};
+
+
+
 ControllerI2s.prototype.hotAddI2SDAC = function (data) {
 	var self = this;
 
@@ -514,7 +564,7 @@ ControllerI2s.prototype.hotAddI2SDAC = function (data) {
 	}
 
 
-}
+};
 
 ControllerI2s.prototype.hotRemoveI2SDAC = function () {
 };
@@ -553,7 +603,7 @@ ControllerI2s.prototype.revomeAllDtOverlays = function () {
 		defer.resolve('');
 	}
 
-}
+};
 
 ControllerI2s.prototype.execDacScript = function () {
 	var self = this;
@@ -607,6 +657,5 @@ ControllerI2s.prototype.writeModulesFile = function (modules) {
 			ws.end()
 		}
 	});
+};
 
-
-}
