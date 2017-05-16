@@ -439,24 +439,24 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
-	var bootstring = 'dtoverlay='+ data + os.EOL + os.EOL;
-	var searchexp = new RegExp('dtoverlay=.*' + os.EOL + os.EOL);
+	var bootstring = 'dtoverlay='+ data + os.EOL;
+	var searchexp = new RegExp(i2sOverlayBanner + 'dtoverlay=.*' + os.EOL);
 	
-	fs.readFile('/boot/config.txt', 'utf8', function (err,data) {
+	fs.readFile('/boot/config.txt', 'utf8', function (err,ConfigTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
-  			var index = data.search(i2sOverlayBanner);
-  			var result;
-  			
-  			if (index == -1) {
-  				result = data + os.EOL + i2sOverlayBanner + bootstring;
+  			var newConfigTxt;
+  		
+  			newConfigTxt = ConfigTxt.replace(searchexp,i2sOverlayBanner + bootstring);
+
+  			if (ConfigTxt == newConfigTxt) {
+  			// there was no pre-existing Volumio i2S DAC in config.txt => adding it  
+  				newConfigTxt = ConfigTxt + os.EOL + i2sOverlayBanner + bootstring + os.EOL;
  			}			
-  			else {
-  				result = data.substring(0,index) + data.substring(index).replace(searchexp,bootstring);
-			}
-  			fs.writeFile('/boot/config.txt', result, 'utf8', function (err) {
+
+  			fs.writeFile('/boot/config.txt', newConfigTxt, 'utf8', function (err) {
 				if (err) self.logger.error('Cannot write config.txt file: '+err);
   			});
   		}	
@@ -466,18 +466,18 @@ ControllerI2s.prototype.writeI2SDAC = function (data) {
 
 ControllerI2s.prototype.disableI2SDAC = function () {
 	var self = this;
-	var searchexp = new RegExp(os.EOL + i2sOverlayBanner + 'dtoverlay=.*' + os.EOL + os.EOL);
+	var searchexp = new RegExp(os.EOL + os.EOL + '*' + i2sOverlayBanner + 'dtoverlay=.*' + os.EOL + '*');
 
 	this.config.set("i2s_enabled", false);
 
-	fs.readFile('/boot/config.txt', 'utf8', function (err,data) {
+	fs.readFile('/boot/config.txt', 'utf8', function (err,ConfigTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
-  			data = data.replace(searchexp,"");
-
- 			fs.writeFile('/boot/config.txt', data, 'utf8', function (err) {
+  			ConfigTxt = ConfigTxt.replace(searchexp,os.EOL);
+  			
+  			fs.writeFile('/boot/config.txt', ConfigTxt, 'utf8', function (err) {
 				if (err) self.logger.error('Cannot write config.txt file: '+err);
   			});
   			
@@ -490,12 +490,12 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 	var self = this;
 	
-	fs.readFile('/boot/config.txt', 'utf8', function (err,data) {
+	fs.readFile('/boot/config.txt', 'utf8', function (err,ConfigTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
-  			var index = data.search(i2sOverlayBanner);
+  			var index = ConfigTxt.search(i2sOverlayBanner);
   			
   			if (index == -1) {
   				//there is no Banner in config.txt; check if DAC dtoverlay is present (for backward compatibility)  
@@ -505,7 +505,7 @@ ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 						self.logger.error('Cannot read dacs.json file: '+err);
   					}
   					else {
-						var entries = data.split(/dtoverlay=/);
+						var entries = ConfigTxt.split(/dtoverlay=/);
 						var searchexp;
 				
 						entries.forEach(function(str) {
@@ -517,9 +517,9 @@ ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 
   						if (searchexp !== undefined) { // we found older config file with valid DAC dtoverlay set and no Banner
   							// we add Banner before found dtoverlay i2s entry and rewrite file
-  							data = data.replace(searchexp,os.EOL + i2sOverlayBanner + searchexp.source + os.EOL);
+  							ConfigTxt = ConfigTxt.replace(searchexp, os.EOL + i2sOverlayBanner + searchexp.source + os.EOL);
 
-  							fs.writeFile('/boot/config.txt', data, 'utf8', function (err) {
+  							fs.writeFile('/boot/config.txt', ConfigTxt, 'utf8', function (err) {
 								if (err) self.logger.error('Cannot write config.txt file: '+err);
   							});
 						}	
