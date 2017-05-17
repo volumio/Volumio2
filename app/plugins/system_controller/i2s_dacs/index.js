@@ -442,18 +442,18 @@ ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var bootstring = 'dtoverlay='+ data + os.EOL;
 	var searchexp = new RegExp(i2sOverlayBanner + 'dtoverlay=.*' + os.EOL);
 	
-	fs.readFile('/boot/config.txt', 'utf8', function (err,ConfigTxt) {
+	fs.readFile('/boot/config.txt', 'utf8', function (err,configTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
   			var newConfigTxt;
   		
-  			newConfigTxt = ConfigTxt.replace(searchexp,i2sOverlayBanner + bootstring);
+  			newConfigTxt = configTxt.replace(searchexp,i2sOverlayBanner + bootstring);
 
-  			if (ConfigTxt == newConfigTxt) {
-  			// there was no pre-existing Volumio i2S DAC in config.txt => adding it  
-  				newConfigTxt = ConfigTxt + os.EOL + i2sOverlayBanner + bootstring + os.EOL;
+  			if (configTxt == newConfigTxt) {
+  			// there was no pre-existing Volumio i2S DAC in config.txt => appending new entry 
+  				newConfigTxt = configTxt + os.EOL + i2sOverlayBanner + bootstring + os.EOL;
  			}			
 
   			fs.writeFile('/boot/config.txt', newConfigTxt, 'utf8', function (err) {
@@ -470,14 +470,14 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 
 	this.config.set("i2s_enabled", false);
 
-	fs.readFile('/boot/config.txt', 'utf8', function (err,ConfigTxt) {
+	fs.readFile('/boot/config.txt', 'utf8', function (err,configTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
-  			ConfigTxt = ConfigTxt.replace(searchexp,os.EOL);
+  			configTxt = configTxt.replace(searchexp,os.EOL);
   			
-  			fs.writeFile('/boot/config.txt', ConfigTxt, 'utf8', function (err) {
+  			fs.writeFile('/boot/config.txt', configTxt, 'utf8', function (err) {
 				if (err) self.logger.error('Cannot write config.txt file: '+err);
   			});
   			
@@ -490,12 +490,12 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 	var self = this;
 	
-	fs.readFile('/boot/config.txt', 'utf8', function (err,ConfigTxt) {
+	fs.readFile('/boot/config.txt', 'utf8', function (err,configTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
-  			var index = ConfigTxt.search(i2sOverlayBanner);
+  			var index = configTxt.search(i2sOverlayBanner);
   			
   			if (index == -1) {
   				//there is no Banner in config.txt; check if DAC dtoverlay is present (for backward compatibility)  
@@ -505,7 +505,7 @@ ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 						self.logger.error('Cannot read dacs.json file: '+err);
   					}
   					else {
-						var entries = ConfigTxt.split(/dtoverlay=/);
+						var entries = configTxt.split(/dtoverlay=/);
 						var searchexp;
 				
 						entries.forEach(function(str) {
@@ -516,10 +516,10 @@ ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 						});
 
   						if (searchexp !== undefined) { // we found older config file with valid DAC dtoverlay set and no Banner
-  							// we add Banner before found dtoverlay i2s entry and rewrite file
-  							ConfigTxt = ConfigTxt.replace(searchexp, os.EOL + i2sOverlayBanner + searchexp.source + os.EOL);
+  							// we add Banner before existing dtoverlay i2s entry and rewrite file
+  							configTxt = configTxt.replace(searchexp, os.EOL + i2sOverlayBanner + searchexp.source + os.EOL);
 
-  							fs.writeFile('/boot/config.txt', ConfigTxt, 'utf8', function (err) {
+  							fs.writeFile('/boot/config.txt', configTxt, 'utf8', function (err) {
 								if (err) self.logger.error('Cannot write config.txt file: '+err);
   							});
 						}	
