@@ -39,7 +39,11 @@ else {
         /**
          * Sending back error code 500
          **/
-        res.sendFile(__dirname + '/default.png');
+        try{
+            res.sendFile(__dirname + '/default.jpg');
+        } catch(e) {
+            res.sendFile(__dirname + '/default.png');
+        }
     });
 
     app.listen(process.argv[2]);

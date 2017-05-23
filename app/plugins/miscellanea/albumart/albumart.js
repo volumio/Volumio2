@@ -378,7 +378,11 @@ var processExpressRequest = function (req, res) {
                 res.sendFile(__dirname + '/icons/'+icon+'.jpg');
 			} else {
 			    res.setHeader('Cache-Control', 'public, max-age=2628000')
-			    res.sendFile(__dirname + '/default.png');
+                try{
+                    res.sendFile(__dirname + '/default.jpg');
+                } catch(e) {
+                    res.sendFile(__dirname + '/default.png');
+                }
 			}
 		});
 };
