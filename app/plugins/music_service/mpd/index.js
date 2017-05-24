@@ -438,6 +438,8 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	if (objTrackInfo.Artist != undefined) {
 		resp.artist = objTrackInfo.Artist;
+	} else if (objTrackInfo.Name != undefined) {
+ +		resp.artist = objTrackInfo.Name;
 	} else {
 		resp.artist = null;
 	}
