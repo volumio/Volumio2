@@ -432,30 +432,47 @@ PluginManager.prototype.checkRequiredConfigurationParameters = function (require
 	configJson.save();
 };
 
-PluginManager.prototype.installPlugin = function (url) {
+PluginManager.prototype.installPlugin = function (data) {
 	var self=this;
 	var defer=libQ.defer();
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
+	var sourcefile = '';
+	var currentMessage = '';
+
+	if ( data != undefined && data.sourcefile != undefined ) {
+		sourcefile = data.sourcefile;
+	} else {
+		currentMessage = "Unable to locate downloaded plugin file";
+		advancedlog = advancedlog + "<br>" + currentMessage;
+		self.logger.info(currentMessage);
+		self.pushMessage('installPluginStatus',
+							{'progress': 0,
+							 'message': 'Download failure',
+							 'title' : modaltitle,
+							 'advancedLog': advancedlog,
+							 'buttons':[{'name':'Close','class': 'btn btn-warning'}]
+							});
+		defer.reject(new Error());
+		return defer.promise;
+	}
 
 
-	var currentMessage = "Downloading plugin at "+url;
+	currentMessage = "Downloaded plugin is at "+sourcefile;
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
-	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
+	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloaded plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
-
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
-
+	exec("/bin/mv -f " + sourcefile + " /tmp/downloaded_plugin.zip", function (error, stdout, stderr) {
 		if (error !== null) {
-			currentMessage = "Cannot download file "+url+ ' - ' + error;
+			currentMessage = "Cannot handle file "+sourcefile+ ' - ' + error;
 			self.logger.info(currentMessage);
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			defer.reject(new Error(error));
 		}
 		else {
-			currentMessage = "END DOWNLOAD: "+url;
+			currentMessage = "END DOWNLOAD: "+sourcefile;
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			self.logger.info(currentMessage);
 			currentMessage = 'Creating folder on disk';
@@ -718,6 +735,7 @@ PluginManager.prototype.tempCleanup = function () {
 
 	self.rmDir('/tmp/downloaded_plugin');
 	self.rmDir('/tmp/downloaded_plugin.zip');
+	self.rmDir('/tmp/downloadedPlugin');
 }
 
 PluginManager.prototype.createFolder = function (folder) {

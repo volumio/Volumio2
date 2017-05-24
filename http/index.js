@@ -107,13 +107,13 @@ app.route('/plugin-upload')
                 console.log('Cannot Create Plugin Dir ' + plugindir)
             }
             //Path where image will be uploaded
-            fstream = fs.createWriteStream(plugindir + '/' + uniquename);
+            var uniquepath = plugindir + '/' + uniquename;
+            fstream = fs.createWriteStream(uniquepath);
             file.pipe(fstream);
             fstream.on('close', function () {
                 console.log("Upload Finished of " + filename + " as " + uniquename);
                 var socket= io.connect('http://localhost:3000');
-                var pluginurl= 'http://127.0.0.1:3000/plugin-serve/' + uniquename;
-                socket.emit('installPlugin', { url:pluginurl});
+                socket.emit('installPlugin', { sourcefile:uniquepath });
                 res.status(201);
                 //res.redirect('/');
             });
