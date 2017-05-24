@@ -53,7 +53,15 @@
     "PERSISTENT_QUEUE":"File d'attente persistante",
   	"PERSISTENT_QUEUE_DOC":"Si activé, la file d'attente sera conservée après un reboot, sinon elle sera éffacée",
     "HARDWARE":"Matériel",
-    "SOFTWARE":"Logiciel"
+    "SOFTWARE":"Logiciel",
+    "MPD_VOLUME":"Controle du volume par les clients MPD",
+    "MPD_VOLUME_DOC":"Permet aux Clients MPD de changer le volume. A une incidence négative sur la vitesse de changement du volume",
+    "RESAMPLING_ALG":"Resampling algorithm quality",
+    "RESAMPLING_ALG_DOC":"Permet de choisr l'algorithme de ré-échantillonage idéal. Une haute qualité requière plus de puissance de calcul, et sur des systèmes peu puissants le son son peu présenter des coupures ou stopper. Dans ce cas utiliser une qualité moindre pour une lecture correcte ",
+    "VERY_HIGH":"Très haute",
+    "HIGH":"Haute",
+    "MEDIUM":"Moyenne",
+    "LOW":"Basse"
   	  },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
@@ -83,7 +91,13 @@
     "HOTSPOT_PW_LENGTH":"Le mot de passe du Hotspot doit faire au moins 8 caractères",
     "WIRELESS_ENABLED":"Réseau sans fil (WiFi)",
     	"WIRELESS_ENABLED_DOC":"Active ou désactive le WiFi",
-    "STATIC_IP_WARNING":"Attention, assurez-vous d'avoir entré des paramètres corrects. Une mauvaise configuration peut rendre votre appareil injoignable"
+    "STATIC_IP_WARNING":"Attention, assurez-vous d'avoir entré des paramètres corrects. Une mauvaise configuration peut rendre votre appareil injoignable",
+    "DNS_SETTINGS":"Réglage serveurs DNS",
+    "ENABLE_CUSTOM_DNS_DOC":"Permet de règler des serveurs DNS personnalisés. Utile si votre système ne peut joindre internet ou jouer les web radios ou faire les mises à jour",
+    "ENABLE_CUSTOM_DNS":"Activer les serveurs DNS personnalisés",
+    "PRIMARY_DNS":"DNS primaire",
+    "SECONDARYY_DNS":"DNS Secondaire",
+    "DNS_ERROR_INFO":"Remplisser les adresses IP des DNS correctement"
   },
   "NETWORKFS":{
   "ALIAS_DOC":"Choisir un le nom qui sera affiché dans les disques NAS montés",
@@ -184,8 +198,8 @@
     "SLEEP_MODE_IN":" dans ",
     "SLEEP_MODE_MINUTE":" minute (s)",
     "SLEEP_MODE_HOUR":"heure(s)",
-    "STOP_MUSIC":"Arrêter la musique",
-    "TURN_OFF":"S'éteindre",
+    "STOP_MUSIC":"Arrêter la musique dans",
+    "TURN_OFF":"Eteindre dans",
     "TIME_SELECT_ERROR":"Selectionner l'heure de l'alarme",
     "PLAYLIST_SELECT_ERROR":"Sélectionner une Playlist"
   },

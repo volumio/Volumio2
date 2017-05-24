@@ -289,7 +289,8 @@ CoreCommandRouter.prototype.volumioPushState = function (state) {
 	var res = libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-			return thisInterface.pushState(state);
+			if (typeof thisInterface.pushState === "function")
+				return thisInterface.pushState(state);
 		})
 	);
 	self.callCallback("volumioPushState", state);
@@ -309,7 +310,8 @@ CoreCommandRouter.prototype.volumioPushQueue = function (queue) {
 	return libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-			return thisInterface.pushQueue(queue);
+			if (typeof thisInterface.pushQueue === "function")
+				return thisInterface.pushQueue(queue);
 		})
 	);
 };
@@ -1084,10 +1086,12 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 // Platform specific & Hardware related options, they can be found in platformSpecific.js
 // This allows to change system commands across different devices\environments
 CoreCommandRouter.prototype.shutdown = function () {
+	this.pluginManager.onVolumioShutdown();
 	this.platformspecific.shutdown();
 };
 
 CoreCommandRouter.prototype.reboot = function () {
+	this.pluginManager.onVolumioReboot();
 	this.platformspecific.reboot();
 };
 
@@ -1148,6 +1152,22 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 	{
 		return this.stateMachine.play(N);
 	}
+};
+
+// Volumio Toggle
+CoreCommandRouter.prototype.volumioToggle = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioToggle');
+
+    var state=this.stateMachine.getState();
+
+	if (state.status != undefined) {
+		if(state.status==='stop' || state.status==='pause')
+		{
+        		return this.stateMachine.play();
+    		} else {
+        		return this.stateMachine.pause();
+		}
+    }
 };
 
 
@@ -1283,10 +1303,39 @@ CoreCommandRouter.prototype.volumioRandom = function (data) {
 	return this.stateMachine.setRandom(data);
 };
 
+CoreCommandRouter.prototype.randomToggle = function(){
+	var self = this;
+
+	var state = self.stateMachine.getState();
+
+	if(state.random){
+		return self.stateMachine.setRandom(false);
+	}
+	else{
+		return self.stateMachine.setRandom(true);
+	}
+}
+
 CoreCommandRouter.prototype.volumioRepeat = function (repeat,repeatSingle) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
 	return this.stateMachine.setRepeat(repeat,repeatSingle);
 };
+
+CoreCommandRouter.prototype.repeatToggle = function () {
+	var self = this;
+
+	var state = self.stateMachine.getState();
+
+	console.log(state.repeat);
+
+	if(state.repeat){
+		return self.stateMachine.setRepeat(false, false);
+	}
+	else{
+		return self.stateMachine.setRepeat(true, false);
+	}
+
+}
 
 CoreCommandRouter.prototype.volumioConsume = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');

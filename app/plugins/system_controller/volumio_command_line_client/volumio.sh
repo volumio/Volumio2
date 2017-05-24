@@ -10,6 +10,15 @@ Usage : volumio <argument1> <argument2>
 status                             Gives Playback status information
 volume                             Gives Current Volume Information
 volume <desired volume>            Sets Volume at desired level 0-100
+volume mute                        Mutes
+volume unmute                      Unmutes
+volume plus                        Increases Volume of one step
+volume minus                       Decreases Volume of one step
+seek plus                          Forwards 10 seconds in the song
+seek minus                         Backwards 10 seconds in the song
+seek <seconds>                     Plays song from selected time
+repeat                             Toggles repetition of queue
+random                             Toggles randomization of queue
 
 
 [[PLAYBACK CONTROL]]
@@ -19,6 +28,7 @@ pause
 next
 previous
 stop
+clear
 
 
 [[VOLUMIO SERVICE CONTROL]]
@@ -29,42 +39,15 @@ restart                             Restarts Volumio Service
 
 [[VOLUMIO DEVELOPMENT]]
 
-pull                               Pull latest github status on master
-kernelsource                       Get Current Kernel source (Raspberry PI only)
+pull                               Pulls latest github status on master
+kernelsource                       Gets Current Kernel source (Raspberry PI only)
+plugin init                        Creates a new plugin
+plugin refresh                     updates plugin in the system
+plugin zip                         compresses the plugin
+plugin publish                     publishes the plugin on git
 "
 
 }
-
-volumeval="0"
-playbackcommand="play"
-
-
-#PLAYBACK STATUS CONTROLS
-
-function status {
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/status.js
-echo $var
-}
-
-function volumeget {
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/getvolume.js
-echo $var
-}
-
-function volumeset {
-echo "Setting Volume "$volumeval""
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/setvolume.js "$volumeval"
-echo $var
-}
-
-#PLAYBACK CONTROLS
-
-function playback {
-echo "Sending "$playbackcommand" "
-var=$ /volumio/app/plugins/system_controller/volumio_command_line_client/commands/playback.js "$playbackcommand"
-echo $var
-}
-
 
 #VOLUMIO SERVICE CONTROLS
 
@@ -91,27 +74,48 @@ function kernelsource {
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 
-
 case "$1" in
         play)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=play"
+            ;;
+        toggle)
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=toggle"
             ;;
         pause)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=pause"
             ;;
         next)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=next"
             ;;
         previous)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=prev"
             ;;
         stop)
-            playbackcommand=$1
-            playback
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stop"
+            ;;
+        clear)
+            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=clearQueue"
+            ;;
+        seek)
+            if [ "$2" != "" ]; then
+                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=seek&position=$2"
+            else
+               /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.seek'
+            fi
+            ;;
+        repeat)
+            if [ "$2" != "" ]; then
+                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=repeat&value=$2"
+            else
+               /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=repeat"
+            fi
+            ;;
+        random)
+            if [ "$2" != "" ]; then
+                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random&value=$2"
+            else
+               /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random"
+            fi
             ;;
         start)
             start
@@ -130,21 +134,27 @@ case "$1" in
             ;;
 
         status)
-            status
+            /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.'
             ;;
         volume)
             if [ "$2" != "" ]; then
-                volumeval=$2
-                volumeset
+               /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=volume&volume=$2"
             else
-                volumeget
+               /usr/bin/curl -sS "http://127.0.0.1:3000/api/v1/getstate" | /usr/bin/jq -r '.volume'
             fi
             ;;
-	pull)
+	    pull)
             pull
             ;;
-	kernelsource)
-	    kernelsource
+	    kernelsource)
+	        kernelsource
+            ;;
+        plugin)
+            if [ "$2" != "" ]; then
+               /usr/local/bin/node /volumio/pluginhelper.js $2
+            else
+               /usr/local/bin/node /volumio/pluginhelper.js
+            fi
             ;;
         *)
             doc

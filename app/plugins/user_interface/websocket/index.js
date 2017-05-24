@@ -306,6 +306,16 @@ function InterfaceWebUI(context) {
 					});
 			});
 
+            connWebSocket.on('toggle', function () {
+                var timeStart = Date.now();
+                self.logStart('Client requests Volumio toggle')
+                    .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+            });
+
 			connWebSocket.on('stop', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio stop')

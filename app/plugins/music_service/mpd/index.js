@@ -1,6 +1,6 @@
 'use strict';
 
-var libMpd = require('mpd');
+var libMpd = require('./lib/mpd.js');
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
@@ -438,6 +438,8 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	if (objTrackInfo.Artist != undefined) {
 		resp.artist = objTrackInfo.Artist;
+	} else if (objTrackInfo.Name != undefined) {
+		resp.artist = objTrackInfo.Name;
 	} else {
 		resp.artist = null;
 	}
@@ -517,9 +519,26 @@ ControllerMpd.prototype.parseState = function (objState) {
 		var objMetrics = objState.audio.split(':');
 		var nSampleRateRaw = Number(objMetrics[0]) / 1000;
 		nBitDepth = Number(objMetrics[1])+' bit';
-		if (objMetrics[1] == 'f')
-			nBitDepth = '32f bit';
-		else if (objMetrics[1] == 'dsd') {
+        nChannels = Number(objMetrics[2]);
+		if (objMetrics[1] == 'f') {
+            nBitDepth = '32f bit';
+		} else if (objMetrics[0] == 'dsd64') {
+            var nSampleRateRaw = 2.82 + ' MHz';
+            nBitDepth = '1 bit';
+            nChannels = 2;
+        } else if (objMetrics[0] == 'dsd128') {
+            var nSampleRateRaw = 5.64 + ' MHz';
+            nBitDepth = '1 bit';
+            nChannels = 2;
+        } else if (objMetrics[0] == 'dsd256') {
+        var nSampleRateRaw = 11.28 + ' MHz';
+        nBitDepth = '1 bit';
+        nChannels = 2;
+        } else if (objMetrics[0] == 'dsd512') {
+        var nSampleRateRaw = 22.58 + ' MHz';
+        nBitDepth = '1 bit';
+        nChannels = 2;
+        } else if (objMetrics[1] == 'dsd') {
 			if (nSampleRateRaw === 352.8) {
 				var nSampleRateRaw = 2.82 + ' MHz';
 				nBitDepth = '1 bit'
@@ -537,7 +556,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 		}
 		nSampleRate = nSampleRateRaw;
 
-		nChannels = Number(objMetrics[2]);
+
 	}
 	var random = null;
 	if ('random' in objState) {
@@ -788,10 +807,9 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 					self.logger.error('Cannot restart MPD: ' + error);
 					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVE_ERROR'));
 				}
-				else
+				else {
 					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
-				
-				
+				}
 				defer.resolve({});
 			});
 		}
@@ -872,16 +890,29 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 			var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
 			var mixer = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mixer');
+
 			var resampling = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling');
 			var resampling_bitdepth = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_bitdepth');
 			var resampling_samplerate = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_samplerate');
+            var resampling_quality = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_quality');
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
-				mixerdev = 'hw:'+outdev;
-				outdev = 'hw:'+outdev+',0';
+                if (outdev.indexOf(',') >= 0) {
+                    mixerdev = 'hw:'+outdev;
+                    outdev = 'hw:'+outdev;
+                } else {
+                    mixerdev = 'hw:'+outdev;
+                    outdev = 'hw:'+outdev+',0';
+				}
+
 			} else {
 				mixerdev = 'SoftMaster';
+			}
+
+            var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');
+			if (mpdvolume == undefined) {
+                mpdvolume = false;
 			}
 
 			var conf1 = data.replace("${gapless_mp3_playback}", self.checkTrue('gapless_mp3_playback'));
@@ -898,21 +929,24 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 
 			if (mixer) {
-				if (mixer.length > 0) {
+				if (mixer.length > 0 && mpdvolume) {
 					mixerstrings = 'mixer_device    "'+ mixerdev + '"' + os.EOL + '                mixer_control   "'+ mixer +'"'+ os.EOL + '                mixer_type      "hardware"'+ os.EOL;
 				}
 			}
 
-
 			var conf7 = conf6.replace("${mixer}", mixerstrings);
 
 			if(resampling){
-				var conf8 = conf7.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
+                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "0"' + os.EOL + '}');
+				var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
+
 			} else {
-				var conf8 = conf7.replace("${format}", "");
+                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "0"' + os.EOL + '}');
+				var conf9 = conf8.replace("${format}", "");
+
 			}
 
-			fs.writeFile("/etc/mpd.conf", conf8, 'utf8', function (err) {
+			fs.writeFile("/etc/mpd.conf", conf9, 'utf8', function (err) {
 				if (err) return self.logger.error(err);
 			});
 		});
@@ -1212,7 +1246,6 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 ControllerMpd.prototype.search = function (query) {
 	var self = this;
-
 	var defer = libQ.defer();
 	var commandArtist = 'search artist '+' "' + query.value + '"';
     var commandAlbum = 'search album '+' "' + query.value + '"';
@@ -1223,106 +1256,89 @@ ControllerMpd.prototype.search = function (query) {
     deferArray.push(libQ.defer());
 
     var cmd = libMpd.cmd;
-
+//ARTIST
     self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(commandArtist, []), function (err, msg) {
             var subList=[];
-
-            if (msg) {
-
-				var lines = msg.split('\n');
-                for (var i = 0; i < lines.length; i++) {
+            if (msg) {		
+				var lines = msg.split('\n');  //var lines is now an array
+				var artistsfound = [];					
+				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
-
 					if (line.startsWith('file:')) {
-                        var path = line.slice(5).trimLeft();
-                        var name = path.split('/');
-                        var count = name.length;
-
-                        var artist = self.searchFor(lines, i + 1, 'Artist:');
-
-                        deferArray[0].resolve([{
-                            service: 'mpd',
-                            type: 'folder',
-                            title: artist,
-                            uri: 'artists://' + nodetools.urlEncode(artist),
-                            albumart: self.getAlbumArt({artist: artist},
-                                self.getParentFolder('/mnt/' + path),
-                                'fa-tags')
-
-                    }]);
-
-                        return;
+						var path = line.slice(5).trimLeft();
+						var artist = self.searchFor(lines, i + 1, 'Artist:');
+						//**********Check if artist is already found and exists in 'artistsfound' array
+						if (artistsfound.indexOf(artist) <0 ) { //Artist is not in 'artistsfound' array
+							artistsfound.push(artist);
+							subList.push({	
+								service: 'mpd',
+								type: 'folder',
+								title: artist,
+								uri: 'artists://' + nodetools.urlEncode(artist),
+								albumart: self.getAlbumArt({artist: artist},
+								self.getParentFolder('/mnt/' + path),'fa-tags')
+							});
+						}
 					}
-
 				}
-
-
+                deferArray[0].resolve(subList);
 			}
 			else if(err)  deferArray[0].reject(new Error('Artist:' +err));
             else deferArray[0].resolve();
 		});
 	});
-
+//ALBUM
     self.mpdReady.then(function () {
         self.clientMpd.sendCommand(cmd(commandAlbum, []), function (err, msg) {
             var subList=[];
 
             if (msg) {
-
                 var lines = msg.split('\n');
-                for (var i = 0; i < lines.length; i++) {
+				var albumsfound=[];
+				for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
-
-                    if (line.startsWith('file:')) {
+                    if (line.startsWith('file:')) {	
                         var path = line.slice(5).trimLeft();
-                        var name = path.split('/');
-                        var count = name.length;
-
                         var album = self.searchFor(lines, i + 1, 'Album:');
-                        var artist = self.searchFor(lines, i + 1, 'Artist:');
-
-                        deferArray[1].resolve([{
+                        var artist = self.searchFor	(lines, i + 1, 'Artist:');
+						//********Check if album is already found and exists in 'albumsfound' array
+						if (albumsfound.indexOf(album) <0 ) { //Album is not in 'albumsfound' array
+							albumsfound.push(album);
+							subList.push({
                             service: 'mpd',
                             type: 'folder',
                             title: album,
                             artist: artist,
                             album:'',
                             uri: 'albums://' + nodetools.urlEncode(album),
-                            albumart: self.getAlbumArt({artist: artist, album: album},
-                                self.getParentFolder('/mnt/' + path),'fa-tags')
+                            albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
+							});
+						}
+					}
 
-                    }]);
-
-                        return;
-                    }
-
-                }
-            }
+				}
+			deferArray[1].resolve(subList);
+			}
             else if(err)  deferArray[1].reject(new Error('Album:' +err));
             else deferArray[1].resolve();
         });
     });
-
+//SONG
     self.mpdReady.then(function () {
         self.clientMpd.sendCommand(cmd(commandSong, []), function (err, msg) {
             var subList=[];
-
-            if (msg) {
-
+			if (msg) {
                 var lines = msg.split('\n');
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
-
                     if (line.startsWith('file:')) {
                         var path = line.slice(5).trimLeft();
                         var name = path.split('/');
                         var count = name.length;
-
                         var artist = self.searchFor(lines, i + 1, 'Artist:');
                         var album = self.searchFor(lines, i + 1, 'Album:');
                         var title = self.searchFor(lines, i + 1, 'Title:');
-
                         if (title == undefined) {
                             title = name[count - 1];
                         }
@@ -1333,14 +1349,10 @@ ControllerMpd.prototype.search = function (query) {
                             artist: artist,
                             album: album,
                             uri: 'music-library/' + path,
-                            albumart : self.getAlbumArt({artist: artist, album: album},
-                                self.getParentFolder('/mnt/' + path),'fa-tags')
-
-                    });
+                            albumart : self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
+						});
                     }
-
                 }
-
                 deferArray[2].resolve(subList);
             }
             else if(err)  deferArray[2].reject(new Error('Song:' +err));

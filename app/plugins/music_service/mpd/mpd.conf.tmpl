@@ -40,11 +40,7 @@ input {
 
 # Audio Output ################################################################
 
-# remove comments when resampler will be reintroduced
-#resampler {
-#  		plugin "soxr"
-#  		quality "very high"
-#}
+${sox}
 
 audio_output {
 		type		"alsa"

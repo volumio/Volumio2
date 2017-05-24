@@ -38,6 +38,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
     this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
 
+    return libQ.resolve();
 };
 
 volumioAppearance.prototype.onStart = function() {

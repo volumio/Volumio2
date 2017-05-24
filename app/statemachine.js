@@ -1071,16 +1071,40 @@ CoreStateMachine.prototype.seek = function (position) {
 	var trackBlock = this.getTrack(this.currentPosition);
 	if (trackBlock !== undefined)
 	{
-		this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
+		if(position == '+'){
+			var curPos = this.getState().seek;
+            var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
-		var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+            this.currentSeek = curPos + 10000;
+            this.startPlaybackTimer(curPos + 10000);
 
-		this.currentSeek = position*1000;
-		this.startPlaybackTimer(position*1000);
+            thisPlugin.seek(curPos + 10000);
 
-		thisPlugin.seek(position*1000);
+            this.pushState().fail(this.pushError.bind(this));
+		}
+		else if(position == '-'){
+    	    var curPos = this.getState().seek;
+	        var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
-		this.pushState().fail(this.pushError.bind(this));
+        	this.currentSeek = curPos - 10000;
+    	    this.startPlaybackTimer(curPos - 10000);
+
+	        thisPlugin.seek(curPos - 10000);
+
+        	this.pushState().fail(this.pushError.bind(this));
+    	}
+		else{
+            this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
+
+            var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+
+            this.currentSeek = position*1000;
+            this.startPlaybackTimer(position*1000);
+
+            thisPlugin.seek(position*1000);
+
+            this.pushState().fail(this.pushError.bind(this));
+		}
 	}
 };
 
