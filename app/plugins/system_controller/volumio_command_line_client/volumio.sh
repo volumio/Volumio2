@@ -151,9 +151,26 @@ case "$1" in
             ;;
         plugin)
             if [ "$2" != "" ]; then
+                if [ "$2" == "init" ]; then
+                    echo ""
+                    echo "Welcome to the Volumio Plugin Creator!"
+                    echo "You have to decide which category your plugin belongs to, \
+then you have to select a name for it, leave us the rest ;)"
+                    echo "Warning: make meaningful choices, you cannot change them later!"
+                    echo ""
+                fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
             else
-               /usr/local/bin/node /volumio/pluginhelper.js
+                echo ""
+                echo "---- VOLUMIO PLUGIN HELPER ----"
+                echo ""
+                echo "This utility helps you creating new plugins for Volumio."
+                echo "Options:"
+                echo "init      creates a new plugin"
+                echo "refresh   copies the plugin in the system"
+                echo "package   compresses the plugin"
+                echo "publish   publishes the plugin on git"
+                echo ""
             fi
             ;;
         *)
