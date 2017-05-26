@@ -79,8 +79,8 @@ function ask_user(categories, answer) {
 }
 
 /**
- * This function creates the directories for the custom plugin, using information
- * provided by the user, then calls for customization of files
+ * This function creates the directories for the custom plugin, using
+ * information provided by the user, then calls for customization of files
  * @param answer = name of the plugin
  * @param category = category of the plugin
  */
@@ -123,7 +123,8 @@ function customize_index(data, name, path, category) {
         if (i == 0)
             camelName += splitName[i];
         else
-            camelName += splitName[i].charAt(0).toUpperCase() + splitName[i].slice(1);
+            camelName += splitName[i].charAt(0).toUpperCase() +
+                splitName[i].slice(1);
     }
     var file = data.replace(/ControllerExamplePlugin/g, camelName);
 
@@ -155,8 +156,8 @@ function customize_install(name, path, category) {
 }
 
 /**
- * changes package file, according to the name and category inserted by the user,
- * asks for additional informations like description and author
+ * changes package file, according to the name and category inserted by the
+ * user, asks for additional informations like description and author
  * @param pluginName = name of the plugin
  * @param path = path of the plugin in volumio-plugin
  * @param category = category of the plugin
@@ -206,40 +207,38 @@ function customize_package(pluginName, path, category) {
 }
 
 /**
- * finalizes the creation, copying the new plugin in data and updating plugin.json
+ * finalizes the creation, copying the new plugin in data and updating
+ * plugin.json
  * @param path = path of the plugin
  * @param package = content of package.json
  */
 function finalizing(path, package) {
     if(!fs.existsSync("/data/plugins/" + package.volumio_info.plugin_type)){
             fs.mkdirSync("/data/plugins/" + package.volumio_info.plugin_type);
-            if(!fs.existsSync("/data/plugins/" + package.volumio_info.plugin_type + "/" +
-                    package.name)) {
-                fs.mkdirSync("/data/plugins/" + package.volumio_info.plugin_type + "/" +
-                    package.name)
+            if(!fs.existsSync("/data/plugins/" +
+                    package.volumio_info.plugin_type + "/" + package.name)) {
+                fs.mkdirSync("/data/plugins/" +
+                    package.volumio_info.plugin_type + "/" + package.name)
             }
     }
 
     var pluginName = package.name;
     var field = {
-        pluginName: {
-            "enabled": {
-            "type": "boolean",
-                "value": true
-            },
-            "status": {
-            "type": "string",
-                "value": "STARTED"
-            }
+        "enabled": {
+        "type": "boolean",
+            "value": true
+        },
+        "status": {
+        "type": "string",
+            "value": "STARTED"
         }
     }
 
-    //TODO finish to write in plugins.json
     try{
         var plugins = fs.readJsonSync("/data/configuration/plugins.json");
         for(var i in plugins){
-            if(Object.keys(plugins)[i] == package.volumio_info.plugin_type){
-                plugins[i].push(field);
+            if(i == package.volumio_info.plugin_type){
+                plugins[i][pluginName] = field;
             }
         }
         fs.writeJsonSync("/data/configuration/plugins.json", plugins);
@@ -248,32 +247,52 @@ function finalizing(path, package) {
         console.log("Error, impossible to update plugins.json: " + e);
     }
 
-    execSync("/bin/cp -rp /home/volumio/volumio-plugins/plugins/" + package.volumio_info.plugin_type +
-        "/" + package.name + "/* /data/plugins/" + package.volumio_info.plugin_type +
-        "/" + package.name);
+    execSync("/bin/cp -rp /home/volumio/volumio-plugins/plugins/" +
+        package.volumio_info.plugin_type + "/" + package.name + "/* /data/plugins/" +
+        package.volumio_info.plugin_type + "/" + package.name);
 
-    console.log("Congratulation, your plugin has been succesfully created!\n" +
-        "You can find it in: " + path);
+    console.log("\nCongratulation, your plugin has been succesfully created!\n" +
+        "You can find it in: " + path + "\n");
 }
 
-// ========================= INSTALL/UPDATE LOCALLY ===========================
-
+// ============================= UPDATE LOCALLY ===============================
+/**
+ * This function copies the content of the current folder in the correspondent
+ * folder in data, according to the information found in package.json, updating
+ * the plugin
+ */
 function refresh() {
     console.log("Updating the plugin in Data");
-    try
-    {
+    try {
         var package = fs.readJsonSync("package.json");
-        execSync("/bin/cp -rp" + __dirname + "/data/plugins/" + package.volumio_info.plugin_type+
-           "/" + package.name);
+        execSync("/bin/cp -rp " + process.cwd() + "/* /data/plugins/" +
+            package.volumio_info.plugin_type+ "/" + package.name);
+        console.log("Plugin succesfully refreshed");
     }
     catch(e){
-        console.log("Error, impossible to copy the plugin: " + e)
+        console.log("Error, impossible to copy the plugin: " + e);
     }
 }
 
 // ================================ COMPRESS ==================================
+/**
+ * This function creates an archive with the plugin
+ */
 function zip(){
     console.log("Compressing the plugin");
+    try {
+        if(fs.existsSync("node_modules")) {
+            var package = fs.readJsonSync("package.json");
+            execSync("/bin/zip -r " + package.name + ".zip " + process.cwd());
+            console.log("Plugin succesfully compressed");
+        }
+        else{
+            console.log("No modules found, please run \"npm install\"");
+        }
+    }
+    catch (e){
+        console.log("Error compressing plugin: " + e);
+    }
 }
 
 // ================================= COMMIT ===================================

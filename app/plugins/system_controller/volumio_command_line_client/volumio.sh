@@ -43,7 +43,7 @@ pull                               Pulls latest github status on master
 kernelsource                       Gets Current Kernel source (Raspberry PI only)
 plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
-plugin zip                         compresses the plugin
+plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
 "
 
@@ -157,6 +157,15 @@ case "$1" in
                     echo "You have to decide which category your plugin belongs to, \
 then you have to select a name for it, leave us the rest ;)"
                     echo "Warning: make meaningful choices, you cannot change them later!"
+                    echo ""
+                elif [ "$2" == "refresh" ]; then
+                    echo ""
+                    echo "This command will copy all your plugin's file in the \
+correspondent folder in data"
+                    echo ""
+                elif [ "$2" == "package" ]; then
+                    echo ""
+                    echo "This command will create a package with your plugin"
                     echo ""
                 fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
