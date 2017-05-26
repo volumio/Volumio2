@@ -215,11 +215,11 @@ function customize_package(pluginName, path, category) {
 function finalizing(path, package) {
     if(!fs.existsSync("/data/plugins/" + package.volumio_info.plugin_type)){
             fs.mkdirSync("/data/plugins/" + package.volumio_info.plugin_type);
-            if(!fs.existsSync("/data/plugins/" +
-                    package.volumio_info.plugin_type + "/" + package.name)) {
-                fs.mkdirSync("/data/plugins/" +
-                    package.volumio_info.plugin_type + "/" + package.name)
-            }
+    }
+    if(!fs.existsSync("/data/plugins/" + package.volumio_info.plugin_type +
+            "/" + package.name)) {
+        fs.mkdirSync("/data/plugins/" + package.volumio_info.plugin_type +
+            "/" + package.name);
     }
 
     var pluginName = package.name;
@@ -283,7 +283,7 @@ function zip(){
     try {
         if(fs.existsSync("node_modules")) {
             var package = fs.readJsonSync("package.json");
-            execSync("/bin/zip -r " + package.name + ".zip " + process.cwd());
+            execSync("/usr/bin/zip -r " + package.name + ".zip " + process.cwd());
             console.log("Plugin succesfully compressed");
         }
         else{
@@ -298,8 +298,143 @@ function zip(){
 // ================================= COMMIT ===================================
 function publish() {
     console.log("Publishing the plugin");
+
+    try{
+        var package = fs.readJsonSync("package.json");
+        if(!fs.existsSync(package.name + ".zip")){
+            zip();
+        }
+        execSync("/bin/cp -rp " + package.name + ".zip /tmp/");
+        process.chdir("../../../");
+        execSync("/usr/bin/git checkout gh-pages");
+        var arch = "";
+        exec("cat /etc/os-release | grep ^VOLUMIO_ARCH | tr -d \'VOLUMIO_ARCH=\"\'",
+        function (error, stdout, stderr) {
+            if(error){
+                console.error('exec error: ${error}');
+                return;
+            }
+            arch = stdout;
+            if(arch == 'x86'){
+                arch = 'i386';
+            }
+            else{
+                arch = 'armhf';
+            }
+            create_folder(package, arch);
+        });
+    }
+    catch (e){
+        console.log("Error publishing plugin: " + e);
+    }
 }
 
+function create_folder(package, arch) {
+    var path = process.cwd() + "/plugins/volumio/" + arch + "/" +
+        package.volumio_info.plugin_type;
+    if(!fs.existsSync(path + "/" + package.name)){
+        if(!fs.existsSync(path)){
+            fs.mkdirSync(path);
+        }
+        fs.mkdirSync(path + "/" + package.name);
+    }
+    execSync("/bin/cp -rp /tmp/" + package.name + ".zip " + path + "/" +
+        package.name);
+
+    update_plugins(package, arch);
+}
+
+function update_plugins(package, arch) {
+    try {
+        var plugins = fs.readJsonSync(process.cwd() + "/plugins/volumio/" + arch +
+        "/plugins.json");
+        var i = 0;
+        for (i = 0; i < plugins.categories.length; i++){
+            if(plugins.categories[i].name == package.volumio_info.plugin_type){
+                var j = 0;
+                for (j = 0; j < plugins.categories[i].plugins.length; j++){
+                    if(plugins.categories[i].plugins[j].name == package.name){
+                        plugins.categories[i].plugins[j].updated =
+                            today.getDate() + "-" + (today.getMonth()+1) +
+                            "-" + today.getFullYear();
+                        plugins.categories[i].plugins[j].version = package.version;
+                        fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
+                            arch + "/plugins.json", plugins);
+                    }
+                }
+                if(j == plugins.categories[i].plugins.length &&
+                    plugins.categories[i].plugins[j-1].name != package.name){
+                    plugins.categories[i].plugins.push(write_new_plugin(package, arch));
+                    fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
+                        arch + "/plugins.json", plugins);
+                }
+            }
+        }
+        if(i == plugins.categories.length && plugins.categories[i-1].name
+            != package.volumio_info.plugin_type){
+            newCat = write_new_category(package);
+            newCat.id = "cat" + (i+1);
+            newCat.plugins.push(write_new_plugin(package, arch));
+            plugins.categories.push(newCat);
+            fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
+                arch + "/plugins.json", plugins);
+        }
+        
+        commit(package, arch);
+    }
+    catch(e){
+        console.log("Error updating plugins.json: " + e)
+    }
+}
+
+function write_new_plugin(package, arch) {
+    var data = {};
+    var today = new Date();
+    data.prettyName = package.prettyName;
+    data.icon = "fa-lightbulb";
+    data.name = package.name;
+    data.version = package.version;
+    data.url = "http://volumio.github.io/volumio-plugins/" +
+        "plugins/volumio/" + arch + "/" +
+        package.volumio_info.plugin_type + "/" +
+        package.name + "/" + package.name + ".zip";
+    data.license = package.license;
+    data.description = package.description;
+    data.author = package.author;
+    data.screenshots = [{"image": "", "thumb": ""}];
+    data.updated = today.getDate() + "-" + (today.getMonth()+1) +
+        "-" + today.getFullYear();
+
+    return data;
+}
+
+function write_new_category(package){
+    var data = {};
+    data.name = package.volumio_info.plugin_type;
+    data.prettyName = data.name.replace(/_/g, " ");
+    data.description = "";
+    data.plugins = [];
+
+    return data;
+}
+
+//TODO create pull request
+function commit(package, arch) {
+    execSync("/usr/bin/git add " + process.cwd() + "/plugins/volumio/" + arch +
+        "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
+    execSync("/usr/bin/git commit -m \"updating plugin " + package.name + "\"");
+    execSync("/usr/bin/git push origin gh-pages");
+    exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
+        if(error){
+            console.error('exec error: ${error}');
+            return;
+        }
+        var user = stdout;
+        if (user != "volumio"){
+            //execSync("/usr/bin/git request-pull origin gh-pages");
+        }
+    })
+}
 
 // ================================ START =====================================
 var argument = process.argv[2];

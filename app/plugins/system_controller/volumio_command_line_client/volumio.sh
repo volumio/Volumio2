@@ -167,6 +167,10 @@ correspondent folder in data"
                     echo ""
                     echo "This command will create a package with your plugin"
                     echo ""
+                elif [ "$2" == "publish" ]; then
+                    echo ""
+                    echo "This command will publish the plugin on gh-pages branch"
+                    echo ""
                 fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
             else
