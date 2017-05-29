@@ -169,7 +169,7 @@ correspondent folder in data"
                     echo ""
                 elif [ "$2" == "publish" ]; then
                     echo ""
-                    echo "This command will publish the plugin on gh-pages branch"
+                    echo "This command will publish the plugin on volumio plugins store"
                     echo ""
                 fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
