@@ -2,6 +2,7 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
+var pullr = require('pullr');
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -418,27 +419,39 @@ function write_new_category(package){
     return data;
 }
 
-//TODO create pull request
 function commit(package, arch) {
     execSync("/usr/bin/git add " + process.cwd() + "/plugins/volumio/" + arch +
         "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
     execSync("/usr/bin/git commit -m \"updating plugin " + package.name + "\"");
-    execSync("/usr/bin/git push origin gh-pages");
     exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
-        if(error){
+        if (error) {
             console.error('exec error: ${error}');
             return;
         }
         var user = stdout;
-        if (user != "volumio"){
-            var repo = 'git remote -v | grep -m 1 \"(push)\" | sed -e \"s/.' +
-                '*github.com[:/]\(.*\)\.git.*/\1/\"';
-            var branch='git name-rev --name-only HEAD';
-            console.log("... creating pull request for branch: " + branch + " in "
-                        + repo);
-            execSync("open https://github.com/" + repo + "/pull/new/" + branch);
+        if (user != "volumio") {
+            console.log("\nYour package has been committed and is ready to be " +
+                "uploaded!\n");
         }
-    })
+        else{
+            execSync("/usr/bin/git push origin gh-pages");
+        }
+    }
+    /* exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
+         if(error){
+             console.error('exec error: ${error}');
+             return;
+         }
+         var user = stdout;
+         if (user != "volumio"){
+             var repo = 'git remote -v | grep -m 1 \"(push)\" | sed -e \"s/.' +
+                 '*github.com[:/]\(.*\)\.git.*!/\1/\"';
+             var branch='git name-rev --name-only HEAD';
+             console.log("... creating pull request for branch: " + branch + " in "
+                         + repo);
+             execSync("open https://github.com/" + repo + "/pull/new/" + branch);*!/
+         }
+    })*/
 }
 
 // ================================ START =====================================
