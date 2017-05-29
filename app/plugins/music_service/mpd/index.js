@@ -16,7 +16,7 @@ var ignoreupdate = false;
 //tracknumbers variable below adds track numbers to titles if set to true. Set to false for normal behavour.
 var tracknumbers = true;
 //compilation array below adds different strings used to describe albumartist in compilations or 'multiple artist' albums
-var compilation = ['Various', 'Various Artists', 'VA', 'various', 'va', 'various artists', 'Bryan Ferry & Roxy Music', 'Fleetwood Mac and Christine Perfect'];
+var compilation = ['Various','various','Various Artists','various artists','VA','va'];
 //atistsort variable below will list artists by albumartist if set to true or artist if set to false
 var artistsort = true;
 
@@ -1382,13 +1382,11 @@ ControllerMpd.prototype.search = function (query) {
 
 		if(values[0])
 		{
-			var artistdesc = "artist"
-			if (artistcount > 1) artistdesc = "artists";
+			var artistdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ARTIST');
+			if (artistcount > 1) artistdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ARTISTS');
 			list=[
                 {
-//                "title": self.commandRouter.getI18nString('COMMON.SEARCH_ARTIST_SECTION'),
-//title description below will need getI18nString changed....
-					"title": "Found " + artistcount + " " + artistdesc + " matching '" + query.value +"'",
+					"title": self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_FOUND') + " " + artistcount + " " + artistdesc + " " + self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_MATCHING') +" '" + query.value +"'",
                     "availableListViews": [
                         "list",
                         "grid"
@@ -1401,13 +1399,11 @@ ControllerMpd.prototype.search = function (query) {
 
 		if(values[1])
 		{
-			var albumdesc = "album";
-			if (albumcount > 1) albumdesc = "albums";
+			var albumdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ALBUM');
+			if (albumcount > 1) albumdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ALBUMS');
 		    var albList=
                 {
-//                "title": self.commandRouter.getI18nString('COMMON.SEARCH_ALBUM_SECTION'),
-//title description below will need getI18nString changed....
-					"title": "Found " + albumcount + " " + albumdesc + " matching '" + query.value +"'",
+					"title": self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_FOUND') + " " + albumcount + " " + albumdesc + " " + self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_MATCHING') + " '" + query.value +"'",
                     "availableListViews": [
                         "list",
                         "grid"
@@ -1416,26 +1412,22 @@ ControllerMpd.prototype.search = function (query) {
                 };
             albList.items=values[1];
 
-
 			list.push(albList);
 		}
 
 		if(values[2])
 		{
-			var trackdesc = "track";
-			if (trackcount > 1) trackdesc = "tracks";
+			var trackdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_TRACK');
+			if (trackcount > 1) var trackdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_TRACKS');;
 			var songList=
                 {
-//            "title": self.commandRouter.getI18nString('COMMON.SEARCH_SONG_SECTION'),
-//title description below will need getI18nString changed....
-					"title": "Found " + trackcount + " " + trackdesc + " matching '" + query.value +"'",
+					"title": self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_FOUND') + " " + trackcount + " " + trackdesc + " " + self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_MATCHING') + " '" + query.value +"'",
                     "availableListViews": [
                         "list"
                     ],
                     "items": []
                 };
             songList.items=values[2];
-
 
             list.push(songList);
         }
@@ -3079,7 +3071,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
         "navigation": {
             "lists": [
                 {
-                    "title": self.commandRouter.getI18nString('COMMON.ARTISTS') + " with '" + genreName + "' genre tracks",
+                    "title": self.commandRouter.getI18nString('COMMON.ARTISTS') + " " + self.commandRouter.getI18nString('COMMON.WITH') + " '" + genreName + "' " + self.commandRouter.getI18nString('COMMON.GENRE') + " " + self.commandRouter.getI18nString('COMMON.TRACKS'),
                     "icon": "fa icon",
                     "availableListViews": [
                         "list",
@@ -3088,7 +3080,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     "items": []
                 },
                 {
-                    "title": self.commandRouter.getI18nString('COMMON.ALBUMS') + " with '" + genreName + "' genre tracks",
+                    "title": self.commandRouter.getI18nString('COMMON.ALBUMS') + " " + self.commandRouter.getI18nString('COMMON.WITH') + " '" + genreName + "' " + self.commandRouter.getI18nString('COMMON.GENRE') + " " + self.commandRouter.getI18nString('COMMON.TRACKS'),
                     "icon": "fa icon",
                     "availableListViews": [
                         "list",
@@ -3097,7 +3089,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     "items": []
                 }
                 ,{
-                    "title": self.commandRouter.getI18nString('COMMON.TRACKS') + " - '" + genreName + "' genre",
+                    "title": self.commandRouter.getI18nString('COMMON.TRACKS') + " - '" + genreName + "' " + self.commandRouter.getI18nString('COMMON.GENRE'),
                     "icon": "fa icon",
                     "availableListViews": [
                         "list"
