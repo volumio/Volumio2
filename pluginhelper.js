@@ -431,7 +431,12 @@ function commit(package, arch) {
         }
         var user = stdout;
         if (user != "volumio"){
-            //execSync("/usr/bin/git request-pull origin gh-pages");
+            var repo = 'git remote -v | grep -m 1 \"(push)\" | sed -e \"s/.' +
+                '*github.com[:/]\(.*\)\.git.*/\1/\"';
+            var branch='git name-rev --name-only HEAD';
+            console.log("... creating pull request for branch: " + branch + " in "
+                        + repo);
+            execSync("open https://github.com/" + repo + "/pull/new/" + branch);
         }
     })
 }
