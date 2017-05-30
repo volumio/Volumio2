@@ -26,7 +26,7 @@ function CorePlayQueue(commandRouter, stateMachine) {
 	if (persistentqueue) {
 		fs.readJson('/data/queue', function (err, queue) {
 			if(err)
-				self.commandRouter.logger.info("Cannot read play queue form file");
+				self.commandRouter.logger.info("Cannot read play queue from file");
 			else
 			{
 				self.commandRouter.logger.info("Reloading queue from file");
