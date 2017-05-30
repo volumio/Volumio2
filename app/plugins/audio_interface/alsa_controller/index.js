@@ -339,7 +339,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].saveButton.data', dspoptions[w].name);
 					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , hidden:false, value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].content', dspconf);
-					if ((dspoptions[w].name == 'Subwoofer mode') && (dspoptions[w].value == '  2.0')) {
+					if ((dspoptions[w].name == 'Subwoofer mode') && (dspoptions[w].value == '  2.0' || dspoptions[w].value == '  Dual Stereo' || dspoptions[w].value == '  Dual Mono')) {
 						uiconf.sections[1].content[0].hidden = true;
 					}
 
