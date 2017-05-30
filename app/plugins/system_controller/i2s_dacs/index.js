@@ -511,7 +511,7 @@ ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
 						entries.forEach(function(str) {
 							str = str.split(/[^a-zA-Z0-9-]/)[0];     // take first word only (candidate overlay name)
 							if (dacdata.includes(str)) {      		// we found current dtoverlay name within .json database => is an i2s!
-								searchexp = new RegExp('dtoverlay=' + str + os.EOL);
+								searchexp = new RegExp('dtoverlay=' + str);
 							}  
 						});
 
