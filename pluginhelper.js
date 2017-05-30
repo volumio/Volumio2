@@ -570,9 +570,6 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
         plugins.categories[catIndex].plugins[plugIndex].details = answer.details;
         plugins.categories[catIndex].plugins[plugIndex].description = answer.description;
 
-        console.log(plugins.categories[catIndex].plugins[plugIndex].details + "\n");
-        console.log(plugins.categories[catIndex].plugins[plugIndex].description + "\n");
-
         fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
             arch + "/plugins.json", plugins);
 
@@ -591,7 +588,7 @@ function commit(package, arch) {
         "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
     execSync("/usr/bin/git commit -am \"updating plugin " + package.name + " " +
         package.version + "\"");
-    exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
+    /*exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
         if (error) {
             console.error('exec error: ${error}');
             return;
@@ -607,22 +604,9 @@ function commit(package, arch) {
             console.log("updating plugin packages:\n");
             execSync("/usr/bin/git push origin gh-pages");
         }
-    });
-    /* exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
-         if(error){
-             console.error('exec error: ${error}');
-             return;
-         }
-         var user = stdout;
-         if (user != "volumio"){
-             var repo = 'git remote -v | grep -m 1 \"(push)\" | sed -e \"s/.' +
-                 '*github.com[:/]\(.*\)\.git.*!/\1/\"';
-             var branch='git name-rev --name-only HEAD';
-             console.log("... creating pull request for branch: " + branch + " in "
-                         + repo);
-             execSync("open https://github.com/" + repo + "/pull/new/" + branch);*!/
-         }
-    })*/
+    });*/
+    console.log("\nCongratulations, your package has been committed and is " +
+        "ready to be uploaded!\n");
 }
 
 // ================================ START =====================================
