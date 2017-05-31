@@ -17,6 +17,8 @@ var variant = '';
 var device = '';
 
 module.exports = PluginManager;
+
+
 function PluginManager(ccommand, server) {
 	var self = this;
 
@@ -124,14 +126,27 @@ PluginManager.prototype.loadPlugin = function (folder) {
 			instance: pluginInstance
 		};
 
-		self.plugins.set(key, pluginData);
 
 		if (pluginInstance.onVolumioStart !== undefined){
+			var myPromise = pluginInstance.onVolumioStart();
+	
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onVolumioStart(): push an error message and disable plugin
+				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing init routine. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioStart: please update!");
+				self.disablePlugin (category,name);
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+			else
+				self.plugins.set(key, pluginData);  // not set if no promise, so can't be started/stopped
+		
 			defer.resolve();
-			return pluginInstance.onVolumioStart();
+			return myPromise;
 		}
-		else
+		else {
+			self.plugins.set(key, pluginData);
 			defer.resolve();
+		}
 
 	}
 	else
@@ -240,9 +255,20 @@ PluginManager.prototype.startPlugin = function (category, name) {
 		if(plugin.onStart!==undefined)
 		{
 		    self.logger.info("PLUGIN START: "+name);
+			var myPromise = plugin.onStart();
 			self.config.set(category + '.' + name + '.status', "STARTED");
+
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onStart(): push an error message and disable plugin
+				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onStart: please update!");
+				self.disableAndStopPlugin (category,name);
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+
 			defer.resolve();
-			return plugin.onStart();
+			return myPromise;
+
 		}
 		else
 		{
@@ -266,9 +292,20 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 		if(plugin.onStop!==undefined)
 		{
 			self.logger.info("PLUGIN STOP: "+name);
+			var myPromise = plugin.onStop();
 			self.config.set(category + '.' + name + '.status', "STOPPED");					
+			
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onStop(): push an error message and disable plugin
+				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing stop routine. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onStop: please update!");
+				self.disablePlugin (category,name);
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+			
 			defer.resolve();
-			return plugin.onStop();
+			return myPromise;
+			
 		}
 		else
 		{
@@ -405,7 +442,7 @@ PluginManager.prototype.onVolumioShutdown = function () {
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin = value.instance;
-			if (plugin.onVolumioShutdown != undefined)
+			if (plugin.onVolumioShutdown !== undefined)
 				plugin.onVolumioShutdown();
 		}
 	});
@@ -417,7 +454,7 @@ PluginManager.prototype.onVolumioReboot = function () {
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin = value.instance;
-			if (plugin.onVolumioReboot != undefined)
+			if (plugin.onVolumioReboot !== undefined)
 				plugin.onVolumioReboot();
 		}
 	});
