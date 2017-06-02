@@ -1287,8 +1287,7 @@ function InterfaceWebUI(context) {
 						var installed = self.commandRouter.getInstalledPlugins();
 						if (installed != undefined) {
 							installed.then(function (installedPLugins) {
-								self.logger.info(JSON.stringify(installedPLugins));
-								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+								self.broadcastMessage('pushInstalledPlugins',installedPLugins);
 							});
 						}
 						var available = self.commandRouter.getAvailablePlugins();
