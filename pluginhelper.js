@@ -14,31 +14,65 @@ function init() {
     console.log("Creating a new plugin");
 
     if(!fs.existsSync("/home/volumio/volumio-plugins")){
-        console.log("volumio plugins folder non existent, cloning repo:\n" +
-            "git clone https://github.com/volumio/volumio-plugins.git");
-        execSync("/usr/bin/git clone https://github.com/volumio/volumio-plugins.git " +
-            "/home/volumio/volumio-plugins")
+        var question = [
+            {
+                type: 'input',
+                name: 'user',
+                message: 'volumio plugins folder non existent, please type ' +
+                'your github username'
+            }
+        ];
+        inquirer.prompt(question).then(function (answer) {
+            var name = answer.user;
+            console.log("cloning repo:\ngit clone https://github.com/" + name +
+                "/volumio-plugins.git");
+            try {
+                execSync("/usr/bin/git clone https://github.com/" + name +
+                    "/volumio-plugins.git /home/volumio/volumio-plugins");
+                console.log("Done, please run command again");
+                process.exit(1);
+            }catch(e){
+                console.log("Unable to find repo, are you sure you forked it?")
+                process.exit(1);
+            }
+        });
     }
+    else {
+        process.chdir("/home/volumio/volumio-plugins");
+        exec("git config --get remote.origin.url", function (error, stdout, stderr) {
+            if (error) {
+                console.error('exec error: ${error}');
+                process.exit(1);
+            }
+            var url = stdout;
+            if (url == "https://github.com/volumio/volumio-plugins.git\n") {
+                console.log("Error, your repo is the original one, please " +
+                    "fork it as suggested in the documentation!");
+                process.exit(1);
+            }
+            else {
+                var categories = [
+                    "audio_interface",
+                    "miscellanea",
+                    "music_service",
+                    "system_controller",
+                    "user_interface"
+                ];
 
-    var categories = [
-        "audio_interface",
-        "miscellanea",
-        "music_service",
-        "system_controller",
-        "user_interface"
-    ];
+                var questions = [
+                    {
+                        type: 'rawlist',
+                        name: 'category',
+                        message: 'Please select the Plugin Category',
+                        choices: categories
+                    }];
 
-    var questions = [
-        {
-            type: 'rawlist',
-            name: 'category',
-            message: 'Please select the Plugin Category',
-            choices: categories
-        }];
-
-    inquirer.prompt(questions).then(function (answer) {
-        ask_user(categories, answer);
-    });
+                inquirer.prompt(questions).then(function (answer) {
+                    ask_user(categories, answer);
+                });
+            }
+        });
+    }
 }
 
 /**
