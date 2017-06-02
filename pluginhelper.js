@@ -504,10 +504,10 @@ function write_new_plugin(package, arch, plugins, index) {
             type: 'input',
             name: 'details',
             message: 'Insert some details about your plugin (e.g. features, ' +
-            'requirements, notes, etc... max 100 chars)',
+            'requirements, notes, etc... max 1000 chars)',
             default: "",
             validate: function (desc) {
-                if(desc.length > 100){
+                if(desc.length > 1000){
                     return "please be brief";
                 }
                 return true;
@@ -556,10 +556,7 @@ function write_new_category(package, arch, plugins, index){
     data.description = "";
     data.plugins = [];
 
-    //data.plugins.push(write_new_plugin(package, arch));
     plugins.categories.push(data);
-    //fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-    //    arch + "/plugins.json", plugins);
     write_new_plugin(package, arch, plugins, index);
 }
 
@@ -619,14 +616,15 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
  */
 function commit(package, arch) {
     execSync("/usr/bin/git add " + process.cwd() + "/plugins/volumio/" + arch +
-        "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
+       "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
     execSync("/usr/bin/git commit -am \"updating plugin " + package.name + " " +
         package.version + "\"");
     console.log("updating plugin sources:\n");
     execSync("/usr/bin/git push origin master");
     console.log("updating plugin packages:\n");
     execSync("/usr/bin/git push origin gh-pages");
-    console.log("Congratulations, your package has been correctly uploaded!")
+    console.log("Congratulations, your package has been correctly uploaded and" +
+        "is ready for merging!")
 }
 
 // ================================ START =====================================
