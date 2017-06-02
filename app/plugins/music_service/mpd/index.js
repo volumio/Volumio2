@@ -1322,8 +1322,9 @@ ControllerMpd.prototype.search = function (query) {
                         var path = line.slice(5).trimLeft();
                         var album = self.searchFor(lines, i + 1, 'Album:');
                         var artist = self.searchFor	(lines, i + 1, 'AlbumArtist:');
+
 						//********Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
-						if (albumsfound.indexOf(album + artist) <0 ) { // Album/Artist is not in 'albumsfound' array
+						if (album != undefined && artist != undefined && albumsfound.indexOf(album + artist) <0 ) { // Album/Artist is not in 'albumsfound' array
 							albumcount ++;
 							albumsfound.push(album + artist);
 							subList.push({
@@ -1392,15 +1393,16 @@ ControllerMpd.prototype.search = function (query) {
     });
 
     libQ.all(deferArray).then(function(values){
+    	console.log(JSON.stringify(values))
         var list = [];
 
 		if(values[0])
 		{
-			var artistdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ARTIST');
-			if (artistcount > 1) artistdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ARTISTS');
+			var artistdesc = self.commandRouter.getI18nString('COMMON.ARTIST');
+			if (artistcount > 1) artistdesc = self.commandRouter.getI18nString('COMMON.ARTISTS');
 			list=[
                 {
-					"title": self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_FOUND') + " " + artistcount + " " + artistdesc + " " + self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_MATCHING') +" '" + query.value +"'",
+					"title": self.commandRouter.getI18nString('COMMON.FOUND') + " " + artistcount + " " + artistdesc + " '" + query.value +"'",
                     "availableListViews": [
                         "list",
                         "grid"
@@ -1413,11 +1415,11 @@ ControllerMpd.prototype.search = function (query) {
 
 		if(values[1])
 		{
-			var albumdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ALBUM');
-			if (albumcount > 1) albumdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_ALBUMS');
+			var albumdesc = self.commandRouter.getI18nString('COMMON.ALBUM');
+			if (albumcount > 1) albumdesc = self.commandRouter.getI18nString('COMMON.ALBUMS');
 		    var albList=
                 {
-					"title": self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_FOUND') + " " + albumcount + " " + albumdesc + " " + self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_MATCHING') + " '" + query.value +"'",
+					"title": self.commandRouter.getI18nString('COMMON.FOUND') + " " + albumcount + " " + albumdesc + " '" + query.value +"'",
                     "availableListViews": [
                         "list",
                         "grid"
@@ -1431,11 +1433,11 @@ ControllerMpd.prototype.search = function (query) {
 
 		if(values[2])
 		{
-			var trackdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_TRACK');
-			if (trackcount > 1) var trackdesc = self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_TRACKS');;
+			var trackdesc = self.commandRouter.getI18nString('COMMON.TRACK');
+			if (trackcount > 1) var trackdesc = self.commandRouter.getI18nString('COMMON.TRACKS');;
 			var songList=
                 {
-					"title": self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_FOUND') + " " + trackcount + " " + trackdesc + " " + self.commandRouter.getI18nString('COMMON.SEARCH_SECTION_MATCHING') + " '" + query.value +"'",
+					"title": self.commandRouter.getI18nString('COMMON.FOUND') + " " + trackcount + " " + trackdesc + " '" + query.value +"'",
                     "availableListViews": [
                         "list"
                     ],
@@ -3345,7 +3347,7 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
     tracknumbers = data.tracknumbers;
     compilation = data.compilation.split(',');
     artistsort = data.artistsort.value;
-	
+
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.MUSIC_LIBRARY_SETTINGS'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'));
 }
 
