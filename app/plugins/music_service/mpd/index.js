@@ -14,7 +14,7 @@ var os = require('os');
 var execSync = require('child_process').execSync;
 var ignoreupdate = false;
 //tracknumbers variable below adds track numbers to titles if set to true. Set to false for normal behavour.
-var tracknumbers = true;
+var tracknumbers = false;
 //compilation array below adds different strings used to describe albumartist in compilations or 'multiple artist' albums
 var compilation = ['Various','various','Various Artists','various artists','VA','va'];
 //atistsort variable below will list artists by albumartist if set to true or artist if set to false
@@ -624,6 +624,8 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
 
 	self.config.loadFile(configFile);
+
+
 	pidof('mpd', function (err, pid) {
 		if (err) {
 			self.logger.info('Cannot initialize  MPD Connection: MPD is not running');
@@ -3320,3 +3322,30 @@ ControllerMpd.prototype.ffwdRew=function(millisecs){
     });
     return defer.promise;
 };
+
+ControllerMpd.prototype.loadLibrarySettings=function(){
+    var self = this;
+
+    var tracknumbersConf = this.config.get('tracknumbers', false);
+    var compilationConf = this.config.get('compilation', 'Various,various,Various Artists,various artists,VA,va')
+    var artistsortConf = this.config.get('artistsort', true);
+
+    tracknumbers = tracknumbersConf;
+    compilation = compilationConf.split(',');
+    artistsort = artistsort;
+}
+
+ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
+	var self = this;
+
+	self.config.set('tracknumbers', data.tracknumbers);
+    self.config.set('compilation', data.compilation)
+    self.config.set('artistsort', data.artistsort.value);
+
+    tracknumbers = data.tracknumbers;
+    compilation = data.compilation.split(',');
+    artistsort = data.artistsort.value;
+	
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.MUSIC_LIBRARY_SETTINGS'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'));
+}
+

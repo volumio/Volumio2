@@ -180,7 +180,16 @@
 	"MEDIUM":"Medium",
 	"LARGE":"Large",
 	"EXTRALARGE":"Extra-large",
-	"MEGA":"Mega"
+	"MEGA":"Mega",
+    "MUSIC_LIBRARY_SETTINGS":"Music Library Settings",
+    "SHOW_TRACKNUMBERS":"Show Track numbers",
+    "SHOW_TRACKNUMBERS_DOC":"Prepend track numbers to tracks title",
+    "ARTIST_SORTING":"Sort artists by",
+    "ARTIST_SORTING_DOC":"Choose the metadata used to sort artists",
+    "ALBUMARTIST":"Albumartist",
+    "ARTIST":"Artist",
+    "COMPILATION_METADATA_DOC":"Configure the metadata fields used to describe albumartist in compilations or 'multiple artist' albums, use comma separated fields",
+    "COMPILATION_METADATA":"Compilation metadata fields"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",
