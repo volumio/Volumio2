@@ -83,15 +83,19 @@ AirPlayInterface.prototype.setAdditionalConf = function () {
 };
 
 AirPlayInterface.prototype.startShairportSync = function () {
+    var self = this;
     // Loading Configured output device
     var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
-    if (outdev != 'softvolume' ) {
-        if (outdev.indexOf(',') >= 0) {
-            outdev = 'plughw:'+outdev;
-        } else {
-            outdev = 'plughw:'+outdev+',0';
-        }
+    if (outdev == 'softvolume' ) {
+        outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
     }
+    if (outdev.indexOf(',') >= 0) {
+        outdev = 'plughw:'+outdev;
+    } else {
+        outdev = 'plughw:'+outdev+',0';
+    }
+
+
     var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
     var name = this.commandRouter.sharedVars.get('system.name');
 
@@ -250,3 +254,7 @@ AirPlayInterface.prototype.unsetVol = function () {
 
 };
 
+AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
+    var self = this;
+    return self.context.coreCommand.executeOnPlugin(type, controller, 'getConfigParam', data);
+};
