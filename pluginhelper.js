@@ -622,25 +622,11 @@ function commit(package, arch) {
         "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
     execSync("/usr/bin/git commit -am \"updating plugin " + package.name + " " +
         package.version + "\"");
-    /*exec("/usr/bin/git config user.name", function (error, stdout, stderr) {
-        if (error) {
-            console.error('exec error: ${error}');
-            return;
-        }
-        var user = stdout;
-        if (user != "volumio") {
-            console.log("\nYour package has been committed and is ready to be " +
-                "uploaded!\n");
-        }
-        else{
-            console.log("updating plugin sources:\n");
-            execSync("/usr/bin/git push origin master");
-            console.log("updating plugin packages:\n");
-            execSync("/usr/bin/git push origin gh-pages");
-        }
-    });*/
-    console.log("\nCongratulations, your package has been committed and is " +
-        "ready to be uploaded!\n");
+    console.log("updating plugin sources:\n");
+    execSync("/usr/bin/git push origin master");
+    console.log("updating plugin packages:\n");
+    execSync("/usr/bin/git push origin gh-pages");
+    console.log("Congratulations, your package has been correctly uploaded!")
 }
 
 // ================================ START =====================================
