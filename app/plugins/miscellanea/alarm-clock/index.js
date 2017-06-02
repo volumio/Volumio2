@@ -120,8 +120,7 @@ AlarmClock.prototype.clearJobs = function () {
 
 AlarmClock.prototype.applyConf = function(conf) {
 	var self = this;
-
-	console.log(conf)
+	
 	for (var i in conf) {
 		var item = conf[i];
 		var d = new Date(item.time);
