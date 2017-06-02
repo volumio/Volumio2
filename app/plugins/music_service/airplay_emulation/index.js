@@ -2,8 +2,10 @@
 
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var config = new (require('v-conf'))();
 var libQ = require('kew');
+var ShairportReader = require('shairport-sync-reader');
 
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;
@@ -13,6 +15,22 @@ function AirPlayInterface(context) {
 	// Save a reference to the parent commandRouter
 	this.context = context;
 	this.commandRouter = this.context.coreCommand;
+
+    this.obj={
+        status: 'play',
+        service:'airplay',
+        title: '',
+        artist: '',
+        album: '',
+        albumart: '/albumart',
+        uri: '',
+        trackType: 'airplay',
+        seek: 0,
+        duration: 0,
+        samplerate: '',
+        bitdepth: '',
+        channels: 2
+    };
 
 }
 
@@ -106,6 +124,7 @@ function startAirPlay(self) {
 		}
 		else {
 			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
+            self.startAirplayMeta();
 		}
 	});
 }
@@ -125,3 +144,116 @@ AirPlayInterface.prototype.playerNameCallback = function () {
 	self.startShairportSync()
 }
 
+AirPlayInterface.prototype.startAirplayMeta = function () {
+    var self = this;
+    var pipeReader = new ShairportReader({ path: '/tmp/shairport-sync-metadata' });
+
+	// Play begin
+    pipeReader.on('pbeg', function(data) {
+        self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
+        self.context.coreCommand.pushConsoleMessage("Airplay started streaming");
+
+        self.obj.status='play';
+        self.obj.title="";
+        self.obj.artist="";
+        self.obj.album="";
+        self.obj.seek=0;
+        self.obj.duration=0;
+        self.obj.albumart="/albumart";
+
+        self.context.coreCommand.stateMachine.setVolatile({
+            service:"airplay",
+            callback: self.airPlayStop.bind(self)
+        });
+
+	})
+
+    pipeReader.on('meta', function(meta) {
+
+        if (meta.asaa != undefined && meta.asaa.length > 0) {
+            self.obj.artist=meta.asaa;
+        }
+
+        if (meta.minm != undefined && meta.minm.length > 0) {
+            self.obj.title=meta.minm;
+        }
+
+        if (meta.asar != undefined && meta.asar.length > 0) {
+            self.obj.artist=meta.asar;
+        }
+
+        if (meta.asal != undefined && meta.asal.length > 0) {
+            self.obj.album=meta.asal;
+        }
+
+        if (meta.assr != undefined && meta.assr.length > 0) {
+            self.obj.samplerate=meta.assr;
+            self.obj.bitdepth=16;
+        } else {
+            self.obj.samplerate=44100;
+            self.obj.bitdepth=16;
+		}
+
+        self.obj.albumart=self.getAlbumArt({artist:self.obj.artist,album: self.obj.album},'');
+
+        self.pushAirplayMeta();
+
+    })
+
+    pipeReader.on('prgr', function(meta) {
+
+        var duration = Math.round(parseFloat((meta.end-meta.start)/self.obj.samplerate));
+		var seek = Math.round(parseFloat((meta.current-meta.start)/self.obj.samplerate));
+
+        self.obj.duration= duration;
+        self.obj.seek = seek;
+        self.pushAirplayMeta();
+    })
+
+
+}
+
+AirPlayInterface.prototype.pushAirplayMeta = function () {
+    var self = this;
+
+    self.context.coreCommand.servicePushState(self.obj, 'airplay');
+}
+
+AirPlayInterface.prototype.getAlbumArt = function (data, path,icon) {
+    var self = this;
+
+    if(this.albumArtPlugin==undefined)
+    {
+        //initialization, skipped from second call
+        this.albumArtPlugin=  self.context.coreCommand.pluginManager.getPlugin('miscellanea', 'albumart');
+    }
+
+    if(this.albumArtPlugin)
+        return this.albumArtPlugin.getAlbumArt(data,path,icon);
+    else
+    {
+        return "/albumart";
+    }
+};
+
+AirPlayInterface.prototype.airPlayStop = function () {
+    var self = this;
+
+    self.obj={
+        status: 'play',
+        service:'airplay',
+        title: '',
+        artist: '',
+        album: '',
+        albumart: '/albumart',
+        uri: '',
+        trackType: 'airplay',
+        seek: 0,
+        duration: 0,
+        samplerate: '',
+        bitdepth: '',
+        channels: 2
+    };
+
+    self.pushAirplayMeta();
+};
