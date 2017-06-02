@@ -120,6 +120,8 @@ AlarmClock.prototype.clearJobs = function () {
 
 AlarmClock.prototype.applyConf = function(conf) {
 	var self = this;
+
+	console.log(conf)
 	for (var i in conf) {
 		var item = conf[i];
 		var d = new Date(item.time);
@@ -130,12 +132,16 @@ AlarmClock.prototype.applyConf = function(conf) {
 		rule.minute = d.getMinutes();
 		rule.hour = d.getHours();
 
+		if (item.enabled) {
+
 		var func = self.fireAlarm.bind(self);
 		var j = schedule.scheduleJob(rule, function(){
 		  func(item);
 		});
+
 		self.logger.info("Alarm: Scheduling " + j.name + " at " +rule.hour + ":" + rule.minute) ;
 		self.jobs.push(j);
+        }
 	}
 }
 
