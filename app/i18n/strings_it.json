@@ -176,7 +176,16 @@
 	  "MEDIUM":"Medie",
 	  "LARGE":"Grandi",
 	  "EXTRALARGE":"Molto grandi",
-	  "MEGA":"Enormi"
+	  "MEGA":"Enormi",
+    "MUSIC_LIBRARY_SETTINGS":"Impostazioni della libreria musicale",
+    "SHOW_TRACKNUMBERS":"Mostra numero traccia",
+    "SHOW_TRACKNUMBERS_DOC":"Mostra il numero della traccia prima del titolo",
+    "ARTIST_SORTING":"Ordina artisti per",
+    "ARTIST_SORTING_DOC":"Scegli il metadata usato per ordinare gli artisti",
+    "ALBUMARTIST":"Albumartist",
+    "ARTIST":"Artist",
+    "COMPILATION_METADATA_DOC":"Configura i campi di metadati utilizzati per identificare le raccolte o gli album di artisti vari, utilizza valori separati da virgole",
+    "COMPILATION_METADATA":"Metadati per artisti vari"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"La Mia Musica",
