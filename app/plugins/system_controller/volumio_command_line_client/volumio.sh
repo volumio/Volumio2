@@ -120,6 +120,9 @@ case "$1" in
         startairplay)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=startAirplay"
         ;;
+        stopairplay)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
+        ;;
         start)
             start
             ;;

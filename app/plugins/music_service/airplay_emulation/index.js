@@ -12,9 +12,9 @@ module.exports = AirPlayInterface;
 
 
 function AirPlayInterface(context) {
-	// Save a reference to the parent commandRouter
-	this.context = context;
-	this.commandRouter = this.context.coreCommand;
+    // Save a reference to the parent commandRouter
+    this.context = context;
+    this.commandRouter = this.context.coreCommand;
 
     this.obj={
         status: 'play',
@@ -35,12 +35,12 @@ function AirPlayInterface(context) {
 }
 
 AirPlayInterface.prototype.onVolumioStart = function () {
-	var self = this;
-	this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
-	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
-	this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
-	
-	self.startShairportSync();
+    var self = this;
+    this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
+    this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+    this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
+
+    self.startShairportSync();
     return libQ.resolve();
 };
 
@@ -83,72 +83,72 @@ AirPlayInterface.prototype.setAdditionalConf = function () {
 };
 
 AirPlayInterface.prototype.startShairportSync = function () {
-	// Loading Configured output device
-	var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
-	if (outdev != 'softvolume' ) {
+    // Loading Configured output device
+    var outdev = this.commandRouter.sharedVars.get('alsa.outputdevice');
+    if (outdev != 'softvolume' ) {
         if (outdev.indexOf(',') >= 0) {
             outdev = 'plughw:'+outdev;
         } else {
             outdev = 'plughw:'+outdev+',0';
         }
-	}
-	var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
-	var name = this.commandRouter.sharedVars.get('system.name');
+    }
+    var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
+    var name = this.commandRouter.sharedVars.get('system.name');
 
 
-	var fs = require('fs');
+    var fs = require('fs');
 
-	var self = this;
-	fs.readFile(__dirname + "/shairport-sync.conf.tmpl", 'utf8', function (err, data) {
-		if (err) {
-			return console.log(err);
-		}
+    var self = this;
+    fs.readFile(__dirname + "/shairport-sync.conf.tmpl", 'utf8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
 
-		var conf = data;
-		conf = conf.replace("${name}", name);
-		conf = conf.replace("${device}", outdev);
-		conf = conf.replace("${mixer}", mixer);
+        var conf = data;
+        conf = conf.replace("${name}", name);
+        conf = conf.replace("${device}", outdev);
+        conf = conf.replace("${mixer}", mixer);
 
 
-		fs.writeFile("/etc/shairport-sync.conf", conf, 'utf8', function (err) {
-			if (err) return console.log(err);
-			startAirPlay(self);
-		});
-	});
+        fs.writeFile("/etc/shairport-sync.conf", conf, 'utf8', function (err) {
+            if (err) return console.log(err);
+            startAirPlay(self);
+        });
+    });
 };
 
 function startAirPlay(self) {
-	exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
-		if (error !== null) {
-			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-sync error: ' + error);
-		}
-		else {
-			self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
+    exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-sync error: ' + error);
+        }
+        else {
+            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
             self.startAirplayMeta();
-		}
-	});
+        }
+    });
 }
 
 AirPlayInterface.prototype.outputDeviceCallback = function () {
-	var self = this;
+    var self = this;
 
-	self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting Shairport Sync');
-	self.startShairportSync()
+    self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting Shairport Sync');
+    self.startShairportSync()
 }
 
 
 AirPlayInterface.prototype.playerNameCallback = function () {
-	var self = this;
+    var self = this;
 
-	self.context.coreCommand.pushConsoleMessage('System name has changed, restarting Shairport Sync');
-	self.startShairportSync()
+    self.context.coreCommand.pushConsoleMessage('System name has changed, restarting Shairport Sync');
+    self.startShairportSync()
 }
 
 AirPlayInterface.prototype.startAirplayMeta = function () {
     var self = this;
     var pipeReader = new ShairportReader({ path: '/tmp/shairport-sync-metadata' });
 
-	// Play begin
+    // Play begin
     pipeReader.on('pbeg', function(data) {
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
         self.context.coreCommand.pushConsoleMessage("Airplay started streaming");
@@ -163,10 +163,10 @@ AirPlayInterface.prototype.startAirplayMeta = function () {
 
         self.context.coreCommand.stateMachine.setVolatile({
             service:"airplay",
-            callback: self.airPlayStop.bind(self)
+            callback: self.unsetVol.bind(self)
         });
 
-	})
+    })
 
     pipeReader.on('meta', function(meta) {
 
@@ -187,12 +187,12 @@ AirPlayInterface.prototype.startAirplayMeta = function () {
         }
 
         if (meta.assr != undefined && meta.assr.length > 0) {
-            self.obj.samplerate=meta.assr;
-            self.obj.bitdepth=16;
+            self.obj.samplerate=meta.assr/1000+' KHz';
+            self.obj.bitdepth='16 bit';
         } else {
-            self.obj.samplerate=44100;
-            self.obj.bitdepth=16;
-		}
+            self.obj.samplerate='44.1 KHz';
+            self.obj.bitdepth='16 bit';
+        }
 
         self.obj.albumart=self.getAlbumArt({artist:self.obj.artist,album: self.obj.album},'');
 
@@ -202,8 +202,9 @@ AirPlayInterface.prototype.startAirplayMeta = function () {
 
     pipeReader.on('prgr', function(meta) {
 
-        var duration = Math.round(parseFloat((meta.end-meta.start)/self.obj.samplerate));
-		var seek = Math.round(parseFloat((meta.current-meta.start)/self.obj.samplerate));
+        var samplerate = (self.obj.samplerate.replace(' KHz', '')*1000);
+        var duration = Math.round(parseFloat((meta.end-meta.start)/samplerate));
+        var seek = Math.round(parseFloat((meta.current-meta.start)/samplerate));
 
         self.obj.duration= duration;
         self.obj.seek = seek;
@@ -238,22 +239,14 @@ AirPlayInterface.prototype.getAlbumArt = function (data, path,icon) {
 
 AirPlayInterface.prototype.airPlayStop = function () {
     var self = this;
+    self.context.coreCommand.stateMachine.unSetVolatile();
+    self.context.coreCommand.stateMachine.resetVolumioState().then(
+        self.context.coreCommand.volumioStop.bind(self.commandRouter));
 
-    self.obj={
-        status: 'play',
-        service:'airplay',
-        title: '',
-        artist: '',
-        album: '',
-        albumart: '/albumart',
-        uri: '',
-        trackType: 'airplay',
-        seek: 0,
-        duration: 0,
-        samplerate: '',
-        bitdepth: '',
-        channels: 2
-    };
-
-    self.pushAirplayMeta();
 };
+
+AirPlayInterface.prototype.unsetVol = function () {
+    var self = this;
+
+};
+
