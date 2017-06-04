@@ -455,7 +455,7 @@ CoreCommandRouter.prototype.initPlayerControls = function () {
 
 			try {
 				var config = JSON.parse(data.toString());
-				self.stateMachine.setRepeat(config.repeat, config.repeatSingle);
+				self.stateMachine.setRepeat(config.repeat);
 				self.stateMachine.setRandom(config.random);
 			} catch(e) {
 				var state = self.stateMachine.getState();
