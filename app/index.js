@@ -419,6 +419,59 @@ CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	return thisPlugin.getUIConfig(data);
 };
 
+CoreCommandRouter.prototype.writePlayerControls = function (config) {
+	var self = this;
+	var pCtrlFile = '/data/playerstate/playback-controls.json';
+
+	this.pushConsoleMessage('CoreCommandRouter::writePlayerControls');
+
+	var state = self.stateMachine.getState();
+
+	var data = Object.assign({
+		random: state.random,
+		repeat: state.repeat
+	}, config);
+
+	fs.writeFile(pCtrlFile, JSON.stringify(data, null, 4), function (err) {
+		if (err) self.pushConsoleMessage('Failed setting player state in CoreCommandRouter::initPlayerState');
+	});
+};
+
+CoreCommandRouter.prototype.initPlayerControls = function () {
+	var pCtrlFile = '/data/playerstate/playback-controls.json';
+	var self = this;
+
+	this.pushConsoleMessage('CoreCommandRouter::initPlayerControls');
+
+	function handleError() {
+		self.pushConsoleMessage('Failed setting player state in CoreCommandRouter::initPlayerControls');
+	}
+
+	fs.ensureFile(pCtrlFile, function (err) {
+		if (err) handleError();
+
+		fs.readFile(pCtrlFile, function (err, data) {
+			if (err) handleError();
+
+			try {
+				var config = JSON.parse(data.toString());
+				self.stateMachine.setRepeat(config.repeat, config.repeatSingle);
+				self.stateMachine.setRandom(config.random);
+			} catch(e) {
+				var state = self.stateMachine.getState();
+				var config = {
+					random: state.random,
+					repeat: state.repeat
+				};
+
+				fs.writeFile(pCtrlFile, JSON.stringify(config, null, 4), function (err) {
+					if (err) handleError();
+				});
+			}
+		});
+	});
+};
+
 /* what is this?
  CoreCommandRouter.prototype.getConfiguration=function(componentCode)
  {
@@ -707,11 +760,21 @@ CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
 
 CoreCommandRouter.prototype.volumioRandom = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+
+	this.writePlayerControls({
+		random: data
+	});
+
 	return this.stateMachine.setRandom(data);
 };
 
 CoreCommandRouter.prototype.volumioRepeat = function (data) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+	this.pushConsoleMessage('CoreCommandRouter::volumioRepeat');
+
+	this.writePlayerControls({
+		repeat: repeat
+	});
+
 	return this.stateMachine.setRepeat(data);
 };
 
