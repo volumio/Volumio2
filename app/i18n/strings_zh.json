@@ -24,7 +24,11 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"已经启用, 重新启动生效",
     "I2S_DAC_DEACTIVATED":"禁用I2S DAC",
     "I2S_DAC_DEACTIVATED_MESSAGE":"已经禁用, 重新启动生效",
-	"DOP":"DSD over PCM (DoP)"
+	  "DOP":"DSD over PCM (DoP)",
+    "SOFTVOL":"软件控制",
+    "MIXER_CONTROL_NAME":"调节控制名e",
+    "MIXER_TYPE":"调节类型",
+    "SOFTWARE":"软件控制"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"网络设定",
@@ -40,6 +44,9 @@
     "WIRELESS_RESTART_TITLE": "重新启用无线网络",
     "WIRELESS_RESTART_ERROR": "重启无线网络发生错误: ",
     "WIRELESS_RESTART_SUCCESS": "成功重启无线网络"
+  },
+  "NETWORKFS":{
+    "ALIAS_DOC":"选择一个别名显示在NAS的挂载点中"
   },
   "PLAYLIST":{
   "ADDED_TITLE":"已添加",
@@ -75,7 +82,19 @@
     "ILLEGAL_CHARACTER_/":"删除禁用的字符 /",
     "FAVOURITES":"收藏夹",
     "PLAYLISTS":"播放列表",
-    "MUSIC_LIBRARY":"音乐库"
+    "MUSIC_LIBRARY":"音乐库",
+    "ARTISTS":"艺术家",
+    "ARTIST":"艺术家",
+    "ALBUMS":"专辑",
+    "ALBUM":"专辑",
+    "GENRES":"音乐题材",
+    "TRACKS":"曲目",
+    "CANCEL":"取消",
+    "NONE":"无",
+    "LAST_100":"last 100",
+    "CONTINUE":"继续",
+    "SETTINGS_SAVED_SUCCESSFULLY":"保存设置成功",
+    "SETTINGS_SAVE_ERROR":"保存设置时发生错误"
   },
   "APPEARANCE":{
     "APPEARANCE":"外观",
@@ -127,7 +146,9 @@
     "SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"系统配置成功更新",
     "SYSTEM_NAME":"系统名称",
     "SYSTEM_NAME_ERROR":"无法更改系统名称",
-    "SYSTEM_NAME_NOW":"系统名称已更改"
+    "SYSTEM_NAME_NOW":"系统名称已更改",
+    "UPDATE_ALREADY_LATEST_VERSION":"您的设备已经是最新版本。",
+	  "NO_UPDATE_AVAILABLE":"无法升级"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"我的网络电台",

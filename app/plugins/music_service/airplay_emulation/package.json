@@ -10,6 +10,6 @@
   "license": "ISC",
   "volumio_info":{
     "plugin_type": "music_service",
-    "boot_priority":2
+    "boot_priority":10
   }
 }

@@ -3,6 +3,7 @@
 var net = require('net');
 var libQ = require('kew');
 var libFast = require('fast.js');
+var okay_response = 'OK\n';
 
 // MPD info
 var mpdPort = 6500;
@@ -136,22 +137,24 @@ function InterfaceMPD( context) {
 			// add new incoming data to our buffer
 			buffer += data.toString();
 			// check if we have a complete line
-			lineIndex = buffer.indexOf('\n');
+			while(true)
+			{
+				lineIndex = buffer.indexOf('\n');
 
-			if (lineIndex === -1) {
-				return; // our buffer has received no full line yet
-			}
+				if (lineIndex === -1) {
+					return; // our buffer has received no full line yet
+				}
 
-			var results;
-			// while we still have a complete line in our buffer (os.EOL == end of line (\r\n))
-			while (results = buffer.split(/\r?\n/)) {
-				// get 1 line from our buffer to process
-				var message = results[0];
-				// Handle message elsewhere (keep it clean)
-				self.handleMessage(message, client);
-
-				buffer = buffer.substring(lineIndex + 1); // Cuts off the processed line
-				break;
+				var results;
+				// while we still have a complete line in our buffer (os.EOL == end of line (\r\n))
+				while (results = buffer.split(/\r?\n/)) {
+					// get 1 line from our buffer to process
+					var message = results[0];
+					// Handle message elsewhere (keep it clean)
+					self.handleMessage(message, client);
+					buffer = buffer.substring(lineIndex + 1); // Cuts off the processed line
+					break;
+				}
 			}
 		});
 	}).listen(mpdPort, mpdAddress); // start server
@@ -191,13 +194,24 @@ InterfaceMPD.prototype.handleMessage = function(message, socket) {
 	}
 
 	// self.commRouter.pushConsoleMessage('Incoming command: ' + sCommand + '\nParam: '+sParam);
-
-	var handler = self.commandHandlers[sCommand];
-	if (handler)
-		handler(sCommand, sParam, socket);
-	else
-		self.commRouter.pushConsoleMessage('default');
-
+	if(sCommand == 'command_list_begin'){
+		okay_response = '';
+	}
+	else if(sCommand == 'command_list_ok_begin'){
+		okay_response = 'list_OK\n';
+		socket.write(okay_response);
+	}
+	else if(sCommand == 'command_list_end'){
+		okay_response = 'OK\n';
+		socket.write(okay_response);
+	}
+	else {
+		var handler = self.commandHandlers[sCommand];
+		if (handler)
+			handler.call(self, sCommand, sParam, socket);
+		else
+			self.commRouter.pushConsoleMessage('default');
+	}
 };
 
 InterfaceMPD.prototype.logDone = function(timeStart) {
@@ -218,127 +232,127 @@ InterfaceMPD.prototype.logStart = function(sCommand) {
 // Handler for command: ADD
 InterfaceMPD.prototype.handleAdd = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: ADDID
 InterfaceMPD.prototype.handleAddid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: ADDTAGID
 InterfaceMPD.prototype.handleAddtagid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CHANNELS
 InterfaceMPD.prototype.handleChannels = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CLEAR
 InterfaceMPD.prototype.handleClear = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CLEARERROR
 InterfaceMPD.prototype.handleClearerror = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CLEARTAGID
 InterfaceMPD.prototype.handleCleartagid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CLOSE
 InterfaceMPD.prototype.handleClose = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: COMMANDS
 InterfaceMPD.prototype.handleCommands = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CONFIG
 InterfaceMPD.prototype.handleConfig = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CONSUME
 InterfaceMPD.prototype.handleConsume = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: COUNT
 InterfaceMPD.prototype.handleCount = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CROSSFADE
 InterfaceMPD.prototype.handleCrossfade = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: CURRENTSONG
 InterfaceMPD.prototype.handleCurrentsong = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: DECODERS
 InterfaceMPD.prototype.handleDecoders = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: DELETE
 InterfaceMPD.prototype.handleDelete = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: DELETEID
 InterfaceMPD.prototype.handleDeleteid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: DISABLEOUTPUT
 InterfaceMPD.prototype.handleDisableoutput = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: ENABLEOUTPUT
 InterfaceMPD.prototype.handleEnableoutput = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: FIND
 InterfaceMPD.prototype.handleFind = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: FINDADD
 InterfaceMPD.prototype.handleFindadd = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: IDLE
@@ -349,19 +363,19 @@ InterfaceMPD.prototype.handleIdle = function(sCommand, sParam, client) {
 	self.idles.push(client);
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: KILL
 InterfaceMPD.prototype.handleKill = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LIST
 InterfaceMPD.prototype.handleList = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LISTALL
@@ -377,7 +391,7 @@ InterfaceMPD.prototype.handleListall = function(sCommand, sParam, client) {
 	.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
 	.done(function() {
 		// Respond with default 'OK'
-		client.write('OK\n');
+		client.write(okay_response);
 		return self.logDone(timeStart);
 	});
 };
@@ -385,79 +399,79 @@ InterfaceMPD.prototype.handleListall = function(sCommand, sParam, client) {
 // Handler for command: LISTALLINFO
 InterfaceMPD.prototype.handleListallinfo = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LISTFILES
 InterfaceMPD.prototype.handleListfiles = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LISTMOUNTS
 InterfaceMPD.prototype.handleListmounts = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LISTPLAYLIST
 InterfaceMPD.prototype.handleListplaylist = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LISTPLAYLISTINFO
 InterfaceMPD.prototype.handleListplaylistinfo = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LISTPLAYLISTS
 InterfaceMPD.prototype.handleListplaylists = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LOAD
 InterfaceMPD.prototype.handleLoad = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: LSINFO
 InterfaceMPD.prototype.handleLsinfo = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: MIXRAMPDB
 InterfaceMPD.prototype.handleMixrampdb = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: MIXRAMPDELAY
 InterfaceMPD.prototype.handleMixrampdelay = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: MOUNT
 InterfaceMPD.prototype.handleMount = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: MOVE
 InterfaceMPD.prototype.handleMove = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: MOVEID
 InterfaceMPD.prototype.handleMoveid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: NEXT
@@ -473,13 +487,13 @@ InterfaceMPD.prototype.handleNext = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: NOTCOMMANDS
 InterfaceMPD.prototype.handleNotcommands = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: OUTPUTS
@@ -488,16 +502,16 @@ InterfaceMPD.prototype.handleOutputs = function(sCommand, sParam, client) {
 	client.write('outputid: 0\n');
 	client.write('outputname: Default\n');
 	client.write('outputenabled: 1\n');
-	client.write('OK\n');
+	client.write(okay_response);
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PASSWORD
 InterfaceMPD.prototype.handlePassword = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PAUSE
@@ -514,13 +528,13 @@ InterfaceMPD.prototype.handlePause = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PING
 InterfaceMPD.prototype.handlePing = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAY
@@ -529,21 +543,28 @@ InterfaceMPD.prototype.handlePlay = function(sCommand, sParam, client) {
 	var timeStart = Date.now();
 
 	// Send play command to CommandRouter
-	self.logStart('Client requests Volumio play' )
-	.then(libFast.bind(self.commRouter.volumioPlay, self.commRouter))
+	self.logStart('Client requests Volumio play')
+	.then(libFast.bind(self.commRouter.volumioGetState, self.commRouter))
+	// Forward state to pushState function
+	.then(function(state) {
+		if(state.status == 'play')
+			self.commRouter.volumioPause.call(self.commRouter);
+		else
+			self.commRouter.volumioPlay.call(self.commRouter);
+	})
 	.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
 	.done(function() {
 		return self.logDone(timeStart);
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYID
 InterfaceMPD.prototype.handlePlayid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLIST
@@ -567,31 +588,31 @@ InterfaceMPD.prototype.handlePlaylist = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTADD
 InterfaceMPD.prototype.handlePlaylistadd = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTCLEAR
 InterfaceMPD.prototype.handlePlaylistclear = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTDELETE
 InterfaceMPD.prototype.handlePlaylistdelete = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTFIND
 InterfaceMPD.prototype.handlePlaylistfind = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTID
@@ -600,37 +621,37 @@ InterfaceMPD.prototype.handlePlaylistid = function(sCommand, sParam, client) {
 	client.write('ACK [50@0] {playlistid} No such song\n');
 
 	// Respond with default 'OK'
-	// client.write('OK\n');
+	// client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTINFO
 InterfaceMPD.prototype.handlePlaylistinfo = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTMOVE
 InterfaceMPD.prototype.handlePlaylistmove = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLAYLISTSEARCH
 InterfaceMPD.prototype.handlePlaylistsearch = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLCHANGES
 InterfaceMPD.prototype.handlePlchanges = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PLCHANGESPOSID
 InterfaceMPD.prototype.handlePlchangesposid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PREVIOUS
@@ -647,145 +668,145 @@ InterfaceMPD.prototype.handlePrevious = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PRIO
 InterfaceMPD.prototype.handlePrio = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: PRIOID
 InterfaceMPD.prototype.handlePrioid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: RANDOM
 InterfaceMPD.prototype.handleRandom = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: RANGEID
 InterfaceMPD.prototype.handleRangeid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: READCOMMENTS
 InterfaceMPD.prototype.handleReadcomments = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: READMESSAGES
 InterfaceMPD.prototype.handleReadmessages = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: RENAME
 InterfaceMPD.prototype.handleRename = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: REPEAT
 InterfaceMPD.prototype.handleRepeat = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: REPLAY_GAIN_MODE
 InterfaceMPD.prototype.handleReplay_gain_mode = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: REPLAY_GAIN_STATUS
 InterfaceMPD.prototype.handleReplay_gain_status = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: RESCAN
 InterfaceMPD.prototype.handleRescan = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: RM
 InterfaceMPD.prototype.handleRm = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SAVE
 InterfaceMPD.prototype.handleSave = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SEARCH
 InterfaceMPD.prototype.handleSearch = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SEARCHADD
 InterfaceMPD.prototype.handleSearchadd = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SEARCHADDPL
 InterfaceMPD.prototype.handleSearchaddpl = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SEEK
 InterfaceMPD.prototype.handleSeek = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SEEKCUR
 InterfaceMPD.prototype.handleSeekcur = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SEEKID
 InterfaceMPD.prototype.handleSeekid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SENDMESSAGE
 InterfaceMPD.prototype.handleSendmessage = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SETVOL
 InterfaceMPD.prototype.handleSetvol = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SHUFFLE
 InterfaceMPD.prototype.handleShuffle = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SINGLE
 InterfaceMPD.prototype.handleSingle = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: STATS
@@ -801,7 +822,7 @@ InterfaceMPD.prototype.handleStats = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: STATUS
@@ -822,7 +843,7 @@ InterfaceMPD.prototype.handleStatus = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: STOP
@@ -839,25 +860,25 @@ InterfaceMPD.prototype.handleStop = function(sCommand, sParam, client) {
 	});
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SUBSCRIBE
 InterfaceMPD.prototype.handleSubscribe = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SWAP
 InterfaceMPD.prototype.handleSwap = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: SWAPID
 InterfaceMPD.prototype.handleSwapid = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: TAGTYPES
@@ -866,31 +887,31 @@ InterfaceMPD.prototype.handleTagtypes = function(sCommand, sParam, client) {
 
 	client.write(self.helper.printTagTypes());
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: TOGGLEOUTPUT
 InterfaceMPD.prototype.handleToggleoutput = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: UNMOUNT
 InterfaceMPD.prototype.handleUnmount = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: UNSUBSCRIBE
 InterfaceMPD.prototype.handleUnsubscribe = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: UPDATE
 InterfaceMPD.prototype.handleUpdate = function(sCommand, sParam, client) {
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
 // Handler for command: URLHANDLERS
@@ -909,13 +930,31 @@ InterfaceMPD.prototype.handleUrlhandlers = function(sCommand, sParam, client) {
 	client.write('handler: rtmps://\n');
 
 	// Respond with default 'OK'
-	client.write('OK\n');
+	client.write(okay_response);
 };
 
-// Handler for command: VOLUME
+// Handler for command: VOLUME (volume is incremental, implement 'setvol' for absolute volume)
 InterfaceMPD.prototype.handleVolume = function(sCommand, sParam, client) {
-	// Respond with default 'OK'
-	client.write('OK\n');
+	var self = this;
+	var timeStart = Date.now();
+
+	var vol = parseInt(sParam.substring(1, sParam.length-1));
+
+	self.logStart('Client requests Volume ' + vol)
+	.then(libFast.bind(self.commRouter.volumioGetState, self.commRouter))
+	.then(function (state) {
+		var newvolume = state.volume + vol;
+		if(newvolume > 100)
+			newvolume = 100;
+		if(newvolume < 0)
+			newvolume = 0;
+		return self.commRouter.volumiosetvolume.call(self.commRouter, newvolume);
+	})
+	.fail(libFast.bind(self.commRouter.pushConsoleMessage, self.commRouter))
+	.done(function () {
+		return self.logDone(timeStart);
+	});
+	client.write(okay_response);
 };
 
 // COMMAND HANDLERS END

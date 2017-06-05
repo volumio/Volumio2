@@ -6,6 +6,7 @@ var config = new (require('v-conf'))();
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
 var crypto = require('crypto');
+var calltrials = 0;
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -39,6 +40,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
 
+    this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
 	self.deviceDetect();
@@ -383,11 +385,27 @@ ControllerSystem.prototype.setTestSystem = function (data) {
 
 
 ControllerSystem.prototype.sendBugReport = function (message) {
-    for (var key in message) {
-        console.log("BUG: " + key + " - " + message[key]);
-        fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
-    }
-    exec('sudo systemctl start logondemand');
+	var self = this;
+
+	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
+		message.text = 'No info available';
+	}
+	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
+	exec('/usr/local/bin/node /volumio/logsubmit.js "'+ message.text+'"', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			self.logger.info('Canot send bug report: ' + error);
+		} else {
+			self.logger.info('Log sent successfully, reply: '+stdout);
+			//if (stdout != undefined && stdout.status != undefined && stdout.status == 'OK' && stdout.link != undefined ) {
+				return self.commandRouter.broadcastMessage('pushSendBugReport', stdout);
+			//}
+
+
+
+
+		}
+	});
+
 };
 
 ControllerSystem.prototype.deleteUserData = function () {
@@ -471,7 +489,13 @@ ControllerSystem.prototype.callHome = function () {
 			function (error, stdout, stderr) {
 
 				if (error !== null) {
-					self.logger.info('Cannot call home: '+error);
+					if (calltrials < 3) {
+					setTimeout(function () {
+						self.logger.info('Cannot call home: '+error+ ' retrying in 5 seconds, trial '+calltrials);
+						calltrials++
+						self.callHome();
+					}, 10000);
+					}
 				}
 				else self.logger.info('Volumio called home');
 
@@ -501,5 +525,21 @@ ControllerSystem.prototype.enableSSH = function (data) {
             self.logger.info(action+ ' SSH service success');
         }
     });
+}
+
+ControllerSystem.prototype.checkPassword = function (data) {
+	var self = this;
+	var defer = libQ.defer();
+
+	var currentpass = self.config.get('system_password', 'volumio');
+
+	if (data.password === currentpass) {
+		defer.resolve(true);
+	} else {
+		defer.resolve(false)
+	}
+
+
+	return defer.promise;
 }
 

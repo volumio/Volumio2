@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<script src="./assets/clipboard.min.js"></script>
 		<title><%= title %></title>
 		<style>
 			#div-console {
@@ -47,7 +48,7 @@
 
 		<h3>Test Mode</h3>
 		<button id='button-testtrue' class='control-websocket' disabled>TRUE</button>
-		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>		
+		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>
 
 
 
@@ -68,13 +69,24 @@
 			<input type='submit' value='Upload!' />
 		</form>
 
+		<h3>Send Log or bug report</h3>
+		<span id="log-message"></span>
+		<form class="bug-form">
+			<input id="bug-form-description" type="text" placeholder="Describe what you were doing/why you are sending the report." style="border: 1px solid black; width: 600px;"/>
+			<button id="bug-form-button" type="bug-form-submit">Send</button>
+			<button class="btn" id="copy-button" type="button" data-clipboard-demo data-clipboard-target="#bug-form-description" style="display:none">
+				Copy to clipboard
+			</button>
+		</form>
+
 		<h3>Console</h3>
 			<button id='button-clearconsole'>Clear</button>
 			<div id='div-console' style='border: 1px solid black; height: 400px; overflow-y: scroll;'>
 				<ul id='console' style='font-family: monospace;'></ul>
 			</div>
 
-		<script src="./socket.io-1.2.0.js"></script>
+		<script src="./assets/socket.io-1.2.0.js"></script>
 		<script src="./dev.js"></script>
+
 	</body>
 </html>

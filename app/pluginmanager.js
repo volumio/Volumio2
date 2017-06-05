@@ -225,6 +225,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
 	{
 		if(plugin.onStart!==undefined)
 		{
+		    console.log("PLUGIN START: "+name);
 			var deferStart=plugin.onStart();
 			deferStart.then(function(){
 				self.config.set(category + '.' + name + '.status', "STARTED");
@@ -251,10 +252,8 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	if(plugin!==undefined)
 	{
 		var deferStart=plugin.onStop();
-		deferStart.then(function(){
-			self.config.set(category + '.' + name + '.status', "STOPPED");
+		self.config.set(category + '.' + name + '.status', "STOPPED");
 			defer.resolve();
-		})
 	} else defer.resolve();
 
 
@@ -313,14 +312,83 @@ PluginManager.prototype.getPluginNames = function (category) {
 	return names;
 };
 
+/**
+ * returns an array of plugin's names, given their category
+ * @param category
+ * @returns {Array}
+ */
+PluginManager.prototype.getAllPlugNames = function (category) {
+	var self = this;
+
+	var plugFile = fs.readJsonSync(('/data/configuration/plugins.json'), 'utf-8', {throws: false});
+	var plugins = [];
+	for (var i in plugFile){
+		if (i == category){
+			for (var j in plugFile[i]){
+				plugins.push(j);
+			}
+		}
+	}
+	return plugins;
+}
+
+/**
+ * Returns an array of plugins with status, sorted by category
+ * @returns {Array}
+ */
+PluginManager.prototype.getPluginsMatrix = function () {
+	var self = this;
+
+	//plugins = [{"cat": "", "plugs": []}]
+	var plugins = [];
+	var catNames = self.getPluginCategories();
+	for (var i = 0; i < catNames.length; i++){
+		var cName = catNames[i];
+		var plugNames = self.getAllPlugNames(catNames[i]);
+		//catPlugin = [{"plug": "", "enabled": ""}]
+		var catPlugin = [];
+		for (var j = 0; j < plugNames.length; j++){
+			var name = plugNames[j];
+			var enabled = self.isEnabled(catNames[i], plugNames[j]);
+			catPlugin.push({name, enabled});
+		}
+		plugins.push({cName, catPlugin});
+	}
+	return plugins;
+}
+
 PluginManager.prototype.onVolumioStart = function () {
 	var self = this;
 
 	self.plugins.forEach(function (value, key) {
 		var plugin = value.instance;
-
+		
 		if (plugin.onVolumioStart != undefined)
 			plugin.onVolumioStart();
+	});
+};
+
+PluginManager.prototype.onVolumioShutdown = function () {
+	var self = this;
+
+	self.plugins.forEach(function (value, key) {
+		if (self.isEnabled(value.category, value.name)) {
+			var plugin = value.instance;
+			if (plugin.onVolumioShutdown != undefined)
+				plugin.onVolumioShutdown();
+		}
+	});
+};
+
+PluginManager.prototype.onVolumioReboot = function () {
+	var self = this;
+
+	self.plugins.forEach(function (value, key) {
+		if (self.isEnabled(value.category, value.name)) {
+			var plugin = value.instance;
+			if (plugin.onVolumioReboot != undefined)
+				plugin.onVolumioReboot();
+		}
 	});
 };
 
@@ -378,7 +446,7 @@ PluginManager.prototype.installPlugin = function (url) {
 	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
 
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip "+url, function (error, stdout, stderr) {
+	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
 
 		if (error !== null) {
 			currentMessage = "Cannot download file "+url+ ' - ' + error;
@@ -472,11 +540,11 @@ PluginManager.prototype.installPlugin = function (url) {
 					self.tempCleanup();
 				})
 				.fail(function (e) {
-					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
+					currentMessage = 'The following error occurred when installing the plugin: ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The folowing error occurred when installing the plugin: ' + e,
+						'message': 'The following error occurred when installing the plugin: ' + e,
 						'title' : modaltitle+' Error',
 						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
 						'advancedLog': advancedlog
@@ -499,7 +567,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 	var url = data.url;
 	var category = data.category;
 	var name = data.name;
-	console.log(data);
+
 	var currentMessage = 'Downloading from'+url;
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
@@ -507,7 +575,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading Update','title' : modaltitle, 'advancedLog': advancedlog});
 
 
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip "+url, function (error, stdout, stderr) {
+	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
 
 		if (error !== null) {
 			currentMessage = "Cannot download file "+url+ ' - ' + error;
@@ -598,11 +666,11 @@ PluginManager.prototype.updatePlugin = function (data) {
 					self.enablePlugin(category,name);
 				})
 				.fail(function (e) {
-					currentMessage = 'The folowing error occurred when installing the plugin: ' + e;
+					currentMessage = 'The following error occurred when installing the plugin: ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The folowing error occurred when installing the plugin: ' + e,
+						'message': 'The following error occurred when installing the plugin: ' + e,
 						'title' : modaltitle+' Error',
 						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
 						'advancedLog': advancedlog
@@ -635,7 +703,7 @@ PluginManager.prototype.rmDir = function (folder) {
 
 	var defer=libQ.defer();
 	fs.remove('/tmp/downloaded_plugin', function (err) {
-		if (err) defere.reject(new Error("Cannot delete folder "+folder));
+		if (err) defer.reject(new Error("Cannot delete folder "+folder));
 
 		self.logger.info("Folder "+folder+" removed");
 		defer.resolve(folder);
@@ -773,10 +841,8 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 		else {
 			self.logger.info("Executing install.sh");
-			exec(installScript+' > /tmp/installog', {uid:1000, gid:1000},function(error, stdout, stderr) {
+			exec('echo volumio | sudo -S sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
 				if (error!==undefined && error!==null) {
-					console.log(stdout);
-					console.log(stderr);
 					self.logger.info("Install script return the error "+error);
 					defer.reject(new Error());
 				} else {
@@ -788,6 +854,36 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 	});
 	return defer.promise;
+}
+
+PluginManager.prototype.executeUninstallationScript = function (category,name) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info("Checking if uninstall.sh is present");
+    var installScript='/data/plugins/'+category+'/'+name+'/uninstall.sh';
+    fs.stat(installScript,function(err,stat){
+        if(err)
+        {
+            self.logger.info("Check return the error "+err);
+            defer.reject(new Error());
+        }
+        else {
+            self.logger.info("Executing uninstall.sh");
+            exec('echo volumio | sudo -S sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
+                if (error!==undefined && error!==null) {
+
+                    self.logger.info("Uninstall script return the error "+error);
+                    defer.reject(new Error());
+                } else {
+                    self.logger.info("Uninstall script completed");
+                    defer.resolve('');
+                }
+            });
+
+        }
+    });
+    return defer.promise;
 }
 
 
@@ -878,7 +974,6 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
 	var defer=libQ.defer();
 
 	var key=category+'.'+name;
-	console.log(key);
 	var modaltitle= 'Uninstalling Plugin '+name;
 	if(self.config.has(key))
 	{
@@ -895,6 +990,12 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
 				self.pushMessage('installPluginStatus',{'progress': 60, 'message': 'Plugin disabled', 'title' : modaltitle});
 				return e;
 			}).
+            then(self.executeUninstallationScript.bind(self,category,name))
+            .then(function(e)
+            {
+                self.pushMessage('installPluginStatus',{'progress': 70, 'message': 'Plugin dependencies removed', 'title' : modaltitle});
+                return e;
+            }).
 			then(self.removePluginFromConfiguration.bind(self,category,name))
 			.then(function(e)
 			{
@@ -971,7 +1072,7 @@ PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
 	var isEnabled=self.config.get(key+'.enabled');
 
 	if(isEnabled==false)
-		defere.reject(new Error());
+		defer.reject(new Error());
 	else
 	{
 		self.logger.info("Changing plugin "+name+" status to "+status);

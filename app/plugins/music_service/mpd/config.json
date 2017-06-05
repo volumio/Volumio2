@@ -13,11 +13,11 @@
   },
   "buffer_before_play":{
     "type": "string",
-    "value": "20%"
+    "value": "10%"
   },
   "dop": {
 	"type": "boolean",
-	"value": true
+	"value": false
   },
   "auto_update":{
     "type": "boolean",

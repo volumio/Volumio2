@@ -21,12 +21,12 @@ ExamplePlugin.prototype.onVolumioStart = function () {
 
 ExamplePlugin.prototype.onStop = function () {
 	var self = this;
-	//Perform startup tasks here
+	//Perform stop tasks here
 };
 
 ExamplePlugin.prototype.onRestart = function () {
 	var self = this;
-	//Perform startup tasks here
+	//Perform restart tasks here
 };
 
 ExamplePlugin.prototype.onInstall = function () {
@@ -36,7 +36,7 @@ ExamplePlugin.prototype.onInstall = function () {
 
 ExamplePlugin.prototype.onUninstall = function () {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your deinstallation tasks here
 };
 
 ExamplePlugin.prototype.getUIConfig = function () {
@@ -47,36 +47,36 @@ ExamplePlugin.prototype.getUIConfig = function () {
 
 ExamplePlugin.prototype.setUIConfig = function (data) {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your UI configuration tasks here
 };
 
 ExamplePlugin.prototype.getConf = function (varName) {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your tasks to fetch config data here
 };
 
 ExamplePlugin.prototype.setConf = function (varName, varValue) {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your tasks to set config data here
 };
 
 //Optional functions exposed for making development easier and more clear
 ExamplePlugin.prototype.getSystemConf = function (pluginName, varName) {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your tasks to fetch system config data here
 };
 
 ExamplePlugin.prototype.setSystemConf = function (pluginName, varName) {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your tasks to set system config data here
 };
 
 ExamplePlugin.prototype.getAdditionalConf = function () {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your tasks to fetch additional config data here
 };
 
 ExamplePlugin.prototype.setAdditionalConf = function () {
 	var self = this;
-	//Perform your installation tasks here
+	//Perform your tasks to set additional config data here
 };

@@ -38,6 +38,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
     this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
     self.createThumbnailPath();
 
+    return libQ.resolve();
 };
 
 volumioAppearance.prototype.onStart = function() {
@@ -117,8 +118,8 @@ volumioAppearance.prototype.getUIConfig = function () {
 
     var defer=libQ.defer();
     self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+config.get('language_code')+'.json',
-                                __dirname+'/../../../i18n/strings_en.json',
-                                __dirname + '/UIConfig.json')
+        __dirname+'/../../../i18n/strings_en.json',
+        __dirname + '/UIConfig.json')
         .then(function(uiconf)
         {
             var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
@@ -148,7 +149,7 @@ volumioAppearance.prototype.getUIConfig = function () {
 
 
     /*var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
-    */
+     */
     return defer.promise;
 };
 
@@ -160,14 +161,15 @@ volumioAppearance.prototype.getUiSettings = function()
     var language = config.get('language_code');
     var theme = config.get('theme');
     var background_type = config.get('background_type');
+    var metatitle = config.get('metatitle', 'Volumio - Audiophile Music Player');
 
     if (background_type === 'background') {
         var background_title = config.get('background_title');
         var background_path = config.get('background_path');
-        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme}
+        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme, "pageTitle":metatitle}
     } else {
         var background_color = config.get('background_color');
-        var UiSettings = {"color":background_color, "language":language, "theme":theme}
+        var UiSettings = {"color":background_color, "language":language, "theme":theme, "pageTitle":metatitle}
     }
 
     defer.resolve(UiSettings);
@@ -187,7 +189,7 @@ volumioAppearance.prototype.getBackgrounds = function()
         }
         files.forEach(function(f) {
             if (f.indexOf("thumbnail-") < 0) {
-            backgroundsArray.push({"name":f.split('.')[0].capitalize(),"path":f,"thumbnail":"thumbnail-"+f});
+                backgroundsArray.push({"name":f.split('.')[0].capitalize(),"path":f,"thumbnail":"thumbnail-"+f});
             }
         });
         var background_title = config.get('background_title');
@@ -221,30 +223,30 @@ volumioAppearance.prototype.generateThumbnails = function(){
             if (f.indexOf("thumbnail-") >= 0) {
             } else  {
 
-            //console.log('Processing file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
-            try {
-                fs.accessSync(backgroundPath+'/thumbnail-'+f, fs.F_OK);
-                //console.log('Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f+ ' exists');
-            } catch (e) {
-                console.log('Creating Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
-                lwip.open(backgroundPath+'/'+f, function(err, image) {
-                    if (err) return console.log(err);
-                    image.resize(300, 200 , function(err, imageres) {
+                //console.log('Processing file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
+                try {
+                    fs.accessSync(backgroundPath+'/thumbnail-'+f, fs.F_OK);
+                    //console.log('Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f+ ' exists');
+                } catch (e) {
+                    console.log('Creating Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
+                    lwip.open(backgroundPath+'/'+f, function(err, image) {
                         if (err) return console.log(err);
-                        imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
+                        image.resize(300, 200 , function(err, imageres) {
                             if (err) return console.log(err);
+                            imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
+                                if (err) return console.log(err);
+                            });
                         });
                     });
-                });
-            }
+                }
 
 
             }
             if (numberfile===files.length){
-				var background = config.get('background_title')
-				if (background === 'Initial') {
-						self.selectRandomBacground();
-				}
+                var background = config.get('background_title')
+                if (background === 'Initial') {
+                    self.selectRandomBacground();
+                }
                 defer.resolve('Ok');
             }
         });
@@ -256,19 +258,19 @@ volumioAppearance.prototype.generateThumbnails = function(){
 volumioAppearance.prototype.createThumbnailPath = function() {
     var self=this;
 
-	try {
-		fs.statSync(backgroundPath);
-	} catch(e) {
-		fs.mkdirSync(backgroundPath);
-	}
-        fs.copy(__dirname+'/backgrounds', backgroundPath, function (err) {
-            if (err) {
-                console.error(err);
-            } else {
-                self.generateThumbnails();
-                console.log("success!");
-            }
-        });
+    try {
+        fs.statSync(backgroundPath);
+    } catch(e) {
+        fs.mkdirSync(backgroundPath);
+    }
+    fs.copy(__dirname+'/backgrounds', backgroundPath, function (err) {
+        if (err) {
+            console.error(err);
+        } else {
+            self.generateThumbnails();
+            console.log("success!");
+        }
+    });
 
 }
 
@@ -283,11 +285,19 @@ volumioAppearance.prototype.setBackgrounds = function(data)
     } else {
         config.set('background_type', 'background');
         config.set('background_title', data.name);
-        config.set('background_path', data.path);
+        config.set('background_path', data.path.substring(data.path.lastIndexOf("/") + 1));
     }
 
     self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
         self.commandRouter.getI18nString('APPEARANCE.NEW_BACKGROUND_APPLIED'));
+    var data = self.getUiSettings();
+
+    if (data != undefined) {
+        data.then(function (settings) {
+            console.log(settings)
+            self.commandRouter.broadcastMessage('pushUiSettings', settings);
+        });
+    }
 
     return ('Done');
 };
@@ -295,8 +305,8 @@ volumioAppearance.prototype.setBackgrounds = function(data)
 volumioAppearance.prototype.setLanguage = function(data)
 {
     var self = this;
-    var defer = libQ.defer();   
-    
+    var defer = libQ.defer();
+
 
     if (data.language) {
         config.set('language', data.language.label);
@@ -334,8 +344,8 @@ volumioAppearance.prototype.deleteBackgrounds = function(data)
             var backgrounds = self.getBackgrounds();
             if (backgrounds != undefined) {
                 backgrounds.then(function (data) {
-                  defer.resolve(data);
-            });
+                    defer.resolve(data);
+                });
             }
         });
     }
@@ -404,4 +414,7 @@ volumioAppearance.prototype.getAvailableLanguages = function() {
 }
 
 
-
+volumioAppearance.prototype.getConfigParam = function (key) {
+    var self = this;
+    return config.get(key);
+};
