@@ -397,6 +397,8 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 
 // Define a method to clear, add, and play an array of tracks
 ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
+
+	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+track)
     var self = this;
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerWebradio::clearAddPlayTrack');
 
@@ -653,6 +655,8 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
             var song = {
                 service: 'webradio',
                 type: 'mywebradio',
+				artist: '',
+				album: '',
                 title: ithdata.name,
                 uri: ithdata.uri,
                 icon: 'fa fa-microphone'
@@ -751,10 +755,16 @@ ControllerWebradio.prototype.search = function (query) {
     memoryCache.wrap(uri, function (cacheCallback) {
         var promise=libQ.defer();
 
-        unirest.get(uri)
-            .end(function(xml)
+        var request= unirest.get(uri);
+
+        request.timeout(1500);
+        request.end(function(xml)
             {
-                if(xml.ok)
+                if(xml.error)
+                {
+                    promise.resolve(xml);
+                }
+                else if(xml.ok)
                 {
                     memoryCache.set(uri,xml);
                     promise.resolve(xml);

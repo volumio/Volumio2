@@ -38,6 +38,7 @@
           "element": "",
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ENABLE_I2S_DAC",
           "label": "",
+          "hidden": true,
           "value": false
         },
         {
@@ -61,6 +62,27 @@
 
       ]
     },
+	{
+	  "id": "dac_dsp_options",
+	  "element": "section",
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS",
+	  "doc":"TRANSLATE.PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS_DOC",
+	  "icon": "fa-microchip",
+	  "hidden": true,
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveDSPOptions"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+
+		]
+	  },
+	  "value":  {
+		"value": "",
+		"label": ""
+	  },
+	  "content": [
+	  ]
+	},
     {
       "id": "playback_options",
       "element": "section",
@@ -73,14 +95,15 @@
           "dop",
           "volume_normalization",
           "audio_buffer_size",
-          "buffer_before_play"
+          "buffer_before_play",
+		  "persistent_queue"
         ]
       },
       "content": [
         {
           "id": "dop",
           "element": "switch",
-          "doc": "DSD Over PCM",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.DOP_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP",
           "value":false
         },
@@ -89,7 +112,7 @@
         {
           "id": "volume_normalization",
           "element": "switch",
-          "doc":"If turned On Volumio will normalize the volume of tracks as they play. Default is Off.",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION",
           "value":false
         },
@@ -97,7 +120,7 @@
         {
           "id": "audio_buffer_size",
           "element": "select",
-          "doc":"This specifies the size of the audio buffer. The default is 2 MB, large enough for nearly 12 seconds of CD-quality audio.",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.AUDIO_BUFFER_SIZE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_BUFFER_SIZE",
           "value":  {
             "value":8192,
@@ -131,7 +154,7 @@
         {
           "id": "buffer_before_play",
           "element": "select",
-          "doc": "This specifies how much of the audio buffer should be filled before playing a track. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size.",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.BUFFER_BEFORE_PLAY_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.BUFFER_BEFORE_PLAY",
           "value":  {
             "value":"20%",
@@ -156,7 +179,14 @@
             }
           ]
 
-        }
+        },
+		{
+		  "id": "persistent_queue",
+		  "element": "switch",
+		  "doc":"TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE_DOC",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE",
+		  "value":true
+		}
       ]
     },
     {
@@ -168,19 +198,35 @@
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
+          "mixer_type",
           "mixer",
           "volumestart",
           "volumemax",
           "volumesteps",
-          "volumecurvemode"
+          "volumecurvemode",
+          "mpdvolume"
         ]
       },
       "content": [
         {
-          "id": "",
+          "id": "mixer_type",
           "element": "select",
-          "doc" : "Mixer Selector ",
-          "label": "",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_TYPE_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_TYPE",
+          "value":  {
+            "value":"",
+            "label": ""
+          },
+          "options": [
+
+          ]
+
+        },
+        {
+          "id": "mixer",
+          "element": "select",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
             "value":"",
             "label": ""
@@ -193,7 +239,7 @@
         {
           "id": "volumestart",
           "element": "select",
-          "doc" : "This is the default volume that is set at system startup.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME",
           "value":  {
             "value":"disabled",
@@ -251,7 +297,7 @@
         {
           "id": "volumemax",
           "element": "select",
-          "doc" : "This is the maximum volume of the system.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL",
           "value":  {
             "value":"100",
@@ -304,7 +350,7 @@
         {
           "id": "volumesteps",
           "element": "select",
-          "doc" : "This is the maximum volume of the system.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS",
           "value":  {
             "value":"10",
@@ -342,7 +388,7 @@
         {
           "id": "volumecurvemode",
           "element": "select",
-          "doc" : "This is the volume curve used by the system, most DACs will use a logarithmic curve.",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE",
           "value":  {
             "value":"logarithmic",
@@ -359,9 +405,157 @@
             }
           ]
 
+        },
+        {
+          "id": "mpdvolume",
+          "element": "switch",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME",
+          "value":false
         }
 
       ]
-    }
+    },
+	{
+	  "id": "advanced_twaaks",
+	  "element": "section",	
+	  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+	  "icon": "fa-tachometer",
+	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveResamplingOpts"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+		  "resampling",
+		  "resampling_target_bitdepth",
+		  "resampling_target_samplerate",
+		  "resampling_quality"
+		]
+	  },
+	  "content": [
+		{
+		  "id": "resampling",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+		  "value": false
+		},
+		{
+		  "id": "resampling_target_bitdepth",
+		  "element": "select",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.TARGET_BITDEPTH",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.TARGET_BITDEPTH",
+		  "value":  {
+			"value":"*",
+			"label": "TRANSLATE.PLAYBACK_OPTIONS.NATIVE"
+		  },
+		  "visibleIf": {
+			"field": "resampling",
+			"value": true
+		  },
+		  "options": [
+			{
+			  "value":"*",
+			  "label": "Native"
+			},
+			{
+			  "value":"16",
+			  "label": "16"
+			},
+			{
+			  "value":"24",
+			  "label": "24"
+			},
+			{
+			  "value":"32",
+			  "label": "32"
+			}
+		  ]
+
+		},
+		{
+		  "id": "resampling_target_samplerate",
+		  "element": "select",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.TARGET_SAMPLERATE",
+		  "label": "TRANSLATE.PLAYBACK_OPTIONS.TARGET_SAMPLERATE",
+		  "value":  {
+			"value":"*",
+			"label": "TRANSLATE.PLAYBACK_OPTIONS.NATIVE"
+		  },
+		  "visibleIf": {
+			"field": "resampling",
+			"value": true
+		  },
+		  "options": [
+			{
+			  "value":"*",
+			  "label": "Native"
+			},
+			{
+			  "value":"44100",
+			  "label": "44.1 kHz"
+			},
+			{
+			  "value":"48000",
+			  "label": "48 kHz"
+			},
+			{
+			  "value":"88200",
+			  "label": "88,2 kHz"
+			},
+			{
+			  "value":"96000",
+			  "label": "96 kHz"
+			},
+			{
+			  "value":"176400",
+			  "label": "176,4 kHz"
+			},
+			{
+			  "value":"192000",
+			  "label": "192 kHz"
+			},
+			{
+			  "value":"352800",
+			  "label": "352,8 kHz"
+			}
+		  ]
+
+		},
+        {
+          "id": "resampling_quality",
+          "element": "select",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.RESAMPLING_ALG_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.RESAMPLING_ALG",
+          "value":  {
+            "value":"high",
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.HIGH"
+          },
+          "visibleIf": {
+            "field": "resampling",
+            "value": true
+          },
+          "options": [
+            {
+              "value":"very high",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.VERY_HIGH"
+            },
+            {
+              "value":"high",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.HIGH"
+            },
+            {
+              "value":"medium",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.MEDIUM"
+            },
+            {
+              "value":"low",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.LOW"
+            }
+          ]
+
+        }
+
+	  ]
+	}
   ]
 }

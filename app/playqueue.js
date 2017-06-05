@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var execSync = require('child_process').execSync;
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
@@ -17,16 +18,30 @@ function CorePlayQueue(commandRouter, stateMachine) {
     this.defaultChannels=0;
 
     //trying to read play queue from file
-    fs.readJson('/data/queue', function (err, queue) {
-        if(err)
-            self.commandRouter.logger.info("Cannot read play queue form file");
-        else
-        {
-            self.commandRouter.logger.info("Reloading queue from file");
-            //self.commandRouter.logger.info(queue);
-            self.arrayQueue=queue;
-        }
-    })
+	var persistentqueue = this.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'persistent_queue');
+	if (persistentqueue == undefined) {
+		persistentqueue = true;
+	}
+
+	if (persistentqueue) {
+		fs.readJson('/data/queue', function (err, queue) {
+			if(err)
+				self.commandRouter.logger.info("Cannot read play queue from file");
+			else
+			{
+				self.commandRouter.logger.info("Reloading queue from file");
+				//self.commandRouter.logger.info(queue);
+				self.arrayQueue=queue;
+			}
+		})
+	} else {
+		exec('echo "" > /data/queue', function (error, stdout, stderr) {
+			if (error !== null) {
+				console.log('Cannot empty queue');
+			}
+		});
+	}
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -43,7 +58,12 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
 	// jpa hack workaround for now....
 	var goodIndex = Math.min(this.arrayQueue.length - 1, nStartIndex);
-	var sTargetService = this.arrayQueue[goodIndex].service;
+    if (this.arrayQueue[goodIndex]) {
+        var sTargetService = this.arrayQueue[goodIndex].service;
+    } else {
+        return {service: 'mpd', uris: '', startindex: ''};
+    }
+
 	var nEndIndex = goodIndex;
 	var nToCheck = this.arrayQueue.length - 1;
 
@@ -63,6 +83,8 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 // Removes one item from the queue
 CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
+    var self=this;
+
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
 	var item=this.arrayQueue.splice(nIndex.value, 1);
 
@@ -74,7 +96,15 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
         item[0].name+
         this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_2'));
 
-    return this.commandRouter.volumioPushQueue(this.arrayQueue);
+    var defer=libQ.defer();
+    this.commandRouter.volumioPushQueue(this.arrayQueue)
+      .then(function(){
+        defer.resolve({});
+    }).fail(function(err){
+        defer.reject(new Error(err));
+    });
+
+    return defer.promise;
 };
 
 // Add one item to the queue
@@ -141,7 +171,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
                 if(self.arrayQueue.length>0)
                 {
-                    if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
+                    //if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
                         self.arrayQueue = self.arrayQueue.concat(content[j]);
                 }
                 else  self.arrayQueue = self.arrayQueue.concat(content[j]);
@@ -177,6 +207,8 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
 	this.arrayQueue = [];
     this.saveQueue();
+
+    this.commandRouter.stateMachine.pushEmptyState();
 	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
@@ -198,7 +230,7 @@ CorePlayQueue.prototype.moveQueueItem = function (from,to) {
         this.arrayQueue.splice(to,0,this.arrayQueue.splice(from,1)[0]);
         return this.commandRouter.volumioPushQueue(this.arrayQueue);
     }
-    else return;
+    else return defer.resolve();
 };
 
 

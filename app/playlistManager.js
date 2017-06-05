@@ -61,9 +61,14 @@ PlaylistManager.prototype.deletePlaylist = function (name) {
 			defer.resolve({success: false, reason: 'Playlist does not exist'});
 		else {
 			fs.unlink(filePath, function (err) {
-				if (err)
+				if (err) {
 					defer.resolve({success: false});
-				else defer.resolve({success: true});
+				} else {
+					var playlists = self.listPlaylist();
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'),
+						name + ' ' +  self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'));
+					defer.resolve(playlists);
+				}
 			});
 		}
 
@@ -84,6 +89,16 @@ PlaylistManager.prototype.listPlaylist = function () {
 
 	return defer.promise;
 };
+
+PlaylistManager.prototype.retrievePlaylists = function () {
+	var self = this;
+	var content = [];
+
+	content = fs.readdirSync(this.playlistFolder);
+
+	return content;
+}
+
 
 PlaylistManager.prototype.getPlaylistContent = function (name) {
 	var self = this;
@@ -284,9 +299,15 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 				}
 
 				fs.writeJson(filePath, data, function (err) {
-					if (err)
+					if (err) {
+						self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
 						defer.resolve({success: false});
-					else defer.resolve({success: true});
+					}
+
+					else {
+						defer.resolve({success: true});
+						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
+					}
 				})
 			}
 		});
@@ -407,9 +428,8 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         if (item.type == 'song') {
                             var artUrl = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getAlbumArt', {
                                 artist: item.artist,
-                                album: item.album,
-                                path: path
-                            });
+                                album: item.album
+                            }, path, '');
                             if (item.uri.indexOf('music-library/') >= 0) {
                                 var itemUri = item.uri.replace('music-library', '');
                             } else var itemUri = item.uri;
@@ -441,11 +461,12 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         var output = data.concat(entries);
                         console.log(filePath)
                         fs.writeJson(filePath, output, function (err) {
-                            if (err)
+                            if (err!==undefined && err!==null)
                                 defer.resolve({success: false});
-                            else
+                            else {
                                 var favourites = self.commandRouter.checkFavourites({uri: path});
-                            defer.resolve(favourites);
+                                defer.resolve({});
+                            }
                         })
                     }
                 });
@@ -593,7 +614,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                     self.commandRouter.addQueueItems(uris)
                         .then(function()
                         {
-                            self.commandRouter.volumioPlay();
+                            self.commandRouter.volumioPlay(0);
                             defer.resolve();
                         })
                         .fail(function()
