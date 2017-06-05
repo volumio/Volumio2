@@ -1590,58 +1590,6 @@ ControllerMpd.prototype.setAdditionalConf = function (type, controller, data) {
 	return self.commandRouter.executeOnPlugin(type, controller, 'setConfigParam', data);
 };
 
-ControllerMpd.prototype.getMyCollectionStats = function () {
-	var self = this;
-
-	var defer = libQ.defer();
-
-	var cmd = libMpd.cmd;
-	self.clientMpd.sendCommand(cmd("count", ["group", "artist"]), function (err, msg) {
-		if (err) defer.resolve({
-			artists: 0,
-			albums: 0,
-			songs: 0,
-			playtime: '00:00:00'
-		});
-		else {
-			var artistsCount = 0;
-			var songsCount = 0;
-			var playtimesCount = 0;
-
-			var splitted = msg.split('\n');
-			for (var i = 0; i < splitted.length - 1; i = i + 3) {
-				artistsCount++;
-				songsCount = songsCount + parseInt(splitted[i + 1].substring(7));
-				playtimesCount = playtimesCount + parseInt(splitted[i + 2].substring(10));
-			}
-
-			var convertedSecs = convert(playtimesCount);
-
-
-			self.clientMpd.sendCommand(cmd("count", ["group", "album"]), function (err, msg) {
-				if (!err) {
-					var splittedAlbum = msg.split('\n').length;
-					var response = {
-						artists: artistsCount,
-						albums: (splittedAlbum - 1) / 3,
-						songs: songsCount,
-						playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
-					};
-				}
-
-				defer.resolve(response);
-
-			});
-
-		}
-
-
-	});
-	return defer.promise;
-
-};
-
-
 ControllerMpd.prototype.rescanDb = function () {
 	var self = this;
 
@@ -2463,12 +2411,12 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
             var convertedSecs = convert(playtimesCount);
 
 
-            self.clientMpd.sendCommand(cmd("count", ["group", "album"]), function (err, msg) {
+            self.clientMpd.sendCommand(cmd("list", ["album", "group", "albumartist"]), function (err, msg) {
                 if (!err) {
                     var splittedAlbum = msg.split('\n').length;
                     var response = {
                         artists: artistsCount,
-                        albums: (splittedAlbum - 1) / 3,
+                        albums: (splittedAlbum - 1) / 2,
                         songs: songsCount,
                         playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
                     };
