@@ -7,6 +7,7 @@ var config = new (require('v-conf'))();
 var libQ = require('kew');
 var ShairportReader = require('shairport-sync-reader');
 
+
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;
 
@@ -128,7 +129,7 @@ function startAirPlay(self) {
         }
         else {
             self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
-            self.startAirplayMeta();
+                self.startAirplayMeta();
         }
     });
 }
@@ -150,7 +151,8 @@ AirPlayInterface.prototype.playerNameCallback = function () {
 
 AirPlayInterface.prototype.startAirplayMeta = function () {
     var self = this;
-    var pipeReader = new ShairportReader({ path: '/tmp/shairport-sync-metadata' });
+    var pipeReader = new ShairportReader({ address: '226.0.0.1', port: '5555' });
+
 
     // Play begin
     pipeReader.on('pbeg', function(data) {
