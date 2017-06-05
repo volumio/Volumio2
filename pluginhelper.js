@@ -46,42 +46,62 @@ function init() {
             }
             var url = stdout;
             if (url == "https://github.com/volumio/volumio-plugins.git\n") {
-                console.log("Error, your repo is the original one, please " +
-                    "fork it as suggested in the documentation!");
-                process.exit(1);
+                exec("git config user.name", function (error, stdout, stderr) {
+                    if (error) {
+                        console.error('exec error: ${error}');
+                        process.exit(1);
+                    }
+                    var user = stdout;
+                    if (user != 'volumio\n'){
+                        console.log("Error, your repo is the original one, please " +
+                            "fork it as suggested in the documentation!");
+                        process.exit(1);
+                    }
+                    else{
+                        ask_category();
+                    }
+                });
             }
             else {
-                var categories = [
-                    "audio_interface",
-                    "miscellanea",
-                    "music_service",
-                    "system_controller",
-                    "user_interface"
-                ];
-
-                var questions = [
-                    {
-                        type: 'rawlist',
-                        name: 'category',
-                        message: 'Please select the Plugin Category',
-                        choices: categories
-                    }];
-
-                inquirer.prompt(questions).then(function (answer) {
-                    ask_user(categories, answer);
-                });
+                ask_category();
             }
         });
     }
 }
 
 /**
- * This function asks the user to specify name and category for his plugin, then
+ * This function asks the user to specify a category for his plugin, then
+ * proceeds to the one for the name
+ */
+function ask_category() {
+    var categories = [
+        "audio_interface",
+        "miscellanea",
+        "music_service",
+        "system_controller",
+        "user_interface"
+    ];
+
+    var questions = [
+        {
+            type: 'rawlist',
+            name: 'category',
+            message: 'Please select the Plugin Category',
+            choices: categories
+        }];
+
+    inquirer.prompt(questions).then(function (answer) {
+        ask_name(categories, answer);
+    });
+}
+
+/**
+ * This function asks the user to specify name for his plugin, then
  * calls for the creation
  * @param categories = list of available categories
  * @param answer = previous selected category
  */
-function ask_user(categories, answer) {
+function ask_name(categories, answer) {
     var category = answer.category;
     var prettyName = "";
     questions = [
