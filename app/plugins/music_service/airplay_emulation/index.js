@@ -156,6 +156,7 @@ AirPlayInterface.prototype.startAirplayMeta = function () {
 
     // Play begin
     pipeReader.on('pbeg', function(data) {
+        self.context.coreCommand.volumioStop();
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
         self.context.coreCommand.pushConsoleMessage("Airplay started streaming");
 
