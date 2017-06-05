@@ -2892,7 +2892,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
         var cmd = libMpd.cmd;	
 
 		if (uriBegin === 'genres://')  {
-			var genre = splitted[2];
+			var genre = nodetools.urlDecode(splitted[2]);
 			var findartist = "find artist \"" + artist + "\" genre \"" + genre + "\" ";
 		}
 
