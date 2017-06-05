@@ -46,6 +46,7 @@ function CoreStateMachine(commandRouter) {
 
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
+    this.commandRouter.initPlayerControls();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
