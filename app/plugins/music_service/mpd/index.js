@@ -2413,10 +2413,17 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
 
             self.clientMpd.sendCommand(cmd("list", ["album", "group", "albumartist"]), function (err, msg) {
                 if (!err) {
-                    var splittedAlbum = msg.split('\n').length;
+                    var splittedAlbum = msg.split('\n');
+					var albumsCount = 0;
+					for (var i = 0; i < splittedAlbum.length; i++) {
+					var line = splittedAlbum[i];
+					if (line.startsWith('Album:')) {
+						albumsCount++;
+						}
+					}
                     var response = {
                         artists: artistsCount,
-                        albums: (splittedAlbum - 1) / 2,
+                        albums: albumsCount,
                         songs: songsCount,
                         playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
                     };
@@ -2428,8 +2435,8 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
 
         }
 
-
     });
+    
     return defer.promise;
 
 };
