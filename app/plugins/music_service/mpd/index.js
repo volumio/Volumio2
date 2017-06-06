@@ -3031,6 +3031,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     var defer = libQ.defer();
     var splitted=curUri.split('/');
     var genreName=nodetools.urlDecode(splitted[2]);
+    var genreArtist=nodetools.urlDecode(splitted[3]);
     var response={
         "navigation": {
             "lists": [
@@ -3070,7 +3071,13 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     self.mpdReady
         .then(function() {
             var cmd = libMpd.cmd;
-            self.clientMpd.sendCommand(cmd("find genre \"" + genreName + "\"", []), function (err, msg) {
+            if (genreArtist != 'undefined') {
+            var findString = "find genre \"" + genreName + "\" artist \"" + genreArtist + "\" ";
+            }
+            else {
+                var findString = "find genre \"" + genreName + "\"";
+                }
+            self.clientMpd.sendCommand(cmd(findString, []), function (err, msg) {
                 var albums=[];
                 var albumsArt=[];
                 var artists=[];
