@@ -26,6 +26,7 @@ function ControllerSystem(context) {
 
 ControllerSystem.prototype.onVolumioStart = function () {
     var self = this;
+    var defer_List=[];
 
     //getting configuration
     var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
@@ -43,10 +44,10 @@ ControllerSystem.prototype.onVolumioStart = function () {
     this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
-	self.deviceDetect();
-	self.callHome();
+	defer_List.push(self.deviceDetect());
+	defer_List.push(self.callHome());
 
-    return libQ.resolve();
+    return libQ.all(defer_List);
 };
 
 ControllerSystem.prototype.onStop = function () {
@@ -440,9 +441,8 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 			{
 				if(deviceslist.devices[i].cpuid == cpuidparam)
 				{
-					defer.resolve(deviceslist.devices[i].name);
 					device = deviceslist.devices[i].name;
-					self.deviceCheck(device);
+					defer.resolve(self.deviceCheck(device));
 				}
 			}
 
@@ -458,17 +458,18 @@ ControllerSystem.prototype.deviceCheck = function (data) {
     var device = config.get('device');
 
     if (device == undefined) {
-        self.logger.info ('Setting Device type: ' + data)
+        self.logger.info ('Setting Device type: ' + data);
         self.config.set('device', data);
     } else if (device != data) {
-        self.logger.info ('Device has changed, setting Device type: ' + data)
+        self.logger.info ('Device has changed, setting Device type: ' + data);
         self.config.set('device', data);
     }
-}
+};
 
 
 ControllerSystem.prototype.callHome = function () {
 	var self = this;
+	var defer = libQ.defer();
 
 
 	try {
@@ -497,13 +498,19 @@ ControllerSystem.prototype.callHome = function () {
 					}, 10000);
 					}
 				}
-				else self.logger.info('Volumio called home');
+				else
+				{
+					self.logger.info('Volumio called home');
+					defer.resolve();
+				}
 
 			});
 	} else {
 			self.logger.info('Cannot retrieve data for calling home');
+			defer.resolve();
 	}
-	});
+	});		
+	return defer.promise;
 };
 
 
