@@ -1590,58 +1590,6 @@ ControllerMpd.prototype.setAdditionalConf = function (type, controller, data) {
 	return self.commandRouter.executeOnPlugin(type, controller, 'setConfigParam', data);
 };
 
-ControllerMpd.prototype.getMyCollectionStats = function () {
-	var self = this;
-
-	var defer = libQ.defer();
-
-	var cmd = libMpd.cmd;
-	self.clientMpd.sendCommand(cmd("count", ["group", "artist"]), function (err, msg) {
-		if (err) defer.resolve({
-			artists: 0,
-			albums: 0,
-			songs: 0,
-			playtime: '00:00:00'
-		});
-		else {
-			var artistsCount = 0;
-			var songsCount = 0;
-			var playtimesCount = 0;
-
-			var splitted = msg.split('\n');
-			for (var i = 0; i < splitted.length - 1; i = i + 3) {
-				artistsCount++;
-				songsCount = songsCount + parseInt(splitted[i + 1].substring(7));
-				playtimesCount = playtimesCount + parseInt(splitted[i + 2].substring(10));
-			}
-
-			var convertedSecs = convert(playtimesCount);
-
-
-			self.clientMpd.sendCommand(cmd("count", ["group", "album"]), function (err, msg) {
-				if (!err) {
-					var splittedAlbum = msg.split('\n').length;
-					var response = {
-						artists: artistsCount,
-						albums: (splittedAlbum - 1) / 3,
-						songs: songsCount,
-						playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
-					};
-				}
-
-				defer.resolve(response);
-
-			});
-
-		}
-
-
-	});
-	return defer.promise;
-
-};
-
-
 ControllerMpd.prototype.rescanDb = function () {
 	var self = this;
 
@@ -2463,12 +2411,19 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
             var convertedSecs = convert(playtimesCount);
 
 
-            self.clientMpd.sendCommand(cmd("count", ["group", "album"]), function (err, msg) {
+            self.clientMpd.sendCommand(cmd("list", ["album", "group", "albumartist"]), function (err, msg) {
                 if (!err) {
-                    var splittedAlbum = msg.split('\n').length;
+                    var splittedAlbum = msg.split('\n');
+					var albumsCount = 0;
+					for (var i = 0; i < splittedAlbum.length; i++) {
+					var line = splittedAlbum[i];
+					if (line.startsWith('Album:')) {
+						albumsCount++;
+						}
+					}
                     var response = {
                         artists: artistsCount,
-                        albums: (splittedAlbum - 1) / 3,
+                        albums: albumsCount,
                         songs: songsCount,
                         playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
                     };
@@ -2480,8 +2435,8 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
 
         }
 
-
     });
+    
     return defer.promise;
 
 };
@@ -2892,7 +2847,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
         var cmd = libMpd.cmd;	
 
 		if (uriBegin === 'genres://')  {
-			var genre = splitted[2];
+			var genre = nodetools.urlDecode(splitted[2]);
 			var findartist = "find artist \"" + artist + "\" genre \"" + genre + "\" ";
 		}
 
@@ -3083,6 +3038,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     var defer = libQ.defer();
     var splitted=curUri.split('/');
     var genreName=nodetools.urlDecode(splitted[2]);
+    var genreArtist=nodetools.urlDecode(splitted[3]);
     var response={
         "navigation": {
             "lists": [
@@ -3122,7 +3078,13 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     self.mpdReady
         .then(function() {
             var cmd = libMpd.cmd;
-            self.clientMpd.sendCommand(cmd("find genre \"" + genreName + "\"", []), function (err, msg) {
+            if (genreArtist != 'undefined') {
+            var findString = "find genre \"" + genreName + "\" artist \"" + genreArtist + "\" ";
+            }
+            else {
+                var findString = "find genre \"" + genreName + "\"";
+                }
+            self.clientMpd.sendCommand(cmd(findString, []), function (err, msg) {
                 var albums=[];
                 var albumsArt=[];
                 var artists=[];
