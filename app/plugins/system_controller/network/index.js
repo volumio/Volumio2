@@ -791,6 +791,9 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 	var response = [];
 	var defers = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
+	if (ethspeed.replace('\n', '') == '1000Mb/s') {
+        ethspeed = '1Gb/s'
+	}
 	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = wirelessspeedraw.replace('=', '');
 	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
