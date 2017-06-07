@@ -789,6 +789,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var defer = libQ.defer();
 	var response = [];
+	var defers = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
 	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = wirelessspeedraw.replace('=', '');
@@ -810,21 +811,34 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var ethip = ''
 	var wlanip = ''
-	var oll = 'no';
-	isOnline(function (err, online) {
-		if (online) oll = 'yes';
-	});
+
+    try {
+        execSync("/usr/bin/wget -q  --timeout=1 --spider http://updates.volumio.org/");
+        var oll = 'yes';
+    } catch (e) {
+        var oll = 'no';
+    }
+
+    var ethdefer = libQ.defer();
+	defers.push(ethdefer)
 
 	ifconfig.status('eth0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll}
+				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll};
 				response.push(ethstatus);
+				ethdefer.resolve()
+			} else {
+                ethdefer.resolve()
 			}
+		} else {
+            ethdefer.resolve()
 		}
 	});
 
+    var wlandefer = libQ.defer();
+    defers.push(wlandefer)
 	ifconfig.status('wlan0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
@@ -834,17 +848,28 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 					wlanip = status.ipv4_address;
 					var wlanstatus = {type: "Wireless", ssid: ssid, signal: wirelessquality,ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				}
-
 				response.push(wlanstatus);
-				//console.log(wlanstatus);
-
+				wlandefer.resolve()
+			} else  {
+                wlandefer.resolve()
 			}
+		} else {
+            wlandefer.resolve()
 		}
-		defer.resolve(response);
+
 	});
-//console.log(response);
+    libQ.all(defers)
+        .then(function () {
+            defer.resolve(response)
+        })
+        .fail(function (err) {
+            console.log('Cannot get all networks info'+err);
+            defer.reject(new Error());
+        });
+
 	return defer.promise;
 };
+
 ControllerNetwork.prototype.saveDnsSettings = function (data) {
 	var self = this;
 	var customdnsfile = '';
