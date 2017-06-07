@@ -117,9 +117,12 @@ PluginManager.prototype.loadPlugin = function (folder) {
 
 		self.initializeConfiguration(package_json, pluginInstance, folder);
 
-
-		if (pluginInstance.onVolumioStart != undefined)
-			pluginInstance.onVolumioStart();
+		if (pluginInstance.onVolumioStart !== undefined)
+		{	
+			var deferStart=pluginInstance.onVolumioStart();
+			defer.resolve(deferStart);
+		}
+		else defer.resolve();
 
 		var pluginData = {
 			name: name,
@@ -129,16 +132,20 @@ PluginManager.prototype.loadPlugin = function (folder) {
 		};
 
 		self.plugins.set(key, pluginData);
-	}
-	else self.logger.info("Plugin " + name + " is not enabled");
 
-	defer.resolve();
+	}
+	else
+	{
+	 	self.logger.info("Plugin " + name + " is not enabled");
+		defer.resolve();
+	}	
 	return defer.promise;
 };
 
 
 PluginManager.prototype.loadPlugins = function () {
 	var self = this;
+	var defer_all=[];
 
 	var priority_array = new HashMap();
 
@@ -184,16 +191,22 @@ PluginManager.prototype.loadPlugins = function () {
 
 	}
 
-	for (i = 1; i < 101; i++) {
-		var plugin_array = priority_array.get(i);
-		if (plugin_array != undefined) {
-			for (var j in plugin_array) {
-				var folder = plugin_array[j];
-				self.loadPlugin(folder);
-			}
-		}
+	priority_array.forEach(function(plugin_array) {
+		var defer_loads=[];
+		var defer_priority;
 
-	}
+		if (plugin_array != undefined) {
+			plugin_array.forEach(function(folder) {
+				var defer_local=self.loadPlugin(folder);
+				defer_loads.push(defer_local.promise);
+			});
+		}
+		
+		defer_priority=libQ.all(defer_loads);
+		defer_all.push(defer_priority.promise);
+	});
+	
+	return libQ.all(defer_all);
 };
 
 PluginManager.prototype.getPackageJson = function (folder) {
