@@ -66,7 +66,7 @@
     "yargs": "^8.0.1"
   },
   "devDependencies": {
-    "mocha": "^3.2.0",
+    "mocha": "^3.4.0",
     "fs-extra": "^2.0.0"
   },
   "description": "Audiophile Music Player/Streamer",
