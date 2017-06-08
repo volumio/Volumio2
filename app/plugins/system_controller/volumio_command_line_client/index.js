@@ -62,11 +62,11 @@ CommandLineClient.prototype.buildVolumeFiles = function () {
 	var mixer = '"'+mixerdev+'"';
 	var volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
 
-	if (volumecurve == 'logarithmic'){
-		var getcommand = "volume=`/usr/bin/amixer -M get -c " + device + " " + mixer + " | awk '$0~/%/{print $4}' | tr -d '[]%' | head -1`";
-	} else {
-		var getcommand = "volume=`/usr/bin/amixer get -c " + device + " " + mixer + " | awk '$0~/%/{print $4}' | tr -d '[]%' | head -1`";
-	}
+    if (volumecurve == 'logarithmic'){
+        var getcommand = "volume=`/usr/bin/amixer -M get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
+    } else {
+        var getcommand = "volume=`/usr/bin/amixer get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
+    }
 	self.writeVolumeFiles('/tmp/setvolume')
 	self.writeVolumeFiles('/tmp/getvolume', getcommand)
 };
