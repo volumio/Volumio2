@@ -283,6 +283,7 @@ CoreCommandRouter.prototype.volumioSearch = function (data) {
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioPushState');
+	// TODO SYNC EVERY 2 SECONDS, NOT ON ANY STATE CHANGE
 	this.executeOnPlugin('system_controller', 'volumiodiscovery', 'saveDeviceInfo', state);
 	// Announce new player state to each client interface
 	var self = this;
