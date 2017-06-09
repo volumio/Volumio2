@@ -362,9 +362,10 @@ PlaylistManager.prototype.playMyWebRadio = function () {
 
 //  COMMON methods
 PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service, uri, title) {
+	var self = this;
 
-	var self = this
 	var defer = libQ.defer();
+
 	var playlist = [];
 	var filePath = folder + name;
 	var path = uri;
@@ -410,36 +411,6 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                     listingDefer.reject(new Error());
                 })
             }
-            else if (uri.startsWith("mnt/")) {
-
-                var lsfolder = mpdPlugin.listallFolder(uri);
-                lsfolder.then(function (info) {
-                    var list = info.navigation.lists[0].items;
-                    var nItems = list.length;
-                    var entries = [];
-                    for (var i = 0; i < nItems; i++) {
-                        var item = list[i];
-                        if (item.type == 'song') {
-                            if (item.uri.indexOf('music-library/') >= 0) {
-                                var itemUri = item.uri.replace('music-library', '');
-                            } 
-                            else {
-                                var itemUri = item.uri;
-                            }
-                            entries.push({
-                                service: service,
-                                uri: itemUri,
-                                title: item.title,
-                                artist: item.artist,
-                                album: item.album,
-                                albumart: item.albumart
-                            });
-                        } 
-                    }
-                    listingDefer.resolve(entries);
-                });							
-			}
-
 		    else {
                 var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
                 prms.then(function (info) {
