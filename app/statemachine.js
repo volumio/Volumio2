@@ -19,6 +19,7 @@ function CoreStateMachine(commandRouter) {
     this.volatileService="";
     this.volatileState={};
 	this.isVolatile = false;
+	this.currentState = {};
     /**
      * This field tells the system if it is currenty running in consume mode
      * @type {boolean} true or false wether the system is in consume mode
@@ -46,6 +47,7 @@ function CoreStateMachine(commandRouter) {
 
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
+    this.commandRouter.initPlayerControls();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -481,10 +483,13 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 //Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
+	var self = this;
 
 	this.currentVolume = Volume.vol;
 	this.currentMute = Volume.mute;
-	this.pushState().fail(this.pushError.bind(this));
+    this.currentState.volume = Volume.vol;
+    this.currentState.mute = Volume.mute;
+    self.commandRouter.volumioPushState(this.currentState)
 };
 
 //Gets current Volume and Mute Status
@@ -504,6 +509,7 @@ CoreStateMachine.prototype.pushState = function () {
 	var promise = libQ.defer();
 
 	var state = this.getState();
+	this.currentState = state;
 
 	var self = this;
 	self.commandRouter.volumioPushState(state)
