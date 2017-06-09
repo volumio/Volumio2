@@ -5,7 +5,7 @@ var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var config = new (require('v-conf'))();
 var libQ = require('kew');
-var ShairportReader = require('shairport-sync-reader');
+var ShairportReader = require('./shairport-sync-reader/shairport-sync-reader.js');
 
 
 // Define the UpnpInterface class
