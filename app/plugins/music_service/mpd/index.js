@@ -1258,6 +1258,77 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	return defer.promise;
 };
 
+ControllerMpd.prototype.listallFolder = function (uri) {
+
+    var self = this;
+    var defer = libQ.defer();
+    var sections = uri.split('/');
+    var prev = '';
+    var command = 'listallinfo';
+    var liburi = uri.slice(4);
+    var cmd = libMpd.cmd;
+
+    self.mpdReady.then(function () {
+        self.clientMpd.sendCommand(cmd(command, [liburi]), function (err, msg) {
+            var list = [];
+            if (msg) {
+
+                var s0 = sections[0] + '/';
+                var path;
+                var name;
+                var lines = msg.split('\n');
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+
+                    if (line.indexOf('file:') === 0) {
+                        var path = line.slice(6);
+                        var name = path.split('/').pop();
+                        var artist = self.searchFor(lines, i + 1, 'Artist:');
+                        var album = self.searchFor(lines, i + 1, 'Album:');
+                        var albumartist = self.searchFor(lines, i + 1, 'AlbumArtist:');
+                        if (!tracknumbers) {
+                            var title = self.searchFor(lines, i + 1, 'Title:');
+                        }
+                        else {
+                            var title1 = self.searchFor(lines, i + 1, 'Title:');
+                            var track = self.searchFor(lines, i + 1, 'Track:');
+                            var title = track + " - " + title1;
+                        }
+                        var albumart = self.getAlbumArt({artist: albumartist, album: album},self.getParentFolder('/mnt/' + path),'fa-tags');
+
+                        if (title) {
+                            title = title;
+                        } else {
+                            title = name;
+                        }						
+                        list.push({
+                            service: 'mpd',
+                            type: 'song',
+                            title: title,
+                            artist: artist,
+                            album: album,
+                            icon: 'fa fa-music',
+                            uri: s0 + path,
+                            albumart:albumart
+                        });
+                    }
+                }
+            }
+            else self.logger.info(err);
+
+            defer.resolve({
+                navigation: {
+                    prev: {
+                        uri: prev
+                    },
+                    lists: [{availableListViews:['list'],items:list}]
+                }
+			});
+        });
+    });
+    return defer.promise;
+};
+
 ControllerMpd.prototype.search = function (query) {
 	var self = this;
 	var defer = libQ.defer();
