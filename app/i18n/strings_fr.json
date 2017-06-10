@@ -149,8 +149,14 @@
     "ARTIST":"Artiste",
     "ALBUMS":"Albums",
     "ALBUM":"Album",
+    "GENRE":"Genre",
     "GENRES":"Genres",
+	  
     "TRACKS":"Pistes",
+    "TRACK":"Piste",
+	  "WITH":"avec",
+	  "FOUND":"Trouvé",
+	  "MATCHING":"Correspondant",
     "CANCEL":"Annuler",
     "NONE":"Aucun",
     "LAST_100":"100 dernières",
@@ -176,7 +182,16 @@
     "MEDIUM":"Moyenne",
     "LARGE":"Grande",
     "EXTRALARGE":"Très grande",
-    "MEGA":"Mega"
+    "MEGA":"Mega",
+    "MUSIC_LIBRARY_SETTINGS":"Réglages de la bibliothèque",
+    "SHOW_TRACKNUMBERS":"Montrer les numéros de pistes",
+    "SHOW_TRACKNUMBERS_DOC":"Ajouter le numéro de piste au titre",
+    "ARTIST_SORTING":"Trier les artistes par",
+    "ARTIST_SORTING_DOC":"Utiliser les métadatas pour trier les artistes",
+    "ALBUMARTIST":"Albumartist",
+    "ARTIST":"Artiste",
+    "COMPILATION_METADATA_DOC":"Configure les metadatas utilisées pour décrire albumart dans les compilations ou multi artistes. Utilise la vigrgule comme séparateur.",
+"COMPILATION_METADATA":"Champs Metadatas pour les compilations"  
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
