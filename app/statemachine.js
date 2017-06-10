@@ -19,6 +19,7 @@ function CoreStateMachine(commandRouter) {
     this.volatileService="";
     this.volatileState={};
 	this.isVolatile = false;
+	this.currentState = {};
     /**
      * This field tells the system if it is currenty running in consume mode
      * @type {boolean} true or false wether the system is in consume mode
@@ -46,6 +47,7 @@ function CoreStateMachine(commandRouter) {
 
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
+    this.commandRouter.initPlayerControls();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -71,7 +73,6 @@ CoreStateMachine.prototype.getState = function () {
             album: this.volatileState.album,
             albumart: this.volatileState.albumart,
             uri: this.volatileState.uri,
-            trackType: this.volatileState.trackType,
             seek: this.volatileState.seek,
             duration: this.volatileState.duration,
             samplerate: this.volatileState.samplerate,
@@ -87,7 +88,7 @@ CoreStateMachine.prototype.getState = function () {
             updatedb: false,
 			volatile: true,
 			trackType: this.volatileState.trackType,
-            service: this.volatileState.service
+			service: this.volatileState.service
         };
     }
     else if(this.isConsume)
@@ -112,7 +113,6 @@ CoreStateMachine.prototype.getState = function () {
                 album: this.consumeState.album,
                 albumart: this.consumeState.albumart,
                 uri: this.consumeState.uri,
-                trackType: this.consumeState.trackType,
                 seek: this.consumeState.seek,
                 duration: this.consumeState.duration,
                 samplerate: this.consumeState.samplerate,
@@ -468,7 +468,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.nextRandomIndex=undefined;
 
             this.askedForPrefetch=false;
-			this.pushState.bind(this);
+			this.pushState.call(this);
 
 			this.startPlaybackTimer();
 
@@ -481,10 +481,13 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 //Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
+	var self = this;
 
 	this.currentVolume = Volume.vol;
 	this.currentMute = Volume.mute;
-	this.pushState().fail(this.pushError.bind(this));
+    this.currentState.volume = Volume.vol;
+    this.currentState.mute = Volume.mute;
+    self.commandRouter.volumioPushState(this.currentState)
 };
 
 //Gets current Volume and Mute Status
@@ -499,41 +502,26 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
 
 // Announce updated Volumio state
 CoreStateMachine.prototype.pushState = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushState');
-
-	var promise = libQ.defer();
-
-	var state = this.getState();
-
 	var self = this;
-	self.commandRouter.volumioPushState(state)
-		.then(function (data) {
-			self.checkFavourites(state)
-				.then(function (a) {
-					promise.resolve({});
-				})
-		});
 
-	return promise.promise;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushState');
+
+	var state = self.getState();
+	self.currentState = state;
+
+	return libQ.all([self.commandRouter.volumioPushState(state), self.checkFavourites(state)])
+	    .fail(self.pushError.bind(self));
 };
 
 CoreStateMachine.prototype.pushEmptyState = function () {
-	this.commandRouter.pushDebugConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushEmptyState');
-
-	var promise = libQ.defer();
-
-	var state = this.getEmptyState();
-
 	var self = this;
-	self.commandRouter.volumioPushState(state)
-		.then(function (data) {
-			self.checkFavourites(state)
-				.then(function (a) {
-					promise.resolve({});
-				})
-		});
 
-	return promise.promise;
+	self.commandRouter.pushDebugConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::pushEmptyState');
+
+	var state = self.getEmptyState();
+
+	return libQ.all([self.commandRouter.volumioPushState(state), self.checkFavourites(state)])
+	    .fail(self.pushError.bind(self));
 };
 
 // Pass the error if we don't want to handle it
@@ -545,7 +533,7 @@ CoreStateMachine.prototype.pushError = function (sReason) {
 // Sync state from service status announcement
 // Input state object has the form {status: sStatus, position: nPosition, seek: nSeek, duration: nDuration, samplerate: nSampleRate, bitdepth: nBitDepth, channels: nChannels, dynamictitle: sTitle}
 CoreStateMachine.prototype.syncState = function (stateService, sService) {
-	var  self = this;
+	var self = this;
 	this.commandRouter.pushDebugConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 
     //Checking if stateService is defined (REPLACE WITH CONDITIONAL LIBRARY AS SOON AS POSSIBLE)
@@ -559,8 +547,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	    this.volatileService = sService;
         this.currentStatus='play';
         this.volatileState=stateService;
-        this.pushState().fail(this.pushError.bind(this));
-        return;
+        return this.pushState();
 	}
 	else if (this.volatileState && stateService.status == 'stop'){
         this.volatileService = undefined;
@@ -590,7 +577,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                 this.consumeUpdateService = 'mpd';
                 sService = 'mpd';
 			} else {
-                return;
+                return libQ.resolve();
 			}
 
 		}
@@ -600,7 +587,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if(trackBlock!=undefined && trackBlock.service!==sService)
 		{
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
-			return;
+			return libQ.resolve();;
 		}
 
 	}
@@ -741,7 +728,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
             this.currentStatus='play';
-            this.pushState().fail(this.pushError.bind(this));
+            return this.pushState();
 		}
 		else if (this.currentStatus === 'stop') {
 
@@ -774,7 +761,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		}
 		else if (this.currentStatus === 'pause') {
 			this.currentStatus='play';
-			this.pushState().fail(this.pushError.bind(this));
+			return this.pushState();
 		}
 
 	} else if (stateService.status === 'stop') {
@@ -837,19 +824,17 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			//Checking repeat status
             if(this.currentRepeat && this.currentRepeatSingleSong)
             {
+				this.askedForPrefetch=false;
+				this.simulateStopStartDone=false;
+
                 if(this.prefetchDone==false)
                 {
-                    this.play(this.currentPosition)
+					return this.play(this.currentPosition)
                         .then(self.pushState.bind(self))
-                        .fail(this.pushError.bind(this));
-
-                    this.askedForPrefetch=false;
-                    this.simulateStopStartDone=false;
+                        .fail(self.pushError.bind(self));
                 }
                 else
                 {
-                    this.prefetchDone=false;
-                    this.askedForPrefetch=false;
                     this.simulateStopStartDone=false;
 
                     this.commandRouter.pushDebugConsoleMessage("Prefetch done, skipping queuing");
@@ -864,22 +849,18 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     if(this.currentRepeat!==undefined && this.currentRepeat===true)
                     {
                         this.currentPosition=0;
+						this.askedForPrefetch=false;
+						this.simulateStopStartDone=false;
 
                         if(this.prefetchDone==false)
                         {
                             this.play()
-                                .then(self.pushState.bind(self))
-                                .fail(this.pushError.bind(this));
-
-                            this.askedForPrefetch=false;
-                            this.simulateStopStartDone=false;
+							    .then(self.pushState.bind(self))
+								.fail(self.pushError.bind(self));
                         }
                         else
                         {
                             this.prefetchDone=false;
-                            this.askedForPrefetch=false;
-                            this.simulateStopStartDone=false;
-
                             this.commandRouter.pushDebugConsoleMessage("Prefetch done, skipping queuing");
                         }
 
@@ -889,37 +870,35 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     else
                     {
                         this.currentPosition=0;
-                        this.pushEmptyState().fail(this.pushError.bind(this));
-
-                        return this.stopPlaybackTimer();
+                        return this.pushEmptyState()
+						    .then(this.stopPlaybackTimer.bind(self))
+							.fail(this.pushError.bind(this));
                     }
 
 
 
                 } else {
+					this.askedForPrefetch=false;
+					this.simulateStopStartDone=false;
+
                     if(this.prefetchDone==false)
                     {
-                        this.play()
-                            .then(self.pushState.bind(self))
-                            .fail(this.pushError.bind(this));
-
-                        this.askedForPrefetch=false;
-                        this.simulateStopStartDone=false;
+                        return this.play()
+						    .then(self.pushState.bind(self))
+							.fail(this.pushError.bind(this));
                     }
                     else
                     {
                         this.prefetchDone=false;
-                        this.askedForPrefetch=false;
-                        this.simulateStopStartDone=false;
-                        this.pushState();
-                        this.commandRouter.pushDebugConsoleMessage("Prefetch done, skipping queuing");
+						this.commandRouter.pushDebugConsoleMessage("Prefetch done, skipping queuing");
+						return this.pushState();
                     }
                 }
             }
 
 		} else if (this.currentStatus === 'stop') {
-			this.pushState().fail(this.pushError.bind(this));
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'No code');
+			return this.pushState();
 		}
 	} else if (stateService.status === 'pause') {
         /**
@@ -930,19 +909,19 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             if(this.isConsume)
             {
                 this.consumeState.status='pause';
-                this.pushState().fail(this.pushError.bind(this));
-
-                return this.stopPlaybackTimer();
+                return this.pushState()
+				    .then(this.stopPlaybackTimer.bind(self))
+					.fail(this.pushError.bind(this));
             }
         }
 	    else if (this.currentStatus === 'pause') {
-			this.pushState().fail(this.pushError.bind(this));
-
-			return this.stopPlaybackTimer();
+            return this.pushState()
+			    .then(this.stopPlaybackTimer.bind(self))
+				.fail(this.pushError.bind(this));
 		}
 	}
 
-	this.pushState().fail(this.pushError.bind(this));
+	return this.pushState();
 
 	/*else if (stateService.status === 'undefined') {
 	 stateService.status = 'stop';
@@ -953,46 +932,36 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 };
 
 CoreStateMachine.prototype.checkFavourites = function (state) {
+var self = this;
 
-	var defer = libQ.defer();
-	var response = {
-		service: state.service,
-		uri: state.uri,
-		favourite: false
-	};
+    var response = {
+        service: state.service,
+        uri: state.uri,
+        favourite: false
+    };
 
-	if (state.uri != undefined && state.uri != null) {
-		var promise = this.commandRouter.playListManager.listFavourites();
-		var self = this;
-		promise.then(function (favList) {
-			/**
-			 * WARNING: The favourites section uses music-library/ to start each uri
-			 * This is not used in mpd uris, so we are adding it at the beginning of each uri
-			 */
-			var list = favList.navigation.lists[0].items;
-			var nFavs = list.length;
-			for (var i = 0; i < nFavs; i++) {
-				var match = self.sanitizeUri(state.uri);
-				var listUri= self.sanitizeUri(list[i].uri);
+    if (state.uri == undefined || state.uri == null) {
+        return self.emitFavourites(response);
+    }
 
-				if (match === listUri) {
-					response.favourite = true;
-					break;
-				}
-			}
-			self.emitFavourites(response);
-		});
-	}
-	else {
-		this.emitFavourites(response);
-		defer.resolve({});
-	}
-	return defer.promise;
+    return self.commandRouter.playListManager.listFavourites()
+        .then(function (favList) {
+            /**
+             * WARNING: The favourites section uses music-library/ to start each uri
+             * This is not used in mpd uris, so we are adding it at the beginning of each uri
+             */
+            var match = self.sanitizeUri(state.uri);
+            if (favList.navigation.lists[0].items.some(listItem => self.sanitizeUri(listItem.uri) === match))
+                response.favourite = true;
+            return response;
+        })
+        .then(self.emitFavourites.bind(self))
+        .fail(self.pushError.bind(self));
 };
 
 
 CoreStateMachine.prototype.emitFavourites = function (msg) {
-	this.commandRouter.emitFavourites(msg);
+	return libQ.resolve(this.commandRouter.emitFavourites(msg));
 };
 
 
@@ -1080,7 +1049,7 @@ CoreStateMachine.prototype.seek = function (position) {
 
             thisPlugin.seek(curPos + 10000);
 
-            this.pushState().fail(this.pushError.bind(this));
+            this.pushState();
 		}
 		else if(position == '-'){
     	    var curPos = this.getState().seek;
@@ -1091,7 +1060,7 @@ CoreStateMachine.prototype.seek = function (position) {
 
 	        thisPlugin.seek(curPos - 10000);
 
-        	this.pushState().fail(this.pushError.bind(this));
+        	this.pushState();
     	}
 		else{
             this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
@@ -1103,7 +1072,7 @@ CoreStateMachine.prototype.seek = function (position) {
 
             thisPlugin.seek(position*1000);
 
-            this.pushState().fail(this.pushError.bind(this));
+            this.pushState();
 		}
 	}
 };
@@ -1186,7 +1155,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 
 		this.stopPlaybackTimer();
 		this.updateTrackBlock();
-		this.pushState().fail(this.pushError.bind(this));
+		this.pushState();
 		return this.serviceStop();
 
 	} else if (this.currentStatus === 'pause') {
@@ -1196,7 +1165,7 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 		this.updateTrackBlock();
 
 		this.stopPlaybackTimer();
-		this.pushState().fail(this.pushError.bind(this));
+		this.pushState();
 		return this.serviceStop();
 	}
 	else return libQ.resolve();
@@ -1312,7 +1281,7 @@ CoreStateMachine.prototype.setRandom = function (value) {
 
 	this.currentRandom=value;
 
-	this.pushState().fail(this.pushError.bind(this));
+	this.pushState();
 };
 
 CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
@@ -1323,7 +1292,7 @@ CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
 	if(repeatSingle!=undefined)
 	    this.currentRepeatSingleSong=repeatSingle;
 
-	this.pushState().fail(this.pushError.bind(this));
+	this.pushState();
 };
 
 CoreStateMachine.prototype.setConsume = function (value) {
@@ -1331,7 +1300,7 @@ CoreStateMachine.prototype.setConsume = function (value) {
 
 	this.currentConsume=value;
 
-	this.pushState().fail(this.pushError.bind(this));
+	this.pushState();
 };
 
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {

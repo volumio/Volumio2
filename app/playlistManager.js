@@ -633,26 +633,15 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 };
 
 PlaylistManager.prototype.commonGetPlaylistContent = function (folder, name) {
-	var defer = libQ.defer();
-
+	var self = this;
 	var filePath = folder + name;
-
-	fs.exists(filePath, function (exists) {
-		if (!exists)
-			defer.resolve([]);
-		else {
-			fs.readJson(filePath, function (err, data) {
-				if (err)
-					defer.reject(new Error("Error reading playlist"));
-				else {
-					defer.resolve(data);
-				}
-			});
-		}
-
-	});
-
-	return defer.promise;
+	return libQ.nfcall(fs.readJson, filePath)
+		.fail(function (e) {
+			if(e && e.code === 'ENOENT') {
+				return [];
+			}
+			return libQ.reject(new Error("Error reading playlist"));
+		});
 };
 
 /**
@@ -661,10 +650,8 @@ PlaylistManager.prototype.commonGetPlaylistContent = function (folder, name) {
 PlaylistManager.prototype.listFavourites = function (uri) {
 	var self = this;
 
-	var defer = libQ.defer();
-
-	var promise = self.getFavouritesContent();
-	promise.then(function (data) {
+	return self.getFavouritesContent()
+	    .then(function (data) {
 			var response = {
 				navigation: {
 					prev: {
@@ -689,14 +676,11 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 				response.navigation.lists[0].items.push(song);
 			}
 
-			defer.resolve(response);
-
+			return response;
 		})
 		.fail(function () {
-			defer.reject(new Error("Cannot list Favourites"));
+			return libQ.reject(new Error("Cannot list Favourites"));
 		});
-
-	return defer.promise;
 };
 
 
