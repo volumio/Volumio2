@@ -1,7 +1,8 @@
 {
   "cards": [
-    {"name": "ALSA", "multidevice": false, "prettyname": "Audio Jack", "defaultmixer": "PCM","type":"integrated"},
+    {"name": "bcm2835 ALSA", "multidevice": false, "prettyname": "Audio Jack", "defaultmixer": "PCM","type":"integrated"},
     {"name": "sndrpihifiberry", "multidevice": false, "prettyname": "Hifiberry DAC", "type":"i2S"},
+    {"name": "HiFiBerry Digi+ Pro HiFi wm8804-spdif-0", "multidevice": false, "prettyname": "HiFiBerry Digi+ Pro", "type":"i2S"},
     {"name": "IQaudIODAC", "multidevice": false, "prettyname": "IQaudIO DAC", "type":"i2S"},
     {"name": "sndrpijustboomd", "multidevice": false, "prettyname": "JustBoom DAC Boards", "type":"i2S"},
     {"name": "atm7059link", "multidevice": false, "prettyname": "Audio Out", "defaultmixer": "Digital","type":"integrated"},
