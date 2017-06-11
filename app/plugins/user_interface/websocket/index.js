@@ -1023,55 +1023,26 @@ function InterfaceWebUI(context) {
 
 			//Updater
 			connWebSocket.on('updateCheck', function () {
-				var selfConnWebSocket = this;
 
-				self.logger.info("Sending updateCheck to server");
+                self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				};
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('updateCheck', 'search-for-upgrade');
-
-				client.on('updateReady', function (message) {
-					self.logger.info("Update Ready: " + message);
-					selfConnWebSocket.emit('updateReady', message);
-				});
-
-				client.on('updateCheck-error', function (message) {
-					self.logger.info("Update Check error: " + message);
-					selfConnWebSocket.emit('updateCheck-error', message);
-				});
 			});
+
+            connWebSocket.on('ClientUpdateReady', function (message) {
+                var selfConnWebSocket = this;
+
+                var updateMessage = JSON.parse(message)
+				self.logger.info("Update Ready: " + updateMessage);
+                self.commandRouter.broadcastMessage('updateReady', updateMessage);
+            });
 
 
 			connWebSocket.on('update', function (data) {
 				var selfConnWebSocket = this;
 				self.logger.info("Update: " + data);
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('update', data);
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+                self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
+                self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
 			});
 
 			connWebSocket.on('deleteUserData', function () {
@@ -1085,28 +1056,8 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('factoryReset', '');
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+				self.commandRouter.broadcastMessage('ClientFactoryReset', {value:"now"});
 			});
-
-			//factory reset
 
 			connWebSocket.on('getSystemVersion', function () {
 				var selfConnWebSocket = this;

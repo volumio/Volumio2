@@ -422,6 +422,20 @@ ControllerSystem.prototype.deleteUserData = function () {
     });
 };
 
+ControllerSystem.prototype.factoryReset = function () {
+    var self = this;
+
+    fs.writeFile('/boot/factory_reset', ' ', function (err) {
+        if (err) {
+            self.logger.info('Cannot Initiate factory reset');
+        } else {
+            self.logger.info('Created Factory Reset file, rebooting');
+            self.commandRouter.reboot();
+        }
+
+    });
+};
+
 
 ControllerSystem.prototype.deviceDetect = function (data) {
 	var self = this;
