@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-function kernelinstall {
+kernelinstall() {
 
 echo " ---- VOLUMIO RASPBERRY PI KERNEL SOURCE DOWNLOADER ----"
 echo " "
