@@ -587,7 +587,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		if(trackBlock!=undefined && trackBlock.service!==sService)
 		{
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
-			return libQ.resolve();;
+			return libQ.resolve();
 		}
 
 	}
