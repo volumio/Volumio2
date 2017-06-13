@@ -19,6 +19,7 @@ var tracknumbers = false;
 var compilation = ['Various','various','Various Artists','various artists','VA','va'];
 //atistsort variable below will list artists by albumartist if set to true or artist if set to false
 var artistsort = true;
+var dsd_autovolume = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -640,7 +641,8 @@ ControllerMpd.prototype.onVolumioStart = function () {
 		}
 	});
 
-
+    self.loadLibrarySettings();
+    dsd_autovolume = self.config.get('dsd_autovolume', false);
     return libQ.resolve();
 };
 
@@ -781,13 +783,14 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 
 ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	var self = this;
-	console.log(data)
 
 	var defer = libQ.defer();
 
-	self.config.set('volume_normalization', data['volume_normalization']);
+	self.config.set('dsd_autovolume', data['dsd_autovolume']);
+    self.config.set('volume_normalization', data['volume_normalization']);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
+    dsd_autovolume = data['dsd_autovolume'];
 
 	//fixing dop
 	if (self.config.get('dop') == null) {
@@ -1394,7 +1397,7 @@ ControllerMpd.prototype.search = function (query) {
     });
 
     libQ.all(deferArray).then(function(values){
-    	console.log(JSON.stringify(values))
+
         var list = [];
 
 		if(values[0])
@@ -1581,9 +1584,15 @@ ControllerMpd.prototype.getConfigurationFiles = function () {
 	return ['config.json'];
 };
 
-ControllerMpd.prototype.getAdditionalConf = function (type, controller, data) {
-	var self = this;
-	return self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+ControllerMpd.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
 };
 
 ControllerMpd.prototype.setAdditionalConf = function (type, controller, data) {
@@ -2372,11 +2381,6 @@ ControllerMpd.prototype.getConfigurationFiles = function () {
     var self = this;
 
     return ['config.json'];
-};
-
-ControllerMpd.prototype.getAdditionalConf = function (type, controller, data) {
-    var self = this;
-    return self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
 };
 
 ControllerMpd.prototype.setAdditionalConf = function (type, controller, data) {
@@ -3314,3 +3318,10 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.MUSIC_LIBRARY_SETTINGS'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'));
 }
 
+ControllerMpd.prototype.dsdVolume=function(){
+	var self = this;
+
+	if (dsd_autovolume) {
+        self.commandRouter.volumiosetvolume(100);
+	}
+}

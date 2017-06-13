@@ -272,24 +272,28 @@ ControllerAlsa.prototype.getUIConfig = function () {
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'volume_normalization');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
+            value = self.getAdditionalConf('music_service', 'mpd', 'dsd_autovolume', false);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.value', value);
+            value = self.getAdditionalConf('music_service', 'mpd', 'volume_normalization');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
+			value = self.getAdditionalConf('music_service', 'mpd', 'audio_buffer_size');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[3].options'), value));
+
+			value = self.getAdditionalConf('music_service', 'mpd', 'buffer_before_play');
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
 			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue');
 			if (value == undefined) {
 				value = true
 			}
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value', value);
+			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
 
 			value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
@@ -700,9 +704,14 @@ ControllerAlsa.prototype.getConfigurationFiles = function () {
 	return ['config.json'];
 };
 
-ControllerAlsa.prototype.getAdditionalConf = function (type, controller, data) {
-	var self = this;
-	return self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+ControllerAlsa.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
 };
 
 ControllerAlsa.prototype.setAdditionalConf = function (type, controller, data) {

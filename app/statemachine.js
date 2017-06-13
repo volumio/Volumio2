@@ -511,6 +511,10 @@ CoreStateMachine.prototype.pushState = function () {
 	var state = this.getState();
 	this.currentState = state;
 
+	if (state.trackType != undefined && (state.trackType == 'dsd' || state.trackType == 'dff') ) {
+        this.commandRouter.executeOnPlugin('music_service', 'mpd', 'dsdVolume', '100');
+	}
+
 	var self = this;
 	self.commandRouter.volumioPushState(state)
 		.then(function (data) {
