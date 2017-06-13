@@ -57,7 +57,7 @@ if [ "$ARCH" = armv7l ]; then
  else
  echo volumio | sudo -S cp /home/volumio/Module.symvers Module.symvers
 fi
-echo volumio | sudo -S make modules_prepare
+echo volumio | sudo -S make LOCALVERSION=+ modules_prepare
 echo "Linking Modules"
 echo volumio | sudo -S ln -sv /usr/src/rpi-linux /lib/modules/$(uname -r)/build
 echo Â" "
