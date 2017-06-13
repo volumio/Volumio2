@@ -269,8 +269,8 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			}
 
 			value = self.getAdditionalConf('music_service', 'mpd', 'dop');
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', value);
-			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
 
 			value = self.getAdditionalConf('music_service', 'mpd', 'volume_normalization');
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value', value);

@@ -781,6 +781,7 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 
 ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	var self = this;
+	console.log(data)
 
 	var defer = libQ.defer();
 
@@ -790,9 +791,9 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 
 	//fixing dop
 	if (self.config.get('dop') == null) {
-		self.config.addConfigValue('dop', 'boolean', data['dop']);
+		self.config.addConfigValue('dop', 'boolean', data['dop'].value);
 	} else {
-		self.config.set('dop', data['dop']);
+		self.config.set('dop', data['dop'].value);
 	}
 
 	if (self.config.get('persistent_queue') == null) {

@@ -102,13 +102,24 @@
       "content": [
         {
           "id": "dop",
-          "element": "switch",
-          "doc": "TRANSLATE.PLAYBACK_OPTIONS.DOP_DOC",
-          "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP",
-          "value":false
+          "element": "select",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.DSD_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_PLAYBACK_MODE",
+          "value":  {
+            "value":false,
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_DIRECT"
+          },
+          "options": [
+            {
+              "value":false,
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_DIRECT"
+            },
+            {
+              "value":true,
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP"
+            }
+          ]
         },
-
-
         {
           "id": "volume_normalization",
           "element": "switch",
