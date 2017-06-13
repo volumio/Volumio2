@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-function doc {
+doc() {
 echo "
 Usage : volumio <argument1> <argument2>
 
@@ -51,17 +51,17 @@ plugin publish                     publishes the plugin on git
 
 #VOLUMIO SERVICE CONTROLS
 
-function start {
+start() {
 echo volumio | sudo -S systemctl start volumio.service
 }
 
-function vstop {
+vstop() {
 echo volumio | sudo -S systemctl stop volumio.service
 }
 
 #VOLUMIO DEVELOPMENT
 
-function pull {
+pull() {
 echo "Stopping Volumio"
 echo volumio | sudo -S systemctl stop volumio.service
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
@@ -70,7 +70,7 @@ echo volumio | sudo -S systemctl start volumio.service
 echo "Done"
 }
 
-function kernelsource {
+kernelsource() {
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 

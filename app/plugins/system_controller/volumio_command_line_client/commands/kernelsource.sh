@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-function kernelinstall {
+kernelinstall() {
 
 echo " ---- VOLUMIO RASPBERRY PI KERNEL SOURCE DOWNLOADER ----"
 echo " "
@@ -32,7 +32,7 @@ if [ "$ARCH" = armv7l ]; then
  curl -L https://github.com/Hexxeh/rpi-firmware/raw/${FIRMWARE_REV}/Module.symvers >Module.symvers
 fi
 
-echo "Donwloading Kernel source tarball from " https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz
+echo "Downloading Kernel source tarball from " https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz
 curl -L https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz >rpi-linux.tar.gz
 
 echo "creating /usr/src/rpi-linux folder"
