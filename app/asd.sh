@@ -34,23 +34,23 @@ case "$1" in
 esac
 
 
-function start {
+start() {
 systemctl start volumio.service
 }
 
-function stop {
+stop() {
 systemctl stop volumio.service
 }
 
-function status {
+status() {
 echo "Not Implemented yet"
 }
 
-function volume {
+volume() {
 echo "reading volume"
 }
 
-function volumeset {
+volumeset() {
 "echo setting volume $volumeval"
 }
 
@@ -90,23 +90,23 @@ case "$1" in
 esac
 
 
-function start {
+start() {
 systemctl start volumio.service
 }
 
-function stop {
+stop() {
 systemctl stop volumio.service
 }
 
-function status {
+status() {
 echo "Not Implemented yet"
 }
 
-function volume {
+volume() {
 echo "reading volume"
 }
 
-function volumeset {
+volumeset() {
 "echo setting volume $volumeval"
 }
 

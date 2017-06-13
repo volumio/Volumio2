@@ -19,6 +19,7 @@ function CoreStateMachine(commandRouter) {
     this.volatileService="";
     this.volatileState={};
 	this.isVolatile = false;
+	this.currentState = {};
     /**
      * This field tells the system if it is currenty running in consume mode
      * @type {boolean} true or false wether the system is in consume mode
@@ -46,6 +47,7 @@ function CoreStateMachine(commandRouter) {
 
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
+    this.commandRouter.initPlayerControls();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -92,9 +94,19 @@ CoreStateMachine.prototype.getState = function () {
     }
     else if(this.isConsume)
     {
+        // checking consumeState or the below code will throw an exception
         if(this.consumeState)
         {
-            // checking consumeState or the below code will throw an exception
+        	//we identify a webradio stream from its duration which is zero
+        if(this.consumeState.duration == '0') {
+            this.consumeState.stream = true;
+            this.consumeState.service = 'webradio';
+            this.consumeState.trackType = 'webradio';
+            this.consumeState.samplerate = '';
+            this.consumeState.bitdepth =  '';
+        }
+
+
             return {
                 status: this.consumeState.status,
                 title: this.consumeState.title,
@@ -229,14 +241,6 @@ CoreStateMachine.prototype.clearQueue = function () {
 
 };
 
-
-// Add array of items to queue
-CoreStateMachine.prototype.clearAddPlayQueue = function (items) {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::clearAddPlayQueue');
-
-    return this.playQueue.clearAddPlayQueue(items);
-
-};
 
 
 
@@ -479,10 +483,13 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 //Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
+	var self = this;
 
 	this.currentVolume = Volume.vol;
 	this.currentMute = Volume.mute;
-	this.pushState().fail(this.pushError.bind(this));
+    this.currentState.volume = Volume.vol;
+    this.currentState.mute = Volume.mute;
+    self.commandRouter.volumioPushState(this.currentState)
 };
 
 //Gets current Volume and Mute Status
@@ -502,6 +509,7 @@ CoreStateMachine.prototype.pushState = function () {
 	var promise = libQ.defer();
 
 	var state = this.getState();
+	this.currentState = state;
 
 	var self = this;
 	self.commandRouter.volumioPushState(state)
@@ -1069,16 +1077,40 @@ CoreStateMachine.prototype.seek = function (position) {
 	var trackBlock = this.getTrack(this.currentPosition);
 	if (trackBlock !== undefined)
 	{
-		this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
+		if(position == '+'){
+			var curPos = this.getState().seek;
+            var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
-		var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+            this.currentSeek = curPos + 10000;
+            this.startPlaybackTimer(curPos + 10000);
 
-		this.currentSeek = position*1000;
-		this.startPlaybackTimer(position*1000);
+            thisPlugin.seek(curPos + 10000);
 
-		thisPlugin.seek(position*1000);
+            this.pushState().fail(this.pushError.bind(this));
+		}
+		else if(position == '-'){
+    	    var curPos = this.getState().seek;
+	        var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
-		this.pushState().fail(this.pushError.bind(this));
+        	this.currentSeek = curPos - 10000;
+    	    this.startPlaybackTimer(curPos - 10000);
+
+	        thisPlugin.seek(curPos - 10000);
+
+        	this.pushState().fail(this.pushError.bind(this));
+    	}
+		else{
+            this.commandRouter.pushConsoleMessage('TRACKBLOCK ' + JSON.stringify(trackBlock));
+
+            var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
+
+            this.currentSeek = position*1000;
+            this.startPlaybackTimer(position*1000);
+
+            thisPlugin.seek(position*1000);
+
+            this.pushState().fail(this.pushError.bind(this));
+		}
 	}
 };
 

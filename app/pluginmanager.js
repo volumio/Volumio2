@@ -362,9 +362,33 @@ PluginManager.prototype.onVolumioStart = function () {
 
 	self.plugins.forEach(function (value, key) {
 		var plugin = value.instance;
-
+		
 		if (plugin.onVolumioStart != undefined)
 			plugin.onVolumioStart();
+	});
+};
+
+PluginManager.prototype.onVolumioShutdown = function () {
+	var self = this;
+
+	self.plugins.forEach(function (value, key) {
+		if (self.isEnabled(value.category, value.name)) {
+			var plugin = value.instance;
+			if (plugin.onVolumioShutdown != undefined)
+				plugin.onVolumioShutdown();
+		}
+	});
+};
+
+PluginManager.prototype.onVolumioReboot = function () {
+	var self = this;
+
+	self.plugins.forEach(function (value, key) {
+		if (self.isEnabled(value.category, value.name)) {
+			var plugin = value.instance;
+			if (plugin.onVolumioReboot != undefined)
+				plugin.onVolumioReboot();
+		}
 	});
 };
 
@@ -543,7 +567,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 	var url = data.url;
 	var category = data.category;
 	var name = data.name;
-	console.log(data);
+
 	var currentMessage = 'Downloading from'+url;
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
@@ -819,8 +843,6 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 			self.logger.info("Executing install.sh");
 			exec('echo volumio | sudo -S sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
 				if (error!==undefined && error!==null) {
-					console.log(stdout);
-					console.log(stderr);
 					self.logger.info("Install script return the error "+error);
 					defer.reject(new Error());
 				} else {
@@ -832,6 +854,36 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 	});
 	return defer.promise;
+}
+
+PluginManager.prototype.executeUninstallationScript = function (category,name) {
+    var self=this;
+    var defer=libQ.defer();
+
+    self.logger.info("Checking if uninstall.sh is present");
+    var installScript='/data/plugins/'+category+'/'+name+'/uninstall.sh';
+    fs.stat(installScript,function(err,stat){
+        if(err)
+        {
+            self.logger.info("Check return the error "+err);
+            defer.reject(new Error());
+        }
+        else {
+            self.logger.info("Executing uninstall.sh");
+            exec('echo volumio | sudo -S sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
+                if (error!==undefined && error!==null) {
+
+                    self.logger.info("Uninstall script return the error "+error);
+                    defer.reject(new Error());
+                } else {
+                    self.logger.info("Uninstall script completed");
+                    defer.resolve('');
+                }
+            });
+
+        }
+    });
+    return defer.promise;
 }
 
 
@@ -922,7 +974,6 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
 	var defer=libQ.defer();
 
 	var key=category+'.'+name;
-	console.log(key);
 	var modaltitle= 'Uninstalling Plugin '+name;
 	if(self.config.has(key))
 	{
@@ -939,6 +990,12 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
 				self.pushMessage('installPluginStatus',{'progress': 60, 'message': 'Plugin disabled', 'title' : modaltitle});
 				return e;
 			}).
+            then(self.executeUninstallationScript.bind(self,category,name))
+            .then(function(e)
+            {
+                self.pushMessage('installPluginStatus',{'progress': 70, 'message': 'Plugin dependencies removed', 'title' : modaltitle});
+                return e;
+            }).
 			then(self.removePluginFromConfiguration.bind(self,category,name))
 			.then(function(e)
 			{

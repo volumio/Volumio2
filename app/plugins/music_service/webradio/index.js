@@ -757,7 +757,7 @@ ControllerWebradio.prototype.search = function (query) {
 
         var request= unirest.get(uri);
 
-        request.timeout(1000);
+        request.timeout(1500);
         request.end(function(xml)
             {
                 if(xml.error)

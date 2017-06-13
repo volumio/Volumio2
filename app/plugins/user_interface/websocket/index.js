@@ -120,18 +120,10 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('replaceAndPlay', function (data) {
 				var timeStart = Date.now();
 
-				self.commandRouter.volumioStop()
-                    .then(function(){
-                        return self.commandRouter.stateMachine.playQueue.clearPlayQueue();
-                    })
-                    .then(function(){
-                        console.log("DATA::::" +JSON.stringify(data));
-                        self.commandRouter.playPlaylist(data.title);
-                    });
-
-				/*.then(function(e){
+				self.commandRouter.replaceAndPlay(data)
+				.then(function(e){
 					return self.commandRouter.volumioPlay(e.firstItemIndex);
-				});*/
+				});
 			});
 
 			connWebSocket.on('addPlay', function (data) {
@@ -314,6 +306,16 @@ function InterfaceWebUI(context) {
 					});
 			});
 
+            connWebSocket.on('toggle', function () {
+                var timeStart = Date.now();
+                self.logStart('Client requests Volumio toggle')
+                    .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+            });
+
 			connWebSocket.on('stop', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio stop')
@@ -413,15 +415,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('volume', function (VolumeInteger) {
-				var timeStart = Date.now();
-				self.logStart('Client requests Volume ' + VolumeInteger)
-					.then(function () {
-						return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
-					})
-					.fail(self.pushError.bind(self))
-					.done(function () {
-						return self.logDone(timeStart);
-					});
+                return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
 			});
 
 			connWebSocket.on('mute', function () {
@@ -1285,8 +1279,7 @@ function InterfaceWebUI(context) {
 						var installed = self.commandRouter.getInstalledPlugins();
 						if (installed != undefined) {
 							installed.then(function (installedPLugins) {
-								self.logger.info(JSON.stringify(installedPLugins));
-								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+								self.broadcastMessage('pushInstalledPlugins',installedPLugins);
 							});
 						}
 						var available = self.commandRouter.getAvailablePlugins();

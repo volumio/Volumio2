@@ -369,7 +369,7 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 
 
 		var addresses=foundVolumioInstances.get(key+'.addresses');
-		
+
 		for(var j in addresses)
 		{
 			var address=addresses[j];
@@ -381,6 +381,10 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 							address = status.ipv4_address;
 						} else address = ip.address();
 					} }); address = ip.address();
+			} else {
+				if ( address.value[0] != undefined && address.value[0].value[0] != undefined){
+					address = address.value[0].value[0];
+				}
 			}
 			if (albumart){
 				var albumartstring = 'http://'+address+albumart;

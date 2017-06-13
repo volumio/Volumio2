@@ -38,6 +38,7 @@
           "element": "",
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ENABLE_I2S_DAC",
           "label": "",
+          "hidden": true,
           "value": false
         },
         {
@@ -202,7 +203,8 @@
           "volumestart",
           "volumemax",
           "volumesteps",
-          "volumecurvemode"
+          "volumecurvemode",
+          "mpdvolume"
         ]
       },
       "content": [
@@ -403,14 +405,20 @@
             }
           ]
 
+        },
+        {
+          "id": "mpdvolume",
+          "element": "switch",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME",
+          "value":false
         }
 
       ]
     },
 	{
 	  "id": "advanced_twaaks",
-	  "element": "section",
-	  "hidden":true,	
+	  "element": "section",	
 	  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
 	  "icon": "fa-tachometer",
 	  "onSave": {"type":"controller", "endpoint":"audio_interface/alsa_controller", "method":"saveResamplingOpts"},
@@ -509,10 +517,51 @@
 			{
 			  "value":"352800",
 			  "label": "352,8 kHz"
-			}
+			},
+            {
+              "value":"384000",
+              "label": "384 kHz"
+            },
+            {
+              "value":"768000",
+              "label": "768 kHz"
+            }
 		  ]
 
-		}
+		},
+        {
+          "id": "resampling_quality",
+          "element": "select",
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.RESAMPLING_ALG_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.RESAMPLING_ALG",
+          "value":  {
+            "value":"high",
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.HIGH"
+          },
+          "visibleIf": {
+            "field": "resampling",
+            "value": true
+          },
+          "options": [
+            {
+              "value":"very high",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.VERY_HIGH"
+            },
+            {
+              "value":"high",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.HIGH"
+            },
+            {
+              "value":"medium",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.MEDIUM"
+            },
+            {
+              "value":"low",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.LOW"
+            }
+          ]
+
+        }
 
 	  ]
 	}

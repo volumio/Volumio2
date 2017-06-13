@@ -283,13 +283,15 @@ CoreCommandRouter.prototype.volumioSearch = function (data) {
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioPushState');
+	// TODO SYNC EVERY 2 SECONDS, NOT ON ANY STATE CHANGE
 	this.executeOnPlugin('system_controller', 'volumiodiscovery', 'saveDeviceInfo', state);
 	// Announce new player state to each client interface
 	var self = this;
 	var res = libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-			return thisInterface.pushState(state);
+			if (typeof thisInterface.pushState === "function")
+				return thisInterface.pushState(state);
 		})
 	);
 	self.callCallback("volumioPushState", state);
@@ -309,7 +311,8 @@ CoreCommandRouter.prototype.volumioPushQueue = function (queue) {
 	return libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
-			return thisInterface.pushQueue(queue);
+			if (typeof thisInterface.pushQueue === "function")
+				return thisInterface.pushQueue(queue);
 		})
 	);
 };
@@ -385,22 +388,13 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
-	var self=this;
+	this.stateMachine.clearQueue();
 
-	var defer=libQ.defer();
-
-	//this.stateMachine.clearQueue();
-    this.stateMachine.clearAddPlayQueue(arrayItems)
-        .then(function()
-        {
-           //self.volumioPlay(0);
-           defer.resolve();
-        })
-        .fail(function(err){
-            defer.reject(new Error(err));
-        });
-
-    return defer.promise;
+    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
+        return this.playPlaylist(arrayItems.title)
+    } else  {
+        return this.stateMachine.addQueueItems(arrayItems);
+    }
 };
 
 
@@ -980,6 +974,59 @@ CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	return thisPlugin.getUIConfig(data);
 };
 
+CoreCommandRouter.prototype.writePlayerControls = function (config) {
+	var self = this;
+	var pCtrlFile = '/data/playerstate/playback-controls.json';
+
+	this.pushConsoleMessage('CoreCommandRouter::writePlayerControls');
+
+	var state = self.stateMachine.getState();
+
+	var data = Object.assign({
+		random: state.random,
+		repeat: state.repeat
+	}, config);
+
+	fs.writeFile(pCtrlFile, JSON.stringify(data, null, 4), function (err) {
+		if (err) self.pushConsoleMessage('Failed setting player state in CoreCommandRouter::initPlayerState');
+	});
+};
+
+CoreCommandRouter.prototype.initPlayerControls = function () {
+	var pCtrlFile = '/data/playerstate/playback-controls.json';
+	var self = this;
+
+	this.pushConsoleMessage('CoreCommandRouter::initPlayerControls');
+
+	function handleError() {
+		self.pushConsoleMessage('Failed setting player state in CoreCommandRouter::initPlayerControls');
+	}
+
+	fs.ensureFile(pCtrlFile, function (err) {
+		if (err) handleError();
+
+		fs.readFile(pCtrlFile, function (err, data) {
+			if (err) handleError();
+
+			try {
+				var config = JSON.parse(data.toString());
+				self.stateMachine.setRepeat(config.repeat);
+				self.stateMachine.setRandom(config.random);
+			} catch(e) {
+				var state = self.stateMachine.getState();
+				var config = {
+					random: state.random,
+					repeat: state.repeat
+				};
+
+				fs.writeFile(pCtrlFile, JSON.stringify(config, null, 4), function (err) {
+					if (err) handleError();
+				});
+			}
+		});
+	});
+};
+
 /* what is this?
  CoreCommandRouter.prototype.getConfiguration=function(componentCode)
  {
@@ -1093,10 +1140,12 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 // Platform specific & Hardware related options, they can be found in platformSpecific.js
 // This allows to change system commands across different devices\environments
 CoreCommandRouter.prototype.shutdown = function () {
+	this.pluginManager.onVolumioShutdown();
 	this.platformspecific.shutdown();
 };
 
 CoreCommandRouter.prototype.reboot = function () {
+	this.pluginManager.onVolumioReboot();
 	this.platformspecific.reboot();
 };
 
@@ -1157,6 +1206,22 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 	{
 		return this.stateMachine.play(N);
 	}
+};
+
+// Volumio Toggle
+CoreCommandRouter.prototype.volumioToggle = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioToggle');
+
+    var state=this.stateMachine.getState();
+
+	if (state.status != undefined) {
+		if(state.status==='stop' || state.status==='pause')
+		{
+        		return this.stateMachine.play();
+    		} else {
+        		return this.stateMachine.pause();
+		}
+    }
 };
 
 
@@ -1289,13 +1354,65 @@ CoreCommandRouter.prototype.disableAndStopPlugin = function (category,name) {
 
 CoreCommandRouter.prototype.volumioRandom = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+
+	this.writePlayerControls({
+		random: data
+	});
+
 	return this.stateMachine.setRandom(data);
 };
 
+
+
+
+CoreCommandRouter.prototype.randomToggle = function(){
+    var self = this;
+
+    var state = self.stateMachine.getState();
+
+    if(state.random){
+        var random = false;
+    }
+    else{
+        var random = true;
+    }
+
+    this.writePlayerControls({
+        random: random
+	});
+
+    return self.stateMachine.setRandom(random);
+
+}
+
 CoreCommandRouter.prototype.volumioRepeat = function (repeat,repeatSingle) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
-	return this.stateMachine.setRepeat(repeat,repeatSingle);
+    this.pushConsoleMessage('CoreCommandRouter::volumioRandom');
+
+    this.writePlayerControls({
+        repeat: repeat
+    });
+
+    return this.stateMachine.setRepeat(repeat,repeatSingle);
 };
+
+CoreCommandRouter.prototype.repeatToggle = function () {
+    var self = this;
+
+    var state = self.stateMachine.getState();
+
+    if(state.repeat){
+        var repeat = false;
+    }
+    else{
+        var repeat = true;
+    }
+
+    this.writePlayerControls({
+        repeat: repeat
+    });
+
+    return self.stateMachine.setRepeat(repeat, false);
+}
 
 CoreCommandRouter.prototype.volumioConsume = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');

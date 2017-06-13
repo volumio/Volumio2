@@ -1,9 +1,7 @@
 #!/bin/bash
 
 
-HARDWARE_REV=`cat /proc/cpuinfo | grep "Hardware" | awk -F: '{print $NF}'`
-
-function kernelinstall {
+kernelinstall() {
 
 echo " ---- VOLUMIO RASPBERRY PI KERNEL SOURCE DOWNLOADER ----"
 echo " "
@@ -20,11 +18,16 @@ then
 fi
 
 cd /home/volumio
+if [ -f "/boot/.firmware_revision_kernel" ]; then
+FIRMWARE_REV=`cat /boot/.firmware_revision_kernel`
+else
 FIRMWARE_REV=`cat /boot/.firmware_revision`
+fi
+
 echo "Firmware revision is"  $FIRMWARE_REV 
 
 KERNEL_REV=`curl -L https://github.com/Hexxeh/rpi-firmware/raw/${FIRMWARE_REV}/git_hash`
-echo "Kernel revision is "$FIRMWARE_REV
+echo "Kernel revision is "$KERNEL_REV
 
 if [ "$ARCH" = armv7l ]; then
  echo "Getting modules symvers for V7 kernel"
@@ -34,7 +37,7 @@ if [ "$ARCH" = armv7l ]; then
  curl -L https://github.com/Hexxeh/rpi-firmware/raw/${FIRMWARE_REV}/Module.symvers >Module.symvers
 fi
 
-echo "Donwloading Kernel source tarball from " https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz
+echo "Downloading Kernel source tarball from " https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz
 curl -L https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz >rpi-linux.tar.gz
 
 echo "creating /usr/src/rpi-linux folder"
@@ -62,7 +65,7 @@ echo "Done, you can now build and install out of kernel modules"
 }
 
 
-if [ "$HARDWARE_REV" = " BCM2709" ] || [ "$HARDWARE_REV" = " BCM2708" ]; then
+if (cat /proc/cpuinfo | grep '^Hardware.*BCM2[78][013][05-9].*' > /dev/null); then
  kernelinstall
 else
  echo "This tool is available only for Raspberry PI, exiting"

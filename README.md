@@ -8,22 +8,12 @@
 
 [![Volumio](https://volumio.org/wp-content/uploads/2016/02/Volumio_logo_HD2000.jpg)](https://volumio.org)
 
-Volumio is an headless audiophile music player, designed to play music with the highest possible fidelity. Volumio runs on most embedded devices (Raspberry Pi, UDOO, Odroid, Cubieboard, Beaglebone...) and on any ordinary PC (x86).
+Volumio is an headless audiophile music player, designed to play music with the highest possible fidelity. Volumio runs on most embedded devices (Raspberry Pi, UDOO, Odroid, Cubieboard, Beaglebone, Pine64, Allo Sparky...) and on any ordinary PC (x86).
 
 ## Volumio 2 System Images
 
 LATEST
-* [2.041 (2016-12-12)](http://updates.volumio.org/pi/volumio/2.041/volumio-2.041-2016-12-12-pi.img.zip)
-
-PREVIOUS VERSIONS
-* [RC2 HOTFIX (2016-07-01)](http://updates.volumio.org/pi/volumio/0.928/volumio-0.928-2016-06-30-pi.img.zip)
-* [RC2 (2016-06-25)](http://updates.volumio.org/pi/volumio/0.923/volumio-0.923-2016-06-25-pi.img.zip)
-* [RC1 (2016-03-25)](http://updates.volumio.org/pi/volumio/0.861/volumio-0.861-2016-03-25-pi.img.zip)
-* [Beta4 (2016-03-03)](http://updates.volumio.org/pi/volumio/0.839/volumio-0.839-2016-03-03-pi.img.zip)
-* [Beta3 (2016-02-23)](http://updates.volumio.org/pi/volumio/0.836/volumio-0.836-2016-02-23-pi.img.zip)
-* [Beta2 (2016-02-20)](http://updates.volumio.org/pi/volumio/0.833/volumio-0.833-2016-02-20-pi.img.zip)
-* [Beta1 (2016-02-11)](http://updates.volumio.org/pi/volumio/0.830/Volumio0.830-2016-02-11PI.img.zip)
-* [Alpha6 (2016-01-25)](http://updates.volumio.org/pi/volumio/0.824/Volumio0.824-2016-01-25PI.img.zip)
+* Link : https://volumio.org/get-started/
 
 Logins
 * user : *volumio*

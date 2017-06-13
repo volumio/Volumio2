@@ -20,6 +20,8 @@ myVolumio.prototype.onVolumioStart = function ()
         'config.json');
     self.config = new (require('v-conf'))();
     self.config.loadFile(configFile);
+    
+    return libQ.resolve();
 };
 
 
