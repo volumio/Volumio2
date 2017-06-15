@@ -34,7 +34,7 @@
     "DOP":"DSD over PCM (DoP)",
     "DSD_PLAYBACK_MODE":"DSD Playback mode",
     "DSD_DIRECT":"DSD Direct",
-    "DSD_DOC":"Choose the DSD Playback mode: Direct DSD Playback plays DSD Native on supported hardware, if DSD is not supported by your DAC then DSD is converted on-the-fly to PCM. With DoP (DSD over PCM) , DSD streams will be encapsulated in 24 bits PCM (as per DoP Standard).",
+    "DSD_DOC":"Choose the DSD Playback mode: Direct DSD Playback plays DSD Native on supported hardware, if DSD is not supported by your DAC then DSD is converted on-the-fly to PCM. With DoP (DSD over PCM), DSD streams will be encapsulated in 24 bits PCM (as per DoP Standard).",
     "DSD_AUTO_VOLUME":"DSD Auto Volume Level",
     "DSD_AUTO_VOLUME_DOC":"DSD Requires volume to be set to 100, if enabled when DSD is playing Volume will be automatically set to 100 (WARNING: Set with caution!)",
     "SOFTVOL":"Software Volume Control",
