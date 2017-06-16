@@ -6,7 +6,6 @@ var libFast = require('fast.js');
 var S = require('string');
 var vconf=require('v-conf');
 var libQ=require('kew');
-var DecompressZip = require('decompress-zip');
 var http = require('http');
 var execSync = require('child_process').execSync;
 var Tail = require('tail').Tail;
@@ -461,7 +460,7 @@ PluginManager.prototype.installPlugin = function (url) {
 			currentMessage = 'Creating folder on disk';
 			advancedlog = advancedlog + "<br>" + currentMessage;
 
-			var pluginFolder = '/tmp/downloaded_plugin';
+			var pluginFolder = '/data/temp/downloaded_plugin';
 
 
 			self.createFolder(pluginFolder)
@@ -590,7 +589,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 			currentMessage = 'Creating folder on disk';
 			advancedlog = advancedlog + "<br>" + currentMessage;
 
-			var pluginFolder = '/tmp/downloaded_plugin';
+			var pluginFolder = '/data/temp/downloaded_plugin';
 
 			self.stopPlugin(category,name)
 				.then(function(e)
@@ -702,7 +701,7 @@ PluginManager.prototype.rmDir = function (folder) {
 	var self=this;
 
 	var defer=libQ.defer();
-	fs.remove('/tmp/downloaded_plugin', function (err) {
+	fs.remove(folder, function (err) {
 		if (err) defer.reject(new Error("Cannot delete folder "+folder));
 
 		self.logger.info("Folder "+folder+" removed");
@@ -716,7 +715,8 @@ PluginManager.prototype.rmDir = function (folder) {
 PluginManager.prototype.tempCleanup = function () {
 	var self=this;
 
-	self.rmDir('/tmp/downloaded_plugin');
+	self.rmDir('/data/temp');
+	self.rmDir('/tmp/plugins');
 	self.rmDir('/tmp/downloaded_plugin.zip');
 }
 
@@ -738,21 +738,19 @@ PluginManager.prototype.createFolder = function (folder) {
 PluginManager.prototype.unzipPackage = function () {
 	var self=this;
 	var defer=libQ.defer();
+	var extractFolder='/data/temp/downloaded_plugin';
 
-	var extractFolder='/tmp/downloadedPlugin';
-	var unzipper = new DecompressZip('/tmp/downloaded_plugin.zip')
-
-	unzipper.on('error', function (err) {
-		console.log("ERROR: "+err);
-		defer.reject(new Error());
-	});
-
-	unzipper.on('extract', function (log) {
-		defer.resolve(extractFolder);
-	});
-
-	unzipper.extract({
-		path: extractFolder
+	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, function (error) {
+	
+		if (error !== null) {
+			console.log("ERROR: "+ error);
+			defer.reject(new Error());
+		}
+		else {
+			defer.resolve(extractFolder);
+		}
+	
+		self.rmDir('/tmp/downloaded_plugin.zip');
 	});
 
 	return defer.promise;
@@ -768,18 +766,21 @@ PluginManager.prototype.renameFolder = function (folder) {
 	var package_json = self.getPackageJson(folder);
 	var name = package_json.name;
 
-	var newFolderName=self.pluginPath[1]+'/'+name;
+	var newFolderName=self.pluginPath[1]+name;
 
-	fs.move(folder,newFolderName ,function (err) {
-		if (err) defer.reject(new Error());
-		else
-		{
+	exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {	
+		if (error !== null) {
+			console.log("ERROR: "+ error);
+			defer.reject(new Error());
+		}
+		else {
 			defer.resolve(newFolderName);
 		}
 	});
-
+	
 	return defer.promise;
 }
+
 
 PluginManager.prototype.moveToCategory = function (folder) {
 	var self=this;
@@ -791,22 +792,25 @@ PluginManager.prototype.moveToCategory = function (folder) {
 	var name = package_json.name;
 	var category = package_json.volumio_info.plugin_type;
 
-	var newFolderName=self.pluginPath[1]+'/'+category+'/'+name;
+	var newFolderName=self.pluginPath[1]+category;
 
-	fs.remove(newFolderName,function()
+	fs.remove(newFolderName +'/'+name,function()
 	{
-		fs.move(folder,newFolderName ,function (err) {
-			if (err) defer.reject(new Error(err));
-			else
-			{
-				defer.resolve(newFolderName);
-			}
-		});
-	});
-
-
+		self.createFolder(newFolderName)
+			.then (exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {	
+				if (error !== null) {
+					console.log("ERROR: "+ error);
+					defer.reject(new Error());
+				}
+				else {
+					defer.resolve(newFolderName +'/'+name);
+				}
+			}));
+	});		
+	
 	return defer.promise;
 }
+
 
 PluginManager.prototype.addPluginToConfig = function (folder) {
 	var self=this;
