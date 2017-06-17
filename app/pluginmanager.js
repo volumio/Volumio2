@@ -436,16 +436,22 @@ PluginManager.prototype.installPlugin = function (url) {
 	var defer=libQ.defer();
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
-
+	var downloadCommand;
 
 	var currentMessage = "Downloading plugin at "+url;
+	var droppedFile = url.replace("http://127.0.0.1:3000/plugin-serve/", "");
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
+	if (droppedFile == url)
+		downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
+	else
+		downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
+
 	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
-
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
+	
+	exec(downloadCommand, function (error, stdout, stderr) {
 
 		if (error !== null) {
 			currentMessage = "Cannot download file "+url+ ' - ' + error;
@@ -455,6 +461,7 @@ PluginManager.prototype.installPlugin = function (url) {
 		}
 		else {
 			currentMessage = "END DOWNLOAD: "+url;
+			self.rmDir('/tmp/plugins');
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			self.logger.info(currentMessage);
 			currentMessage = 'Creating folder on disk';
