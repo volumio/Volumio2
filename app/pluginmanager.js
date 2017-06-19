@@ -841,7 +841,7 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 		else {
 			self.logger.info("Executing install.sh");
-			exec('echo volumio | sudo -S sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
+			exec('echo volumio | sh ' + installScript+' > /tmp/installog', {uid:1000, gid:1000, maxBuffer: 2024000},function(error, stdout, stderr) {
 				if (error!==undefined && error!==null) {
 					self.logger.info("Install script return the error "+error);
 					defer.reject(new Error());
