@@ -23,8 +23,7 @@ underscore.shuffle = function (set) {
 };
 
 class RandomQueue {
-    constructor(commandRouter, stateMachine) {
-        this.commandRouter = commandRouter;
+    constructor(stateMachine) {
         this.stateMachine = stateMachine;
 
         this.queueMap = [];
