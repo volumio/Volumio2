@@ -1,6 +1,7 @@
 'use strict';
 
 var libQ = require('kew');
+var RandomQueue = require('./randomqueue');
 
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
@@ -44,6 +45,7 @@ function CoreStateMachine(commandRouter) {
 
     this.isUpnp = false;
 
+	this.randomQueue = new RandomQueue(commandRouter, this);
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
 }
@@ -406,7 +408,7 @@ CoreStateMachine.prototype.getNextIndex = function () {
     // Then check if Random mode is on - Random mode overrides Repeat mode by this
     if(this.currentRandom)
     {
-        nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+		nextIndex = this.randomQueue.next(this.playQueue.arrayQueue);
         this.nextRandomIndex=nextIndex;
     }
 
@@ -819,7 +821,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                         if(this.nextRandomIndex)
                             this.currentPosition=this.nextRandomIndex;
                         else
-                            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+							this.currentPosition = this.randomQueue.next(this.playQueue.arrayQueue);
 					}
 					else {
 						if(this.currentPosition ==null || this.currentPosition===undefined)
@@ -1022,6 +1024,10 @@ CoreStateMachine.prototype.play = function (index) {
 			{
                 this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
 				self.currentPosition=0;
+			}
+
+			if (self.currentPosition === 0 && self.currentRandom!==undefined && self.currentRandom===true) {
+				self.currentPosition = self.randomQueue.getRandomListPosition();
 			}
 
 
@@ -1245,7 +1251,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			if (this.currentRandom !== undefined && this.currentRandom === true) {
 				this.stop();
 				setTimeout(function () {
-					self.currentPosition = Math.floor(Math.random() * (self.playQueue.arrayQueue.length));
+					self.currentPosition = self.randomQueue.prev(self.playQueue.arrayQueue);
 					self.play();
 				}, 500);
 			}
@@ -1262,7 +1268,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		// Pause -> Previous transition
 		if(this.currentRandom!==undefined && this.currentRandom===true)
 		{
-			this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length  + 1));
+			this.currentPosition = this.randomQueue.prev(this.playQueue.arrayQueue);
 		}
 		else if (this.currentPosition > 0) {
 			this.currentPosition--;
