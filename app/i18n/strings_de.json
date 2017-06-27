@@ -32,7 +32,6 @@
 	"I2S_DAC_DEACTIVATED":"I2S DAC inaktiv",
 	"I2S_DAC_DEACTIVATED_MESSAGE":"wurde deaktiviert. Bitte System neu starten!",
 	"DOP":"DSD over PCM (DoP)",
-	  "DOP_DOC":"Wenn aktiviert wird der DSD-Stream in PCM (DoP) gekapselt transportiert.",
 	"DSD_PLAYBACK_MODE":"DSD-Abspielmodus",
 	"DSD_DIRECT":"DSD Direct",
 	"DSD_DOC":"DSD-Abspielmodus auswählen: DSD Direct verwendet auf unterstützter Hardware natives DSD. Sollte auf der verwendeten Hardware DSD nicht unterstützt werden, wird DSD on-the-fly zu PCM konvertiert. Sollte DoP (DSD over PCM) ausgewählt sein, werden DSD-Streams in einem 24-bit PCM-Stream gekapselt (wie bei normalem DoP).",
