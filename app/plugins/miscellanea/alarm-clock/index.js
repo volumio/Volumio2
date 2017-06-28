@@ -348,20 +348,27 @@ AlarmClock.prototype.setSleep = function(data)
 			actionText = self.commandRouter.getI18nString('ALARM.TURN_OFF');
 		}
 		if (addedHours == 0)  {
-			self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.SLEEP_MODE_TITLE'), self.commandRouter.getI18nString('ALARM.SLEEP_MODE_SYSTEM_WILL')
-                + ' ' + actionText + ' ' +
-                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_IN') + ' '
-                + addedMinutes + ' ' +
-                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_MINUTE'));
+			self.commandRouter.pushToastMessage(
+				'success',
+				self.commandRouter.getI18nString('ALARM.SLEEP_MODE_TITLE'),
+				self.commandRouter.getI18nString('ALARM.SLEEP_MODE_SYSTEM_WILL') + ' '
+					+ actionText + ' '
+					+ self.commandRouter.getI18nString('ALARM.SLEEP_MODE_IN') + ' '
+					+ addedMinutes + ' '
+					+ self.commandRouter.getI18nString('ALARM.SLEEP_MODE_MINUTE')
+			);
 		} else {
-			self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('ALARM.SLEEP_MODE_TITLE'),
-                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_SYSTEM_WILL') + ' '
-                + actionText + ' ' +
-                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_IN') + ' '
-                + addedHours + ' ' +
-                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_HOUR')
-                + addedMinutes + ' ' +
-                self.commandRouter.getI18nString('ALARM.SLEEP_MODE_MINUTE'));
+			self.commandRouter.pushToastMessage(
+				'success',
+				self.commandRouter.getI18nString('ALARM.SLEEP_MODE_TITLE'),
+				self.commandRouter.getI18nString('ALARM.SLEEP_MODE_SYSTEM_WILL') + ' '
+					+ actionText + ' '
+					+ self.commandRouter.getI18nString('ALARM.SLEEP_MODE_IN') + ' '
+					+ addedHours + ' '
+					+ self.commandRouter.getI18nString('ALARM.SLEEP_MODE_HOUR')
+					+ addedMinutes + ' '
+					+ self.commandRouter.getI18nString('ALARM.SLEEP_MODE_MINUTE')
+			);
 		}
 	}
 
