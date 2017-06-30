@@ -125,6 +125,8 @@ ControllerMpd.prototype.addPlay = function (fileName) {
 	this.commandRouter.pushToastMessage('Success', '', fileName + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 
 
+
+
 	//Add playlists and cue with load command
 	if (fileName.endsWith('.cue') || fileName.endsWith('.pls') || fileName.endsWith('.m3u')) {
 		this.logger.info('Adding Playlist: ' + fileName);
@@ -2372,6 +2374,10 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
 
         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
 
+		var urilow = uri.toLowerCase();
+        if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd')) {
+			self.dsdVolume();
+        }
         // Clear the queue, add the first track, and start playback
         var defer = libQ.defer();
         var cmd = libMpd.cmd;
@@ -3310,8 +3316,14 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
     var self=this;
     this.logger.info("DOING PREFETCH IN MPD");
     var uri=this.sanitizeUri(trackBlock.uri);
-    this.logger.info(uri);
 
+    var urilow = trackBlock.uri.toLowerCase();
+    if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd')) {
+    	setTimeout(function(){
+            self.dsdVolume();
+		},5000)
+
+    }
     return this.sendMpdCommand('add "'+uri+'"',[])
         .then(function(){
             return self.sendMpdCommand('consume 1',[]);
@@ -3393,6 +3405,7 @@ ControllerMpd.prototype.dsdVolume=function(){
 	var self = this;
 
 	if (dsd_autovolume) {
+		self.logger.info('Setting Volume to 100 automatically for DSD')
         self.commandRouter.volumiosetvolume(100);
 	}
 }
