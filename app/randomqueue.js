@@ -30,25 +30,25 @@ class RandomQueue {
         this.position = 0;
     }
 
-    _modifyQueueLength(playQueue) {
+    modifyQueueLength(playQueue) {
         const mapping = playQueue.map((_, i) => i);
 
         if (this.queueMap.length < playQueue.length) {
             this.queueMap = underscore.shuffle(mapping);
-        } else if (this.queueMap.length < playQueue.length) {
+        } else if (this.queueMap.length > playQueue.length) {
             this.queueMap = underscore.shuffle(mapping);
         }
     }
 
     getRandomListPosition(index) {
         if (!this.queueMap.length) {
-            this._modifyQueueLength(this.stateMachine.playQueue.arrayQueue);
+            this.modifyQueueLength(this.stateMachine.playQueue.arrayQueue);
         }
         return this.queueMap[index || 0];
     }
 
     next(playQueue) {
-        this._modifyQueueLength(playQueue);
+        this.modifyQueueLength(playQueue);
         this.position++;
 
         if (this.position > this.queueMap.length-1) {
@@ -59,7 +59,7 @@ class RandomQueue {
     }
 
     prev(playQueue) {
-        this._modifyQueueLength(playQueue);
+        this.modifyQueueLength(playQueue);
         this.position--;
 
         if (this.position < 0 ) {

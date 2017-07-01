@@ -1025,10 +1025,8 @@ CoreStateMachine.prototype.play = function (index) {
                 this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
 				self.currentPosition=0;
 			}
-
-			if (self.currentPosition === 0 && self.currentRandom!==undefined && self.currentRandom===true) {
-				self.currentPosition = self.randomQueue.getRandomListPosition();
-			}
+			
+			self.randomQueue.modifyQueueLength(self.playQueue.arrayQueue);
 
 
 			if(index!==undefined)
