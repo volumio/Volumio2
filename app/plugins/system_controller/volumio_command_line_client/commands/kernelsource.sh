@@ -19,7 +19,7 @@ kernelinstall() {
   if [ $(dpkg-query -W -f='${Status}' make 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
     echo "Installing build essential"
-    echo volumio | sudo -S apt-get update && apt-get install -y build-essential bc;
+    apt-get update && apt-get install -y build-essential bc;
   fi
 
   cd /home/volumio
@@ -46,25 +46,25 @@ kernelinstall() {
   curl -L https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz >rpi-linux.tar.gz
 
   echo "creating /usr/src/rpi-linux folder"
-  echo volumio | sudo -S mkdir /usr/src/rpi-linux
+  mkdir /usr/src/rpi-linux
 
   echo "Extracting Kernel"
-  echo volumio | sudo -S tar --strip-components 1 -xf rpi-linux.tar.gz -C /usr/src/rpi-linux
+  tar --strip-components 1 -xf rpi-linux.tar.gz -C /usr/src/rpi-linux
   cd /usr/src/rpi-linux
 
   echo "Cloning current config"
-  echo volumio | sudo -S /sbin/modprobe configs
-  echo volumio | sudo -S gunzip -c /proc/config.gz >.config
+  /sbin/modprobe configs
+  gunzip -c /proc/config.gz >.config
 
   echo "Copying modules symverse"
   if [ "$ARCH" = armv7l ]; then
-    echo volumio | sudo -S cp /home/volumio/Module7.symvers Module.symvers
+    cp /home/volumio/Module7.symvers Module.symvers
     else
-    echo volumio | sudo -S cp /home/volumio/Module.symvers Module.symvers
+    cp /home/volumio/Module.symvers Module.symvers
   fi
-  echo volumio | sudo -S make LOCALVERSION=+ modules_prepare
+  make LOCALVERSION=+ modules_prepare
   echo "Linking Modules"
-  echo volumio | sudo -S ln -sv /usr/src/rpi-linux /lib/modules/$(uname -r)/build
+  ln -sv /usr/src/rpi-linux /lib/modules/$(uname -r)/build
   echo " "
   echo "Done, you can now build and install out of kernel modules"
 }
