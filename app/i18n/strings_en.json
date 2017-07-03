@@ -245,7 +245,9 @@
     "SYSTEM_NAME_ERROR":"Cannot change system name",
     "SYSTEM_NAME_NOW":"System name is now",
 	"UPDATE_ALREADY_LATEST_VERSION":"You're already on the latest version",
-	"NO_UPDATE_AVAILABLE":"No Updates Available"
+	"NO_UPDATE_AVAILABLE":"No Updates Available",
+    "CANNOT_REMOVE_MEDIA":"Cannot remove media",
+    "MEDIA_REMOVED_SUCCESSFULLY":"Media Removed Successfully"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

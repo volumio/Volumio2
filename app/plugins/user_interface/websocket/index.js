@@ -1752,6 +1752,30 @@ function InterfaceWebUI(context) {
 
 			});
 
+            connWebSocket.on('safeRemoveDrive', function (data) {
+                var selfConnWebSocket = this;
+
+
+                var remove = self.commandRouter.safeRemoveDrive(data);
+
+                if (remove != undefined) {
+                    remove.then(function (data) {
+                        response=self.musicLibrary.executeBrowseSource('music-library/USB');
+
+                        if (response != undefined) {
+                            response.then(function (result) {
+                                selfConnWebSocket.emit('pushBrowseLibrary', result);
+                            })
+                                .fail(function () {
+                                    self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                });
+                        }
+                    });
+                }
+
+
+            });
+
 
 
 

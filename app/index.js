@@ -1645,3 +1645,13 @@ CoreCommandRouter.prototype.checkAndPerformSystemUpdates = function () {
 
     }
 }
+
+CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
+    var self=this;
+    var defer = libQ.defer();
+
+    this.platformspecific.safeRemoveDrive(data);
+    defer.resolve('');
+
+    return defer.promise;
+}
