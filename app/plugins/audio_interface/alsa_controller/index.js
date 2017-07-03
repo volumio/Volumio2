@@ -343,8 +343,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].saveButton.data', dspoptions[w].name);
 					var dspconf = {id : dspoptions[w].name, element : 'select' , label:dspoptions[w].name , hidden:false, value :{value:dspoptions[w].value, label:dspoptions[w].value}, options: []}
 					self.configManager.pushUIConfigParam(uiconf, 'sections[1].content', dspconf);
-					if ((dspoptions[w].name == 'Subwoofer mode') && (dspoptions[w].value == '  2.0' || dspoptions[w].value == '  Dual Stereo' || dspoptions[w].value == '  Dual Mono')) {
-						uiconf.sections[1].content[0].hidden = true;
+
+					if ((dspoptions[w].name === 'Subwoofer mode') && (dspoptions[w].value === 'None')) {
+						uiconf.sections[1].content[1].hidden = true;
 					}
 
 					for (var r in dspoptions[w].options) {
@@ -371,9 +372,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 ControllerAlsa.prototype.saveDSPOptions = function (data) {
 	var self = this;
-	//console.log(data)
-
-	var pre = '';
+	var defer = libQ.defer();
 	var reboot = false;
 
 	var value = self.config.get('outputdevice');
@@ -389,48 +388,62 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
 	} else {
 		outdevicename = self.getLabelForSelectedCard(cards, value);
 	}
-
 	if (outdevicename == 'Allo Piano 2.1') {
-		var preraw = execSync("amixer get -c 1 'Subwoofer mode' | grep Item0", {encoding: 'utf8'});
-		var preraw2 = preraw.split("'");
-		pre = preraw2[1];
-	}
+		var SubValue = execSync("amixer get -c 1 'Subwoofer mode' | grep Item0", {encoding: 'utf8'}).split("'")[1];
+        var DualModeValue = execSync("amixer get -c 1 'Dual Mode' | grep Item0", {encoding: 'utf8'}).split("'")[1];
+
+		if (data['Dual Mode'].value != DualModeValue && data['Dual Mode'].value != 'None') {
+            data['Subwoofer mode'].value = 'None';
+            reboot = true;
+		}
+		else if (data['Subwoofer mode'].value != SubValue && data['Subwoofer mode'].value != 'None') {
+            data['Dual Mode'].value = 'None';
+            reboot = true;
+        }
+
+    }
 
 	for(var i in data ) {
-		//console.log(data[i])
-		//console.log(i)
-		//console.log("/usr/bin/amixer -c " + value + " set  '" + i + "' '" + data[i].value.replace('  ', ''))
-		exec("/usr/bin/amixer -c " + value + " set '" + i + "' '" + data[i].value.replace('  ', '')+"'", {uid:1000, gid:1000},function(error, stdout, stderr) {
-			if (error) {
-				self.logger.info('ERROR Cannot set DSP ' + i + ' for card ' + value +': '+error);
-			} else {
-				self.logger.info('Successfully set DSP ' + i + ' for card ' + value );
-				if ((outdevicename == 'Allo Piano 2.1') && (i == 'Subwoofer mode') && (pre != data[i].value.replace('  ', ''))) {
+		var dspname = i;
+		var dspvalue = data[i].value;
 
-					var responseData = {
-						title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'),
-						message: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_REBOOT'),
-						size: 'lg',
-						buttons: [
-							{
-								name: self.commandRouter.getI18nString('COMMON.RESTART'),
-								class: 'btn btn-info',
-								emit:'reboot',
-								payload:''
-							}
-						]
-					}
+		try {
 
-					self.commandRouter.broadcastMessage("openModal", responseData);
-
-				}
-
-			}
-		});
-
+            execSync('/usr/bin/amixer -c ' + value + ' set "' + dspname + '" "' + dspvalue+'"', {uid:1000, gid:1000, encoding: 'utf8'});
+            self.logger.info('Successfully set DSP ' + dspname + ' with value ' + dspvalue + ' for card ' + value );
+		} catch (e) {
+            self.logger.info('ERROR Cannot set DSP ' + dspname + ' for card ' + value +': '+error);
+		}
 	}
 
+    if (reboot) {
+        var responseData = {
+            title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'),
+            message: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_REBOOT'),
+            size: 'lg',
+            buttons: [
+                {
+                    name: self.commandRouter.getI18nString('COMMON.RESTART'),
+                    class: 'btn btn-info',
+                    emit:'reboot',
+                    payload:''
+                }
+            ]
+        }
+
+        self.commandRouter.broadcastMessage("openModal", responseData)
+    }
+
 	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS'), self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'));
+
+    var respconfig = self.getUIConfig();
+
+    respconfig.then(function(config)
+    {
+        self.commandRouter.broadcastMessage('pushUiConfig', config);
+    });
+
+    return defer.promise;
 }
 
 
@@ -460,14 +473,15 @@ ControllerAlsa.prototype.getDSPDACOptions = function (data) {
 						var dspspace = line2[0].replace(/'/g, "").toString();
 						var dspname = dspspace.replace(" ", "");
 						if (dspdata.cards[e].dsp_options.indexOf(dspname) > -1) {
-							//console.log(dspname)
+							//console.log('1'+dspname)
+							//console.log(line[2])
 							var dspoptsarray = line[2].replace(/Items:/g, "").replace(" ", "").split("'").filter(function (val) {
-								return val.length > 0;
+								return val.length > 0 && val != ' ' && val != '  ';
 							});
-							//var dspoptsarray = dspoptraw;
-							//console.log(dspoptsarray)
-							var dspvalue = line[3].replace(/Item0:/g, "").replace(" ", "").replace(/\'/g, "");
-							//console.log(dspvalue)
+
+							//console.log('2'+dspoptsarray)
+							var dspvalue = line[3].replace(/Item0:/g, "").replace(" ", "").replace(/\'/g, "").replace(/\s+/, "") ;
+							//console.log('--'+dspvalue+'--')
 							dspcontrols.push({"name": dspname, "options": dspoptsarray, "value": dspvalue});
 						}
 					}
