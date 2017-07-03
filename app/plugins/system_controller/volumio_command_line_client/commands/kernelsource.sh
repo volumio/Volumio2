@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "0" != "$(id -u)" ]; then
+    echo "You must be root to run $0." 1>&2;
+    logger "$0 : called by $(id -un), not root"
+    exit 1;
+fi
+
 kernelinstall() {
 
   echo " ---- VOLUMIO RASPBERRY PI KERNEL SOURCE DOWNLOADER ----"
