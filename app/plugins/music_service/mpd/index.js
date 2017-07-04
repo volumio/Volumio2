@@ -1,5 +1,7 @@
 'use strict';
 
+var cacheManager = require('cache-manager');
+var memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 0});
 var libMpd = require('./lib/mpd.js');
 var libQ = require('kew');
 var libFast = require('fast.js');
@@ -722,7 +724,12 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	//Notify that The mpd DB has changed
 	self.clientMpd.on('system-database', function () {
 		//return self.commandRouter.fileUpdate();
-		//return self.reportUpdatedLibrary();
+		//return self.reportUpdatedLibrary();		
+		//Refresh AlbumList - delete the current AlbumList cache entry
+		memoryCache.del('cacheAlbumList', function(err) {});
+		//Store new AlbumList in cache
+		self.listAlbums();
+		self.logger.info("MPD Database updated - AlbumList cache refreshed");
 	});
 
 
@@ -1673,7 +1680,7 @@ ControllerMpd.prototype.getAdditionalConf = function (type, controller, data, de
     if (setting == undefined) {
         setting = def;
     }
-    return setting
+    return setting;
 };
 
 ControllerMpd.prototype.setAdditionalConf = function (type, controller, data) {
@@ -2657,50 +2664,79 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
  *
  * list album
  */
-ControllerMpd.prototype.listAlbums = function () {
+ControllerMpd.prototype.listAlbums = function (ui) {
+
     var self = this;
-    var defer = libQ.defer();
-    var response = {
-        "navigation": {
-            "lists": [
-                {
-                    "availableListViews": [
-                        "list",
-                        "grid"
-                    ],
-                    "items": [
+    var defer = libQ.defer();	
+    var response = memoryCache.get("cacheAlbumList", function( err, response){
+		if(response == undefined){
+	
+			response = {
+				"navigation": {
+					"lists": [
+						{
+							"availableListViews": [
+								"list",
+								"grid"
+								],
+							"items": [
+							]
+						}
+					]
+				}
+			};
 
-                    ]
-                }
-            ]
-        }
-    };
-
-    var cmd = libMpd.cmd;
-    self.clientMpd.sendCommand(cmd("list", ["album","group","albumartist"]), function (err, msg) {
-        if(err)
-            defer.reject(new Error('Cannot list albums'));
-        else {
-            var lines=msg.split('\n');
-
-            for (var i = 0; i < lines.length; i++) {
-                var line=lines[i];
-                if (line.indexOf('Album:') === 0) {
-                    var albumName = line.slice(6).trim();
-
-                    if(albumName!==undefined && albumName!=='') {
-                        var artistName=lines[i+1].slice(13).trim();
-                        var codedAlbumName = nodetools.urlEncode(albumName);
-                        var album = {service:'mpd',type: 'folder', title: albumName, artist: artistName, albumart: self.getAlbumArt({artist:artistName,album:albumName},undefined,'fa-dot-circle-o'), uri: 'albums://' + artistName + '/' + codedAlbumName};
-                        response.navigation.lists[0].items.push(album);
-                    }
-                }
-            }
-            defer.resolve(response);
-        }
-    });
-    return defer.promise;
-
+			var cmd = libMpd.cmd;
+			
+			self.clientMpd.sendCommand(cmd("search album \"\"", []), function (err, msg) {
+			if(err) {
+				defer.reject(new Error('Cannot list albums'));
+			}
+			else {				
+				
+                var lines = msg.split('\n');            
+                var albumsfound = [];
+				for (var i = 0; i < lines.length; i++) {
+					var line = lines[i];
+					if (line.startsWith('file:')) {
+						var path = line.slice(6);
+						var albumName = self.searchFor(lines, i + 1, 'Album:');
+						var artistName = self.searchFor	(lines, i + 1, 'AlbumArtist:');
+					//********Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
+						if (albumsfound.indexOf(albumName + artistName) <0 ) { // Album/Artist is not in 'albumsfound' array
+							albumsfound.push(albumName + artistName);
+							var codedArtistName = nodetools.urlEncode(artistName);
+							var codedAlbumName = nodetools.urlEncode(albumName);
+							var album = {
+								service:'mpd',
+								type: 'folder', 
+								title: albumName, 
+								artist: artistName, 							
+								album:'',
+								uri: 'albums://' + nodetools.urlEncode(artistName) + '/'+ nodetools.urlEncode(albumName),
+						//Get correct album art from path- only download if not existent								
+								albumart: self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path),'fa-tags')
+								};
+							response.navigation.lists[0].items.push(album);
+							}
+						}
+					}
+				//Save response in albumList cache for future use
+				memoryCache.set("cacheAlbumList", response);		
+				if(ui) {
+					defer.resolve(response);
+					}				
+				}
+			});				
+		}
+		else {
+			console.log("listAlbums - loading Albums from cache");
+			if(ui) {
+				defer.resolve(response);
+			}	
+		}
+	});					
+	return defer.promise;
 };
 
 /**
@@ -2865,8 +2901,7 @@ ControllerMpd.prototype.listArtists = function () {
 				if(splitted[i].startsWith(artistbegin))  {
                     var artist=splitted[i].substring(artistbegin.length);
 
-                    if(artist!=='')
-                    {
+                    if(artist!=='') {		
                         var codedArtists=nodetools.urlEncode(artist);
 
                         var albumart=self.getAlbumArt({artist:codedArtists},undefined,'fa-users');
@@ -2945,9 +2980,14 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 			if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
 				var findartist = "find albumartist \"" + artist + "\"";
 				VA = 1;
-			}
-			else {                                      //artist is NOT in compilation array so use artist
-				var findartist = "find artist \"" + artist + "\"";
+			}		
+			else {                                      //artist is NOT in compilation array so use artist or albumartist
+				if (artistsort) {						//Fix - now set by artistsort variable
+					var findartist = "find albumartist \"" + artist + "\"";
+				}
+				else {
+					var findartist = "find artist \"" + artist + "\"";
+				}
 			}
 		}
 
