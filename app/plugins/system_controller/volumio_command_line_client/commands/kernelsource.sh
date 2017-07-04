@@ -7,7 +7,7 @@ if [ "0" != "$(id -u)" ]; then
 fi
 
 asvolumio() {
-    sudu -u volumio "$@"
+    sudo -u volumio "$@"
 }
 
 
