@@ -52,26 +52,26 @@ plugin publish                     publishes the plugin on git
 #VOLUMIO SERVICE CONTROLS
 
 start() {
-echo volumio | sudo -S systemctl start volumio.service
+sudo systemctl start volumio.service
 }
 
 vstop() {
-echo volumio | sudo -S systemctl stop volumio.service
+sudo systemctl stop volumio.service
 }
 
 #VOLUMIO DEVELOPMENT
 
 pull() {
 echo "Stopping Volumio"
-echo volumio | sudo -S systemctl stop volumio.service
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+sudo systemctl stop volumio.service
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
 echo "Pull completed, restarting Volumio"
-echo volumio | sudo -S systemctl start volumio.service
+sudo systemctl start volumio.service
 echo "Done"
 }
 
 kernelsource() {
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 
 case "$1" in
