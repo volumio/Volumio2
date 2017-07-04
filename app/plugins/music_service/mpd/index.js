@@ -1129,16 +1129,24 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                 var s0 = sections[0] + '/';
 				var path;
 				var name;
+				var dirtype;
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
 
                     //self.logger.info("LINE "+line);
+
 					if (line.indexOf('directory:') === 0) {
 						path = line.slice(11);
-						name = path.split('/').pop();
+						var namearr = path.split('/')
+						if (namearr.length == 2 && namearr[0] == 'USB') {
+                            dirtype = 'remdisk';
+						} else {
+							dirtype = 'folder';
+						}
+						name = namearr.pop();
 						list.push({
-							type: 'folder',
+							type: dirtype,
 							title: name,
                                                         service:'mpd',
 							icon: 'fa fa-folder-open-o',

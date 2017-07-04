@@ -1304,8 +1304,6 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('updatePlugin', function (data) {
 				var selfConnWebSocket = this;
 
-				console.log(data);
-
 				var returnedData = self.commandRouter.updatePlugin(data);
 
 				if (returnedData != undefined) {
@@ -1752,9 +1750,19 @@ function InterfaceWebUI(context) {
 
 			});
 
+            connWebSocket.on('safeRemoveDrive', function (data) {
+                var selfConnWebSocket = this;
 
+                var remove = self.commandRouter.safeRemoveDrive(data);
 
-
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
 
 		}
 		catch (ex) {
