@@ -51,7 +51,7 @@ kernelinstall() {
   asvolumio curl -L https://github.com/raspberrypi/linux/archive/${KERNEL_REV}.tar.gz >rpi-linux.tar.gz
 
   echo "creating /usr/src/rpi-linux folder"
-  mkdir /usr/src/rpi-linux
+  mkdir -p /usr/src/rpi-linux
 
   echo "Extracting Kernel"
   tar --strip-components 1 -xf rpi-linux.tar.gz -C /usr/src/rpi-linux
