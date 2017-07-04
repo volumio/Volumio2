@@ -1650,8 +1650,31 @@ CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
     var self=this;
     var defer = libQ.defer();
 
-    this.platformspecific.safeRemoveDrive(data);
-    defer.resolve('');
-
+    exec("/usr/bin/sudo /bin/umount /mnt/USB/"+data, function (error, stdout, stderr) {
+        if (error !== null) {
+            self.pushConsoleMessage(error);
+            self.pushToastMessage('error',data,
+                self.getI18nString('SYSTEM.CANNOT_REMOVE_MEDIA')+ ': ' +error);
+        } else {
+            self.pushToastMessage('success',self.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'),
+                self.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'));
+            self.executeOnPlugin('music_service', 'mpd', 'updateMpdDB', '/USB/');
+            execSync('/usr/bin/mpc update', { uid:1000, gid:1000, encoding: 'utf8' });
+            exec('/usr/bin/mpc idle update', {uid:1000, gid:1000, timeout: 10000}, function (error, stdout, stderr) {
+                if (error !== null) {
+                } else {
+                    var response = self.musicLibrary.executeBrowseSource('music-library/USB');
+                    if (response != undefined) {
+                        response.then(function (result) {
+                            defer.resolve(result);
+                        })
+                            .fail(function () {
+                                defer.reject();
+                            });
+                    }
+				}
+            });
+        }
+    });
     return defer.promise;
 }

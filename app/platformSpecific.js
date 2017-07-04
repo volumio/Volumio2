@@ -90,20 +90,3 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
 	return self.coreCommand.broadcastMessage('dbUpdate', {'status':data});
 
 }
-
-PlatformSpecific.prototype.safeRemoveDrive = function (data) {
-    var self = this;
-    self.coreCommand.pushConsoleMessage('Safely unmounting drive: '+data);
-
-    exec("/usr/bin/sudo /bin/umount /mnt/USB/"+data, function (error, stdout, stderr) {
-        if (error !== null) {
-            self.coreCommand.pushConsoleMessage(error);
-            self.coreCommand.pushToastMessage('error',data,
-                self.coreCommand.getI18nString('SYSTEM.CANNOT_REMOVE_MEDIA')+ ': ' +error);
-        } else {
-            self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'),
-                self.coreCommand.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'))
-		}
-    });
-
-}
