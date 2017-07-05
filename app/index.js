@@ -275,7 +275,7 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function () {
 CoreCommandRouter.prototype.volumioSearch = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::Search '+data);
 	var asd = this.musicLibrary.search(data);
-	console.log(asd)
+
 	return this.musicLibrary.search(data);
 };
 
@@ -395,6 +395,18 @@ CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
         return this.stateMachine.addQueueItems(arrayItems);
     }
 };
+
+CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.stateMachine.clearQueue();
+
+    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
+        return this.playPlaylist(arrayItems.title)
+    } else  {
+        return this.stateMachine.addQueueItems(arrayItems);
+    }
+};
+
 
 
 // Volumio Check Favourites

@@ -126,6 +126,32 @@ function InterfaceWebUI(context) {
 				});
 			});
 
+            connWebSocket.on('replaceAndPlayCue', function (data) {
+                var timeStart = Date.now();
+
+                if (data.service == undefined || data.service == 'mpd') {
+                    var uri = data.uri;
+                    var arr = uri.split("/");
+                    arr.shift();
+                    var str = arr.join('/');
+                }
+                else str = data.uri;
+
+                self.logStart('Client requests Volumio Clear Queue')
+                    .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+					.then(function () {
+						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
+                        'uri': str,
+                        'number': data.number
+                    });
+                })
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+
+            });
+
 			connWebSocket.on('addPlay', function (data) {
 
                 self.commandRouter.addQueueItems(data)
@@ -169,7 +195,6 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addPlayCue', function (data) {
-
 				if (data.service == undefined || data.service == 'mpd') {
 					var uri = data.uri;
 					var arr = uri.split("/");
@@ -177,7 +202,6 @@ function InterfaceWebUI(context) {
 					var str = arr.join('/');
 				}
 				else str = data.uri;
-
 
 				//TODO add proper service handler
 				var timeStart = Date.now();
