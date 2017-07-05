@@ -1099,14 +1099,31 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
-
-                    //self.logger.info("LINE "+line);
-
+					
 					if (line.indexOf('directory:') === 0) {
+                        var diricon = 'fa fa-folder-open-o';
 						path = line.slice(11);
-						var namearr = path.split('/')
+						var namearr = path.split('/');
+
+						if (uri === 'music-library') {
+                            switch(path) {
+                                case 'INTERNAL':
+                                    diricon = 'fa fa-microchip';
+                                    break;
+                                case 'NAS':
+                                    diricon = 'fa fa-server';
+                                    break;
+                                case 'USB':
+                                    diricon = 'fa fa-usb';
+                                    break;
+                                default:
+                                    diricon = 'fa fa-folder-open-o';
+                            }
+						}
+
 						if (namearr.length == 2 && namearr[0] == 'USB') {
                             dirtype = 'remdisk';
+                            diricon = 'fa fa-usb';
 						} else {
 							dirtype = 'folder';
 						}
@@ -1114,8 +1131,8 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						list.push({
 							type: dirtype,
 							title: name,
-                                                        service:'mpd',
-							icon: 'fa fa-folder-open-o',
+							service:'mpd',
+							icon: diricon,
 							uri: s0 + path
 						});
 					}
