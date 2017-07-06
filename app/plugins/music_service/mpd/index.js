@@ -760,7 +760,10 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
     dsd_autovolume = data['dsd_autovolume'];
 
-	//fixing dop
+    var isonew = data.iso;
+    var iso = self.config.get('iso', false);
+
+    //fixing dop
 	if (self.config.get('dop') == null) {
 		self.config.addConfigValue('dop', 'boolean', data['dop'].value);
 	} else {
@@ -772,6 +775,59 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	} else {
 		self.config.set('persistent_queue', data['persistent_queue']);
 	}
+
+    if (isonew != iso) {
+        self.config.set('iso', data['iso']);
+        if (isonew) {
+            //iso enabled
+            execSync("/usr/bin/sudo /usr/bin/killall mpd", {uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('echo "volumio" | sudo -S /bin/cp -f /usr/bin/mpdsacd /usr/bin/mpd', {
+                uid: 1000,
+                gid: 1000,
+                encoding: 'utf8'
+            });
+            execSync('/bin/sync', {uid: 1000, gid: 1000, encoding: 'utf8'});
+            setTimeout(function () {
+                exec('/usr/bin/mpc update', {uid: 1000, gid: 1000},
+                    function (error, stdout, stderr) {
+                        if (error) {
+                            self.logger.error('Cannot Update MPD DB: ' + error);
+                        }
+                    });
+                var responseData = {
+                    title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE')+ ': ISO Playback',
+                    message: 'ISO Playback ' +self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
+                    size: 'lg',
+                    buttons: [
+                        {
+                            name: self.commandRouter.getI18nString('COMMON.RESTART'),
+                            class: 'btn btn-info',
+                            emit:'reboot',
+                            payload:''
+                        }
+                    ]
+                }
+
+                self.commandRouter.broadcastMessage("openModal", responseData);
+            }, 1000);
+        } else {
+            execSync("/usr/bin/sudo /usr/bin/killall mpd", {uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('echo "volumio" | sudo -S /bin/cp -f /usr/bin/mpdorig /usr/bin/mpd', {
+                uid: 1000,
+                gid: 1000,
+                encoding: 'utf8'
+            });
+            execSync('/bin/sync', {uid: 1000, gid: 1000, encoding: 'utf8'});
+            setTimeout(function () {
+                exec('/usr/bin/mpc update', {uid: 1000, gid: 1000},
+                    function (error, stdout, stderr) {
+                        if (error) {
+                            self.logger.error('Cannot Update MPD DB: ' + error);
+                        }
+                    });
+            }, 5000);
+        }
+    }
 
 
 	self.createMPDFile(function (error) {
@@ -926,10 +982,20 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 			}
 
-			fs.writeFile("/etc/mpd.conf", conf9, 'utf8', function (err) {
-				if (err) return self.logger.error(err);
-			});
-		});
+            if (self.config.get('iso', false)){
+                //iso enabled
+                var isopart = 'decoder { ' + os.EOL + 'plugin "sacdiso"'  + os.EOL + 'dstdec_threads "2"'  + os.EOL + 'edited_master "true"'  + os.EOL + 'lsbitfirst "false"' + os.EOL + 'playable_area "stereo"'+ os.EOL +'}' + os.EOL + 'decoder { ' + os.EOL + 'plugin "ffmpeg"'  + os.EOL + 'enabled "no"' + os.EOL + '}'  + os.EOL;
+                var conf10 = conf9.replace('"${sacdiso}"', isopart);
+                var conf11 = conf10.replace("${sox}", '');
+            } else {
+                //iso disabled
+                var conf11 = conf9.replace('"${sacdiso}"', " ");
+            }
+
+            fs.writeFile("/etc/mpd.conf", conf11, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        });
 
 		callback();
 	}

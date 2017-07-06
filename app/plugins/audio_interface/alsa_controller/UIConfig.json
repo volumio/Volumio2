@@ -97,7 +97,8 @@
           "volume_normalization",
           "audio_buffer_size",
           "buffer_before_play",
-		  "persistent_queue"
+		  "persistent_queue",
+          "iso"
         ]
       },
       "content": [
@@ -205,7 +206,14 @@
 		  "doc":"TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE_DOC",
 		  "label": "TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE",
 		  "value":true
-		}
+		},
+        {
+          "id": "iso",
+          "element": "switch",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK",
+          "value":false
+        }
       ]
     },
     {
