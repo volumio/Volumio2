@@ -268,7 +268,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			}
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'dop');
+			value = self.getAdditionalConf('music_service', 'mpd', 'dop', false);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
 
@@ -288,14 +288,12 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue');
-			if (value == undefined) {
-				value = true
-			}
+			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue', true);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
 
-            value = self.getAdditionalConf('music_service', 'mpd', 'iso');
+            value = self.getAdditionalConf('music_service', 'mpd', 'iso', false);
+            console.log(value)
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[6].options'), value));
 
