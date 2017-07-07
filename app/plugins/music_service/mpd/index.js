@@ -2135,7 +2135,40 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             }
         });
     }
+    else if(uri.endsWith('.iso')) {
+        var uriPath = '/mnt/' + self.sanitizeUri(uri);
+        //self.commandRouter.logger.info('AAAAAAAAAAAAAAAAAAAA----------------------------'+uriPath);
+        var uris = self.scanFolder(uriPath);
+        var response = [];
 
+        libQ.all(uris)
+            .then(function (result) {
+                for (var j in result) {
+
+                    self.commandRouter.logger.info("----->>>>> " + JSON.stringify(result[j]));
+                    //console.log('AAAAAAAAALLLLLLLLLLLLLLLLLLLLL'+result[j].albumart)
+                    var albumartiso = result[j].albumart.substring(0, result[j].albumart.lastIndexOf("%2F"));
+                    if (result !== undefined && result[j].uri !== undefined) {
+                        response.push({
+                            uri: self.fromPathToUri(result[j].uri),
+                            service: 'mpd',
+                            name: result[j].name,
+                            artist: result[j].artist,
+                            album: result[j].album,
+                            type: 'track',
+                            tracknumber: result[j].tracknumber,
+                            albumart: albumartiso,
+                            duration: result[j].duration,
+                            samplerate: result[j].samplerate,
+                            bitdepth: result[j].bitdepth,
+                            trackType: result[j].trackType
+                        });
+                    }
+
+                }
+                defer.resolve(response);
+            })
+    }
     else {
 
 
@@ -2170,7 +2203,6 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                         }
 
                     }
-
                     defer.resolve(response);
                 }).fail(function(err)
             {
@@ -2310,43 +2342,35 @@ ControllerMpd.prototype.scanFolder=function(uri)
 {
     var self=this;
     var uris=[];
+    var isofile = false;
 
-    try {
-        var stat=libFsExtra.statSync(uri);
-    } catch(err) {
-        console.log("scanFolder - failure to stat '" + uri + "'");
-        return uris;
+    if ((uri.indexOf(".iso") >= 0) || (uri.indexOf(".ISO") >= 0)){
+        var uri2 = uri.substr(0, uri.lastIndexOf("/"));
+        if ((uri2.indexOf(".iso") >= 0) || (uri2.indexOf(".ISO") >= 0)){
+        } else {
+            isofile = true
+        }
+    } else {
+        try {
+            var stat = libFsExtra.statSync(uri);
+        } catch (err) {
+            console.log("scanFolder - failure to stat '" + uri + "'");
+            return uris;
+        }
     }
 
-    if(stat.isDirectory())
+    if(  ((uri.indexOf(".iso") < 0) && (uri.indexOf(".ISO") < 0)) && (stat != undefined && stat.isDirectory()) )
     {
         var files=libFsExtra.readdirSync(uri);
 
         for(var i in files)
             uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
     }
+    else if (isofile){
+
+    }
     else {
             var defer=libQ.defer();
-/*
-            var parser = mm(libFsExtra.createReadStream(uri), function (err, metadata) {
-                if (err) defer.resolve({});
-                else {
-                    defer.resolve({
-                        uri: 'music-library/'+self.fromPathToUri(uri),
-                        service: 'mpd',
-                        name: metadata.title,
-                        artist: metadata.artist[0],
-                        album: metadata.album,
-                        type: 'track',
-                        tracknumber: metadata.track.no,
-                        albumart: self.getAlbumArt(
-                            {artist:metadata.artist,
-                             album: metadata.album},uri),
-                        duration: metadata.duration
-                    });
-                }
-
-            });*/
 
             var sections = uri.split('/');
             var folderToList = '';
@@ -2636,12 +2660,8 @@ ControllerMpd.prototype.getGroupVolume = function () {
         .then(function (objState) {
 
             if (objState.volume) {
-                //console.log(objState.volume);
                 defer.resolve(objState.volume);
             }
-
-
-
         });
     return defer.promise;
 };
