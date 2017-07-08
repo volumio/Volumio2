@@ -267,7 +267,6 @@ volumioAppearance.prototype.createThumbnailPath = function() {
             console.error(err);
         } else {
             self.generateThumbnails();
-            console.log("success!");
         }
     });
 
@@ -293,7 +292,6 @@ volumioAppearance.prototype.setBackgrounds = function(data)
 
     if (data != undefined) {
         data.then(function (settings) {
-            console.log(settings)
             self.commandRouter.broadcastMessage('pushUiSettings', settings);
         });
     }

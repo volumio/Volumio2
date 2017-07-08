@@ -19,7 +19,6 @@ function CoreStateMachine(commandRouter) {
     this.volatileService="";
     this.volatileState={};
 	this.isVolatile = false;
-	this.currentState = {};
     /**
      * This field tells the system if it is currenty running in consume mode
      * @type {boolean} true or false wether the system is in consume mode
@@ -483,13 +482,10 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 //Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
-	var self = this;
 
 	this.currentVolume = Volume.vol;
 	this.currentMute = Volume.mute;
-    this.currentState.volume = Volume.vol;
-    this.currentState.mute = Volume.mute;
-    self.commandRouter.volumioPushState(this.currentState)
+	this.pushState().fail(this.pushError.bind(this));
 };
 
 //Gets current Volume and Mute Status
@@ -509,8 +505,7 @@ CoreStateMachine.prototype.pushState = function () {
 	var promise = libQ.defer();
 
 	var state = this.getState();
-	this.currentState = state;
-
+	
 	var self = this;
 	self.commandRouter.volumioPushState(state)
 		.then(function (data) {

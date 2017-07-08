@@ -275,7 +275,7 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function () {
 CoreCommandRouter.prototype.volumioSearch = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::Search '+data);
 	var asd = this.musicLibrary.search(data);
-	console.log(asd)
+
 	return this.musicLibrary.search(data);
 };
 
@@ -283,7 +283,6 @@ CoreCommandRouter.prototype.volumioSearch = function (data) {
 
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioPushState');
-	// TODO SYNC EVERY 2 SECONDS, NOT ON ANY STATE CHANGE
 	this.executeOnPlugin('system_controller', 'volumiodiscovery', 'saveDeviceInfo', state);
 	// Announce new player state to each client interface
 	var self = this;
@@ -396,6 +395,18 @@ CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
         return this.stateMachine.addQueueItems(arrayItems);
     }
 };
+
+CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.stateMachine.clearQueue();
+
+    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
+        return this.playPlaylist(arrayItems.title)
+    } else  {
+        return this.stateMachine.addQueueItems(arrayItems);
+    }
+};
+
 
 
 // Volumio Check Favourites
@@ -1645,4 +1656,37 @@ CoreCommandRouter.prototype.checkAndPerformSystemUpdates = function () {
 
 
     }
+}
+
+CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
+    var self=this;
+    var defer = libQ.defer();
+
+    exec("/usr/bin/sudo /bin/umount /mnt/USB/"+data, function (error, stdout, stderr) {
+        if (error !== null) {
+            self.pushConsoleMessage(error);
+            self.pushToastMessage('error',data,
+                self.getI18nString('SYSTEM.CANNOT_REMOVE_MEDIA')+ ': ' +error);
+        } else {
+            self.pushToastMessage('success',self.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'),
+                self.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'));
+            self.executeOnPlugin('music_service', 'mpd', 'updateMpdDB', '/USB/');
+            execSync('/usr/bin/mpc update', { uid:1000, gid:1000, encoding: 'utf8' });
+            exec('/usr/bin/mpc idle update', {uid:1000, gid:1000, timeout: 10000}, function (error, stdout, stderr) {
+                if (error !== null) {
+                } else {
+                    var response = self.musicLibrary.executeBrowseSource('music-library/USB');
+                    if (response != undefined) {
+                        response.then(function (result) {
+                            defer.resolve(result);
+                        })
+                            .fail(function () {
+                                defer.reject();
+                            });
+                    }
+				}
+            });
+        }
+    });
+    return defer.promise;
 }
