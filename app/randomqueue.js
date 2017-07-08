@@ -30,43 +30,62 @@ class RandomQueue {
         this.position = 0;
     }
 
-    modifyQueueLength(playQueue) {
-        const mapping = playQueue.map((_, i) => i);
+    modifyQueueLength(index = 0) {
+        var mapping = this.stateMachine.playQueue.arrayQueue.map((_, i) => i);
+        var shuffled = false;
 
-        if (this.queueMap.length < playQueue.length) {
+        if (index) {
+            shuffled = true;
             this.queueMap = underscore.shuffle(mapping);
-        } else if (this.queueMap.length > playQueue.length) {
+        } else if (this.queueMap.length < this.stateMachine.playQueue.arrayQueue.length) {
+            shuffled = true;
             this.queueMap = underscore.shuffle(mapping);
+        } else if (this.queueMap.length > this.stateMachine.playQueue.arrayQueue.length) {
+            shuffled = true;
+            this.queueMap = underscore.shuffle(mapping);
+        }
+
+        if (shuffled) {
+            var mappedIndex = this.queueMap.indexOf(index);
+            this.queueMap.splice(mappedIndex, 1);
+            this.queueMap.unshift(index);
         }
     }
 
     getRandomListPosition(index) {
-        if (!this.queueMap.length) {
-            this.modifyQueueLength(this.stateMachine.playQueue.arrayQueue);
-        }
         return this.queueMap[index || 0];
     }
 
-    next(playQueue) {
-        this.modifyQueueLength(playQueue);
+    next() {
+        this.modifyQueueLength();
         this.position++;
 
-        if (this.position > this.queueMap.length-1) {
+        if (this.position >= this.queueMap.length - 1 && this.stateMachine.currentRepeat) {
             this.position = 0;
+        } else if (this.position > this.queueMap.length - 1) {
+            this.queueMap = [];
         }
 
-        return this.getRandomListPosition(this.position);
+        var nextIndex = this.getRandomListPosition(this.position);
+        return nextIndex !== undefined ? nextIndex : this.stateMachine.playQueue.arrayQueue.length;
     }
 
-    prev(playQueue) {
-        this.modifyQueueLength(playQueue);
+    prev() {
+        this.modifyQueueLength();
         this.position--;
 
-        if (this.position < 0 ) {
+        if (this.position < 0 && this.stateMachine.currentRepeat) {
             this.position = this.queueMap.length-1;
+        } else  if (this.position < 0) {
+            this.queueMap = [];
         }
 
-        return this.getRandomListPosition(this.position);
+        var prevIndex = this.getRandomListPosition(this.position);
+        return prevIndex !== undefined ? prevIndex : this.stateMachine.playQueue.arrayQueue.length;
+    }
+
+    reset() {
+        this.position = 0;
     }
 
 }

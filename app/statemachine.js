@@ -408,7 +408,7 @@ CoreStateMachine.prototype.getNextIndex = function () {
     // Then check if Random mode is on - Random mode overrides Repeat mode by this
     if(this.currentRandom)
     {
-		nextIndex = this.randomQueue.next(this.playQueue.arrayQueue);
+		nextIndex = this.randomQueue.next();
         this.nextRandomIndex=nextIndex;
     }
 
@@ -821,7 +821,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                         if(this.nextRandomIndex)
                             this.currentPosition=this.nextRandomIndex;
                         else
-							this.currentPosition = this.randomQueue.next(this.playQueue.arrayQueue);
+							this.currentPosition = this.randomQueue.next();
 					}
 					else {
 						if(this.currentPosition ==null || this.currentPosition===undefined)
@@ -1022,11 +1022,13 @@ CoreStateMachine.prototype.play = function (index) {
 		{
 			if(self.currentPosition ==null || self.currentPosition===undefined)
 			{
-                this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
+                self.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
 				self.currentPosition=0;
 			}
-			
-			self.randomQueue.modifyQueueLength(self.playQueue.arrayQueue);
+
+			if (self.currentRandom!==undefined && self.currentRandom===true) {
+				self.randomQueue.modifyQueueLength(index);
+			}
 
 
 			if(index!==undefined)
@@ -1041,6 +1043,14 @@ CoreStateMachine.prototype.play = function (index) {
 			else
 			{
 				var trackBlock = self.getTrack(self.currentPosition);
+
+				if (!trackBlock) {
+					// Trying to play a track out of the list. Reset currentPosition to zero, and stop.
+					self.currentPosition = 0;
+					self.randomQueue.reset();
+					return libQ.reject();
+				}
+
 				var thisPlugin = self.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
 				if(self.currentStatus==='stop')
@@ -1249,7 +1259,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			if (this.currentRandom !== undefined && this.currentRandom === true) {
 				this.stop();
 				setTimeout(function () {
-					self.currentPosition = self.randomQueue.prev(self.playQueue.arrayQueue);
+					self.currentPosition = self.randomQueue.prev();
 					self.play();
 				}, 500);
 			}
@@ -1266,7 +1276,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		// Pause -> Previous transition
 		if(this.currentRandom!==undefined && this.currentRandom===true)
 		{
-			this.currentPosition = this.randomQueue.prev(this.playQueue.arrayQueue);
+			this.currentPosition = this.randomQueue.prev();
 		}
 		else if (this.currentPosition > 0) {
 			this.currentPosition--;
