@@ -93,22 +93,42 @@
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "dop",
+          "dsd_autovolume",
           "volume_normalization",
           "audio_buffer_size",
           "buffer_before_play",
-		  "persistent_queue"
+		  "persistent_queue",
+          "iso"
         ]
       },
       "content": [
         {
           "id": "dop",
+          "element": "select",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.DSD_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_PLAYBACK_MODE",
+          "value":  {
+            "value":false,
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_DIRECT"
+          },
+          "options": [
+            {
+              "value":false,
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_DIRECT"
+            },
+            {
+              "value":true,
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP"
+            }
+          ]
+        },
+        {
+          "id": "dsd_autovolume",
           "element": "switch",
-          "doc": "TRANSLATE.PLAYBACK_OPTIONS.DOP_DOC",
-          "label": "TRANSLATE.PLAYBACK_OPTIONS.DOP",
+          "doc":"TRANSLATE.PLAYBACK_OPTIONS.DSD_AUTO_VOLUME_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.DSD_AUTO_VOLUME",
           "value":false
         },
-
-
         {
           "id": "volume_normalization",
           "element": "switch",
@@ -186,7 +206,14 @@
 		  "doc":"TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE_DOC",
 		  "label": "TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE",
 		  "value":true
-		}
+		},
+        {
+          "id": "iso",
+          "element": "switch",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK",
+          "value":false
+        }
       ]
     },
     {
@@ -517,7 +544,15 @@
 			{
 			  "value":"352800",
 			  "label": "352,8 kHz"
-			}
+			},
+            {
+              "value":"384000",
+              "label": "384 kHz"
+            },
+            {
+              "value":"768000",
+              "label": "768 kHz"
+            }
 		  ]
 
 		},

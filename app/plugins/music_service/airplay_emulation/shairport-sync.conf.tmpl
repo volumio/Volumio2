@@ -1,7 +1,7 @@
 general =
 {
     name = "${name}";
-    log_verbosity = 1;
+    log_verbosity = 0;
     interpolation = "soxr";
 };
 
@@ -12,7 +12,16 @@ alsa =
 
 sessioncontrol =
 {
-  run_this_before_play_begins = "/usr/bin/mpc stop";
   allow_session_interruption = "yes";
+  run_this_after_play_ends = "/usr/local/bin/volumio stopairplay";
 };
 
+metadata =
+{
+    enabled = "yes";
+    include_cover_art = "no";
+    //pipe_name = "/tmp/shairport-sync-metadata";
+    //pipe_timeout = 5000;
+    socket_address = "226.0.0.1";
+    socket_port = 5555;
+};

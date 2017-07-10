@@ -64,5 +64,57 @@
 
 		}
 	  ]
-	}
+	},
+	  {
+		  "id": "library_settings",
+		  "element": "section",
+		  "label": "TRANSLATE.APPEARANCE.MUSIC_LIBRARY_SETTINGS",
+		  "icon": "fa-music",
+		  "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveMusicLibraryOptions"},
+		  "saveButton": {
+			  "label": "TRANSLATE.COMMON.SAVE",
+			  "data": [
+				  "tracknumbers",
+				  "compilation",
+				  "artistsort"
+			  ]
+		  },
+		  "content": [
+			  {
+				  "id": "tracknumbers",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.APPEARANCE.SHOW_TRACKNUMBERS_DOC",
+				  "label": "TRANSLATE.APPEARANCE.SHOW_TRACKNUMBERS",
+				  "value": false
+			  },
+			  {
+				  "id": "compilation",
+				  "element": "input",
+				  "value": "",
+				  "doc" : "TRANSLATE.APPEARANCE.COMPILATION_METADATA_DOC",
+				  "label": "TRANSLATE.APPEARANCE.COMPILATION_METADATA"
+			  },
+			  {
+				  "id": "artistsort",
+				  "element": "select",
+				  "doc" : "TRANSLATE.APPEARANCE.ARTIST_SORTING_DOC",
+				  "label": "TRANSLATE.APPEARANCE.ARTIST_SORTING",
+				  "value":  {
+					  "value":true,
+					  "label": "albumartist"
+				  },
+				  "options": [
+					  {
+						  "value":true,
+						  "label": "albumartist"
+					  },
+					  {
+						  "value":false,
+						  "label": "artist"
+					  }
+				  ]
+
+			  }
+		  ]
+	  }
 ]}

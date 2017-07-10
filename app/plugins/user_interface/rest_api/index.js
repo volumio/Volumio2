@@ -252,6 +252,28 @@ function interfaceApi(context) {
                             res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                         });
                 }
+                else if(req.query.cmd == "startAirplay"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Start Airplay metadata parsing')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'startAirplayMeta', '');
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "stopAirplay"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Start Airplay metadata parsing')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'airPlayStop', '');
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
                 else{
                     res.json({'Error': "command not recognized"});
                 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-function doc {
+doc() {
 echo "
 Usage : volumio <argument1> <argument2>
 
@@ -43,7 +43,7 @@ pull                               Pulls latest github status on master
 kernelsource                       Gets Current Kernel source (Raspberry PI only)
 plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
-plugin zip                         compresses the plugin
+plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
 "
 
@@ -51,17 +51,17 @@ plugin publish                     publishes the plugin on git
 
 #VOLUMIO SERVICE CONTROLS
 
-function start {
+start() {
 echo volumio | sudo -S systemctl start volumio.service
 }
 
-function vstop {
+vstop() {
 echo volumio | sudo -S systemctl stop volumio.service
 }
 
 #VOLUMIO DEVELOPMENT
 
-function pull {
+pull() {
 echo "Stopping Volumio"
 echo volumio | sudo -S systemctl stop volumio.service
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
@@ -70,7 +70,7 @@ echo volumio | sudo -S systemctl start volumio.service
 echo "Done"
 }
 
-function kernelsource {
+kernelsource() {
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 
@@ -117,6 +117,12 @@ case "$1" in
                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random"
             fi
             ;;
+        startairplay)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=startAirplay"
+        ;;
+        stopairplay)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
+        ;;
         start)
             start
             ;;
@@ -151,9 +157,39 @@ case "$1" in
             ;;
         plugin)
             if [ "$2" != "" ]; then
+                if [ "$2" == "init" ]; then
+                    echo ""
+                    echo "Welcome to the Volumio Plugin Creator!"
+                    echo "You have to decide which category your plugin belongs to, \
+then you have to select a name for it, leave us the rest ;)"
+                    echo "Warning: make meaningful choices, you cannot change them later!"
+                    echo ""
+                elif [ "$2" == "refresh" ]; then
+                    echo ""
+                    echo "This command will copy all your plugin's file in the \
+correspondent folder in data"
+                    echo ""
+                elif [ "$2" == "package" ]; then
+                    echo ""
+                    echo "This command will create a package with your plugin"
+                    echo ""
+                elif [ "$2" == "publish" ]; then
+                    echo ""
+                    echo "This command will publish the plugin on volumio plugins store"
+                    echo ""
+                fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
             else
-               /usr/local/bin/node /volumio/pluginhelper.js
+                echo ""
+                echo "---- VOLUMIO PLUGIN HELPER ----"
+                echo ""
+                echo "This utility helps you creating new plugins for Volumio."
+                echo "Options:"
+                echo "init      creates a new plugin"
+                echo "refresh   copies the plugin in the system"
+                echo "package   compresses the plugin"
+                echo "publish   publishes the plugin on git"
+                echo ""
             fi
             ;;
         *)
