@@ -1074,6 +1074,8 @@ function InterfaceWebUI(context) {
 				self.logger.info("Update: " + data);
 
                 self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
+                var started = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': 'Starting Software Update'};
+                selfConnWebSocket.emit('updateProgress', started);
                 self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
 			});
 
