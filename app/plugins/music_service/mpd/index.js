@@ -277,7 +277,6 @@ ControllerMpd.prototype.getState = function () {
 					 })*/
 					.then(function (objTrackInfo) {
 						var trackinfo = self.parseTrackInfo(objTrackInfo);
-						console.log(trackinfo.trackType)
 						collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
 						collectedState.title = trackinfo.title;
 						collectedState.artist = trackinfo.artist;
