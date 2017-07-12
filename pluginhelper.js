@@ -358,7 +358,7 @@ function zip(){
                 execSync("/usr/local/bin/npm install");
                 var package = fs.readJsonSync("package.json");
                 execSync("cd " + process.cwd() + " && /usr/bin/minizip -o -9 " +
-                	package.name + ".zip $(find -type f -not -name " + package.name + ".zip -printf '%P ')");
+                    package.name + ".zip $(find -type f -not -name " + package.name + ".zip -printf '%P ')");
                 console.log("Plugin succesfully compressed");
             }
             catch (e){
