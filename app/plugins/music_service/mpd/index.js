@@ -277,13 +277,14 @@ ControllerMpd.prototype.getState = function () {
 					 })*/
 					.then(function (objTrackInfo) {
 						var trackinfo = self.parseTrackInfo(objTrackInfo);
+						console.log(trackinfo.trackType)
 						collectedState.isStreaming = trackinfo.isStreaming != undefined ? trackinfo.isStreaming : false;
 						collectedState.title = trackinfo.title;
 						collectedState.artist = trackinfo.artist;
 						collectedState.album = trackinfo.album;
 						//collectedState.albumart = trackinfo.albumart;
 						collectedState.uri = trackinfo.uri;
-						collectedState.trackType = trackinfo.trackType;
+						collectedState.trackType = trackinfo.trackType.split('?')[0];
 						return collectedState;
 					});
 				// Else return null track info
