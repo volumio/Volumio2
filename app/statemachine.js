@@ -209,7 +209,7 @@ CoreStateMachine.prototype.getEmptyState = function () {
         updatedb: this.currentUpdate,
         consume: this.currentConsume
     };
-}
+};
 
 
 
@@ -422,13 +422,13 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 	var now=Date.now();
 	this.currentSeek+=(now-this.playbackStart);
 
-	if(this.runPlaybackTimer==true)
+	if(this.runPlaybackTimer===true)
 	{
 		this.playbackStart=Date.now();
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		if(remainingTime<5000 && this.askedForPrefetch==false)
+		if(remainingTime<5000 && this.askedForPrefetch===false)
 		{
 			this.askedForPrefetch=true;
 
@@ -450,7 +450,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			}
 		}
 
-		if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
+		if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone===false)
 		{
 
 			this.simulateStopStartDone=true;
@@ -512,7 +512,7 @@ CoreStateMachine.prototype.pushState = function () {
 			self.checkFavourites(state)
 				.then(function (a) {
 					promise.resolve({});
-				})
+				});
 		});
 
 	return promise.promise;
@@ -531,7 +531,7 @@ CoreStateMachine.prototype.pushEmptyState = function () {
 			self.checkFavourites(state)
 				.then(function (a) {
 					promise.resolve({});
-				})
+				});
 		});
 
 	return promise.promise;
@@ -569,7 +569,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		var trackBlock = this.getTrack(this.currentPosition);
 	}
     else if (this.isUpnp){
-		console.log('In UPNP mode')
+		console.log('In UPNP mode');
 
     } else {
         this.volatileService = undefined;
@@ -598,7 +598,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	} else
 	{
 
-		if(trackBlock!=undefined && trackBlock.service!==sService)
+		if(trackBlock!==undefined && trackBlock.service!==sService)
 		{
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
 			return;
@@ -613,7 +613,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
     this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION "+this.currentPosition);
 
 
-	if (stateService.isStreaming != undefined) {
+	if (stateService.isStreaming !== undefined) {
 		this.isStreaming = stateService.isStreaming;
 	}
 	else this.isStreaming = false;
@@ -648,11 +648,11 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                             album:consumeAlbum
                         });
                 }
-				if (stateService.service == undefined ) {
+				if (stateService.service === undefined ) {
 					stateService.service = 'mpd';
 				}
 
-				if (this.consumeIgnoreMetadata != undefined && this.consumeIgnoreMetadata) {
+				if (this.consumeIgnoreMetadata !== undefined && this.consumeIgnoreMetadata) {
 					this.consumeState={
 						status:stateService.status,
 						title:trackBlock.name,
@@ -693,7 +693,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			else
             {
                 //checking if prefetch has been done. In that case the update is sent elsewhere
-                if(this.askedForPrefetch==false) {
+                if(this.askedForPrefetch===false) {
 
 
                     if (stateService.seek !== undefined) {
@@ -802,7 +802,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
             if(trackBlock!==undefined && trackBlock.service!=='webradio')
 			{
-				if(this.currentConsume!==undefined && this.currentConsume==true)
+				if(this.currentConsume!==undefined && this.currentConsume===true)
 				{
 					this.playQueue.removeQueueItem(this.currentPosition);
 				}
@@ -823,7 +823,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                             this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
 					}
 					else {
-						if(this.currentPosition ==null || this.currentPosition===undefined)
+						if(this.currentPosition ===null || this.currentPosition===undefined)
 							this.currentPosition=0;
 						else this.currentPosition++;
 					}
@@ -838,7 +838,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 			//Checking repeat status
             if(this.currentRepeat && this.currentRepeatSingleSong)
             {
-                if(this.prefetchDone==false)
+                if(this.prefetchDone===false)
                 {
                     this.play(this.currentPosition)
                         .then(self.pushState.bind(self))
@@ -866,7 +866,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     {
                         this.currentPosition=0;
 
-                        if(this.prefetchDone==false)
+                        if(this.prefetchDone===false)
                         {
                             this.play()
                                 .then(self.pushState.bind(self))
@@ -898,7 +898,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 
                 } else {
-                    if(this.prefetchDone==false)
+                    if(this.prefetchDone===false)
                     {
                         this.play()
                             .then(self.pushState.bind(self))
@@ -962,7 +962,7 @@ CoreStateMachine.prototype.checkFavourites = function (state) {
 		favourite: false
 	};
 
-	if (state.uri != undefined && state.uri != null) {
+	if (state.uri !== undefined && state.uri !== null) {
 		var promise = this.commandRouter.playListManager.listFavourites();
 		var self = this;
 		promise.then(function (favList) {
@@ -1019,7 +1019,7 @@ CoreStateMachine.prototype.play = function (index) {
 	return self.setConsumeUpdateService(undefined)
 		.then(function()
 		{
-			if(self.currentPosition ==null || self.currentPosition===undefined)
+			if(self.currentPosition ===null || self.currentPosition===undefined)
 			{
                 this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
 				self.currentPosition=0;
@@ -1116,7 +1116,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 
 	//self.setConsumeUpdateService(undefined);
 
-	if (this.isConsume && this.consumeState.service != undefined) {
+	if (this.isConsume && this.consumeState.service !== undefined) {
 		var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
 		thisPlugin.next();
 	} else if (this.isUpnp){
@@ -1239,7 +1239,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 		}
 
 	} else if (this.currentStatus === 'play') {
-		if (this.isConsume && this.consumeState.service != undefined) {
+		if (this.isConsume && this.consumeState.service !== undefined) {
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
 			thisPlugin.previous();
 		} else {
@@ -1321,7 +1321,7 @@ CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
 
 	this.currentRepeat=value;
 
-	if(repeatSingle!=undefined)
+	if(repeatSingle!==undefined)
 	    this.currentRepeatSingleSong=repeatSingle;
 
 	this.pushState().fail(this.pushError.bind(this));
@@ -1386,7 +1386,7 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta
 	}
 
 	this.consumeUpdateService = value;
-	this.isConsume = value!=undefined;
+	this.isConsume = value!==undefined;
 	this.consumeState.service = value;
 	if (ignoremeta != undefined) {
 		this.consumeIgnoreMetadata = ignoremeta;
@@ -1394,7 +1394,7 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta
 		this.consumeIgnoreMetadata = false;
 	}
 
-    if (upnp != undefined) {
+    if (upnp !== undefined) {
         this.isUpnp = upnp;
     } else {
         this.isUpnp = false;
@@ -1404,11 +1404,11 @@ CoreStateMachine.prototype.setConsumeUpdateService = function (value, ignoremeta
 
 
 
-}
+};
 
 CoreStateMachine.prototype.sanitizeUri = function (uri) {
 	return uri.replace('music-library/', '').replace('mnt/', '');
-}
+};
 
 CoreStateMachine.prototype.setVolatile = function (data) {
 
@@ -1437,4 +1437,4 @@ CoreStateMachine.prototype.unSetVolatile = function () {
 
     this.volatileService=undefined;
     this.isVolatile=false;
-}
+};
