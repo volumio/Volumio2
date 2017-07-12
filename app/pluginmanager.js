@@ -27,7 +27,7 @@ function PluginManager(ccommand, server) {
 		if (err) {
 			self.logger.info('ERROR: Cannot create /data/plugins directory');
 		}
-	})
+	});
 
 	self.pluginPath = [__dirname + '/plugins/', '/data/plugins/'];
 
@@ -50,7 +50,7 @@ function PluginManager(ccommand, server) {
 	self.configurationFolder = '/data/configuration/';
 
 	var archraw = execSync('/usr/bin/dpkg --print-architecture', { encoding: 'utf8' });
-	arch = archraw.replace(/(\r\n|\n|\r)/gm,"")
+	arch = archraw.replace(/(\r\n|\n|\r)/gm,"");
 
 	var file = fs.readFileSync('/etc/os-release').toString().split('\n');
 	for (var l in file) {
@@ -68,7 +68,7 @@ function PluginManager(ccommand, server) {
 PluginManager.prototype.initializeConfiguration = function (package_json, pluginInstance, folder) {
 	var self = this;
 
-	if (pluginInstance.getConfigurationFiles != undefined) {
+	if (pluginInstance.getConfigurationFiles !== undefined) {
 		var configFolder = self.configurationFolder + package_json.volumio_info.plugin_type + "/" + package_json.name + '/';
 
 		var configurationFiles = pluginInstance.getConfigurationFiles();
@@ -105,8 +105,8 @@ PluginManager.prototype.loadPlugin = function (folder) {
 	var key = category + '.' + name;
 	var configForPlugin = self.config.get(key + '.enabled');
 
-	var shallStartup = configForPlugin != undefined && configForPlugin == true;
-	if (shallStartup == true) {
+	var shallStartup = configForPlugin !== undefined && configForPlugin === true;
+	if (shallStartup === true) {
 		self.logger.info('Loading plugin \"' + name + '\"...');
 
 		var pluginInstance = null;
@@ -186,11 +186,11 @@ PluginManager.prototype.loadPlugins = function () {
 						if(package_json!==undefined)
 						{
 							var boot_priority = package_json.volumio_info.boot_priority;
-							if (boot_priority == undefined)
+							if (boot_priority === undefined)
 								boot_priority = 100;
 
 							var plugin_array = priority_array.get(boot_priority);
-							if (plugin_array == undefined)
+							if (plugin_array === undefined)
 								plugin_array = [];
 
 							plugin_array.push(pluginFolder);
@@ -213,7 +213,7 @@ PluginManager.prototype.loadPlugins = function () {
 	implemented below (chain by boot-priority order, or else...)
 */	
 	priority_array.forEach(function(plugin_array) {
-		if (plugin_array != undefined) {
+		if (plugin_array !== undefined) {
 			plugin_array.forEach(function(folder) {
 				defer_loadList.push(self.loadPlugin(folder));
 			});
@@ -404,7 +404,7 @@ PluginManager.prototype.getAllPlugNames = function (category) {
 		}
 	}
 	return plugins;
-}
+};
 
 /**
  * Returns an array of plugins with status, sorted by category
@@ -429,7 +429,7 @@ PluginManager.prototype.getPluginsMatrix = function () {
 		plugins.push({cName, catPlugin});
 	}
 	return plugins;
-}
+};
 
 
 PluginManager.prototype.onVolumioShutdown = function () {
@@ -764,10 +764,10 @@ PluginManager.prototype.notifyInstalledPlugins = function () {
 	var installedplugins = self.getInstalledPlugins();
 	defer.resolve();
 
-	self.pushMessage('pushInstalledPlugins',installedplugins)
+	self.pushMessage('pushInstalledPlugins',installedplugins);
 
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.rmDir = function (folder) {
 	var self=this;
@@ -781,7 +781,7 @@ PluginManager.prototype.rmDir = function (folder) {
 	});
 
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.tempCleanup = function () {
@@ -790,7 +790,7 @@ PluginManager.prototype.tempCleanup = function () {
 	self.rmDir('/data/temp');
 	self.rmDir('/tmp/plugins');
 	self.rmDir('/tmp/downloaded_plugin.zip');
-}
+};
 
 PluginManager.prototype.createFolder = function (folder) {
 	var self=this;
@@ -805,7 +805,7 @@ PluginManager.prototype.createFolder = function (folder) {
 	});
 
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.unzipPackage = function () {
 	var self=this;
@@ -826,7 +826,7 @@ PluginManager.prototype.unzipPackage = function () {
 	});
 
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.renameFolder = function (folder) {
@@ -851,7 +851,7 @@ PluginManager.prototype.renameFolder = function (folder) {
 	});
 	
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.moveToCategory = function (folder) {
@@ -881,7 +881,7 @@ PluginManager.prototype.moveToCategory = function (folder) {
 	});		
 	
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.addPluginToConfig = function (folder) {
@@ -901,7 +901,7 @@ PluginManager.prototype.addPluginToConfig = function (folder) {
 
 	defer.resolve(folder);
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.executeInstallationScript = function (folder) {
 	var self=this;
@@ -930,7 +930,7 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
 		}
 	});
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.executeUninstallationScript = function (category,name) {
     var self=this;
@@ -960,7 +960,7 @@ PluginManager.prototype.executeUninstallationScript = function (category,name) {
         }
     });
     return defer.promise;
-}
+};
 
 
 PluginManager.prototype.rollbackInstall = function (folder) {
@@ -974,7 +974,7 @@ PluginManager.prototype.rollbackInstall = function (folder) {
 	self.tempCleanup();
 
 	return defer.promise;
-}
+};
 
 
 //This method uses synchronous methods only in order to block the whole volumio and don't let it access plugins methods
@@ -1024,7 +1024,7 @@ PluginManager.prototype.pluginFolderCleanup = function () {
 				}
 
 
-				if(plugins.length==0)
+				if(plugins.length===0)
 				{
 					fs.removeSync(catFile);
 				}
@@ -1112,7 +1112,7 @@ PluginManager.prototype.disablePlugin = function (category,name) {
 
 	defer.resolve();
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.enablePlugin = function (category,name) {
@@ -1126,7 +1126,7 @@ PluginManager.prototype.enablePlugin = function (category,name) {
 
 	defer.resolve();
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.removePluginFromConfiguration = function (category,name) {
 	var self = this;
@@ -1141,7 +1141,7 @@ PluginManager.prototype.removePluginFromConfiguration = function (category,name)
 
 	defer.resolve();
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
@@ -1151,7 +1151,7 @@ PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
 	var key = category + '.' + name;
 	var isEnabled=self.config.get(key+'.enabled');
 
-	if(isEnabled==false)
+	if(isEnabled===false)
 		defer.reject(new Error());
 	else
 	{
@@ -1201,7 +1201,7 @@ PluginManager.prototype.modifyPluginStatus = function (category,name,status) {
 	}
 
 	return defer.promise;
-}
+};
 
 /*
  { , buttons[{name:nome bottone, emit:emit, payload:payload emit},{name:nome2, emit:emit2,payload:payload2}]}
@@ -1214,7 +1214,7 @@ PluginManager.prototype.pushMessage = function (emit,payload) {
 
 	defer.resolve();
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.checkPluginDoesntExist = function (folder) {
 	var self=this;
@@ -1233,7 +1233,7 @@ PluginManager.prototype.checkPluginDoesntExist = function (folder) {
 	else defer.resolve(folder);
 
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.getInstalledPlugins = function () {
 	var self=this;
@@ -1311,7 +1311,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 	var url = 'http://plugins.volumio.org/plugins/'+variant+'/'+arch+'/plugins.json';
 	var installed = self.getInstalledPlugins();
 
-	if (installed != undefined) {
+	if (installed !== undefined) {
 		installed.then(function (installedPlugins) {
 			for (var e = 0; e <  installedPlugins.length; e++) {
 				var pluginpretty = {"prettyName":installedPlugins[e].prettyName,"version":installedPlugins[e].version};
@@ -1371,7 +1371,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 						plugins[a].installed = true;
 						var v = compareVersions(availableVersion, myplugins[c].version);
 						if (v === 1) {
-							plugins[a].updateAvailable = true
+							plugins[a].updateAvailable = true;
 						}
 					} else {
 						plugins[a].installed = false;
@@ -1384,7 +1384,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 	}
 
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.getPluginDetails = function (data) {
 	var self = this;
@@ -1470,14 +1470,14 @@ PluginManager.prototype.getPluginDetails = function (data) {
 					class: 'btn btn-warning'
 				}
 			]
-		}
+		};
 		defer.resolve(responseData);
 
 
 	}
 
 	return defer.promise;
-}
+};
 
 
 PluginManager.prototype.enableAndStartPlugin = function (category,name) {
@@ -1503,7 +1503,7 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
 		});
 
 	return defer.promise;
-}
+};
 
 PluginManager.prototype.disableAndStopPlugin = function (category,name) {
 	var self=this;
@@ -1526,7 +1526,7 @@ PluginManager.prototype.disableAndStopPlugin = function (category,name) {
 		});
 
 	return defer.promise;
-}
+};
 
 
 
@@ -1539,7 +1539,7 @@ PluginManager.prototype.findPluginFolder = function (category,name) {
 		if (fs.existsSync(pathToCheck))
 			return pathToCheck;
 	}
-}
+};
 
 
 PluginManager.prototype.getPrettyName = function (package_json) {
@@ -1547,7 +1547,7 @@ PluginManager.prototype.getPrettyName = function (package_json) {
 		package_json.volumio_info.prettyName!==undefined)
 		return package_json.volumio_info.prettName;
 	else return package_json.name;
-}
+};
 
 
 PluginManager.prototype.checkIndex = function () {
@@ -1596,7 +1596,7 @@ PluginManager.prototype.checkIndex = function () {
 				plugin_exists = plugin_exists | (package_json !== undefined);
 			}
 
-			if (plugin_exists == false) {
+			if (plugin_exists === false) {
 				self.logger.info("Configured plugin " + category + "/" + plugin + " cannot be loaded. Removing from configuration");
 				self.config.delete(key+'.enabled');
 				self.config.delete(key+'.status');
@@ -1606,4 +1606,4 @@ PluginManager.prototype.checkIndex = function () {
 	}
 
 	return defer.promise;
-}
+};
