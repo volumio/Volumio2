@@ -1306,11 +1306,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					}
 
 				} if (singleBrowse && uri === 'music-library') {
-					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites'},
-					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'category'},
-                    {icon: 'fa fa-users',title: 'Artists', uri: 'artists://', type: 'category'},
-                    {icon: 'fa fa-dot-circle-o',title: 'Albums', uri: 'albums://', type: 'category'},
-                    {icon: 'fa fa-tag',title: 'Genres', uri: 'genres://', type: 'category'}];
+					var prev = '/';
+					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites', type: 'title'},
+					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'title'},
+                    {icon: 'fa fa-users',title: 'Artists', uri: 'artists://', type: 'title'},
+                    {icon: 'fa fa-dot-circle-o',title: 'Albums', uri: 'albums://', type: 'title'},
+                    {icon: 'fa fa-tag',title: 'Genres', uri: 'genres://', type: 'title'}];
 
 					for (var i in browseSources) {
                         list.push(browseSources[i]);
