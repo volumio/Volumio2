@@ -290,11 +290,12 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
         return self.commandRouter.playListManager.listFavourites(curUri);
     }
     else if (curUri.startsWith('search')) {
-        var splitted=curUri.split('/');
+        var splitted = curUri.split('/');
 
-        return this.search({"value":splitted[2]});
-    }
-    else {
+        return this.search({"value": splitted[2]});
+    } else if (curUri === 'playlists' || curUri === 'artists://' || curUri === 'albums://' || curUri === 'genres://') {
+            return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
+    } else {
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
