@@ -50,14 +50,11 @@
     "playtime":{
       "type": "string",
       "value": ""
-    },
-    "singleBrowse":{
-      "type": "boolean",
-      "value": false
     }
-
-
-
+  },
+  "singleBrowse":{
+    "type": "boolean",
+    "value": false
   }
 
 }

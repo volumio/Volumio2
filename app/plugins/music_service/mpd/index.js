@@ -3508,11 +3508,12 @@ ControllerMpd.prototype.loadLibrarySettings=function(){
     var tracknumbersConf = this.config.get('tracknumbers', false);
     var compilationConf = this.config.get('compilation', 'Various,various,Various Artists,various artists,VA,va')
     var artistsortConf = this.config.get('artistsort', true);
-    var singleBrowse = this.config.get('singleBrowse', false);
-
+    var singleBrowseConf = this.config.get('singleBrowse', false);
+	
     tracknumbers = tracknumbersConf;
     compilation = compilationConf.split(',');
-    artistsort = artistsort;
+    artistsort = artistsortConf;
+    singleBrowse = singleBrowseConf;
 }
 
 ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
