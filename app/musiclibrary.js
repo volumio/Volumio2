@@ -4,6 +4,7 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
+var fs=require('fs-extra');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
@@ -99,13 +100,19 @@ function CoreMusicLibrary (commandRouter) {
 	];
 
 	// The Browse Sources Array is the list showed on Browse Page
-	self.browseSources = [{icon: 'fa fa-heart', name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
-		{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
-		{albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
-        {icon: 'fa fa-users',name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
-        {icon: 'fa fa-dot-circle-o',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
-        {icon: 'fa fa-tag',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
-		];
+	var sourcesJson = '/volumio/app/browsesources.json'
+    if (fs.existsSync(sourcesJson)) {
+        self.browseSources = fs.readJsonSync((sourcesJson),  'utf8', {throws: false});
+    } else {
+        self.browseSources = [{icon: 'fa fa-heart', name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
+            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
+            {icon: 'fa fa-users',name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
+            {icon: 'fa fa-dot-circle-o',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
+            {icon: 'fa fa-tag',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
+        ];
+    }
+
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
 	// This is okay because no part of Volumio requires a populated library to function.
