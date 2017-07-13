@@ -293,7 +293,7 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
         var splitted = curUri.split('/');
 
         return this.search({"value": splitted[2]});
-    } else if (curUri === 'playlists' || curUri === 'artists://' || curUri === 'albums://' || curUri === 'genres://') {
+    } else if (curUri.startsWith('playlists') || curUri.startsWith('artists://') || curUri.startsWith('albums://') || curUri.startsWith('genres://')) {
             return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
     } else {
         for(var i in self.browseSources)
