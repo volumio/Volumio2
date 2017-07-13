@@ -20,6 +20,7 @@ var compilation = ['Various','various','Various Artists','various artists','VA',
 //atistsort variable below will list artists by albumartist if set to true or artist if set to false
 var artistsort = true;
 var dsd_autovolume = false;
+var singleBrowse = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -1304,6 +1305,16 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						});
 					}
 
+				} if (singleBrowse && uri === 'music-library') {
+					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites'},
+					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'category'},
+                    {icon: 'fa fa-users',title: 'Artists', uri: 'artists://', type: 'category'},
+                    {icon: 'fa fa-dot-circle-o',title: 'Albums', uri: 'albums://', type: 'category'},
+                    {icon: 'fa fa-tag',title: 'Genres', uri: 'genres://', type: 'category'}];
+
+					for (var i in browseSources) {
+                        list.push(browseSources[i]);
+					}
 				}
 			}
 			else self.logger.info(err);
@@ -1313,7 +1324,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					prev: {
 						uri: prev
 					},
-					lists: [{availableListViews:['list'],items:list}]
+					lists: [{availableListViews:['grid', 'list'],items:list}]
 				}
 			});
 		});
@@ -3497,6 +3508,7 @@ ControllerMpd.prototype.loadLibrarySettings=function(){
     var tracknumbersConf = this.config.get('tracknumbers', false);
     var compilationConf = this.config.get('compilation', 'Various,various,Various Artists,various artists,VA,va')
     var artistsortConf = this.config.get('artistsort', true);
+    var singleBrowse = this.config.get('singleBrowse', false);
 
     tracknumbers = tracknumbersConf;
     compilation = compilationConf.split(',');
