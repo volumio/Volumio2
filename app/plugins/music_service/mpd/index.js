@@ -618,13 +618,11 @@ ControllerMpd.prototype.onVolumioStart = function () {
 ControllerMpd.prototype.mpdEstablish = function () {
 	var self = this;
 
-
 	// TODO use names from the package.json instead
 	self.servicename = 'mpd';
 	self.displayname = 'MPD';
 
 	//getting configuration
-
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
@@ -741,7 +739,6 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 				}
 				else {
 					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('COMMON.PLAYER_RESTARTED'));
-					setTimeout(function(){self.mpdEstablish()}, 3000)
 				}
 				defer.resolve({});
 			});
@@ -893,13 +890,16 @@ ControllerMpd.prototype.restartMpd = function (callback) {
 	if (callback) {
 		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
 			function (error, stdout, stderr) {
-				callback(error);
+			self.mpdEstablish();
+			callback(error);
 			});
 	} else {
 		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
 			function (error, stdout, stderr) {
 				if (error){
 					self.logger.error('Cannot restart MPD: ' + error);
+				} else {
+                    self.mpdEstablish();
 				}
 			});
 	}
