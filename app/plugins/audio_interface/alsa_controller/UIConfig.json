@@ -210,6 +210,7 @@
         {
           "id": "iso",
           "element": "switch",
+          "hidden": "true",
           "doc": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK",
           "value":false

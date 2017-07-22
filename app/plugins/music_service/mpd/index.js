@@ -781,7 +781,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
         self.config.set('iso', data['iso']);
         if (isonew) {
             //iso enabled
-            execSync("/usr/bin/sudo /usr/bin/killall mpd", {uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync("/usr/bin/sudo /bin/systemctl stop mpd", {uid: 1000, gid: 1000, encoding: 'utf8'});
             execSync('echo "volumio" | sudo -S /bin/cp -f /usr/bin/mpdsacd /usr/bin/mpd', {
                 uid: 1000,
                 gid: 1000,
