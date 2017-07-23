@@ -32,7 +32,11 @@
     "I2S_DAC_DEACTIVATED":"DAC I2S DAC Désactivé",
     "I2S_DAC_DEACTIVATED_MESSAGE":"a été désactivé, redémarrage du système pour la prise en compte",
     "DOP":"DSD sur PCM (DoP)",
-    	"DOP_DOC":"Si activé, le flux DSD sera encapsulé dans PCM (DoP)",
+    "DSD_PLAYBACK_MODE":"Mode de lecture DSD",
+    "DSD_DIRECT":"DSD Direct",
+    "DOP_DOC":"Si activé, le flux DSD sera encapsulé dans PCM (DoP)",
+    "DSD_AUTO_VOLUME":"DSD Volume automatique",
+    "DSD_AUTO_VOLUME_DOC":"DSD nécessite un réglage de volume à 100. Si activé pendant la lecture DSD, le volume sera automatiquement règlé à 100 (ATTENTION: A utiliser avec précaution!)",
     "SOFTVOL":"Contrôle logiciel du Volume",
     "MIXER_CONTROL_NAME":"Nom du mixeur",
     	"MIXER_CONTROL_NAME_DOC":"Change le mixeur utilisé. Utile si votre système comporte plusieurs possibilités. Mais la plupart du temps aucune modification n'est nécéssaire",
@@ -61,7 +65,9 @@
     "VERY_HIGH":"Très haute",
     "HIGH":"Haute",
     "MEDIUM":"Moyenne",
-    "LOW":"Basse"
+    "LOW":"Basse",
+     "ISO_PLAYBACK":"Lecture de fichier ISO",
+    "ISO_PLAYBACK_DOC":"Utilise une version experimental de MPD pour la lecture de fichiers ISO. Désactive DSD direct si activé"
   	  },
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
@@ -150,8 +156,7 @@
     "ALBUMS":"Albums",
     "ALBUM":"Album",
     "GENRE":"Genre",
-    "GENRES":"Genres",
-	  
+    "GENRES":"Genres",	  
     "TRACKS":"Pistes",
     "TRACK":"Piste",
 	  "WITH":"avec",
@@ -242,7 +247,9 @@
     "SYSTEM_NAME_ERROR":"Impossible de changer le nom du système",
     "SYSTEM_NAME_NOW":"Le nom du système est désormais",
     "UPDATE_ALREADY_LATEST_VERSION":"Vous avez déja la dernière version disponible",
-    "NO_UPDATE_AVAILABLE":"Pas de mise à jour disponible"
+    "NO_UPDATE_AVAILABLE":"Pas de mise à jour disponible",
+    "CANNOT_REMOVE_MEDIA":"Cannot remove media",
+    "MEDIA_REMOVED_SUCCESSFULLY":"Media Removed Successfully"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
