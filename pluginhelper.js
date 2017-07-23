@@ -416,9 +416,9 @@ function publish() {
             catch (e){
                 console.log("Nothing to commit");
             }
-            if (!fs.existsSync(package.name + ".zip")) {
-                zip();
-            }
+            
+            zip();
+            
             execSync("/bin/cp -rp " + package.name + ".zip /tmp/");
             process.chdir("../../../");
             execSync("/usr/bin/git checkout gh-pages");

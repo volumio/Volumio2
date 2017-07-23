@@ -24,11 +24,23 @@
     "I2S_DAC_ACTIVATED_MESSAGE":"已经启用, 重新启动生效",
     "I2S_DAC_DEACTIVATED":"禁用I2S DAC",
     "I2S_DAC_DEACTIVATED_MESSAGE":"已经禁用, 重新启动生效",
-	  "DOP":"DSD over PCM (DoP)",
+    "DOP":"DSD 置 PCM (DOP)",
+    "DSD_PLAYBACK_MODE":"DSD 播放",
+    "DSD_DIRECT":"DSD 直接",
+    "MIXER_TYPE":"混音器種類",
+    "MIXER_CONTROL_NAME":"混音器名稱",
+    "AUDIO_RESAMPLING":"音频重取樣",
+    "TARGET_BITDEPTH":"目標位深度",
+    "TARGET_SAMPLERATE":"目標採樣率",
+    "NATIVE":"Native",
     "SOFTVOL":"软件控制",
-    "MIXER_CONTROL_NAME":"调节控制名e",
     "MIXER_TYPE":"调节类型",
-    "SOFTWARE":"软件控制"
+    "SOFTWARE":"软件控制",
+    "RESAMPLING_ALG":"重採樣演段質量",
+    "VERY_HIGH":"最高",
+    "HIGH":"高",
+    "MEDIUM":"中",
+    "LOW":"低"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"网络设定",
@@ -43,7 +55,11 @@
     "NETWORK_RESTART_SUCCESS": "网络重新启用",
     "WIRELESS_RESTART_TITLE": "重新启用无线网络",
     "WIRELESS_RESTART_ERROR": "重启无线网络发生错误: ",
-    "WIRELESS_RESTART_SUCCESS": "成功重启无线网络"
+    "WIRELESS_RESTART_SUCCESS": "成功重启无线网络",
+    "HOTSPOT_SETTINGS":"熱點設置",
+    "ENABLE_HOTSPOT":"開啟熱點",
+    "DNS_SETTINGS":"DNS 設定",
+    "ENABLE_CUSTOM_DNS":"開啟專案DNS伺服器"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"选择一个别名显示在NAS的挂载点中"
@@ -101,7 +117,10 @@
     "UI_CONFIG_LANGUAGE":"语言",
     "UI_CONFIG_SELECT_LANGUAGE":"选择语言",
     "NEW_LANGUAGE_SET":"新语言设定",
-    "NEW_BACKGROUND_APPLIED":"新的背景已应用"
+    "NEW_BACKGROUND_APPLIED":"新的背景已应用",
+    "ALBUMART_SETTINGS":"專輯圖像設定",
+    "WEB_ALBUMART_ENABLE":"網絡專輯圖像",
+    "WEB_ALBUMART_SIZE":"網絡專輯圖像大小"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"我的音乐",

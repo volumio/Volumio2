@@ -126,6 +126,32 @@ function InterfaceWebUI(context) {
 				});
 			});
 
+            connWebSocket.on('replaceAndPlayCue', function (data) {
+                var timeStart = Date.now();
+
+                if (data.service == undefined || data.service == 'mpd') {
+                    var uri = data.uri;
+                    var arr = uri.split("/");
+                    arr.shift();
+                    var str = arr.join('/');
+                }
+                else str = data.uri;
+
+                self.logStart('Client requests Volumio Clear Queue')
+                    .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+					.then(function () {
+						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
+                        'uri': str,
+                        'number': data.number
+                    });
+                })
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+
+            });
+
 			connWebSocket.on('addPlay', function (data) {
 
                 self.commandRouter.addQueueItems(data)
@@ -169,7 +195,6 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addPlayCue', function (data) {
-
 				if (data.service == undefined || data.service == 'mpd') {
 					var uri = data.uri;
 					var arr = uri.split("/");
@@ -177,7 +202,6 @@ function InterfaceWebUI(context) {
 					var str = arr.join('/');
 				}
 				else str = data.uri;
-
 
 				//TODO add proper service handler
 				var timeStart = Date.now();
@@ -1031,55 +1055,28 @@ function InterfaceWebUI(context) {
 
 			//Updater
 			connWebSocket.on('updateCheck', function () {
-				var selfConnWebSocket = this;
 
-				self.logger.info("Sending updateCheck to server");
+                self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				};
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('updateCheck', 'search-for-upgrade');
-
-				client.on('updateReady', function (message) {
-					self.logger.info("Update Ready: " + message);
-					selfConnWebSocket.emit('updateReady', message);
-				});
-
-				client.on('updateCheck-error', function (message) {
-					self.logger.info("Update Check error: " + message);
-					selfConnWebSocket.emit('updateCheck-error', message);
-				});
 			});
+
+            connWebSocket.on('ClientUpdateReady', function (message) {
+                var selfConnWebSocket = this;
+
+                var updateMessage = JSON.parse(message)
+				self.logger.info("Update Ready: " + updateMessage);
+                self.commandRouter.broadcastMessage('updateReady', updateMessage);
+            });
 
 
 			connWebSocket.on('update', function (data) {
 				var selfConnWebSocket = this;
 				self.logger.info("Update: " + data);
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('update', data);
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+                self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
+                var started = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': 'Starting Software Update'};
+                selfConnWebSocket.emit('updateProgress', started);
+                self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
 			});
 
 			connWebSocket.on('deleteUserData', function () {
@@ -1093,28 +1090,8 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('factoryReset', '');
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+				self.commandRouter.broadcastMessage('ClientFactoryReset', {value:"now"});
 			});
-
-			//factory reset
 
 			connWebSocket.on('getSystemVersion', function () {
 				var selfConnWebSocket = this;
@@ -1303,8 +1280,6 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('updatePlugin', function (data) {
 				var selfConnWebSocket = this;
-
-				console.log(data);
 
 				var returnedData = self.commandRouter.updatePlugin(data);
 
@@ -1752,9 +1727,19 @@ function InterfaceWebUI(context) {
 
 			});
 
+            connWebSocket.on('safeRemoveDrive', function (data) {
+                var selfConnWebSocket = this;
 
+                var remove = self.commandRouter.safeRemoveDrive(data);
 
-
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
 
 		}
 		catch (ex) {
