@@ -91,10 +91,10 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
             var tracknumbersConf = self.getAdditionalConf('music_service', 'mpd', 'tracknumbers', false);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', tracknumbersConf);
 
-            var compilationConf = self.getAdditionalConf('music_service', 'mpd', 'compilationConf', 'Various,various,Various Artists,various artists,VA,va');
+            var compilationConf = self.getAdditionalConf('music_service', 'mpd', 'compilation', 'Various,various,Various Artists,various artists,VA,va');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value', compilationConf);
 
-            var artistsortConf = self.getAdditionalConf('music_service', 'mpd', 'artistsortConf', true);
+            var artistsortConf = self.getAdditionalConf('music_service', 'mpd', 'artistsort', true);
             if (artistsortConf) {
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', true);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'albumartist')

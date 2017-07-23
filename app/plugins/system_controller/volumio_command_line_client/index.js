@@ -4,6 +4,7 @@
 var fs = require('fs-extra');
 var execSync = require('child_process').execSync;
 var libQ = require('kew');
+var os = require('os');
 
 
 // Define the CommandLineClient class
@@ -61,14 +62,12 @@ CommandLineClient.prototype.buildVolumeFiles = function () {
 	var mixer = '"'+mixerdev+'"';
 	var volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
 
-	if (volumecurve == 'logarithmic'){
-		var setcommand = '/usr/bin/amixer -M set -c ' + device + ' ' + mixer + ' $1 %';
-		var getcommand = "/usr/bin/amixer -M get -c " + device + " " + mixer + " | awk '$0~/%/{print $4}' | tr -d '[]%'";
-	} else {
-		var setcommand = '/usr/bin/amixer set -c ' + device + ' ' + mixer + ' $1 %';
-		var getcommand = "/usr/bin/amixer get -c " + device + " " + mixer + " | awk '$0~/%/{print $4}' | tr -d '[]%'";
-	}
-	self.writeVolumeFiles('/tmp/setvolume', setcommand)
+    if (volumecurve == 'logarithmic'){
+        var getcommand = "volume=`/usr/bin/amixer -M get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
+    } else {
+        var getcommand = "volume=`/usr/bin/amixer get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
+    }
+	self.writeVolumeFiles('/tmp/setvolume')
 	self.writeVolumeFiles('/tmp/getvolume', getcommand)
 };
 
@@ -78,10 +77,22 @@ CommandLineClient.prototype.writeVolumeFiles = function (path , content) {
 	try {
 		var ws = fs.createWriteStream(path);
 		ws.cork();
-		ws.write('#!/bin/sh\n')
-		ws.write(content+'\n');
-		if(path == '/tmp/setvolume') {
-			ws.write('echo $1');
+		ws.write('#!/bin/bash\n')
+		if (path == '/tmp/setvolume') {
+            ws.write('echo $1\n');
+            ws.write('volume=$1\n');
+            ws.write('if [ "$volume" = "0" ]; then\n');
+            ws.write('volume="1"\n');
+            ws.write('fi\n');
+            ws.write('/usr/local/bin/volumio volume $volume\n');
+            ws.write('echo $volume\n');
+		} else {
+            ws.write(content+'\n');
+            ws.write('if [ "$volume" = "0" ]; then\n');
+            ws.write('echo "1"\n');
+            ws.write('else\n');
+            ws.write('echo $volume\n');
+            ws.write('fi\n');
 		}
 		ws.uncork();
 		ws.end();
