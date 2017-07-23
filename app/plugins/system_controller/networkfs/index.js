@@ -25,7 +25,7 @@ function ControllerNetworkfs(context) {
 }
 
 ControllerNetworkfs.prototype.getConfigurationFiles = function () {
-	var self = this;
+	
 
 	return ['config.json'];
 };
@@ -97,10 +97,10 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
             var artistsortConf = self.getAdditionalConf('music_service', 'mpd', 'artistsort', true);
             if (artistsortConf) {
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', true);
-                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'albumartist')
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'albumartist');
             } else {
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', false);
-                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'artist')
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'artist');
             }
 
 			defer.resolve(uiconf);
@@ -108,7 +108,7 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
 		.fail(function()
 		{
 			defer.reject(new Error());
-		})
+		});
 
 	return defer.promise;
 };
@@ -223,11 +223,11 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 				// if the split does not match, splitreason[1] is undefined
 				if (splitreason.length > 1) result.error = splitreason[1];
 			}
-			responsemessage = {status:"fail", reason:result.error}
+			responsemessage = {status:"fail", reason:result.error};
 			defer.resolve(responsemessage);
 			if (data.init) {
 				if (trial < 4) {
-					trial++
+					trial++;
 					self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
 					setTimeout(function () {
 						self.mountShare({init:true, key:data.key, trial:trial});
@@ -237,7 +237,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 				}
 			}
 		} else {
-			responsemessage = {status:"success"}
+			responsemessage = {status:"success"};
 			defer.resolve(responsemessage);
 
 		}
@@ -321,7 +321,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	/*
 	 * A name is required. In the ui this field is called 'alias'.
 	 */
-	if (name == undefined) name = '';
+	if (name === undefined) name = '';
 	var blankname_regex = /^\s*$/;
 	var matches = blankname_regex.exec(name);
 	if (matches) {
@@ -349,9 +349,9 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 	var password = data['password'];
 	var options = data['options'];
 
-	if (username == undefined) username = '';
-	if (password == undefined) password = '';
-	if (options == undefined) options = '';
+	if (username === undefined) username = '';
+	if (password === undefined) password = '';
+	if (options === undefined) options = '';
 
 	if (fstype == 'cifs') {
 		/* when the share is mounted the ip and path are joined with '/'.
@@ -363,7 +363,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 
 	var uuid = self.getShare(name, ip, path);
 	var response;
-	if (uuid != undefined) {
+	if (uuid !== undefined) {
 		self.logger.info("Share " + name + " has already been configured, with uuid " + uuid);
 		defer.resolve({
 			success: false,
@@ -379,7 +379,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 
 	saveshare.then(function () {
 		var mountshare = self.mountShare({key:uuid});
-		if (mountshare != undefined) {
+		if (mountshare !== undefined) {
 			mountshare.then(function (data) {
 				var responsemessage = {};
 				if (data.status == 'success') {
@@ -427,9 +427,9 @@ ControllerNetworkfs.prototype.saveShareConf = function (parent, uuid, name, ip, 
 	config.addConfigValue(key + '.password', 'string', password);
 	config.addConfigValue(key + '.options', 'string', options);
 
-	defer.resolve('ok')
+	defer.resolve('ok');
 	return defer.promise;
-}
+};
 
 ControllerNetworkfs.prototype.deleteShare = function (data) {
 	var self = this;
@@ -510,7 +510,7 @@ ControllerNetworkfs.prototype.listShares = function (data) {
 		libQ.all(promises).then(function (d) {
 			defer.resolve(d);
 		}).fail(function (e) {
-			console.log("Failed getting mounts size", e)
+			console.log("Failed getting mounts size", e);
 		});
 	}
 	else {
@@ -705,7 +705,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 
 
 				var mountshare = self.mountShare({key:id});
-				if (mountshare != undefined) {
+				if (mountshare !== undefined) {
 					mountshare.then(function (data) {
 
 						if (data.status == 'success') {
@@ -844,10 +844,10 @@ ControllerNetworkfs.prototype.getAdditionalConf = function (type, controller, da
 	var self = this;
 	var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
 
-	if (setting == undefined) {
+	if (setting === undefined) {
 		setting = def;
 	}
-	return setting
+	return setting;
 };
 
 ControllerNetworkfs.prototype.getLabelForSelect = function (options, key) {
