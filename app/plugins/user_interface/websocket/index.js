@@ -561,12 +561,6 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('getBrowseSources', function (date) {
-				
-				//Refresh cacheAlbumList			
-				var mpdPlugin = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-				//mpdPlugin.listAlbums();
-				self.logger.info('cacheAlbumList being updated');
-
 				var selfConnWebSocket = this;
 				var response;
 
