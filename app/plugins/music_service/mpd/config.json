@@ -51,9 +51,10 @@
       "type": "string",
       "value": ""
     }
-
-
-
+  },
+  "singleBrowse":{
+    "type": "boolean",
+    "value": false
   }
 
 }

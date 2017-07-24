@@ -268,7 +268,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			}
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'dop');
+			value = self.getAdditionalConf('music_service', 'mpd', 'dop', false);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
 
@@ -288,12 +288,14 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[4].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[4].options'), value));
 
-			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue');
-			if (value == undefined) {
-				value = true
-			}
+			value = self.getAdditionalConf('music_service', 'mpd', 'persistent_queue', true);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[5].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[5].options'), value));
+
+            value = self.getAdditionalConf('music_service', 'mpd', 'iso', false);
+            console.log(value)
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[6].options'), value));
 
 			value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
@@ -652,6 +654,10 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
 		var outdevice = self.config.get('outputdevice');
+		if (outdevice === 'softvolume'){
+            var outdevice = self.config.get('softvolumenumber');
+            this.config.set('outputdevice', outdevice);
+		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
 		self.disableSoftMixer(outdevice);
 	}
@@ -758,57 +764,65 @@ ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
 ControllerAlsa.prototype.getAlsaCards = function () {
 	var self=this;
 	var cards = [];
-
-	var soundCardDir = '/proc/asound/';
-	var idFile = '/id';
-	var regex = /card(\d+)/;
 	var multi = false;
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
 	try {
-		var soundFiles = fs.readdirSync(soundCardDir);
+        var soundCardDir = '/proc/asound/';
+        var soundFiles = fs.readdirSync(soundCardDir);
 
+        for (var i = 0; i < soundFiles.length; i++) {
 
+            if (soundFiles[i].indexOf('card') >= 0 && soundFiles[i] != 'cards'){
+				var cardnum = soundFiles[i].replace('card', '');
+				var cardinfo = self.getCardinfo(cardnum);
+				var rawname = cardinfo.name;
+				var name = rawname;
+				var id = cardinfo.id;
+                    for (var n = 0; n < carddata.cards.length; n++){
+                        var cardname = carddata.cards[n].name.toString().trim();
+                        if (cardname === rawname){
+                            if(carddata.cards[n].multidevice) {
+                                multi = true;
+                                var card = carddata.cards[n];
+                                for (var j = 0; j < card.devices.length; j++) {
+                                    var subdevice = carddata.cards[n].devices[j].number;
+                                    name = carddata.cards[n].devices[j].prettyname;
+                                    cards.push({id: id + ',' + subdevice, name: name});
+                                }
 
-	for (var i = 0; i < soundFiles.length; i++) {
-		var fileName = soundFiles[i];
-		var matches = regex.exec(fileName);
-		var idFileName = soundCardDir + fileName + idFile;
-		if (matches && fs.existsSync(idFileName)) {
-			var id = matches[1];
-			var content = fs.readFileSync(idFileName);
-			var rawname = content.toString().trim();
-			var name = rawname;
-			for (var n = 0; n < carddata.cards.length; n++){
-				var cardname = carddata.cards[n].name.toString().trim();
-				if (cardname === rawname){
-					if(carddata.cards[n].multidevice) {
-                        multi = true;
-                        var card = carddata.cards[n];
-                        for (var j = 0; j < card.devices.length; j++) {
-                        	var subdevice = carddata.cards[n].devices[j].number;
-                            name = carddata.cards[n].devices[j].prettyname;
-                            cards.push({id: id + ',' + subdevice, name: name});
+                            } else {
+                                multi = false;
+                                name = carddata.cards[n].prettyname;
+                            }
+
                         }
+                    } if (!multi){
+                        cards.push({id: id, name: name});
+                    }
+                }
 
-					} else {
-                        multi = false;
-                        name = carddata.cards[n].prettyname;
-					}
-
-				}
-			} if (!multi){
-				cards.push({id: id, name: name});
             }
-
-		}
-	}
 	} catch (e) {
 		var namestring = 'No Audio Device Available';
 		cards.push({id: '', name: namestring});
 	}
 	return cards;
 };
+
+ControllerAlsa.prototype.getCardinfo = function (cardnum) {
+	var self = this;
+	var info = fs.readFileSync('/proc/asound/card'+cardnum+'/pcm0p/info').toString().trim().split('\n');
+
+    for (var e = 0; e < info.length; e++) {
+        if (info[e].indexOf('id') >= 0) {
+        	var infoname = info[e].split(':')[1].replace(' ', '');
+        }
+
+    }
+    	var cardinfo = {'id':cardnum,'name':infoname};
+        return cardinfo
+}
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
 

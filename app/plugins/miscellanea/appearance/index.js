@@ -4,7 +4,7 @@ var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var libQ = require('kew');
 var path = require('path');
-var lwip = require('lwip');
+var Jimp = require("jimp");
 
 var backgroundPath = '/data/backgrounds';
 
@@ -229,14 +229,13 @@ volumioAppearance.prototype.generateThumbnails = function(){
                     //console.log('Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f+ ' exists');
                 } catch (e) {
                     console.log('Creating Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
-                    lwip.open(backgroundPath+'/'+f, function(err, image) {
-                        if (err) return console.log(err);
-                        image.resize(300, 200 , function(err, imageres) {
-                            if (err) return console.log(err);
-                            imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
-                                if (err) return console.log(err);
-                            });
-                        });
+
+                    Jimp.read(backgroundPath+'/'+f).then(function (image) {
+                        image.resize(300, 200)
+                            .quality(60)
+                            .write(backgroundPath+'/thumbnail-'+f);
+                    }).catch(function (err) {
+                        console.error(err);
                     });
                 }
 

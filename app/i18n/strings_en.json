@@ -65,7 +65,9 @@
     "VERY_HIGH":"Very high",
     "HIGH":"High",
     "MEDIUM":"Medium",
-    "LOW":"Low"
+    "LOW":"Low",
+    "ISO_PLAYBACK":"ISO Playback",
+    "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

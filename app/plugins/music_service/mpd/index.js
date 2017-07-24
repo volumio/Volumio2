@@ -22,6 +22,7 @@ var compilation = ['Various','various','Various Artists','various artists','VA',
 //atistsort variable below will list artists by albumartist if set to true or artist if set to false
 var artistsort = true;
 var dsd_autovolume = false;
+var singleBrowse = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -154,61 +155,27 @@ ControllerMpd.prototype.addPlay = function (fileName) {
 };
 
 ControllerMpd.prototype.addPlayCue = function (data) {
-	//this.commandRouter.pushToastMessage('Success', '', data.uri + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
+	var self = this;
 
-	//Add playlists and cue with load command
-
-    //console.log(data);
     if(data.number!==undefined)
     {
         this.logger.info('Adding CUE individual entry: ' + data.number + ' ' + data.uri);
+        var cueItem = this.explodeCue(data.uri , data.number);
 
         this.commandRouter.addQueueItems([{
-            uri:'cue://'+data.uri+'@'+data.number,
-            service:'mpd'
+            uri: cueItem.uri,
+            type: cueItem.type,
+            service: cueItem.service,
+            name: cueItem.name,
+            artist: cueItem.artist,
+            album: cueItem.album,
+            number: cueItem.number,
+            albumart: cueItem.albumart
         }]);
 
         var index=this.commandRouter.stateMachine.playQueue.arrayQueue.length;
         this.commandRouter.volumioPlay(index);
     }
-
-
-
-    var items=[];
-
-    /*
-     var cuesheet = parser.parse('/mnt/' + path);
-
-     list.push({
-     service: 'mpd',
-     type: 'song',
-     title: name,
-     icon: 'fa fa-list-ol',
-     uri: s0 + path
-     });
-     var tracks = cuesheet.files[0].tracks;
-     for (var j in tracks) {
-
-     list.push({
-     service: 'mpd',
-     type: 'cuesong',
-     title: tracks[j].title,
-     artist: tracks[j].performer,
-     album: path.substring(path.lastIndexOf("/") + 1),
-     number: tracks[j].number - 1,
-     icon: 'fa fa-music',
-     uri: s0 + path
-     });
-     }*/
-
-
-    /*this.commandRouter.addQueueItems();
-
-	return this.sendMpdCommandArray([
-		{command: 'clear', parameters: []},
-		{command: 'load', parameters: [data.uri]},
-		{command: 'play', parameters: [data.number]}
-	])*/
 };
 
 
@@ -319,7 +286,7 @@ ControllerMpd.prototype.getState = function () {
 						collectedState.album = trackinfo.album;
 						//collectedState.albumart = trackinfo.albumart;
 						collectedState.uri = trackinfo.uri;
-						collectedState.trackType = trackinfo.trackType;
+						collectedState.trackType = trackinfo.trackType.split('?')[0];
 						return collectedState;
 					});
 				// Else return null track info
@@ -653,13 +620,11 @@ ControllerMpd.prototype.onVolumioStart = function () {
 ControllerMpd.prototype.mpdEstablish = function () {
 	var self = this;
 
-
 	// TODO use names from the package.json instead
 	self.servicename = 'mpd';
 	self.displayname = 'MPD';
 
 	//getting configuration
-
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = self.context.coreCommand;
@@ -781,7 +746,6 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
 				}
 				else {
 					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('COMMON.PLAYER_RESTARTED'));
-					setTimeout(function(){self.mpdEstablish()}, 3000)
 				}
 				defer.resolve({});
 			});
@@ -801,7 +765,10 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
     dsd_autovolume = data['dsd_autovolume'];
 
-	//fixing dop
+    var isonew = data.iso;
+    var iso = self.config.get('iso', false);
+
+    //fixing dop
 	if (self.config.get('dop') == null) {
 		self.config.addConfigValue('dop', 'boolean', data['dop'].value);
 	} else {
@@ -813,6 +780,59 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 	} else {
 		self.config.set('persistent_queue', data['persistent_queue']);
 	}
+
+    if (isonew != iso) {
+        self.config.set('iso', data['iso']);
+        if (isonew) {
+            //iso enabled
+            execSync("/usr/bin/sudo /bin/systemctl stop mpd", {uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('echo "volumio" | sudo -S /bin/cp -f /usr/bin/mpdsacd /usr/bin/mpd', {
+                uid: 1000,
+                gid: 1000,
+                encoding: 'utf8'
+            });
+            execSync('/bin/sync', {uid: 1000, gid: 1000, encoding: 'utf8'});
+            setTimeout(function () {
+                exec('/usr/bin/mpc update', {uid: 1000, gid: 1000},
+                    function (error, stdout, stderr) {
+                        if (error) {
+                            self.logger.error('Cannot Update MPD DB: ' + error);
+                        }
+                    });
+                var responseData = {
+                    title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.PLAYBACK_OPTIONS_TITLE')+ ': ISO Playback',
+                    message: 'ISO Playback ' +self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
+                    size: 'lg',
+                    buttons: [
+                        {
+                            name: self.commandRouter.getI18nString('COMMON.RESTART'),
+                            class: 'btn btn-info',
+                            emit:'reboot',
+                            payload:''
+                        }
+                    ]
+                }
+
+                self.commandRouter.broadcastMessage("openModal", responseData);
+            }, 1000);
+        } else {
+            execSync("/usr/bin/sudo /usr/bin/killall mpd", {uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('echo "volumio" | sudo -S /bin/cp -f /usr/bin/mpdorig /usr/bin/mpd', {
+                uid: 1000,
+                gid: 1000,
+                encoding: 'utf8'
+            });
+            execSync('/bin/sync', {uid: 1000, gid: 1000, encoding: 'utf8'});
+            setTimeout(function () {
+                exec('/usr/bin/mpc update', {uid: 1000, gid: 1000},
+                    function (error, stdout, stderr) {
+                        if (error) {
+                            self.logger.error('Cannot Update MPD DB: ' + error);
+                        }
+                    });
+            }, 5000);
+        }
+    }
 
 
 	self.createMPDFile(function (error) {
@@ -877,13 +897,16 @@ ControllerMpd.prototype.restartMpd = function (callback) {
 	if (callback) {
 		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
 			function (error, stdout, stderr) {
-				callback(error);
+			self.mpdEstablish();
+			callback(error);
 			});
 	} else {
 		exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid:1000, gid:1000},
 			function (error, stdout, stderr) {
 				if (error){
 					self.logger.error('Cannot restart MPD: ' + error);
+				} else {
+                    self.mpdEstablish();
 				}
 			});
 	}
@@ -967,10 +990,20 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 			}
 
-			fs.writeFile("/etc/mpd.conf", conf9, 'utf8', function (err) {
-				if (err) return self.logger.error(err);
-			});
-		});
+            if (self.config.get('iso', false)){
+                //iso enabled
+                var isopart = 'decoder { ' + os.EOL + 'plugin "sacdiso"'  + os.EOL + 'dstdec_threads "2"'  + os.EOL + 'edited_master "true"'  + os.EOL + 'lsbitfirst "false"' + os.EOL + 'playable_area "stereo"'+ os.EOL +'}' + os.EOL + 'decoder { ' + os.EOL + 'plugin "ffmpeg"'  + os.EOL + 'enabled "no"' + os.EOL + '}'  + os.EOL;
+                var conf10 = conf9.replace('"${sacdiso}"', isopart);
+                var conf11 = conf10.replace("${sox}", '');
+            } else {
+                //iso disabled
+                var conf11 = conf9.replace('"${sacdiso}"', " ");
+            }
+
+            fs.writeFile("/etc/mpd.conf", conf11, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        });
 
 		callback();
 	}
@@ -1140,14 +1173,31 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
-
-                    //self.logger.info("LINE "+line);
-
+					
 					if (line.indexOf('directory:') === 0) {
+                        var diricon = 'fa fa-folder-open-o';
 						path = line.slice(11);
-						var namearr = path.split('/')
+						var namearr = path.split('/');
+
+						if (uri === 'music-library') {
+                            switch(path) {
+                                case 'INTERNAL':
+                                    diricon = 'fa fa-microchip';
+                                    break;
+                                case 'NAS':
+                                    diricon = 'fa fa-server';
+                                    break;
+                                case 'USB':
+                                    diricon = 'fa fa-usb';
+                                    break;
+                                default:
+                                    diricon = 'fa fa-folder-open-o';
+                            }
+						}
+
 						if (namearr.length == 2 && namearr[0] == 'USB') {
                             dirtype = 'remdisk';
+                            diricon = 'fa fa-usb';
 						} else {
 							dirtype = 'folder';
 						}
@@ -1155,8 +1205,8 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						list.push({
 							type: dirtype,
 							title: name,
-                                                        service:'mpd',
-							icon: 'fa fa-folder-open-o',
+							service:'mpd',
+							icon: diricon,
 							uri: s0 + path
 						});
 					}
@@ -1169,7 +1219,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 								list.push({
 									service: 'mpd',
-									type: 'song',
+									type: 'cuefile',
 									title: name,
 									icon: 'fa fa-list-ol',
 									uri: s0 + path
@@ -1262,6 +1312,17 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						});
 					}
 
+				} if (singleBrowse && uri === 'music-library') {
+					var prev = '/';
+					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites', type: 'title'},
+					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'title'},
+                    {icon: 'fa fa-users',title: 'Artists', uri: 'artists://', type: 'title'},
+                    {icon: 'fa fa-dot-circle-o',title: 'Albums', uri: 'albums://', type: 'title'},
+                    {icon: 'fa fa-tag',title: 'Genres', uri: 'genres://', type: 'title'}];
+
+					for (var i in browseSources) {
+                        list.push(browseSources[i]);
+					}
 				}
 			}
 			else self.logger.info(err);
@@ -1271,7 +1332,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					prev: {
 						uri: prev
 					},
-					lists: [{availableListViews:['list'],items:list}]
+					lists: [{availableListViews:['grid', 'list'],items:list}]
 				}
 			});
 		});
@@ -1386,7 +1447,7 @@ ControllerMpd.prototype.search = function (query) {
 								service: 'mpd',
 								type: 'folder',
 								title: artist,
-								uri: 'artists://' + nodetools.urlEncode(artist),
+								uri: 'artists://' + encodeURIComponent(artist),
 								albumart: self.getAlbumArt({artist: artist},undefined,'fa-users')
 							});
 						}
@@ -1426,7 +1487,7 @@ ControllerMpd.prototype.search = function (query) {
                             artist: artist,
                             album:'',
 							//Use the correct album / artist match
-							uri: 'albums://' + nodetools.urlEncode(artist) + '/'+ nodetools.urlEncode(album),							
+							uri: 'albums://' + encodeURIComponent(artist) + '/'+ encodeURIComponent(album),							
                             albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
 							});
 						}
@@ -1738,22 +1799,55 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var index=splitted[1];
         var path='/mnt/' + splitted[0].substring(6);
 
-        var cuesheet = parser.parse(path);
+		var cuesheet = parser.parse(path);
 
 		var tracks = cuesheet.files[0].tracks;
 		var cueartist = tracks[index].performer;
-		var cuealbum =	path.substring(path.lastIndexOf("/") + 1);
+		var cuealbum =	cuesheet.title;
 		var cuenumber = tracks[index].number - 1;
 		var path = uri.substring(0, uri.lastIndexOf("/") + 1).replace('cue:/','');
 
 		defer.resolve({
-			uri:uri,service:'mpd',name: tracks[index].title,
+			uri:uri,
+            type: 'cuesong',
+			service:'mpd',
+			name: tracks[index].title,
 			artist: cueartist,
 			album: cuealbum,
 			number: cuenumber,
 			albumart:self.getAlbumArt({artist:cueartist,album: cuealbum},path)
 		});
-    }
+    } else if(uri.endsWith('.cue')) {
+
+        try {
+            var uriPath='/mnt/'+self.sanitizeUri(uri);
+
+
+            var cuesheet = parser.parse(uriPath);
+
+            var tracks = cuesheet.files[0].tracks;
+            var list=[];
+
+            for (var j in tracks) {
+                var cueItem = self.explodeCue(uriPath , j);
+                list.push({
+                    uri: cueItem.uri,
+                    type: cueItem.type,
+                    service: cueItem.service,
+                    name: cueItem.name,
+                    artist: cueItem.artist,
+                    album: cueItem.album,
+                    number: cueItem.number,
+                    albumart:cueItem.albumart
+                });
+            }
+
+            defer.resolve(list);
+        } catch (err) {
+            self.logger.info(err);
+            self.logger.info('Cue Parser - Cannot parse ' + uriPath);
+        }
+	}
     else if(uri.startsWith('search://'))
     {
         //exploding search
@@ -1887,8 +1981,8 @@ ControllerMpd.prototype.explodeUri = function(uri) {
     else if(uri.startsWith('albums://')) {
         //exploding search
         var splitted = uri.split('/');
-        var artistName = nodetools.urlDecode(splitted[2]);
-        var albumName = nodetools.urlDecode(splitted[3]);
+        var artistName = decodeURIComponent(splitted[2]);
+        var albumName = decodeURIComponent(splitted[3]);
         var cmd = libMpd.cmd;
 
 		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
@@ -1962,7 +2056,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         if(splitted.length===4) {
             return this.explodeUri('albums://'+ splitted[2] + '/' + splitted[3]);		
 		}
-        var artist = nodetools.urlDecode(splitted[2]);
+        var artist = decodeURIComponent(splitted[2]);
 
         var cmd = libMpd.cmd;
 
@@ -1980,9 +2074,9 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 		
         //exploding search
         var splitted = uri.split('/');
-        var genreName = nodetools.urlDecode(splitted[2]);
-        var artistName = nodetools.urlDecode(splitted[3]);
-        var albumName = nodetools.urlDecode(splitted[4]);
+        var genreName = decodeURIComponent(splitted[2]);
+        var artistName = decodeURIComponent(splitted[3]);
+        var albumName = decodeURIComponent(splitted[4]);
 
 		if(splitted.length==4) {
 			var GetMatches = "find genre \"" + genreName + "\" artist \"" +  artistName + "\"";
@@ -2060,42 +2154,45 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             }
         });
     }
+    else if(uri.endsWith('.iso')) {
+        var uriPath = '/mnt/' + self.sanitizeUri(uri);
+        //self.commandRouter.logger.info('AAAAAAAAAAAAAAAAAAAA----------------------------'+uriPath);
+        var uris = self.scanFolder(uriPath);
+        var response = [];
 
-    else {
-        if(uri.endsWith('.cue'))
-        {
-            try {
-                var uriPath='/mnt/'+self.sanitizeUri(uri);
+        libQ.all(uris)
+            .then(function (result) {
+                for (var j in result) {
 
+                    self.commandRouter.logger.info("----->>>>> " + JSON.stringify(result[j]));
+                    //console.log('AAAAAAAAALLLLLLLLLLLLLLLLLLLLL'+result[j].albumart)
+                    var albumartiso = result[j].albumart.substring(0, result[j].albumart.lastIndexOf("%2F"));
+                    if (result !== undefined && result[j].uri !== undefined) {
+                        response.push({
+                            uri: self.fromPathToUri(result[j].uri),
+                            service: 'mpd',
+                            name: result[j].name,
+                            artist: result[j].artist,
+                            album: result[j].album,
+                            type: 'track',
+                            tracknumber: result[j].tracknumber,
+                            albumart: albumartiso,
+                            duration: result[j].duration,
+                            samplerate: result[j].samplerate,
+                            bitdepth: result[j].bitdepth,
+                            trackType: result[j].trackType
+                        });
+                    }
 
-                var cuesheet = parser.parse(uriPath);
-
-                var tracks = cuesheet.files[0].tracks;
-                var list=[];
-                for (var j in tracks) {
-
-                    list.push({
-                        service: 'mpd',
-                        name: tracks[j].title,
-                        artist: tracks[j].performer,
-                        album: uriPath.substring(uriPath.lastIndexOf("/") + 1),
-                        number: tracks[j].number - 1,
-                        uri: 'cue://'+uri+'@'+j,
-                        albumart:'/albumart'
-                    });
                 }
-
-                defer.resolve(list);
-            } catch (err) {
-                self.logger.info(err);
-                self.logger.info('Cue Parser - Cannot parse ' + uriPath);
-            }
+                defer.resolve(response);
+            })
+    }
+    else {
 
 
-        }
-        else {
             var uriPath='/mnt/'+self.sanitizeUri(uri);
-            self.commandRouter.logger.info('----------------------------'+uriPath);
+            //self.commandRouter.logger.info('----------------------------'+uriPath);
             var uris=self.scanFolder(uriPath);
             var response=[];
 
@@ -2105,7 +2202,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                     for(var j in result)
                     {
 
-                        self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
+                        //self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
 
                         if(result!==undefined && result[j].uri!==undefined) {
                             response.push({
@@ -2125,19 +2222,57 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                         }
 
                     }
-
                     defer.resolve(response);
                 }).fail(function(err)
             {
                 self.commandRouter.logger.info("explodeURI: ERROR "+err);
                 defer.resolve([]);
             });
-        }
+
 
     }
 
     return defer.promise;
 };
+
+ControllerMpd.prototype.explodeCue=function(uri , index) {
+	var self = this;
+
+	var uri = self.sanitizeUri(uri);
+    var cuesheet = parser.parse('/mnt/'+uri);
+    var cuealbum;
+    var cueartist;
+    var cuename;
+
+    var tracks = cuesheet.files[0].tracks;
+    var list=[];
+
+    if (cuesheet.title != undefined && cuesheet.title.length > 0) {
+        cuealbum = cuesheet.title;
+    } else {
+        cuealbum = uri.substring(uri.lastIndexOf("/") + 1);
+    }
+
+    if (tracks[index].performer != undefined && tracks[index].performer.length > 0) {
+        cueartist = tracks[index].performer;
+    } else {
+        cueartist = cuesheet.files[0].performer;
+    }
+    var cuename = tracks[index].title;
+    var cueuri = 'cue://'+uri+'@'+index;
+
+	var cueItem = {
+        uri: cueuri.replace('///','//'),
+		service: 'mpd',
+        name: cuename,
+        artist: cueartist,
+        album: cuealbum,
+        number: Number(index)+1,
+        albumart: self.getAlbumArt({artist: cueartist, album: cuealbum}, self.getParentFolder('/mnt/'+uri)),
+    }
+
+    return cueItem;
+}
 
 ControllerMpd.prototype.exploderArtist=function(err,msg,defer) {
 	
@@ -2226,43 +2361,35 @@ ControllerMpd.prototype.scanFolder=function(uri)
 {
     var self=this;
     var uris=[];
+    var isofile = false;
 
-    try {
-        var stat=libFsExtra.statSync(uri);
-    } catch(err) {
-        console.log("scanFolder - failure to stat '" + uri + "'");
-        return uris;
+    if ((uri.indexOf(".iso") >= 0) || (uri.indexOf(".ISO") >= 0)){
+        var uri2 = uri.substr(0, uri.lastIndexOf("/"));
+        if ((uri2.indexOf(".iso") >= 0) || (uri2.indexOf(".ISO") >= 0)){
+        } else {
+            isofile = true
+        }
+    } else {
+        try {
+            var stat = libFsExtra.statSync(uri);
+        } catch (err) {
+            console.log("scanFolder - failure to stat '" + uri + "'");
+            return uris;
+        }
     }
 
-    if(stat.isDirectory())
+    if(  ((uri.indexOf(".iso") < 0) && (uri.indexOf(".ISO") < 0)) && (stat != undefined && stat.isDirectory()) )
     {
         var files=libFsExtra.readdirSync(uri);
 
         for(var i in files)
             uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
     }
+    else if (isofile){
+
+    }
     else {
             var defer=libQ.defer();
-/*
-            var parser = mm(libFsExtra.createReadStream(uri), function (err, metadata) {
-                if (err) defer.resolve({});
-                else {
-                    defer.resolve({
-                        uri: 'music-library/'+self.fromPathToUri(uri),
-                        service: 'mpd',
-                        name: metadata.title,
-                        artist: metadata.artist[0],
-                        album: metadata.album,
-                        type: 'track',
-                        tracknumber: metadata.track.no,
-                        albumart: self.getAlbumArt(
-                            {artist:metadata.artist,
-                             album: metadata.album},uri),
-                        duration: metadata.duration
-                    });
-                }
-
-            });*/
 
             var sections = uri.split('/');
             var folderToList = '';
@@ -2366,9 +2493,6 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
 
         var index=splitted[1];
         var uri=self.sanitizeUri(splitted[0]);
-
-        self.logger.info(uri);
-        self.logger.info(index);
 
         return self.sendMpdCommand('stop',[])
             .then(function()
@@ -2555,12 +2679,8 @@ ControllerMpd.prototype.getGroupVolume = function () {
         .then(function (objState) {
 
             if (objState.volume) {
-                //console.log(objState.volume);
                 defer.resolve(objState.volume);
             }
-
-
-
         });
     return defer.promise;
 };
@@ -2665,7 +2785,6 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
  * list album
  */
 ControllerMpd.prototype.listAlbums = function (ui) {
-
     var self = this;
     var defer = libQ.defer();	
     var response = memoryCache.get("cacheAlbumList", function( err, response){
@@ -2685,7 +2804,6 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 					]
 				}
 			};
-
 			var cmd = libMpd.cmd;
 			
 			self.clientMpd.sendCommand(cmd("search album \"\"", []), function (err, msg) {
@@ -2705,8 +2823,8 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 					//********Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
 						if (albumsfound.indexOf(albumName + artistName) <0 ) { // Album/Artist is not in 'albumsfound' array
 							albumsfound.push(albumName + artistName);
-							var codedArtistName = nodetools.urlEncode(artistName);
-							var codedAlbumName = nodetools.urlEncode(albumName);
+							var codedArtistName = encodeURIComponent(artistName);
+              var codedAlbumName = encodeURIComponent(albumName);
 							var album = {
 								service:'mpd',
 								type: 'folder', 
@@ -2750,9 +2868,9 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
     var splitted = uri.split('/');
 
 	if (splitted[0] == 'genres:') { //genre
-		var genre = nodetools.urlDecode(splitted[2]);
-		var albumartist = nodetools.urlDecode(splitted[3]);
-		var albumName = nodetools.urlDecode(splitted[4]);
+		var genre = decodeURIComponent(splitted[2]);
+		var albumartist = decodeURIComponent(splitted[3]);
+		var albumName = decodeURIComponent(splitted[4]);
 		if (compilation.indexOf(albumartist)>-1) {
 			var findstring = "find album \"" + albumName + "\" genre \"" + genre + "\" ";
 		}
@@ -2761,13 +2879,13 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 		}
 	}
 	else if (splitted[0] == 'albums:') { //album
-		var artist = nodetools.urlDecode(splitted[2]);
-		var albumName = nodetools.urlDecode(splitted[3]);	
+		var artist = decodeURIComponent(splitted[2]);
+		var albumName = decodeURIComponent(splitted[3]);	
 		var findstring = "find album \"" + albumName + "\"" + " albumartist \"" + artist + "\" ";
 	}
 	else {  //artist
-		var artist = nodetools.urlDecode(splitted[2]);
-		var albumName = nodetools.urlDecode(splitted[3]);
+		var artist = decodeURIComponent(splitted[2]);
+		var albumName = decodeURIComponent(splitted[3]);
 		if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
 			var typeofartist = 'albumartist';
 		}
@@ -2904,6 +3022,7 @@ ControllerMpd.prototype.listArtists = function () {
                     if(artist!=='') {		
                         var codedArtists=nodetools.urlEncode(artist);
 
+
                         var albumart=self.getAlbumArt({artist:codedArtists},undefined,'fa-users');
                         var item={
                             service: "mpd",
@@ -2939,7 +3058,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
     var response = {
         "navigation": {
             "lists": [{
-                "title": self.commandRouter.getI18nString('COMMON.ALBUMS') + " (" + nodetools.urlDecode(splitted[index]) + ")",
+                "title": self.commandRouter.getI18nString('COMMON.ALBUMS') + " (" + decodeURIComponent(splitted[index]) + ")",
                 "icon": "fa icon",
                 "availableListViews": [
                     "list",
@@ -2950,7 +3069,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                 ]
             },
                 {
-                    "title": self.commandRouter.getI18nString('COMMON.TRACKS') + " (" + nodetools.urlDecode(splitted[index]) + ")",
+                    "title": self.commandRouter.getI18nString('COMMON.TRACKS') + " (" + decodeURIComponent(splitted[index]) + ")",
                     "icon": "fa icon",
                     "availableListViews": [
                     "list"
@@ -2967,12 +3086,12 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 
     self.mpdReady
     .then(function() {
-        var artist=nodetools.urlDecode(splitted[index]);
+        var artist=decodeURIComponent(splitted[index]);
 		var VA = 0;
         var cmd = libMpd.cmd;	
 
 		if (uriBegin === 'genres://')  {
-			var genre = nodetools.urlDecode(splitted[2]);
+			var genre = decodeURIComponent(splitted[2]);
 			var findartist = "find artist \"" + artist + "\" genre \"" + genre + "\" ";
 		}
 
@@ -3071,15 +3190,15 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                     var uri;
 	
                     if(uriBegin==='artists://') {	
-                        uri='artists://' + nodetools.urlEncode(artist) +'/'+nodetools.urlEncode(album);
+                        uri='artists://' + encodeURIComponent(artist) +'/'+encodeURIComponent(album);
 					}
 					
 					else if (uriBegin==='genres://') {
-						uri='genres://' + genre + '/' + nodetools.urlEncode(artist) +'/'+nodetools.urlEncode(album);			
+						uri='genres://' + genre + '/' + encodeURIComponent(artist) +'/'+encodeURIComponent(album);			
 					}
 					
                     else {
-						uri=uriBegin + nodetools.urlEncode(album);				
+						uri=uriBegin + encodeURIComponent(album);				
 					}
 					
                     response.navigation.lists[0].items.push(
@@ -3146,7 +3265,7 @@ ControllerMpd.prototype.listGenres = function () {
                     if(genreName!=='')
                     {
                         var albumart=self.getAlbumArt({},undefined,'fa-tags');
-                        var album = {service:'mpd',type: 'folder', title: genreName, albumart:albumart, uri: 'genres://' + nodetools.urlEncode(genreName)};
+                        var album = {service:'mpd',type: 'folder', title: genreName, albumart:albumart, uri: 'genres://' + encodeURIComponent(genreName)};
 
                         response.navigation.lists[0].items.push(album);
                     }
@@ -3167,8 +3286,8 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     var self = this;
     var defer = libQ.defer();
     var splitted=curUri.split('/');
-    var genreName=nodetools.urlDecode(splitted[2]);
-    var genreArtist=nodetools.urlDecode(splitted[3]);
+    var genreName=decodeURIComponent(splitted[2]);
+    var genreArtist=decodeURIComponent(splitted[3]);
     var response={
         "navigation": {
             "lists": [
@@ -3274,7 +3393,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 									title: album, 
 									artist: albumartist, 
 									albumart: albumart,
-									uri: 'genres://'+ genreName + '/' + nodetools.urlEncode(albumartist) +'/' + nodetools.urlEncode(album)});
+									uri: 'genres://'+ genreName + '/' + encodeURIComponent(albumartist) +'/' + encodeURIComponent(album)});
 								}		
                             }
 
@@ -3288,7 +3407,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 										type: 'folder', 
 										title: artist, 
 										albumart: self.getAlbumArt({artist:artist},undefined,'fa-users'),
-                                        uri: 'genres://' + nodetools.urlEncode(genreName)+'/'+nodetools.urlEncode(artist)});
+                                        uri: 'genres://' + encodeURIComponent(genreName)+'/'+encodeURIComponent(artist)});
 								}
                             }
                         }
@@ -3380,9 +3499,9 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
 
 ControllerMpd.prototype.goto=function(data){
     if(data.type=='artist')
-        return this.listArtist('artists://'+nodetools.urlEncode(data.value),2,'')
+        return this.listArtist('artists://'+encodeURIComponent(data.value),2,'')
     else
-        return this.listAlbumSongs("albums://"+nodetools.urlEncode(data.value),2);
+        return this.listAlbumSongs("albums://"+encodeURIComponent(data.value),2);
 
 }
 
@@ -3429,10 +3548,12 @@ ControllerMpd.prototype.loadLibrarySettings=function(){
     var tracknumbersConf = this.config.get('tracknumbers', false);
     var compilationConf = this.config.get('compilation', 'Various,various,Various Artists,various artists,VA,va')
     var artistsortConf = this.config.get('artistsort', true);
-
+    var singleBrowseConf = this.config.get('singleBrowse', false);
+	
     tracknumbers = tracknumbersConf;
     compilation = compilationConf.split(',');
-    artistsort = artistsort;
+    artistsort = artistsortConf;
+    singleBrowse = singleBrowseConf;
 }
 
 ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
