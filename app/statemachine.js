@@ -1,6 +1,7 @@
 'use strict';
 
 var libQ = require('kew');
+var RandomQueue = require('./randomqueue');
 
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
@@ -44,6 +45,7 @@ function CoreStateMachine(commandRouter) {
 
     this.isUpnp = false;
 
+	this.randomQueue = new RandomQueue(this);
 	this.playQueue = new (require('./playqueue.js'))(commandRouter, this);
 	this.resetVolumioState();
     this.commandRouter.initPlayerControls();
@@ -407,7 +409,7 @@ CoreStateMachine.prototype.getNextIndex = function () {
     // Then check if Random mode is on - Random mode overrides Repeat mode by this
     if(this.currentRandom)
     {
-        nextIndex=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+		nextIndex = this.randomQueue.next();
         this.nextRandomIndex=nextIndex;
     }
 
@@ -820,7 +822,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                         if(this.nextRandomIndex)
                             this.currentPosition=this.nextRandomIndex;
                         else
-                            this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length ));
+							this.currentPosition = this.randomQueue.next();
 					}
 					else {
 						if(this.currentPosition ==null || this.currentPosition===undefined)
@@ -1021,8 +1023,12 @@ CoreStateMachine.prototype.play = function (index) {
 		{
 			if(self.currentPosition ==null || self.currentPosition===undefined)
 			{
-                this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
+                self.commandRouter.pushDebugConsoleMessage("CURRENT POSITION NOT SET, RESETTING TO 0");
 				self.currentPosition=0;
+			}
+
+			if (self.currentRandom!==undefined && self.currentRandom===true) {
+				self.randomQueue.modifyQueueLength(index);
 			}
 
 
@@ -1038,6 +1044,14 @@ CoreStateMachine.prototype.play = function (index) {
 			else
 			{
 				var trackBlock = self.getTrack(self.currentPosition);
+
+				if (!trackBlock) {
+					// Trying to play a track out of the list. Reset currentPosition to zero, and stop.
+					self.currentPosition = 0;
+					self.randomQueue.reset();
+					return libQ.reject();
+				}
+
 				var thisPlugin = self.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 
 				if(self.currentStatus==='stop')
@@ -1102,7 +1116,6 @@ CoreStateMachine.prototype.seek = function (position) {
 
         this.currentSeek = curPos + 10000;
         this.startPlaybackTimer(curPos + 10000);
-
         thisPlugin.seek(curPos + 10000);
 
         this.pushState().fail(this.pushError.bind(this));
@@ -1127,7 +1140,6 @@ CoreStateMachine.prototype.seek = function (position) {
         this.startPlaybackTimer(position*1000);
 
         thisPlugin.seek(position*1000);
-
         this.pushState().fail(this.pushError.bind(this));
 			}
 		}
@@ -1275,7 +1287,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			// Stop -> Previous transition
 			if(this.currentRandom!==undefined && this.currentRandom===true)
 			{
-				this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length));
+				this.currentPosition=self.randomQueue.prev();
 				return this.updateTrackBlock().then(this.serviceClearAddPlay.bind(this));
 			}
 			else if (this.currentPosition > 0) {
@@ -1309,7 +1321,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			// Pause -> Previous transition
 			if(this.currentRandom!==undefined && this.currentRandom===true)
 			{
-				this.currentPosition=Math.floor(Math.random() * (this.playQueue.arrayQueue.length  + 1));
+				this.currentPosition = this.randomQueue.prev();
 			}
 			else if (this.currentPosition > 0) {
 				this.currentPosition--;

@@ -1742,6 +1742,7 @@ ControllerMpd.prototype.getAdditionalConf = function (type, controller, data, de
     if (setting == undefined) {
         setting = def;
     }
+
     return setting;
 };
 
@@ -2787,6 +2788,7 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
  */
 ControllerMpd.prototype.listAlbums = function (ui) {
     var self = this;
+
     var defer = libQ.defer();	
     var response = memoryCache.get("cacheAlbumList", function( err, response){
 		if(response == undefined){
@@ -3024,10 +3026,9 @@ ControllerMpd.prototype.listArtists = function () {
 				if(splitted[i].startsWith(artistbegin))  {
                     var artist=splitted[i].substring(artistbegin.length);
 
+
                     if(artist!=='') {		
                         var codedArtists=encodeURIComponent(artist);
-
-
                         var albumart=self.getAlbumArt({artist:codedArtists},undefined,'fa-users');
                         var item={
                             service: "mpd",
