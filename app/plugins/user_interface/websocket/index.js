@@ -564,7 +564,7 @@ function InterfaceWebUI(context) {
 				
 				//Refresh cacheAlbumList			
 				var mpdPlugin = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-				mpdPlugin.listAlbums();
+				//mpdPlugin.listAlbums();
 				self.logger.info('cacheAlbumList being updated');
 
 				var selfConnWebSocket = this;

@@ -614,6 +614,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
 
     self.loadLibrarySettings();
     dsd_autovolume = self.config.get('dsd_autovolume', false);
+
     return libQ.resolve();
 };
 
@@ -2820,18 +2821,22 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 						var path = line.slice(6);
 						var albumName = self.searchFor(lines, i + 1, 'Album:');
 						var artistName = self.searchFor	(lines, i + 1, 'AlbumArtist:');
+
+						if (!artistName) {
+                            artistName = self.searchFor	(lines, i + 1, 'Artist:');
+						}
 					//********Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
 						if (albumsfound.indexOf(albumName + artistName) <0 ) { // Album/Artist is not in 'albumsfound' array
 							albumsfound.push(albumName + artistName);
 							var codedArtistName = encodeURIComponent(artistName);
-              var codedAlbumName = encodeURIComponent(albumName);
+              				var codedAlbumName = encodeURIComponent(albumName);
 							var album = {
 								service:'mpd',
 								type: 'folder', 
 								title: albumName, 
 								artist: artistName, 							
 								album:'',
-								uri: 'albums://' + nodetools.urlEncode(artistName) + '/'+ nodetools.urlEncode(albumName),
+								uri: 'albums://' + encodeURIComponent(artistName) + '/'+ encodeURIComponent(albumName),
 						//Get correct album art from path- only download if not existent								
 								albumart: self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path),'fa-tags')
 								};
@@ -3020,7 +3025,7 @@ ControllerMpd.prototype.listArtists = function () {
                     var artist=splitted[i].substring(artistbegin.length);
 
                     if(artist!=='') {		
-                        var codedArtists=nodetools.urlEncode(artist);
+                        var codedArtists=encodeURIComponent(artist);
 
 
                         var albumart=self.getAlbumArt({artist:codedArtists},undefined,'fa-users');
