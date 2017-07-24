@@ -1116,7 +1116,6 @@ CoreStateMachine.prototype.seek = function (position) {
 
         this.currentSeek = curPos + 10000;
         this.startPlaybackTimer(curPos + 10000);
-
         thisPlugin.seek(curPos + 10000);
 
         this.pushState().fail(this.pushError.bind(this));
@@ -1141,7 +1140,6 @@ CoreStateMachine.prototype.seek = function (position) {
         this.startPlaybackTimer(position*1000);
 
         thisPlugin.seek(position*1000);
-
         this.pushState().fail(this.pushError.bind(this));
 			}
 		}
