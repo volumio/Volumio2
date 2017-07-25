@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var spawn = require('child_process').spawn;
+var execSync = require('child_process').execSync;
 var Volume = {};
 Volume.vol = null;
 Volume.mute = null;
@@ -17,6 +18,7 @@ var currentmute = false;
 var premutevolume = '';
 var mixertype = '';
 var devicename = '';
+var volumescript = {'enabled':false, 'setvolumescript':'', 'getvolumescript':''};
 
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
@@ -115,6 +117,13 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.getVolume = function (cb) {
+        if (volumescript.enabled) {
+            try {
+                execSync('/bin/sh ' + volumescript.getvolumescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
+            } catch(e) {
+                self.logger.info('Cannot get Volume with script: '+e);
+            }
+        }
 		getInfo(function (err, obj) {
 			if (err) {
 				cb(err);
@@ -126,6 +135,13 @@ function CoreVolumeController(commandRouter) {
 
 	self.setVolume = function (val, cb) {
 		console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
+		if (volumescript.enabled) {
+			try {
+                execSync('/bin/sh ' + volumescript.setvolumescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
+			} catch(e) {
+                self.logger.info('Cannot set Volume with script: '+e);
+			}
+		}
 		if (volumecurve === 'logarithmic') {
 			amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
 				console.log(err)
@@ -188,6 +204,15 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	volumesteps = data.volumesteps;
 	mixertype = data.mixertype
 	devicename = data.name;
+}
+
+CoreVolumeController.prototype.updateVolumeScript = function (data) {
+    var self = this;
+
+    if (data.setvolumescript != undefined && data.getvolumescript != undefined) {
+        self.commandRouter.pushConsoleMessage('Updating Volume script: '+data);
+        volumescript = data;
+	}
 }
 
 
