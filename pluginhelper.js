@@ -346,26 +346,20 @@ function refresh() {
 function zip(){
     console.log("Compressing the plugin");
     try {
-        if(fs.existsSync("node_modules")) {
-            var package = fs.readJsonSync("package.json");
-            execSync("cd " + process.cwd() + " && /usr/bin/zip -r " +
-                package.name + ".zip *");
-            console.log("Plugin succesfully compressed");
-        }
-        else{
+        if(! fs.existsSync("node_modules")) {
             console.log("No modules found, running \"npm install\"");
             try{
                 execSync("/usr/local/bin/npm install");
-                var package = fs.readJsonSync("package.json");
-                execSync("cd " + process.cwd() + " && /usr/bin/zip -r " +
-                    package.name + ".zip *");
-                console.log("Plugin succesfully compressed");
             }
             catch (e){
                 console.log("Error installing node modules: " + e);
                 process.exit(1);
             }
-        }
+        }        
+        var package = fs.readJsonSync("package.json");
+        execSync("cd " + process.cwd() + " && /usr/bin/minizip -o -9 " +
+            package.name + ".zip $(find -type f -not -name " + package.name + ".zip -printf '%P ')");
+        console.log("Plugin succesfully compressed");
     }
     catch (e){
         console.log("Error compressing plugin: " + e);
