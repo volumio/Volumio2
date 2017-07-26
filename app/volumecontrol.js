@@ -120,7 +120,10 @@ function CoreVolumeController(commandRouter) {
         if (volumescript.enabled) {
             try {
                 var scriptvolume = execSync('/bin/sh ' + volumescript.getvolumescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
-                cb(null, scriptvolume);
+                self.logger.info('External Volume: ' + scriptvolume)
+                Volume.vol = scriptvolume;
+                Volume.mute = false;
+                self.commandRouter.volumioupdatevolume(Volume);
             } catch(e) {
                 self.logger.info('Cannot get Volume with script: '+e);
             }
@@ -137,16 +140,20 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setVolume = function (val, cb) {
-		console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
+
 		if (volumescript.enabled) {
 			try {
 				var cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + val
 				self.logger.info('Volume script ' + cmd)
-                execSync(cmd, { uid: 1000, gid: 1000, encoding: 'utf8'});
+                execSync(cmd, { uid: 1000, gid: 1000, encoding: 'utf8', tty:'pts/1'});
+                Volume.vol = val;
+                Volume.mute = false;
+                self.commandRouter.volumioupdatevolume(Volume);
 			} catch(e) {
                 self.logger.info('Cannot set Volume with script: '+e);
 			}
 		} else {
+            //console.log('amixer -M set -c '+device + ' '+ mixer + ' '+val+'%')
             if (volumecurve === 'logarithmic') {
                 amixer(['-M', 'set', '-c', device, mixer, val + '%'], function (err) {
                     console.log(err)
