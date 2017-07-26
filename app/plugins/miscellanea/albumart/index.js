@@ -5,6 +5,7 @@ var libQ = require('kew');
 var nodetools = require('nodetools');
 var enableweb = true;
 var defaultwebsize = 'large';
+var cacheid = '';
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -29,6 +30,7 @@ AlbumArt.prototype.onVolumioStart = function() {
 
 	enableweb = self.config.get('enableweb', true);
 	defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
+	cacheid = self.config.get('cacheid', 0);
 
 	//Starting server
 	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
@@ -136,7 +138,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
         else url=url+'&icon='+icon;
     }
 
-
+    url=url+'&cacheid='+cacheid;
 
     return url;
 };
@@ -166,4 +168,18 @@ AlbumArt.prototype.saveAlbumartOptions = function (data) {
 	}
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+};
+
+AlbumArt.prototype.clearAlbumartCache = function () {
+	var self = this;
+
+    exec('/bin/rm -rf /data/albumart/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+            if (error) {
+                self.logger.error('Cannot Delete Albumart Cache DirectoryB: ' + error);
+            } else {
+				var newcache = cacheid++
+                self.config.set('cacheid', newcache)
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEARED'));
+			}
+        });
 };

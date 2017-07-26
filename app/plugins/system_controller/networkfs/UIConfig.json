@@ -62,7 +62,14 @@
 			}
 		  ]
 
-		}
+		},
+		  {
+		  "id":"albumartcache",
+		  "element": "button",
+		  "label": "TRANSLATE.APPEARANCE.ALBUMART_RESET_CACHE",
+		  "doc": "TRANSLATE.APPEARANCE.ALBUMART_RESET_CACHE_DOC",
+		  "onClick": {"type":"emit", "message":"callMethod", "data":{"endpoint":"miscellanea/albumart","method":"clearAlbumartCache","data":""}}
+		 }
 	  ]
 	},
 	  {

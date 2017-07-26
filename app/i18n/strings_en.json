@@ -196,7 +196,10 @@
     "ALBUMARTIST":"Albumartist",
     "ARTIST":"Artist",
     "COMPILATION_METADATA_DOC":"Configure the metadata fields used to describe albumartist in compilations or 'multiple artist' albums, use comma separated fields",
-    "COMPILATION_METADATA":"Compilation metadata fields"
+    "COMPILATION_METADATA":"Compilation metadata fields",
+    "ALBUMART_CACHE_CLEARED":"Album Art cache reset successfully",
+    "ALBUMART_RESET_CACHE":"Reset Album Art cache",
+    "ALBUMART_RESET_CACHE_DOC":"The system caches your albumart to improve performances, however this prevents newly added albumart to show. By resetting the cache you will be able to see newly added albumarts"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",
