@@ -158,6 +158,13 @@ CoreCommandRouter.prototype.volumioUpdateVolumeSettings = function (vol) {
 	}
 };
 
+CoreCommandRouter.prototype.updateVolumeScripts = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioUpdateVolumeScripts');
+    if (this.volumeControl){
+        return this.volumeControl.updateVolumeScript(data);
+    }
+};
+
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
 	if (this.callbacks[name] == undefined) {
 		this.callbacks[name] = [];
