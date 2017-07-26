@@ -374,7 +374,7 @@ var processExpressRequest = function (req, res) {
 		.fail(function () {
 		    if(icon!==undefined){
 				res.setHeader('Cache-Control', 'public, max-age=2628000')
-                res.sendFile(__dirname + '/icons/'+icon+'.jpg');
+                res.sendFile(__dirname + '/icons/'+icon+'.svg');
 			} else if (sourceicon!==undefined) {
                 try {
                 	var corepluginurl = '/volumio/app/plugins/' + sourceicon;
