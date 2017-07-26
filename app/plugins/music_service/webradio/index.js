@@ -28,7 +28,7 @@ ControllerWebradio.prototype.getConfigurationFiles = function()
 }
 
 ControllerWebradio.prototype.addToBrowseSources = function () {
-	var data = {albumart: '/albumart?sourceicon=music_service/webradio/icon.png', icon: 'fa fa-microphone', name: 'Webradio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio'};
+	var data = {albumart: '/albumart?sourceicon=music_service/webradio/icon.svg', icon: 'fa fa-microphone', name: 'Webradio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio'};
 	this.commandRouter.volumioAddToBrowseSources(data);
 };
 

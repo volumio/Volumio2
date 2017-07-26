@@ -1317,7 +1317,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					}
 
 				} if (singleBrowse && uri === 'music-library') {
-					var prev = '/';
+					prev = '/';
 					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites', type: 'title'},
 					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'title'},
                     {icon: 'fa users',title: 'Artists', uri: 'artists://', type: 'title'},

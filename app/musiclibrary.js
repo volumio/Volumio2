@@ -105,8 +105,8 @@ function CoreMusicLibrary (commandRouter) {
         self.browseSources = fs.readJsonSync((sourcesJson),  'utf8', {throws: false});
     } else {
         self.browseSources = [{icon: 'fa fa-heart', name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
-            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
-            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.svg', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
             {icon: 'fa fa-users',name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
             {icon: 'fa fa-dot-circle-o',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
             {icon: 'fa fa-tag',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
