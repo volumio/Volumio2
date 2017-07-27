@@ -417,20 +417,22 @@ function publish() {
             process.chdir("../../../");
             execSync("/usr/bin/git checkout gh-pages");
             var arch = "";
-            exec("cat /etc/os-release | grep ^VOLUMIO_ARCH | tr -d VOLUMIO_ARCH=\"\'",
+            exec("cat /etc/os-release | grep ^VOLUMIO_ARCH | tr -d \'VOLUMIO_ARCH=\"\'",
                 function (error, stdout, stderr) {
                     if (error) {
-                        console.error('exec error: ${error}');
+                        console.error('Error, cannot detect system architecture: '+error);
                         return;
+                    } else {
+                        arch = stdout.replace(/\n$/, '');
+                        if (arch == 'x86') {
+                            arch = 'i386';
+                        }
+                        else {
+                            arch = 'armhf';
+                        }
+                        create_folder(package, arch);
                     }
-                    arch = stdout;
-                    if (arch == 'x86') {
-                        arch = 'i386';
-                    }
-                    else {
-                        arch = 'armhf';
-                    }
-                    create_folder(package, arch);
+
                 });
         });
     }
