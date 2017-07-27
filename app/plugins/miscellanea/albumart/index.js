@@ -177,8 +177,9 @@ AlbumArt.prototype.clearAlbumartCache = function () {
             if (error) {
                 self.logger.error('Cannot Delete Albumart Cache DirectoryB: ' + error);
             } else {
-				var newcache = cacheid++
-                self.config.set('cacheid', newcache)
+                cacheid++
+                self.config.set('cacheid', cacheid);
+                self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rebuildAlbumCache');
                 self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEARED'));
 			}
         });

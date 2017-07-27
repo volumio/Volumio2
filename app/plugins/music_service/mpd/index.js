@@ -3587,3 +3587,12 @@ ControllerMpd.prototype.dsdVolume=function(){
         self.commandRouter.volumiosetvolume(100);
 	}
 }
+
+ControllerMpd.prototype.rebuildAlbumCache=function(){
+    var self = this;
+
+	self.logger.info('Rebuild Album cache')
+    memoryCache.del('cacheAlbumList', function(err) {});
+    self.listAlbums();
+}
+
