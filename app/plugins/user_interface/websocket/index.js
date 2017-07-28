@@ -437,12 +437,20 @@ function InterfaceWebUI(context) {
 						return self.logDone(timeStart);
 					});
 			});
-
+			
+			var VolumeUpdateNumeral = -1;
 			connWebSocket.on('volume', function (VolumeInteger) {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volume ' + VolumeInteger)
 					.then(function () {
-						return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+						if(typeof VolumeInteger === "object"){
+							if(VolumeInteger.numeral > VolumeUpdateNumeral){
+								VolumeUpdateNumeral = VolumeInteger.numeral;
+								return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger.volume);
+							}
+						}else{
+							return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+						}
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {

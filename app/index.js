@@ -36,6 +36,9 @@ function CoreCommandRouter(server) {
 		]
 	});
 
+	//Initializing PushStateNumeral at 0. First PushState will have numeral == 0
+	this.PushStateNumeral = 0;
+
 	this.callbacks = [];
 	this.sharedVars = new vconf();
     this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
@@ -284,6 +287,9 @@ CoreCommandRouter.prototype.volumioSearch = function (data) {
 CoreCommandRouter.prototype.volumioPushState = function (state) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioPushState');
 	this.executeOnPlugin('system_controller', 'volumiodiscovery', 'saveDeviceInfo', state);
+	//State Numeral allows for enforcing the right processing order
+	state.numeral = this.PushStateNumeral;
+	this.PushStateNumeral++;
 	// Announce new player state to each client interface
 	var self = this;
 	var res = libQ.all(
