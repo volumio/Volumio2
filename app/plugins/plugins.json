@@ -49,7 +49,17 @@
         "type": "string",
         "value": "STARTED"
       }
-    }
+    },
+	"upnp_browser": {
+	  "enabled": {
+		"type": "boolean",
+		"value": false
+	  },
+	  "status": {
+		"type": "string",
+		"value": "STARTED"
+	  }
+	}
   },
   "audio_interface": {
     "upnp": {

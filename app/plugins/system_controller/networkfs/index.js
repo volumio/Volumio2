@@ -43,7 +43,7 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
 
 ControllerNetworkfs.prototype.languageCallback = function (data) {
 	var self = this;
-	console.log(data);
+
 };
 
 
@@ -87,6 +87,22 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', websize);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), websize));
 
+
+            var tracknumbersConf = self.getAdditionalConf('music_service', 'mpd', 'tracknumbers', false);
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', tracknumbersConf);
+
+            var compilationConf = self.getAdditionalConf('music_service', 'mpd', 'compilation', 'Various,various,Various Artists,various artists,VA,va');
+			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value', compilationConf);
+
+            var artistsortConf = self.getAdditionalConf('music_service', 'mpd', 'artistsort', true);
+            if (artistsortConf) {
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'albumartist')
+            } else {
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', false);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'artist')
+            }
+
 			defer.resolve(uiconf);
 		})
 		.fail(function()
@@ -123,11 +139,6 @@ ControllerNetworkfs.prototype.getSystemConf = function (pluginName, varName) {
 };
 
 ControllerNetworkfs.prototype.setSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
-};
-
-ControllerNetworkfs.prototype.getAdditionalConf = function () {
 	var self = this;
 	//Perform your installation tasks here
 };
@@ -204,7 +215,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 
 	mountutil.mount(pointer, mountpoint, {"createDir": true, "fstype": fstype, "fsopts": fsopts}, function (result) {
 		if (result.error) {
-			console.log(result.error)
+
 			if (result.error.indexOf('Permission denied') >= 0) {
 				result.error = 'Permission denied';
 			} else {
@@ -630,7 +641,7 @@ ControllerNetworkfs.prototype.infoShare = function (data) {
 ControllerNetworkfs.prototype.editShare = function (data) {
 	var self = this;
 
-	console.log(data)
+
 	var responsemessageedit = {};
 	var defer = libQ.defer();
 	if (data.id){
@@ -696,8 +707,7 @@ ControllerNetworkfs.prototype.editShare = function (data) {
 				var mountshare = self.mountShare({key:id});
 				if (mountshare != undefined) {
 					mountshare.then(function (data) {
-						console.log(data)
-						console.log(data.status);
+
 						if (data.status == 'success') {
 							self.scanDatabase();
 							responsemessageedit = {emit: 'pushToastMessage', data:{ type: 'success', title: self.commandRouter.getI18nString('NETWORKFS.NETWORK_DRIVE'), message: self.commandRouter.getI18nString('NETWORKFS.SHARE_MOUNT_SUCCESS')}};

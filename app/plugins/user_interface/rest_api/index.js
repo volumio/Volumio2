@@ -91,6 +91,15 @@ function interfaceApi(context) {
                             });
                     }
                 }
+                else if (req.query.cmd == "toggle"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio toggle')
+                        .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
                 else if (req.query.cmd == "stop"){
                     var timeStart = Date.now();
                     self.logStart('Client requests Volumio stop')
@@ -138,13 +147,12 @@ function interfaceApi(context) {
                 }
                 else if(req.query.cmd == "volume"){
                     var VolumeInteger = req.query.volume;
-
                     if (VolumeInteger == "plus") {
                         VolumeInteger = '+';
                     } else if (VolumeInteger == "minus"){
                         VolumeInteger = '-';
                     }
-                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute") {
+                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute" || VolumeInteger == "toggle") {
 
                     } else {
                         VolumeInteger = parseInt(VolumeInteger);
@@ -168,6 +176,98 @@ function interfaceApi(context) {
                         .then(function () {
                             return self.commandRouter.playPlaylist.call(self.commandRouter,
                                 playlistName);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd=="seek"){
+                    var position = req.query.position;
+                    if(position == "plus") {
+                        position = '+';
+                    }
+                    else if (position == "minus"){
+                        position = '-';
+                    }
+                    else {
+                        position = parseInt(position);
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Position ' + position)
+                        .then(function () {
+                            return self.commandRouter.volumioSeek(position);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "repeat"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Repeat ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioRepeat(value, false);
+                            }
+                            else{
+                                return self.commandRouter.repeatToggle();
+                            }
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "random"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Random ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioRandom(value);
+                            }
+                            else{
+                                return self.commandRouter.randomToggle();
+                            }
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "startAirplay"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Start Airplay metadata parsing')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'startAirplayMeta', '');
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "stopAirplay"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Start Airplay metadata parsing')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'airPlayStop', '');
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {

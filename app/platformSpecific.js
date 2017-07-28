@@ -68,15 +68,19 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 PlatformSpecific.prototype.startupSound = function () {
 	var self = this;
 	var outdev = self.coreCommand.sharedVars.get('alsa.outputdevice');
-	var hwdev = '--device=plughw:' + outdev + ',0';
-	if (outdev === 'softvolume'){
-		hwdev = '-D softvolume';
-	}
-	exec('/usr/bin/aplay '+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
-		if (error !== null) {
-			console.log(error);
-		}
-	});
+    var startupSound = self.coreCommand.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'startupSound');
+
+    if (startupSound){
+			var hwdev = '--device=plughw:' + outdev + ',0';
+			if (outdev === 'softvolume'){
+			hwdev = '-D softvolume';
+			}
+			exec('/usr/bin/aplay '+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
+			if (error !== null) {
+				console.log(error);
+			}
+			});
+    	}
 }
 
 PlatformSpecific.prototype.fileUpdate = function (data) {

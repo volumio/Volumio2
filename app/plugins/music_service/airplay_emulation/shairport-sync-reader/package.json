@@ -1,0 +1,98 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "shairport-sync-reader@0.0.6",
+        "scope": null,
+        "escapedName": "shairport-sync-reader",
+        "name": "shairport-sync-reader",
+        "rawSpec": "0.0.6",
+        "spec": "0.0.6",
+        "type": "version"
+      },
+      "/volumio"
+    ]
+  ],
+  "_from": "shairport-sync-reader@0.0.6",
+  "_id": "shairport-sync-reader@0.0.6",
+  "_inCache": true,
+  "_location": "/shairport-sync-reader",
+  "_nodeVersion": "7.10.0",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/shairport-sync-reader-0.0.6.tgz_1496263427654_0.4369101859629154"
+  },
+  "_npmUser": {
+    "name": "roblan",
+    "email": "roberto.lange+npm@gmail.com"
+  },
+  "_npmVersion": "5.0.0",
+  "_phantomChildren": {
+    "sax": "1.2.1",
+    "xmlbuilder": "4.2.1"
+  },
+  "_requested": {
+    "raw": "shairport-sync-reader@0.0.6",
+    "scope": null,
+    "escapedName": "shairport-sync-reader",
+    "name": "shairport-sync-reader",
+    "rawSpec": "0.0.6",
+    "spec": "0.0.6",
+    "type": "version"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/shairport-sync-reader/-/shairport-sync-reader-0.0.6.tgz",
+  "_shasum": "9599028b99ea6d6f2c49ee008a42b6ef8b278ea0",
+  "_shrinkwrap": null,
+  "_spec": "shairport-sync-reader@0.0.6",
+  "_where": "/volumio",
+  "author": {
+    "name": "Robert Lange",
+    "url": "https://github.com/roblan"
+  },
+  "bugs": {
+    "url": "https://github.com/roblan/shairport-sync-reader/issues"
+  },
+  "dependencies": {
+    "daap-parser": "0.0.1",
+    "xml2js": "^0.4.17"
+  },
+  "description": "Shairport-sync metadata reader",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "integrity": "sha512-U3qurkZYe/7o2Rk5quFii3+Wo2tMfOnXz7EaRdeirizX+2E5WuJIqeK+p5l+laxluwgsb2VIxi2icSwHoc+HcQ==",
+    "shasum": "9599028b99ea6d6f2c49ee008a42b6ef8b278ea0",
+    "tarball": "https://registry.npmjs.org/shairport-sync-reader/-/shairport-sync-reader-0.0.6.tgz"
+  },
+  "gitHead": "24bed5092ee9741f5a75c963b291339ad20e12a6",
+  "homepage": "https://github.com/roblan/shairport-sync-reader#readme",
+  "keywords": [
+    "shairport",
+    "shairport-sync",
+    "airplay",
+    "metadata"
+  ],
+  "license": "MIT",
+  "main": "shairport-sync-reader.js",
+  "maintainers": [
+    {
+      "name": "roblan",
+      "email": "roberto.lange+npm@gmail.com"
+    }
+  ],
+  "name": "shairport-sync-reader",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roblan/shairport-sync-reader.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.6"
+}

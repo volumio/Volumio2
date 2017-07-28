@@ -17,7 +17,7 @@
   },
   "dop": {
 	"type": "boolean",
-	"value": true
+	"value": false
   },
   "auto_update":{
     "type": "boolean",

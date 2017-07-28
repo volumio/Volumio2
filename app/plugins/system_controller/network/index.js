@@ -164,10 +164,23 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
 			}
 
-			uiconf.sections[5].content[0].value = config.get('enable_custom_dns', false);
-			uiconf.sections[5].content[1].value = config.get('primary_dns', '8.8.8.8');
-			uiconf.sections[5].content[2].value = config.get('secondary_dns', '8.8.4.4');
+			if (config.get('enable_custom_dns') == undefined) {
+				uiconf.sections[5].content[0].value = false;
+			} else {
+				uiconf.sections[5].content[0].value = config.get('enable_custom_dns');
+			}
+			
+			if (config.get('primary_dns') == undefined) {
+				uiconf.sections[5].content[1].value = '208.67.222.222';
+			} else {
+				uiconf.sections[5].content[1].value = config.get('primary_dns');
+			}
 
+			if (config.get('secondary_dns') == undefined) {
+				uiconf.sections[5].content[2].value = '208.67.220.220';
+			} else {
+				uiconf.sections[5].content[2].value = config.get('secondary_dns');
+			}
 
 			//console.log(uiconf);
 
@@ -737,7 +750,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 					staticconf.write('interface eth0\n');
 					staticconf.write('static ip_address=' + config.get('ethip') + '/24\n');
 					staticconf.write('static routers=' + config.get('ethgateway') + '\n');
-					staticconf.write('static domain_name_servers=' + config.get('ethgateway') + ' 8.8.8.8\n');
+					staticconf.write('static domain_name_servers=' + config.get('ethgateway') + ' 208.67.222.222\n');
 					staticconf.write('\n');
 				}
 
@@ -751,7 +764,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 					staticconf.write('interface wlan0\n');
 					staticconf.write('static ip_address=' + config.get('wirelessip') + '/24\n');
 					staticconf.write('static routers=' + config.get('wirelessgateway') + '\n');
-					staticconf.write('static domain_name_servers=' + config.get('wirelessgateway') + ' 8.8.8.8\n');
+					staticconf.write('static domain_name_servers=' + config.get('wirelessgateway') + ' 208.67.222.222\n');
 					staticconf.write('\n');
 				}
 
@@ -776,7 +789,11 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var defer = libQ.defer();
 	var response = [];
+	var defers = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
+	if (ethspeed.replace('\n', '') == '1000Mb/s') {
+        ethspeed = '1Gb/s'
+	}
 	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = wirelessspeedraw.replace('=', '');
 	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
@@ -797,21 +814,34 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var ethip = ''
 	var wlanip = ''
-	var oll = 'no';
-	isOnline(function (err, online) {
-		if (online) oll = 'yes';
-	});
+
+    try {
+        execSync("/usr/bin/wget -q  --timeout=1 --spider http://updates.volumio.org/");
+        var oll = 'yes';
+    } catch (e) {
+        var oll = 'no';
+    }
+
+    var ethdefer = libQ.defer();
+	defers.push(ethdefer)
 
 	ifconfig.status('eth0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll}
+				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll};
 				response.push(ethstatus);
+				ethdefer.resolve()
+			} else {
+                ethdefer.resolve()
 			}
+		} else {
+            ethdefer.resolve()
 		}
 	});
 
+    var wlandefer = libQ.defer();
+    defers.push(wlandefer)
 	ifconfig.status('wlan0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
@@ -821,45 +851,57 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 					wlanip = status.ipv4_address;
 					var wlanstatus = {type: "Wireless", ssid: ssid, signal: wirelessquality,ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				}
-
 				response.push(wlanstatus);
-				//console.log(wlanstatus);
-
+				wlandefer.resolve()
+			} else  {
+                wlandefer.resolve()
 			}
+		} else {
+            wlandefer.resolve()
 		}
-		defer.resolve(response);
+
 	});
-//console.log(response);
+    libQ.all(defers)
+        .then(function () {
+            defer.resolve(response)
+        })
+        .fail(function (err) {
+            console.log('Cannot get all networks info'+err);
+            defer.reject(new Error());
+        });
+
 	return defer.promise;
 };
+
 ControllerNetwork.prototype.saveDnsSettings = function (data) {
 	var self = this;
-
+	var customdnsfile = '';
+	
 	console.log(data);
-	if (data.enable_custom_dns && (data.primary_dns.length < 7 || data.secondary_dns.length < 7)) {
+		
+	if ((data.enable_custom_dns) && ((data.primary_dns.length < 7 || data.secondary_dns.length < 7))) {
 		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
-	} else {
-		config.set('enable_custom_dns', data.enable_custom_dns);
-		config.set('primary_dns', data.primary_dns);
-		config.set('secondary_dns', data.secondary_dns);
+		return;
 	}
+	
+	if (data.enable_custom_dns)
+		customdnsfile = 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns + os.EOL;
 
-	var dnsfile = '##custom DNS' + os.EOL + 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns;
-	exec("/usr/bin/sudo /bin/chmod 777 /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
-		if (error !== null) {
-			console.log('Canot set permissions for /etc/resolv.conf.tail: ' + error);
+	fs.writeFile('/etc/resolv.conf.head', customdnsfile, function (err) {
+		if (err) {
+			self.logger.error('Cannot write custom DNS File' + error);
 		} else {
-			self.logger.info('Permissions for /etc/resolv.conf.tail')
-			fs.writeFile('/etc/resolv.conf.tail', dnsfile, function (err) {
-				if (err) {
-					self.logger.error('Cannot write wpasupplicant.conf ' + error);
-				} else {
-					self.commandRouter.wirelessRestart();
-					self.commandRouter.networkRestart();
-					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
-				}
-			});
+			if (data.enable_custom_dns)
+				exec("/usr/bin/sudo /usr/bin/unlink /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {});
+			else
+				exec("/usr/bin/sudo /bin/ln -s /etc/resolv.conf.tail.tmpl /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {});
+									
+			config.set('enable_custom_dns', data.enable_custom_dns);
+			config.set('primary_dns', data.primary_dns);
+			config.set('secondary_dns', data.secondary_dns);				
+			self.commandRouter.wirelessRestart();
+			self.commandRouter.networkRestart();
+			self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 		}
 	});
-
 };
