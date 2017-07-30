@@ -83,7 +83,8 @@
 			  "data": [
 				  "tracknumbers",
 				  "compilation",
-				  "artistsort"
+				  "artistsort",
+				  "ffmpegenable"
 			  ]
 		  },
 		  "content": [
@@ -121,6 +122,13 @@
 					  }
 				  ]
 
+			  },
+			  {
+				  "id": "ffmpegenable",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT_DOC",
+				  "label": "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT",
+				  "value": false
 			  }
 		  ]
 	  }

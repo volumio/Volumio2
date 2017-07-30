@@ -1001,7 +1001,14 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                 var conf11 = conf9.replace('"${sacdiso}"', " ");
             }
 
-            fs.writeFile("/etc/mpd.conf", conf11, 'utf8', function (err) {
+            var ffmpeg = self.config.get('ffmpegenable', true);
+            if (ffmpeg) {
+                var conf12 = conf11.replace('"${ffmpeg}"', 'decoder { ' + os.EOL + 'plugin "ffmpeg"'  + os.EOL + 'enabled "yes"'  + os.EOL + 'analyzeduration "1000000000"'  + os.EOL + 'probesize "1000000000"' + os.EOL + '}' + os.EOL);
+			} else {
+                var conf12 = conf11.replace('"${ffmpeg}"', " ");
+			}
+
+            fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
                 if (err) return console.log(err);
             });
         });
@@ -1757,12 +1764,14 @@ ControllerMpd.prototype.setAdditionalConf = function (type, controller, data) {
 ControllerMpd.prototype.rescanDb = function () {
 	var self = this;
 
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.RESCAN_DB'));
 	return self.sendMpdCommand('rescan', []);
 };
 
 ControllerMpd.prototype.updateDb = function () {
 	var self = this;
 
+	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.SCAN_DB'));
 	return self.sendMpdCommand('update', []);
 };
 
@@ -2614,67 +2623,64 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
 
     var defer = libQ.defer();
 
-    var cmd = libMpd.cmd;
-    self.clientMpd.sendCommand(cmd("count", ["group", "artist"]), function (err, msg) {
-        if (err) defer.resolve({
-            artists: 0,
-            albums: 0,
-            songs: 0,
-            playtime: '00:00:00'
-        });
-        else {
-            var artistsCount = 0;
-            var songsCount = 0;
-            var playtimesCount = 0;
+    try {
+        var cmd = libMpd.cmd;
+        self.clientMpd.sendCommand(cmd("count", ["group", "artist"]), function (err, msg) {
+            if (err) defer.resolve({
+                artists: 0,
+                albums: 0,
+                songs: 0,
+                playtime: '00:00:00'
+            });
+            else {
+                var artistsCount = 0;
+                var songsCount = 0;
+                var playtimesCount = 0;
 
-            var splitted = msg.split('\n');
-            for (var i = 0; i < splitted.length - 1; i = i + 3) {
-                artistsCount++;
-                songsCount = songsCount + parseInt(splitted[i + 1].substring(7));
-                playtimesCount = playtimesCount + parseInt(splitted[i + 2].substring(10));
-            }
-
-            var convertedSecs = convert(playtimesCount);
-
-
-            self.clientMpd.sendCommand(cmd("list", ["album", "group", "albumartist"]), function (err, msg) {
-                if (!err) {
-                    var splittedAlbum = msg.split('\n');
-					var albumsCount = 0;
-					for (var i = 0; i < splittedAlbum.length; i++) {
-					var line = splittedAlbum[i];
-					if (line.startsWith('Album:')) {
-						albumsCount++;
-						}
-					}
-                    var response = {
-                        artists: artistsCount,
-                        albums: albumsCount,
-                        songs: songsCount,
-                        playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
-                    };
+                var splitted = msg.split('\n');
+                for (var i = 0; i < splitted.length - 1; i = i + 3) {
+                    artistsCount++;
+                    songsCount = songsCount + parseInt(splitted[i + 1].substring(7));
+                    playtimesCount = playtimesCount + parseInt(splitted[i + 2].substring(10));
                 }
 
-                defer.resolve(response);
+                var convertedSecs = convert(playtimesCount);
 
-            });
 
-        }
+                self.clientMpd.sendCommand(cmd("list", ["album", "group", "albumartist"]), function (err, msg) {
+                    if (!err) {
+                        var splittedAlbum = msg.split('\n');
+                        var albumsCount = 0;
+                        for (var i = 0; i < splittedAlbum.length; i++) {
+                            var line = splittedAlbum[i];
+                            if (line.startsWith('Album:')) {
+                                albumsCount++;
+                            }
+                        }
+                        var response = {
+                            artists: artistsCount,
+                            albums: albumsCount,
+                            songs: songsCount,
+                            playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
+                        };
+                    }
 
-    });
+                    defer.resolve(response);
+
+                });
+
+            }
+
+        });
+	} catch(e) {
+        defer.resolve('');
+	}
+
+
     
     return defer.promise;
 
 };
-
-
-ControllerMpd.prototype.rescanDb = function () {
-    var self = this;
-
-    return self.sendMpdCommand('rescan', []);
-};
-
-
 
 ControllerMpd.prototype.getGroupVolume = function () {
     var self = this;
@@ -3576,7 +3582,31 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
     compilation = data.compilation.split(',');
     artistsort = data.artistsort.value;
 
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.MUSIC_LIBRARY_SETTINGS'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'));
+    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.MUSIC_LIBRARY_SETTINGS'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'));
+
+    var ffmpegenable = this.config.get('ffmpegenable', true);
+    if (data.ffmpegenable != undefined && ffmpegenable != data.ffmpegenable) {
+        self.config.set('ffmpegenable', data.ffmpegenable);
+        self.createMPDFile(function (error) {
+            if (error !== undefined && error !== null) {
+                self.logger.error('Cannot create mpd file: ' + error);
+            }
+            else {
+                self.restartMpd(function (error) {
+                    if (error !== null && error != undefined) {
+                        self.logger.error('Cannot restart MPD: ' + error);
+                    }
+                    else {
+                    	setTimeout(function() {
+                            self.rescanDb();
+						}, 3000)
+					}
+                });
+            }
+        });
+	}
+
+
 }
 
 ControllerMpd.prototype.dsdVolume=function(){

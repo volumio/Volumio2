@@ -67,7 +67,9 @@
     "MEDIUM":"Medium",
     "LOW":"Low",
     "ISO_PLAYBACK":"ISO Playback",
-    "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled"
+    "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled",
+    "EXTENDED_FILE_FORMAT_SUPPORT":"Extended File Format Support",
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -146,7 +148,8 @@
     "SEARCH_ALBUM_SECTION":"Albums",
     "SEARCH_SONG_SECTION":"Tracks",
     "SCAN_DB_ERROR":"Error while scanning database",
-    "SCAN_DB":"Scanning Music",
+    "SCAN_DB":"Updating Music Database",
+    "RESCAN_DB":"Re-creating Music Database",
     "ILLEGAL_CHARACTER_/":"Remove forbidden character /",
     "FAVOURITES":"Favorites",
     "PLAYLISTS":"Playlists",

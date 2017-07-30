@@ -103,6 +103,9 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'artist')
             }
 
+            var ffmpeg = self.getAdditionalConf('music_service', 'mpd', 'ffmpegenable', true);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[3].value', ffmpeg);
+
 			defer.resolve(uiconf);
 		})
 		.fail(function()
