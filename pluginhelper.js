@@ -255,7 +255,7 @@ function customize_package(pluginName, path, category) {
         inquirer.prompt(questions).then(function (answer) {
             package.author = answer.username;
             package.description = answer.description;
-            fs.writeJsonSync(path + '/package.json', package);
+            fs.writeJsonSync(path + '/package.json', package, {spaces:'\t'});
             finalizing(path, package);
         });
     }
@@ -299,7 +299,7 @@ function finalizing(path, package) {
                 plugins[i][pluginName] = field;
             }
         }
-        fs.writeJsonSync("/data/configuration/plugins.json", plugins);
+        fs.writeJsonSync("/data/configuration/plugins.json", plugins, {spaces:'\t'});
     }
     catch(e){
         console.log("Error, impossible to update plugins.json: " + e);
@@ -401,7 +401,7 @@ function publish() {
         ];
         inquirer.prompt(questions).then(function (answer) {
             package.version = answer.version;
-            fs.writeJsonSync("package.json", package);
+            fs.writeJsonSync("package.json", package, {spaces:'\t'});
             try {
                 execSync("/usr/bin/git add *");
                 execSync("/usr/bin/git commit -am \"updating plugin " +
@@ -550,7 +550,7 @@ function write_new_plugin(package, arch, plugins, index) {
 
         plugins.categories[index].plugins.push(data);
         fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-            arch + "/plugins.json", plugins);
+            arch + "/plugins.json", plugins, {spaces:'\t'});
 
         commit(package, arch);
     });
@@ -618,7 +618,7 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
         plugins.categories[catIndex].plugins[plugIndex].description = answer.description;
 
         fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-            arch + "/plugins.json", plugins);
+            arch + "/plugins.json", plugins, {spaces:'\t'});
 
         commit(package, arch);
     });
