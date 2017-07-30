@@ -54,8 +54,10 @@ CommandLineClient.prototype.getAdditionalConf = function (type, controller, data
 CommandLineClient.prototype.buildVolumeFiles = function () {
 	var self = this;
 
-	var  device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
+	var device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
+    var mixer_type = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer_type');
+
 	if (mixerdev === 'SoftMaster') {
 		device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
 	}
@@ -67,8 +69,21 @@ CommandLineClient.prototype.buildVolumeFiles = function () {
     } else {
         var getcommand = "volume=`/usr/bin/amixer get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
     }
-	self.writeVolumeFiles('/tmp/setvolume')
-	self.writeVolumeFiles('/tmp/getvolume', getcommand)
+
+    if (mixer_type != 'None') {
+        self.writeVolumeFiles('/tmp/setvolume')
+        self.writeVolumeFiles('/tmp/getvolume', getcommand)
+	} else {
+    	try {
+            fs.writeFileSync('/tmp/setvolume', '#!/bin/bash\necho 100', 'utf8');
+            fs.writeFileSync('/tmp/getvolume', '#!/bin/bash\necho 100', 'utf8');
+            execSync('/bin/chmod a+x /tmp/getvolume', {uid: 1000, gid: 1000})
+            execSync('/bin/chmod a+x /tmp/setvolume', {uid: 1000, gid: 1000})
+		} catch(e) {
+
+		}
+	}
+
 };
 
 CommandLineClient.prototype.writeVolumeFiles = function (path , content) {
