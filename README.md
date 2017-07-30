@@ -19,7 +19,7 @@ Logins
 * user : *volumio*
 * password : *volumio*
 
-Root login has been disabled by default, however user volumio can become root.
+Root login via ssh has been disabled by default, however user volumio can become root.
 
 ## Resources
 
