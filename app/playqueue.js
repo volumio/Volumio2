@@ -141,7 +141,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             service='spop';
         }
 
-        if(service==='webradio')
+        if(service==='webradio' || item.uri.startsWith('cdda:'))
         {
             item.name=item.title;
             item.albumart="/albumart";
