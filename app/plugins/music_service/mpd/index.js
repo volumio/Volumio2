@@ -940,6 +940,8 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var resampling_bitdepth = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_bitdepth');
 			var resampling_samplerate = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_samplerate');
             var resampling_quality = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_quality');
+            var ffmpeg = self.config.get('ffmpegenable', false);
+
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
@@ -1001,7 +1003,6 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                 var conf11 = conf9.replace('"${sacdiso}"', " ");
             }
 
-            var ffmpeg = self.config.get('ffmpegenable', true);
             if (ffmpeg) {
                 var conf12 = conf11.replace('"${ffmpeg}"', 'decoder { ' + os.EOL + 'plugin "ffmpeg"'  + os.EOL + 'enabled "yes"'  + os.EOL + 'analyzeduration "1000000000"'  + os.EOL + 'probesize "1000000000"' + os.EOL + '}' + os.EOL);
 			} else {
@@ -3584,26 +3585,28 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
 
     self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.MUSIC_LIBRARY_SETTINGS'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'));
 
-    var ffmpegenable = this.config.get('ffmpegenable', true);
+    var ffmpegenable = this.config.get('ffmpegenable', false);
     if (data.ffmpegenable != undefined && ffmpegenable != data.ffmpegenable) {
         self.config.set('ffmpegenable', data.ffmpegenable);
-        self.createMPDFile(function (error) {
-            if (error !== undefined && error !== null) {
-                self.logger.error('Cannot create mpd file: ' + error);
-            }
-            else {
-                self.restartMpd(function (error) {
-                    if (error !== null && error != undefined) {
-                        self.logger.error('Cannot restart MPD: ' + error);
-                    }
-                    else {
-                    	setTimeout(function() {
-                            self.rescanDb();
-						}, 3000)
-					}
-                });
-            }
-        });
+        setTimeout(function(){
+            self.createMPDFile(function (error) {
+                if (error !== undefined && error !== null) {
+                    self.logger.error('Cannot create mpd file: ' + error);
+                }
+                else {
+                    self.restartMpd(function (error) {
+                        if (error !== null && error != undefined) {
+                            self.logger.error('Cannot restart MPD: ' + error);
+                        }
+                        else {
+                            setTimeout(function() {
+                                self.rescanDb();
+                            }, 3000)
+                        }
+                    });
+                }
+            });
+		},500)
 	}
 
 
