@@ -391,7 +391,8 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 		message.text = 'No info available';
 	}
 	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
-	exec('/usr/local/bin/node /volumio/logsubmit.js "'+ message.text+'"', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+    // Must single-quote the message or the shell may interpret it and crash.
+	exec("/usr/local/bin/node /volumio/logsubmit.js '"+ message.text+"'", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			self.logger.info('Canot send bug report: ' + error);
 		} else {

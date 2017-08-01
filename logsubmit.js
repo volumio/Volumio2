@@ -26,7 +26,7 @@ if (process.argv.slice(2)) {
 try {
     var args = process.argv.slice(2);
     //If description is supplied, add it
-    execSync("echo " + args[0] +  " >>" + logFile);
+    execSync("echo '" + args[0] +  "' >>" + logFile);
 } catch (e) {
     console.log(error)
 }
@@ -58,7 +58,12 @@ for (var itemN in commandArray) {
 
 var variant = getSystemVersion();
 
-var command = '/usr/bin/curl -X POST -H "Content-Type: multipart/form-data" -F "logFile=@'+logFile+'" -F "desc='+args[0]+'" -F "variant='+variant+'" "http://logs.volumio.org:7171/logs/v1"';
+// Use single quotes to avoid the shell expanding any characters in the form data
+var command = "/usr/bin/curl -X POST -H 'Content-Type: multipart/form-data'"
+            + " -F 'logFile=@" + logFile + "'"
+            + " -F 'desc=" + args[0] + "'"
+            + " -F 'variant=" + variant + "'"
+            + " 'http://logs.volumio.org:7171/logs/v1'";
 
 exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
     if (error !== null) {
