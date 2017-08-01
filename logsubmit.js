@@ -26,7 +26,7 @@ if (process.argv.slice(2)) {
 try {
     var args = process.argv.slice(2);
     //If description is supplied, add it
-    execSync("echo " + args[0] +  " >>" + logFile);
+    execSync("echo '" + args[0] +  "' >>" + logFile);
 } catch (e) {
     console.log(error)
 }
