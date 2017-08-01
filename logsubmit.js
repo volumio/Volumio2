@@ -58,7 +58,11 @@ for (var itemN in commandArray) {
 
 var variant = getSystemVersion();
 
-var command = '/usr/bin/curl -X POST -H "Content-Type: multipart/form-data" -F "logFile=@'+logFile+'" -F "desc='+args[0]+'" -F "variant='+variant+'" "http://logs.volumio.org:7171/logs/v1"';
+var command = '/usr/bin/curl -X POST -H "Content-Type: multipart/form-data"'
+            + ' -F "logFile=@' + logFile + '"'
+            + ' -F "desc=' + args[0] + '"'
+            + ' -F "variant=' + variant + '"'
+            + ' "http://logs.volumio.org:7171/logs/v1"';
 
 exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
     if (error !== null) {
