@@ -6,6 +6,7 @@ var nodetools = require('nodetools');
 var enableweb = true;
 var defaultwebsize = 'large';
 var cacheid = '';
+var metadataimage = false;
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -31,6 +32,7 @@ AlbumArt.prototype.onVolumioStart = function() {
 	enableweb = self.config.get('enableweb', true);
 	defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
 	cacheid = self.config.get('cacheid', 0);
+    metadataimage = self.config.get('metadataimage', false);
 
 	//Starting server
 	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
@@ -138,6 +140,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
         else url=url+'&icon='+icon;
     }
 
+    url=url+'&metadata='+metadataimage;
     url=url+'&cacheid='+cacheid;
 
     return url;
@@ -166,6 +169,11 @@ AlbumArt.prototype.saveAlbumartOptions = function (data) {
 		self.config.set('defaultwebsize', data['web_quality'].value);
 		defaultwebsize = data.web_quality.value;
 	}
+
+    if (data.metadataimage != undefined) {
+        self.config.set('metadataimage', data['metadataimage']);
+        metadataimage = data.metadataimage;
+    }
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 };

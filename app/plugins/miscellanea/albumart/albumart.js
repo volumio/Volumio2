@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools = require('nodetools');
 var mm = require('musicmetadata');
+var exec = require('child_process').exec;
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -22,6 +23,7 @@ var logger = new (winston.Logger)({
 
 var albumArtRootFolder = '/data/albumart/web';
 var mountAlbumartFolder= '/data/albumart/folder';
+var mountMetadataFolder= '/data/albumart/metadata';
 
 var setFolder = function (newFolder) {
 	//logger.info("Setting folder " + newFolder);
@@ -30,6 +32,9 @@ var setFolder = function (newFolder) {
 
     mountAlbumartFolder= S(newFolder).ensureRight('/').s+'folder/';
     fs.ensureDirSync(mountAlbumartFolder);
+
+    mountMetadataFolder= S(newFolder).ensureRight('/').s+'metadata/';
+    fs.ensureDirSync(mountMetadataFolder);
 };
 
 var searchOnline = function (defer, web) {
@@ -153,7 +158,7 @@ var searchOnline = function (defer, web) {
 	}
 };
 
-var searchInFolder = function (defer, path, web) {
+var searchInFolder = function (defer, path, web, meta) {
 	var coverFolder = '';
 	var splitted = path.split('/');
 
@@ -206,25 +211,75 @@ var searchInFolder = function (defer, path, web) {
 		for (var j in files) {
 			var fileName = S(files[j]);
 
-			//console.log(fileName.s);
 			if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG')|| fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
 				defer.resolve(coverFolder + '/' + fileName.s);
 				return defer.promise;
 			}
 
 		}
+
 	} else {
 		//logger.info('Folder ' + coverFolder + ' does not exist');
 	}
-	searchOnline(defer, web);
-
+	//searchOnline(defer, web);
+    searchMeta(defer, coverFolder, web, meta);
 };
+
+var searchMeta = function (defer, coverFolder, web, meta) {
+
+    if (meta) {
+
+	try {
+        var files = fs.readdirSync(coverFolder);
+	} catch(e) {
+        return searchOnline(defer, web);
+	}
+
+    var fileName = coverFolder + '/' + S(files[0]);
+    fs.stat(fileName, function (err, stats) {
+        if (err) {
+            return searchOnline(defer, web);
+        } else {
+            if (stats.isFile() && ( fileName.endsWith('.mp3') || fileName.endsWith('.flac') || fileName.endsWith('.aif') )) {
+                var cmd = '/usr/bin/exiftool "'+ fileName + '" | grep Picture';
+                exec(cmd, {uid: 1000, gid: 1000},  function (error, stdout, stderr) {
+                    if (error) {
+                        return searchOnline(defer, web);
+                    } else {
+                        if (stdout.length > 0 ) {
+                            var metaCacheFile = mountMetadataFolder+'/'+ coverFolder+'/metadata.jpeg';
+                            var extract = '/usr/bin/exiftool -b -Picture "'+ fileName + '" > "' + metaCacheFile + '"';
+
+                            fs.ensureFileSync(metaCacheFile);
+                            exec(extract, {uid: 1000, gid: 1000, encoding: 'utf8'},  function (error, stdout, stderr) {
+                                if (error) {
+                                    return searchOnline(defer, web);
+                                } else {
+                                    console.log('Extracted metadata : '+metaCacheFile)
+                                    defer.resolve(metaCacheFile);
+                                    return defer.promise;
+                                }
+                            });
+                        } else {
+                            return searchOnline(defer, web);
+						}
+                    }
+                });
+            } else {
+                return searchOnline(defer, web);
+			}
+		}
+    });
+    } else {
+        searchOnline(defer, web);
+    }
+}
 
 /**
  *    This method searches for the album art, downloads it if needed
  *    and returns its file path. The return value is a promise
  **/
-var processRequest = function (web, path) {
+var processRequest = function (web, path, meta) {
 	var defer = Q.defer();
 
 	if (web == undefined && path == undefined) {
@@ -273,50 +328,28 @@ var processRequest = function (web, path) {
 
             fs.ensureDirSync(coverFolder);
             var cacheFilePath=mountAlbumartFolder+coverFolder+'/'+imageSize+'.jpeg';
+            var metaFilePath=mountMetadataFolder+coverFolder+'/'+imageSize+'.jpeg';
             //logger.info(cacheFilePath);
 
 
             if(fs.existsSync(cacheFilePath))
             {
                 defer.resolve(cacheFilePath);
-            }
-            else {
+            } else if (fs.existsSync(metaFilePath)) {
+                defer.resolve(metaFilePath);
+			} else {
                 if (isFolder) {
-                    searchInFolder(defer, path, web);
+                    searchInFolder(defer, path, web, meta);
                 } else {
                     var starttime=Date.now();
-                    searchInFolder(defer, path, web);
-                    /*var parser = mm(fs.createReadStream(path), function (err, metadata) {
-                     if (err) {
-                     logger.info(err);
-                     searchInFolder(defer, path, web);
-                     }
-                     else {
-                     try {
-                     var stoptime=Date.now();
-                     logger.info("Parsing took "+(stoptime-starttime)+" milliseconds");
-                     if (metadata.picture != undefined && metadata.picture.length > 0) {
-                     logger.info("Found art in file " + path);
-
-                     fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
-                     //console.log('file has been written');
-                     defer.resolve('/tmp/albumart');
-                     });
-                     }
-                     else searchInFolder(defer, path, web);
-                     }
-                     catch (ecc) {
-                     logger.info(ecc);
-                     }
-                     }
-                     });*/
+                    searchInFolder(defer, path, web, meta);
                 }
             }
 
 
 		} else {
 			//logger.info('File' + path + ' doesnt exist');
-			searchInFolder(defer, path, web);
+			searchInFolder(defer, path, web, meta);
 		}
 
 	}
@@ -344,6 +377,7 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
+    var meta = req.query.metadata;
 
     if(rawQuery !== undefined && rawQuery !== null)
     {
@@ -362,7 +396,7 @@ var processExpressRequest = function (req, res) {
 
 
     //var starttime=Date.now();
-	var promise = processRequest(web, path);
+	var promise = processRequest(web, path, meta);
 	promise.then(function (filePath) {
 			//logger.info('Sending file ' + filePath);
 

@@ -87,6 +87,9 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', websize);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), websize));
 
+            var metadataimage = self.getAdditionalConf('miscellanea', 'albumart', 'metadataimage', false);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value', metadataimage);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), metadataimage));
 
             var tracknumbersConf = self.getAdditionalConf('music_service', 'mpd', 'tracknumbers', false);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', tracknumbersConf);
