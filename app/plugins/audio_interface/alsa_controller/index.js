@@ -649,13 +649,17 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
-		self.enableSoftMixer(outdevice);
+		if (outdevice != 'sofvolume'){
+			self.enableSoftMixer(outdevice);
+		}
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
 		var outdevice = self.config.get('outputdevice');
 		if (outdevice === 'softvolume'){
             var outdevice = self.config.get('softvolumenumber');
             this.config.set('outputdevice', outdevice);
+            this.config.delete('softvolumenumber');
+            this.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
 		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
 		self.disableSoftMixer(outdevice);
