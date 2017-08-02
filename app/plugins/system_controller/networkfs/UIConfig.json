@@ -15,7 +15,8 @@
 		"label": "TRANSLATE.COMMON.SAVE",
 		"data": [
 		  "enable_web",
-		  "web_quality"
+		  "web_quality",
+		  "metadataimage"
 		]
 	  },
 	  "content": [
@@ -62,6 +63,13 @@
 			}
 		  ]
 
+		},
+		{
+		 "id": "metadataimage",
+			"element": "switch",
+			"doc" : "TRANSLATE.APPEARANCE.METADATA_IMAGE_DOC",
+			"label": "TRANSLATE.APPEARANCE.METADATA_IMAGE",
+			"value": false
 		},
 		  {
 		  "id":"albumartcache",

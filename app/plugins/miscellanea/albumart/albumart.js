@@ -158,7 +158,7 @@ var searchOnline = function (defer, web) {
 	}
 };
 
-var searchInFolder = function (defer, path, web) {
+var searchInFolder = function (defer, path, web, meta) {
 	var coverFolder = '';
 	var splitted = path.split('/');
 
@@ -222,10 +222,13 @@ var searchInFolder = function (defer, path, web) {
 		//logger.info('Folder ' + coverFolder + ' does not exist');
 	}
 	//searchOnline(defer, web);
-    searchMeta(defer, coverFolder, web);
+    searchMeta(defer, coverFolder, web, meta);
 };
 
-var searchMeta = function (defer, coverFolder, web) {
+var searchMeta = function (defer, coverFolder, web, meta) {
+
+    if (meta) {
+
 	try {
         var files = fs.readdirSync(coverFolder);
 	} catch(e) {
@@ -252,7 +255,7 @@ var searchMeta = function (defer, coverFolder, web) {
                                 if (error) {
                                     return searchOnline(defer, web);
                                 } else {
-                                    console.log('Done: '+metaCacheFile)
+                                    console.log('Extracted metadata : '+metaCacheFile)
                                     defer.resolve(metaCacheFile);
                                     return defer.promise;
                                 }
@@ -267,13 +270,16 @@ var searchMeta = function (defer, coverFolder, web) {
 			}
 		}
     });
+    } else {
+        searchOnline(defer, web);
+    }
 }
 
 /**
  *    This method searches for the album art, downloads it if needed
  *    and returns its file path. The return value is a promise
  **/
-var processRequest = function (web, path) {
+var processRequest = function (web, path, meta) {
 	var defer = Q.defer();
 
 	if (web == undefined && path == undefined) {
@@ -333,17 +339,17 @@ var processRequest = function (web, path) {
                 defer.resolve(metaFilePath);
 			} else {
                 if (isFolder) {
-                    searchInFolder(defer, path, web);
+                    searchInFolder(defer, path, web, meta);
                 } else {
                     var starttime=Date.now();
-                    searchInFolder(defer, path, web);
+                    searchInFolder(defer, path, web, meta);
                 }
             }
 
 
 		} else {
 			//logger.info('File' + path + ' doesnt exist');
-			searchInFolder(defer, path, web);
+			searchInFolder(defer, path, web, meta);
 		}
 
 	}
@@ -371,6 +377,7 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
+    var meta = req.query.metadata;
 
     if(rawQuery !== undefined && rawQuery !== null)
     {
@@ -389,7 +396,7 @@ var processExpressRequest = function (req, res) {
 
 
     //var starttime=Date.now();
-	var promise = processRequest(web, path);
+	var promise = processRequest(web, path, meta);
 	promise.then(function (filePath) {
 			//logger.info('Sending file ' + filePath);
 
