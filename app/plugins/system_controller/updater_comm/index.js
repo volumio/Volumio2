@@ -46,20 +46,25 @@ updater_comm.prototype.notifyProgress = function () {
         if (mask & Inotify.IN_CLOSE_WRITE) {
             fs = require('fs')
             fs.readFile('/tmp/updater', function (err, dota) {
-                var data = dota.toString()
-                //console.log("Got " + data);
-                var arr = data.split("\n")
-                if (arr.length > 1) {
-                    var message = arr[0];
-                    var obj = JSON.parse(arr[1]);
-                    if (obj != undefined && obj.updateavailable != undefined && !obj.updateavailable) {
-                        obj.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
-                        obj.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
+                try {
+                    var data = dota.toString()
+                    //console.log("Got " + data);
+                    var arr = data.split("\n")
+                    if (arr.length > 1) {
+                        var message = arr[0];
+                        var obj = JSON.parse(arr[1]);
+                        if (obj != undefined && obj.updateavailable != undefined && !obj.updateavailable) {
+                            obj.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
+                            obj.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
+                        }
+                        console.log(message)
+                        console.log(obj)
+                        self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
                     }
-                    console.log(message)
-					console.log(obj)
-                    self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
+                } catch (e) {
+                    
                 }
+
             });
         }
     }
