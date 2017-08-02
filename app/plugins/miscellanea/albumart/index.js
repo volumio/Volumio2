@@ -121,27 +121,24 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 	console.log('Cannot compose Albumart path')
 	}
     var url = '/albumart';
+    url=url+'?cacheid='+cacheid;
 
-    if (web != undefined)
+    if (web != undefined) {
         url = url + web;
-
-    if (web != undefined && path != undefined)
-        url = url + '&';
-    else if (path != undefined)
-        url = url + '?';
-
-    if (path != undefined)
-        url = url + 'path=' + nodetools.urlEncode(path);
-
-    if(icon!==undefined)
-    {
-        if(url==='/albumart')
-            url=url+'?icon='+icon;
-        else url=url+'&icon='+icon;
     }
 
-    url=url+'&metadata='+metadataimage;
-    url=url+'&cacheid='+cacheid;
+    if (path != undefined) {
+        url = url + '&path=' + nodetools.urlEncode(path);
+    }
+
+    if(icon!==undefined) {
+        url=url+'&icon='+icon;
+    }
+
+    if (path != undefined) {
+        url=url+'&metadata='+metadataimage;
+    }
+
 
     return url;
 };
