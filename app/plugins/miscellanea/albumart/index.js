@@ -115,7 +115,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 			size=defaultwebsize;
 		}
 
-        web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
+        web = '&web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
     }
 	} catch (e) {
 	console.log('Cannot compose Albumart path')
