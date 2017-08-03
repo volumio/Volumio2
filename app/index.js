@@ -39,6 +39,7 @@ function CoreCommandRouter(server) {
 	this.callbacks = [];
 	this.sharedVars = new vconf();
     this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
+    this.sharedVars.addConfigValue('selective_search','boolean',true);
 
 	this.logger.info("-------------------------------------------");
 	this.logger.info("-----            Volumio2              ----");

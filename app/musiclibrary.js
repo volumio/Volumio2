@@ -330,6 +330,10 @@ CoreMusicLibrary.prototype.search = function(data) {
 
         var executed=[];
 
+
+		var enableSelectiveSearch
+        enableSelectiveSearch=this.commandRouter.sharedVars.get("selective_search")
+
 		/*
 		 * New search method. If data structure contains fields service or plugin_name that field will be used to pick
 		 * a plugin for search. If that is not available (only root should be this case) then search will be performed
@@ -344,21 +348,26 @@ CoreMusicLibrary.prototype.search = function(data) {
 		 */
         var searchAll=false
 
-		if (data.service || data.plugin_name)
+        if(enableSelectiveSearch)
         {
-            // checking if uri is /. Should revert to search to all
-            if(data.uri!== undefined && data.uri === '/')
+            if (data.service || data.plugin_name)
             {
-                searchAll=true
-            } else {
-                searchAll=false
-            }
+                // checking if uri is /. Should revert to search to all
+                if(data.uri!== undefined && data.uri === '/')
+                {
+                    searchAll=true
+                } else {
+                    searchAll=false
+                }
 
+            } else {
+                searchAll=true
+            }
         } else {
             searchAll=true
         }
 
-        if(searchAll)
+		if(searchAll)
         {
             console.log("Searching all installed plugins")
             /**
