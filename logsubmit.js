@@ -17,16 +17,24 @@ var logFile = "/tmp/logondemand";
 // Let's start fresh!
 execSync("date >" + logFile);
 
-if (process.argv.slice(2)) {
-    var args = process.argv.slice(2);
+var args = process.argv.slice(2);
+var description;
+if ( args[0] == undefined ) {
+    description = 'Unknown';
 } else {
-    var args = ['Unknown'];
+    description = '';
+    // This will always yield a string that starts and ends with single quotes.
+    var pieces = args[0].split("'");
+    var n = pieces.length;
+    for (var i=0; i<n; i++) {
+        description = description + "'" + pieces[i] + "'";
+        if (i < (n-1)) description = description + "\\'";
+    }
 }
 
 try {
-    var args = process.argv.slice(2);
     //If description is supplied, add it
-    execSync("echo '" + args[0] +  "' >>" + logFile);
+    execSync("echo " + description + " >>" + logFile);
 } catch (e) {
     console.log(error)
 }
@@ -59,9 +67,10 @@ for (var itemN in commandArray) {
 var variant = getSystemVersion();
 
 // Use single quotes to avoid the shell expanding any characters in the form data
+// description is a special case, see above
 var command = "/usr/bin/curl -X POST -H 'Content-Type: multipart/form-data'"
             + " -F 'logFile=@" + logFile + "'"
-            + " -F 'desc=" + args[0] + "'"
+            + " -F desc=" + description
             + " -F 'variant=" + variant + "'"
             + " 'http://logs.volumio.org:7171/logs/v1'";
 

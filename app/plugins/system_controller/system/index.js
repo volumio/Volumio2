@@ -391,8 +391,18 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 		message.text = 'No info available';
 	}
 	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
-    // Must single-quote the message or the shell may interpret it and crash.
-	exec("/usr/local/bin/node /volumio/logsubmit.js '"+ message.text+"'", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	// Must single-quote the message or the shell may interpret it and crash.
+	// single-quotes already within the message need to be escaped.
+	// The resulting string always starts and ends with single quotes.
+	var description = '';
+	var pieces = message.text.split("'");
+	var n = pieces.length;
+	for (var i=0; i<n; i++) {
+		description = description + "'" + pieces[i] + "'";
+		if (i < (n-1)) description = description + "\\'";
+	}
+
+	exec("/usr/local/bin/node /volumio/logsubmit.js " + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			self.logger.info('Canot send bug report: ' + error);
 		} else {
