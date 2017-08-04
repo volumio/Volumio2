@@ -36,7 +36,7 @@ try {
     //If description is supplied, add it
     execSync("echo " + description + " >>" + logFile);
 } catch (e) {
-    console.log(error)
+    console.log(e);
 }
 
 execSync("cat /tmp/logfields >> " + logFile);
@@ -60,7 +60,7 @@ for (var itemN in commandArray) {
 	try {
 		execSync(cmd);
 	} catch(e) {
-		console.log(error);
+		console.log(e);
 	}
 }
 
