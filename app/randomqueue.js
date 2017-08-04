@@ -60,13 +60,16 @@ class RandomQueue {
         this.modifyQueueLength();
         this.position++;
 
-        if (this.position >= this.queueMap.length - 1 && this.stateMachine.currentRepeat) {
+        if (this.position > this.queueMap.length - 1 && this.stateMachine.currentRepeat) {
             this.position = 0;
         } else if (this.position > this.queueMap.length - 1) {
             this.queueMap = [];
         }
 
         var nextIndex = this.getRandomListPosition(this.position);
+        if (nextIndex === undefined) {
+          this.position = 0;
+        }
         return nextIndex !== undefined ? nextIndex : this.stateMachine.playQueue.arrayQueue.length;
     }
 
@@ -81,6 +84,9 @@ class RandomQueue {
         }
 
         var prevIndex = this.getRandomListPosition(this.position);
+        if (prevIndex === undefined) {
+          this.position = 0;
+        }
         return prevIndex !== undefined ? prevIndex : this.stateMachine.playQueue.arrayQueue.length;
     }
 
