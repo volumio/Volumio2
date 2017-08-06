@@ -67,7 +67,7 @@ var command = "/usr/bin/curl -X POST -H 'Content-Type: multipart/form-data'"
 
 exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
     if (error !== null) {
-        console.log('Canot send bug report: ' + error);
+        console.log('Cannot send bug report: ' + error);
     } else {
         console.log(stdout)
     }

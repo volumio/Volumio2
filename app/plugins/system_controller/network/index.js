@@ -587,7 +587,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 		fs.accessSync(hostapdedimax, fs.F_OK);
 		exec("/usr/bin/sudo /bin/chmod 777 "+ hostapdedimax, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 			if (error !== null) {
-				console.log('Canot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
+				console.log('Cannot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
 
 			} else {
 				self.logger.info('Permissions for /etc/hostapd/hostapd-edimax.conf')
@@ -627,7 +627,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 " + hostapd, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/hostapd/hostapd.conf: ' + error);
+			console.log('Cannot set permissions for /etc/hostapd/hostapd.conf: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/hostapd/hostapd.conf')
@@ -714,7 +714,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcpcd.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
+			console.log('Cannot set permissions for /etc/network/interfaces: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/network/interfaces set')
