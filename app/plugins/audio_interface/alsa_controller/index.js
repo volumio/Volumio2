@@ -659,7 +659,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
             var outdevice = self.config.get('softvolumenumber');
             this.config.set('outputdevice', outdevice);
             this.config.delete('softvolumenumber');
-            this.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+            self.restartMpd.bind(self);
 		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
 		self.disableSoftMixer(outdevice);
