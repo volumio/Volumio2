@@ -646,7 +646,7 @@ ControllerI2s.prototype.writeModulesFile = function (modules) {
 
 	exec("/usr/bin/sudo /bin/chmod 777 "+ modulesfile, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/modules: ' + error);
+			console.log('Cannot set permissions for /etc/modules: ' + error);
 
 		} else {
 			var ws = fs.createWriteStream(modulesfile);

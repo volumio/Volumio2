@@ -229,7 +229,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 		else {
 			exec("/usr/bin/sudo /bin/chmod 777 /etc/hosts", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 				if (error !== null) {
-					console.log('Canot set permissions for /etc/hosts: ' + error);
+					console.log('Cannot set permissions for /etc/hosts: ' + error);
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
@@ -254,7 +254,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ hostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
 						exec("/usr/bin/sudo /bin/chmod 777 /etc/avahi/services/volumio.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								console.log('Canot set permissions for /etc/hosts: ' + error);
+								console.log('Cannot set permissions for /etc/hosts: ' + error);
 
 							} else {
 								self.logger.info('Permissions for /etc/avahi/services/volumio.service')
@@ -394,7 +394,7 @@ ControllerSystem.prototype.sendBugReport = function (message) {
     // Must single-quote the message or the shell may interpret it and crash.
 	exec("/usr/local/bin/node /volumio/logsubmit.js '"+ message.text+"'", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			self.logger.info('Canot send bug report: ' + error);
+			self.logger.info('Cannot send bug report: ' + error);
 		} else {
 			self.logger.info('Log sent successfully, reply: '+stdout);
 			//if (stdout != undefined && stdout.status != undefined && stdout.status == 'OK' && stdout.link != undefined ) {
@@ -445,7 +445,7 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 
 	exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			self.logger.info('Canot read proc/cpuinfo: ' + error);
+			self.logger.info('Cannot read proc/cpuinfo: ' + error);
 		} else {
 			var hardwareLine = stdout.split(":");
 			var cpuidparam = hardwareLine[1].replace(/\s/g, '');
