@@ -39,7 +39,9 @@ restart                             Restarts Volumio Service
 
 [[VOLUMIO DEVELOPMENT]]
 
-pull                               Pulls latest github status on master
+pull                               Pulls latest github status on master from https://github.com/volumio/Volumio2.git
+pull -b <branch>                   Pulls branch <branch> from https://github.com/volumio/Volumio2.git
+pull -b <branch> <repository>      Pulls branch <branch> from git repository <repository>
 kernelsource                       Gets Current Kernel source (Raspberry PI only)
 plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
@@ -64,7 +66,7 @@ echo volumio | sudo -S systemctl stop volumio.service
 pull() {
 echo "Stopping Volumio"
 echo volumio | sudo -S systemctl stop volumio.service
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $1 $2 $3
 echo "Pull completed, restarting Volumio"
 echo volumio | sudo -S systemctl start volumio.service
 echo "Done"
@@ -150,7 +152,7 @@ case "$1" in
             fi
             ;;
 	    pull)
-            pull
+            pull $2 $3 $4
             ;;
 	    kernelsource)
 	        kernelsource
