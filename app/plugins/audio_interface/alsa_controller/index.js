@@ -658,7 +658,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		if (outdevice === 'softvolume'){
             var outdevice = self.config.get('softvolumenumber');
             this.config.set('outputdevice', outdevice);
-            this.config.delete('softvolumenumber');
+            self.config.delete('softvolumenumber');
             self.restartMpd.bind(self);
 		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
