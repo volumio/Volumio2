@@ -228,8 +228,16 @@
     "SLEEP_MODE_HOUR":"hour(s)",
     "STOP_MUSIC":"Stop Music",
     "TURN_OFF":"Turn off",
-	"TIME_SELECT_ERROR":"Please select an alarm start time",
-	"PLAYLIST_SELECT_ERROR":"Please select a Playlist"
+    "TIME_SELECT_ERROR":"Please select an alarm start time",
+    "PLAYLIST_SELECT_ERROR":"Please select a Playlist",
+    "DAY_SELECT_ERROR":"Please select at least one day of week",
+    "MONDAY":"Monday",
+    "TUESDAY":"Tuesday",
+    "WEDNESDAY":"Wednesday",
+    "THURSDAY":"Thursday",
+    "FRIDAY":"Friday",
+    "SATURDAY":"Saturday",
+    "SUNDAY":"Sunday"
   },
   "SYSTEM":{
     "SYSTEM_SETTINGS":"System Settings",

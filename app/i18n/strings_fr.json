@@ -224,7 +224,15 @@
     "STOP_MUSIC":"Arrêter la musique dans",
     "TURN_OFF":"Eteindre dans",
     "TIME_SELECT_ERROR":"Selectionner l'heure de l'alarme",
-    "PLAYLIST_SELECT_ERROR":"Sélectionner une Playlist"
+    "PLAYLIST_SELECT_ERROR":"Sélectionner une Playlist",
+    "DAY_SELECT_ERROR":"Sélectionner au moins un jour de la semaine",
+    "MONDAY":"Lundi",
+    "TUESDAY":"Mardi",
+    "WEDNESDAY":"Mercredi",
+    "THURSDAY":"Jeudi",
+    "FRIDAY":"Vendredi",
+    "SATURDAY":"Samedi",
+    "SUNDAY":"Dimanche"
   },
   "SYSTEM":{
     "SYSTEM_SETTINGS":"Réglages du Système",

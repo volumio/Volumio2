@@ -14,7 +14,14 @@
         "data": [
           "enabled",
           "hour",
-          "minute"
+          "minute",
+	  "monday",
+	  "tuesday",
+	  "wednesday",
+	  "thursday",
+	  "friday",
+	  "saturday",
+	  "sunday"
         ]
       },
       "content": [
@@ -391,7 +398,76 @@
             "field": "enabled",
             "value": true
           }
-
+        },
+        {
+          "id": "monday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.MONDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
+        },
+        {
+          "id": "tuesday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.TUESDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
+        },
+        {
+          "id": "wednesday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.WEDNESDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
+        },
+        {
+          "id": "thursday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.THURSDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
+        },
+        {
+          "id": "friday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.FRIDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
+        },
+        {
+          "id": "saturday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.SATURDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
+        },
+        {
+          "id": "sunday",
+          "element": "switch",
+          "label": "TRANSALTE.ALARM.SUNDAY",
+          "value": true,
+          "visibleIf": {
+            "field": "enabled",
+            "value": true
+          }
         }
       ]
     }
