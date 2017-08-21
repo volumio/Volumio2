@@ -328,7 +328,7 @@ var processRequest = function (web, path, meta) {
 
             fs.ensureDirSync(coverFolder);
             var cacheFilePath=mountAlbumartFolder+coverFolder+'/'+imageSize+'.jpeg';
-            var metaFilePath=mountMetadataFolder+coverFolder+'/'+imageSize+'.jpeg';
+            var metaFilePath=mountMetadataFolder+coverFolder+'/metadata.jpeg';
             //logger.info(cacheFilePath);
 
 
