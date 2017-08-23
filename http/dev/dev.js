@@ -65,6 +65,10 @@ socket.on('pushQueue', function(arrayQueue) {
 
 socket.on('pushSendBugReport', function(data) {
 
+	// defensive: make sure data has no junk prefixed or suffixed
+	var str = data;
+	str = str.replace('^[^{]*{','{');
+	str = str.replace('}[^{]*$','}');
 	var json = JSON.parse(data);
 	document.getElementById('bug-form-description').value = json.link;
 	var btn = document.getElementById('bug-form-button');
