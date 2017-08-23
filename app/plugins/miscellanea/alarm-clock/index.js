@@ -299,7 +299,7 @@ AlarmClock.prototype.setSleep = function(data)
 	};
 	self.setSleepConf(sleepTask);
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SetSleep: ' + splitted[0] + ' hours ' + splitted[1] + ' minutes');
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'SetSleep: ' + splitted[0] + ' hours ' + splitted[1] + ' minutes ' + ', enabled: ' + data.enabled);
 
 
 	if(self.haltSchedule!=undefined)
