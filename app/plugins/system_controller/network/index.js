@@ -675,7 +675,9 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     var netstring='ctrl_interface=/var/run/wpa_supplicant' + os.EOL ;
 
     //searching network
-    if (data.pass.length <= 13) {
+	if (data.pass === undefined) {
+        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=1' + os.EOL + '}'+os.EOL;
+	} else if (data.pass.length <= 13) {
         netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
     } else {
         netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
@@ -684,11 +686,14 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     while(config.has('wirelessNetworksSSID['+index+']'))
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
+
         if(data.ssid!=configuredSSID && configuredSSID.length > 0)
         {
             var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 
-            if (configuredPASS.length <= 13) {
+            if (configuredPASS === undefined) {
+                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=0' + os.EOL + '}'+os.EOL;
+            } else if (configuredPASS.length <= 13) {
                 netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0'+os.EOL + '}'+os.EOL;
             } else {
                 netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL + '}' + os.EOL ;
@@ -876,9 +881,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 ControllerNetwork.prototype.saveDnsSettings = function (data) {
 	var self = this;
 	var customdnsfile = '';
-	
-	console.log(data);
-		
+
 	if ((data.enable_custom_dns) && ((data.primary_dns.length < 7 || data.secondary_dns.length < 7))) {
 		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
 		return;
