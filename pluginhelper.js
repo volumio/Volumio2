@@ -413,7 +413,7 @@ function publish() {
             
             zip();
             
-            execSync("/bin/cp -rp " + package.name + ".zip /tmp/");
+            execSync("/bin/mv " + package.name + ".zip /tmp/");
             process.chdir("../../../");
             execSync("/usr/bin/git checkout gh-pages");
             var arch = "";
