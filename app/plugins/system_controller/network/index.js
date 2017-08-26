@@ -677,10 +677,18 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     //searching network
 	if (data.pass === undefined) {
         netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=1' + os.EOL + '}'+os.EOL;
-	} else if (data.pass.length <= 13) {
-        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
-    } else {
-        netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+	} else {
+		if (self.isWEPHEX(data.pass)) {
+            netstring += 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0=' + data.pass +  os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
+        }
+        if (self.isWEPASCII(data.pass)) {
+            netstring += 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
+        }
+        if (self.isWPA(data.pass)){
+            netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+        } else {
+            self.logger.error('Not saving Password for network '+ data.ssid + ': shorter than 8 chars');
+        }
     }
 
     while(config.has('wirelessNetworksSSID['+index+']'))
@@ -693,10 +701,18 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
             if (configuredPASS === undefined) {
                 netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=0' + os.EOL + '}'+os.EOL;
-            } else if (configuredPASS.length <= 13) {
-                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0'+os.EOL + '}'+os.EOL;
             } else {
-                netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL + '}' + os.EOL ;
+                if (self.isWEPHEX(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0=' + configuredPASS + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWEPASCII(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWPA(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                } else {
+                    self.logger.error('Not saving Password for network ' + configuredSSID + ': shorter than 8 chars');
+                }
             }
         }
 
@@ -907,4 +923,50 @@ ControllerNetwork.prototype.saveDnsSettings = function (data) {
 			self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 		}
 	});
+};
+
+ControllerNetwork.prototype.isHex = function (data) {
+    var self = this;
+
+    return /^[0-9A-Fa-f]+$/i.test(data)
+};
+
+ControllerNetwork.prototype.isWEPHEX = function (data) {
+    var self = this;
+
+    if (self.isHex(data)){
+    	if ((data.length === 10) || (data.length === 26) || (data.length === 32)) {
+    		return true
+		} else {
+    		return false
+		}
+    } else {
+    	return false
+	}
+
+};
+
+ControllerNetwork.prototype.isWEPASCII = function (data) {
+    var self = this;
+
+    if (!self.isHex(data)){
+        if ((data.length === 5) || (data.length === 13) || (data.length === 16)) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        return false
+    }
+
+};
+
+ControllerNetwork.prototype.isWPA = function (data) {
+    var self = this;
+
+     if ((data.length >= 8) && (data.length <= 63)){
+     	return true
+	 } else {
+     	return false
+	 }
 };
