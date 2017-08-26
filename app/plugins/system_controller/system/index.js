@@ -74,6 +74,7 @@ ControllerSystem.prototype.getUIConfig = function () {
 	var defer = libQ.defer();
 
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
+    var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -83,7 +84,38 @@ ControllerSystem.prototype.getUIConfig = function () {
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
-			defer.resolve(uiconf);
+
+
+
+    if (showLanguageSelector) {
+        self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+            __dirname+'/../../../i18n/strings_en.json',
+            __dirname + '/language_selector.json')
+            .then(function(languageSelector)
+            {
+        	var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
+        	var language = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language');
+        	var language_code = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language_code');
+        	uiconf.sections.unshift(languageSelector);
+
+        	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+            value: language_code,
+            label: language
+        	});
+
+        	for (var n = 0; n < languagesdata.languages.length; n++){
+				self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+                value: languagesdata.languages[n].code,
+                label: languagesdata.languages[n].name
+				});
+        	}
+                defer.resolve(uiconf);
+            })
+    } else {
+        defer.resolve(uiconf);
+	}
+
+
 		})
 		.fail(function()
 		{
@@ -568,3 +600,12 @@ ControllerSystem.prototype.checkPassword = function (data) {
 	return defer.promise;
 }
 
+ControllerSystem.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
+};
