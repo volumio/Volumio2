@@ -1634,18 +1634,15 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('getWizard', function () {
 				var selfConnWebSocket = this;
 
-
-				selfConnWebSocket.emit('pushWizard', {"openWizard": true});
-
-
+                var showWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getShowWizard', '');
+				selfConnWebSocket.emit('pushWizard', {"openWizard": showWizard});
 			});
 
 			connWebSocket.on('getWizardSteps', function () {
 				var selfConnWebSocket = this;
 
-
-				var steps = ["language","name","output","network","music","follow","done"];
-				selfConnWebSocket.emit('pushWizardSteps', steps);
+				var wizardSteps = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardSteps', '');
+				selfConnWebSocket.emit('pushWizardSteps', wizardSteps);
 			});
 
 			connWebSocket.on('getAvailableLanguages', function () {
