@@ -1660,13 +1660,19 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setLanguage', function (data) {
 				//var self = this;
+				var disallowReload = false;
 				var value = data.defaultLanguage.code;
 				var label = data.defaultLanguage.language;
-				var languagedata = {'language':{'value':value,'label':label}}
+				if (data.disallowReload != undefined) {
+                    disallowReload = data.disallowReload;
+				}
+				var languagedata = {'language':{'value':value,'label':label}, 'disallowReload': disallowReload}
 
 				//var lang = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
 				var name = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
 			});
+
+
 
 			connWebSocket.on('getDeviceName', function () {
 				var selfConnWebSocket = this;
@@ -1695,6 +1701,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setOutputDevices', function (data) {
 				var selfConnWebSocket = this;
+				data.disallowPush = true;
 
 				var name = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
 			});

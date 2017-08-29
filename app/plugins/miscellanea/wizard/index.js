@@ -140,5 +140,3 @@ volumioWizard.prototype.getWizardSteps = function () {
     return  stepsArray
 };
 
-
-

@@ -310,17 +310,21 @@ volumioAppearance.prototype.setLanguage = function(data)
         config.set('language_code', data.language.value);
         this.commandRouter.sharedVars.set('language_code',data.language.value);
     }
-    self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
-        self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
-    var data = self.getUiSettings();
-    self.commandRouter.updateBrowseSourcesLang();
+    if (!data.disallowReload) {
+        self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
+            self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
-    if (data != undefined) {
-        data.then(function (data) {
-            self.commandRouter.broadcastMessage('pushUiSettings', data);
-        });
+        var data = self.getUiSettings();
+        self.commandRouter.updateBrowseSourcesLang();
+
+        if (data != undefined) {
+            data.then(function (data) {
+                self.commandRouter.broadcastMessage('pushUiSettings', data);
+            });
+        }
     }
+
     return ('Done');
 };
 
