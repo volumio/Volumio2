@@ -941,6 +941,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var resampling_samplerate = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_samplerate');
             var resampling_quality = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_quality');
             var ffmpeg = self.config.get('ffmpegenable', false);
+            var btconfig = self.getAdditionalConf('audio_interface', 'bluetooth_controller', 'pairedDevices');
 
 			var mixerdev = '';
 			var mixerstrings = '';
@@ -1007,9 +1008,22 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                 var conf12 = conf11.replace('"${ffmpeg}"', 'decoder { ' + os.EOL + 'plugin "ffmpeg"'  + os.EOL + 'enabled "yes"'  + os.EOL + 'analyzeduration "1000000000"'  + os.EOL + 'probesize "1000000000"' + os.EOL + '}' + os.EOL);
 			} else {
                 var conf12 = conf11.replace('"${ffmpeg}"', " ");
-			}
+            }
+                       
+            if (btconfig) {
+                var btdata = '';
+                for(var i = 0; i < btconfig.length; ++i) {
+                    var device = btconfig[i];
+                    btdata += 'audio_output { \n\ttype "alsa"\n\tname "' +  device.name + '"\n\t'
+                    btdata += 'device "bluealsa:HCI=hci0,DEV=' + device.mac + ',PROFILE=a2dp" \n\t'
+                    btdata += 'mixer_type "software"\n\t}\n'
+                }
+                var conf13 = conf12.replace("${bt}", btdata);
+            } else {
+                var conf13 = conf12.replace("${bt}", " ");
+            }
 
-            fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
+            fs.writeFile("/etc/mpd.conf", conf13, 'utf8', function (err) {
                 if (err) return console.log(err);
             });
         });
