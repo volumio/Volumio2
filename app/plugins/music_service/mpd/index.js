@@ -1016,7 +1016,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                     var device = btconfig[i];
                     btdata += 'audio_output { \n\ttype "alsa"\n\tname "' +  device.name + '"\n\t'
                     btdata += 'device "bluealsa:HCI=hci0,DEV=' + device.mac + ',PROFILE=a2dp" \n\t'
-                    btdata += 'mixer_type "software"\n\t}\n'
+                    btdata += 'mixer_type "software"\n}\n'
                 }
                 var conf13 = conf12.replace("${bt}", btdata);
             } else {
