@@ -271,10 +271,10 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 // 			});
 // 		}
 // 	});
-
-
-	return defer.promise;
-};
+//
+//
+//	return defer.promise;
+//};
 
 
 
