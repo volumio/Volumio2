@@ -2541,7 +2541,7 @@ ControllerMpd.prototype.explodeISOFile = function (uri) {
 
                         var artist = self.searchFor(lines, i + 1, 'Artist:');
                         var album = self.searchFor(lines, i + 1, 'Album:');
-                        var ISOuri = self.searchFor(lines, i + 1, 'file:');
+                        var ISOuri = self.searchFor(lines, i, 'file:');
                         //Include track number if tracknumber variable is set to 'true'
                         if (!tracknumbers) {
                             var title = self.searchFor(lines, i + 1, 'Title:');
