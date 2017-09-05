@@ -14,7 +14,7 @@ var Client = require('node-ssdp').Client;
 var client = new Client();
 var xml2js = require('xml2js');
 var http = require('http');
-var browseDLNAServer = require("dlna-browser-utils");
+var browseDLNAServer = require(__dirname + "/dlna-browser.js");
 
 // Define the ControllerUPNPBrowser class
 module.exports = ControllerUPNPBrowser;
@@ -227,8 +227,11 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 				console.log(err);
 				return;
 			}
-			if(data.container[0].parentID){
+			if(data && data.container && data.container[0].parentID && data.container[0].parentID != "-1"){
 				obj.navigation.prev.uri = "upnp/" + address + "@" + data.container[0].parentID;
+				console.log(obj.navigation.prev.uri);
+			}else{
+				obj.navigation.prev.uri = "upnp";
 			}
 			defer.resolve(obj);
 		});
