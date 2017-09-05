@@ -7,7 +7,6 @@ var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools = require('nodetools');
-var mm = require('musicmetadata');
 var exec = require('child_process').exec;
 
 var winston = require('winston');
@@ -99,14 +98,28 @@ var searchOnline = function (defer, web) {
 
     if (fileSizeInBytes > 0)
     {
-        infoJson = fs.readJsonSync(infoPath, {throws: false});
+        try {
+            infoJson = fs.readJsonSync(infoPath, {throws: true});
+        } catch(e) {
+            console.log("Invalid JSON " + infoPath);
+            defer.reject(new Error(err));
+            return defer.promise;
+        }
+
     }
 
 
     if (infoJson[resolution] == undefined) {
-        var decodedArtist=nodetools.urlDecode(artist);
-        var decodedAlbum=nodetools.urlDecode(album);
-        var decodedResolution=nodetools.urlDecode(resolution);
+
+        try {
+            var decodedArtist=nodetools.urlDecode(artist);
+            var decodedAlbum=nodetools.urlDecode(album);
+            var decodedResolution=nodetools.urlDecode(resolution);
+        } catch(e) {
+            console.log("ERROR getting albumart info from JSON file: " + e);
+            defer.reject(new Error(err));
+            return defer.promise;
+        }
 
         if(decodedAlbum===''){
 			decodedAlbum = decodedAlbum|| null;
@@ -117,8 +130,7 @@ var searchOnline = function (defer, web) {
                 console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
                 defer.reject(new Error(err));
                 return defer.promise;
-            }
-            else {
+            }  else {
                 if (url != undefined && url != '') {
                     var splitted = url.split('.');
                     var fileExtension = splitted[splitted.length - 1];
@@ -142,9 +154,7 @@ var searchOnline = function (defer, web) {
 
                     infoJson[resolution] = diskFileName;
 
-                }
-
-                else {
+                } else {
                     defer.reject(new Error('No albumart URL'));
                     return defer.promise;
                 }
