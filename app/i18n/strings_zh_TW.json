@@ -85,7 +85,7 @@
     "NETWORK_RESTART_SUCCESS": "網路已經重新啟動",
     "WIRELESS_RESTART_TITLE": "重新啟動無線網路",
     "WIRELESS_RESTART_ERROR": "重新啟動無線網路時發生錯誤： ",
-    "WIRELESS_RESTART_SUCCESS": "成功重新啟動無線網路"
+    "WIRELESS_RESTART_SUCCESS": "成功重新啟動無線網路",
     "HOTSPOT_SETTINGS":"熱點設定",
     "ENABLE_HOTSPOT":"啟用熱點",
 	"ENABLE_HOTSPOT_DOC":"若有啟用熱點且沒有連線到無線網路（或沒有設定任何無線網路），系統會自動開啟熱點。 除非 您不希望有這種行為再停用它",
@@ -108,7 +108,7 @@
 	"DNS_ERROR_INFO":"請正確填入兩個 DNS 伺服器 IP 位址"
   },
   "NETWORKFS":{
-    "ALIAS_DOC":"選擇一個別名顯示在 NAS 的掛載點中"
+    "ALIAS_DOC":"選擇一個別名顯示在 NAS 的掛載點中",
 	  "ERROR_UMOUNT":"錯誤：無法移除分享資料夾",
 	  "REMOVED":"已經移除分享資料夾",
 	  "NETWORK_DRIVE":"網路硬碟",
@@ -170,7 +170,7 @@
     "LAST_100":"最後 100 個",
     "CONTINUE":"繼續",
     "SETTINGS_SAVED_SUCCESSFULLY":"成功儲存設定",
-    "SETTINGS_SAVE_ERROR":"儲存設定時發生錯誤"
+    "SETTINGS_SAVE_ERROR":"儲存設定時發生錯誤",
 	"ERROR":"錯誤"
   },
   "APPEARANCE":{
@@ -179,7 +179,7 @@
     "UI_CONFIG_SELECT_LANGUAGE":"選擇語言",
 	"UI_CONFIG_SELECT_LANGUAGE_DOC":"選擇系統語言",
     "NEW_LANGUAGE_SET":"新語言設定",
-    "NEW_BACKGROUND_APPLIED":"已套用新的背景"
+    "NEW_BACKGROUND_APPLIED":"已套用新的背景",
     "BACKGROUND_DELETED":"已刪除背景",
 	"ALBUMART_SETTINGS":"專輯封面設定",
 	"WEB_ALBUMART_ENABLE_DOC":"啟用從網路下載專輯封面，如果資料夾中沒找到圖片的話",
@@ -227,7 +227,7 @@
     "SLEEP_MODE_MINUTE":" 分鐘 ",
     "SLEEP_MODE_HOUR":"小時",
     "STOP_MUSIC":"停止音樂",
-    "TURN_OFF":"關閉"
+    "TURN_OFF":"關閉",
 	"TIME_SELECT_ERROR":"錯誤：請選擇鬧鈴時間",
 	"PLAYLIST_SELECT_ERROR":"錯誤：請選擇一個播放清單"
   },
@@ -255,7 +255,7 @@
     "SYSTEM_NAME_ERROR":"無法更改系統名稱",
     "SYSTEM_NAME_NOW":"系統名稱已更改",
     "UPDATE_ALREADY_LATEST_VERSION":"已經是最新版本",
-    "NO_UPDATE_AVAILABLE":"目前沒有更新"
+    "NO_UPDATE_AVAILABLE":"目前沒有更新",
     "CANNOT_REMOVE_MEDIA":"無法移除媒體",
     "MEDIA_REMOVED_SUCCESSFULLY":"媒體移除成功"
   },
