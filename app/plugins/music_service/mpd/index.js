@@ -23,6 +23,7 @@ var compilation = ['Various','various','Various Artists','various artists','VA',
 var artistsort = true;
 var dsd_autovolume = false;
 var singleBrowse = false;
+var startup = true;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -634,6 +635,14 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(self.clientMpd.on.bind(self.clientMpd), 'ready');
+
+    self.mpdReady.then(function () {
+        if (startup) {
+            startup = false;
+            self.listAlbums();
+        }
+    })
+	
 	// Catch and log errors
 	self.clientMpd.on('error', function (err) {
 		self.logger.error('MPD error: ' + err);
@@ -650,6 +659,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
 	self.updateQueue();
+
 	// TODO remove pertaining function when properly found out we don't need em
 	//self.fswatch();
 	// When playback status changes
