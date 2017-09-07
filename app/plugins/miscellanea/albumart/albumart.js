@@ -209,18 +209,21 @@ var searchInFolder = function (defer, path, web, meta) {
 			var coverFile = coverFolder + '/' + covers[i];
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
-
-                if (diskCache) {
-                    var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
-                    //logger.info('1: Copying file to cache ['+cacheFile+']');
-                    fs.ensureFileSync(cacheFile);
-                    fs.copySync(coverFile,cacheFile);
-                    defer.resolve(cacheFile);
-                } else {
-                    defer.resolve(coverFile);
+                var size = fs.statSync(coverFile).size;
+                // Limit the size of local arts to about 5MB 
+                if (size < 5000000) {
+                    if (diskCache) {
+                        var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
+                        //logger.info('1: Copying file to cache ['+cacheFile+']');
+                        fs.ensureFileSync(cacheFile);
+                        fs.copySync(coverFile,cacheFile);
+                        defer.resolve(cacheFile);
+                    } else {
+                        defer.resolve(coverFile);
+                    }
+                    return defer.promise;
                 }
 
-				return defer.promise;
 			}
 		}
 
@@ -230,17 +233,20 @@ var searchInFolder = function (defer, path, web, meta) {
 
 			if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG')|| fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
                 var coverFile = coverFolder + '/' + fileName.s;
-                if (diskCache) {
-                    var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
-                    //logger.info('2: Copying file to cache ['+cacheFile+']');
-                    fs.ensureFileSync(cacheFile);
-                    fs.copySync(coverFile,cacheFile);
-                    defer.resolve(cacheFile);
-                } else {
-                    defer.resolve(coverFile);
+                var size = fs.statSync(coverFile).size;
+                // Limit the size of local arts to about 5MB
+                if (size < 5000000) {
+                    if (diskCache) {
+                        var cacheFile = mountAlbumartFolder + '/' + coverFolder + '/extralarge.jpeg';
+                        //logger.info('2: Copying file to cache ['+cacheFile+']');
+                        fs.ensureFileSync(cacheFile);
+                        fs.copySync(coverFile, cacheFile);
+                        defer.resolve(cacheFile);
+                    } else {
+                        defer.resolve(coverFile);
+                    }
+                    return defer.promise;
                 }
-
-                return defer.promise;
 			}
 
 		}
