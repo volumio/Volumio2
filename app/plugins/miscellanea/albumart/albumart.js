@@ -8,6 +8,7 @@ var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools = require('nodetools');
 var exec = require('child_process').exec;
+var diskCache = false;
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -208,11 +209,17 @@ var searchInFolder = function (defer, path, web, meta) {
 			var coverFile = coverFolder + '/' + covers[i];
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
-                var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
-                //logger.info('Copying file to cache ['+cacheFile+']');
-                fs.ensureFileSync(cacheFile);
-                fs.copySync(coverFile,cacheFile);
-				defer.resolve(cacheFile);
+
+                if (diskCache) {
+                    var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
+                    //logger.info('1: Copying file to cache ['+cacheFile+']');
+                    fs.ensureFileSync(cacheFile);
+                    fs.copySync(coverFile,cacheFile);
+                    defer.resolve(cacheFile);
+                } else {
+                    defer.resolve(coverFile);
+                }
+
 				return defer.promise;
 			}
 		}
@@ -222,8 +229,18 @@ var searchInFolder = function (defer, path, web, meta) {
 			var fileName = S(files[j]);
 
 			if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG')|| fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
-				defer.resolve(coverFolder + '/' + fileName.s);
-				return defer.promise;
+                var coverFile = coverFolder + '/' + fileName.s;
+                if (diskCache) {
+                    var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
+                    //logger.info('2: Copying file to cache ['+cacheFile+']');
+                    fs.ensureFileSync(cacheFile);
+                    fs.copySync(coverFile,cacheFile);
+                    defer.resolve(cacheFile);
+                } else {
+                    defer.resolve(coverFile);
+                }
+
+                return defer.promise;
 			}
 
 		}
