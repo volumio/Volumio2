@@ -237,7 +237,7 @@ var searchInFolder = function (defer, path, web, meta) {
 
 var searchMeta = function (defer, coverFolder, web, meta) {
 
-    if (meta) {
+    if (meta === true && coverFolder != undefined) {
 
 	try {
         var files = fs.readdirSync(coverFolder);
@@ -338,7 +338,7 @@ var processRequest = function (web, path, meta) {
 
             fs.ensureDirSync(coverFolder);
             var cacheFilePath=mountAlbumartFolder+coverFolder+'/'+imageSize+'.jpeg';
-            var metaFilePath=mountMetadataFolder+coverFolder+'/'+imageSize+'.jpeg';
+            var metaFilePath=mountMetadataFolder+coverFolder+'/metadata.jpeg';
             //logger.info(cacheFilePath);
 
 
@@ -387,7 +387,10 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
-    var meta = req.query.metadata;
+    var meta = false;
+    if (req.query.metadata != undefined && req.query.metadata === 'true') {
+        meta = true;
+    }
 
     if(rawQuery !== undefined && rawQuery !== null)
     {
