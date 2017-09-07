@@ -8,7 +8,7 @@ var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools = require('nodetools');
 var exec = require('child_process').exec;
-var diskCache = false;
+var diskCache = true;
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -102,7 +102,7 @@ var searchOnline = function (defer, web) {
         try {
             infoJson = fs.readJsonSync(infoPath, {throws: true});
         } catch(e) {
-            console.log("Invalid JSON " + infoPath);
+            //console.log("Invalid JSON " + infoPath);
             defer.reject(new Error(err));
             return defer.promise;
         }
@@ -117,7 +117,7 @@ var searchOnline = function (defer, web) {
             var decodedAlbum=nodetools.urlDecode(album);
             var decodedResolution=nodetools.urlDecode(resolution);
         } catch(e) {
-            console.log("ERROR getting albumart info from JSON file: " + e);
+           //console.log("ERROR getting albumart info from JSON file: " + e);
             defer.reject(new Error(err));
             return defer.promise;
         }
@@ -128,7 +128,7 @@ var searchOnline = function (defer, web) {
 
 		albumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
             if (err) {
-                console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
+                //console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
                 defer.reject(new Error(err));
                 return defer.promise;
             }  else {
