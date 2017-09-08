@@ -724,13 +724,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 };
 
 ControllerMpd.prototype.mpdConnect = function () {
-
 	var self = this;
-
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
-
-	self.config = new (require('v-conf'))();
-	self.config.loadFile(configFile);
 
 	var nHost = self.config.get('nHost');
 	var nPort = self.config.get('nPort');
@@ -774,17 +768,11 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
     self.config.set('volume_normalization', data['volume_normalization']);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
+    self.config.set('dop', data['dop'].value);
     dsd_autovolume = data['dsd_autovolume'];
 
     var isonew = data.iso;
     var iso = self.config.get('iso', false);
-
-    //fixing dop
-	if (self.config.get('dop') == null) {
-		self.config.addConfigValue('dop', 'boolean', data['dop'].value);
-	} else {
-		self.config.set('dop', data['dop'].value);
-	}
 
 	if (self.config.get('persistent_queue') == null) {
 		self.config.addConfigValue('persistent_queue', 'boolean', data['persistent_queue']);
@@ -977,11 +965,12 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
 			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
 			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
-			if (self.config.get('dop')){
+			if (self.config.get('dop', false)){
 				var dop = 'yes';
 			} else {
 				var dop = 'no';
 			}
+
 			var conf6 = conf5.replace("${dop}", dop);
 
 
@@ -1057,8 +1046,8 @@ ControllerMpd.prototype.setConfiguration = function (configuration) {
 
 ControllerMpd.prototype.getConfigParam = function (key) {
 	var self = this;
-
-	return self.config.get(key);
+	var confval = self.config.get(key);
+	return confval
 };
 ControllerMpd.prototype.setConfigParam = function (data) {
 	var self = this;
