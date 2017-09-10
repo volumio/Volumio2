@@ -1731,6 +1731,20 @@ function InterfaceWebUI(context) {
 
 			});
 
+            connWebSocket.on('connectWirelessNetworkWizard', function (data) {
+                var selfConnWebSocket = this;
+
+                var connectWifiWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'connectWirelessNetwork', data);
+
+                if (connectWifiWizard != undefined) {
+                    connectWifiWizard.then(function (data) {
+                        selfConnWebSocket.emit('pushWizardWirelessConnResults', data);
+                    });
+                }
+
+
+            });
+
             connWebSocket.on('safeRemoveDrive', function (data) {
                 var selfConnWebSocket = this;
 

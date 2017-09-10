@@ -1,3 +1,5 @@
 {
-  "show_wizard":{"value":true,"type":"boolean"}
+  "show_wizard":{"value":true,"type":"boolean"},
+  "welcome_message_title":{"value":"Welcome to Volumio, the Audiophile Music Player. ","type":"string"},
+  "welcome_message_message":{"value":"Welcome to Volumio, the Audiophile Music Player. ","type":"string"}
 }

@@ -54,13 +54,18 @@ PlatformSpecific.prototype.wirelessRestart = function () {
 		if (error !== null) {
 			self.coreCommand.pushToastMessage('error',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
                 self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_ERROR')+error);
-		} else
-			self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
-                self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_SUCCESS'))
-		// Restart Upmpdcli
-		setTimeout(function () {
-			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
-		}, 10000);
+		} else {
+            self.coreCommand.pushToastMessage('success',self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_TITLE'),
+                self.coreCommand.getI18nString('NETWORK.WIRELESS_RESTART_SUCCESS'));
+            setTimeout(function (){
+            self.coreCommand.executeOnPlugin('miscellanea', 'wizard', 'reportWirelessConnection', '');
+            }, 5000);
+            // Restart Upmpdcli
+            setTimeout(function () {
+                self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
+            }, 10000);
+		}
+
 	});
 };
 

@@ -3,6 +3,9 @@
 var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var libQ = require('kew');
+var netJson = {};
+var wifiConnectPayload = {};
+var wifiConnectPayloadExec = false;
 
 
 var backgroundPath = '/data/backgrounds';
@@ -132,11 +135,68 @@ volumioWizard.prototype.getWizardSteps = function () {
     var stepsFolder = __dirname + '/wizard_steps';
     var steps = fs.readdirSync(stepsFolder).sort(function(a, b){return a-b});
     var stepsArray = [];
+    netJson = {};
 
     for (var i in steps) {
         var step = fs.readJsonSync((__dirname + '/wizard_steps/' + steps[i]),  'utf8', {throws: false});
-        stepsArray.push(step.id)
+        if (step.show){
+            stepsArray.push(step.id);
+        }
+
     }
     return  stepsArray
 };
 
+volumioWizard.prototype.connectWirelessNetwork = function (data) {
+    var self = this;
+    var defer = libQ.defer();
+    wifiConnectPayload = {};
+    wifiConnectPayloadExec = false;
+
+    var ethinfo = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWiredInfo', '');
+
+    ethinfo.then(function (ethdata) {
+        if (ethdata.connected) {
+            if (data.ssid != undefined) {
+                self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', data);
+
+                var connResults = {"wait": true, "message":"Connecting to network "+ data.ssid + "... " +  "Please wait"}
+                defer.resolve(connResults)
+            } else {
+                defer.resolve('')
+            }
+        } else {
+            wifiConnectPayload = data;
+            wifiConnectPayloadExec = true;
+            var message = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER');
+            var message2 = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER2');
+            var connStatus = {"wait": false, "result": message + " " + data.ssid +" " + message2};
+            defer.resolve(connResults)
+        }
+
+    });
+
+    return defer.promise;
+};
+
+volumioWizard.prototype.reportWirelessConnection = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var netInfo = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessInfo', '');
+
+    netInfo.then(function (data) {
+        if (data != undefined) {
+            if (data.connected && data.ssid != undefined) {
+                var message = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_SUCCESSFUL');
+                var message2 = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED');
+                var connStatus = {"wait": false, "result": message + " " + data.ssid +", " + message2};
+            } else {
+                var message = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_ERROR');
+                var message2 = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED');
+                var connStatus = {"wait": false, "result": message + " " + data.ssid +", " + message2};
+            }
+            return self.commandRouter.broadcastMessage('pushWizardWirelessConnResults', connStatus);
+        }
+    });
+
+};

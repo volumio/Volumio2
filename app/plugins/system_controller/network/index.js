@@ -970,3 +970,53 @@ ControllerNetwork.prototype.isWPA = function (data) {
      	return false
 	 }
 };
+
+ControllerNetwork.prototype.getWirelessInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var response = {"connected":false, "ssid":""}
+
+    ifconfig.status('wlan0', function (err, status) {
+        if (status != undefined) {
+            if (status.ipv4_address != undefined) {
+                if (status.ipv4_address != '192.168.211.1') {
+                    response.connected = true
+					response.ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
+                } else {
+
+                }
+                defer.resolve(response)
+            } else  {
+                defer.resolve(response)
+            }
+        } else {
+            defer.resolve(response)
+        }
+
+    });
+
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getWiredInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var response = {"connected":false, "ip":""}
+
+    ifconfig.status('eth0', function (err, status) {
+        if (status != undefined) {
+            if (status.ipv4_address != undefined) {
+                response.connected = true;
+				response.ip = status.ipv4_address;
+                defer.resolve(response)
+            } else  {
+                defer.resolve(response)
+            }
+        } else {
+            defer.resolve(response)
+        }
+
+    });
+
+    return defer.promise
+};
