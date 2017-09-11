@@ -55,6 +55,9 @@ function CoreCommandRouter(server) {
     this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
     this.pluginManager.checkIndex();
     this.pluginManager.pluginFolderCleanup();
+    this.configManager=new(require(__dirname+'/configManager.js'))(this.logger);
+
+
     this.pluginManager.loadPlugins();
     this.pluginManager.startPlugins();
 
@@ -1611,6 +1614,50 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
         }
     }
 }
+
+/**
+ *  [
+ *   attribute_name:"",
+ *   value:"",
+ *   paths:["",""]
+ */
+
+CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
+    var self=this;
+    var methodDefer=libQ.defer();
+
+    fs.readJson(overrideFile, function(err,override){
+
+        if(err)
+        {
+            methodDefer.reject(new Error(err))
+        }
+        else {
+            for(var i in override)
+            {
+                var attr=override[i]
+
+                //var name=attr.attribute_name
+                var value=attr.value
+
+                var paths=attr.paths
+
+                for(var j in paths)
+                {
+                    var path=paths[j]
+
+                    self.configManager.setUIConfigParam(uiconfig,path,value);
+                }
+            }
+
+            methodDefer.resolve()
+        }
+    })
+
+    return methodDefer.promise;
+
+};
+
 
 CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
 	var self=this;
