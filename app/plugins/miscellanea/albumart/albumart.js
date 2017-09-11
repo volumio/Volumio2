@@ -236,15 +236,7 @@ var searchInFolder = function (defer, path, web, meta) {
                 var size = fs.statSync(coverFile).size;
                 // Limit the size of local arts to about 5MB
                 if (size < 5000000) {
-                    if (diskCache) {
-                        var cacheFile = mountAlbumartFolder + '/' + coverFolder + '/extralarge.jpeg';
-                        //logger.info('2: Copying file to cache ['+cacheFile+']');
-                        fs.ensureFileSync(cacheFile);
-                        fs.copySync(coverFile, cacheFile);
-                        defer.resolve(cacheFile);
-                    } else {
-                        defer.resolve(coverFile);
-                    }
+                    defer.resolve(coverFile);
                     return defer.promise;
                 }
 			}
