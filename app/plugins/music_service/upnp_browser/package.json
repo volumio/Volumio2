@@ -16,6 +16,7 @@
     "node-ssdp": "3.2.1",
     "dlna-browser-utils": ">= 0.0.1",
     "xml2js": "~0.4.19",
-    "xmlbuilder": "~8.2.2"
+    "xmlbuilder": "~8.2.2",
+    "html-entities": "1.2.1"
   }
 }

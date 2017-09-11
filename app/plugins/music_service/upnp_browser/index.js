@@ -46,10 +46,11 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 	this.addToBrowseSources();
 
 	client.on('response', function responseHandler(headers, code, rinfo) {
-			var urlraw = headers.LOCATION.replace('http://', '').split('/')[0].split(':');
-			var server = {'url': 'http://'+urlraw[0], 'port': urlraw[1], 'endpoint': headers}
-			var location = server;
-			xmlToJson(headers.LOCATION, function(err, data) {
+		var urlraw = headers.LOCATION.replace('http://', '').split('/')[0].split(':');
+		var server = {'url': 'http://'+urlraw[0], 'port': urlraw[1], 'endpoint': headers}
+		var location = server;
+		xmlToJson(headers.LOCATION, function(err, data) {
+			try{
         if (err) {
 					//TODO: Handle this
           return console.err(err);
@@ -57,14 +58,14 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 				var server = {};
         server.name = data.root.device[0].friendlyName[0];
         server.UDN = data.root.device[0].UDN + "";
-        server.icon = data.root.device[0].iconList[0].icon[0].url;
+        server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
 				server.lastTimeAlive = Date.now();
 				server.location = location.url + ":" + location.port;
 				var services = data.root.device[0].serviceList[0].service;
 				var ContentDirectoryService = false;
 				//Finding ContentDirectory Service
 				for(var s = 0; s < services.length; s++){
-					if(services[s].serviceType[0] === "urn:schemas-upnp-org:service:ContentDirectory:1"){
+					if(services[s].serviceType[0] == "urn:schemas-upnp-org:service:ContentDirectory:1"){
 						ContentDirectoryService = services[s];
 						server.location += ContentDirectoryService.controlURL[0];
 					}
@@ -80,17 +81,27 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 				if(!duplicate){
 					self.DLNAServers.push(server);
 				}
-    });
+			}catch(e){
+				console.err(e);
+			}
+  	});
 	});
 	client.search('urn:schemas-upnp-org:device:MediaServer:1');
-	setInterval(() => {
-		client.search('urn:schemas-upnp-org:device:MediaServer:1');
-	}, 10000);
 
 	this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 	//this.startDjmount();
 	return libQ.resolve();
 };
+
+ControllerUPNPBrowser.prototype.discover = function(){
+	var defer = libQ.defer();
+	var self = this;
+	client.search('urn:schemas-upnp-org:device:MediaServer:1');
+	setTimeout(function(){
+		defer.resolve(self.DLNAServers);
+	}, 2000);
+	return defer.promise;
+}
 
 ControllerUPNPBrowser.prototype.startDjmount = function() {
 	var self = this;
@@ -117,8 +128,8 @@ ControllerUPNPBrowser.prototype.handleBrowseUri=function(curUri)
 
 
 		if (curUri == 'upnp')
-			response = self.listRoot(curUri);
-		else {
+			response = self.listRoot();
+		else if(curUri.startsWith("upnp/")){
 			var uri = curUri.replace('upnp/', '');
 			response = self.listUPNP(uri);
 		}
@@ -130,36 +141,37 @@ ControllerUPNPBrowser.prototype.handleBrowseUri=function(curUri)
 ControllerUPNPBrowser.prototype.listRoot = function()
 {
 	var self = this;
-	var listitems = [];
 	var defer = libQ.defer();
 
-	client.search('urn:schemas-upnp-org:device:MediaServer:1');
-	var obj = {
-		"navigation":{
-			"lists":[
-				{
-					"availableListViews": ["list"],
-					"items":[
+	this.discover().then((DLNAServers) => {
+		var obj = {
+			"navigation":{
+				"lists":[
+					{
+						"availableListViews": ["list"],
+						"items":[
 
-					]
-				}
-			]
+						]
+					}
+				]
+			}
+		};
+		for(var i = 0; i < DLNAServers.length; i++){
+			if(Date.now() - DLNAServers[i].lastTimeAlive < 15000){
+				obj.navigation.lists[0].items.push({
+					service: "upnp_browser",
+					type: "folder",
+					"title": DLNAServers[i].name,
+					"uri": "upnp/" + DLNAServers[i].location  + "@0",//@ separator, 0 for root element,
+					"albumart": DLNAServers[i].icon
+				});
+			}else{
+				DLNAServers.splice(i, 1);
+			}
 		}
-	};
-	for(var i = 0; i < this.DLNAServers.length; i++){
-		if(Date.now() - this.DLNAServers[i].lastTimeAlive < 15000){
-			obj.navigation.lists[0].items.push({
-				service: "upnp_browser",
-				type: "folder",
-				"title": this.DLNAServers[i].name,
-				"icon": "fa fa-microphone",
-				"uri": "upnp/" + this.DLNAServers[i].location  + "@0"//@ separator, 0 for root element
-			});
-		}else{
-			this.DLNAServers.splice(i, 1);
-		}
-	}
-	defer.resolve(obj);
+		defer.resolve(obj);
+	}).end();
+
 	return defer.promise;
 }
 
@@ -170,6 +182,8 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 
 	var defer = libQ.defer();
 	var address = data.split("@")[0];
+	if(address.startsWith("folder/"))
+		address = address.replace("folder/", "");
 	var id = data.split("@")[1];
 	var obj = {
 		"navigation":{
@@ -199,26 +213,26 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 					"type": "folder",
 					"title": data.container[i].title,
 					"artist": "",
+					"icon": "fa fa-folder",
 					"album": "",
-					"uri": "upnp/" + address + "@" + data.container[i].id
+					"uri": "upnp/folder/" + address + "@" + data.container[i].id
 				});
 			}
 		}
 		if(data.item){
 			for(var i = 0; i < data.item.length; i++){
-				if(data.item[i]["upnp:class"] && data.item[i]["upnp:class"][0] === "object.item.audioItem.musicTrack"){
-					var item = {
-						"service": "mpd",
-						"type": "song"
+				if(data.item[i].class == "object.item.audioItem.musicTrack"){
+					var item = data.item[i];
+					var track = {
+						"service": "upnp_browser",
+						"type": "song",
+						"uri": "upnp/" + address + "@" + item.id,
+						"title": item.title,
+						"artist": item.artist,
+						"album": item.album,
+						"albumart": item.image
 					}
-					if(data.item[i]["dc:title"])
-						item.title = data.item[i]["dc:title"][0];
-					if(data.item[i]["upnp:artist"])
-						item.artist = data.item[i]["upnp:artist"][0];
-					if(data.item[i]["upnp:album"])
-						item.album = data.item[i]["upnp:album"][0];
-
-					obj.navigation.lists[0].items.push(item);
+					obj.navigation.lists[0].items.push(track);
 				}
 			}
 		}
@@ -227,9 +241,8 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 				console.log(err);
 				return;
 			}
-			if(data && data.container && data.container[0].parentID && data.container[0].parentID != "-1"){
-				obj.navigation.prev.uri = "upnp/" + address + "@" + data.container[0].parentID;
-				console.log(obj.navigation.prev.uri);
+			if(data && data.container && data.container[0] && data.container[0].parentId && data.container[0].parentId != "-1"){
+				obj.navigation.prev.uri = "upnp/" + address + "@" + data.container[0].parentId;
 			}else{
 				obj.navigation.prev.uri = "upnp";
 			}
@@ -294,12 +307,15 @@ ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
 			return self.mpdPlugin.sendMpdCommand('clear',[]);
 		})
 		.then(function()
-		{
-			return self.mpdPlugin.sendMpdCommand('add "file:///'+track.uri+'"',[]);
-		})
+    {
+        return self.mpdPlugin.sendMpdCommand('load "'+track.uri+'"',[]);
+    })
+    .fail(function (e) {
+        return self.mpdPlugin.sendMpdCommand('add "'+track.uri+'"',[]);
+    })
 		.then(function()
 		{
-			self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+			self.commandRouter.stateMachine.setConsumeUpdateService('upnp_browser');
 			return self.mpdPlugin.sendMpdCommand('play',[]);
 		});
 };
@@ -341,9 +357,42 @@ ControllerUPNPBrowser.prototype.explodeUri = function(uri) {
 	var self = this;
 
 	var defer=libQ.defer();
-
-	var metas = self.parseTrack(uri);
-	defer.resolve(metas);
+	uri = uri.replace("upnp/", "");//Removing upnp/
+	var folder = uri.startsWith("folder/");
+	if(folder)
+		uri = uri.replace("folder/");
+	var address = uri.split("@")[0];//Getting server address
+	var id = uri.split("@")[1];//Getting item ID
+	var browseFlag = folder ? "BrowseDirectChildren" : "BrowseMetadata";
+	browseDLNAServer(id, address, {browseFlag: browseFlag}, (err, data) => {
+		if(err){
+			console.log(err);
+			return;
+		}
+		var result = [];
+		if(data){
+			if(data.item){
+				for(var i = 0; i < data.item.length; i++){
+					var item = data.item[i];
+					if(item.class == "object.item.audioItem.musicTrack"){
+						var obj = {
+							"service": "upnp_browser",
+							"uri": item.source,
+							"type": "song",
+							"albumart": item.image,
+							"artist": item.artist,
+							"album": item.album,
+							"name": item.title,
+							"title": item.title,
+							"duration": item.duration,
+						};
+						result.push(obj);
+					}
+				}
+			}
+			defer.resolve(result);
+		}
+	});
 
 	return defer.promise;
 };
