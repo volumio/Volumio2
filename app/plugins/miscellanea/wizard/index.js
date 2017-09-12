@@ -146,9 +146,9 @@ volumioWizard.prototype.getWizardSteps = function () {
     for (var i in steps) {
         if (steps[i].indexOf("conf") <= -1)  {
             var step = fs.readJsonSync((__dirname + '/wizard_steps/' + steps[i]),  'utf8', {throws: false});
-                if (step.show){
-                        stepsArray.push(step);
-                }
+            if (step.show){
+                stepsArray.push(step);
+            }
         }
     }
     return  stepsArray
@@ -177,7 +177,7 @@ volumioWizard.prototype.connectWirelessNetwork = function (data) {
             wifiConnectPayloadExec = true;
             var message = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER');
             var message2 = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER2');
-            var connStatus = {"wait": false, "result": message + " " + data.ssid +" " + message2};
+            var connResults = {"wait": false, "result": message + " " + data.ssid +" " + message2};
             defer.resolve(connResults)
         }
 
@@ -278,6 +278,10 @@ volumioWizard.prototype.setCloseWizard = function () {
     if (I2Sreboot) {
         self.logger.info('Player Reboot required after I2S DAC has been enabled in wizard');
         self.pushReboot();
+    }
+    if (wifiConnectPayloadExec) {
+        self.logger.info('Executing Deferred Wifi Connection');
+        self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', wifiConnectPayload);
     }
 };
 
