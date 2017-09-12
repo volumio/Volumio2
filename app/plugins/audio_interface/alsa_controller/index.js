@@ -541,6 +541,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 					if (uiPush) {
                         self.commandRouter.broadcastMessage("openModal", responseData);
 					}
+					self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'setWizardAction', {'action':'reboot', 'dacName':data.i2sid.label});
 				}
 				})
 					.fail(function () {

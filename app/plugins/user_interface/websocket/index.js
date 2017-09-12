@@ -1645,6 +1645,12 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushWizardSteps', wizardSteps);
 			});
 
+            connWebSocket.on('setWizardAction', function (data) {
+                var selfConnWebSocket = this;
+
+               return self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'setWizardAction', data);
+            });
+
             connWebSocket.on('getWizardUiConfig', function (data) {
                 var selfConnWebSocket = this;
 
@@ -1652,7 +1658,7 @@ function InterfaceWebUI(context) {
 
                 if (wizardConfig != undefined) {
                     wizardConfig.then(function (data) {
-                        selfConnWebSocket.emit('pushUIConfig', data);
+                        selfConnWebSocket.emit('pushUiConfig', data);
                     });
                 }
             });

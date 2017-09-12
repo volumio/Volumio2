@@ -6,6 +6,8 @@ var libQ = require('kew');
 var netJson = {};
 var wifiConnectPayload = {};
 var wifiConnectPayloadExec = false;
+var I2Sreboot = false;
+var I2SName = '';
 
 
 var backgroundPath = '/data/backgrounds';
@@ -19,7 +21,7 @@ function volumioWizard(context) {
     // Save a reference to the parent commandRouter
     self.context=context;
     self.commandRouter = self.context.coreCommand;
-    self.configManager = self.context.configManager;
+    this.configManager = this.context.configManager;
 
     self.logger=self.context.logger;
 }
@@ -34,8 +36,10 @@ volumioWizard.prototype.getConfigurationFiles = function()
 volumioWizard.prototype.onVolumioStart = function() {
     var self = this;
     //Perform startup tasks here
-    self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
-    config.loadFile(self.configFile);
+    var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+
+    this.config = new (require('v-conf'))();
+    this.config.loadFile(configFile);
 
     return libQ.resolve();
 };
@@ -125,7 +129,9 @@ volumioWizard.prototype.getConfigParam = function (key) {
 
 volumioWizard.prototype.getShowWizard = function () {
     var self = this;
-    return  config.get('show_wizard', true)
+    var show = self.config.get('show_wizard', true);
+
+    return  show
 };
 
 
@@ -138,7 +144,6 @@ volumioWizard.prototype.getWizardSteps = function () {
     netJson = {};
 
     for (var i in steps) {
-        console.log(steps[i])
         if (steps[i].indexOf("conf") <= -1)  {
             var step = fs.readJsonSync((__dirname + '/wizard_steps/' + steps[i]),  'utf8', {throws: false});
                 if (step.show){
@@ -227,3 +232,72 @@ volumioWizard.prototype.getWizardConfig = function (data) {
 
     return defer.promise
 };
+
+
+volumioWizard.prototype.setWizardAction = function (data) {
+    var self = this;
+
+    if (data.action != undefined) {
+        switch(data.action) {
+            case 'skip':
+                self.setSkip();
+                break;
+            case 'reboot':
+                self.setReboot(data);
+                break;
+            case 'close':
+                self.setCloseWizard();
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+volumioWizard.prototype.setSkip = function () {
+    var self = this;
+
+    self.logger.info('Wizard skipped')
+    self.config.set('show_wizard', false);
+};
+
+volumioWizard.prototype.setReboot = function (data) {
+    var self = this;
+
+    I2Sreboot = true;
+    if (data.dacName != undefined) {
+        I2SName = data.dacName;
+    }
+};
+
+volumioWizard.prototype.setCloseWizard = function () {
+    var self = this;
+
+    self.config.set('show_wizard', false);
+    self.logger.info('Wizard terminated Successfully');
+    if (I2Sreboot) {
+        self.logger.info('Player Reboot required after I2S DAC has been enabled in wizard');
+        self.pushReboot();
+    }
+};
+
+
+volumioWizard.prototype.pushReboot = function () {
+    var self = this;
+
+    var responseData = {
+        title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED'),
+        message: I2SName + ' '+ self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_ACTIVATED_MESSAGE'),
+        size: 'lg',
+        buttons: [
+            {
+                name: self.commandRouter.getI18nString('COMMON.RESTART'),
+                class: 'btn btn-info',
+                emit:'reboot',
+                payload:''
+            }
+        ]
+    }
+    self.commandRouter.broadcastMessage("openModal", responseData);
+};
+
