@@ -1,3 +1,6 @@
 {
-  "show_wizard":{"value":true,"type":"boolean"}
+  "show_wizard":{"value":true,"type":"boolean"},
+  "donation":{"value":true,"type":"boolean"},
+  "show_message":{"value":true,"type":"boolean"},
+  "system_name":{"value":"Volumio","type":"string"}
 }

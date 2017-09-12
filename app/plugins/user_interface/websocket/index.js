@@ -1721,15 +1721,18 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				data.disallowPush = true;
 
-				var name = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
+                return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
 			});
 
 
 			connWebSocket.on('getDonePage', function () {
 				var selfConnWebSocket = this;
 
-				var contributionsarray =  {"donationAmount": 20, "customAmount": 150, "amounts": [10, 20, 50, 100]};
-				var laststep =  {"title":"Ready to roll","message":"Your Volumio Audiophile Music Player is ready. Please consider donating.","donation":true, "donationAmount": contributionsarray};
+
+				var donation = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDonation', '');
+				var contributionsarray =  self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDonationsArray', '');
+				var lastStepMessage = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDoneMessage', '');
+				var laststep = {"congratulations":lastStepMessage.congratulations, "title":lastStepMessage.title,"message":lastStepMessage.message,"donation":donation, "donationAmount": contributionsarray};
 
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});

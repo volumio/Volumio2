@@ -280,5 +280,10 @@
     "UPDATING_PLUGIN":"Updating Plugin",
     "DOWNLOADING_FROM":"Downloading Plugin from ",
     "DOWNLOADING":"Downloading Plugin"
+  },
+  "WIZARD":{
+    "CONGRATULATIONS":"Congratulations",
+    "DEVICE_SUCCESSFULLY_CONFIGURED":"has been configured and it's ready to play",
+    "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!"
   }
 }

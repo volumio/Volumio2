@@ -301,3 +301,34 @@ volumioWizard.prototype.pushReboot = function () {
     self.commandRouter.broadcastMessage("openModal", responseData);
 };
 
+volumioWizard.prototype.getDonationsArray = function () {
+    var self = this;
+
+    var donationsArray = {"donationAmount": 20, "customAmount": 30, "amounts": [10, 20, 50, 100]};
+
+    return donationsArray;
+};
+
+volumioWizard.prototype.getDonation = function () {
+    var self = this;
+
+    var donation = self.config.get('donation', true)
+
+    return donation;
+};
+
+volumioWizard.prototype.getDoneMessage = function () {
+    var self = this;
+
+    var systemName = self.config.get('system_name', 'Volumio');
+    var showMessage = self.config.get('show_message', true);
+    var respcongratulations =  self.commandRouter.getI18nString('WIZARD.CONGRATULATIONS');
+    var resptitle = systemName + ' ' + self.commandRouter.getI18nString('WIZARD.DEVICE_SUCCESSFULLY_CONFIGURED');
+    var respmessage = self.commandRouter.getI18nString('WIZARD.PLEASE_DONATE');
+    if (showMessage) {
+        var response = {congratulations: respcongratulations, title: resptitle, message : respmessage}
+    } else {
+        var response = {congratulations: respcongratulations, title: resptitle, message : ''}
+    }
+    return response;
+};
