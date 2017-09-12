@@ -7,8 +7,8 @@ var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools = require('nodetools');
-var mm = require('musicmetadata');
 var exec = require('child_process').exec;
+var diskCache = true;
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -99,14 +99,28 @@ var searchOnline = function (defer, web) {
 
     if (fileSizeInBytes > 0)
     {
-        infoJson = fs.readJsonSync(infoPath, {throws: false});
+        try {
+            infoJson = fs.readJsonSync(infoPath, {throws: true});
+        } catch(e) {
+            //console.log("Invalid JSON " + infoPath);
+            defer.reject(new Error(err));
+            return defer.promise;
+        }
+
     }
 
 
     if (infoJson[resolution] == undefined) {
-        var decodedArtist=nodetools.urlDecode(artist);
-        var decodedAlbum=nodetools.urlDecode(album);
-        var decodedResolution=nodetools.urlDecode(resolution);
+
+        try {
+            var decodedArtist=nodetools.urlDecode(artist);
+            var decodedAlbum=nodetools.urlDecode(album);
+            var decodedResolution=nodetools.urlDecode(resolution);
+        } catch(e) {
+           //console.log("ERROR getting albumart info from JSON file: " + e);
+            defer.reject(new Error(err));
+            return defer.promise;
+        }
 
         if(decodedAlbum===''){
 			decodedAlbum = decodedAlbum|| null;
@@ -114,11 +128,10 @@ var searchOnline = function (defer, web) {
 
 		albumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
             if (err) {
-                console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
+                //console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
                 defer.reject(new Error(err));
                 return defer.promise;
-            }
-            else {
+            }  else {
                 if (url != undefined && url != '') {
                     var splitted = url.split('.');
                     var fileExtension = splitted[splitted.length - 1];
@@ -142,9 +155,7 @@ var searchOnline = function (defer, web) {
 
                     infoJson[resolution] = diskFileName;
 
-                }
-
-                else {
+                } else {
                     defer.reject(new Error('No albumart URL'));
                     return defer.promise;
                 }
@@ -198,12 +209,21 @@ var searchInFolder = function (defer, path, web, meta) {
 			var coverFile = coverFolder + '/' + covers[i];
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
-                var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
-                //logger.info('Copying file to cache ['+cacheFile+']');
-                fs.ensureFileSync(cacheFile);
-                fs.copySync(coverFile,cacheFile);
-				defer.resolve(cacheFile);
-				return defer.promise;
+                var size = fs.statSync(coverFile).size;
+                // Limit the size of local arts to about 5MB 
+                if (size < 5000000) {
+                    if (diskCache) {
+                        var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
+                        //logger.info('1: Copying file to cache ['+cacheFile+']');
+                        fs.ensureFileSync(cacheFile);
+                        fs.copySync(coverFile,cacheFile);
+                        defer.resolve(cacheFile);
+                    } else {
+                        defer.resolve(coverFile);
+                    }
+                    return defer.promise;
+                }
+
 			}
 		}
 
@@ -212,8 +232,13 @@ var searchInFolder = function (defer, path, web, meta) {
 			var fileName = S(files[j]);
 
 			if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG')|| fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
-				defer.resolve(coverFolder + '/' + fileName.s);
-				return defer.promise;
+                var coverFile = coverFolder + '/' + fileName.s;
+                var size = fs.statSync(coverFile).size;
+                // Limit the size of local arts to about 5MB
+                if (size < 5000000) {
+                    defer.resolve(coverFile);
+                    return defer.promise;
+                }
 			}
 
 		}
@@ -227,7 +252,7 @@ var searchInFolder = function (defer, path, web, meta) {
 
 var searchMeta = function (defer, coverFolder, web, meta) {
 
-    if (meta) {
+    if (meta === true && coverFolder != undefined) {
 
 	try {
         var files = fs.readdirSync(coverFolder);
@@ -328,7 +353,7 @@ var processRequest = function (web, path, meta) {
 
             fs.ensureDirSync(coverFolder);
             var cacheFilePath=mountAlbumartFolder+coverFolder+'/'+imageSize+'.jpeg';
-            var metaFilePath=mountMetadataFolder+coverFolder+'/'+imageSize+'.jpeg';
+            var metaFilePath=mountMetadataFolder+coverFolder+'/metadata.jpeg';
             //logger.info(cacheFilePath);
 
 
@@ -377,7 +402,10 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
-    var meta = req.query.metadata;
+    var meta = false;
+    if (req.query.metadata != undefined && req.query.metadata === 'true') {
+        meta = true;
+    }
 
     if(rawQuery !== undefined && rawQuery !== null)
     {

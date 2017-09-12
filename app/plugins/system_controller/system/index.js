@@ -74,6 +74,7 @@ ControllerSystem.prototype.getUIConfig = function () {
 	var defer = libQ.defer();
 
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
+    var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -83,7 +84,38 @@ ControllerSystem.prototype.getUIConfig = function () {
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
-			defer.resolve(uiconf);
+
+
+
+    if (showLanguageSelector) {
+        self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+            __dirname+'/../../../i18n/strings_en.json',
+            __dirname + '/language_selector.json')
+            .then(function(languageSelector)
+            {
+        	var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
+        	var language = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language');
+        	var language_code = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language_code');
+        	uiconf.sections.unshift(languageSelector);
+
+        	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+            value: language_code,
+            label: language
+        	});
+
+        	for (var n = 0; n < languagesdata.languages.length; n++){
+				self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+                value: languagesdata.languages[n].code,
+                label: languagesdata.languages[n].name
+				});
+        	}
+                defer.resolve(uiconf);
+            })
+    } else {
+        defer.resolve(uiconf);
+	}
+
+
 		})
 		.fail(function()
 		{
@@ -391,8 +423,18 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 		message.text = 'No info available';
 	}
 	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
-    // Must single-quote the message or the shell may interpret it and crash.
-	exec("/usr/local/bin/node /volumio/logsubmit.js '"+ message.text+"'", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	// Must single-quote the message or the shell may interpret it and crash.
+	// single-quotes already within the message need to be escaped.
+	// The resulting string always starts and ends with single quotes.
+	var description = '';
+	var pieces = message.text.split("'");
+	var n = pieces.length;
+	for (var i=0; i<n; i++) {
+		description = description + "'" + pieces[i] + "'";
+		if (i < (n-1)) description = description + "\\'";
+	}
+
+	exec("/usr/local/bin/node /volumio/logsubmit.js " + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			self.logger.info('Cannot send bug report: ' + error);
 		} else {
@@ -558,3 +600,12 @@ ControllerSystem.prototype.checkPassword = function (data) {
 	return defer.promise;
 }
 
+ControllerSystem.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
+};

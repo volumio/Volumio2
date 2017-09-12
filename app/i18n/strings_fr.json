@@ -34,7 +34,7 @@
     "DOP":"DSD sur PCM (DoP)",
     "DSD_PLAYBACK_MODE":"Mode de lecture DSD",
     "DSD_DIRECT":"DSD Direct",
-    "DOP_DOC":"Choisissez le mode de lecture DSD. DSD Direct lit le format DSD natif si le materièl le supporte, sinon le flux ext converti à la volée au format PCM. Avec DoP activé, le flux DSD sera encapsulé dans PCM 24 bits (DoP)",
+    "DSP_DOC":"Choisissez le mode de lecture DSD. DSD Direct lit le format DSD natif si le materièl le supporte, sinon le flux ext converti à la volée au format PCM. Avec DoP activé, le flux DSD sera encapsulé dans PCM 24 bits (DoP)",
     "DSD_AUTO_VOLUME":"DSD Volume automatique",
     "DSD_AUTO_VOLUME_DOC":"DSD nécessite un réglage de volume à 100. Si activé pendant la lecture DSD, le volume sera automatiquement règlé à 100 (ATTENTION: A utiliser avec précaution!)",
     "SOFTVOL":"Contrôle logiciel du Volume",
@@ -66,10 +66,12 @@
     "HIGH":"Haute",
     "MEDIUM":"Moyenne",
     "LOW":"Basse",
-     "ISO_PLAYBACK":"Lecture de fichier ISO",
-    "ISO_PLAYBACK_DOC":"Utilise une version experimental de MPD pour la lecture de fichiers ISO. Désactive DSD direct si activé"
+    "ISO_PLAYBACK":"Lecture de fichier ISO",
+    "ISO_PLAYBACK_DOC":"Utilise une version experimental de MPD pour la lecture de fichiers ISO. Désactive DSD direct si activé",
+    "EXTENDED_FILE_FORMAT_SUPPORT":"Support de Extended File Format",
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Active la possibilité de lire de plus nombreux formats audio. Cependant, cela ralentira la création de la bibliothèque musicale.Si désactivé Volumio pourra toujours lire la pluplart des fichiers et la création sera plus rapide."
   	  },
-  "NETWORK": {
+    "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau cablé",
     "AUTOMATIC_IP":"IP Automatique",
@@ -146,7 +148,8 @@
     "SEARCH_ALBUM_SECTION":"Albums",
     "SEARCH_SONG_SECTION":"Pistes",
     "SCAN_DB_ERROR":"Erreur lors du scan de la base de données",
-    "SCAN_DB":"Scannage de la musique",
+    "SCAN_DB":"Mise à jour de la base de donnée de musique",
+	  "RESCAN_DB":"Reconstruction de la base de données",
     "ILLEGAL_CHARACTER_/":"Suppression des caractères interdits : /",
     "FAVOURITES":"Favoris",
     "PLAYLISTS":"Playlists",
@@ -199,7 +202,9 @@
     "COMPILATION_METADATA":"Champs Metadatas pour les compilations",
     "ALBUMART_CACHE_CLEARED":"Cache de images des albums réinitialisé avec succès",
     "ALBUMART_RESET_CACHE":"Réinitialiser le cache des images des albums",
-    "ALBUMART_RESET_CACHE_DOC":"Volumio met en cache les images des albums pour améliorer la performance, cependant cela empèche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums "
+    "ALBUMART_RESET_CACHE_DOC":"Volumio met en cache les images des albums pour améliorer la performance, cependant cela empèche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums ",
+    "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
+    "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement"
    },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",

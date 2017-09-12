@@ -32,6 +32,10 @@ AlbumArt.prototype.onVolumioStart = function() {
 	enableweb = self.config.get('enableweb', true);
 	defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
 	cacheid = self.config.get('cacheid', 0);
+	if (cacheid === 0) {
+	    cacheid = Math.floor(Math.random() * 1000);
+	    self.config.set('cacheid',cacheid)
+    }
     metadataimage = self.config.get('metadataimage', false);
 
 	//Starting server
@@ -180,7 +184,8 @@ AlbumArt.prototype.clearAlbumartCache = function () {
 
     exec('/bin/rm -rf /data/albumart/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
             if (error) {
-                self.logger.error('Cannot Delete Albumart Cache DirectoryB: ' + error);
+                console.log('Cannot Delete Albumart Cache DirectoryB: ' + error);
+                self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEAR_ERROR'));
             } else {
                 cacheid++
                 self.config.set('cacheid', cacheid);

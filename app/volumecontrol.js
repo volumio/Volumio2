@@ -80,54 +80,70 @@ function CoreVolumeController(commandRouter) {
 
 	var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
 	var getInfo = function (cb) {
-		if (volumecurve === 'logarithmic'){
-			amixer(['-M', 'get', '-c', device , mixer], function (err, data) {
-				if (err) {
-					cb(err);
-				} else {
-					var res = reInfo.exec(data);
-					if (res === null) {
-						cb(new Error('Alsa Mixer Error: failed to parse output'));
-					} else {
-						cb(null, {
-							volume: parseInt(res[1], 10),
-							muted: (res[2] == 'off')
-						});
-					}
-				}
-			});
-
-		} else {
-				amixer(['get', '-c', device , mixer], function (err, data) {
-					if (err) {
-						cb(err);
-					} else {
-						var res = reInfo.exec(data);
-						if (res === null) {
-							cb(new Error('Alsa Mixer Error: failed to parse output'));
-						} else {
-							cb(null, {
-								volume: parseInt(res[1], 10),
-								muted: (res[2] == 'off')
-							});
-						}
-					}
-				});
-		}
-	};
-
-	self.getVolume = function (cb) {
         if (volumescript.enabled) {
             try {
                 var scriptvolume = execSync('/bin/sh ' + volumescript.getvolumescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
-                self.logger.info('External Volume: ' + scriptvolume)
-                Volume.vol = scriptvolume;
+                self.logger.info('External Volume: ' + scriptvolume);
                 Volume.mute = false;
-                self.commandRouter.volumioupdatevolume(Volume);
+                if (volumescript.mapTo100 != undefined && volumescript.maxVol != undefined && volumescript.mapTo100) {
+                    Volume.vol = parseInt((scriptvolume*100)/volumescript.maxVol);
+                } else {
+                    Volume.vol = scriptvolume;
+				}
+                if (volumescript.getmutescript != undefined && volumescript.getmutescript.length > 0) {
+                    var scriptmute = execSync('/bin/sh ' + volumescript.getmutescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    self.logger.info('External Volume: ' + scriptmute)
+                    if (parseInt(scriptmute) === 1) {
+                        Volume.mute = true;
+                    }
+                }
+                cb(null, {
+                    volume: Volume.vol,
+                    muted: Volume.mute
+                });
             } catch(e) {
                 self.logger.info('Cannot get Volume with script: '+e);
+                cb(new Error('Cannot execute Volume script'));
             }
         } else {
+            if (volumecurve === 'logarithmic') {
+                amixer(['-M', 'get', '-c', device, mixer], function (err, data) {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        var res = reInfo.exec(data);
+                        if (res === null) {
+                            cb(new Error('Alsa Mixer Error: failed to parse output'));
+                        } else {
+                            cb(null, {
+                                volume: parseInt(res[1], 10),
+                                muted: (res[2] == 'off')
+                            });
+                        }
+                    }
+                });
+
+            } else {
+                amixer(['get', '-c', device, mixer], function (err, data) {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        var res = reInfo.exec(data);
+                        if (res === null) {
+                            cb(new Error('Alsa Mixer Error: failed to parse output'));
+                        } else {
+                            cb(null, {
+                                volume: parseInt(res[1], 10),
+                                muted: (res[2] == 'off')
+                            });
+                        }
+                    }
+                });
+            }
+        }
+	};
+
+	self.getVolume = function (cb) {
             getInfo(function (err, obj) {
                 if (err) {
                     cb(err);
@@ -135,19 +151,38 @@ function CoreVolumeController(commandRouter) {
                     cb(null, obj.volume);
                 }
             });
-		}
-
 	};
 
 	self.setVolume = function (val, cb) {
-
 		if (volumescript.enabled) {
 			try {
-				var cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + val
+				if (volumescript.minVol != undefined && val < volumescript.minVol) {
+					val = volumescript.minVol;
+				}
+
+                if (volumescript.mapTo100 != undefined && volumescript.maxVol != undefined && volumescript.mapTo100) {
+                    var cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + parseInt(val*(volumescript.maxVol/100));
+                } else {
+                    if (volumescript.maxVol != undefined && val > volumescript.maxVol) {
+                        val = volumescript.maxVol;
+                    }
+                    var cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + val;
+				}
+
 				self.logger.info('Volume script ' + cmd)
-                execSync(cmd, { uid: 1000, gid: 1000, encoding: 'utf8', tty:'pts/1'});
-                Volume.vol = val;
                 Volume.mute = false;
+                if (volumescript.setmutescript != undefined && volumescript.setmutescript.length > 0) {
+                	if (val === 0) {
+                        Volume.mute = true;
+                        var scriptmute = execSync('/bin/sh ' + volumescript.setmutescript + ' 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+					} else {
+                        execSync(cmd, { uid: 1000, gid: 1000, encoding: 'utf8', tty:'pts/1'});
+                        var scriptmute = execSync('/bin/sh ' + volumescript.setmutescript + ' 0', { uid: 1000, gid: 1000, encoding: 'utf8'});
+					}
+                    self.logger.info('External Volume: ' + scriptmute)
+                }
+                Volume.vol = parseInt(val);
+                currentvolume = parseInt(val);
                 self.commandRouter.volumioupdatevolume(Volume);
 			} catch(e) {
                 self.logger.info('Cannot set Volume with script: '+e);

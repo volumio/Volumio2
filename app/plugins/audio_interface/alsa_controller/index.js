@@ -649,13 +649,17 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
-		self.enableSoftMixer(outdevice);
+		if (outdevice != 'softvolume'){
+			self.enableSoftMixer(outdevice);
+		}
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
 		var outdevice = self.config.get('outputdevice');
 		if (outdevice === 'softvolume'){
             var outdevice = self.config.get('softvolumenumber');
             this.config.set('outputdevice', outdevice);
+            self.config.delete('softvolumenumber');
+            self.restartMpd.bind(self);
 		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
 		self.disableSoftMixer(outdevice);
@@ -762,65 +766,70 @@ ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
 
 ControllerAlsa.prototype.getAlsaCards = function () {
 	var self=this;
-	var cards = [];
 	var multi = false;
+	var cards = [];
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
 	try {
-        var soundCardDir = '/proc/asound/';
-        var soundFiles = fs.readdirSync(soundCardDir);
-
-        for (var i = 0; i < soundFiles.length; i++) {
-
-            if (soundFiles[i].indexOf('card') >= 0 && soundFiles[i] != 'cards'){
-				var cardnum = soundFiles[i].replace('card', '');
-				var cardinfo = self.getCardinfo(cardnum);
-				var rawname = cardinfo.name;
-				var name = rawname;
-				var id = cardinfo.id;
-                    for (var n = 0; n < carddata.cards.length; n++){
-                        var cardname = carddata.cards[n].name.toString().trim();
-                        if (cardname === rawname){
-                            if(carddata.cards[n].multidevice) {
-                                multi = true;
-                                var card = carddata.cards[n];
-                                for (var j = 0; j < card.devices.length; j++) {
-                                    var subdevice = carddata.cards[n].devices[j].number;
-                                    name = carddata.cards[n].devices[j].prettyname;
-                                    cards.push({id: id + ',' + subdevice, name: name});
-                                }
-
-                            } else {
-                                multi = false;
-                                name = carddata.cards[n].prettyname;
-                            }
-
+		var aplaycards = self.getAplayInfo();
+        for (var k = 0; k < aplaycards.length; k++){
+        	var aplaycard = aplaycards[k];
+        	var name = aplaycard.name;
+        	var id = aplaycard.id;
+            for (var n = 0; n < carddata.cards.length; n++){
+                var cardname = carddata.cards[n].name.toString().trim();
+                if (cardname === name){
+                    if(carddata.cards[n].multidevice) {
+                        multi = true;
+                        var card = carddata.cards[n];
+                        for (var j = 0; j < card.devices.length; j++) {
+                            var subdevice = carddata.cards[n].devices[j].number;
+                            name = carddata.cards[n].devices[j].prettyname;
+                            cards.push({id: id + ',' + subdevice, name: name});
                         }
-                    } if (!multi){
-                        cards.push({id: id, name: name});
-                    }
-                }
 
+                    } else {
+                        multi = false;
+                        name = carddata.cards[n].prettyname;
+                    }
+
+                }
+            } if (!multi){
+                cards.push({id: id, name: name});
             }
+        }
 	} catch (e) {
 		var namestring = 'No Audio Device Available';
 		cards.push({id: '', name: namestring});
 	}
-	return cards;
+    return cards
 };
 
-ControllerAlsa.prototype.getCardinfo = function (cardnum) {
-	var self = this;
-	var info = fs.readFileSync('/proc/asound/card'+cardnum+'/pcm0p/info').toString().trim().split('\n');
-
-    for (var e = 0; e < info.length; e++) {
-        if (info[e].indexOf('id') >= 0) {
-        	var infoname = info[e].split(':')[1].replace(' ', '');
-        }
-
-    }
-    	var cardinfo = {'id':cardnum,'name':infoname};
-        return cardinfo
+ControllerAlsa.prototype.getAplayInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var cards = [];
+    try {
+        var aplaycmd = execSync('/usr/bin/aplay -l', {uid: 1000, gid: 1000, encoding: 'utf8'});
+            var currentCard;
+            var line = aplaycmd.split('\n')
+            for (var i = 0; i < line.length; i++) {
+                if (line[i].indexOf('card')>= 0) {
+                    var info = line[i].split(',')[0];
+                    var num = info.split(':')[0].replace('card ', '');
+                    var name = info.split('[')[1].replace(']', '');
+                    var card = {'id': num, 'name': name};
+                    if (num != currentCard) {
+                        cards.push(card);
+                    }
+                    currentCard = num;
+                }
+            }
+	} catch (e) {
+        console.log('Cannot get aplay -l output: '+e);
+        return cards
+	}
+	return cards
 }
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
@@ -867,7 +876,8 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var mixertpye = '';
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
-	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
+
+    var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
 
 	for (var i in cards) {

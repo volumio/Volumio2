@@ -23,6 +23,7 @@ var compilation = ['Various','various','Various Artists','various artists','VA',
 var artistsort = true;
 var dsd_autovolume = false;
 var singleBrowse = false;
+var startup = true;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -348,7 +349,7 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 			// If there's an error show an alert on UI
 			if ('error' in respobject) {
 				self.commandRouter.broadcastToastMessage('error', 'Error', respobject.error)
-				
+
                 self.sendMpdCommand('clearerror', [])
 
 			}
@@ -501,30 +502,30 @@ ControllerMpd.prototype.parseState = function (objState) {
 		if (objMetrics[1] == 'f') {
             nBitDepth = '32f bit';
 		} else if (objMetrics[0] == 'dsd64') {
-            var nSampleRateRaw = 2.82 + ' MHz';
+            var nSampleRateRaw = '2.82 MHz';
             nBitDepth = '1 bit';
             nChannels = 2;
         } else if (objMetrics[0] == 'dsd128') {
-            var nSampleRateRaw = 5.64 + ' MHz';
+            var nSampleRateRaw = '5.64 MHz';
             nBitDepth = '1 bit';
             nChannels = 2;
         } else if (objMetrics[0] == 'dsd256') {
-        var nSampleRateRaw = 11.28 + ' MHz';
+        var nSampleRateRaw = '11.28 MHz';
         nBitDepth = '1 bit';
         nChannels = 2;
         } else if (objMetrics[0] == 'dsd512') {
-        var nSampleRateRaw = 22.58 + ' MHz';
+        var nSampleRateRaw = '22.58 MHz';
         nBitDepth = '1 bit';
         nChannels = 2;
         } else if (objMetrics[1] == 'dsd') {
 			if (nSampleRateRaw === 352.8) {
-				var nSampleRateRaw = 2.82 + ' MHz';
+				var nSampleRateRaw = '2.82 MHz';
 				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 705.6) {
-				var nSampleRateRaw = 5.64 + ' MHz';
+				var nSampleRateRaw = '5.64 MHz';
 				nBitDepth = '1 bit'
 			} else if (nSampleRateRaw === 1411.2) {
-				var nSampleRateRaw = 11.2 + ' MHz';
+				var nSampleRateRaw = '11.2 MHz';
 				nBitDepth = '1 bit'
 			} else {
 				var nSampleRateRaw = nSampleRateRaw + ' KHz';
@@ -634,6 +635,14 @@ ControllerMpd.prototype.mpdEstablish = function () {
 
 	// Make a promise for when the MPD connection is ready to receive events
 	self.mpdReady = libQ.nfcall(self.clientMpd.on.bind(self.clientMpd), 'ready');
+
+    self.mpdReady.then(function () {
+        if (startup) {
+            startup = false;
+            self.listAlbums();
+        }
+    })
+	
 	// Catch and log errors
 	self.clientMpd.on('error', function (err) {
 		self.logger.error('MPD error: ' + err);
@@ -650,6 +659,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	// This tracks the the timestamp of the newest detected status change
 	self.timeLatestUpdate = 0;
 	self.updateQueue();
+
 	// TODO remove pertaining function when properly found out we don't need em
 	//self.fswatch();
 	// When playback status changes
@@ -690,7 +700,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	//Notify that The mpd DB has changed
 	self.clientMpd.on('system-database', function () {
 		//return self.commandRouter.fileUpdate();
-		//return self.reportUpdatedLibrary();		
+		//return self.reportUpdatedLibrary();
 		//Refresh AlbumList - delete the current AlbumList cache entry
 		memoryCache.del('cacheAlbumList', function(err) {});
 		//Store new AlbumList in cache
@@ -714,13 +724,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 };
 
 ControllerMpd.prototype.mpdConnect = function () {
-
 	var self = this;
-
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
-
-	self.config = new (require('v-conf'))();
-	self.config.loadFile(configFile);
 
 	var nHost = self.config.get('nHost');
 	var nPort = self.config.get('nPort');
@@ -764,17 +768,11 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
     self.config.set('volume_normalization', data['volume_normalization']);
 	self.config.set('audio_buffer_size', data['audio_buffer_size'].value);
 	self.config.set('buffer_before_play', data['buffer_before_play'].value);
+    self.config.set('dop', data['dop'].value);
     dsd_autovolume = data['dsd_autovolume'];
 
     var isonew = data.iso;
     var iso = self.config.get('iso', false);
-
-    //fixing dop
-	if (self.config.get('dop') == null) {
-		self.config.addConfigValue('dop', 'boolean', data['dop'].value);
-	} else {
-		self.config.set('dop', data['dop'].value);
-	}
 
 	if (self.config.get('persistent_queue') == null) {
 		self.config.addConfigValue('persistent_queue', 'boolean', data['persistent_queue']);
@@ -967,11 +965,12 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var conf3 = conf2.replace("${volume_normalization}", self.checkTrue('volume_normalization'));
 			var conf4 = conf3.replace("${audio_buffer_size}", self.config.get('audio_buffer_size'));
 			var conf5 = conf4.replace("${buffer_before_play}", self.config.get('buffer_before_play'));
-			if (self.config.get('dop')){
+			if (self.config.get('dop', false)){
 				var dop = 'yes';
 			} else {
 				var dop = 'no';
 			}
+
 			var conf6 = conf5.replace("${dop}", dop);
 
 
@@ -1047,8 +1046,8 @@ ControllerMpd.prototype.setConfiguration = function (configuration) {
 
 ControllerMpd.prototype.getConfigParam = function (key) {
 	var self = this;
-
-	return self.config.get(key);
+	var confval = self.config.get(key);
+	return confval
 };
 ControllerMpd.prototype.setConfigParam = function (data) {
 	var self = this;
@@ -1182,7 +1181,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				var lines = msg.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
-					
+
 					if (line.indexOf('directory:') === 0) {
                         var diricon = 'fa fa-folder-open-o';
 						path = line.slice(11);
@@ -1394,7 +1393,7 @@ ControllerMpd.prototype.listallFolder = function (uri) {
                             title = title;
                         } else {
                             title = name;
-                        }						
+                        }
                         list.push({
                             service: 'mpd',
                             type: 'song',
@@ -1443,7 +1442,7 @@ ControllerMpd.prototype.search = function (query) {
 
 		self.clientMpd.sendCommand(cmd(commandArtist, []), function (err, msg) {
             var subList=[];
-            if (msg) {		
+            if (msg) {
 				var lines = msg.split('\n');  //var lines is now an array
 				var artistsfound = [];
 				for (var i = 0; i < lines.length; i++) {
@@ -1454,8 +1453,8 @@ ControllerMpd.prototype.search = function (query) {
 						//**********Check if artist is already found and exists in 'artistsfound' array
 						if (artistsfound.indexOf(artist) <0 ) { //Artist is not in 'artistsfound' array
 							artistcount ++;
-							artistsfound.push(artist);							
-							subList.push({	
+							artistsfound.push(artist);
+							subList.push({
 								service: 'mpd',
 								type: 'folder',
 								title: artist,
@@ -1475,7 +1474,7 @@ ControllerMpd.prototype.search = function (query) {
     self.mpdReady.then(function () {
 
         self.clientMpd.sendCommand(cmd(commandAlbum, []), function (err, msg) {
-			
+
             var subList=[];
 
             if (msg) {
@@ -1499,7 +1498,7 @@ ControllerMpd.prototype.search = function (query) {
                             artist: artist,
                             album:'',
 							//Use the correct album / artist match
-							uri: 'albums://' + encodeURIComponent(artist) + '/'+ encodeURIComponent(album),							
+							uri: 'albums://' + encodeURIComponent(artist) + '/'+ encodeURIComponent(album),
                             albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
 							});
 						}
@@ -1535,7 +1534,7 @@ ControllerMpd.prototype.search = function (query) {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
 							var title = track + " - " + title1;
-						}						
+						}
                         if (title == undefined) {
                             title = name[count - 1];
                         }
@@ -1870,7 +1869,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var argument=splitted[2];  //artist
         var value=splitted[3];	//album
 
-        if(argument==='artist') {			
+        if(argument==='artist') {
             var commandArtist = 'search artist '+' "' + value + '"';
 
             self.mpdReady.then(function () {
@@ -1889,7 +1888,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
                                 var artist = self.searchFor(lines, i + 1, 'Artist:');
                                 var album = self.searchFor(lines, i + 1, 'Album:');
-							//Include track number if tracknumber variable is set to 'true'	
+							//Include track number if tracknumber variable is set to 'true'
 								if (!tracknumbers) {
 								var title = self.searchFor(lines, i + 1, 'Title:');
 								}
@@ -1929,11 +1928,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
                 });
             });
         }
-        else if(argument==='album') {			
+        else if(argument==='album') {
 			if (compilation.indexOf(value)>-1) {  //artist is in Various Artists array
-				var commandArtist = 'search albumartist '+' "' + value + '"';	
-			}		
-			else {		
+				var commandArtist = 'search albumartist '+' "' + value + '"';
+			}
+			else {
 			var commandAlbum = 'search album '+' "' + value + '"';
 			}
             self.mpdReady.then(function () {
@@ -2002,12 +2001,12 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
 		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
 			var GetAlbum = "find album \""+albumName+"\"" + " albumartist \"" +artistName+"\"";
-		}		
+		}
 		else {
 			var GetAlbum = "find album \""+albumName+"\"" + " artist \"" +artistName+"\"";
 		}
 
-		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {	
+		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {
             var list = [];
             if (msg) {
                 var path;
@@ -2069,7 +2068,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var splitted = uri.split('/');
 
         if(splitted.length===4) {
-            return this.explodeUri('albums://'+ splitted[2] + '/' + splitted[3]);		
+            return this.explodeUri('albums://'+ splitted[2] + '/' + splitted[3]);
 		}
         var artist = decodeURIComponent(splitted[2]);
 
@@ -2086,7 +2085,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
     }
     else if(uri.startsWith('genres://')) {
-		
+
         //exploding search
         var splitted = uri.split('/');
         var genreName = decodeURIComponent(splitted[2]);
@@ -2104,11 +2103,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 				var GetMatches = "find genre \"" + genreName + "\" artist \"" +  artistName + "\" album \"" + albumName + "\"";
 			}
         }
-		
+
         else {
 			var GetMatches = "find genre \"" + genreName + "\"";
 		}
-		
+
 		var cmd = libMpd.cmd;
 
 		self.clientMpd.sendCommand(cmd(GetMatches, []), function (err, msg) {
@@ -2171,36 +2170,43 @@ ControllerMpd.prototype.explodeUri = function(uri) {
     }
     else if(uri.endsWith('.iso')) {
         var uriPath = '/mnt/' + self.sanitizeUri(uri);
-        //self.commandRouter.logger.info('AAAAAAAAAAAAAAAAAAAA----------------------------'+uriPath);
+       
         var uris = self.scanFolder(uriPath);
         var response = [];
 
         libQ.all(uris)
             .then(function (result) {
-                for (var j in result) {
+                // IF we need to explode the whole iso file
+                if (Array.isArray(result)) {
+                    result = result[0]
+                    defer.resolve(result);
+                } else {
+                    for (var j in result) {
 
-                    self.commandRouter.logger.info("----->>>>> " + JSON.stringify(result[j]));
-                    //console.log('AAAAAAAAALLLLLLLLLLLLLLLLLLLLL'+result[j].albumart)
-                    var albumartiso = result[j].albumart.substring(0, result[j].albumart.lastIndexOf("%2F"));
-                    if (result !== undefined && result[j].uri !== undefined) {
-                        response.push({
-                            uri: self.fromPathToUri(result[j].uri),
-                            service: 'mpd',
-                            name: result[j].name,
-                            artist: result[j].artist,
-                            album: result[j].album,
-                            type: 'track',
-                            tracknumber: result[j].tracknumber,
-                            albumart: albumartiso,
-                            duration: result[j].duration,
-                            samplerate: result[j].samplerate,
-                            bitdepth: result[j].bitdepth,
-                            trackType: result[j].trackType
-                        });
+                        //self.commandRouter.logger.info("----->>>>> " + JSON.stringify(result[j]));
+                        //console.log('AAAAAAAAALLLLLLLLLLLLLLLLLLLLL'+result[j].albumart)
+                        var albumartiso = result[j].albumart.substring(0, result[j].albumart.lastIndexOf("%2F"));
+                        if (result !== undefined && result[j].uri !== undefined) {
+                            response.push({
+                                uri: self.fromPathToUri(result[j].uri),
+                                service: 'mpd',
+                                name: result[j].name,
+                                artist: result[j].artist,
+                                album: result[j].album,
+                                type: 'track',
+                                tracknumber: result[j].tracknumber,
+                                albumart: albumartiso,
+                                duration: result[j].duration,
+                                samplerate: result[j].samplerate,
+                                bitdepth: result[j].bitdepth,
+                                trackType: result[j].trackType
+                            });
+                        }
+
                     }
-
+                    defer.resolve(response);
                 }
-                defer.resolve(response);
+
             })
     }
     else {
@@ -2290,8 +2296,8 @@ ControllerMpd.prototype.explodeCue=function(uri , index) {
 }
 
 ControllerMpd.prototype.exploderArtist=function(err,msg,defer) {
-	
-    var self=this;  
+
+    var self=this;
     var list = [];
     var albums=[],albumarts=[];
     if (msg) {
@@ -2402,6 +2408,10 @@ ControllerMpd.prototype.scanFolder=function(uri)
     }
     else if (isofile){
 
+        var defer=libQ.defer();
+        var uris = self.explodeISOFile(uri);
+        defer.resolve(uris);
+        return defer.promise
     }
     else {
             var defer=libQ.defer();
@@ -2448,7 +2458,7 @@ ControllerMpd.prototype.scanFolder=function(uri)
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
 									var title = track + " - " + title1;
-								}	
+								}
                                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
                                 if (title) {
@@ -2491,6 +2501,98 @@ ControllerMpd.prototype.scanFolder=function(uri)
     return uris;
 }
 
+ControllerMpd.prototype.explodeISOFile = function (uri) {
+    var self = this;
+
+
+    var defer = libQ.defer();
+    var sections = uri.split('/');
+    var folderToList = '';
+    var command = 'lsinfo';
+    var ISOlist = [];
+
+    if (sections.length > 1) {
+        folderToList = sections.slice(2).join('/');
+
+        command += ' "' + folderToList + '"';
+
+    }
+
+    var cmd = libMpd.cmd;
+
+    self.mpdReady.then(function () {
+        self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+
+            if (msg) {
+                var s0 = sections[0] + '/';
+                var path;
+                var name;
+                var lines = msg.split('\n');
+                var isSolved=false;
+
+                for (var i = 0; i < lines.length; i++) {
+
+                    var line = lines[i];
+
+                    if (line.indexOf('file:') === 0) {
+                        var path = line.slice(6);
+                        var name = path.split('/').pop();
+
+                        var artist = self.searchFor(lines, i + 1, 'Artist:');
+                        var album = self.searchFor(lines, i + 1, 'Album:');
+                        var ISOuri = self.searchFor(lines, i, 'file:');
+                        //Include track number if tracknumber variable is set to 'true'
+                        if (!tracknumbers) {
+                            var title = self.searchFor(lines, i + 1, 'Title:');
+                        }
+                        else {
+                            var title1 = self.searchFor(lines, i + 1, 'Title:');
+                            var track = self.searchFor(lines, i + 1, 'Track:');
+                            var title = track + " - " + title1;
+                        }
+                        var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+
+                        if (title) {
+                            title = title;
+                        } else {
+                            title = name;
+                        }
+                        self.commandRouter.logger.info("ALBUMART " + self.getAlbumArt({
+                                artist: artist,
+                                album: album
+                            }, uri));
+                        self.commandRouter.logger.info("URI " + uri);
+
+                        ISOlist.push({
+                            uri: ISOuri,
+                            service: 'mpd',
+                            name: title,
+                            artist: artist,
+                            album: album,
+                            type: 'track',
+                            tracknumber: 0,
+                            albumart: self.getAlbumArt({
+                                artist: artist,
+                                album: album
+                            }, self.getAlbumArtPathFromUri(uri)),
+                            duration: time,
+                            samplerate: '',
+                            bitdepth: '',
+                            trackType: uri.split('.').pop()
+                        });
+                    }
+
+                }
+                defer.resolve(ISOlist);
+            } else {
+                defer.resolve([]);
+            }
+
+        });
+    });
+
+    return defer.promise;
+};
 
 
 
@@ -2678,7 +2780,7 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
 	}
 
 
-    
+
     return defer.promise;
 
 };
@@ -2708,7 +2810,7 @@ ControllerMpd.prototype.syncGroupVolume = function (data) {
 };
 
 
-ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {	
+ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
     var self = this;
     var response;
 
@@ -2719,7 +2821,7 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
     if (curUri.startsWith('music-library')) {
         response = self.lsInfo(curUri);
     }
-	
+
 //playlist
 	else if (curUri.startsWith('playlists')) {
         if (curUri == 'playlists'){
@@ -2729,15 +2831,15 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
 			response = self.browsePlaylist(curUri);
 		}
 	}
-	
+
 //albums
 	else if (curUri.startsWith('albums://')) {
-		
+
 			if (curUri == 'albums://') {			//Just list albums
 				response = self.listAlbums(curUri);
 				}
-			else {		
-				if(splitted.length==3) {			
+			else {
+				if(splitted.length==3) {
 					response = self.listAlbumSongs(curUri,2,'albums://');
 				}
 				else {
@@ -2745,10 +2847,10 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
 				}
 			}
     }
-	
+
 //artists
 	else if (curUri.startsWith('artists://')) {
-		
+
         if (curUri == 'artists://') {
             response = self.listArtists(curUri);
 		}
@@ -2758,14 +2860,14 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
                 response = self.listArtist(curUri,2,'artists://','artists://');  //Pass back to listArtist 
 			}
             else {  //Has album name
-				response = self.listAlbumSongs(curUri,3,'artists://'+ splitted[2]);  //Pass to listAlbumSongs with artist and album name 
+				response = self.listAlbumSongs(curUri,3,'artists://'+ splitted[2]);  //Pass to listAlbumSongs with artist and album name
 			}
         }
     }
-	
+
 //genres
 	else if (curUri.startsWith('genres://')) {
-		
+
         if (curUri == 'genres://') {
             response = self.listGenres(curUri);
 		}
@@ -2775,9 +2877,9 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
 			}
             else if(splitted.length==4) {
 				response = self.listArtist(curUri,3,'genres://'+splitted[2],'genres://');
-			}	
+			}
             else if(splitted.length==5) {
-					response = self.listAlbumSongs(curUri,4,'genres://'+ splitted[2]);	
+					response = self.listAlbumSongs(curUri,4,'genres://'+ splitted[2]);
             }
 			else if(splitted.length=6) {
 				response = self.listAlbumSongs(curUri,4,'genres://'+splitted[4] +"/"+splitted[5]);
@@ -2799,10 +2901,10 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
 ControllerMpd.prototype.listAlbums = function (ui) {
     var self = this;
 
-    var defer = libQ.defer();	
+    var defer = libQ.defer();
     var response = memoryCache.get("cacheAlbumList", function( err, response){
 		if(response == undefined){
-	
+
 			response = {
 				"navigation": {
 					"lists": [
@@ -2818,14 +2920,14 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 				}
 			};
 			var cmd = libMpd.cmd;
-			
+
 			self.clientMpd.sendCommand(cmd("search album \"\"", []), function (err, msg) {
 			if(err) {
 				defer.reject(new Error('Cannot list albums'));
 			}
-			else {				
-				
-                var lines = msg.split('\n');            
+			else {
+
+                var lines = msg.split('\n');
                 var albumsfound = [];
 				for (var i = 0; i < lines.length; i++) {
 					var line = lines[i];
@@ -2844,12 +2946,12 @@ ControllerMpd.prototype.listAlbums = function (ui) {
               				var codedAlbumName = encodeURIComponent(albumName);
 							var album = {
 								service:'mpd',
-								type: 'folder', 
-								title: albumName, 
-								artist: artistName, 							
+								type: 'folder',
+								title: albumName,
+								artist: artistName,
 								album:'',
 								uri: 'albums://' + encodeURIComponent(artistName) + '/'+ encodeURIComponent(albumName),
-						//Get correct album art from path- only download if not existent								
+						//Get correct album art from path- only download if not existent
 								albumart: self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path),'dot-circle-o')
 								};
 							response.navigation.lists[0].items.push(album);
@@ -2857,20 +2959,20 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 						}
 					}
 				//Save response in albumList cache for future use
-				memoryCache.set("cacheAlbumList", response);		
+				memoryCache.set("cacheAlbumList", response);
 				if(ui) {
 					defer.resolve(response);
-					}				
+					}
 				}
-			});				
+			});
 		}
 		else {
 			console.log("listAlbums - loading Albums from cache");
 			if(ui) {
 				defer.resolve(response);
-			}	
+			}
 		}
-	});					
+	});
 	return defer.promise;
 };
 
@@ -2897,7 +2999,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 	}
 	else if (splitted[0] == 'albums:') { //album
 		var artist = decodeURIComponent(splitted[2]);
-		var albumName = decodeURIComponent(splitted[3]);	
+		var albumName = decodeURIComponent(splitted[3]);
 		var findstring = "find album \"" + albumName + "\"" + " albumartist \"" + artist + "\" ";
 	}
 	else {  //artist
@@ -2932,7 +3034,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
     var cmd = libMpd.cmd;
 
 	self.clientMpd.sendCommand(cmd(findstring , []), function (err, msg) {
-		
+
         if (msg) {
             var path;
             var name;
@@ -2994,7 +3096,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
  * list artists
  */
 ControllerMpd.prototype.listArtists = function () {
-	
+
     var self = this;
 
     var defer = libQ.defer();
@@ -3016,7 +3118,7 @@ ControllerMpd.prototype.listArtists = function () {
     var cmd = libMpd.cmd;
 	var artistlist = "artist";
 	var artistbegin = "Artist: ";
-	
+
 	if (artistsort) {
 		artistlist = "albumartist";
 		artistbegin = "AlbumArtist: ";
@@ -3037,7 +3139,7 @@ ControllerMpd.prototype.listArtists = function () {
                     var artist=splitted[i].substring(artistbegin.length);
 
 
-                    if(artist!=='') {		
+                    if(artist!=='') {
                         var codedArtists=encodeURIComponent(artist);
                         var albumart=self.getAlbumArt({artist:codedArtists},undefined,'users');
                         var item={
@@ -3104,7 +3206,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
     .then(function() {
         var artist=decodeURIComponent(splitted[index]);
 		var VA = 0;
-        var cmd = libMpd.cmd;	
+        var cmd = libMpd.cmd;
 
 		if (uriBegin === 'genres://')  {
 			var genre = decodeURIComponent(splitted[2]);
@@ -3115,7 +3217,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 			if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
 				var findartist = "find albumartist \"" + artist + "\"";
 				VA = 1;
-			}		
+			}
 			else {                                      //artist is NOT in compilation array so use artist or albumartist
 				if (artistsort) {						//Fix - now set by artistsort variable
 					var findartist = "find albumartist \"" + artist + "\"";
@@ -3127,16 +3229,16 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 		}
 
         self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {   //get data (msg)
-		
+
 		if(msg=='') { //If there is no data (msg) get data first, else just parseListAlbum
- 
-			self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {	
-	
+
+			self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {
+
 				self.parseListAlbum(err,msg,defer,response,uriBegin,VA);
 
 				});
             }
-			
+
             else {
 				self.parseListAlbum(err,msg,defer,response,uriBegin,VA);
 			}
@@ -3172,7 +3274,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
 				}
                 var album = self.searchFor(lines, i + 1, 'Album:');
 				var genre = self.searchFor(lines, i + 1, 'Genre:');
-			//Include track number if tracknumber variable is set to 'true'	
+			//Include track number if tracknumber variable is set to 'true'
 				if (!tracknumbers) {
 					var title = self.searchFor(lines, i + 1, 'Title:');
 				}
@@ -3204,19 +3306,19 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                     albumarts.push();
 
                     var uri;
-	
-                    if(uriBegin==='artists://') {	
+
+                    if(uriBegin==='artists://') {
                         uri='artists://' + encodeURIComponent(artist) +'/'+encodeURIComponent(album);
 					}
-					
+
 					else if (uriBegin==='genres://') {
-						uri='genres://' + genre + '/' + encodeURIComponent(artist) +'/'+encodeURIComponent(album);			
+						uri='genres://' + genre + '/' + encodeURIComponent(artist) +'/'+encodeURIComponent(album);
 					}
-					
+
                     else {
-						uri=uriBegin + encodeURIComponent(album);				
+						uri=uriBegin + encodeURIComponent(album);
 					}
-					
+
                     response.navigation.lists[0].items.push(
                         {
                             service:'mpd',
@@ -3246,7 +3348,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
  * list genres
  */
 ControllerMpd.prototype.listGenres = function () {
-	
+
     var self = this;
     var defer = libQ.defer();
     var response = {
@@ -3355,7 +3457,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                 var artists=[];
                 var artistArt=[];
                 var list = [];
-				
+
                 if (msg) {
                     var path;
                     var name;
@@ -3396,21 +3498,21 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                                     uri: 'music-library/' + path
                                 });
                             }
-						
+
                             if(albums.indexOf(album)===-1) {
                                 albums.push(album);
                                 albumsArt.push(albumart);
 
                                 if(album!=='') {
-									
+
                                 response.navigation.lists[1].items.push({
 									service:'mpd',
-									type: 'folder', 
-									title: album, 
-									artist: albumartist, 
+									type: 'folder',
+									title: album,
+									artist: albumartist,
 									albumart: albumart,
 									uri: 'genres://'+ genreName + '/' + encodeURIComponent(albumartist) +'/' + encodeURIComponent(album)});
-								}		
+								}
                             }
 
                             if(artists.indexOf(artist)===-1) {
@@ -3420,8 +3522,8 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                                 if(artist!=='') {
                                     response.navigation.lists[0].items.push({
 										service:'mpd',
-										type: 'folder', 
-										title: artist, 
+										type: 'folder',
+										title: artist,
 										albumart: self.getAlbumArt({artist:artist},undefined,'users'),
                                         uri: 'genres://' + encodeURIComponent(genreName)+'/'+encodeURIComponent(artist)});
 								}
@@ -3431,7 +3533,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 
                     defer.resolve(response);
                 }
-				
+
                 else {
                     self.logger.info(err);
                     defer.reject(new Error());
@@ -3565,7 +3667,7 @@ ControllerMpd.prototype.loadLibrarySettings=function(){
     var compilationConf = this.config.get('compilation', 'Various,various,Various Artists,various artists,VA,va')
     var artistsortConf = this.config.get('artistsort', true);
     var singleBrowseConf = this.config.get('singleBrowse', false);
-	
+
     tracknumbers = tracknumbersConf;
     compilation = compilationConf.split(',');
     artistsort = artistsortConf;

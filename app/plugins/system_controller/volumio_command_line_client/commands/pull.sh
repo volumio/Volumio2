@@ -1,10 +1,26 @@
 #!/bin/bash
 
+REPO='https://github.com/volumio/Volumio2.git'
+BRANCH=''
+
+if [ $# -eq 3 ]; then
+    BRANCH="$2"
+    REPO="$3"
+elif [ $# -eq 2 ]; then
+    BRANCH="$2"
+fi
+
 cd /home/volumio
 echo "Backing Up current Volumio folder in /volumio-current"
 mv /volumio /volumio-current
 echo "Cloning Volumio Backend repo"
-git clone https://github.com/volumio/Volumio2.git /volumio
+if [ -n "$BRANCH" ]; then
+    echo "Cloning branch $BRANCH from repository $REPO"
+    git clone -b "$BRANCH" "$REPO" /volumio
+else
+    echo "Cloning master from repository $REPO"
+    git clone "$REPO" /volumio
+fi
 echo "Copying Modules"
 cp -rp /volumio-current/node_modules /volumio/node_modules
 echo "Copying UI"
