@@ -1318,13 +1318,14 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 
 	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
-	if (i2sstatus.enabled) {
-		i2sdevice = i2sstatus.name;
-	} else {
-        i2sdevice = i2soptions[0].label;
-	}
 
 	if(i2soptions.length > 0) {
+        if (i2sstatus.enabled) {
+            i2sdevice = i2sstatus.name;
+        } else {
+            i2sdevice = i2soptions[0].label;
+        }
+
 		var i2sarray = [];
 		for(var i in i2soptions) {
 			var i2scard = {'id': i2soptions[i].value, 'name': i2soptions[i].label}
@@ -1333,7 +1334,7 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 		var response = {'devices':{'active':{'name':outdevicename, 'id':outputdevice},'available':devicesarray},'i2s':{'enabled':i2sstatus.enabled,'active':i2sdevice,'available':i2sarray}};
 		defer.resolve(response);
 	} else {
-		var response = {'devices':devicesarray}
+		var response = {'devices':{'active':{'name':outdevicename, 'id':outputdevice},'available':devicesarray}};
 		defer.resolve(response);
 	}
 
