@@ -315,7 +315,7 @@ ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
     })
 		.then(function()
 		{
-			self.commandRouter.stateMachine.setConsumeUpdateService('upnp_browser');
+			self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
 			return self.mpdPlugin.sendMpdCommand('play',[]);
 		});
 };
