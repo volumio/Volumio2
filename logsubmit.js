@@ -49,12 +49,12 @@ for (var itemN in commandArray) {
 
 // remove sensitive information
 commandArray = [
-    "sed -i -r -e 's/([Pp]assword:  *)([^ ]*)(.*)$/\1<elided> \3/'",
-    "sed -i -r -e 's/([Ss]potify  *.*token is )(.*)$/\1<elided>/'",
-    "sed -i -r -e 's/(--[Pp]assword[ ][ ]*)([^ ]*)/\1<elided>/'",
-    "sed -i -r -e 's/(wlan[0-9]: WPS: UUID [^:]*: ).*$/\1<elided>/'",
-    "sed -i -r -e 's/(mount .*username=)([^,]*,)(.*)$/\1<elided>,\3/'",
-    "sed -i -r -e 's/(mount .*password=)([^,]*,)(.*)$/\1<elided>,\3/'"
+    "sed -i -r -e 's/([Pp]assword:  *)([^ ]*)(.*)$/\\1<elided> \\3/'",
+    "sed -i -r -e 's/([Ss]potify  *.*token is )(.*)$/\\1<elided>/'",
+    "sed -i -r -e 's/(--[Pp]assword[ ][ ]*)([^ ]*)/\\1<elided>/'",
+    "sed -i -r -e 's/(wlan[0-9]: WPS: UUID [^:]*: ).*$/\\1<elided>/'",
+    "sed -i -r -e 's/(mount .*username=)([^,]*,)(.*)$/\\1<elided>,\\3/'",
+    "sed -i -r -e 's/(mount .*password=)([^,]*,)(.*)$/\\1<elided>,\\3/'"
 ];
 for (var itemN in commandArray) {
 	var item = commandArray[itemN];
