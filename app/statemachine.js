@@ -551,32 +551,30 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	var  self = this;
 	this.commandRouter.pushDebugConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState');
 
-    //Checking if stateService is defined (REPLACE WITH CONDITIONAL LIBRARY AS SOON AS POSSIBLE)
-    if(!stateService)
-    {
-        this.commandRouter.pushErrorConsoleMessage('variable stateService in CoreStateMachine::syncState is undefined');
-    }
+  //Checking if stateService is defined (REPLACE WITH CONDITIONAL LIBRARY AS SOON AS POSSIBLE)
+  if(!stateService)
+  {
+    this.commandRouter.pushErrorConsoleMessage('variable stateService in CoreStateMachine::syncState is undefined');
+  }
 
 
-    if (this.isVolatile && stateService.status == 'play') {
-	    this.volatileService = sService;
-        this.currentStatus='play';
-        this.volatileState=stateService;
-        this.pushState().fail(this.pushError.bind(this));
-        return;
-	}
-	else if (this.volatileState && stateService.status == 'stop'){
-        this.volatileService = undefined;
-        //this.currentStatus='stop';
+  if (this.isVolatile && stateService.status == 'play') {
+    this.volatileService = sService;
+    this.currentStatus='play';
+    this.volatileState=stateService;
+    this.pushState().fail(this.pushError.bind(this));
+    return;
+	} else if (this.volatileState && stateService.status == 'stop'){
+    this.volatileService = undefined;
+    //this.currentStatus='stop';
 		var trackBlock = this.getTrack(this.currentPosition);
-	}
-    else if (this.isUpnp){
+	} else if (this.isUpnp){
 		console.log('In UPNP mode')
 
-    } else {
-        this.volatileService = undefined;
+  } else {
+    this.volatileService = undefined;
 
-        var trackBlock = this.getTrack(this.currentPosition);
+    var trackBlock = this.getTrack(this.currentPosition);
 	}
 
     /**
@@ -586,39 +584,31 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
      */
 	if(this.consumeUpdateService){
 		if(this.consumeUpdateService!=sService)
-
 		{
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification. Current '+this.consumeUpdateService+" Received "+sService);
 			if (this.consumeUpdateService == 'upnp') {
-                this.consumeUpdateService = 'mpd';
-                sService = 'mpd';
+        this.consumeUpdateService = 'mpd';
+        sService = 'mpd';
 			} else {
-                return;
+        return;
 			}
-
 		}
-	} else
-	{
-
+	} else {
 		if(trackBlock!=undefined && trackBlock.service!==sService)
 		{
 			this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
 			return;
 		}
-
 	}
-
 	this.timeLastServiceStateUpdate = Date.now();
-
-    this.commandRouter.pushDebugConsoleMessage("STATE SERVICE "+JSON.stringify(stateService));
-
-    this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION "+this.currentPosition);
-
+  this.commandRouter.pushDebugConsoleMessage("STATE SERVICE "+JSON.stringify(stateService));
+  this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION "+this.currentPosition);
 
 	if (stateService.isStreaming != undefined) {
 		this.isStreaming = stateService.isStreaming;
+	} else {
+		this.isStreaming = false;
 	}
-	else this.isStreaming = false;
 
 	if (this.isStreaming) {
 		this.uri = stateService.uri;
@@ -626,7 +616,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		this.uri = '/' + stateService.uri;
 	}
 	this.currentUpdate = stateService.updatedb;
-
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   stateService '+stateService.status);
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::syncState   currentStatus '+this.currentStatus);
 
@@ -637,19 +626,20 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 			// Checking if system is in consume mode. If it is the status shall be stored
 			if(this.isConsume && stateService)
-            {
-                var consumeAlbum=stateService.album;
-                var consumeArtist=stateService.artist;
-                var consumeAlbumArt='/albumart';
-
-                if(consumeArtist)
-                {
-                    consumeAlbumArt=this.commandRouter.executeOnPlugin('miscellanea','albumart','getAlbumArt',
-                        {
-                            artist:consumeArtist,
-                            album:consumeAlbum
-                        });
-                }
+      {
+        var consumeAlbum=stateService.album;
+        var consumeArtist=stateService.artist;
+        var consumeAlbumArt='/albumart';
+				if(typeof trackBlock.albumart !== "undefined" && trackBlock.albumart != "" && trackBlock.albumart != "/albumart"){
+					consumeAlbumArt = trackBlock.albumart;
+				}else if(consumeArtist)
+        {
+          consumeAlbumArt=this.commandRouter.executeOnPlugin('miscellanea','albumart','getAlbumArt',
+	        {
+            artist:consumeArtist,
+            album:consumeAlbum
+	        });
+        }
 				if (stateService.service == undefined ) {
 					stateService.service = 'mpd';
 				}

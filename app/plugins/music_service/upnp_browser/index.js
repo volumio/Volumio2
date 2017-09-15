@@ -87,7 +87,9 @@ ControllerUPNPBrowser.prototype.onStart = function() {
   	});
 	});
 	client.search('urn:schemas-upnp-org:device:MediaServer:1');
-
+	setInterval(() => {
+		client.search('urn:schemas-upnp-org:device:MediaServer:1');
+	}, 30000);
 	this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 	//this.startDjmount();
 	return libQ.resolve();
@@ -143,34 +145,34 @@ ControllerUPNPBrowser.prototype.listRoot = function()
 	var self = this;
 	var defer = libQ.defer();
 
-	this.discover().then((DLNAServers) => {
-		var obj = {
-			"navigation":{
-				"lists":[
-					{
-						"availableListViews": ["list"],
-						"items":[
 
-						]
-					}
-				]
-			}
-		};
-		for(var i = 0; i < DLNAServers.length; i++){
-			if(Date.now() - DLNAServers[i].lastTimeAlive < 15000){
-				obj.navigation.lists[0].items.push({
-					service: "upnp_browser",
-					type: "folder",
-					"title": DLNAServers[i].name,
-					"uri": "upnp/" + DLNAServers[i].location  + "@0",//@ separator, 0 for root element,
-					"albumart": DLNAServers[i].icon
-				});
-			}else{
-				DLNAServers.splice(i, 1);
-			}
+	var obj = {
+		"navigation":{
+			"lists":[
+				{
+					"availableListViews": ["list"],
+					"items":[
+
+					]
+				}
+			]
 		}
-		defer.resolve(obj);
-	}).end();
+	};
+	for(var i = 0; i < this.DLNAServers.length; i++){
+		if(Date.now() - this.DLNAServers[i].lastTimeAlive < 15000){
+			obj.navigation.lists[0].items.push({
+				service: "upnp_browser",
+				type: "folder",
+				"title": this.DLNAServers[i].name,
+				"uri": "upnp/" + this.DLNAServers[i].location  + "@0",//@ separator, 0 for root element,
+				"albumart": this.DLNAServers[i].icon
+			});
+		}else{
+			this.DLNAServers.splice(i, 1);
+		}
+	}
+	defer.resolve(obj);
+
 
 	return defer.promise;
 }
