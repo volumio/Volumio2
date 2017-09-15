@@ -105,7 +105,13 @@
     "ENABLE_CUSTOM_DNS":"Activer les serveurs DNS personnalisés",
     "PRIMARY_DNS":"DNS primaire",
     "SECONDARYY_DNS":"DNS Secondaire",
-    "DNS_ERROR_INFO":"Remplisser les adresses IP des DNS correctement"
+    "DNS_ERROR_INFO":"Renseignez les 2 adresses IP des DNS",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"Connecté au réseau!",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED":"Passez à l'étape suivante",
+    "WIRELESS_NETWORK_CONNECTION_ERROR":"Echec de connexion au réseau",
+    "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Réessayez ou passez à l'étape suivante",
+    "WIRELESS_NETWORK_CONNECTION_DEFER":"Cet appareil va se connecter au réseau",
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"Quand la configuration sera terminée"    
   },
   "NETWORKFS":{
   "ALIAS_DOC":"Choisir un le nom qui sera affiché dans les disques NAS montés",
@@ -201,6 +207,7 @@
     "COMPILATION_METADATA_DOC":"Configure les metadatas utilisées pour décrire albumart dans les compilations ou multi artistes. Utilise la vigrgule comme séparateur.",
     "COMPILATION_METADATA":"Champs Metadatas pour les compilations",
     "ALBUMART_CACHE_CLEARED":"Cache de images des albums réinitialisé avec succès",
+    "ALBUMART_CACHE_CLEAR_ERROR":"Une erreur est survenue en effaçant le cache, reessayer ultérieurement",  
     "ALBUMART_RESET_CACHE":"Réinitialiser le cache des images des albums",
     "ALBUMART_RESET_CACHE_DOC":"Volumio met en cache les images des albums pour améliorer la performance, cependant cela empèche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums ",
     "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
@@ -274,5 +281,10 @@
     "UPDATING_PLUGIN":"Mettre à jour le plugin",
     "DOWNLOADING_FROM":"Télécharger le plugin depuis",
     "DOWNLOADING":"Téléchargement du Plugin en cours"
-  }
+  },
+   "WIZARD":{
+   "CONGRATULATIONS":"Félicitations !",
+   "DEVICE_SUCCESSFULLY_CONFIGURED":"a été correctement configuré et est prèt à l'emploi!",
+   "PLEASE_DONATE":"Si vous aimez Volumio, faite un don! Vous pouvez faire la différence pour ce projet"
+   }
 }
