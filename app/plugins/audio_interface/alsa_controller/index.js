@@ -756,7 +756,7 @@ ControllerAlsa.prototype.getLabelForSelectedCard = function (cards, key) {
 			return cards[i].name;
 	}
 
-	return 'No Audio Device Available';
+	return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 };
 
 ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
@@ -805,7 +805,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
             }
         }
 	} catch (e) {
-		var namestring = 'No Audio Device Available';
+		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 		cards.push({id: '', name: namestring});
 	}
     return cards
@@ -1312,8 +1312,15 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 	if (outdevicename) {
 
 	} else {
-		outdevicename = devicesarray[0].name;
-        outputdevice = devicesarray[0].id;
+		if  (devicesarray.length > 0) {
+            outdevicename = devicesarray[0].name;
+            outputdevice = devicesarray[0].id;
+		} else {
+            outdevicename = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
+            outputdevice = 'nodev';
+
+		}
+
 	}
 
 	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
