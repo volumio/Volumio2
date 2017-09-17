@@ -34,7 +34,7 @@
     "DOP":"DSD sur PCM (DoP)",
     "DSD_PLAYBACK_MODE":"Mode de lecture DSD",
     "DSD_DIRECT":"DSD Direct",
-    "DSP_DOC":"Choisissez le mode de lecture DSD. DSD Direct lit le format DSD natif si le materièl le supporte, sinon le flux ext converti à la volée au format PCM. Avec DoP activé, le flux DSD sera encapsulé dans PCM 24 bits (DoP)",
+    "DSD_DOC":"Choisissez le mode de lecture DSD. DSD Direct lit le format DSD natif si le materièl le supporte, sinon le flux ext converti à la volée au format PCM. Avec DoP activé, le flux DSD sera encapsulé dans PCM 24 bits (DoP)",
     "DSD_AUTO_VOLUME":"DSD Volume automatique",
     "DSD_AUTO_VOLUME_DOC":"DSD nécessite un réglage de volume à 100. Si activé pendant la lecture DSD, le volume sera automatiquement règlé à 100 (ATTENTION: A utiliser avec précaution!)",
     "SOFTVOL":"Contrôle logiciel du Volume",
