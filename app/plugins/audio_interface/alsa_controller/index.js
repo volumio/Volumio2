@@ -863,7 +863,10 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 						mixer = mixer + ',1';
 					}
 				}
-				mixers.push(mixer);
+                if (mixer.indexOf('Internal Clock Validity') < 0) {
+                    mixers.push(mixer);
+                }
+
 			}
 		}
 	} catch (e) {}
@@ -948,7 +951,9 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 						var line2 = line[0].split(',')
 						var mixerspace = line2[0].replace(/'/g, "");
 						var mixer = mixerspace.replace(" ", "");
-						mixers.push(mixer);
+                        if (mixer.indexOf('Internal Clock Validity') < 0) {
+                            mixers.push(mixer);
+                        }
 					}
 				}
 				if (mixers[0] && mixers[0] != 'SoftMaster') {
