@@ -330,23 +330,90 @@ CoreMusicLibrary.prototype.search = function(data) {
 
         var executed=[];
 
-		for (var i = 0; i < self.browseSources.length; i++) {
-			var source=self.browseSources[i];
 
-            var key=source.plugin_type+'_'+source.plugin_name;
-            if(executed.indexOf(key)==-1)
+		var enableSelectiveSearch
+        enableSelectiveSearch=this.commandRouter.sharedVars.get("selective_search")
+
+		/*
+		 * New search method. If data structure contains fields service or plugin_name that field will be used to pick
+		 * a plugin for search. If that is not available (only root should be this case) then search will be performed
+		 * over all plugins.
+		 *
+		 * Examples:
+		 *
+		 * {"type":"any","value":"paolo","plugin_name":"mpd","plugin_type":"music_service","uri":"music-library"}
+		 *
+		 * {"type":"any","value":"sfff","uri":"albums://Nomadi/Ma%20Noi%20No!","service":"mpd"}
+		 *
+		 */
+        var searchAll=false
+
+        if(enableSelectiveSearch)
+        {
+            if (data.service || data.plugin_name)
             {
-                executed.push(key);
+                // checking if uri is /. Should revert to search to all
+                if(data.uri!== undefined && data.uri === '/')
+                {
+                    searchAll=true
+                } else {
+                    searchAll=false
+                }
 
-                var response;
-
-                response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
-
-                if (response != undefined) {
-                    deferArray.push(response);
-                };
+            } else {
+                searchAll=true
             }
-		}
+        } else {
+            searchAll=true
+        }
+
+		if(searchAll)
+        {
+            console.log("Searching all installed plugins")
+            /**
+             * Searching over all plugins
+             */
+
+            for (var i = 0; i < self.browseSources.length; i++) {
+                var source=self.browseSources[i];
+
+                var key=source.plugin_type+'_'+source.plugin_name;
+                if(executed.indexOf(key)==-1)
+                {
+                    executed.push(key);
+
+                    var response;
+
+                    response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+
+                    if (response != undefined) {
+                        deferArray.push(response);
+                    }
+                }
+            }
+        } else {
+            var pluginName=''
+            var pluginType='music_service'
+
+            if(data.service)
+            {
+                pluginName=data.service
+            } else if(data.plugin_name) {
+                pluginName=data.plugin_name
+            }
+
+            if(data.plugin_type)
+            {
+                pluginType=data.plugin_type
+            }
+
+            console.log("Searching plugin "+pluginType+"/"+pluginName)
+
+            response = self.commandRouter.executeOnPlugin(pluginType,pluginName,'search',query);
+            if (response != undefined) {
+                deferArray.push(response);
+            }
+        }
 
 		libQ.all(deferArray)
             .then(function (result) {
