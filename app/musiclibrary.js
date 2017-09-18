@@ -273,10 +273,14 @@ CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
                 source.uri=data.uri;
                 source.plugin_type=data.plugin_type;
                 source.plugin_name=data.plugin_name;
+                if (data.albumart != undefined) {
+                    source.albumart=data.albumart;
+				}
             }
         }
     }
 	var response = self.getBrowseSources();
+
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
 }
 
