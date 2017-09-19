@@ -248,6 +248,11 @@ CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) 
 	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
 	return this.musicLibrary.updateBrowseSources(name,data);
 };
+
+CoreCommandRouter.prototype.setSourceActive = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumiosetSourceActive' + data);
+    return this.musicLibrary.setSourceActive(data);
+};
 // Volumio Get Playlist Index
 CoreCommandRouter.prototype.volumioGetPlaylistIndex = function (sUid) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioGetPlaylistIndex');
