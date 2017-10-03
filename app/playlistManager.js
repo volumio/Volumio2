@@ -203,7 +203,13 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
-		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+        return self.commandRouter.executeOnPlugin('music_service', service,'addToFavourites',{uri:uri,service:service})
+            .then(function(value){
+                return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+            })
+            .fail(function(){
+                return libQ.reject()
+            })
 	}
 };
 
@@ -215,7 +221,13 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 	if (service === 'webradio') {
 		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
 	} else {
-		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+        return self.commandRouter.executeOnPlugin('music_service', service,'removeFromFavourites',{uri:uri,service:service})
+        .then(function(value){
+            return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+        })
+        .fail(function(){
+            return libQ.reject()
+        })
 	}
 };
 
