@@ -31,12 +31,6 @@
           "doc": "TRANSLATE.SYSTEM.STARTUP_SOUND_DOC",
           "label": "TRANSLATE.SYSTEM.STARTUP_SOUND",
           "value": true
-        },
-        {
-          "id":"config_wizard",
-          "element": "button",
-          "label": "TRANSLATE.WIZARD.RUN_FIRST_CONFIG_WIZARD",
-          "onClick": {"type":"emit", "message":"runFirstConfigWizard", "data":""}
         }
 
       ]

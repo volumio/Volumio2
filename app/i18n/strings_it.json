@@ -284,7 +284,6 @@
   "WIZARD":{
     "CONGRATULATIONS":"Congratulazioni",
     "DEVICE_SUCCESSFULLY_CONFIGURED":"è stato configurato ed è pronto per l'uso",
-    "PLEASE_DONATE":"Se ti piace Volumio, considera di fare una donazione. Il tuo contributo può fare la differenza!",
-    "RUN_FIRST_CONFIG_WIZARD":"Avvia la configurazione guidata"
+    "PLEASE_DONATE":"Se ti piace Volumio, considera di fare una donazione. Il tuo contributo può fare la differenza!"
   }
 }

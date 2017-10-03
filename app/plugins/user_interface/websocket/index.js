@@ -1638,12 +1638,6 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushWizard', {"openWizard": showWizard});
 			});
 
-            connWebSocket.on('runFirstConfigWizard', function () {
-                var selfConnWebSocket = this;
-
-                selfConnWebSocket.emit('pushWizard', {"openWizard": true});
-            });
-
 			connWebSocket.on('getWizardSteps', function () {
 				var selfConnWebSocket = this;
 
