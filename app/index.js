@@ -56,6 +56,9 @@ function CoreCommandRouter(server) {
     this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
     this.pluginManager.checkIndex();
     this.pluginManager.pluginFolderCleanup();
+    this.configManager=new(require(__dirname+'/configManager.js'))(this.logger);
+
+
     this.pluginManager.loadPlugins();
     this.pluginManager.startPlugins();
 
@@ -991,11 +994,32 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 };
 
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
-	this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+	var self=this
+    this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+
+	var defer=libQ.defer()
 
 	var thisPlugin = this.pluginManager.getPlugin(type, name);
+    thisPlugin.getUIConfig(data)
+    .then(function(uiconf){
+        var filePath=__dirname + '/plugins/'+type+'/'+name+'/override.json'
 
-	return thisPlugin.getUIConfig(data);
+        self.overrideUIConfig(uiconf,filePath)
+        .then(function(){
+            defer.resolve(uiconf)
+        })
+        .fail(function()
+        {
+            defer.reject(new Error());
+        })
+    })
+    .fail(function()
+    {
+        defer.reject(new Error("Error retrieving UIConfig from plugin "+name))
+    })
+
+
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.writePlayerControls = function (config) {
@@ -1617,6 +1641,74 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
         }
     }
 }
+
+/**
+ *  [{
+ *   attribute_name:"",
+ *   value:"",
+ *   id:""
+ *   },
+ *   {
+ *   attribute_name:"",
+ *   value:"",
+ *   id:""
+ *   },
+ *   ...
+ *   ]
+ */
+
+CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
+    var self=this;
+    var methodDefer=libQ.defer();
+
+    fs.readJson(overrideFile, function(err,override){
+
+        if(err)
+        {
+            methodDefer.resolve()
+        }
+        else {
+            for(var i in override)
+            {
+                var attr=override[i]
+
+                var attribute_name=attr.attribute_name
+                var attribute_value=attr.value
+                var id=attr.id
+
+                self.overrideField(uiconfig,id,attribute_name,attribute_value)
+            }
+
+            methodDefer.resolve()
+        }
+    })
+
+    return methodDefer.promise;
+
+};
+
+CoreCommandRouter.prototype.overrideField = function (parent,id,attribute_name,attribute_value) {
+    var self=this;
+
+    if(typeof(parent)==='object')
+    {
+        if(parent.id===id)
+        {
+            parent[attribute_name]=attribute_value
+        } else {
+            var keys=Object.keys(parent);
+
+            for(var i in keys)
+            {
+                var obj=parent[keys[i]];
+
+                self.overrideField(obj,id,attribute_name,attribute_value);
+            }
+
+        }
+    }
+}
+
 
 CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
 	var self=this;
