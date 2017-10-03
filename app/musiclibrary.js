@@ -273,11 +273,33 @@ CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
                 source.uri=data.uri;
                 source.plugin_type=data.plugin_type;
                 source.plugin_name=data.plugin_name;
+                if (data.albumart != undefined) {
+                    source.albumart=data.albumart;
+				}
             }
         }
     }
 	var response = self.getBrowseSources();
+
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+}
+
+CoreMusicLibrary.prototype.setSourceActive = function(uri) {
+    var self = this;
+
+        for(var i in self.browseSources)
+        {
+            var source=self.browseSources[i];
+            if(source.uri==uri) {
+				source.active = true;
+            } else {
+                source.active = false;
+			}
+        }
+
+    var response = self.getBrowseSources();
+
+    return self.commandRouter.broadcastMessage('pushBrowseSources', response);
 }
 
 CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {

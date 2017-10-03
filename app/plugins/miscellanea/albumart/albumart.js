@@ -160,7 +160,7 @@ var searchOnline = function (defer, web) {
                     return defer.promise;
                 }
             }
-			
+
             fs.writeJsonSync(infoPath, infoJson);
         });
 	}
@@ -210,7 +210,7 @@ var searchInFolder = function (defer, path, web, meta) {
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
                 var size = fs.statSync(coverFile).size;
-                // Limit the size of local arts to about 5MB 
+                // Limit the size of local arts to about 5MB
                 if (size < 5000000) {
                     if (diskCache) {
                         var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
@@ -260,7 +260,9 @@ var searchMeta = function (defer, coverFolder, web, meta) {
         return searchOnline(defer, web);
 	}
 
-    var fileName = coverFolder + '/' + S(files[0]);
+	var middleFileIndex = Math.floor(files.length/2);
+    var fileName = coverFolder + '/' + S(files[middleFileIndex]);
+
     fs.stat(fileName, function (err, stats) {
         if (err) {
             return searchOnline(defer, web);
