@@ -1634,19 +1634,40 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('getWizard', function () {
 				var selfConnWebSocket = this;
 
-
-				selfConnWebSocket.emit('pushWizard', {"openWizard": true});
-
-
+                var showWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getShowWizard', '');
+				selfConnWebSocket.emit('pushWizard', {"openWizard": showWizard});
 			});
+
+            connWebSocket.on('runFirstConfigWizard', function () {
+                var selfConnWebSocket = this;
+
+                selfConnWebSocket.emit('pushWizard', {"openWizard": true});
+            });
 
 			connWebSocket.on('getWizardSteps', function () {
 				var selfConnWebSocket = this;
 
-
-				var steps = ["language","name","output","network","music","follow","done"];
-				selfConnWebSocket.emit('pushWizardSteps', steps);
+				var wizardSteps = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardSteps', '');
+				selfConnWebSocket.emit('pushWizardSteps', wizardSteps);
 			});
+
+            connWebSocket.on('setWizardAction', function (data) {
+                var selfConnWebSocket = this;
+
+               return self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'setWizardAction', data);
+            });
+
+            connWebSocket.on('getWizardUiConfig', function (data) {
+                var selfConnWebSocket = this;
+
+                var wizardConfig = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardConfig', data);
+
+                if (wizardConfig != undefined) {
+                    wizardConfig.then(function (data) {
+                        selfConnWebSocket.emit('pushUiConfig', data);
+                    });
+                }
+            });
 
 			connWebSocket.on('getAvailableLanguages', function () {
 				var selfConnWebSocket = this;
@@ -1663,13 +1684,19 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setLanguage', function (data) {
 				//var self = this;
+				var disallowReload = false;
 				var value = data.defaultLanguage.code;
 				var label = data.defaultLanguage.language;
-				var languagedata = {'language':{'value':value,'label':label}}
+				if (data.disallowReload != undefined) {
+                    disallowReload = data.disallowReload;
+				}
+				var languagedata = {'language':{'value':value,'label':label}, 'disallowReload': disallowReload}
 
 				//var lang = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
 				var name = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
 			});
+
+
 
 			connWebSocket.on('getDeviceName', function () {
 				var selfConnWebSocket = this;
@@ -1698,16 +1725,20 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setOutputDevices', function (data) {
 				var selfConnWebSocket = this;
+				data.disallowPush = true;
 
-				var name = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
+                return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
 			});
 
 
 			connWebSocket.on('getDonePage', function () {
 				var selfConnWebSocket = this;
 
-				var contributionsarray =  {"donationAmount": 20, "customAmount": 150, "amounts": [10, 20, 50, 100]};
-				var laststep =  {"title":"Ready to roll","message":"Your Volumio Audiophile Music Player is ready. Please consider donating.","donation":true, "donationAmount": contributionsarray};
+
+				var donation = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDonation', '');
+				var contributionsarray =  self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDonationsArray', '');
+				var lastStepMessage = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDoneMessage', '');
+				var laststep = {"congratulations":lastStepMessage.congratulations, "title":lastStepMessage.title,"message":lastStepMessage.message,"donation":donation, "donationAmount": contributionsarray};
 
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
@@ -1726,6 +1757,20 @@ function InterfaceWebUI(context) {
 
 
 			});
+
+            connWebSocket.on('connectWirelessNetworkWizard', function (data) {
+                var selfConnWebSocket = this;
+
+                var connectWifiWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'connectWirelessNetwork', data);
+
+                if (connectWifiWizard != undefined) {
+                    connectWifiWizard.then(function (data) {
+                        selfConnWebSocket.emit('pushWizardWirelessConnResults', data);
+                    });
+                }
+
+
+            });
 
             connWebSocket.on('safeRemoveDrive', function (data) {
                 var selfConnWebSocket = this;

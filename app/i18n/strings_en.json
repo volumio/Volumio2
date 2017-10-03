@@ -105,7 +105,13 @@
 	"ENABLE_CUSTOM_DNS":"Enable custom DNS server",
 	"PRIMARY_DNS":"Primary DNS",
   	"SECONDARYY_DNS":"Secondary DNS",
-	"DNS_ERROR_INFO":"Please fill both DNS IP addresses properly"
+	"DNS_ERROR_INFO":"Please fill both DNS IP addresses properly",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"Successfully connected to network",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED":"Please proceed to next step",
+    "WIRELESS_NETWORK_CONNECTION_ERROR":"Failed to connect to network ",
+    "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Please retry or proceed to next step",
+    "WIRELESS_NETWORK_CONNECTION_DEFER":"The unit will connect to network",
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"when first setup will be completed"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts",
@@ -275,5 +281,11 @@
     "UPDATING_PLUGIN":"Updating Plugin",
     "DOWNLOADING_FROM":"Downloading Plugin from ",
     "DOWNLOADING":"Downloading Plugin"
+  },
+  "WIZARD":{
+    "CONGRATULATIONS":"Congratulations",
+    "DEVICE_SUCCESSFULLY_CONFIGURED":"has been configured and it's ready to play",
+    "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!",
+    "RUN_FIRST_CONFIG_WIZARD":"Run first config Wizard"
   }
 }

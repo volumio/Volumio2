@@ -498,16 +498,18 @@ ControllerAlsa.prototype.getDSPDACOptions = function (data) {
 }
 
 ControllerAlsa.prototype.saveAlsaOptions = function (data) {
+    var self = this;
+    var defer = libQ.defer();
+    var uiPush = true;
 
 	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 	if (data.output_device.label != undefined) {
 		data.output_device.label = data.output_device.label.replace('USB: ', '');
 	}
-	//console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
 
-	var self = this;
-
-	var defer = libQ.defer();
+    if(data.disallowPush != undefined && data.disallowPush) {
+        uiPush = false
+	}
 
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
@@ -536,8 +538,10 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 							}
 						]
 					}
-
-					self.commandRouter.broadcastMessage("openModal", responseData);
+					if (uiPush) {
+                        self.commandRouter.broadcastMessage("openModal", responseData);
+					}
+					self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'setWizardAction', {'action':'reboot', 'dacName':data.i2sid.label});
 				}
 				})
 					.fail(function () {
@@ -607,7 +611,9 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
 	respconfig.then(function(config)
 	{
-		self.commandRouter.broadcastMessage('pushUiConfig', config);
+        if (uiPush) {
+            self.commandRouter.broadcastMessage('pushUiConfig', config);
+        }
 	});
 
 	return defer.promise;
@@ -750,7 +756,7 @@ ControllerAlsa.prototype.getLabelForSelectedCard = function (cards, key) {
 			return cards[i].name;
 	}
 
-	return 'No Audio Device Available';
+	return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 };
 
 ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
@@ -799,7 +805,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
             }
         }
 	} catch (e) {
-		var namestring = 'No Audio Device Available';
+		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 		cards.push({id: '', name: namestring});
 	}
     return cards
@@ -857,7 +863,10 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 						mixer = mixer + ',1';
 					}
 				}
-				mixers.push(mixer);
+                if (mixer.indexOf('Internal Clock Validity') < 0) {
+                    mixers.push(mixer);
+                }
+
 			}
 		}
 	} catch (e) {}
@@ -942,7 +951,9 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 						var line2 = line[0].split(',')
 						var mixerspace = line2[0].replace(/'/g, "");
 						var mixer = mixerspace.replace(" ", "");
-						mixers.push(mixer);
+                        if (mixer.indexOf('Internal Clock Validity') < 0) {
+                            mixers.push(mixer);
+                        }
 					}
 				}
 				if (mixers[0] && mixers[0] != 'SoftMaster') {
@@ -1302,28 +1313,40 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 	}
 
 	var outdevicename = self.config.get('outputdevicename');
+    var outputdevice = self.config.get('outputdevice');
 	if (outdevicename) {
 
 	} else {
-		outdevicename = devicesarray[0].name;
+		if  (devicesarray.length > 0) {
+            outdevicename = devicesarray[0].name;
+            outputdevice = devicesarray[0].id;
+		} else {
+            outdevicename = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
+            outputdevice = 'nodev';
+
+		}
+
 	}
 
 	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
-	if (i2sstatus.enabled) {
-		i2sdevice = i2sstatus.name;
-	}
 
 	if(i2soptions.length > 0) {
+        if (i2sstatus.enabled) {
+            i2sdevice = i2sstatus.name;
+        } else {
+            i2sdevice = i2soptions[0].label;
+        }
+
 		var i2sarray = [];
 		for(var i in i2soptions) {
 			var i2scard = {'id': i2soptions[i].value, 'name': i2soptions[i].label}
 			i2sarray.push(i2scard)
 		}
-		var response = {'devices':{'active':outdevicename,'available':devicesarray},'i2s':{'enabled':i2sstatus.enabled,'active':i2sdevice,'available':i2sarray}};
+		var response = {'devices':{'active':{'name':outdevicename, 'id':outputdevice},'available':devicesarray},'i2s':{'enabled':i2sstatus.enabled,'active':i2sdevice,'available':i2sarray}};
 		defer.resolve(response);
 	} else {
-		var response = {'devices':devicesarray}
+		var response = {'devices':{'active':{'name':outdevicename, 'id':outputdevice},'available':devicesarray}};
 		defer.resolve(response);
 	}
 

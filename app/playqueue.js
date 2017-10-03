@@ -130,24 +130,27 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         self.commandRouter.logger.info("ADDING THIS ITEM TO QUEUE: "+JSON.stringify(item));
         var service='mpd';
 
-        if(item.hasOwnProperty('service'))
+        if(item.service)
         {
-            if(item.service!==null)
-                service=item.service;
-        }
+            service=item.service;
 
-        if(item.uri.startsWith('spotify:'))
-        {
-            service='spop';
-        }
+            if(service==='webradio' || item.uri.startsWith('cdda:'))
+            {
+                item.name=item.title;
+                item.albumart="/albumart";
+                promiseArray.push(libQ.resolve(item));
+            }
+            else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
+        } else {
 
-        if(service==='webradio' || item.uri.startsWith('cdda:'))
-        {
-            item.name=item.title;
-            item.albumart="/albumart";
-            promiseArray.push(libQ.resolve(item));
+            //backward compatibility with SPOP plugin
+            if(item.uri.startsWith('spotify:'))
+            {
+                service='spop';
+            }
+
+            promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
         }
-        else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
     }
 
     libQ.all(promiseArray)
