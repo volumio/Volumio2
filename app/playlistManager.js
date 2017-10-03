@@ -203,16 +203,7 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
-        return self.commandRouter.executeOnPlugin('music_service', service,'addToFavourites',{uri:uri,service:service})
-            then(function(value){
-                return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
-            })
-            .fail(function(){
-                return libQ.reject()
-            })
-
-
-
+		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
 	}
 };
 
