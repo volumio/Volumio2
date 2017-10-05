@@ -573,11 +573,9 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 					var newData = [];
 
 					for (var i = 0; i < data.length; i++) {
-						if (!(data[i].service == service &&
-							data[i].uri == uri)) {
+						if (data[i].uri !== uri) {
 							newData.push(data[i]);
 						}
-
 					}
 
 					fs.writeJson(filePath, newData, function (err) {
