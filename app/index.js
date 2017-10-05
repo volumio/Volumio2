@@ -996,27 +996,34 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	var self=this
     this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+	var noConf = {"page": {"label": self.getI18nString('PLUGINS.NO_CONFIGURATION_AVAILABLE')}, "sections": []};
 
 	var defer=libQ.defer()
 
 	var thisPlugin = this.pluginManager.getPlugin(type, name);
-    thisPlugin.getUIConfig(data)
-    .then(function(uiconf){
-        var filePath=__dirname + '/plugins/'+type+'/'+name+'/override.json'
 
-        self.overrideUIConfig(uiconf,filePath)
-        .then(function(){
-            defer.resolve(uiconf)
-        })
-        .fail(function()
-        {
-            defer.reject(new Error());
-        })
-    })
-    .fail(function()
-    {
-        defer.reject(new Error("Error retrieving UIConfig from plugin "+name))
-    })
+	try {
+        thisPlugin.getUIConfig(data)
+            .then(function(uiconf){
+                var filePath=__dirname + '/plugins/'+type+'/'+name+'/override.json'
+
+                self.overrideUIConfig(uiconf,filePath)
+                    .then(function(){
+                        defer.resolve(uiconf)
+                    })
+                    .fail(function()
+                    {
+                        defer.reject(new Error());
+                    })
+            })
+            .fail(function()
+            {
+                defer.reject(new Error("Error retrieving UIConfig from plugin "+name))
+            })
+	} catch(e) {
+        defer.resolve(noConf)
+	}
+
 
 
 	return defer.promise;

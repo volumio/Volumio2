@@ -279,7 +279,8 @@
     "UNINSTALL":"Disinstalla",
     "UPDATING_PLUGIN":"Aggiornamento Plugin",
     "DOWNLOADING_FROM":"Scaricando il Plugin da ",
-    "DOWNLOADING":"Scaricando il Plugin"
+    "DOWNLOADING":"Scaricando il Plugin",
+    "NO_CONFIGURATION_AVAILABLE":"Nessuna configurazione disponibile"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulazioni",
