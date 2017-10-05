@@ -547,6 +547,33 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 				});
 
 			});
+		} else {
+			// handle generally for all music service plugins
+			var result = self.commandRouter.executeOnPlugin('music_service', service, 'getTrackInfo', uri);
+			if (result) {
+				result.then(function (info) {
+					fs.readJson(filePath, function (err, data) {
+						if (err)
+							defer.resolve({ success: false });
+						else {
+							var output = data.concat(info);
+							fs.writeJson(filePath, output, function (err) {
+								if (err) {
+									defer.resolve({ success: false });
+								}
+								else {
+									defer.resolve(info);
+								}
+							})
+						}
+					});
+				}).fail(function (err) {
+					self.logger.error('Failed adding to playlist with error: ' + err);
+					defer.resolve({ success: false });
+				});
+			} else {
+				defer.resolve({ success: false });
+			}
 		}
 	});
 
@@ -571,7 +598,6 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 					defer.resolve({ success: false });
 				else {
 					var newData = [];
-
 					for (var i = 0; i < data.length; i++) {
 						if (data[i].uri !== uri) {
 							newData.push(data[i]);
