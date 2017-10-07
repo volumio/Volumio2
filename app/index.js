@@ -1632,12 +1632,13 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
                 else {
                     var category=replaceKey.slice(0,dotIndex);
                     var key=replaceKey.slice(dotIndex+1);
-
-                    var value=dictionary[category][key];
-                    if(value===undefined)
+					
+                    if(dictionary[category]===undefined || dictionary[category][key]===undefined)
                     {
-                        value=defaultDictionary[category][key];
-                    }
+                        var value=defaultDictionary[category][key];
+                    } else {
+                        var value=dictionary[category][key];
+					}
                     parent[keys[i]]=value;
                 }
 
