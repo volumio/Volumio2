@@ -599,7 +599,7 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 				else {
 					var newData = [];
 					for (var i = 0; i < data.length; i++) {
-						if (data[i].uri !== uri) {
+						if (!(data[i].service == service && data[i].uri == uri)) {
 							newData.push(data[i]);
 						}
 					}
