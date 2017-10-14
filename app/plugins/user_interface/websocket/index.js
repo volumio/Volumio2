@@ -756,7 +756,6 @@ function InterfaceWebUI(context) {
       connWebSocket.on('removeFromPlaylist', function (data) {
         var selfConnWebSocket = this;
         var playlistname = data.name;
-        console.log(data);
         var returnedData = self.commandRouter.playListManager.removeFromPlaylist(data.name, data.service, data.uri);
         returnedData.then(function (name) {
           var response = self.musicLibrary.executeBrowseSource('playlists/' + playlistname);
