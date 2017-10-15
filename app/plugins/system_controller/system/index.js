@@ -611,3 +611,17 @@ ControllerSystem.prototype.getAdditionalConf = function (type, controller, data,
     }
     return setting
 };
+
+ControllerSystem.prototype.getShowWizard = function () {
+    var self = this;
+
+    var show = self.config.get('show_wizard', false);
+
+    return  show
+};
+
+ControllerSystem.prototype.setShowWizard = function (data) {
+    var self = this;
+
+    self.config.set('show_wizard', data);
+};
