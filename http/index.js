@@ -27,7 +27,7 @@ var allowCrossDomain = function(req, res, next) {
 
     // intercept OPTIONS method
     if ('OPTIONS' == req.method) {
-        res.send(200);
+        res.sendStatus(200);
     }
     else {
         next();
@@ -114,7 +114,7 @@ app.route('/plugin-upload')
                 var socket= io.connect('http://localhost:3000');
                 var pluginurl= 'http://127.0.0.1:3000/plugin-serve/' + uniquename;
                 socket.emit('installPlugin', { url:pluginurl});
-                res.status(201);
+                res.sendStatus(200);
                 //res.redirect('/');
             });
         });

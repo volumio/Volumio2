@@ -1044,6 +1044,7 @@ PluginManager.prototype.pluginFolderCleanup = function () {
 	}
 
 	self.logger.info("Plugin folders cleanup completed");
+	defer.resolve();
 	return defer.promise;
 
 };

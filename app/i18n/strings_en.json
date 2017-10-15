@@ -280,11 +280,13 @@
     "UNINSTALL":"Uninstall",
     "UPDATING_PLUGIN":"Updating Plugin",
     "DOWNLOADING_FROM":"Downloading Plugin from ",
-    "DOWNLOADING":"Downloading Plugin"
+    "DOWNLOADING":"Downloading Plugin",
+    "NO_CONFIGURATION_AVAILABLE":"No configuration available"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",
     "DEVICE_SUCCESSFULLY_CONFIGURED":"has been configured and it's ready to play",
-    "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!"
+    "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!",
+    "RUN_FIRST_CONFIG_WIZARD":"Run first config Wizard"
   }
 }

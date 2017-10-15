@@ -200,10 +200,12 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
     var player_name = data['player_name'];
     var hostname = data['player_name'].split(" ").join("-");
-    var startup_sound = data['startup_sound'];
+    if (data['startup_sound'] != undefined) {
+        self.config.set('startupSound', data['startup_sound']);
+	}
 
     self.config.set('playerName', player_name);
-    self.config.set('startupSound', startup_sound);
+
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 	self.setHostname(player_name);
@@ -608,4 +610,18 @@ ControllerSystem.prototype.getAdditionalConf = function (type, controller, data,
         setting = def;
     }
     return setting
+};
+
+ControllerSystem.prototype.getShowWizard = function () {
+    var self = this;
+
+    var show = self.config.get('show_wizard', false);
+
+    return  show
+};
+
+ControllerSystem.prototype.setShowWizard = function (data) {
+    var self = this;
+
+    self.config.set('show_wizard', data);
 };
