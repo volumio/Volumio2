@@ -996,27 +996,34 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
 	var self=this
     this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+	var noConf = {"page": {"label": self.getI18nString('PLUGINS.NO_CONFIGURATION_AVAILABLE')}, "sections": []};
 
 	var defer=libQ.defer()
 
 	var thisPlugin = this.pluginManager.getPlugin(type, name);
-    thisPlugin.getUIConfig(data)
-    .then(function(uiconf){
-        var filePath=__dirname + '/plugins/'+type+'/'+name+'/override.json'
 
-        self.overrideUIConfig(uiconf,filePath)
-        .then(function(){
-            defer.resolve(uiconf)
-        })
-        .fail(function()
-        {
-            defer.reject(new Error());
-        })
-    })
-    .fail(function()
-    {
-        defer.reject(new Error("Error retrieving UIConfig from plugin "+name))
-    })
+	try {
+        thisPlugin.getUIConfig(data)
+            .then(function(uiconf){
+                var filePath=__dirname + '/plugins/'+type+'/'+name+'/override.json'
+
+                self.overrideUIConfig(uiconf,filePath)
+                    .then(function(){
+                        defer.resolve(uiconf)
+                    })
+                    .fail(function()
+                    {
+                        defer.reject(new Error());
+                    })
+            })
+            .fail(function()
+            {
+                defer.reject(new Error("Error retrieving UIConfig from plugin "+name))
+            })
+	} catch(e) {
+        defer.resolve(noConf)
+	}
+
 
 
 	return defer.promise;
@@ -1625,12 +1632,13 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
                 else {
                     var category=replaceKey.slice(0,dotIndex);
                     var key=replaceKey.slice(dotIndex+1);
-
-                    var value=dictionary[category][key];
-                    if(value===undefined)
+					
+                    if(dictionary[category]===undefined || dictionary[category][key]===undefined)
                     {
-                        value=defaultDictionary[category][key];
-                    }
+                        var value=defaultDictionary[category][key];
+                    } else {
+                        var value=dictionary[category][key];
+					}
                     parent[keys[i]]=value;
                 }
 

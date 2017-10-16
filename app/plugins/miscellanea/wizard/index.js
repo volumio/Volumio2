@@ -129,7 +129,7 @@ volumioWizard.prototype.getConfigParam = function (key) {
 
 volumioWizard.prototype.getShowWizard = function () {
     var self = this;
-    var show = self.config.get('show_wizard', true);
+    var show = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getShowWizard', '');
 
     return  show
 };
@@ -258,7 +258,7 @@ volumioWizard.prototype.setSkip = function () {
     var self = this;
 
     self.logger.info('Wizard skipped')
-    self.config.set('show_wizard', false);
+    self.commandRouter.executeOnPlugin('system_controller', 'system', 'setShowWizard', false);
 };
 
 volumioWizard.prototype.setReboot = function (data) {
@@ -273,7 +273,7 @@ volumioWizard.prototype.setReboot = function (data) {
 volumioWizard.prototype.setCloseWizard = function () {
     var self = this;
 
-    self.config.set('show_wizard', false);
+    self.commandRouter.executeOnPlugin('system_controller', 'system', 'setShowWizard', false);
     self.logger.info('Wizard terminated Successfully');
     if (I2Sreboot) {
         self.logger.info('Player Reboot required after I2S DAC has been enabled in wizard');

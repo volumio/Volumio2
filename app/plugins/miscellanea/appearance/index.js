@@ -384,7 +384,7 @@ volumioAppearance.prototype.selectRandomBacground = function(){
     var backgrounds = self.getBackgrounds();
     if (backgrounds != undefined) {
         backgrounds.then(function (result) {
-            var max = result.available.length;
+            var max = result.available.length-1;
             var random = Math.floor(Math.random() * (max - 0 + 1) + 0);
             var randomBackground = result.available[random];
             var setting = {'name':randomBackground.name, 'path':randomBackground.path}
