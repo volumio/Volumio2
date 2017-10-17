@@ -1012,7 +1012,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
             
             for(var callback of self.registeredCallbacks)
             {
-               var data = self.commandRouter.executeOnPlugin(callback[0], callback[1], callback[2]);
+               var data = self.commandRouter.executeOnPlugin(callback.type, callback.plugin, callback.data);
                conf12 += data;  
             }
 
