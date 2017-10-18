@@ -33,7 +33,8 @@ function ControllerMpd(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
-	this.config = new (require('v-conf'))();
+    this.config = new (require('v-conf'))();
+    this.registeredCallbacks = [];
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -1006,7 +1007,13 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                 var conf12 = conf11.replace('"${ffmpeg}"', 'decoder { ' + os.EOL + 'plugin "ffmpeg"'  + os.EOL + 'enabled "yes"'  + os.EOL + 'analyzeduration "1000000000"'  + os.EOL + 'probesize "1000000000"' + os.EOL + '}' + os.EOL);
 			} else {
                 var conf12 = conf11.replace('"${ffmpeg}"', " ");
-			}
+            }
+            
+            for(var callback of self.registeredCallbacks)
+            {
+               var data = self.commandRouter.executeOnPlugin(callback.type, callback.plugin, callback.data);
+               conf12 += data;  
+            }
 
             fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
                 if (err) return console.log(err);
@@ -3729,5 +3736,11 @@ ControllerMpd.prototype.rebuildAlbumCache=function(){
 	self.logger.info('Rebuild Album cache')
     memoryCache.del('cacheAlbumList', function(err) {});
     self.listAlbums();
+}
+
+ControllerMpd.prototype.registerConfigCallback = function(callback){
+    var self = this;
+    self.logger.info('register callback: ' + JSON.stringify(callback,null,4));
+    self.registeredCallbacks.push(callback);
 }
 
