@@ -3022,6 +3022,16 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 	}
     var response={
         "navigation": {
+        	"info": {
+        'uri': 'music-library/',
+            'service': 'mpd',
+        'title': 'title',
+        'artist': 'artist',
+        'album': 'album',
+        'type': 'song',
+        'albumart': 'albumart',
+        'duration': 'time'
+			},
             "lists": [
                 {
                     "availableListViews": [
@@ -3039,9 +3049,10 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
     };
 
     var cmd = libMpd.cmd;
+    var duration = 0;
+    var year = '';
 
 	self.clientMpd.sendCommand(cmd(findstring , []), function (err, msg) {
-
         if (msg) {
             var path;
             var name;
@@ -3065,6 +3076,8 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 					}
                     var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                    duration = duration + parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                    year = self.searchFor(lines, i + 1, 'Date:');
 
                     if (title) {
                         title = title;
@@ -3087,7 +3100,30 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 
                 }
 
+
+
             }
+            if (duration != undefined && duration > 0) {
+            	var durationminutes = Math.floor(duration/60);
+            	var durationseconds = duration - (durationminutes*60);
+            	if (durationseconds < 10 ) {
+            		durationseconds = '0'+durationseconds;
+				}
+				duration = durationminutes + ':' + durationseconds;
+			}
+            duration =
+            response.navigation.info = {
+                uri: uri,
+                service: 'mpd',
+                artist: artist,
+                album: album,
+                albumart: albumart,
+                year: year,
+                type: 'album',
+                duration: duration
+            };
+
+
         }
         else self.logger.info(err);
 
