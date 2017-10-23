@@ -82,6 +82,10 @@ function CoreCommandRouter(server) {
     this.pushConsoleMessage('BOOT COMPLETED');
 
     this.startupSound();
+
+
+    	this.closeModals();
+
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -1806,4 +1810,10 @@ CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
         }
     });
     return defer.promise;
+}
+
+CoreCommandRouter.prototype.closeModals = function () {
+    var self=this;
+
+    return self.broadcastMessage('closeModal', '');
 }

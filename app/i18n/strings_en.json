@@ -177,7 +177,9 @@
 	"CONTINUE":"Continue",
 	"SETTINGS_SAVED_SUCCESSFULLY":"Settings saved successfully",
 	"SETTINGS_SAVE_ERROR":"Error in saving settings",
-	"ERROR":"Error"
+	"ERROR":"Error",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Your music is being scanned and the icon on bottom left will keep spinning until all your library has been successfully indexed. Since the system might be less responsive during this operation, please don't use the system while music is being indexed ",
+    "GOT_IT":"Got it"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
