@@ -94,7 +94,6 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
 	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update'+data);
 
 	if (data === true) {
-		console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
         var responseData = {
             title: self.coreCommand.getI18nString('COMMON.SCAN_DB'),
             message: self.coreCommand.getI18nString('COMMON.UPDATING_MUSIC_DB_WAIT_MESSAGE'),
