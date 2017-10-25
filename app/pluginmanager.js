@@ -434,26 +434,101 @@ PluginManager.prototype.getPluginsMatrix = function () {
 
 PluginManager.prototype.onVolumioShutdown = function () {
 	var self = this;
+	var defer_onShutdownList=[];
+
+	self.logger.info("___________ PLUGINS: Run Shutdown Tasks ___________");
+
+/*
+	each plugin's onVolumioShutdown() is launched following plugins.json order.
+	Note: there is no resolution strategy: each plugin completes
+	at it's own pace, and in whatever order.
+	Should completion order matter, a new promise strategy should be
+	implemented below (chain by start order, or else...)
+*/
 
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
-			var plugin = value.instance;
-			if (plugin.onVolumioShutdown !== undefined)
-				plugin.onVolumioShutdown();
+			var plugin_defer = self.onVolumioShutdownPlugin(value.category,value.name);
+			defer_onShutdownList.push(plugin_defer);
+			self.logger.info(value.category + "_" + value.name + " added to plugin onShutdown list");
 		}
 	});
+
+	return  libQ.all(defer_onShutdownList);
+};
+
+PluginManager.prototype.onVolumioShutdownPlugin = function (category, name) {
+	var self = this;
+	var defer=libQ.defer();
+
+	var plugin = self.getPlugin(category, name);
+
+	if(plugin!==undefined)
+	{
+		if(plugin.onVolumioShutdown!==undefined)
+		{
+			self.logger.info("PLUGIN onShutdown : "+name);
+			var myPromise = plugin.onVolumioShutdown();
+
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onVolumioShutdown(): push an error message
+				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Shutdown. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioShutdown: please update!");
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+		
+			return myPromise;
+		}
+	}
+
+	return defer.resolve();
 };
 
 PluginManager.prototype.onVolumioReboot = function () {
 	var self = this;
+	var defer_onRebootList=[];
+	self.logger.info("___________ PLUGINS: Run onVolumioReboot Tasks ___________");
+/*
+	each plugin's onVolumioReboot() is launched following plugins.json order.
+	Note: there is no resolution strategy: each plugin completes
+	at it's own pace, and in whatever order.
+	Should completion order matter, a new promise strategy should be
+	implemented below (chain by start order, or else...)
+*/
 
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
-			var plugin = value.instance;
-			if (plugin.onVolumioReboot !== undefined)
-				plugin.onVolumioReboot();
+			var plugin_defer = self.onVolumioRebootPlugin(value.category,value.name);
+			defer_onRebootList.push(plugin_defer);
+			self.logger.info(value.category + "_" + value.name + " added to plugin onReboot list");
 		}
 	});
+
+	return libQ.all(defer_onRebootList);
+};
+
+PluginManager.prototype.onVolumioRebootPlugin = function (category, name) {
+	var self = this;
+	var defer=libQ.defer();
+	var plugin = self.getPlugin(category, name);
+
+	if(plugin!==undefined)
+	{
+		if(plugin.onVolumioReboot!==undefined)
+		{
+			self.logger.info("PLUGIN onReboot : "+name);
+			var myPromise = plugin.onVolumioReboot();
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onVolumioReboot(): push an error message
+				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Reboot. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioReboot: please update!");
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+			
+			return myPromise;
+		}
+	}
+	return defer.resolve();
 };
 
 PluginManager.prototype.getPlugin = function (category, name) {
