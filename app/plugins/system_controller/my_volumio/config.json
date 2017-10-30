@@ -6,5 +6,9 @@
   "password":{
     "type":"string",
     "value":""
+  },
+  "token":{
+    "type":"string",
+    "value":""
   }
 }

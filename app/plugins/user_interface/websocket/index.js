@@ -1786,6 +1786,56 @@ function InterfaceWebUI(context) {
                 }
             });
 
+            connWebSocket.on('getMyVolumioStatus', function () {
+                var selfConnWebSocket = this;
+
+                var remove = self.commandRouter.getMyVolumioStatus();
+
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('getMyVolumioToken', function (data) {
+                var selfConnWebSocket = this;
+
+                var remove = self.commandRouter.getMyVolumioToken(data);
+
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushMyVolumioToken', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('setMyVolumioToken', function (data) {
+                var selfConnWebSocket = this;
+
+                var token = self.commandRouter.setMyVolumioToken(data);
+
+                if (token != undefined) {
+                    token.then(function (result) {
+                        self.commandRouter.broadcastMessage('pushMyVolumioToken', {"token":result});
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('myVolumioLogout', function () {
+                var selfConnWebSocket = this;
+
+                self.commandRouter.broadcastMessage('pushMyVolumioLogout', '');
+
+                return self.commandRouter.myVolumioLogout();
+            });
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
