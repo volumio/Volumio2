@@ -28,7 +28,7 @@ ControllerWebradio.prototype.getConfigurationFiles = function()
 }
 
 ControllerWebradio.prototype.addToBrowseSources = function () {
-	var data = {name: 'Webradio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio'};
+	var data = {albumart: '/albumart?sourceicon=music_service/webradio/icon.svg', icon: 'fa fa-microphone', name: 'Webradio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio'};
 	this.commandRouter.volumioAddToBrowseSources(data);
 };
 
@@ -757,7 +757,7 @@ ControllerWebradio.prototype.search = function (query) {
 
         var request= unirest.get(uri);
 
-        request.timeout(1000);
+        request.timeout(1500);
         request.end(function(xml)
             {
                 if(xml.error)

@@ -5,7 +5,7 @@ music_directory		"/var/lib/mpd/music"
 playlist_directory		"/var/lib/mpd/playlists"
 db_file			"/var/lib/mpd/tag_cache"
 #log_file			"/var/log/mpd/mpd.log"
-pid_file			"/var/run/mpd/pid"
+#pid_file			"/var/run/mpd/pid"
 #state_file			"/var/lib/mpd/state"
 #sticker_file                   "/var/lib/mpd/sticker.sql"
 ###############################################################################
@@ -36,15 +36,31 @@ input {
 }
 ###############################################################################
 
-	# Audio Output ################################################################
+# Decoder ################################################################
+
+"${ffmpeg}"
+
+"${sacdiso}"
+
+###############################################################################
+
+# Audio Output ################################################################
+
+${sox}
+
 audio_output {
 		type		"alsa"
 		name		"alsa"
 		device		"${device}"
 		dop			"${dop}"
 		${mixer}
+		${format}
 
 }
+
+
+
+
 
 audio_output {
     type            "fifo"
@@ -54,8 +70,6 @@ audio_output {
     format          "44100:16:2"
 }
 
-
-samplerate_converter "soxr very high"
 #replaygain			"album"
 #replaygain_preamp		"0"
 volume_normalization		"${volume_normalization}"

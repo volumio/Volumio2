@@ -10,7 +10,7 @@ var busboy = require('connect-busboy');
 var path = require('path');
 var fs = require('fs-extra');
 var io=require('socket.io-client');
-
+var libUUID = require('node-uuid');
 
 var app = express();
 var dev = express();
@@ -27,7 +27,7 @@ var allowCrossDomain = function(req, res, next) {
 
     // intercept OPTIONS method
     if ('OPTIONS' == req.method) {
-        res.send(200);
+        res.sendStatus(200);
     }
     else {
         next();
@@ -98,21 +98,23 @@ app.route('/plugin-upload')
         req.pipe(req.busboy);
         req.busboy.on('file', function (fieldname, file, filename) {
             console.log("Uploading: " + filename);
+            var uniquename = libUUID.v4() + '.zip';
+            console.log("Created safe filename as '"+uniquename+"'");
 
             try {
                 fs.ensureDirSync(plugindir)
             } catch (err) {
-                console.log('Cannot Create Plugin DIR ')
+                console.log('Cannot Create Plugin Dir ' + plugindir)
             }
             //Path where image will be uploaded
-            fstream = fs.createWriteStream('/tmp/plugins/' + filename);
+            fstream = fs.createWriteStream(plugindir + '/' + uniquename);
             file.pipe(fstream);
             fstream.on('close', function () {
-                console.log("Upload Finished of " + filename);
+                console.log("Upload Finished of " + filename + " as " + uniquename);
                 var socket= io.connect('http://localhost:3000');
-                var pluginurl= 'http://127.0.0.1:3000/plugin-serve/'+filename.replace(/'|\\/g, '\\$&');;
+                var pluginurl= 'http://127.0.0.1:3000/plugin-serve/' + uniquename;
                 socket.emit('installPlugin', { url:pluginurl});
-                res.status(201);
+                res.sendStatus(200);
                 //res.redirect('/');
             });
         });

@@ -23,7 +23,17 @@ function InterfaceWebUI(context) {
 	/** On Client Connection, listen for various types of clients requests */
 	self.libSocketIO.on('connection', function (connWebSocket) {
 		try {
+            connWebSocket.on('getDeviceInfo', function () {
+                var uuid=self.commandRouter.sharedVars.get('system.uuid');
+                var name=self.commandRouter.sharedVars.get('system.name');
 
+                var data={
+                    "uuid":uuid,
+                    "name":name
+                };
+                connWebSocket.emit('pushDeviceInfo', data);
+
+            });
 
 			/** Request Volumio State
 			 * It returns an array definining the Playback state, Volume and other amenities
@@ -116,6 +126,32 @@ function InterfaceWebUI(context) {
 				});
 			});
 
+            connWebSocket.on('replaceAndPlayCue', function (data) {
+                var timeStart = Date.now();
+
+                if (data.service == undefined || data.service == 'mpd') {
+                    var uri = data.uri;
+                    var arr = uri.split("/");
+                    arr.shift();
+                    var str = arr.join('/');
+                }
+                else str = data.uri;
+
+                self.logStart('Client requests Volumio Clear Queue')
+                    .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+					.then(function () {
+						self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
+                        'uri': str,
+                        'number': data.number
+                    });
+                })
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+
+            });
+
 			connWebSocket.on('addPlay', function (data) {
 
                 self.commandRouter.addQueueItems(data)
@@ -159,7 +195,6 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('addPlayCue', function (data) {
-
 				if (data.service == undefined || data.service == 'mpd') {
 					var uri = data.uri;
 					var arr = uri.split("/");
@@ -167,7 +202,6 @@ function InterfaceWebUI(context) {
 					var str = arr.join('/');
 				}
 				else str = data.uri;
-
 
 				//TODO add proper service handler
 				var timeStart = Date.now();
@@ -296,6 +330,16 @@ function InterfaceWebUI(context) {
 					});
 			});
 
+            connWebSocket.on('toggle', function () {
+                var timeStart = Date.now();
+                self.logStart('Client requests Volumio toggle')
+                    .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        return self.logDone(timeStart);
+                    });
+            });
+
 			connWebSocket.on('stop', function () {
 				var timeStart = Date.now();
 				self.logStart('Client requests Volumio stop')
@@ -352,9 +396,9 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('setRepeat', function (data) {
 				//TODO add proper service handler
 				var timeStart = Date.now();
-				self.logStart('Client requests Volumio Repeat ' + data.value)
+				self.logStart('Client requests Volumio Repeat ' + data.value+' single '+data.repeatSingle)
 					.then(function () {
-                        return self.commandRouter.volumioRepeat(data.value);
+                        return self.commandRouter.volumioRepeat(data.value,data.repeatSingle);
 					})
 					.fail(self.pushError.bind(self))
 					.done(function () {
@@ -1011,55 +1055,28 @@ function InterfaceWebUI(context) {
 
 			//Updater
 			connWebSocket.on('updateCheck', function () {
-				var selfConnWebSocket = this;
 
-				self.logger.info("Sending updateCheck to server");
+                self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				};
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('updateCheck', 'search-for-upgrade');
-
-				client.on('updateReady', function (message) {
-					self.logger.info("Update Ready: " + message);
-					selfConnWebSocket.emit('updateReady', message);
-				});
-
-				client.on('updateCheck-error', function (message) {
-					self.logger.info("Update Check error: " + message);
-					selfConnWebSocket.emit('updateCheck-error', message);
-				});
 			});
+
+            connWebSocket.on('ClientUpdateReady', function (message) {
+                var selfConnWebSocket = this;
+
+                var updateMessage = JSON.parse(message)
+				self.logger.info("Update Ready: " + updateMessage);
+                self.commandRouter.broadcastMessage('updateReady', updateMessage);
+            });
 
 
 			connWebSocket.on('update', function (data) {
 				var selfConnWebSocket = this;
 				self.logger.info("Update: " + data);
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('update', data);
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+                self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
+                var started = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': 'Starting Software Update'};
+                selfConnWebSocket.emit('updateProgress', started);
+                self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
 			});
 
 			connWebSocket.on('deleteUserData', function () {
@@ -1073,28 +1090,8 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				self.logger.info("Command Factory Reset Received");
 
-				var socketURL = 'http://localhost:3005';
-				var options = {
-					transports: ['websocket'],
-					'force new connection': true
-				}
-
-				var io = require('socket.io-client');
-				var client = io.connect(socketURL, options);
-				client.emit('factoryReset', '');
-
-				client.on('updateProgress', function (message) {
-					self.logger.info("Update Progress: " + message);
-					selfConnWebSocket.emit('updateProgress', message);
-				});
-
-				client.on('updateDone', function (message) {
-					self.logger.info("Update Done: " + message);
-					selfConnWebSocket.emit('updateDone', message);
-				});
+				self.commandRouter.broadcastMessage('ClientFactoryReset', {value:"now"});
 			});
-
-			//factory reset
 
 			connWebSocket.on('getSystemVersion', function () {
 				var selfConnWebSocket = this;
@@ -1267,8 +1264,7 @@ function InterfaceWebUI(context) {
 						var installed = self.commandRouter.getInstalledPlugins();
 						if (installed != undefined) {
 							installed.then(function (installedPLugins) {
-								self.logger.info(JSON.stringify(installedPLugins));
-								selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
+								self.broadcastMessage('pushInstalledPlugins',installedPLugins);
 							});
 						}
 						var available = self.commandRouter.getAvailablePlugins();
@@ -1284,8 +1280,6 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('updatePlugin', function (data) {
 				var selfConnWebSocket = this;
-
-				console.log(data);
 
 				var returnedData = self.commandRouter.updatePlugin(data);
 
@@ -1640,19 +1634,40 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('getWizard', function () {
 				var selfConnWebSocket = this;
 
-
-				selfConnWebSocket.emit('pushWizard', {"openWizard": true});
-
-
+                var showWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getShowWizard', '');
+				selfConnWebSocket.emit('pushWizard', {"openWizard": showWizard});
 			});
+
+            connWebSocket.on('runFirstConfigWizard', function () {
+                var selfConnWebSocket = this;
+
+                selfConnWebSocket.emit('pushWizard', {"openWizard": true});
+            });
 
 			connWebSocket.on('getWizardSteps', function () {
 				var selfConnWebSocket = this;
 
-
-				var steps = ["language","name","output","network","music","follow","done"];
-				selfConnWebSocket.emit('pushWizardSteps', steps);
+				var wizardSteps = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardSteps', '');
+				selfConnWebSocket.emit('pushWizardSteps', wizardSteps);
 			});
+
+            connWebSocket.on('setWizardAction', function (data) {
+                var selfConnWebSocket = this;
+
+               return self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'setWizardAction', data);
+            });
+
+            connWebSocket.on('getWizardUiConfig', function (data) {
+                var selfConnWebSocket = this;
+
+                var wizardConfig = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardConfig', data);
+
+                if (wizardConfig != undefined) {
+                    wizardConfig.then(function (data) {
+                        selfConnWebSocket.emit('pushUiConfig', data);
+                    });
+                }
+            });
 
 			connWebSocket.on('getAvailableLanguages', function () {
 				var selfConnWebSocket = this;
@@ -1669,13 +1684,19 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setLanguage', function (data) {
 				//var self = this;
+				var disallowReload = false;
 				var value = data.defaultLanguage.code;
 				var label = data.defaultLanguage.language;
-				var languagedata = {'language':{'value':value,'label':label}}
+				if (data.disallowReload != undefined) {
+                    disallowReload = data.disallowReload;
+				}
+				var languagedata = {'language':{'value':value,'label':label}, 'disallowReload': disallowReload}
 
 				//var lang = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
 				var name = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setLanguage', languagedata);
 			});
+
+
 
 			connWebSocket.on('getDeviceName', function () {
 				var selfConnWebSocket = this;
@@ -1704,16 +1725,20 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('setOutputDevices', function (data) {
 				var selfConnWebSocket = this;
+				data.disallowPush = true;
 
-				var name = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
+                return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', data);
 			});
 
 
 			connWebSocket.on('getDonePage', function () {
 				var selfConnWebSocket = this;
 
-				var contributionsarray =  {"donationAmount": 20, "customAmount": 150, "amounts": [10, 20, 50, 100]};
-				var laststep =  {"title":"Ready to roll","message":"Your Volumio Audiophile Music Player is ready. Please consider donating.","donation":true, "donationAmount": contributionsarray};
+
+				var donation = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDonation', '');
+				var contributionsarray =  self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDonationsArray', '');
+				var lastStepMessage = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getDoneMessage', '');
+				var laststep = {"congratulations":lastStepMessage.congratulations, "title":lastStepMessage.title,"message":lastStepMessage.message,"donation":donation, "donationAmount": contributionsarray};
 
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
@@ -1733,9 +1758,33 @@ function InterfaceWebUI(context) {
 
 			});
 
+            connWebSocket.on('connectWirelessNetworkWizard', function (data) {
+                var selfConnWebSocket = this;
+
+                var connectWifiWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'connectWirelessNetwork', data);
+
+                if (connectWifiWizard != undefined) {
+                    connectWifiWizard.then(function (data) {
+                        selfConnWebSocket.emit('pushWizardWirelessConnResults', data);
+                    });
+                }
 
 
+            });
 
+            connWebSocket.on('safeRemoveDrive', function (data) {
+                var selfConnWebSocket = this;
+
+                var remove = self.commandRouter.safeRemoveDrive(data);
+
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
 
 		}
 		catch (ex) {

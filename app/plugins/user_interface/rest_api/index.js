@@ -47,11 +47,10 @@ function interfaceApi(context) {
             var response = {'Error': "Error: impossible to restore given data"};
 
             try{
-                self.commandRouter.restorePlaylist({'type': req.body.type, 'path': req.body.path,
-                    'backup': JSON.parse(req.body.data)});
+                self.commandRouter.restorePlaylist({'type': req.body.type, 'backup': JSON.parse(req.body.data)});
                 res.json(success);
             }catch(e){
-                res.json(response)
+                res.json(response);
             }
         });
 
@@ -91,6 +90,15 @@ function interfaceApi(context) {
                                 res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                             });
                     }
+                }
+                else if (req.query.cmd == "toggle"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio toggle')
+                        .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
                 }
                 else if (req.query.cmd == "stop"){
                     var timeStart = Date.now();
@@ -139,12 +147,127 @@ function interfaceApi(context) {
                 }
                 else if(req.query.cmd == "volume"){
                     var VolumeInteger = req.query.volume;
-                    if (VolumeInteger != "mute" && VolumeInteger != "unmute")
-                        var VolumeInteger = parseInt(VolumeInteger);
+                    if (VolumeInteger == "plus") {
+                        VolumeInteger = '+';
+                    } else if (VolumeInteger == "minus"){
+                        VolumeInteger = '-';
+                    }
+                    else if (VolumeInteger == "mute" || VolumeInteger == "unmute" || VolumeInteger == "toggle") {
+
+                    } else {
+                        VolumeInteger = parseInt(VolumeInteger);
+                    }
+
                     var timeStart = Date.now();
                     self.logStart('Client requests Volume ' + VolumeInteger)
                         .then(function () {
-                            return self.commandRouter.volumiosetvolume.call(self.commandRouter, VolumeInteger);
+                            return self.commandRouter.volumiosetvolume.call(self.commandRouter,
+                                VolumeInteger);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "playplaylist"){
+                    var playlistName = req.query.name;
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Volumio Play Playlist '+playlistName)
+                        .then(function () {
+                            return self.commandRouter.playPlaylist.call(self.commandRouter,
+                                playlistName);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd=="seek"){
+                    var position = req.query.position;
+                    if(position == "plus") {
+                        position = '+';
+                    }
+                    else if (position == "minus"){
+                        position = '-';
+                    }
+                    else {
+                        position = parseInt(position);
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Position ' + position)
+                        .then(function () {
+                            return self.commandRouter.volumioSeek(position);
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "repeat"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Repeat ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioRepeat(value, false);
+                            }
+                            else{
+                                return self.commandRouter.repeatToggle();
+                            }
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "random"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Random ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioRandom(value);
+                            }
+                            else{
+                                return self.commandRouter.randomToggle();
+                            }
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "startAirplay"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Start Airplay metadata parsing')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'startAirplayMeta', '');
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "stopAirplay"){
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Start Airplay metadata parsing')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'airPlayStop', '');
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {
@@ -173,6 +296,24 @@ function interfaceApi(context) {
                 res.json(response);
             else
                 res.json(notFound);
+        });
+
+    api.route('/listplaylists')
+        .get(function (req, res) {
+
+            var response = self.commandRouter.playListManager.listPlaylist();
+
+            var response = self.commandRouter.playListManager.listPlaylist();
+            response.then(function (data) {
+                if (data != undefined) {
+                    res.json(data);
+                } else {
+                    res.json(notFound);
+                }
+            });
+
+
+
         });
 
 }

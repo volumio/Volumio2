@@ -124,10 +124,10 @@ ControllerNetwork.prototype.getUIConfig = function () {
 	uiconf.sections[2].content[2].value = config.get('wirelessip');
 
 	//static netmask
-	uiconf.sections[2].content[3].value = config.get('wirelessnetmask');
+	uiconf.sections[2].content[3].value = config.get('wirelessnetmask', '255.255.255.0');
 
 	//static gateway
-	uiconf.sections[2].content[4].value = config.get('wirelessgateway');
+	uiconf.sections[2].content[4].value = config.get('wirelessgateway', '192.168.1.1');
 
 			if (config.get('enable_hotspot') == undefined) {
 				uiconf.sections[4].content[0].value = true;
@@ -162,6 +162,24 @@ ControllerNetwork.prototype.getUIConfig = function () {
 			} else {
 				uiconf.sections[4].content[4].value.value = Number(config.get('hotspot_channel'));
 				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
+			}
+
+			if (config.get('enable_custom_dns') == undefined) {
+				uiconf.sections[5].content[0].value = false;
+			} else {
+				uiconf.sections[5].content[0].value = config.get('enable_custom_dns');
+			}
+			
+			if (config.get('primary_dns') == undefined) {
+				uiconf.sections[5].content[1].value = '208.67.222.222';
+			} else {
+				uiconf.sections[5].content[1].value = config.get('primary_dns');
+			}
+
+			if (config.get('secondary_dns') == undefined) {
+				uiconf.sections[5].content[2].value = '208.67.220.220';
+			} else {
+				uiconf.sections[5].content[2].value = config.get('secondary_dns');
 			}
 
 			//console.log(uiconf);
@@ -362,40 +380,58 @@ ControllerNetwork.prototype.saveWiredNet = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
+	if ((data.confirm) || (data.dhcp != false)) {
+		var dhcp = data['dhcp'];
+		var static_ip = data['static_ip'];
+		var static_netmask = data['static_netmask'];
+		var static_gateway = data['static_gateway'];
 
-	var dhcp = data['dhcp'];
-	var static_ip = data['static_ip'];
-	var static_netmask = data['static_netmask'];
-	var static_gateway = data['static_gateway'];
+		//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
 
-	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
-
-	config.set('dhcp', dhcp);
-	config.set('ethip', static_ip);
-	config.set('ethnetmask', static_netmask);
-	config.set('ethgateway', static_gateway);
-
-
-	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+		config.set('dhcp', dhcp);
+		config.set('ethip', static_ip);
+		config.set('ethnetmask', static_netmask);
+		config.set('ethgateway', static_gateway);
 
 
-	defer.resolve({});
-	return defer.promise;
+		self.rebuildNetworkConfig();
+		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+
+
+		defer.resolve({});
+		return defer.promise;
+	} else {
+		var responseData = {
+			title: self.commandRouter.getI18nString('NETWORK.STATIC_IP'),
+			message: self.commandRouter.getI18nString('NETWORK.STATIC_IP_WARNING'),
+			size: 'lg',
+			buttons: [
+				{
+					name: self.commandRouter.getI18nString('COMMON.CANCEL'),
+					class: 'btn btn-cancel',
+					emit:'',
+					payload:''
+				},
+				{
+					name: self.commandRouter.getI18nString('COMMON.CONTINUE'),
+					class: 'btn btn-info',
+					emit:'callMethod',
+					payload:{'endpoint':'system_controller/network','method':'saveWiredNet','data':{'confirm':true,'dhcp':data.dhcp,'static_ip':data.static_ip,'static_netmask':data.static_netmask,'static_gateway':data.static_gateway}}
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
+	}
+
+
 };
 
 ControllerNetwork.prototype.saveWirelessNet = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
-
 	var wireless_enabled = data['wireless_enabled'];
-	var dhcp = data['wireless_dhcp'];
-	var static_ip = data['wireless_static_ip'];
-	var static_netmask = data['wireless_static_netmask'];
-	var static_gateway = data['wireless_static_gateway'];
-
-	//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
 
 	var wireless_enabled_setting = config.get('wireless_enabled');
 	if (wireless_enabled_setting == undefined) {
@@ -404,25 +440,60 @@ ControllerNetwork.prototype.saveWirelessNet = function (data) {
 		config.set('wireless_enabled', wireless_enabled);
 	}
 
-	var wirelessdhcp = config.get('wirelessdhcp');
-	if (wirelessdhcp == undefined) {
-		config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
-		config.addConfigValue('wirelessip', 'string', static_ip);
-		config.addConfigValue('wirelessnetmask', 'string', static_netmask);
-		config.addConfigValue('wirelessgateway', 'string', static_gateway);
+	var dhcp = data['wireless_dhcp'];
+	var static_ip = data['wireless_static_ip'];
+	var static_netmask = data['wireless_static_netmask'];
+	var static_gateway = data['wireless_static_gateway'];
+
+
+	if ((data.confirm) || (dhcp != false)) {
+
+		//	fs.copySync(__dirname + '/config.json', __dirname + '/config.json.orig');
+
+		var wirelessdhcp = config.get('wirelessdhcp');
+		if (wirelessdhcp == undefined) {
+			config.addConfigValue('wirelessdhcp', 'boolean', dhcp);
+			config.addConfigValue('wirelessip', 'string', static_ip);
+			config.addConfigValue('wirelessnetmask', 'string', static_netmask);
+			config.addConfigValue('wirelessgateway', 'string', static_gateway);
+		} else {
+			config.set('wirelessdhcp', dhcp);
+			config.set('wirelessip', static_ip);
+			config.set('wirelessnetmask', static_netmask);
+			config.set('wirelessgateway', static_gateway);
+		}
+
+
+		self.rebuildNetworkConfig();
+		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
+
+
+		defer.resolve({});
+		return defer.promise;
 	} else {
-		config.set('wirelessdhcp', dhcp);
-		config.set('wirelessip', static_ip);
-		config.set('wirelessnetmask', static_netmask);
-		config.set('wirelessgateway', static_gateway);
+		var responseData = {
+			title: self.commandRouter.getI18nString('NETWORK.STATIC_IP'),
+			message: self.commandRouter.getI18nString('NETWORK.STATIC_IP_WARNING'),
+			size: 'lg',
+			buttons: [
+				{
+					name: self.commandRouter.getI18nString('COMMON.CANCEL'),
+					class: 'btn btn-cancel',
+					emit:'',
+					payload:''
+				},
+				{
+					name: self.commandRouter.getI18nString('COMMON.CONTINUE'),
+					class: 'btn btn-info',
+					emit:'callMethod',
+					payload:{'endpoint':'system_controller/network','method':'saveWirelessNet','data':{'confirm':true,'wireless_dhcp':dhcp,'wireless_static_ip':static_ip,'wireless_static_netmask':static_netmask,'wireless_static_gateway':static_gateway, 'wireless_enabled':wireless_enabled}}
+				}
+			]
+		}
+
+		self.commandRouter.broadcastMessage("openModal", responseData);
 	}
 
-	self.rebuildNetworkConfig();
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_TITLE'), self.commandRouter.getI18nString('NETWORK.NETWORK_RESTART_SUCCESS'));
-
-
-	defer.resolve({});
-	return defer.promise;
 };
 
 
@@ -516,7 +587,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 		fs.accessSync(hostapdedimax, fs.F_OK);
 		exec("/usr/bin/sudo /bin/chmod 777 "+ hostapdedimax, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 			if (error !== null) {
-				console.log('Canot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
+				console.log('Cannot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
 
 			} else {
 				self.logger.info('Permissions for /etc/hostapd/hostapd-edimax.conf')
@@ -556,7 +627,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 " + hostapd, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/hostapd/hostapd.conf: ' + error);
+			console.log('Cannot set permissions for /etc/hostapd/hostapd.conf: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/hostapd/hostapd.conf')
@@ -569,6 +640,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 					hs.write('interface=wlan0\n');
 					hs.write('ssid=' + hotspotname + '\n');
 					hs.write('channel=' + hotspotchannel + '\n');
+					hs.write('driver=nl80211\n');
 					hs.write('hw_mode=g\n');
 					if (config.get('hotspot_protection') == true || config.get('hotspot_protection') == 'true') {
 						hs.write('auth_algs=1\n');
@@ -603,23 +675,44 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     var netstring='ctrl_interface=/var/run/wpa_supplicant' + os.EOL ;
 
     //searching network
-    if (data.pass.length <= 13) {
-        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
-    } else {
-        netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+	if (data.pass === undefined) {
+        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=1' + os.EOL + '}'+os.EOL;
+	} else {
+		if (self.isWEPHEX(data.pass)) {
+            netstring += 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0=' + data.pass +  os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
+        }
+        if (self.isWEPASCII(data.pass)) {
+            netstring += 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
+        }
+        if (self.isWPA(data.pass)){
+            netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+        } else {
+            self.logger.error('Not saving Password for network '+ data.ssid + ': shorter than 8 chars');
+        }
     }
 
     while(config.has('wirelessNetworksSSID['+index+']'))
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
+
         if(data.ssid!=configuredSSID && configuredSSID.length > 0)
         {
             var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 
-            if (configuredPASS.length <= 13) {
-                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0'+os.EOL + '}'+os.EOL;
+            if (configuredPASS === undefined) {
+                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=0' + os.EOL + '}'+os.EOL;
             } else {
-                netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL + '}' + os.EOL ;
+                if (self.isWEPHEX(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0=' + configuredPASS + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWEPASCII(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWPA(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                } else {
+                    self.logger.error('Not saving Password for network ' + configuredSSID + ': shorter than 8 chars');
+                }
             }
         }
 
@@ -642,7 +735,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcpcd.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
+			console.log('Cannot set permissions for /etc/network/interfaces: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/network/interfaces set')
@@ -678,7 +771,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 					staticconf.write('interface eth0\n');
 					staticconf.write('static ip_address=' + config.get('ethip') + '/24\n');
 					staticconf.write('static routers=' + config.get('ethgateway') + '\n');
-					staticconf.write('static domain_name_servers=' + config.get('ethgateway') + ' 8.8.8.8\n');
+					staticconf.write('static domain_name_servers=' + config.get('ethgateway') + ' 208.67.222.222\n');
 					staticconf.write('\n');
 				}
 
@@ -688,11 +781,11 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 				ws.write('iface wlan0 inet manual\n');
 
 				if (config.get('wirelessdhcp') == true || config.get('wirelessdhcp') == 'true') {
-				} else {
+				} else if (config.get('wirelessdhcp') == false || config.get('wirelessdhcp') == 'false'){
 					staticconf.write('interface wlan0\n');
 					staticconf.write('static ip_address=' + config.get('wirelessip') + '/24\n');
 					staticconf.write('static routers=' + config.get('wirelessgateway') + '\n');
-					staticconf.write('static domain_name_servers=' + config.get('wirelessgateway') + ' 8.8.8.8\n');
+					staticconf.write('static domain_name_servers=' + config.get('wirelessgateway') + ' 208.67.222.222\n');
 					staticconf.write('\n');
 				}
 
@@ -717,7 +810,11 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var defer = libQ.defer();
 	var response = [];
+	var defers = [];
 	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
+	if (ethspeed.replace('\n', '') == '1000Mb/s') {
+        ethspeed = '1Gb/s'
+	}
 	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
 	var wirelessspeed = wirelessspeedraw.replace('=', '');
 	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
@@ -738,39 +835,188 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 
 	var ethip = ''
 	var wlanip = ''
-	var oll = 'no';
-	isOnline(function (err, online) {
-		if (online) oll = 'yes';
-	});
+
+    try {
+        execSync("/usr/bin/wget -q  --timeout=1 --spider http://updates.volumio.org/");
+        var oll = 'yes';
+    } catch (e) {
+        var oll = 'no';
+    }
+
+    var ethdefer = libQ.defer();
+	defers.push(ethdefer)
 
 	ifconfig.status('eth0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll}
+				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll};
 				response.push(ethstatus);
+				ethdefer.resolve()
+			} else {
+                ethdefer.resolve()
 			}
+		} else {
+            ethdefer.resolve()
 		}
 	});
 
+    var wlandefer = libQ.defer();
+    defers.push(wlandefer)
 	ifconfig.status('wlan0', function (err, status) {
 		if (status != undefined) {
 			if (status.ipv4_address != undefined) {
 				if (status.ipv4_address == '192.168.211.1') {
-					var wlanstatus = {type: "Wireless", ssid: 'Volumio Hotspot', signal: 5, ip:'192.168.211.1', online: oll}
+					var wlanstatus = {type: "Wireless", ssid: 'Hotspot', signal: 5, ip:'192.168.211.1', online: oll}
 				} else {
 					wlanip = status.ipv4_address;
 					var wlanstatus = {type: "Wireless", ssid: ssid, signal: wirelessquality,ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
 				}
-
 				response.push(wlanstatus);
-				//console.log(wlanstatus);
-
+				wlandefer.resolve()
+			} else  {
+                wlandefer.resolve()
 			}
+		} else {
+            wlandefer.resolve()
 		}
-		defer.resolve(response);
+
 	});
-//console.log(response);
+    libQ.all(defers)
+        .then(function () {
+            defer.resolve(response)
+        })
+        .fail(function (err) {
+            console.log('Cannot get all networks info'+err);
+            defer.reject(new Error());
+        });
+
 	return defer.promise;
 };
 
+ControllerNetwork.prototype.saveDnsSettings = function (data) {
+	var self = this;
+	var customdnsfile = '';
+
+	if ((data.enable_custom_dns) && ((data.primary_dns.length < 7 || data.secondary_dns.length < 7))) {
+		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
+		return;
+	}
+	
+	if (data.enable_custom_dns)
+		customdnsfile = 'nameserver '+ data.primary_dns + os.EOL + 'nameserver '+ data.secondary_dns + os.EOL;
+
+	fs.writeFile('/etc/resolv.conf.head', customdnsfile, function (err) {
+		if (err) {
+			self.logger.error('Cannot write custom DNS File' + error);
+		} else {
+			if (data.enable_custom_dns)
+				exec("/usr/bin/sudo /usr/bin/unlink /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {});
+			else
+				exec("/usr/bin/sudo /bin/ln -s /etc/resolv.conf.tail.tmpl /etc/resolv.conf.tail", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {});
+									
+			config.set('enable_custom_dns', data.enable_custom_dns);
+			config.set('primary_dns', data.primary_dns);
+			config.set('secondary_dns', data.secondary_dns);				
+			self.commandRouter.wirelessRestart();
+			self.commandRouter.networkRestart();
+			self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+		}
+	});
+};
+
+ControllerNetwork.prototype.isHex = function (data) {
+    var self = this;
+
+    return /^[0-9A-Fa-f]+$/i.test(data)
+};
+
+ControllerNetwork.prototype.isWEPHEX = function (data) {
+    var self = this;
+
+    if (self.isHex(data)){
+    	if ((data.length === 10) || (data.length === 26) || (data.length === 32)) {
+    		return true
+		} else {
+    		return false
+		}
+    } else {
+    	return false
+	}
+
+};
+
+ControllerNetwork.prototype.isWEPASCII = function (data) {
+    var self = this;
+
+    if (!self.isHex(data)){
+        if ((data.length === 5) || (data.length === 13) || (data.length === 16)) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        return false
+    }
+
+};
+
+ControllerNetwork.prototype.isWPA = function (data) {
+    var self = this;
+
+     if ((data.length >= 8) && (data.length <= 63)){
+     	return true
+	 } else {
+     	return false
+	 }
+};
+
+ControllerNetwork.prototype.getWirelessInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var response = {"connected":false, "ssid":""}
+
+    ifconfig.status('wlan0', function (err, status) {
+        if (status != undefined) {
+            if (status.ipv4_address != undefined) {
+                if (status.ipv4_address != '192.168.211.1') {
+                    response.connected = true
+					response.ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
+                } else {
+
+                }
+                defer.resolve(response)
+            } else  {
+                defer.resolve(response)
+            }
+        } else {
+            defer.resolve(response)
+        }
+
+    });
+
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getWiredInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var response = {"connected":false, "ip":""}
+
+    ifconfig.status('eth0', function (err, status) {
+        if (status != undefined) {
+            if (status.ipv4_address != undefined) {
+                response.connected = true;
+				response.ip = status.ipv4_address;
+                defer.resolve(response)
+            } else  {
+                defer.resolve(response)
+            }
+        } else {
+            defer.resolve(response)
+        }
+
+    });
+
+    return defer.promise
+};

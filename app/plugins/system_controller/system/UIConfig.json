@@ -21,16 +21,22 @@
           "id": "player_name",
           "type":"text",
           "element": "input",
-          "doc": "This is the name of your system as it will appear on your network.",
+          "doc": "TRANSLATE.SYSTEM.PLAYER_NAME_DOC",
           "label": "TRANSLATE.SYSTEM.PLAYER_NAME",
           "value": "volumio"
         },
         {
           "id":"startup_sound",
           "element": "switch",
-          "doc": "By default Volumio will play a short startup sound after it has finished booting",
+          "doc": "TRANSLATE.SYSTEM.STARTUP_SOUND_DOC",
           "label": "TRANSLATE.SYSTEM.STARTUP_SOUND",
           "value": true
+        },
+        {
+          "id":"config_wizard",
+          "element": "button",
+          "label": "TRANSLATE.WIZARD.RUN_FIRST_CONFIG_WIZARD",
+          "onClick": {"type":"emit", "message":"runFirstConfigWizard", "data":""}
         }
 
       ]

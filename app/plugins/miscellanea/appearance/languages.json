@@ -1,5 +1,6 @@
 {"languages":[
   {"name":"Català","code":"ca"},
+  {"name":"Česky","code":"cs"},
   {"name":"Dansk","code":"da"},
   {"name":"Deutsch","code":"de"},
   {"name":"English","code":"en"},
@@ -15,6 +16,7 @@
   {"name":"Polski","code":"pl"},
   {"name":"Português","code":"pt"},
   {"name":"Русский","code":"ru"},
+  {"name":"Slovensky","code":"sk"},
   {"name":"Suomi","code":"fi"},
   {"name":"Svenska","code":"sv"},
   {"name":"Українська","code":"ua"},

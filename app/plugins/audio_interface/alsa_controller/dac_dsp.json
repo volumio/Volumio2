@@ -1,12 +1,11 @@
 {
   "cards": [
-	{"name": "Allo Piano 2.1", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]},
-	{"name": "PianoDACPlus", "dsp_options":["DSP Program","Subwoofer mode","Lowpass"]},
-        {"name": "PianoDAC", "dsp_options":["DSP Program"]},
-        {"name": "Allo Piano", "dsp_options":["DSP Program"]},
+	{"name": "Allo Piano 2.1", "dsp_options":["Subwoofer mode","Lowpass","Dual Mode"]},
+	{"name": "PianoDACPlus", "dsp_options":["Subwoofer mode","Lowpass","Dual Mode"]},
 	{"name": "Hifiberry DAC Plus", "dsp_options":["DSP Program","Clock Missing Period"]},
 	{"name": "JustBoom DAC Boards", "dsp_options":["DSP Program","Clock Missing Period"]},
 	{"name": "JustBoom Digi Boards", "dsp_options":["Tx Source"]},
-	{"name": "HDMI Out", "dsp_options":["hdmi audio format Function"]}
+	{"name": "HDMI Out", "dsp_options":["hdmi audio format Function"]},
+	{"name": "TauDAC - DM101", "dsp_options":["Anti-Clipping Mode","Dither","Filter"]}
   ]
 }

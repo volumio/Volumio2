@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var execSync = require('child_process').execSync;
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
@@ -17,16 +18,30 @@ function CorePlayQueue(commandRouter, stateMachine) {
     this.defaultChannels=0;
 
     //trying to read play queue from file
-    fs.readJson('/data/queue', function (err, queue) {
-        if(err)
-            self.commandRouter.logger.info("Cannot read play queue form file");
-        else
-        {
-            self.commandRouter.logger.info("Reloading queue from file");
-            //self.commandRouter.logger.info(queue);
-            self.arrayQueue=queue;
-        }
-    })
+	var persistentqueue = this.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'persistent_queue');
+	if (persistentqueue == undefined) {
+		persistentqueue = true;
+	}
+
+	if (persistentqueue) {
+		fs.readJson('/data/queue', function (err, queue) {
+			if(err)
+				self.commandRouter.logger.info("Cannot read play queue from file");
+			else
+			{
+				self.commandRouter.logger.info("Reloading queue from file");
+				//self.commandRouter.logger.info(queue);
+				self.arrayQueue=queue;
+			}
+		})
+	} else {
+		exec('echo "" > /data/queue', function (error, stdout, stderr) {
+			if (error !== null) {
+				console.log('Cannot empty queue');
+			}
+		});
+	}
+
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -68,6 +83,8 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 
 // Removes one item from the queue
 CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
+    var self=this;
+
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
 	var item=this.arrayQueue.splice(nIndex.value, 1);
 
@@ -79,7 +96,15 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
         item[0].name+
         this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_2'));
 
-    return this.commandRouter.volumioPushQueue(this.arrayQueue);
+    var defer=libQ.defer();
+    this.commandRouter.volumioPushQueue(this.arrayQueue)
+      .then(function(){
+        defer.resolve({});
+    }).fail(function(err){
+        defer.reject(new Error(err));
+    });
+
+    return defer.promise;
 };
 
 // Add one item to the queue
@@ -89,12 +114,12 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
 
-    self.commandRouter.logger.info(arrayItems);
+    //self.commandRouter.logger.info(arrayItems);
 
     var array = [].concat( arrayItems );
 
     var firstItemIndex=this.arrayQueue.length;
-    self.commandRouter.logger.info("First index is "+firstItemIndex);
+    //self.commandRouter.logger.info("First index is "+firstItemIndex);
 
     // We need to ask the service if the uri corresponds to something bigger, like a playlist
     var promiseArray=[];
@@ -102,27 +127,34 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     {
         var item=array[i];
 
-        self.commandRouter.logger.info("ADDING THIS ITEM TO QUEUE: "+JSON.stringify(item));
+        if (item.uri != undefined) {
+            self.commandRouter.logger.info("Adding Item to queue: " item.uri);
+        }
+
+
         var service='mpd';
 
-        if(item.hasOwnProperty('service'))
+        if(item.service)
         {
-            if(item.service!==null)
-                service=item.service;
-        }
+            service=item.service;
 
-        if(item.uri.startsWith('spotify:'))
-        {
-            service='spop';
-        }
+            if(service==='webradio' || item.uri.startsWith('cdda:'))
+            {
+                item.name=item.title;
+                item.albumart="/albumart";
+                promiseArray.push(libQ.resolve(item));
+            }
+            else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
+        } else {
 
-        if(service==='webradio')
-        {
-            item.name=item.title;
-            item.albumart="/albumart";
-            promiseArray.push(libQ.resolve(item));
+            //backward compatibility with SPOP plugin
+            if(item.uri.startsWith('spotify:'))
+            {
+                service='spop';
+            }
+
+            promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
         }
-        else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
     }
 
     libQ.all(promiseArray)
@@ -146,7 +178,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
                 if(self.arrayQueue.length>0)
                 {
-                    if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
+                    //if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
                         self.arrayQueue = self.arrayQueue.concat(content[j]);
                 }
                 else  self.arrayQueue = self.arrayQueue.concat(content[j]);
@@ -155,7 +187,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
             self.saveQueue();
 
-            self.commandRouter.logger.info("Adding item to queue: "+JSON.stringify(content[j]));
+            //self.commandRouter.logger.info("Adding item to queue: "+JSON.stringify(content[j]));
             self.commandRouter.volumioPushQueue(self.arrayQueue);
         })
         .then(function(){
@@ -182,6 +214,8 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
 	this.arrayQueue = [];
     this.saveQueue();
+
+    this.commandRouter.stateMachine.pushEmptyState();
 	return this.commandRouter.volumioPushQueue(this.arrayQueue);
 };
 
@@ -203,7 +237,7 @@ CorePlayQueue.prototype.moveQueueItem = function (from,to) {
         this.arrayQueue.splice(to,0,this.arrayQueue.splice(from,1)[0]);
         return this.commandRouter.volumioPushQueue(this.arrayQueue);
     }
-    else return;
+    else return defer.resolve();
 };
 
 

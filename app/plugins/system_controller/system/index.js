@@ -40,6 +40,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 		self.config.addConfigValue('uuid', 'string', uuid.v4());
 	}
 
+    this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
 	self.deviceDetect();
@@ -74,6 +75,7 @@ ControllerSystem.prototype.getUIConfig = function () {
 	var defer = libQ.defer();
 
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
+    var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -83,7 +85,38 @@ ControllerSystem.prototype.getUIConfig = function () {
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
-			defer.resolve(uiconf);
+
+
+
+    if (showLanguageSelector) {
+        self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+            __dirname+'/../../../i18n/strings_en.json',
+            __dirname + '/language_selector.json')
+            .then(function(languageSelector)
+            {
+        	var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
+        	var language = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language');
+        	var language_code = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language_code');
+        	uiconf.sections.unshift(languageSelector);
+
+        	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+            value: language_code,
+            label: language
+        	});
+
+        	for (var n = 0; n < languagesdata.languages.length; n++){
+				self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+                value: languagesdata.languages[n].code,
+                label: languagesdata.languages[n].name
+				});
+        	}
+                defer.resolve(uiconf);
+            })
+    } else {
+        defer.resolve(uiconf);
+	}
+
+
 		})
 		.fail(function()
 		{
@@ -168,10 +201,12 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
     var player_name = data['player_name'];
     var hostname = data['player_name'].split(" ").join("-");
-    var startup_sound = data['startup_sound'];
+    if (data['startup_sound'] != undefined) {
+        self.config.set('startupSound', data['startup_sound']);
+	}
 
     self.config.set('playerName', player_name);
-    self.config.set('startupSound', startup_sound);
+
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 	self.setHostname(player_name);
@@ -229,7 +264,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 		else {
 			exec("/usr/bin/sudo /bin/chmod 777 /etc/hosts", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 				if (error !== null) {
-					console.log('Canot set permissions for /etc/hosts: ' + error);
+					console.log('Cannot set permissions for /etc/hosts: ' + error);
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
@@ -254,7 +289,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ hostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
 						exec("/usr/bin/sudo /bin/chmod 777 /etc/avahi/services/volumio.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								console.log('Canot set permissions for /etc/hosts: ' + error);
+								console.log('Cannot set permissions for /etc/hosts: ' + error);
 
 							} else {
 								self.logger.info('Permissions for /etc/avahi/services/volumio.service')
@@ -385,11 +420,38 @@ ControllerSystem.prototype.setTestSystem = function (data) {
 
 
 ControllerSystem.prototype.sendBugReport = function (message) {
-    for (var key in message) {
-        console.log("BUG: " + key + " - " + message[key]);
-        fs.appendFileSync('/tmp/logfields', key + '="' + message[key] + '"\r\n');
-    }
-    exec('sudo systemctl start logondemand');
+	var self = this;
+
+	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
+		message.text = 'No info available';
+	}
+	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
+	// Must single-quote the message or the shell may interpret it and crash.
+	// single-quotes already within the message need to be escaped.
+	// The resulting string always starts and ends with single quotes.
+	var description = '';
+	var pieces = message.text.split("'");
+	var n = pieces.length;
+	for (var i=0; i<n; i++) {
+		description = description + "'" + pieces[i] + "'";
+		if (i < (n-1)) description = description + "\\'";
+	}
+
+	exec("/usr/local/bin/node /volumio/logsubmit.js " + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+		if (error !== null) {
+			self.logger.info('Cannot send bug report: ' + error);
+		} else {
+			self.logger.info('Log sent successfully, reply: '+stdout);
+			//if (stdout != undefined && stdout.status != undefined && stdout.status == 'OK' && stdout.link != undefined ) {
+				return self.commandRouter.broadcastMessage('pushSendBugReport', stdout);
+			//}
+
+
+
+
+		}
+	});
+
 };
 
 ControllerSystem.prototype.deleteUserData = function () {
@@ -406,6 +468,20 @@ ControllerSystem.prototype.deleteUserData = function () {
     });
 };
 
+ControllerSystem.prototype.factoryReset = function () {
+    var self = this;
+
+    fs.writeFile('/boot/factory_reset', ' ', function (err) {
+        if (err) {
+            self.logger.info('Cannot Initiate factory reset');
+        } else {
+            self.logger.info('Created Factory Reset file, rebooting');
+            self.commandRouter.reboot();
+        }
+
+    });
+};
+
 
 ControllerSystem.prototype.deviceDetect = function (data) {
 	var self = this;
@@ -414,7 +490,7 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 
 	exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			self.logger.info('Canot read proc/cpuinfo: ' + error);
+			self.logger.info('Cannot read proc/cpuinfo: ' + error);
 		} else {
 			var hardwareLine = stdout.split(":");
 			var cpuidparam = hardwareLine[1].replace(/\s/g, '');
@@ -526,7 +602,6 @@ ControllerSystem.prototype.checkPassword = function (data) {
 
 	return defer.promise;
 }
-
 
 ControllerSystem.prototype.getDisks = function () {
 	var self = this;
@@ -660,3 +735,28 @@ ControllerSystem.prototype.pushMessage = function (emit,payload) {
 	defer.resolve();
 	return defer.promise;
 }
+
+ControllerSystem.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
+};
+
+ControllerSystem.prototype.getShowWizard = function () {
+    var self = this;
+
+    var show = self.config.get('show_wizard', false);
+
+    return  show
+};
+
+ControllerSystem.prototype.setShowWizard = function (data) {
+    var self = this;
+
+    self.config.set('show_wizard', data);
+};
+

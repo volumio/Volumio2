@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<script src="./assets/clipboard.min.js"></script>
 		<title><%= title %></title>
 		<style>
 			#div-console {
@@ -27,36 +28,18 @@
 	</head>
 	<body>
 		<h3>Player State</h3>
-			<button id='button-volumioplay' class='control-websocket' disabled>Play</button>
-			<button id='button-volumiopause' class='control-websocket' disabled>Pause</button>
-			<button id='button-volumiostop' class='control-websocket' disabled>Stop</button>
-			<button id='button-volumioprev' class='control-websocket' disabled>Prev</button>
-			<button id='button-volumionext' class='control-websocket' disabled>Next</button>
-			<button id='button-volumeup' class='control-websocket' disabled>Volume UP</button>
-			<button id='button-volumedown' class='control-websocket' disabled>Volume Down</button>
-			<button id='button-volumemute' class='control-websocket' disabled>Volume Mute</button>
-			<button id='button-volumeunmute' class='control-websocket' disabled>Volume UnMute</button>
-			<br />
-			<br />
-			<div id='playerstate'></div>
 
-		<h3>Play Queue</h3>
-			<ol id='div-playqueue' start='0'></ol>
-
-
+		<br />
+		<div id='playerstate'></div>
+		<br />
 
 		<h3>Test Mode</h3>
 		<button id='button-testtrue' class='control-websocket' disabled>TRUE</button>
-		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>		
+		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>
 
-
-
-		<h3>WebSocket Client</h3>
-		<form class="pure-form">
-			<input id="form-ws-1" type="text" placeholder="First Param" />
-			<input id="form-ws-2" type="text" placeholder="Second Param" />
-			<button type="submit">Send</button>
-		</form>
+		<h3>SSH</h3>
+		<button id='button-sshenable' class='control-websocket' disabled>ENABLE</button>
+		<button id='button-sshdisable' class='control-websocket' disabled>DISABLE</button>
 
 		<h3>Plugin Upload</h3>
 		<form ref='uploadForm'
@@ -68,13 +51,21 @@
 			<input type='submit' value='Upload!' />
 		</form>
 
-		<h3>Console</h3>
-			<button id='button-clearconsole'>Clear</button>
-			<div id='div-console' style='border: 1px solid black; height: 400px; overflow-y: scroll;'>
-				<ul id='console' style='font-family: monospace;'></ul>
-			</div>
+		<h3>Send Log or bug report</h3>
+		<span id="log-message"></span>
+		<form class="bug-form">
+			<input id="bug-form-description" type="text" placeholder="Describe what you were doing/why you are sending the report." style="border: 1px solid black; width: 600px;"/>
+			<button id="bug-form-button" type="bug-form-submit">Send</button>
+			<button class="btn" id="copy-button" type="button" data-clipboard-demo data-clipboard-target="#bug-form-description" style="display:none">
+				Copy to clipboard
+			</button>
+		</form>
 
-		<script src="./socket.io-1.2.0.js"></script>
+		<h3>Play Queue</h3>
+		<ol id='div-playqueue' start='0'></ol>
+
+		<script src="./assets/socket.io-2.0.3.js"></script>
 		<script src="./dev.js"></script>
+
 	</body>
 </html>

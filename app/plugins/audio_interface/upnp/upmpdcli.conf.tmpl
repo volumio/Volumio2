@@ -1,18 +1,34 @@
+## UPMPDCLI
 iconpath = /volumio/app/plugins/audio_interface/upnp/upnpicon.png
 #upnpav = 0
 openhome = 1
-ohmetapersist = 1
 cachedir = /tmp/upmpdclicache
-presentationhtml = /volumio/app/plugins/audio_interface/upnp/presentation.html
-onstart = /volumio/app/plugins/audio_interface/upnp/startUpnp.js
-#onplay = /volumio/app/plugins/audio_interface/upnp/startUpnp.js
-onstop = /volumio/app/plugins/audio_interface/upnp/stopUpnp.js
-ohmanufacturername = Volumio
-ohmanufacturerurl = http://volumio.org
-ohmodelname = Volumio
-ohmodelurl = http://volumio.org
-#ohmodelimageuri =
+presentationhtml=/tmp/presentation.html
+loglevel = -1
 
+## MPD
+mpdport = 6599
+#ownqueue = 0
+
+## AUDIO CONTROL HOOKS
+externalvolumecontrol = 1
+getexternalvolume = /tmp/getvolume
+onvolumechange = /tmp/setvolume
+
+## OHMEDIA
+ohmanufacturername = Volumio
+ohmanufacturerinfo = Volumio
+ohmanufacturerurl = https://volumio.org/
+ohmanufacturerimageuri = /volumio/app/plugins/audio_interface/upnp/upnpicon.png
+ohmodelname = Volumio
+ohmodelinfo = Volumio
+ohmodelurl = https://volumio.org/
+ohmodelimageuri = /volumio/app/plugins/audio_interface/upnp/upnpicon.png
+ohproductname = Volumio
+ohproductinfo = Volumio
+ohproducturl = https://volumio.org/
+ohproductimageuri = /volumio/app/plugins/audio_interface/upnp/upnpicon.png
+ohmetapersist = 1
 
 ### Parameters for the Songcast modes
 #sclogfilename = /tmp/scmpdcli.log

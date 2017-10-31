@@ -203,7 +203,8 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
-		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+        self.commandRouter.executeOnPlugin('music_service', service,'addToFavourites',{uri:uri,service:service});
+        return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
 	}
 };
 
@@ -215,8 +216,9 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 	if (service === 'webradio') {
 		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
 	} else {
-		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
-	}
+        self.commandRouter.executeOnPlugin('music_service', service,'removeFromFavourites',{uri:uri,service:service});
+        return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+    }
 };
 
 PlaylistManager.prototype.playFavourites = function () {
@@ -411,6 +413,35 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                     listingDefer.reject(new Error());
                 })
             }
+            else if (uri.startsWith("mnt/")) {
+
+                var lsfolder = mpdPlugin.listallFolder(uri);
+                lsfolder.then(function (info) {
+                    var list = info.navigation.lists[0].items;
+                    var nItems = list.length;
+                    var entries = [];
+                    for (var i = 0; i < nItems; i++) {
+                        var item = list[i];
+                        if (item.type == 'song') {
+                            if (item.uri.indexOf('music-library/') >= 0) {
+                                var itemUri = item.uri.replace('music-library', '');
+                            } 
+                            else {
+                                var itemUri = item.uri;
+                            }
+                            entries.push({
+                                service: service,
+                                uri: itemUri,
+                                title: item.title,
+                                artist: item.artist,
+                                album: item.album,
+                                albumart: item.albumart
+                            });
+                        } 
+                    }
+                    listingDefer.resolve(entries);
+                });							
+			}
 		    else {
                 var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
                 prms.then(function (info) {
@@ -428,9 +459,8 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         if (item.type == 'song') {
                             var artUrl = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getAlbumArt', {
                                 artist: item.artist,
-                                album: item.album,
-                                path: path
-                            });
+                                album: item.album
+                            }, path, '');
                             if (item.uri.indexOf('music-library/') >= 0) {
                                 var itemUri = item.uri.replace('music-library', '');
                             } else var itemUri = item.uri;
@@ -615,7 +645,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                     self.commandRouter.addQueueItems(uris)
                         .then(function()
                         {
-                            self.commandRouter.volumioPlay();
+                            self.commandRouter.volumioPlay(0);
                             defer.resolve();
                         })
                         .fail(function()
