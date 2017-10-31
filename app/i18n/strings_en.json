@@ -266,7 +266,15 @@
 	"UPDATE_ALREADY_LATEST_VERSION":"You're already on the latest version",
 	"NO_UPDATE_AVAILABLE":"No Updates Available",
     "CANNOT_REMOVE_MEDIA":"Cannot remove media",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Media Removed Successfully"
+    "MEDIA_REMOVED_SUCCESSFULLY":"Media Removed Successfully",
+    "INSTALL_TO_DISK":"Install to Disk",
+    "INSTALLING_TO_DISK":"Installing to Disk",
+    "INSTALLING_TO_DISK_MESSAGE":"Installing to Disk",
+    "INSTALL_TO_DISK_DESC":"Install Volumio on Disk",
+    "INSTALL_TO_DISK_MESSAGE":"Confirm you want to Install Volumio on Disk",
+    "INSTALL_TO_DISK_LABEL":"LABEL",
+    "INSTALL_TO_DISK_SIZE":"SIZE",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":". WARNING: Be careful to select the correct destination disk, as all data on it will be deleted. You will be notified when installation has completed"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

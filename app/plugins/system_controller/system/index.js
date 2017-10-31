@@ -45,7 +45,6 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
 	self.deviceDetect();
 	self.callHome();
-	self.getDisks();
 
     return libQ.resolve();
 };
@@ -76,6 +75,8 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
     var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
+    var device = self.config.get('device', '');
+    var showDiskInstaller = self.config.get('show_disk_installer', true);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -85,7 +86,30 @@ ControllerSystem.prototype.getUIConfig = function () {
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
 
+	if (device != undefined && device.length > 0 && device === 'x86' && showDiskInstaller) {
+		var disks = self.getDisks();
+        if (disks != undefined) {
+            disks.then(function (result) {
+				if (result.available.length > 0) {
+                    uiconf.sections[3].hidden = false;
+					var disklist = result.available;
+                    for (var i in disklist) {
+                        var device = disklist[i];
+                        var label = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK') + ' ' + device.name;
+                        var description = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ': ' + device.name + ' ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_SIZE') + ': ' + device.size;
+                        var title = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ' ' + device.name;
+                        var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
+						var onClick = {"type":"emit", "message":"installToDisk", "data":{"from": result.current, "target":device.device}, "askForConfirm": {"title": title, "message": message}}
+						var item = {"id": "install_to_disk"+device.device, "element":"button", "label": label, "description": description, "onClick" : onClick};
+                        uiconf.sections[3].content.push(item);
+                    }
+				}
+            })
+                .fail(function () {
+                });
+        }
 
+	}
 
 
     if (showLanguageSelector) {
@@ -661,9 +685,9 @@ ControllerSystem.prototype.getDisks = function () {
 			}
 		}
 	}
-	var final = {'current': currentdisk, 'available': availablearray}
+	var final = {'current': currentdisk, 'available': availablearray};
 	defer.resolve(final);
-	console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBB'+JSON.stringify(final))
+	//console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBB'+JSON.stringify(final))
 
 	return defer.promise;
 }
@@ -699,12 +723,15 @@ ControllerSystem.prototype.ddToDisk = function (currentdisk, targetdisk) {
 	var time = 0;
 	var currentMessage = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_MESSAGE');
 	var modaltitle = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
-	var progress = 10
+	var progress = 10;
+	var installing = true
 
 	self.pushMessage('volumioInstallStatus', {'progress': 1, 'message': currentMessage, 'title' : modaltitle})
 	setTimeout(function () {
 		progress++
-		self.pushMessage('volumioInstallStatus', {'progress': progress, 'message': currentMessage, 'title' : modaltitle});
+		if (installing) {
+            self.pushMessage('volumioInstallStatus', {'progress': progress, 'message': currentMessage, 'title' : modaltitle});
+		}
 	}, 5000)
 
 	exec('echo volumio | sudo -S /bin/dd if=/dev/'+currentdisk+ ' of=/dev/'+targetdisk+' bs=1M',{uid:1000,gid:1000}, function (error, stdout, stderr) {
@@ -712,6 +739,11 @@ ControllerSystem.prototype.ddToDisk = function (currentdisk, targetdisk) {
 			console.log(error);
 			self.logger.info('Cannot copy selected partition');
 		} else {
+			// TODO
+			// MOUNT NEW DEVICE
+			// TOUCH RESIZE DATAPART
+			// TOUCH MOVE GPT
+			// ASK TO REBOOT
 			self.logger.info('Volumio system installed successfully');
 			return defer.promise;
 		}
@@ -771,3 +803,8 @@ ControllerSystem.prototype.setShowWizard = function (data) {
     self.config.set('show_wizard', data);
 };
 
+ControllerSystem.prototype.installToDisk = function (data) {
+    var self = this;
+
+    console.log(JSON.stringify(data))
+};

@@ -71,6 +71,14 @@
           }
       ]
 
+    },
+    {
+      "id":"section_install",
+      "type": "section",
+      "hidden": true,
+      "label": "TRANSLATE.SYSTEM.INSTALL_TO_DISK",
+      "icon": "fa-hdd-o",
+      "content": []
     }
   ]
 }
