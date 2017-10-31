@@ -128,7 +128,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         var item=array[i];
 
         if (item.uri != undefined) {
-            self.commandRouter.logger.info("Adding Item to queue: " item.uri);
+            self.commandRouter.logger.info("Adding Item to queue: " + item.uri);
         }
 
 
