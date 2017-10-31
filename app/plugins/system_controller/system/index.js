@@ -488,26 +488,37 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 	var defer = libQ.defer();
 	var device = '';
 
-	exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
-		if (error !== null) {
-			self.logger.info('Cannot read proc/cpuinfo: ' + error);
+    var info = self.getSystemVersion();
+    var info = self.getSystemVersion();
+    info.then(function(infos)
+    {
+		if (infos != undefined && infos.hardware != undefined && infos.hardware === 'x86') {
+			device = 'x86';
+            defer.resolve(device);
+            self.deviceCheck(device);
 		} else {
-			var hardwareLine = stdout.split(":");
-			var cpuidparam = hardwareLine[1].replace(/\s/g, '');
-			var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'),  'utf8', {throws: false});
-			//self.logger.info('CPU ID ::'+cpuidparam+'::');
-			for(var i = 0; i < deviceslist.devices.length; i++)
-			{
-				if(deviceslist.devices[i].cpuid == cpuidparam)
-				{
-					defer.resolve(deviceslist.devices[i].name);
-					device = deviceslist.devices[i].name;
-					self.deviceCheck(device);
-				}
-			}
+            exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+                if (error !== null) {
+                    self.logger.info('Cannot read proc/cpuinfo: ' + error);
+                } else {
+                    var hardwareLine = stdout.split(":");
+                    var cpuidparam = hardwareLine[1].replace(/\s/g, '');
+                    var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'),  'utf8', {throws: false});
+                    //self.logger.info('CPU ID ::'+cpuidparam+'::');
+                    for(var i = 0; i < deviceslist.devices.length; i++)
+                    {
+                        if(deviceslist.devices[i].cpuid == cpuidparam)
+                        {
+                            defer.resolve(deviceslist.devices[i].name);
+                            device = deviceslist.devices[i].name;
+                            self.deviceCheck(device);
+                        }
+                    }
 
+                }
+            });
 		}
-	});
+    });
 
 	return defer.promise;
 };
@@ -652,7 +663,7 @@ ControllerSystem.prototype.getDisks = function () {
 	}
 	var final = {'current': currentdisk, 'available': availablearray}
 	defer.resolve(final);
-	//console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBB'+JSON.stringify(final))
+	console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBB'+JSON.stringify(final))
 
 	return defer.promise;
 }
