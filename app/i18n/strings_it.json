@@ -177,7 +177,8 @@
     "CONTINUE":"Continua",
     "SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
     "SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
-    "ERROR":"Errore"
+    "ERROR":"Errore",
+    "GOT_IT":"Capito"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -263,7 +264,19 @@
     "UPDATE_ALREADY_LATEST_VERSION":"La versione attuale è la più recente",
     "NO_UPDATE_AVAILABLE":"Nessun aggiornamento disponibile",
     "CANNOT_REMOVE_MEDIA":"Impossibile rimuovere il supporto",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Supporto rimosso correttamente"
+    "MEDIA_REMOVED_SUCCESSFULLY":"Supporto rimosso correttamente",
+    "INSTALL_TO_DISK":"Installa su disco",
+    "INSTALLING_TO_DISK":"Installazione su disco",
+    "INSTALLING_TO_DISK_MESSAGE":"Installazione su disco in corso, attendere",
+    "INSTALLING_TO_DISK_ERROR_MESSAGE":"Installazione su disco fallita",
+    "INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Impossibile installare sul disco selezionato: il disco di destinazione deve essere più capiente di quello di origine",
+    "INSTALL_TO_DISK_DESC":"Installa su disco",
+    "INSTALL_TO_DISK_MESSAGE":"Conferma di installare il sistema sul disco",
+    "INSTALL_TO_DISK_LABEL":"NOME",
+    "INSTALL_TO_DISK_SIZE":"DIMENSIONE",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":"ATTENZIONE: Veriricare che il disco di destinazione sia corretto. Ogni dato presente sul disco di destinazione sarà eliminato!",
+    "INSTALLING_TO_DISK_SUCCESS_TITLE":"Installazione di disco riuscita",
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Per utilizzare il sistema appena installato, riavviare il sistema e rimuovere ogni disco rimuovibile"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

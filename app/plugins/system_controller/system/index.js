@@ -99,7 +99,7 @@ ControllerSystem.prototype.getUIConfig = function () {
                         var label = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK') + ' ' + device.name;
                         var description = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ': ' + device.name + ' ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_SIZE') + ': ' + device.size;
                         var title = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ' ' + device.name;
-                        var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
+                        var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + '. ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
 						var onClick = {"type":"emit", "message":"installToDisk", "data":{"from": result.current, "target":device.device}, "askForConfirm": {"title": title, "message": message}}
 						var item = {"id": "install_to_disk"+device.device, "element":"button", "label": label, "description": description, "onClick" : onClick};
                         uiconf.sections[3].content.push(item);
@@ -771,7 +771,9 @@ ControllerSystem.prototype.setShowWizard = function (data) {
 
 ControllerSystem.prototype.installToDisk = function (data) {
     var self = this;
+
     var ddsize = '';
+    var error = false;
     if (data.from != undefined) {
     	var source = '/dev/' + data.from;
 	}
@@ -780,74 +782,84 @@ ControllerSystem.prototype.installToDisk = function (data) {
     	var target = '/dev/' + data.target;
 	}
     self.notifyInstallToDiskStatus({'progress': 0, 'status':'started'});
+    var ddsizeRaw = execSync("/bin/lsblk -b | grep " + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+    ddsize = Math.ceil(ddsizeRaw/1024/1024);
+    var ddsizeRawDest = execSync("/bin/lsblk -b | grep " + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
 
-	try {
-        var ddsizeRaw = execSync("/bin/lsblk -b | grep " + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
-        ddsize = Math.ceil(ddsizeRaw/1024/1024);
-        var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source +' of=' + target +' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1',  {uid: 1000, gid: 1000, encoding: 'utf8'});
-	} catch(e) {
+    if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
         error = true;
-        self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': e});
+        var sizeError = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_TARGET_SIZE');
+        self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': sizeError});
+    } else {
+        try {
+            var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source +' of=' + target +' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1',  {uid: 1000, gid: 1000, encoding: 'utf8'});
+        } catch(e) {
+            error = true;
+            self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot install on new Disk'});
+        }
+
+
+
+
+        var copyProgress = exec('tail -f /tmp/install_progress');
+
+
+        copyProgress.stdout.on('data', function(data) {
+            if (data.indexOf('%') >= 0) {
+                var progressRaw = data.split('(')[1].split('Mb)')[0];
+                var progress = Math.ceil((100*progressRaw)/ddsize);
+                if (progress <= 100) {
+                    if (progress >= 95) {
+                        progress = 95;
+                    }
+                    self.notifyInstallToDiskStatus({'progress':progress, 'status':'progress'});
+                }
+            }
+        });
+
+        copy.on('close', function(code) {
+            if (code === 0) {
+                self.logger.info('Successfully cloned system');
+
+                try {
+                    execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/umount ' + target + '1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('rm -rf /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    self.logger.info('Successfully prepared system for resize');
+                } catch (e) {
+                    self.logger.error('Cannot prepare system for resize');
+                    error = true;
+                    self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for resize'});
+                }
+
+                try {
+                    execSync('mkdir /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/mount ' + target + '2 /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/touch /tmp/imgpart/move-gpt', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/umount ' + target + '2', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('rm -rf /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    self.logger.info('Successfully prepared system for GPT');
+                } catch (e) {
+                    self.logger.error('Cannot prepare system for GPT');
+                    self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for GPT'});
+                    error = true;
+                }
+                if (!error) {
+                    self.notifyInstallToDiskStatus({'progress':100, 'status':'done'});
+                }
+            } else {
+                self.notifyInstallToDiskStatus({'progress':0, 'status':'error'});
+            }
+        });
 	}
 
 
 
 
-	var copyProgress = exec('tail -f /tmp/install_progress');
-
-
-    copyProgress.stdout.on('data', function(data) {
-        if (data.indexOf('%') >= 0) {
-            var progressRaw = data.split('(')[1].split('Mb)')[0];
-            var progress = Math.ceil((100*progressRaw)/ddsize);
-            if (progress <= 100) {
-            	if (progress >= 95) {
-            		progress = 95;
-				}
-                self.notifyInstallToDiskStatus({'progress':progress, 'status':'progress'});
-			}
-        }
-    });
-
-    copy.on('close', function(code) {
-    	if (code === 0) {
-    		self.logger.info('Successfully cloned system');
-    		var error = false;
-
-    		try {
-                execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/usr/bin/sudo /bin/umount ' + target + '1', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('rm -rf /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                self.logger.info('Successfully prepared system for resize');
-			} catch (e) {
-                self.logger.error('Cannot prepare system for resize');
-    			error = true;
-                self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for resize'});
-			}
-
-			try {
-                execSync('mkdir /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/usr/bin/sudo /bin/mount ' + target + '2 /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/bin/touch /tmp/imgpart/move-gpt', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('/usr/bin/sudo /bin/umount ' + target + '2', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                execSync('rm -rf /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                self.logger.info('Successfully prepared system for GPT');
-			} catch (e) {
-                self.logger.error('Cannot prepare system for GPT');
-                self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for GPT'});
-    			error = true;
-			}
-			if (!error) {
-                self.notifyInstallToDiskStatus({'progress':100, 'status':'done'});
-			}
-		} else {
-            self.notifyInstallToDiskStatus({'progress':0, 'status':'error'});
-		}
-    });
 
 };
 
@@ -867,12 +879,6 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
         size: 'lg',
         buttons: [
             {
-                name: self.commandRouter.getI18nString('COMMON.RESTART'),
-                class: 'btn btn-warning ng-scope',
-                emit:'reboot',
-                payload:''
-            },
-            {
                 name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
                 class: 'btn btn-info ng-scope',
                 emit:'',
@@ -889,11 +895,16 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
     	emit = 'modalDone';
         responseData.title = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_SUCCESS_TITLE');
         responseData.message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_SUCCESS_MESSAGE');
+        var restartButton = {
+                name: self.commandRouter.getI18nString('COMMON.RESTART'),
+                class: 'btn btn-warning ng-scope',
+                emit:'reboot',
+                payload:''
+            };
+        responseData.buttons.push(estartButton);
     } else if (status === 'error') {
         emit = 'modalDone';
         responseData.message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_MESSAGE') + ': ' + data.error;
-        responseData.buttons.shift();
 	}
-
     self.commandRouter.broadcastMessage(emit, responseData);
 };
