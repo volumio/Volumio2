@@ -901,7 +901,7 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
                 emit:'reboot',
                 payload:''
             };
-        responseData.buttons.push(estartButton);
+        responseData.buttons.push(restartButton);
     } else if (status === 'error') {
         emit = 'modalDone';
         responseData.message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_MESSAGE') + ': ' + data.error;
