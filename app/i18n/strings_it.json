@@ -276,7 +276,7 @@
     "INSTALL_TO_DISK_SIZE":"DIMENSIONE",
     "INSTALL_TO_DISK_MESSAGE_WARNING":"ATTENZIONE: Veriricare che il disco di destinazione sia corretto. Ogni dato presente sul disco di destinazione sarà eliminato!",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"Installazione di disco riuscita",
-    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Per utilizzare il sistema appena installato, riavviare il sistema e rimuovere ogni disco rimuovibile"
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Per utilizzare il sistema appena installato, riavviare il sistema e rimuovere ogni disco rimovibile"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

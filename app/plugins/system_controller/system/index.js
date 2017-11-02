@@ -822,6 +822,11 @@ ControllerSystem.prototype.installToDisk = function (data) {
                 self.logger.info('Successfully cloned system');
 
                 try {
+                    fs.unlinkSync('/tmp/boot');
+                    fs.unlinkSync('/tmp/imgpart');
+                } catch(e) {}
+
+                try {
                     execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
                     execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
                     execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
