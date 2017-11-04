@@ -276,7 +276,7 @@
     "INSTALL_TO_DISK_MESSAGE":"Confirmez que vous voulez installer Volumio sur le disque",
    "INSTALL_TO_DISK_LABEL":"LABEL",
     "INSTALL_TO_DISK_SIZE":"TAILLE",
-    "INSTALL_TO_DISK_MESSAGE_WARNING":". ATTENTION ! Prenez soin de sélectionner le bon disque de destination, toutes les données vont être éffacées.",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":" ATTENTION: Prenez soin de sélectionner le bon disque de destination, toutes les données vont être éffacées.",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"Système installé avec succès",
     "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Pour pouvoir utiliser le nouveau système, enlevez les médias amovibles et redémarrez l'appareil." 
   },
