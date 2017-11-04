@@ -101,7 +101,7 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
             buttons: [
                 {
                     name: self.coreCommand.getI18nString('COMMON.GOT_IT'),
-                    class: 'btn btn-ok',
+                    class: 'btn btn-info ng-scope',
                     emit:'',
                     payload:''
                 }
