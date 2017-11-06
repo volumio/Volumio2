@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var firebase = require("firebase");
 var unirest = require('unirest');
 var config = new (require('v-conf'))();
+var endpointdomain = 'https://us-central1-myvolumio.cloudfunctions.net/';
 var uid = '';
 var userLoggedIn = false;
 var crypto = require('crypto');
@@ -59,6 +60,7 @@ myVolumio.prototype.onStart = function ()
     uuid = systemController.getConf('uuid');
     firebase.initializeApp(config);
     self.myVolumioLogin();
+
 
 
     return defer.promise;
@@ -193,6 +195,10 @@ myVolumio.prototype.myVolumioLogin = function () {
             userLoggedIn = true;
             uid = user.uid;
             self.logger.info('MYVOLUMIO SUCCESSFULLY LOGGED IN');
+            if (uid != undefined && uid.length > 0 && uid != self.config.get('uid', '')) {
+                self.config.set('uid', uid)
+            }
+            self.addMyVolumioDevice();
             firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
 
             });
@@ -225,7 +231,7 @@ myVolumio.prototype.getMyVolumioToken = function (data) {
     var defer = libQ.defer();
 
     if (userLoggedIn) {
-        var endpoint = 'https://us-central1-myvolumio.cloudfunctions.net/generateToken?uid='+uid;
+        var endpoint = endpointdomain+'generateToken?uid='+uid;
         self.logger.info('MYVOLUMIO Token request')
         unirest.get(endpoint)
             .end(function (response) {
@@ -296,6 +302,7 @@ myVolumio.prototype.saveMyVolumioData = function (data) {
         var token = data.token
         self.config.set('token', token)
     }
+
     self.myVolumioLogin();
 };
 
@@ -355,3 +362,162 @@ myVolumio.prototype.myVolumioLogout = function () {
 
 
 };
+
+
+myVolumio.prototype.addMyVolumioDevice = function () {
+    var self = this;
+    self.logger.info('MYVOLUMIO: Adding device');
+
+    var request = {};
+    var token = self.config.get('token', '');
+    request.endpoint = endpointdomain+'/api/v1/addMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+    var name = this.commandRouter.sharedVars.get('system.name');
+    var uuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
+    var device = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'device');
+    var hwuuid = self.getHwuuid();
+    request.body = {'name': name, 'uuid': uuid, 'device': device, 'hwuuid': hwuuid};
+    var response=self.restPost(request)
+
+    if (response != undefined) {
+        response.then(function (result) {
+            console.log(result)
+        })
+    }
+};
+
+myVolumio.prototype.updateMyVolumioDevice = function () {
+    var self = this;
+
+    var request = {};
+    var token = self.config.get('token', '');
+    request.endpoint = endpointdomain+'/api/v1/updateMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+    var name = this.commandRouter.sharedVars.get('system.name');
+    var uuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
+    var device = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'device');
+    var hwuuid = self.getHwuuid();
+    request.body = {'name': name, 'uuid': uuid, 'device': device, 'hwuuid': hwuuid};
+    var response=self.restPost(request)
+
+    if (response != undefined) {
+        response.then(function (result) {
+            console.log(result)
+        })
+    }
+};
+
+myVolumio.prototype.deleteMyVolumioDevice = function () {
+    var self = this;
+
+    var request = {};
+    var token = self.config.get('token', '');
+    request.endpoint = endpointdomain+'/api/v1/deleteMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+
+    var hwuuid = self.getHwuuid();
+    request.body = {'hwuuid': hwuuid};
+    var response=self.restPost(request)
+
+    if (response != undefined) {
+        response.then(function (result) {
+            console.log(result)
+        })
+    }
+
+};
+
+myVolumio.prototype.enableMyVolumioDevice = function () {
+    var self = this;
+
+    var request = {};
+    var token = self.config.get('token', '');
+    request.endpoint = endpointdomain+'/api/v1/enableMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+
+    var hwuuid = self.getHwuuid();
+    request.body = {'hwuuid': hwuuid};
+    var response=self.restPost(request)
+
+    if (response != undefined) {
+        response.then(function (result) {
+            console.log(result)
+        })
+    }
+
+};
+
+myVolumio.prototype.disableMyVolumioDevice = function () {
+    var self = this;
+
+    var request = {};
+    var token = self.config.get('token', '');
+    request.endpoint = endpointdomain+'/api/v1/enableMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+
+    var hwuuid = self.getHwuuid();
+    request.body = {'hwuuid': hwuuid};
+    var response=self.restPost(request)
+
+    if (response != undefined) {
+        response.then(function (result) {
+            console.log(result)
+        })
+    }
+};
+
+myVolumio.prototype.getMyVolumioDevices = function () {
+    var self = this;
+
+    var token = self.config.get('token', '');
+    var endpoint = endpointdomain+'/api/v1/getMyVolumioDevices' + '?uid=' + uid + '&token='+token;
+
+    if (userLoggedIn) {
+        unirest.get(endpoint)
+            .end(function (response) {
+                if (response.body === 'Error: could not handle the request') {
+                    defer.resolve('')
+                } else {
+                    var token = response.body;
+                    var jsonobject = {"tokenAvailable":true, "token":token}
+                    defer.resolve(jsonobject)
+                }
+            });
+    } else {
+        var jsonobject = {"tokenAvailable":false}
+        defer.resolve(jsonobject)
+    }
+
+    return defer.promise;
+};
+
+myVolumio.prototype.restPost = function (request) {
+    var self = this;
+    var defer = libQ.defer();
+
+    console.log(JSON.stringify(request))
+
+    unirest.post(request.endpoint)
+        .send(request.body)
+        .end(function (response) {
+            if (response.body === 'Error: could not handle the request') {
+                defer.resolve('error')
+            } else {
+                console.log(response.body)
+                defer.resolve(response.body)
+            }
+        });
+};
+
+myVolumio.prototype.getHwuuid = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    try {
+        var macaddr = fs.readFileSync('/sys/class/net/eth0/address', "utf8");
+        var anonid = macaddr.toString().replace(':','');
+    } catch (e) {
+        console.log(e)
+        var anonid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
+    }
+
+    return crypto.createHash('md5').update(anonid).digest("hex");
+};
+
+
+
