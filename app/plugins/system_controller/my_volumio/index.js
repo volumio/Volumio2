@@ -4,12 +4,14 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var firebase = require("firebase");
 var unirest = require('unirest');
+var config = new (require('v-conf'))();
 var uid = '';
 var userLoggedIn = false;
 var crypto = require('crypto');
 var algorithm = 'aes-256-ctr';
 var uuid = '';
 var name = '';
+
 
 
 
@@ -21,16 +23,19 @@ function myVolumio(context)
 
     self.context = context;
     self.commandRouter = self.context.coreCommand;
+    self.configManager=self.context.configManager;
     self.logger = self.context.logger;
 }
 
 myVolumio.prototype.onVolumioStart = function ()
 {
     var self = this;
-    var configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,
-        'config.json');
-    self.config = new (require('v-conf'))();
-    self.config.loadFile(configFile);
+
+    //getting configuration
+    var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+    this.config = new (require('v-conf'))();
+    this.config.loadFile(configFile);
+
     
     return libQ.resolve();
 };
@@ -40,6 +45,7 @@ myVolumio.prototype.onStart = function ()
 {
     var self = this;
     var defer = libQ.defer();
+
 
     var config = {
         apiKey: "AIzaSyDzEZmwJZS4KZtG9pEXOxlm1XcZikP0KbA",
@@ -144,6 +150,13 @@ myVolumio.prototype.getAdditionalConf = function () {
 myVolumio.prototype.setAdditionalConf = function () {
     var self = this;
     //Perform your installation tasks here
+};
+
+
+myVolumio.prototype.getConfigurationFiles = function () {
+    var self = this;
+
+    return ['config.json'];
 };
 
 myVolumio.prototype.myVolumioLogin = function () {
