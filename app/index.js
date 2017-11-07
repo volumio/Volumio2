@@ -1201,33 +1201,25 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 CoreCommandRouter.prototype.shutdown = function () {
 	var self = this;
 	
-	try {
-		self.pluginManager.onVolumioShutdown().then( function() {
-			self.platformspecific.shutdown();
-	 	}).fail(function(e){
-			self.logger.info("Error in onVolumioShutdown Plugin Promise handling: "+ e);
-			self.platformspecific.shutdown();
-		});
-	} catch(e) { // if error, and not caught by .fail() then log here and shutdown...
-		self.logger.info(e);
+	self.pluginManager.onVolumioShutdown().then( function() {
 		self.platformspecific.shutdown();
-	}
+	}).fail(function(e){
+		self.logger.info("Error in onVolumioShutdown Plugin Promise handling: "+ e);
+		self.platformspecific.shutdown();
+	});
+	
 };
 
 CoreCommandRouter.prototype.reboot = function () {
 	var self = this;
 	
-	try {
-		self.pluginManager.onVolumioReboot().then( function() {
-			 self.platformspecific.reboot();
-		}).fail(function(e){
-			self.logger.info("Error in onVolumioReboot Plugin Promise handling: "+ e);
-			self.platformspecific.reboot();
-		});
-	 } catch(e) { // if error, and not caught by .fail() then log here and reboot...
-		self.logger.info(e);
+	self.pluginManager.onVolumioReboot().then( function() {
+		 self.platformspecific.reboot();
+	}).fail(function(e){
+		self.logger.info("Error in onVolumioReboot Plugin Promise handling: "+ e);
 		self.platformspecific.reboot();
-	 }
+	});
+	
 };
 
 CoreCommandRouter.prototype.networkRestart = function () {
