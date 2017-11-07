@@ -450,7 +450,6 @@ PluginManager.prototype.onVolumioShutdown = function () {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin_defer = self.onVolumioShutdownPlugin(value.category,value.name);
 			defer_onShutdownList.push(plugin_defer);
-			self.logger.info(value.category + "_" + value.name + " added to plugin onShutdown list");
 		}
 	});
 
@@ -472,7 +471,7 @@ PluginManager.prototype.onVolumioShutdownPlugin = function (category, name) {
 
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onVolumioShutdown(): push an error message
-				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Shutdown. Please install updated version, or contact plugin developper");
+				// self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Shutdown. Please install updated version, or contact plugin developper");
 				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioShutdown: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
@@ -500,7 +499,6 @@ PluginManager.prototype.onVolumioReboot = function () {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin_defer = self.onVolumioRebootPlugin(value.category,value.name);
 			defer_onRebootList.push(plugin_defer);
-			self.logger.info(value.category + "_" + value.name + " added to plugin onReboot list");
 		}
 	});
 
@@ -520,7 +518,7 @@ PluginManager.prototype.onVolumioRebootPlugin = function (category, name) {
 			var myPromise = plugin.onVolumioReboot();
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onVolumioReboot(): push an error message
-				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Reboot. Please install updated version, or contact plugin developper");
+				// self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Reboot. Please install updated version, or contact plugin developper");
 				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioReboot: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
