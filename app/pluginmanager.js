@@ -21,7 +21,8 @@ module.exports = PluginManager;
 function PluginManager(ccommand, server) {
 	var self = this;
 
-	self.plugins = new HashMap();
+	self.corePlugins = new HashMap();
+    self.myVolumioPlugins = new HashMap();
 
 	fs.ensureDir('/data/plugins/', function (err) {
 		if (err) {
@@ -71,15 +72,15 @@ PluginManager.prototype.startPlugins = function () {
     this.logger.info("-----      Core plugins startup        ----");
     this.logger.info("-------------------------------------------");
 
-    this.pluginManager.loadCorePlugins();
-    this.pluginManager.startCorePlugins();
+    this.loadCorePlugins();
+    this.startCorePlugins();
 
     this.logger.info("-------------------------------------------");
     this.logger.info("-----    MyVolumio plugins startup     ----");
     this.logger.info("-------------------------------------------");
 
-    this.pluginManager.loadMyVolumioPlugins();
-    this.pluginManager.startMyVolumioPlugins();
+    this.loadMyVolumioPlugins();
+    this.startMyVolumioPlugins();
 }
 
 
@@ -155,13 +156,13 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
 			
-			self.plugins.set(key, pluginData);  // set in any case, so it can be started/stopped
+			self.corePlugins.set(key, pluginData);  // set in any case, so it can be started/stopped
 		
 			defer.resolve();
 			return myPromise;
 		}
 		else {
-			self.plugins.set(key, pluginData);
+			self.corePlugins.set(key, pluginData);
 			defer.resolve();
 		}
 
@@ -177,7 +178,7 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 };
 
 
-PluginManager.prototype.loadPlugins = function () {
+PluginManager.prototype.loadCorePlugins = function () {
 	var self = this;
 	var defer_loadList=[];
 	var priority_array = new HashMap();
@@ -234,13 +235,196 @@ PluginManager.prototype.loadPlugins = function () {
 	priority_array.forEach(function(plugin_array) {
 		if (plugin_array != undefined) {
 			plugin_array.forEach(function(folder) {
-				defer_loadList.push(self.loadPlugin(folder));
+				defer_loadList.push(self.loadCorePlugin(folder));
 			});
 		}
 	});
 	
 	return libQ.all(defer_loadList);
 };
+
+
+PluginManager.prototype.loadMyVolumioPlugins = function () {
+    var self = this;
+    var defer_loadList=[];
+    var priority_array = new HashMap();
+
+    var myVolumioPaths = ['/myvolumio/plusplugins','/data/myvolumio/plusplugins']
+
+    for (var ppaths in myVolumioPaths) {
+        var folder = myVolumioPaths[ppaths];
+        self.logger.info('Loading plugins from folder ' + folder);
+
+        if (fs.existsSync(folder)) {
+            var pluginsFolder = fs.readdirSync(folder);
+            for (var i in pluginsFolder) {
+                var groupfolder = folder + '/' + pluginsFolder[i];
+
+                var stats = fs.statSync(groupfolder);
+                if (stats.isDirectory()) {
+
+                    var folderContents = fs.readdirSync(groupfolder);
+                    for (var j in folderContents) {
+                        var subfolder = folderContents[j];
+
+                        //loading plugin package.json
+                        var pluginFolder = groupfolder + '/' + subfolder;
+
+                        var package_json = self.getPackageJson(pluginFolder);
+                        if(package_json!==undefined)
+                        {
+                            var boot_priority = package_json.volumio_info.boot_priority;
+                            if (boot_priority == undefined)
+                                boot_priority = 100;
+
+                            var plugin_array = priority_array.get(boot_priority);
+                            if (plugin_array == undefined)
+                                plugin_array = [];
+
+                            plugin_array.push(pluginFolder);
+                            priority_array.set(boot_priority, plugin_array);
+                        }
+
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    /*
+        each plugin's onVolumioStart() is launched by priority order.
+        Note: there is no resolution strategy: each plugin completes
+        at it's own pace, and in whatever order.
+        Should completion order matter, a new promise strategy should be
+        implemented below (chain by boot-priority order, or else...)
+    */
+    priority_array.forEach(function(plugin_array) {
+        if (plugin_array != undefined) {
+            plugin_array.forEach(function(folder) {
+                defer_loadList.push(self.loadMyVolumioPlugin(folder));
+            });
+        }
+    });
+
+    return libQ.all(defer_loadList);
+}
+
+PluginManager.prototype.loadMyVolumioPlugin = function (folder) {
+    var self=this
+    var defer=libQ.defer()
+    var package_json = self.getPackageJson(folder);
+
+    var category = package_json.volumio_info.plugin_type;
+    var name = package_json.name;
+    var key = category + '.' + name;
+
+    self.logger.info('Loading plugin \"' + name + '\"...');
+
+    var pluginInstance = null;
+    var context=new (require(__dirname+'/pluginContext.js'))(self.coreCommand, self.websocketServer,self.configManager);
+    context.setEnvVariable('category', category);
+    context.setEnvVariable('name', name);
+
+    pluginInstance = new (require(folder + '/' + package_json.main))(context);
+
+    self.initializeConfiguration(package_json, pluginInstance, folder);
+
+    var pluginData = {
+        name: name,
+        category: category,
+        folder: folder,
+        instance: pluginInstance
+    };
+
+
+    if (pluginInstance.onVolumioStart !== undefined){
+        var myPromise = pluginInstance.onVolumioStart();
+
+        if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+            // Handle non-compliant onVolumioStart(): push an error message and disable plugin
+            //self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing init routine. Please install updated version, or contact plugin developper");
+            self.logger.error("ATTENTION!!!: Plugin " + name + " does not return adequate promise from onVolumioStart: please update!");
+            myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+        }
+
+        self.myVolumioPlugins.set(key, pluginData);  // set in any case, so it can be started/stopped
+
+        defer.resolve();
+    }
+    else {
+        self.myVolumioPlugins.set(key, pluginData);
+        defer.resolve();
+    }
+
+
+    return defer
+}
+
+PluginManager.prototype.startMyVolumioPlugins = function () {
+
+}
+
+PluginManager.prototype.startMyVolumioPlugin = function (category,name) {
+    var self = this;
+    var defer=libQ.defer();
+
+    var plugin = self.getPlugin(category, name);
+
+    if(plugin!==undefined)
+    {
+        if(plugin.onStart!==undefined)
+        {
+            var myPromise = plugin.onStart();
+            //self.config.set(category + '.' + name + '.status', "STARTED");
+
+            if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+                // Handle non-compliant onStart(): push an error message and disable plugin
+                self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
+                self.logger.error("Plugin " + name + " does not return adequate promise from onStart: please update!");
+                myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+            }
+
+            defer.resolve();
+            return myPromise;
+
+        }
+        else
+        {
+           // self.config.set(category + '.' + name + '.status', "STARTED");
+            defer.resolve();
+        }
+
+    } else defer.resolve();
+
+    return defer.promise;
+}
+
+
+PluginManager.prototype.startMyVolumioPlugins = function () {
+    var self = this;
+    var defer_startList=[];
+
+    this.myVolumioPlugins.forEach(function (value,key) {
+        defer_startList.push(self.startMyVolumioPlugin(value.category,value.name));
+    });
+
+    return libQ.all(defer_startList);
+};
+
+PluginManager.prototype.stopMyVolumioPlugins = function () {
+    var self = this;
+    var defer_stopList=[];
+
+    self.myVolumioPlugins.forEach(function (value, key) {
+        defer_stopList.push(self.stopMyVolumioPlugins(value.category,value.name));
+    });
+
+    return libQ.all(defer_stopList);
+};
+
+
 
 PluginManager.prototype.getPackageJson = function (folder) {
 	var self = this;
@@ -271,8 +455,7 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 	{
 		if(plugin.onStart!==undefined)
 		{
-		    self.logger.info("PLUGIN START: "+name);
-			var myPromise = plugin.onStart();
+		    var myPromise = plugin.onStart();
 			self.config.set(category + '.' + name + '.status', "STARTED");
 
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
@@ -307,7 +490,6 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	{
 		if(plugin.onStop!==undefined)
 		{
-			self.logger.info("PLUGIN STOP: "+name);
 			var myPromise = plugin.onStop();
 			self.config.set(category + '.' + name + '.status', "STOPPED");					
 			
@@ -333,7 +515,8 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 	return defer.promise;
 };
 
-PluginManager.prototype.startPlugins = function () {
+
+PluginManager.prototype.startCorePlugins = function () {
 	var self = this;
 	var defer_startList=[];
 
@@ -347,8 +530,8 @@ PluginManager.prototype.startPlugins = function () {
 	implemented below (chain by start order, or else...)
 */	
 
-	self.plugins.forEach(function (value,key) {
-		defer_startList.push(self.startPlugin(value.category,value.name));
+	self.corePlugins.forEach(function (value,key) {
+		defer_startList.push(self.startCorePlugin(value.category,value.name));
 	});
 	
 	return libQ.all(defer_startList);		
@@ -368,7 +551,7 @@ PluginManager.prototype.stopPlugins = function () {
 	implemented below (chain by start order, or else...)
 */	
 
-	self.plugins.forEach(function (value, key) {
+	self.corePlugins.forEach(function (value, key) {
 		defer_stopList.push(self.stopPlugin(value.category,value.name));
 	});
 	
@@ -380,7 +563,7 @@ PluginManager.prototype.getPluginCategories = function () {
 
 	var categories = [];
 
-	var values = self.plugins.values();
+	var values = self.corePlugins.values();
 	for (var i in values) {
 		var metadata = values[i];
 		if (libFast.indexOf(categories, metadata.category) == -1)
@@ -395,7 +578,7 @@ PluginManager.prototype.getPluginNames = function (category) {
 
 	var names = [];
 
-	var values = self.plugins.values();
+	var values = self.corePlugins.values();
 	for (var i in values) {
 		var metadata = values[i];
 		if (metadata.category == category)
@@ -454,7 +637,7 @@ PluginManager.prototype.getPluginsMatrix = function () {
 PluginManager.prototype.onVolumioShutdown = function () {
 	var self = this;
 
-	self.plugins.forEach(function (value, key) {
+	self.corePlugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin = value.instance;
 			if (plugin.onVolumioShutdown !== undefined)
@@ -466,7 +649,7 @@ PluginManager.prototype.onVolumioShutdown = function () {
 PluginManager.prototype.onVolumioReboot = function () {
 	var self = this;
 
-	self.plugins.forEach(function (value, key) {
+	self.corePlugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
 			var plugin = value.instance;
 			if (plugin.onVolumioReboot !== undefined)
@@ -477,9 +660,11 @@ PluginManager.prototype.onVolumioReboot = function () {
 
 PluginManager.prototype.getPlugin = function (category, name) {
 	var self = this;
-	if (self.plugins.get(category + '.' + name)) {
-		return self.plugins.get(category + '.' + name).instance;
-	}
+	if (self.corePlugins.get(category + '.' + name)) {
+		return self.corePlugins.get(category + '.' + name).instance;
+	} else if (self.myVolumioPlugins.get(category + '.' + name)) {
+        return self.myVolumioPlugins.get(category + '.' + name).instance;
+    }
 };
 
 /**
@@ -1169,7 +1354,7 @@ PluginManager.prototype.removePluginFromConfiguration = function (category,name)
 	var key = category + '.' + name;
 	self.config.delete(key);
 
-	self.plugins.remove(key);
+	self.corePlugins.remove(key);
 
 	defer.resolve();
 	return defer.promise;
@@ -1520,7 +1705,7 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
 		.then(function(e)
 		{
 			var folder=self.findPluginFolder(category,name);
-			return self.loadPlugin(folder);
+			return self.loadCorePlugin(folder);
 		})
 		.then(self.startPlugin.bind(self,category,name))
 		.then(function(e)
@@ -1546,7 +1731,7 @@ PluginManager.prototype.disableAndStopPlugin = function (category,name) {
 		.then(function(e)
 		{
 			var key = category + '.' + name;
-			self.plugins.remove(key);
+			self.corePlugins.remove(key);
 
 			self.logger.info("Done.");
 			defer.resolve('ok');
