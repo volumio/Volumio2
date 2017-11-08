@@ -59,7 +59,6 @@ function CoreCommandRouter(server) {
     this.configManager=new(require(__dirname+'/configManager.js'))(this.logger);
 
 
-    this.pluginManager.loadPlugins();
     this.pluginManager.startPlugins();
 
     this.loadI18nStrings();

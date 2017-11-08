@@ -65,6 +65,25 @@ function PluginManager(ccommand, server) {
 	}
 }
 
+PluginManager.prototype.startPlugins = function () {
+
+    this.logger.info("-------------------------------------------");
+    this.logger.info("-----      Core plugins startup        ----");
+    this.logger.info("-------------------------------------------");
+
+    this.pluginManager.loadCorePlugins();
+    this.pluginManager.startCorePlugins();
+
+    this.logger.info("-------------------------------------------");
+    this.logger.info("-----    MyVolumio plugins startup     ----");
+    this.logger.info("-------------------------------------------");
+
+    this.pluginManager.loadMyVolumioPlugins();
+    this.pluginManager.startMyVolumioPlugins();
+}
+
+
+
 PluginManager.prototype.initializeConfiguration = function (package_json, pluginInstance, folder) {
 	var self = this;
 
@@ -93,7 +112,7 @@ PluginManager.prototype.initializeConfiguration = function (package_json, plugin
 	}
 };
 
-PluginManager.prototype.loadPlugin = function (folder) {
+PluginManager.prototype.loadCorePlugin = function (folder) {
 	var self = this;
 	var defer=libQ.defer();
 
@@ -242,7 +261,7 @@ PluginManager.prototype.isEnabled = function (category, pluginName) {
 	return self.config.get(category + '.' + pluginName + '.enabled');
 };
 
-PluginManager.prototype.startPlugin = function (category, name) {
+PluginManager.prototype.startCorePlugin = function (category, name) {
 	var self = this;
 	var defer=libQ.defer();
 
