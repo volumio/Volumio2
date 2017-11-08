@@ -1082,6 +1082,9 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
             ]
         }
     };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
 	var promise = self.commandRouter.playListManager.listPlaylist();
 	promise.then(function (data) {
 		for (var i in data) {
@@ -1332,11 +1335,11 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 
 				} if (singleBrowse && uri === 'music-library') {
 					prev = '/';
-					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites', type: 'title'},
-					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'title'},
-                    {icon: 'fa users',title: 'Artists', uri: 'artists://', type: 'title'},
-                    {icon: 'fa fa-dot-circle-o',title: 'Albums', uri: 'albums://', type: 'title'},
-                    {icon: 'fa fa-tag',title: 'Genres', uri: 'genres://', type: 'title'}];
+					var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: 'Favourites', uri: 'favourites', type: 'title'},
+					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: 'Playlists', uri: 'playlists', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: 'Artists', uri: 'artists://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: 'Albums', uri: 'albums://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'}];
 
 					for (var i in browseSources) {
                         list.push(browseSources[i]);
@@ -2926,6 +2929,9 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 					]
 				}
 			};
+            if (singleBrowse) {
+            	response.navigation.prev ={'uri': 'music-library'}
+			}
 			var cmd = libMpd.cmd;
 
 			self.clientMpd.sendCommand(cmd("search album \"\"", []), function (err, msg) {
@@ -3157,6 +3163,9 @@ ControllerMpd.prototype.listArtists = function () {
         }]
         }
     };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
 
     var cmd = libMpd.cmd;
 	var artistlist = "artist";
@@ -3408,6 +3417,9 @@ ControllerMpd.prototype.listGenres = function () {
             ]
         }
     };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
 
     var cmd = libMpd.cmd;
     self.clientMpd.sendCommand(cmd("list", ["genre"]), function (err, msg) {
