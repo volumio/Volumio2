@@ -231,18 +231,24 @@ myVolumio.prototype.getMyVolumioToken = function (data) {
     var defer = libQ.defer();
 
     if (userLoggedIn) {
-        var endpoint = endpointdomain+'generateToken?uid='+uid;
-        self.logger.info('MYVOLUMIO Token request')
-        unirest.get(endpoint)
-            .end(function (response) {
-                if (response.body === 'Error: could not handle the request') {
-                    var jsonobject = {"tokenAvailable":false}
-                    defer.resolve(jsonobject)
-                } else {
-                    var token = response.body;
-                    var jsonobject = {"tokenAvailable":true, "token":token}
-                    defer.resolve(jsonobject)
-                }
+
+        firebase.auth().currentUser.getIdToken(false)
+            .then(function (idToken) {
+                var endpoint = endpointdomain+'api/v1/getCustomToken?idToken='+idToken;
+                unirest.get(endpoint)
+                    .end(function (response) {
+                        if (response.body === 'Error: could not handle the request') {
+                            var jsonobject = {"tokenAvailable":false}
+                            defer.resolve(jsonobject)
+                        } else if (response.status === 200) {
+                            var token = response.body;
+                            var jsonobject = {"tokenAvailable":true, "token":token}
+                            defer.resolve(jsonobject)
+                        } else {
+                            var jsonobject = {"tokenAvailable":false}
+                            defer.resolve(jsonobject)
+                        }
+                    });
             });
     } else {
         var jsonobject = {"tokenAvailable":false}
@@ -380,7 +386,6 @@ myVolumio.prototype.addMyVolumioDevice = function () {
 
     if (response != undefined) {
         response.then(function (result) {
-            console.log(result)
         })
     }
 };
@@ -400,7 +405,7 @@ myVolumio.prototype.updateMyVolumioDevice = function () {
 
     if (response != undefined) {
         response.then(function (result) {
-            console.log(result)
+            //console.log(result)
         })
     }
 };
@@ -418,7 +423,7 @@ myVolumio.prototype.deleteMyVolumioDevice = function () {
 
     if (response != undefined) {
         response.then(function (result) {
-            console.log(result)
+            //console.log(result)
         })
     }
 
@@ -437,7 +442,7 @@ myVolumio.prototype.enableMyVolumioDevice = function () {
 
     if (response != undefined) {
         response.then(function (result) {
-            console.log(result)
+            //console.log(result)
         })
     }
 
@@ -456,7 +461,7 @@ myVolumio.prototype.disableMyVolumioDevice = function () {
 
     if (response != undefined) {
         response.then(function (result) {
-            console.log(result)
+            //console.log(result)
         })
     }
 };
@@ -490,7 +495,7 @@ myVolumio.prototype.restPost = function (request) {
     var self = this;
     var defer = libQ.defer();
 
-    console.log(JSON.stringify(request))
+    //console.log(JSON.stringify(request))
 
     unirest.post(request.endpoint)
         .send(request.body)
