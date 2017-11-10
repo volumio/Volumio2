@@ -410,15 +410,13 @@ myVolumio.prototype.updateMyVolumioDevice = function () {
     }
 };
 
-myVolumio.prototype.deleteMyVolumioDevice = function () {
+myVolumio.prototype.deleteMyVolumioDevice = function (device) {
     var self = this;
 
     var request = {};
     var token = self.config.get('token', '');
-    request.endpoint = endpointdomain+'/api/v1/deleteMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+    request.endpoint = endpointdomain+'/api/v1/deleteMyVolumioDevice' + '?uid=' + uid + '&token='+token + '&hwuuid=' + device.hwuuid;
 
-    var hwuuid = self.getHwuuid();
-    request.body = {'hwuuid': hwuuid};
     var response=self.restPost(request)
 
     if (response != undefined) {
@@ -429,15 +427,13 @@ myVolumio.prototype.deleteMyVolumioDevice = function () {
 
 };
 
-myVolumio.prototype.enableMyVolumioDevice = function () {
+myVolumio.prototype.enableMyVolumioDevice = function (device) {
     var self = this;
 
     var request = {};
     var token = self.config.get('token', '');
-    request.endpoint = endpointdomain+'/api/v1/enableMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+    request.endpoint = endpointdomain+'/api/v1/enableMyVolumioDevice' + '?uid=' + uid + '&token='+token + '&hwuuid=' + device.hwuuid;
 
-    var hwuuid = self.getHwuuid();
-    request.body = {'hwuuid': hwuuid};
     var response=self.restPost(request)
 
     if (response != undefined) {
@@ -448,15 +444,13 @@ myVolumio.prototype.enableMyVolumioDevice = function () {
 
 };
 
-myVolumio.prototype.disableMyVolumioDevice = function () {
+myVolumio.prototype.disableMyVolumioDevice = function (device) {
     var self = this;
 
     var request = {};
     var token = self.config.get('token', '');
-    request.endpoint = endpointdomain+'/api/v1/enableMyVolumioDevice' + '?uid=' + uid + '&token='+token;
+    request.endpoint = endpointdomain+'/api/v1/enableMyVolumioDevice' + '?uid=' + uid + '&token=' + token + '&hwuuid=' + device.hwuuid;
 
-    var hwuuid = self.getHwuuid();
-    request.body = {'hwuuid': hwuuid};
     var response=self.restPost(request)
 
     if (response != undefined) {
@@ -502,9 +496,10 @@ myVolumio.prototype.restPost = function (request) {
         .end(function (response) {
             if (response.body === 'Error: could not handle the request') {
                 defer.resolve('error')
-            } else {
-                console.log(response.body)
+            } else if (response.status === 200){
                 defer.resolve(response.body)
+            } else {
+                defer.resolve('error')
             }
         });
 };

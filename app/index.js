@@ -1882,3 +1882,24 @@ CoreCommandRouter.prototype.myVolumioLogout = function () {
     return self.executeOnPlugin('system_controller', 'my_volumio', 'myVolumioLogout', '');
 }
 
+CoreCommandRouter.prototype.enableMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'enableMyVolumioDevice', device);
+}
+
+CoreCommandRouter.prototype.disableMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'disableMyVolumioDevice', device);
+}
+
+CoreCommandRouter.prototype.deleteMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'deleteMyVolumioDevice', device);
+}
+

@@ -1836,6 +1836,48 @@ function InterfaceWebUI(context) {
                 return self.commandRouter.myVolumioLogout();
             });
 
+            connWebSocket.on('enableMyVolumioDevice', function (device) {
+                var selfConnWebSocket = this;
+
+                var enable = self.commandRouter.enableMyVolumioDevice(device);
+
+                if (enable != undefined) {
+                    enable.then(function (result) {
+                        //selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('disableMyVolumioDevice', function (device) {
+                var selfConnWebSocket = this;
+
+                var disable = self.commandRouter.disableMyVolumioDevice(device);
+
+                if (disable != undefined) {
+                    disable.then(function (result) {
+                        //selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('deleteMyVolumioDevice', function (device) {
+                var selfConnWebSocket = this;
+
+                var deleteDevice = self.commandRouter.deleteMyVolumioDevice(device);
+
+                if (deleteDevice != undefined) {
+                    deleteDevice.then(function (result) {
+                        //selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
 		}
 		catch (ex) {
 			self.logger.error("Catched an error in socketio. Details: " + ex);
