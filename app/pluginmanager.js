@@ -363,7 +363,23 @@ PluginManager.prototype.loadMyVolumioPlugin = function (folder) {
 }
 
 PluginManager.prototype.startMyVolumioPlugins = function () {
+    var self = this;
+    var defer_startList=[];
 
+
+    /*
+        each plugin's onStart() is launched following plugins.json order.
+        Note: there is no resolution strategy: each plugin completes
+        at it's own pace, and in whatever order.
+        Should completion order matter, a new promise strategy should be
+        implemented below (chain by start order, or else...)
+    */
+
+    self.myVolumioPlugins.forEach(function (value,key) {
+        defer_startList.push(self.startMyVolumioPlugin(value.category,value.name));
+    });
+
+    return libQ.all(defer_startList);
 }
 
 PluginManager.prototype.startMyVolumioPlugin = function (category,name) {
@@ -418,7 +434,7 @@ PluginManager.prototype.stopMyVolumioPlugins = function () {
     var defer_stopList=[];
 
     self.myVolumioPlugins.forEach(function (value, key) {
-        defer_stopList.push(self.stopMyVolumioPlugins(value.category,value.name));
+        defer_stopList.push(self.stopMyVolumioPlugin(value.category,value.name));
     });
 
     return libQ.all(defer_stopList);
@@ -570,6 +586,13 @@ PluginManager.prototype.getPluginCategories = function () {
 			categories.push(metadata.category);
 	}
 
+    values = self.myVolumioPlugins.values();
+    for (var i in values) {
+        var metadata = values[i];
+        if (libFast.indexOf(categories, metadata.category) == -1)
+            categories.push(metadata.category);
+    }
+
 	return categories;
 };
 
@@ -584,6 +607,13 @@ PluginManager.prototype.getPluginNames = function (category) {
 		if (metadata.category == category)
 			names.push(metadata.name);
 	}
+
+    values = self.myVolumioPlugins.values();
+    for (var i in values) {
+        var metadata = values[i];
+        if (metadata.category == category)
+            names.push(metadata.name);
+    }
 
 	return names;
 };
@@ -644,6 +674,12 @@ PluginManager.prototype.onVolumioShutdown = function () {
 				plugin.onVolumioShutdown();
 		}
 	});
+
+    self.myVolumioPlugins.forEach(function (value, key) {
+            var plugin = value.instance;
+            if (plugin.onVolumioShutdown !== undefined)
+                plugin.onVolumioShutdown();
+    });
 };
 
 PluginManager.prototype.onVolumioReboot = function () {
@@ -656,6 +692,12 @@ PluginManager.prototype.onVolumioReboot = function () {
 				plugin.onVolumioReboot();
 		}
 	});
+
+    self.myVolumioPlugins.forEach(function (value, key) {
+            var plugin = value.instance;
+            if (plugin.onVolumioReboot !== undefined)
+                plugin.onVolumioReboot();
+    });
 };
 
 PluginManager.prototype.getPlugin = function (category, name) {
