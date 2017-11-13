@@ -1654,21 +1654,6 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
     }
 }
 
-/**
- *  [{
- *   attribute_name:"",
- *   value:"",
- *   id:""
- *   },
- *   {
- *   attribute_name:"",
- *   value:"",
- *   id:""
- *   },
- *   ...
- *   ]
- */
-
 CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
     var self=this;
     var methodDefer=libQ.defer();
@@ -1814,6 +1799,7 @@ CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
 
 CoreCommandRouter.prototype.closeModals = function () {
     var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::Close All Modals sent);
 
-    return self.broadcastMessage('closeModal', '');
+    return self.broadcastMessage('closeAllModals', '');
 }
