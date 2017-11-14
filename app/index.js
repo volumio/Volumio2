@@ -1799,7 +1799,7 @@ CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
 
 CoreCommandRouter.prototype.closeModals = function () {
     var self=this;
-    this.pushConsoleMessage('CoreCommandRouter::Close All Modals sent);
+    this.pushConsoleMessage('CoreCommandRouter::Close All Modals sent');
 
     return self.broadcastMessage('closeAllModals', '');
 }
