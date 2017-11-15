@@ -43,7 +43,7 @@ ControllerWebradio.prototype.onStart = function() {
 ControllerWebradio.prototype.handleBrowseUri=function(curUri)
 {
     var self=this;
-    console.log(curUri);
+    //console.log(curUri);
     var response;
 
     if (curUri.startsWith('radio')) {
@@ -374,9 +374,20 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
                             title: name,
                             artist: '',
                             album: '',
-                            icon: 'fa fa-microphone',
                             uri: 'http://yp.shoutcast.com' + base+'?id='+id
                         };
+                        try {
+                            var albumart = children[i].attr('logo').value();
+                            if (albumart != undefined && albumart.length > 0) {
+                                category.albumart = albumart;
+                            } else {
+                                category.icon = 'fa fa-microphone';
+                            }
+                        } catch (e) {
+                            category.icon = 'fa fa-microphone';
+                        }
+
+
 
                         response.navigation.lists[0].items.push(category);
                     }
@@ -398,7 +409,6 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 // Define a method to clear, add, and play an array of tracks
 ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
 
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+track)
     var self = this;
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerWebradio::clearAddPlayTrack');
 
@@ -508,7 +518,6 @@ ControllerWebradio.prototype.listRadioCountries = function () {
                 icon: 'fa fa-globe',
                 uri: 'radio/byCountry/' + data[i].country_code
             };
-
             response.navigation.lists[0].items.push(category);
         }
 
@@ -559,7 +568,7 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
 
     var paginationPromises = [];
 
-    for (var i = 0; i < 1; i++) {
+    for (var i = 1; i < 3; i++) {
         var dirbleDefer = libQ.defer();
         self.getStationsForCountry(id, 30, i, dirbleDefer.makeNodeResolver());
 
@@ -580,17 +589,22 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
                 );
 
                 for (var k in pageData) {
-                    if (pageData[k].streams.length > 0) {
+                    var radio = pageData[k];
+                    if (radio.streams.length > 0) {
                         var category = {
                             service: 'webradio',
                             type: 'webradio',
-                            title: pageData[k].name,
-                            id: pageData[k].id,
+                            title: radio.name,
+                            id: radio.id,
                             artist: '',
                             album: '',
-                            icon: 'fa fa-microphone',
-                            uri: pageData[k].streams[0].stream
+                            uri: radio.streams[0].stream
                         };
+                        if (radio.image.url != undefined && radio.image.url != null) {
+                            category.albumart = radio.image.url;
+                        } else {
+                            category.icon = 'fa fa-microphone';
+                        }
                         response.navigation.lists[0].items.push(category);
                     }
                 }
@@ -625,7 +639,6 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
     var promise = self.commandRouter.playListManager.getMyWebRadioContent()
     promise.then(function (data) {
         //console.log(data);
-
         data.sort(
             function (a, b) {
                 return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
@@ -735,7 +748,7 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
 };
 
 
-ControllerWebradio.prototype.search = function (query) {
+ControllerWebradio.prototype.search = function (data) {
     var self = this;
 
     var defer = libQ.defer();
@@ -750,8 +763,47 @@ ControllerWebradio.prototype.search = function (query) {
         ]
     };
 
-    var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
+    var search = data.value.toLowerCase();
+    //var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
+    var uri = 'http://api.dirble.com/v2/search?token=8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2';
 
+    unirest.post(uri)
+        .headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
+        .send({'query':search})
+        .timeout(1800)
+        .end(function (response) {
+           // console.log(response.body);
+            if (response.status === 200) {
+                for (var i in response.body) {
+                    var station = response.body[i];
+                    if (station.streams.length > 0) {
+                        var radio = {
+                            service: 'webradio',
+                            type: 'webradio',
+                            title: station.name,
+                            artist: '',
+                            album: '',
+
+                            uri: station.streams[0].stream
+                        };
+                        if (station.image.url != undefined && station.image.url != null) {
+                            radio.albumart = station.image.url;
+                        } else {
+                            radio.icon = 'fa fa-microphone';
+                        }
+                        list.items.push(radio);
+                    }
+                }
+                defer.resolve(list);
+            } else {
+                defer.resolve();
+            }
+
+        });
+
+
+
+    /*
     memoryCache.wrap(uri, function (cacheCallback) {
         var promise=libQ.defer();
 
@@ -817,6 +869,7 @@ ControllerWebradio.prototype.search = function (query) {
             defer.resolve();
         }
     });
+    */
     return defer.promise;
 };
 

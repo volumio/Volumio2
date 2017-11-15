@@ -508,14 +508,15 @@ PluginManager.prototype.installPlugin = function (url) {
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
-	if (droppedFile == url)
-		downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
-	else
-		downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
+    if (droppedFile == url) {
+        downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
+    } else {
+        downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
+    }
 
 	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
-	
+
 	exec(downloadCommand, function (error, stdout, stderr) {
 
 		if (error !== null) {
@@ -638,15 +639,23 @@ PluginManager.prototype.updatePlugin = function (data) {
 	var url = data.url;
 	var category = data.category;
 	var name = data.name;
+    var downloadCommand;
 
-	var currentMessage = 'Downloading from'+url;
-	self.logger.info(currentMessage);
-	advancedlog = currentMessage;
+    var currentMessage = "Downloading plugin at "+url;
+    var droppedFile = url.replace("http://127.0.0.1:3000/plugin-serve/", "");
+    self.logger.info(currentMessage);
+    advancedlog = currentMessage;
 
-	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading Update','title' : modaltitle, 'advancedLog': advancedlog});
+    if (droppedFile == url) {
+        downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
+	} else {
+        downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
+	}
+
+    self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
 
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
+    exec(downloadCommand, function (error, stdout, stderr) {
 
 		if (error !== null) {
 			currentMessage = "Cannot download file "+url+ ' - ' + error;
@@ -662,6 +671,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 			advancedlog = advancedlog + "<br>" + currentMessage;
 
 			var pluginFolder = '/data/temp/downloaded_plugin';
+            self.createFolder(pluginFolder);
 
 			self.stopPlugin(category,name)
 				.then(function(e)
@@ -846,6 +856,7 @@ PluginManager.prototype.renameFolder = function (folder) {
 			defer.reject(new Error());
 		}
 		else {
+
 			defer.resolve(newFolderName);
 		}
 	});
@@ -875,6 +886,7 @@ PluginManager.prototype.moveToCategory = function (folder) {
 					defer.reject(new Error());
 				}
 				else {
+                    execSync('/bin/sync', { uid: 1000, gid:1000, encoding: 'utf8' });
 					defer.resolve(newFolderName +'/'+name);
 				}
 			}));

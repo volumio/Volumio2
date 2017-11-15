@@ -114,12 +114,12 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
 
-    self.commandRouter.logger.info(arrayItems);
+    //self.commandRouter.logger.info(arrayItems);
 
     var array = [].concat( arrayItems );
 
     var firstItemIndex=this.arrayQueue.length;
-    self.commandRouter.logger.info("First index is "+firstItemIndex);
+    //self.commandRouter.logger.info("First index is "+firstItemIndex);
 
     // We need to ask the service if the uri corresponds to something bigger, like a playlist
     var promiseArray=[];
@@ -127,7 +127,11 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     {
         var item=array[i];
 
-        self.commandRouter.logger.info("ADDING THIS ITEM TO QUEUE: "+JSON.stringify(item));
+        if (item.uri != undefined) {
+            self.commandRouter.logger.info("Adding Item to queue: " + item.uri);
+        }
+
+
         var service='mpd';
 
         if(item.service)
@@ -183,7 +187,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
             self.saveQueue();
 
-            self.commandRouter.logger.info("Adding item to queue: "+JSON.stringify(content[j]));
+            //self.commandRouter.logger.info("Adding item to queue: "+JSON.stringify(content[j]));
             self.commandRouter.volumioPushQueue(self.arrayQueue);
         })
         .then(function(){

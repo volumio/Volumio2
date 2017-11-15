@@ -1786,6 +1786,20 @@ function InterfaceWebUI(context) {
                 }
             });
 
+            connWebSocket.on('installToDisk', function (data) {
+                var selfConnWebSocket = this;
+
+                var installDisk = self.commandRouter.executeOnPlugin('system_controller', 'system', 'installToDisk', data);
+
+                if (installDisk != undefined) {
+                    installDisk.then(function (result) {
+                        selfConnWebSocket.emit('pushInstallToDisk', result);
+                      })
+                        .fail(function () {
+                        });
+                }
+            });
+
             connWebSocket.on('getMyVolumioStatus', function () {
                 var selfConnWebSocket = this;
 

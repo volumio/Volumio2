@@ -704,6 +704,10 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					lists: [{availableListViews:['list'],items:[]}]
 				}
 			};
+		var singleBrowse = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'singleBrowse');
+        if (singleBrowse) {
+            response.navigation.prev.uri = 'music-library';
+        }
 
 			for (var i in data) {
 				var ithdata = data[i];

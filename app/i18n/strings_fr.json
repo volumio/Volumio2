@@ -114,7 +114,7 @@
     "WIRELESS_NETWORK_CONNECTION_DEFER2":"Quand la configuration sera terminée"    
   },
   "NETWORKFS":{
-  "ALIAS_DOC":"Choisir un le nom qui sera affiché dans les disques NAS montés",
+  "ALIAS_DOC":"Choisir le nom qui sera affiché dans les disques NAS montés",
   "ERROR_UMOUNT":"Impossible d'enlever le dossier partagé",
 	"REMOVED":"Dossier partagé enlevé avec succès",
 	"NETWORK_DRIVE":"Disque réseau",
@@ -177,7 +177,9 @@
     "CONTINUE":"Continuer",
     "SETTINGS_SAVED_SUCCESSFULLY":"Réglages enregistrés avec succcès",
     "SETTINGS_SAVE_ERROR":"Erreur en enregistrant les réglages",
-    "ERROR":"Erreur"
+    "ERROR":"Erreur",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Scan en cours de votre musique et la flèche va tourner sur le bouton en bas à gauche jusqu'a ce que ce soit terminé. Durant cette période le système peut être ralenti, pour votre confort d'écoute, évitez d'écouter de la musique ",
+    "GOT_IT":"Compris"  
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -264,7 +266,19 @@
     "UPDATE_ALREADY_LATEST_VERSION":"Vous avez déjà la dernière version disponible",
     "NO_UPDATE_AVAILABLE":"Pas de mise à jour disponible",
     "CANNOT_REMOVE_MEDIA":"Impossible de retirer le périphérique",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Périphérique retiré avec succès"
+    "MEDIA_REMOVED_SUCCESSFULLY":"Périphérique retiré avec succès",
+    "INSTALL_TO_DISK":"Installer sur le disque",
+    "INSTALLING_TO_DISK":"Installation en cours sur le disque",
+    "INSTALLING_TO_DISK_MESSAGE":"Installation en cours, merci de patienter",
+    "INSTALLING_TO_DISK_ERROR_MESSAGE":"L'installation sur le disque a échoué",
+    "INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Impossible d'installer. Le disque de destination doit être plus gros que le disque source.",
+    "INSTALL_TO_DISK_DESC":"Installer sur le disque",
+    "INSTALL_TO_DISK_MESSAGE":"Confirmez que vous voulez installer Volumio sur le disque",
+   "INSTALL_TO_DISK_LABEL":"LABEL",
+    "INSTALL_TO_DISK_SIZE":"TAILLE",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":" ATTENTION: Prenez soin de sélectionner le bon disque de destination, toutes les données vont être éffacées.",
+    "INSTALLING_TO_DISK_SUCCESS_TITLE":"Système installé avec succès",
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Pour pouvoir utiliser le nouveau système, enlevez les médias amovibles et redémarrez l'appareil." 
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
