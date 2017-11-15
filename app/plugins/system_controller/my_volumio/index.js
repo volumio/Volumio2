@@ -36,8 +36,9 @@ myVolumio.prototype.onVolumioStart = function ()
     var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
     this.config = new (require('v-conf'))();
     this.config.loadFile(configFile);
+    this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
 
-    
+
     return libQ.resolve();
 };
 
@@ -101,7 +102,7 @@ myVolumio.prototype.getUIConfig = function () {
             defer.resolve(uiconf);
         })
         .fail(function () {
-           defer.reject(new Error());
+            defer.reject(new Error());
         });
 
     return defer.promise;
@@ -338,7 +339,7 @@ myVolumio.prototype.getMyVolumioData = function () {
 
 
 
-   return data
+    return data
 };
 
 myVolumio.prototype.getValueFromDB = function (data) {
@@ -393,6 +394,7 @@ myVolumio.prototype.addMyVolumioDevice = function () {
 myVolumio.prototype.updateMyVolumioDevice = function () {
     var self = this;
 
+    self.logger.info('Updating MyVolumio device info')
     var request = {};
     var token = self.config.get('token', '');
     request.endpoint = endpointdomain+'/api/v1/updateMyVolumioDevice' + '?uid=' + uid + '&token='+token;
@@ -521,3 +523,10 @@ myVolumio.prototype.getHwuuid = function () {
 
 
 
+myVolumio.prototype.playerNameCallback = function () {
+    var self = this;
+
+    if (userLoggedIn) {
+        self.updateMyVolumioDevice()
+    }
+}
