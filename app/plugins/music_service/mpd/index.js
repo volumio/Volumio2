@@ -381,7 +381,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
-	//self.commandRouter.logger.info(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
+    //this.commandRouter.logger.info("OBJTRACKINFO "+JSON.stringify(objTrackInfo));
 	var resp = {};
 
 
@@ -398,6 +398,10 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		}
         else if (resp.uri.indexOf('http://') >= 0) {
             resp.service='dirble';
+            if (objTrackInfo.file.indexOf('bbc') >= 0) {
+                objTrackInfo.Name = objTrackInfo.Name.replace(/_/g, ' ').replace('bbc', 'BBC');
+                objTrackInfo.file = objTrackInfo.Name;
+			}
         }
 	} else {
 		resp.uri = null;
