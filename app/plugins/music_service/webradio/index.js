@@ -763,7 +763,7 @@ ControllerWebradio.prototype.search = function (data) {
         ]
     };
 
-    var search = data.value;
+    var search = data.value.toLowerCase();
     //var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
     var uri = 'http://api.dirble.com/v2/search?token=8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2';
 
