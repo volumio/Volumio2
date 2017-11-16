@@ -863,7 +863,7 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 						mixer = mixer + ',1';
 					}
 				}
-                if (mixer.indexOf('Clock') < 0) {
+                if (mixer.indexOf('Clock Validity') < 0) {
                     mixers.push(mixer);
                 }
 
@@ -951,7 +951,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 						var line2 = line[0].split(',')
 						var mixerspace = line2[0].replace(/'/g, "");
 						var mixer = mixerspace.replace(" ", "");
-                        if (mixer.indexOf('Clock') < 0) {
+                        if (mixer.indexOf('Clock Validity') < 0) {
                             mixers.push(mixer);
                         }
 					}
