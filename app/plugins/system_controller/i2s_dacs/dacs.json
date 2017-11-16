@@ -40,6 +40,11 @@
   {"name":"Sparky","data":[
 	{"id":"piano-dac","name":"Allo Piano","overlay":"","alsanum":"1","mixer":"Digital","modules":["snd-soc-allo-piano-dac"],"script":"","needsreboot":"yes"},
 	{"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"","alsanum":"1","mixer":"Digital","modules":["snd-soc-allo-piano-dac-plus"],"script":"","needsreboot":"yes"}
+  ]},
+  {"name":"BeagleBone","data":[
+	{"id":"justboom-amp","name":"JustBoom Amp Boards","overlay":"bb-justboom-amp-00A0","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
+	{"id":"justboom-dac","name":"JustBoom DAC Boards","overlay":"bb-justboom-dac-00A0","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"}
+	{"id":"justboom-digi","name":"JustBoom Digi Boards","overlay":"bb-justboom-digi-00A0","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"no"}
   ]}
   ]}
 
