@@ -136,7 +136,13 @@ PlaylistManager.prototype.playPlaylist = function (name) {
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Play playlist ' + name);
 
-	return self.commonPlayPlaylist(self.playlistFolder, name);
+	if (name === 'favourites') {
+        return self.playFavourites();
+	} else {
+        return self.commonPlayPlaylist(self.playlistFolder, name);
+	}
+
+
 };
 
 PlaylistManager.prototype.enqueue = function (name) {
@@ -700,6 +706,14 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 				navigation: {
 					prev: {
 						uri: ''
+					},
+					info: {
+                        uri: 'playlists/favourites',
+						title:  self.commandRouter.getI18nString('COMMON.FAVOURITES'),
+						name: 'favourites',
+						service: 'mpd',
+                        type:  'play-playlist',
+						albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png'
 					},
 					lists: [{availableListViews:['list'],items:[]}]
 				}

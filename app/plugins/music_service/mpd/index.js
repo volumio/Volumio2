@@ -1117,6 +1117,8 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
+	var name = uri.split('/')[1];
+	console.log(uri)
 
     var response={
         "navigation": {
@@ -1130,6 +1132,14 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
                     ]
                 }
             ],
+            "info": {
+                "uri": 'playlists/favourites',
+                "title":  name,
+                "name": name,
+                "service": 'mpd',
+                "type":  'play-playlist',
+                "albumart": '/albumart?sourceicon=music_service/mpd/playlisticon.svg'
+            },
             "prev": {
                 "uri": "playlists"
             }
@@ -3102,7 +3112,6 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                         album: album,
                         type: 'song',
                         tracknumber: 0,
-                        albumart: albumart,
                         duration: time,
                         trackType: path.split('.').pop()
                     });
@@ -3228,6 +3237,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
     var defer = libQ.defer();
 
     var splitted=curUri.split('/');
+    var albumart=self.getAlbumArt({artist:decodeURIComponent(splitted[index])},undefined,'users');
 
     var response = {
         "navigation": {
@@ -3254,6 +3264,13 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                 }],
             "prev": {
                 "uri": previous
+            },
+            info: {
+                uri: curUri,
+                title:  decodeURIComponent(splitted[index]),
+                service: 'mpd',
+                type:  'artist',
+                albumart: albumart
             }
         }
     };
