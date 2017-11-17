@@ -505,7 +505,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 		nBitDepth = Number(objMetrics[1])+' bit';
         nChannels = Number(objMetrics[2]);
 		if (objMetrics[1] == 'f') {
-            nBitDepth = '32f bit';
+            nBitDepth = '32 bit';
 		} else if (objMetrics[0] == 'dsd64') {
             var nSampleRateRaw = '2.82 MHz';
             nBitDepth = '1 bit';
