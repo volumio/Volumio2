@@ -454,13 +454,6 @@ CoreMusicLibrary.prototype.search = function(data) {
                     if(result[i]!== undefined && result[i]!==null)
                         searchResult.navigation.lists=searchResult.navigation.lists.concat(result[i]);
                 }
-
-                fs.writeJson('searchResult.json', searchResult, err => {
-                    if (err) return console.error(err)
-
-                    console.log('success!')
-            })
-
                 defer.resolve(searchResult);
             })
             .fail(function (err) {
