@@ -437,7 +437,7 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
 
 	self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('PLAYBACK_OPTIONS.ADVANCED_DAC_DSP_OPTIONS'), self.commandRouter.getI18nString('PLAYBACK_OPTIONS.DSP_PROGRAM_ENABLED'));
 
-    var respconfig = self.getUIConfig();
+    var respconfig = self.commandRouter.getUIConfigOnPlugin('audio_interface', 'alsa_controller', {});
 
     respconfig.then(function(config)
     {
@@ -607,7 +607,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 	self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
 	self.setDefaultMixer(OutputDeviceNumber);
 
-	var respconfig = self.getUIConfig();
+	var respconfig = self.commandRouter.getUIConfigOnPlugin('audio_interface', 'alsa_controller', {});
 
 	respconfig.then(function(config)
 	{
@@ -682,7 +682,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	defer.resolve({});
 	this.updateVolumeSettings();
 
-	var respconfig = self.getUIConfig();
+	var respconfig = self.commandRouter.getUIConfigOnPlugin('audio_interface', 'alsa_controller', {});
 
 	respconfig.then(function(config)
 	{
