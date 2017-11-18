@@ -114,7 +114,14 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addToQueue', function (data) {
                 var timeStart = Date.now();
 
-                 self.commandRouter.addQueueItems(data);
+                 self.commandRouter.addQueueItems(data)
+                .then(function(){
+                    var item = data.uri;
+                    if (data.title) {
+                        item = data.title;
+                    }
+					self.printToastMessage('success', self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TITLE'),  item);
+                });
 			});
 
 			connWebSocket.on('replaceAndPlay', function (data) {
