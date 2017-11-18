@@ -1792,11 +1792,17 @@ ControllerMpd.prototype.rescanDb = function () {
 	return self.sendMpdCommand('rescan', []);
 };
 
-ControllerMpd.prototype.updateDb = function () {
+ControllerMpd.prototype.updateDb = function (data) {
 	var self = this;
+	var pos = '';
+	var message = self.commandRouter.getI18nString('COMMON.SCAN_DB');
 
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.SCAN_DB'));
-	return self.sendMpdCommand('update', []);
+	if (data != undefined) {
+		pos = data.replace('music-library/', '')
+		message = pos + ': ' + message;
+	}
+    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
+	return self.sendMpdCommand('update', [pos]);
 };
 
 

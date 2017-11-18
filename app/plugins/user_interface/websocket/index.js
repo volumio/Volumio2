@@ -1135,7 +1135,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('updateDb', function (data) {
-				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', '');
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', data);
 			});
 
 
