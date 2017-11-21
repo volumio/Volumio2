@@ -15,6 +15,7 @@ var client = new Client();
 var xml2js = require('xml2js');
 var http = require('http');
 var browseDLNAServer = require(__dirname + "/dlna-browser.js");
+var singleBrowse = false;
 
 // Define the ControllerUPNPBrowser class
 module.exports = ControllerUPNPBrowser;
@@ -36,6 +37,7 @@ ControllerUPNPBrowser.prototype.getConfigurationFiles = function()
 }
 
 ControllerUPNPBrowser.prototype.addToBrowseSources = function () {
+
 	var data = {name: 'Media Servers', uri: 'upnp', plugin_type:'music_service', plugin_name:'upnp_browser', "albumart": "/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png"};
 	this.commandRouter.volumioAddToBrowseSources(data);
 };
@@ -43,7 +45,16 @@ ControllerUPNPBrowser.prototype.addToBrowseSources = function () {
 
 ControllerUPNPBrowser.prototype.onStart = function() {
 	var self = this;
-	this.addToBrowseSources();
+
+
+    var singleBrowseConf = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'singleBrowse');
+    if (singleBrowseConf == undefined) {
+        singleBrowseConf = false;
+	}
+	singleBrowse = singleBrowseConf;
+	if (!singleBrowseConf) {
+        this.addToBrowseSources();
+	}
 
 	client.on('response', function responseHandler(headers, code, rinfo) {
 		var urlraw = headers.LOCATION.replace('http://', '').split('/')[0].split(':');
@@ -141,6 +152,10 @@ ControllerUPNPBrowser.prototype.listRoot = function()
 			]
 		}
 	};
+
+    if (singleBrowse) {
+        obj.navigation.prev ={'uri': 'music-library'}
+    }
 	for(var i = 0; i < this.DLNAServers.length; i++){
 		if(Date.now() - this.DLNAServers[i].lastTimeAlive < 60000){
 			obj.navigation.lists[0].items.push({

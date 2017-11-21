@@ -317,7 +317,9 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
         return this.search({"value": splitted[2]});
     } else if (curUri.startsWith('playlists') || curUri.startsWith('artists://') || curUri.startsWith('albums://') || curUri.startsWith('genres://')) {
             return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
-    } else {
+    } else if (curUri.startsWith('upnp')) {
+    		return self.commandRouter.executeOnPlugin('music_service','upnp_browser','handleBrowseUri',curUri);
+	} else {
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
