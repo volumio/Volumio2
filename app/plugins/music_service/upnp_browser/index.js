@@ -448,7 +448,7 @@ ControllerUPNPBrowser.prototype.search = function (query) {
 
 	var defer = libQ.defer();
 	var list = {
-		"title": 'UPNP',
+		"title": 'Media Servers',
 		"icon": "fa icon",
 		"availableListViews": [
 			"list"
@@ -457,7 +457,7 @@ ControllerUPNPBrowser.prototype.search = function (query) {
 
 		]
 	};
-	defer.resolve(list)
+	defer.resolve()
 
 	return defer.promise;
 };
