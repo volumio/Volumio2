@@ -351,7 +351,7 @@ ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
     })
 		.then(function()
 		{
-			self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+			self.commandRouter.stateMachine.setConsumeUpdateService('mpd', false, false);
 			return self.mpdPlugin.sendMpdCommand('play',[]);
 		});
 };
@@ -568,19 +568,3 @@ function xmlToJson(url, callback) {
         });
     });
 }
-
-ControllerUPNPBrowser.prototype.getAlbumArt = function (data, path,icon) {
-
-    if(this.albumArtPlugin==undefined)
-    {
-        //initialization, skipped from second call
-        this.albumArtPlugin=  this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
-    }
-
-    if(this.albumArtPlugin)
-        return this.albumArtPlugin.getAlbumArt(data,path,icon);
-    else
-    {
-        return "/albumart";
-    }
-};
