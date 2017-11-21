@@ -1353,7 +1353,8 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: 'Playlists', uri: 'playlists', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: 'Artists', uri: 'artists://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: 'Albums', uri: 'albums://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'}];
+                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'},
+					{albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: 'Media Servers', uri: 'upnp', type: 'title'}];
 
 					for (var i in browseSources) {
                         list.push(browseSources[i]);
