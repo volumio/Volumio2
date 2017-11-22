@@ -37,17 +37,12 @@ ControllerWebradio.prototype.addToBrowseSources = function () {
 
 
 ControllerWebradio.prototype.onStart = function() {
+    var  self = this;
     this.addToBrowseSources();
 
     this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-    var variantInfo = this.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
-    variantInfo.then(function(info)
-    {
-        if  (info != undefined && info.variant != undefined && info.variant.length > 0) {
-            variant = info.variant;
-            this.getSelectionInfo();
-        }
-    });
+    this.getSelectionInfo();
+
     return libQ.resolve();
 };
 
@@ -931,49 +926,95 @@ ControllerWebradio.prototype.removeMyWebRadio = function (data) {
 
 ControllerWebradio.prototype.getSelectionInfo = function () {
     var defer = libQ.defer();
+
+    //TODO REFACTOR IN BETTER WAY
+
     if (selection.available) {
         defer.resolve(selection);
     } else {
         selection = {'available':false};
-        try {
-            var Request = unirest.get('https://volumio.org/'+variant+'/selection.json');
-            Request.timeout(1500)
-            Request.query({
-                token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
-            }).end(function (response) {
-                if (response.status === 200) {
-                    selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
-                    defer.resolve(selection);
-                } else {
-                    defer.resolve(selection);
-                    retry++
-                }
-            });
-        } catch(e) {
-            defer.resolve(selection);
-            retry++
-        }
+        var variantInfo = this.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+        variantInfo.then(function(info)
+        {
+            if  (info != undefined && info.variant != undefined && info.variant.length > 0) {
+                variant = info.variant;
+            }
+
+            try {
+                var Request = unirest.get('https://volumio.org/'+variant+'/selection.json');
+                Request.timeout(1500)
+                Request.query({
+                    token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
+                }).end(function (response) {
+                    if (response.status === 200) {
+                        selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
+                        defer.resolve(selection);
+                    } else {
+                        defer.resolve(selection);
+                        retry++
+                    }
+                });
+            } catch(e) {
+                defer.resolve(selection);
+                retry++
+            }
+        });
     }
     return defer.promise
 }
 
+
 ControllerWebradio.prototype.listSelection = function () {
+    var self = this;
     var defer = libQ.defer();
+
+    self.logger.info('Getting webradio selection');
     try {
+
+    var object = {
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list"
+                    ],
+                    "items": [
+
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "radio"
+            }
+        }
+    };
+
         var Request = unirest.get('https://volumio.org/'+variant+'/selection.json');
         Request.timeout(1500)
         Request.query({
             token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
         }).end(function (response) {
             if (response.status === 200) {
-                selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
-                defer.resolve(selection);
+                for (var i in response.body.radios) {
+                    var station = response.body.radios[i];
+                        var radio = {
+                            service: 'webradio',
+                            type: 'webradio',
+                            title: station.title,
+                            artist: '',
+                            album: '',
+                            albumart: station.albumart,
+                            uri: station.uri
+                        };
+                    object.navigation.lists[0].items.push(radio);
+                }
+                defer.resolve(object);
             } else {
-                defer.resolve(selection);
+                defer.resolve(object);
             }
         });
     } catch(e) {
-        defer.resolve(selection);
+        defer.resolve(object);
     }
     return defer.promise
 }
