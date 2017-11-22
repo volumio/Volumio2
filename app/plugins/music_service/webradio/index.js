@@ -504,7 +504,7 @@ ControllerWebradio.prototype.seek = function(position) {
 
 ControllerWebradio.prototype.explodeUri = function(uri) {
     var self = this;
-
+    
     var defer=libQ.defer();
 
     defer.resolve({
@@ -950,7 +950,6 @@ ControllerWebradio.prototype.getSelectionInfo = function () {
                 }).end(function (response) {
                     if (response.status === 200) {
                         try {
-                            console.log(response.body)
                             selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
                             defer.resolve(selection);
                         } catch(e) {

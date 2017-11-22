@@ -141,7 +141,9 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             if(service==='webradio' || item.uri.startsWith('cdda:'))
             {
                 item.name=item.title;
-                item.albumart="/albumart";
+                if (!item.albumart) {
+                    item.albumart="/albumart";
+                }
                 promiseArray.push(libQ.resolve(item));
             }
             else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
