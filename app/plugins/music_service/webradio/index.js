@@ -11,6 +11,8 @@ var nodetools=require('nodetools');
 var variant = '';
 var selection = {};
 var retry = 0;
+var selectionEndpoint = 'https://radio-directory.firebaseapp.com/';
+
 
 // Define the ControllerWebradio class
 module.exports = ControllerWebradio;
@@ -941,14 +943,21 @@ ControllerWebradio.prototype.getSelectionInfo = function () {
             }
 
             try {
-                var Request = unirest.get('https://volumio.org/'+variant+'/selection.json');
+                var Request = unirest.get(selectionEndpoint + variant+'/selection.json');
                 Request.timeout(1500)
                 Request.query({
                     token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
                 }).end(function (response) {
                     if (response.status === 200) {
-                        selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
-                        defer.resolve(selection);
+                        try {
+                            console.log(response.body)
+                            selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
+                            defer.resolve(selection);
+                        } catch(e) {
+                            defer.resolve(selection);
+                            retry++
+                        }
+
                     } else {
                         defer.resolve(selection);
                         retry++
@@ -989,7 +998,8 @@ ControllerWebradio.prototype.listSelection = function () {
         }
     };
 
-        var Request = unirest.get('https://volumio.org/'+variant+'/selection.json');
+        var Request = unirest.get(selectionEndpoint + variant+'/selection.json');
+        var thumbnaiEndpoint = selectionEndpoint + variant + '/src/images/radio-thumbnails/';
         Request.timeout(1500)
         Request.query({
             token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
@@ -1003,7 +1013,7 @@ ControllerWebradio.prototype.listSelection = function () {
                             title: station.title,
                             artist: '',
                             album: '',
-                            albumart: station.albumart,
+                            albumart: thumbnaiEndpoint + station.title + '.png',
                             uri: station.uri
                         };
                     object.navigation.lists[0].items.push(radio);
