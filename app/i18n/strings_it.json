@@ -178,6 +178,7 @@
     "SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
     "SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
     "ERROR":"Errore",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a destra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
     "GOT_IT":"Capito"
   },
   "APPEARANCE": {
