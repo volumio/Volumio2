@@ -987,15 +987,20 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 			var conf7 = conf6.replace("${mixer}", mixerstrings);
 
-			if(resampling){
-                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "1"' + os.EOL + '}');
-				var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
-
+            if (self.config.get('iso', false)) {
+            	var conf9 = conf7.replace("${format}", "");;
 			} else {
-                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "1"' + os.EOL + '}');
-				var conf9 = conf8.replace("${format}", "");
+                if(resampling){
+                    var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "1"' + os.EOL + '}');
+                    var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
 
+                } else {
+                    var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "1"' + os.EOL + '}');
+                    var conf9 = conf8.replace("${format}", "");
+
+                }
 			}
+
 
             if (self.config.get('iso', false)){
                 //iso enabled
