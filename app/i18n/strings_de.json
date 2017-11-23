@@ -177,7 +177,9 @@
 		"CONTINUE":"Weiter",
 		"SETTINGS_SAVED_SUCCESSFULLY":"Einstellungen gespeichert",
 		"SETTINGS_SAVE_ERROR":"Einstellungen konnten nicht gespeichert werden",
-		"ERROR":"Fehler"
+		"ERROR":"Fehler",
+	"UPDATING_MUSIC_DB_WAIT_MESSAGE":"Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
+	"GOT_IT":"Verstanden"
   },
   "APPEARANCE":{
 	"APPEARANCE":"Aussehen",
@@ -264,7 +266,19 @@
 	"UPDATE_ALREADY_LATEST_VERSION":"Die verwendete Version ist aktuell.",
 	"NO_UPDATE_AVAILABLE":"Keine Aktualisierungen verfügbar",
         "CANNOT_REMOVE_MEDIA":"Medium kann nicht ausgeworfen werden",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Medium erfolgreich ausgeworfen"
+    	"MEDIA_REMOVED_SUCCESSFULLY":"Medium erfolgreich ausgeworfen",
+	"INSTALL_TO_DISK":"Auf Laufwerk installieren",
+    	"INSTALLING_TO_DISK":"Auf Laufwerk installieren",
+    	"INSTALLING_TO_DISK_MESSAGE":"Installiere auf Laufwerk. Bitte warten!",
+    	"INSTALLING_TO_DISK_ERROR_MESSAGE":"Installation auf Laufwerk konnte nicht abgeschlossen werden.",
+    	"INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Installation konnte nicht abgeschlossen werden. Das Ziellaufwerk muss größer sein, als das Quelllaufwerk.",
+    	"INSTALL_TO_DISK_DESC":"Installation auf Laufwerk",
+    	"INSTALL_TO_DISK_MESSAGE":"Installation von Volumio auf Laufwerk bitte bestätigen",
+    	"INSTALL_TO_DISK_LABEL":"Bezeichnung",
+    	"INSTALL_TO_DISK_SIZE":"Größe",
+    	"INSTALL_TO_DISK_MESSAGE_WARNING":". ACHTUNG: Alle Daten auf dem Ziellaufwerk werden gelöscht!",
+    	"INSTALLING_TO_DISK_SUCCESS_TITLE":"Installation erfolgreich abgeschlossen",
+	"INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Um das neu installierte System jetzt zu verwenden, müssen alle Wechseldatenträger entfernt und das System neu gestartet werden."
   },
   "WEBRADIO":{
 	"MY_WEB_RADIOS":"Meine Radiosender",
@@ -280,11 +294,13 @@
     	"UNINSTALL":"Deinstallieren",
     	"UPDATING_PLUGIN":"Plugin wird aktualisiert",
     	"DOWNLOADING_FROM":"Plugin herunterladen von ",
-    	"DOWNLOADING":"Plugin wird heruntergeladen"
+    	"DOWNLOADING":"Plugin wird heruntergeladen",
+	"NO_CONFIGURATION_AVAILABLE":"Konfiguration nicht verfügbar"
   },
   "WIZARD":{
-	"CONGRATULATIONS":"Glückwunsch",
-    "DEVICE_SUCCESSFULLY_CONFIGURED":"wurde eingerichtet und ist bereit für die Wiedergabe",
-    "PLEASE_DONATE":"Wenn dir Volumio gefällt, unterstütze uns doch mit einer Spende."
+	  "CONGRATULATIONS":"Glückwunsch",
+	  "DEVICE_SUCCESSFULLY_CONFIGURED":"wurde eingerichtet und ist bereit für die Wiedergabe",
+	  "PLEASE_DONATE":"Wenn dir Volumio gefällt, unterstütze uns doch mit einer Spende.",
+	  "RUN_FIRST_CONFIG_WIZARD":"Einrichtungsassistent ausführen"
   }
 }
