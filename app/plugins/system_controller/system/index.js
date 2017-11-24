@@ -312,9 +312,9 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_NOW') + ' ' + hostname);
 						self.logger.info('Hostname now is ' + newhostname);
 						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ hostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
-						exec("/usr/bin/sudo /bin/chmod 777 /etc/avahi/services/volumio.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						exec("/usr/bin/sudo /bin/chmod -R 777 /etc/avahi/services/", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								console.log('Cannot set permissions for /etc/hosts: ' + error);
+								console.log('Cannot set permissions for /etc/avahi/services/: ' + error);
 
 							} else {
 								self.logger.info('Permissions for /etc/avahi/services/volumio.service')
