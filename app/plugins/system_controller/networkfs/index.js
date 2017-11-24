@@ -37,6 +37,8 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
 	config.loadFile(configFile);
 
 	self.initShares();
+    var boundMethod = self.onPlayerNameChanged.bind(self);
+    self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
     return libQ.resolve();
 };
@@ -865,4 +867,53 @@ ControllerNetworkfs.prototype.getLabelForSelect = function (options, key) {
 	}
 
 	return 'Error';
+};
+
+ControllerNetworkfs.prototype.onPlayerNameChanged = function () {
+    var self = this;
+
+    return self.writeSMBConf();
+};
+
+
+ControllerNetworkfs.prototype.writeSMBConf = function () {
+    var self = this;
+
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var nameraw = systemController.getConf('playerName');
+    var name = nameraw.charAt(0).toUpperCase() + nameraw.slice(1);
+    var smbConfFile = '/etc/samba/smb.conf';
+    var serverString = config.get('server_string', 'Volumio Audiophile Music Player');
+
+    exec('/usr/bin/sudo /bin/chmod 777 ' + smbConfFile, {uid:1000,gid:1000},
+        function (error, stdout, stderr) {
+            if(error != null) {
+                self.logger.info('Error setting smb.conf file perms: '+error);
+            } else {
+                self.logger.info('smb.conf Permissions set');
+                fs.readFile(__dirname + "/smb.conf.tmpl", 'utf8', function (err, data) {
+                    if (err) {
+                        return self.logger.log('Error reading Samba configuration template file: '+err);
+                    }
+                    var conf1 = data.replace(/{NAME}/g, name);
+                    var conf2 = conf1.replace('{STRING}', serverString);
+
+                    fs.writeFile(smbConfFile, conf2, 'utf8', function (err) {
+                        if (err) {
+                            self.logger.log('Error writing Samba configuration file: '+err);
+                        } else {
+                            exec("/usr/bin/sudo /bin/systemctl restart nmbd.service && /usr/bin/sudo /bin/systemctl restart smbd.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+                                if (error !== null) {
+                                    console.log(error);
+                                    self.logger.error('Cannot restart SAMBA')
+                                } else {
+                                    self.logger.info('SAMBA Restarted')
+                                }
+                            });
+
+						}
+                    });
+                });
+            }
+        });
 };
