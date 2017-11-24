@@ -883,7 +883,6 @@ ControllerNetworkfs.prototype.writeSMBConf = function () {
     var nameraw = systemController.getConf('playerName');
     var name = nameraw.charAt(0).toUpperCase() + nameraw.slice(1);
     var smbConfFile = '/etc/samba/smb.conf';
-    var serverString = config.get('server_string', 'Volumio Audiophile Music Player');
 
     exec('/usr/bin/sudo /bin/chmod 777 ' + smbConfFile, {uid:1000,gid:1000},
         function (error, stdout, stderr) {
@@ -895,10 +894,9 @@ ControllerNetworkfs.prototype.writeSMBConf = function () {
                     if (err) {
                         return self.logger.log('Error reading Samba configuration template file: '+err);
                     }
-                    var conf1 = data.replace(/{NAME}/g, name);
-                    var conf2 = conf1.replace('{STRING}', serverString);
+                    var conf = data.replace(/{NAME}/g, name);
 
-                    fs.writeFile(smbConfFile, conf2, 'utf8', function (err) {
+                    fs.writeFile(smbConfFile, conf, 'utf8', function (err) {
                         if (err) {
                             self.logger.log('Error writing Samba configuration file: '+err);
                         } else {
