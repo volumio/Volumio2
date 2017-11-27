@@ -106,7 +106,7 @@
     "PRIMARY_DNS":"DNS primaire",
     "SECONDARYY_DNS":"DNS Secondaire",
     "DNS_ERROR_INFO":"Renseignez les 2 adresses IP des DNS",
-    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"Connecté au réseau!",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"Connecté au réseau",
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED":"Passez à l'étape suivante",
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Echec de connexion au réseau",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Réessayez ou passez à l'étape suivante",
