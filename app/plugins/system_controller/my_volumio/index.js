@@ -6,8 +6,11 @@ var firebase = require("firebase");
 var unirest = require('unirest');
 var config = new (require('v-conf'))();
 var io=require('socket.io-client');
+var execSync = require('child_process').execSync;
+var exec = require('child_process').exec;
 var socket= io.connect('http://localhost:3000');
 var endpointdomain = 'https://us-central1-myvolumio.cloudfunctions.net/';
+var remoteJsonConf = '/tmp/myvolumio-remote.json'
 var uid = '';
 var userLoggedIn = false;
 var crypto = require('crypto');
@@ -15,6 +18,7 @@ var algorithm = 'aes-256-ctr';
 var uuid = '';
 var name = '';
 var hwuuid = '';
+var geo = 'eu1';
 var lastMyVolumioState = {};
 
 module.exports = myVolumio;
@@ -63,8 +67,9 @@ myVolumio.prototype.onStart = function ()
     uuid = systemController.getConf('uuid');
     hwuuid = self.getHwuuid();
     firebase.initializeApp(config);
+    self.remotePrepare();
     self.myVolumioLogin();
-    self.updateMyVolumioDeviceState()
+    self.updateMyVolumioDeviceState();
 
 
 
@@ -208,6 +213,10 @@ myVolumio.prototype.myVolumioLogin = function () {
             firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
 
             });
+            setTimeout(function(){
+                self.startRemoteDaemon();
+            },4000)
+
 
             
             firebase.database().ref(".info/connected")
@@ -230,6 +239,7 @@ myVolumio.prototype.myVolumioLogin = function () {
         } else {
             userLoggedIn = false;
             self.logger.info('MYVOLUMIO LOGGED OUT');
+            self.stopRemoteDaemon();
         }
     });
 };
@@ -558,7 +568,7 @@ myVolumio.prototype.playerNameCallback = function () {
 myVolumio.prototype.updateMyVolumioDeviceState = function () {
     var self = this;
 
-    
+
     socket.on('pushState', function (data) {
         if (userLoggedIn) {
             var currentMyVolumioState = {"albumart": data.albumart, "artist": data.artist, "mute": data.mute, "status": data.status, "track": data.title, "volume":data.volume }
@@ -569,4 +579,71 @@ myVolumio.prototype.updateMyVolumioDeviceState = function () {
         }
 
     })
+}
+
+myVolumio.prototype.remotePrepare = function () {
+    var self = this;
+    var certsPath = '/data/certs'
+    if (!fs.existsSync(certsPath)) {
+        execSync('/bin/mkdir ' + certsPath, { uid: 1000, gid: 1000, encoding: 'utf8'});
+        exec('/usr/bin/openssl req -x509 -nodes -newkey rsa:2048 -sha256 -keyout ' + certsPath + '/client.key -out ' + certsPath + '/client.crt -subj "/C=/ST=/L=/O=/OU=/CN=*"', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+            if (error !== null) {
+                self.logger.error('Cannot create cert: ' + error);
+            } else {
+                self.logger.info('Cert properly created')
+            }
+        });
+    }
+
+}
+
+myVolumio.prototype.writeRemoteConf = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    fs.outputJson(remoteJsonConf, {"hwuuid": hwuuid, "geo": geo}, function(err) {
+      if (err) {
+          self.logger.error('Cannot write remote configuration');
+          defer.reject('')
+      } else {
+          self.logger.info('Remote config written successfully');
+          defer.resolve('')
+      }
+    })
+
+    return defer.promise
+}
+
+myVolumio.prototype.startRemoteDaemon = function () {
+    var self = this;
+
+    var conf = self.writeRemoteConf();
+
+    conf.then(function () {
+        exec("/usr/bin/sudo /bin/systemctl restart tunnel.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+            if (error !== null) {
+                self.logger.error('Cannot start Remote Daemon: '+error)
+            } else {
+                self.logger.info('Remote Daemon Started')
+            }
+        });
+    }).fail(function () {
+        self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+    });
+
+
+
+}
+
+myVolumio.prototype.stopRemoteDaemon = function () {
+    var self = this;
+
+    exec("/usr/bin/sudo /bin/systemctl restart tunnel.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.error('Cannot stop Remote Daemon: '+error)
+        } else {
+            self.logger.info('Remote Daemon Stopped')
+        }
+    });
+
 }
