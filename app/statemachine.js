@@ -767,6 +767,11 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		}
 		else if (this.currentStatus === 'pause') {
 			this.currentStatus='play';
+            if(this.isConsume)
+            {
+                this.consumeState.status='play';
+                this.consumeState.seek=this.currentSeek
+            }
 			this.pushState().fail(this.pushError.bind(this));
 		}
 
@@ -826,6 +831,11 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             this.commandRouter.pushDebugConsoleMessage("CURRENT POSITION "+this.currentPosition);
 
 			this.currentStatus = 'stop';
+            if(this.isConsume)
+            {
+                this.consumeState.status='stop';
+                this.consumeState.seek=0
+            }
 
 			//Checking repeat status
             if(this.currentRepeat && this.currentRepeatSingleSong)
@@ -929,6 +939,12 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             }
         }
 	    else if (this.currentStatus === 'pause') {
+            if(this.isConsume)
+            {
+                this.consumeState.status='pause';
+                this.consumeState.seek=this.currentSeek
+            }
+
 			this.pushState().fail(this.pushError.bind(this));
 
 			return this.stopPlaybackTimer();
