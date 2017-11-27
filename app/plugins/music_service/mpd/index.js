@@ -1202,6 +1202,19 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			var list = [];
+            if (singleBrowse && uri === 'music-library') {
+                prev = '/';
+                var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: 'Favourites', uri: 'favourites', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: 'Playlists', uri: 'playlists', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: 'Artists', uri: 'artists://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: 'Albums', uri: 'albums://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: 'Media Servers', uri: 'upnp', type: 'title'}];
+
+                for (var i in browseSources) {
+                    list.push(browseSources[i]);
+                }
+            }
 			if (msg) {
                 var s0 = sections[0] + '/';
 				var path;
@@ -1352,18 +1365,6 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						});
 					}
 
-				} if (singleBrowse && uri === 'music-library') {
-					prev = '/';
-					var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: 'Favourites', uri: 'favourites', type: 'title'},
-					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: 'Playlists', uri: 'playlists', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: 'Artists', uri: 'artists://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: 'Albums', uri: 'albums://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'},
-					{albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: 'Media Servers', uri: 'upnp', type: 'title'}];
-
-					for (var i in browseSources) {
-                        list.push(browseSources[i]);
-					}
 				}
 			}
 			else self.logger.info(err);
