@@ -26,7 +26,7 @@ Root login via ssh has been disabled by default, however user volumio can become
 Developers are welcome! Check out the resources:
 
 * [Main documentation](https://volumio.github.io/docs/index.html)
-* [Setup a dev environment](https://volumio.github.io/docs/Development_How_To/Set_up_a_development_environment.html)
+* [Setup a dev environment](https://volumio.github.io/docs/Development_How_To/Set_up_development_environment_introduction.html)
 * [Forum thread for feedbacks and suggestions](https://volumio.org/forum/introducing-volumio-t3169.html)
 * [Wiki](https://github.com/volumio/Volumio2/wiki) (there might be some overlap between the documentation and the wiki; in general, consider documentation as the primary information source)
 
