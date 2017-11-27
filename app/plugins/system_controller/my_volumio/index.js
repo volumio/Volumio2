@@ -5,6 +5,8 @@ var fs = require('fs-extra');
 var firebase = require("firebase");
 var unirest = require('unirest');
 var config = new (require('v-conf'))();
+var io=require('socket.io-client');
+var socket= io.connect('http://localhost:3000');
 var endpointdomain = 'https://us-central1-myvolumio.cloudfunctions.net/';
 var uid = '';
 var userLoggedIn = false;
@@ -12,9 +14,8 @@ var crypto = require('crypto');
 var algorithm = 'aes-256-ctr';
 var uuid = '';
 var name = '';
-
-
-
+var hwuuid = '';
+var lastMyVolumioState = {};
 
 module.exports = myVolumio;
 
@@ -39,6 +40,7 @@ myVolumio.prototype.onVolumioStart = function ()
     this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
 
 
+
     return libQ.resolve();
 };
 
@@ -59,8 +61,10 @@ myVolumio.prototype.onStart = function ()
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     name = systemController.getConf('playerName');
     uuid = systemController.getConf('uuid');
+    hwuuid = self.getHwuuid();
     firebase.initializeApp(config);
     self.myVolumioLogin();
+    self.updateMyVolumioDeviceState()
 
 
 
@@ -195,6 +199,7 @@ myVolumio.prototype.myVolumioLogin = function () {
         if (user) {
             userLoggedIn = true;
             uid = user.uid;
+
             self.logger.info('MYVOLUMIO SUCCESSFULLY LOGGED IN');
             if (uid != undefined && uid.length > 0 && uid != self.config.get('uid', '')) {
                 self.config.set('uid', uid)
@@ -203,6 +208,25 @@ myVolumio.prototype.myVolumioLogin = function () {
             firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
 
             });
+
+            
+            firebase.database().ref(".info/connected")
+                .on("value", function (snap) {
+                        if (snap.val()) {
+                            //ONLINE
+                            firebase.database().ref('user_devices/' + uid + '/' + hwuuid + '/online').set(true);
+                            firebase.database().ref('user_devices/' + uid + '/' + hwuuid + '/lastSeen').set(null);
+                        } else {
+                            // If client offline
+                        }
+                    }
+                );
+
+            //just set it offline
+            firebase.database().ref('user_devices/' + uid + '/' + hwuuid + '/online').onDisconnect().set(false);
+
+            //otherwise, we could store the timestamp of last online presence
+            firebase.database().ref('user_devices/' + uid + '/' + hwuuid + '/lastSeen').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
         } else {
             userLoggedIn = false;
             self.logger.info('MYVOLUMIO LOGGED OUT');
@@ -529,4 +553,20 @@ myVolumio.prototype.playerNameCallback = function () {
     if (userLoggedIn) {
         self.updateMyVolumioDevice()
     }
+}
+
+myVolumio.prototype.updateMyVolumioDeviceState = function () {
+    var self = this;
+
+    
+    socket.on('pushState', function (data) {
+        if (userLoggedIn) {
+            var currentMyVolumioState = {"albumart": data.albumart, "artist": data.artist, "mute": data.mute, "status": data.status, "track": data.title, "volume":data.volume }
+            if (currentMyVolumioState != lastMyVolumioState) {
+                lastMyVolumioState = currentMyVolumioState;
+                firebase.database().ref('user_devices/' + uid + '/' + hwuuid + '/state').set(currentMyVolumioState)
+            }
+        }
+
+    })
 }
