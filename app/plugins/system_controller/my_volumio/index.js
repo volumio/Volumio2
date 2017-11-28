@@ -412,15 +412,24 @@ myVolumio.prototype.addMyVolumioDevice = function () {
     var request = {};
     var token = self.config.get('token', '');
     request.endpoint = endpointdomain+'/api/v1/addMyVolumioDevice' + '?uid=' + uid + '&token='+token;
-    var name = this.commandRouter.sharedVars.get('system.name');
+    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+    console.log(request.endpoint)
+    var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'playerName');
     var uuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
     var device = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'device');
     var hwuuid = self.getHwuuid();
     request.body = {'name': name, 'uuid': uuid, 'device': device, 'hwuuid': hwuuid};
+    console.log(request.body)
     var response=self.restPost(request)
+
+    //TODO: Dirty fix for non working API
+    setTimeout(function(){
+        self.updateMyVolumioDevice();
+    },1000)
 
     if (response != undefined) {
         response.then(function (result) {
+
         })
     }
 };
@@ -432,7 +441,7 @@ myVolumio.prototype.updateMyVolumioDevice = function () {
     var request = {};
     var token = self.config.get('token', '');
     request.endpoint = endpointdomain+'/api/v1/updateMyVolumioDevice' + '?uid=' + uid + '&token='+token;
-    var name = this.commandRouter.sharedVars.get('system.name');
+    var name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'playerName');
     var uuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'uuid');
     var device = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'device');
     var hwuuid = self.getHwuuid();
