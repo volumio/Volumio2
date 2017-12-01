@@ -2,6 +2,8 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
+var websocket = require('socket.io-client')
+var socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true})
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -642,6 +644,59 @@ function commit(package, arch) {
     execSync("/usr/bin/git push origin gh-pages");
     console.log("Congratulations, your package has been correctly uploaded and" +
         "is ready for merging!")
+    process.exit(1)
+}
+
+// =============================== INSTALL ====================================
+
+function install(){
+    if(fs.existsSync("package.json")){
+        var package = fs.readJsonSync("package.json");
+        zip();
+        if(!fs.existsSync("/tmp/plugins")) {
+            execSync("/bin/mkdir /tmp/plugins/")
+        }
+        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
+            + package.name + ".zip"})
+        socket.on('installPluginStatus', function (data) {
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
+            if(data.message == "Plugin Successfully Installed"){
+                console.log("Done!");
+                process.exit(1)
+            }
+        })
+    }
+    else {
+        console.log("No package found")
+        process.exit(1)
+    }
+}
+
+// ================================ UPDATE ====================================
+
+function update() {
+    if(fs.existsSync("package.json")){
+        var package = fs.readJsonSync("package.json");
+        zip();
+        if(!fs.existsSync("/tmp/plugins")) {
+            execSync("/bin/mkdir /tmp/plugins/")
+        }
+        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        socket.emit('updatePlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
+            + package.name + ".zip", category: package.category, name: package.name})
+        socket.on('installPluginStatus', function (data) {
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
+            if(data.message == "Plugin Successfully Installed"){
+                console.log("Done!");
+                process.exit(1)
+            }
+        })
+    }
+    else {
+        console.log("No package found")
+        process.exit(1)
+    }
 }
 
 // ================================ START =====================================
@@ -659,5 +714,11 @@ switch (argument){
         break;
     case "publish":
         publish()
+        break;
+    case "install":
+        install()
+        break;
+    case "update":
+        update()
         break;
 }

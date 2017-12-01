@@ -47,6 +47,8 @@ plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
 plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
+plugin install                     installs the plugin locally
+plugin update                      updates the plugin
 "
 
 }
@@ -179,6 +181,14 @@ correspondent folder in data"
                     echo ""
                     echo "This command will publish the plugin on volumio plugins store"
                     echo ""
+                elif [ "$2" == "install" ]; then
+                    echo ""
+                    echo "This command will install the plugin on your device"
+                    echo ""
+                elif [ "$2" == "update" ]; then
+                    echo ""
+                    echo "This command will update the plugin on your device"
+                    echo ""
                 fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
             else
@@ -191,6 +201,8 @@ correspondent folder in data"
                 echo "refresh   copies the plugin in the system"
                 echo "package   compresses the plugin"
                 echo "publish   publishes the plugin on git"
+                echo "install   installs the plugin locally"
+                echo "update    updates the plugin"
                 echo ""
             fi
             ;;
