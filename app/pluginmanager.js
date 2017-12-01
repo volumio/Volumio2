@@ -504,15 +504,17 @@ PluginManager.prototype.installPlugin = function (url) {
 	var downloadCommand;
 
 	var currentMessage = "Downloading plugin at "+url;
+
 	var droppedFile = url.replace("http://127.0.0.1:3000/plugin-serve/", "");
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
-    if (droppedFile == url) {
-        downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
-    } else {
-        downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
-    }
+	if (droppedFile == url) {
+		downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
+	}
+	else {
+		downloadCommand = "/bin/mv /tmp/plugins/" + droppedFile + " /tmp/downloaded_plugin.zip";
+	}
 
 	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
