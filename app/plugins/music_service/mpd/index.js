@@ -671,9 +671,8 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
-		if (!ignoreupdate) {
-			self.logger.info('Mpd Status Update: '+status);
-			self.logStart('MPD announces state update')
+		if (!ignoreupdate && status != 'playlist' && status != undefined) {
+			self.logStart('MPD announces state update: ' + status)
 				.then(self.getState.bind(self))
 				.then(self.pushState.bind(self))
 				.fail(self.pushError.bind(self))
@@ -691,7 +690,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 		var timeStart = Date.now();
 
 		if (!ignoreupdate) {
-		self.logStart('MPD announces system state update')
+		self.logStart('MPD announces system playlist update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
