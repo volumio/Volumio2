@@ -179,6 +179,8 @@ ControllerWebradio.prototype.listRoot=function() {
             }
 
         });
+    } else {
+        defer.resolve(radioRoot)
     }
     return defer.promise
 }
