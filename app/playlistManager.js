@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var S = require('string');
+var singleBrowse = false;
 
 module.exports = PlaylistManager;
 
@@ -18,6 +19,7 @@ function PlaylistManager(commandRouter) {
 	fs.ensureDirSync(self.favouritesPlaylistFolder);
 
 	self.logger = self.commandRouter.logger;
+    singleBrowse = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'singleBrowse');
 }
 
 PlaylistManager.prototype.createPlaylist = function (name) {
@@ -718,7 +720,7 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					lists: [{availableListViews:['list'],items:[]}]
 				}
 			};
-		var singleBrowse = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'singleBrowse');
+
         if (singleBrowse) {
             response.navigation.prev.uri = 'music-library';
         }
