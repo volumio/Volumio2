@@ -34,7 +34,7 @@
     "DOP":"DSD sur PCM (DoP)",
     "DSD_PLAYBACK_MODE":"Mode de lecture DSD",
     "DSD_DIRECT":"DSD Direct",
-    "DSD_DOC":"Choisissez le mode de lecture DSD. DSD Direct lit le format DSD natif si le materièl le supporte, sinon le flux ext converti à la volée au format PCM. Avec DoP activé, le flux DSD sera encapsulé dans PCM 24 bits (DoP)",
+    "DSD_DOC":"Choisissez le mode de lecture DSD. DSD Direct lit le format DSD natif si le matériel le supporte, sinon le flux ext converti à la volée au format PCM. Avec DoP activé, le flux DSD sera encapsulé dans PCM 24 bits (DoP)",
     "DSD_AUTO_VOLUME":"DSD Volume automatique",
     "DSD_AUTO_VOLUME_DOC":"DSD nécessite un réglage de volume à 100. Si activé pendant la lecture DSD, le volume sera automatiquement règlé à 100 (ATTENTION: A utiliser avec précaution!)",
     "SOFTVOL":"Contrôle logiciel du Volume",
@@ -44,14 +44,14 @@
     	"MIXER_TYPE_DOC":"Selectionne le type de mixeur : Aucun = Pas de contrôle de volume, Logiciel = Réglage du volume, avec une perte de qualité (minime), Matériel = Le meilleur des 2 mondes...Réglage du volume sans perte de qualité",
       "ADVANCED_AUDIO_TWEAKS":"Réglages audio avancés",
 	    "AUDIO_RESAMPLING":"Rééchantillonage",
-	    "AUDIO_RESAMPLING_SETTINGS_SAVED":"Réglage du rééchantillonage sauvé",
+	    "AUDIO_RESAMPLING_SETTINGS_SAVED":"Réglage du rééchantillonage enregistré",
 	    "TARGET_BITDEPTH":"Nombre de bits cible",
 	    "TARGET_SAMPLERATE":"Fréquence d'échantillonage",
       "NATIVE":"Native",
     "ADVANCED_DAC_DSP_OPTIONS": "Options DSP",
     	"ADVANCED_DAC_DSP_OPTIONS_DOC": "Activation de certaines options DSP. Disponible seulement sur certains DAC I2S",
     "DSP_PROGRAM_ENABLED": "DSP activé",
-    "DSP_PROGRAM_REBOOT": "Modification DSP,un redémarrrage est nécéssaire",
+    "DSP_PROGRAM_REBOOT": "Modification DSP, un redémarrrage est nécéssaire",
     "NO_AUDIO_DEVICE_AVAILABLE": "Aucun périphérique audio disponible",
     "SETTING_ERROR":"Erreur",
     "PERSISTENT_QUEUE":"File d'attente persistante",
@@ -178,7 +178,7 @@
     "SETTINGS_SAVED_SUCCESSFULLY":"Réglages enregistrés avec succcès",
     "SETTINGS_SAVE_ERROR":"Erreur en enregistrant les réglages",
     "ERROR":"Erreur",
-    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Scan en cours de votre musique et la flèche va tourner sur le bouton en bas à gauche jusqu'a ce que ce soit terminé. Durant cette période le système peut être ralenti, pour votre confort d'écoute, évitez d'écouter de la musique ",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Scan de votre musique en cours. Durant cette période le système peut être ralenti, pour votre confort d'écoute, évitez d'écouter de la musique ",
     "GOT_IT":"Compris"  
   },
   "APPEARANCE":{
@@ -209,7 +209,7 @@
     "COMPILATION_METADATA_DOC":"Configure les metadatas utilisées pour décrire albumart dans les compilations ou multi artistes. Utilise la vigrgule comme séparateur.",
     "COMPILATION_METADATA":"Champs Metadatas pour les compilations",
     "ALBUMART_CACHE_CLEARED":"Cache de images des albums réinitialisé avec succès",
-    "ALBUMART_CACHE_CLEAR_ERROR":"Une erreur est survenue en effaçant le cache, reessayer ultérieurement",  
+    "ALBUMART_CACHE_CLEAR_ERROR":"Une erreur est survenue en effaçant le cache, réessayer ultérieurement",  
     "ALBUMART_RESET_CACHE":"Réinitialiser le cache des images des albums",
     "ALBUMART_RESET_CACHE_DOC":"Volumio met en cache les images des albums pour améliorer la performance, cependant cela empèche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums ",
     "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
@@ -300,7 +300,7 @@
    "WIZARD":{
    "CONGRATULATIONS":"Félicitations !",
    "DEVICE_SUCCESSFULLY_CONFIGURED":"a été correctement configuré et est prèt à l'emploi!",
-   "PLEASE_DONATE":"Si vous aimez Volumio, faite un don! Vous pouvez faire la différence pour ce projet",
+   "PLEASE_DONATE":"Si vous aimez Volumio, faites un don! Vous pouvez faire la différence pour ce projet",
    "RUN_FIRST_CONFIG_WIZARD":"Lancer l'assistant de configuration"
    }
 }
