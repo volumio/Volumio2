@@ -257,6 +257,11 @@ AirPlayInterface.prototype.unsetVol = function () {
 
 };
 
+AirPlayInterface.prototype.stop = function () {
+    var self = this;
+
+};
+
 AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
     var self = this;
     return self.context.coreCommand.executeOnPlugin(type, controller, 'getConfigParam', data);
