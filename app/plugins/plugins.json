@@ -232,16 +232,6 @@
         "type": "string",
         "value": "STARTED"
       }
-    },
-    "my_volumio":  {
-      "enabled": {
-        "type": "boolean",
-        "value": true
-      },
-      "status": {
-        "type": "string",
-        "value": "STARTED"
-      }
     }
   }
 }
