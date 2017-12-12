@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var S = require('string');
+var singleBrowse = false;
 
 module.exports = PlaylistManager;
 
@@ -18,6 +19,7 @@ function PlaylistManager(commandRouter) {
 	fs.ensureDirSync(self.favouritesPlaylistFolder);
 
 	self.logger = self.commandRouter.logger;
+    singleBrowse = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'singleBrowse');
 }
 
 PlaylistManager.prototype.createPlaylist = function (name) {
@@ -136,7 +138,13 @@ PlaylistManager.prototype.playPlaylist = function (name) {
 
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Play playlist ' + name);
 
-	return self.commonPlayPlaylist(self.playlistFolder, name);
+	if (name === 'favourites') {
+        return self.playFavourites();
+	} else {
+        return self.commonPlayPlaylist(self.playlistFolder, name);
+	}
+
+
 };
 
 PlaylistManager.prototype.enqueue = function (name) {
@@ -701,9 +709,21 @@ PlaylistManager.prototype.listFavourites = function (uri) {
 					prev: {
 						uri: ''
 					},
+					info: {
+                        uri: 'playlists/favourites',
+						title:  self.commandRouter.getI18nString('COMMON.FAVOURITES'),
+						name: 'favourites',
+						service: 'mpd',
+                        type:  'play-playlist',
+						albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png'
+					},
 					lists: [{availableListViews:['list'],items:[]}]
 				}
 			};
+
+        if (singleBrowse) {
+            response.navigation.prev.uri = 'music-library';
+        }
 
 			for (var i in data) {
 				var ithdata = data[i];

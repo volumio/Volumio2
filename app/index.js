@@ -1668,21 +1668,6 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
     }
 }
 
-/**
- *  [{
- *   attribute_name:"",
- *   value:"",
- *   id:""
- *   },
- *   {
- *   attribute_name:"",
- *   value:"",
- *   id:""
- *   },
- *   ...
- *   ]
- */
-
 CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
     var self=this;
     var methodDefer=libQ.defer();
@@ -1828,6 +1813,93 @@ CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
 
 CoreCommandRouter.prototype.closeModals = function () {
     var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::Close All Modals sent');
 
-    return self.broadcastMessage('closeModal', '');
+    return self.broadcastMessage('closeAllModals', '');
 }
+
+CoreCommandRouter.prototype.getMyVolumioToken = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioToken', '');
+
+    if (response != undefined) {
+        response.then(function (result) {
+            defer.resolve(result);
+        })
+            .fail(function () {
+                var jsonobject = {"tokenAvailable":false}
+                defer.resolve(jsonobject);
+            });
+    }
+
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.setMyVolumioToken = function (data) {
+    var self=this;
+    var defer = libQ.defer();
+
+    var response = self.executeOnPlugin('system_controller', 'my_volumio', 'setMyVolumioToken', data);
+
+    if (response != undefined) {
+        response.then(function (result) {
+            defer.resolve(result);
+        })
+            .fail(function () {
+
+                defer.resolve('');
+            });
+    }
+
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.getMyVolumioStatus = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioStatus', '');
+
+    if (response != undefined) {
+        response.then(function (result) {
+            defer.resolve(result);
+        })
+            .fail(function () {
+                var jsonobject = {"loggedIn":false}
+                defer.resolve(jsonobject);
+            });
+    }
+
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.myVolumioLogout = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'myVolumioLogout', '');
+}
+
+CoreCommandRouter.prototype.enableMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'enableMyVolumioDevice', device);
+}
+
+CoreCommandRouter.prototype.disableMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'disableMyVolumioDevice', device);
+}
+
+CoreCommandRouter.prototype.deleteMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'deleteMyVolumioDevice', device);
+}
+

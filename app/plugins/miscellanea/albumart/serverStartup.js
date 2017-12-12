@@ -9,7 +9,7 @@ if (cluster.isMaster) {
     var cpuCount = require('os').cpus().length;
 
     if(cpuCount>1)
-        cpuCount=cpuCount-1;
+        cpuCount=cpuCount-2;
     
     console.log("Forking "+cpuCount+" albumart workers");
     // Create a worker for each CPU

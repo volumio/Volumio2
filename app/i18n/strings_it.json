@@ -63,7 +63,7 @@
     "RESAMPLING_ALG":"Qualità dell'algoritmo di Resampling",
     "RESAMPLING_ALG_DOC":"Questo settaggio permette di impostare l'algoritmo di resampling ideale. Qualità superiori richiedono molta capacità di calcolo, su dispositivi poco potenti questo può comportare difetti nella riproduzione. Se è questo il caso provare a diminuire la qualità del resampling fino ad ottenere una riproduzione ottimale",
     "VERY_HIGH":"Molto alta",
-    "HIGH":"Aigh",
+    "HIGH":"Alta",
     "MEDIUM":"Media",
     "LOW":"Bassa",
     "ISO_PLAYBACK":"Riproduzione file ISO",
@@ -177,7 +177,9 @@
     "CONTINUE":"Continua",
     "SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
     "SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
-    "ERROR":"Errore"
+    "ERROR":"Errore",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a destra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
+    "GOT_IT":"Capito"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -263,7 +265,19 @@
     "UPDATE_ALREADY_LATEST_VERSION":"La versione attuale è la più recente",
     "NO_UPDATE_AVAILABLE":"Nessun aggiornamento disponibile",
     "CANNOT_REMOVE_MEDIA":"Impossibile rimuovere il supporto",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Supporto rimosso correttamente"
+    "MEDIA_REMOVED_SUCCESSFULLY":"Supporto rimosso correttamente",
+    "INSTALL_TO_DISK":"Installa su disco",
+    "INSTALLING_TO_DISK":"Installazione su disco",
+    "INSTALLING_TO_DISK_MESSAGE":"Installazione su disco in corso, attendere",
+    "INSTALLING_TO_DISK_ERROR_MESSAGE":"Installazione su disco fallita",
+    "INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Impossibile installare sul disco selezionato: il disco di destinazione deve essere più capiente di quello di origine",
+    "INSTALL_TO_DISK_DESC":"Installa su disco",
+    "INSTALL_TO_DISK_MESSAGE":"Conferma di installare il sistema sul disco",
+    "INSTALL_TO_DISK_LABEL":"NOME",
+    "INSTALL_TO_DISK_SIZE":"DIMENSIONE",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":"ATTENZIONE: Veriricare che il disco di destinazione sia corretto. Ogni dato presente sul disco di destinazione sarà eliminato!",
+    "INSTALLING_TO_DISK_SUCCESS_TITLE":"Installazione di disco riuscita",
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Per utilizzare il sistema appena installato, riavviare il sistema e rimuovere ogni disco rimovibile"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

@@ -151,7 +151,7 @@ AirPlayInterface.prototype.playerNameCallback = function () {
 
 AirPlayInterface.prototype.startAirplayMeta = function () {
     var self = this;
-    var pipeReader = new ShairportReader({ address: '226.0.0.1', port: '5555' });
+    var pipeReader = new ShairportReader({ address: '127.0.0.1', port: '5555' });
 
 
     // Play begin
@@ -253,6 +253,11 @@ AirPlayInterface.prototype.airPlayStop = function () {
 };
 
 AirPlayInterface.prototype.unsetVol = function () {
+    var self = this;
+
+};
+
+AirPlayInterface.prototype.stop = function () {
     var self = this;
 
 };

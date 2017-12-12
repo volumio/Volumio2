@@ -173,7 +173,9 @@
     "CONTINUE":"继续",
     "SETTINGS_SAVED_SUCCESSFULLY":"保存设置成功",
     "SETTINGS_SAVE_ERROR":"保存设置时发生错误",
-    "ERROR":"Error"
+    "ERROR":"Error",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"您的音乐库正在扫描，在此期间，系统可能会反应缓慢。请在音乐索引完毕后，再进行其他操作",
+    "GOT_IT":"知道了"
   },
   "APPEARANCE":{
     "APPEARANCE":"外观",

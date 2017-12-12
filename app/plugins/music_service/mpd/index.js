@@ -381,7 +381,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
 	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
 
-	//self.commandRouter.logger.info(JSON.stringify("OBJTRACKINFO "+JSON.stringify(objTrackInfo)));
+    //this.commandRouter.logger.info("OBJTRACKINFO "+JSON.stringify(objTrackInfo));
 	var resp = {};
 
 
@@ -398,6 +398,10 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		}
         else if (resp.uri.indexOf('http://') >= 0) {
             resp.service='dirble';
+            if (objTrackInfo.file.indexOf('bbc') >= 0) {
+                objTrackInfo.Name = objTrackInfo.Name.replace(/_/g, ' ').replace('bbc', 'BBC');
+                objTrackInfo.file = objTrackInfo.Name;
+			}
         }
 	} else {
 		resp.uri = null;
@@ -501,7 +505,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 		nBitDepth = Number(objMetrics[1])+' bit';
         nChannels = Number(objMetrics[2]);
 		if (objMetrics[1] == 'f') {
-            nBitDepth = '32f bit';
+            nBitDepth = '32 bit';
 		} else if (objMetrics[0] == 'dsd64') {
             var nSampleRateRaw = '2.82 MHz';
             nBitDepth = '1 bit';
@@ -667,9 +671,8 @@ ControllerMpd.prototype.mpdEstablish = function () {
 	self.clientMpd.on('system', function (status) {
 		var timeStart = Date.now();
 
-		if (!ignoreupdate) {
-			self.logger.info('Mpd Status Update: '+status);
-			self.logStart('MPD announces state update')
+		if (!ignoreupdate && status != 'playlist' && status != undefined) {
+			self.logStart('MPD announces state update: ' + status)
 				.then(self.getState.bind(self))
 				.then(self.pushState.bind(self))
 				.fail(self.pushError.bind(self))
@@ -687,7 +690,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
 		var timeStart = Date.now();
 
 		if (!ignoreupdate) {
-		self.logStart('MPD announces system state update')
+		self.logStart('MPD announces system playlist update')
 			.then(self.updateQueue.bind(self))
 			.fail(self.pushError.bind(self))
 			.done(function () {
@@ -983,15 +986,20 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
 			var conf7 = conf6.replace("${mixer}", mixerstrings);
 
-			if(resampling){
-                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "0"' + os.EOL + '}');
-				var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
-
+            if (self.config.get('iso', false)) {
+            	var conf9 = conf7.replace("${format}", "");;
 			} else {
-                var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "0"' + os.EOL + '}');
-				var conf9 = conf8.replace("${format}", "");
+                if(resampling){
+                    var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "1"' + os.EOL + '}');
+                    var conf9 = conf8.replace("${format}", 'format      "'+resampling_samplerate+':'+resampling_bitdepth+':2"');
 
+                } else {
+                    var conf8 = conf7.replace("${sox}", 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "1"' + os.EOL + '}');
+                    var conf9 = conf8.replace("${format}", "");
+
+                }
 			}
+
 
             if (self.config.get('iso', false)){
                 //iso enabled
@@ -1082,6 +1090,9 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
             ]
         }
     };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
 	var promise = self.commandRouter.playListManager.listPlaylist();
 	promise.then(function (data) {
 		for (var i in data) {
@@ -1110,6 +1121,8 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 	var self = this;
 
 	var defer = libQ.defer();
+	var name = uri.split('/')[1];
+	console.log(uri)
 
     var response={
         "navigation": {
@@ -1123,6 +1136,14 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
                     ]
                 }
             ],
+            "info": {
+                "uri": 'playlists/favourites',
+                "title":  name,
+                "name": name,
+                "service": 'mpd',
+                "type":  'play-playlist',
+                "albumart": '/albumart?sourceicon=music_service/mpd/playlisticon.svg'
+            },
             "prev": {
                 "uri": "playlists"
             }
@@ -1180,6 +1201,19 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
 			var list = [];
+            if (singleBrowse && uri === 'music-library') {
+                prev = '/';
+                var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: 'Favourites', uri: 'favourites', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: 'Playlists', uri: 'playlists', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: 'Artists', uri: 'artists://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: 'Albums', uri: 'albums://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: 'Media Servers', uri: 'upnp', type: 'title'}];
+
+                for (var i in browseSources) {
+                    list.push(browseSources[i]);
+                }
+            }
 			if (msg) {
                 var s0 = sections[0] + '/';
 				var path;
@@ -1330,17 +1364,6 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 						});
 					}
 
-				} if (singleBrowse && uri === 'music-library') {
-					prev = '/';
-					var browseSources = [{icon: 'fa fa-heart', title: 'Favourites', uri: 'favourites', type: 'title'},
-					{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: 'Playlists', uri: 'playlists', type: 'title'},
-                    {icon: 'fa users',title: 'Artists', uri: 'artists://', type: 'title'},
-                    {icon: 'fa fa-dot-circle-o',title: 'Albums', uri: 'albums://', type: 'title'},
-                    {icon: 'fa fa-tag',title: 'Genres', uri: 'genres://', type: 'title'}];
-
-					for (var i in browseSources) {
-                        list.push(browseSources[i]);
-					}
 				}
 			}
 			else self.logger.info(err);
@@ -1775,11 +1798,17 @@ ControllerMpd.prototype.rescanDb = function () {
 	return self.sendMpdCommand('rescan', []);
 };
 
-ControllerMpd.prototype.updateDb = function () {
+ControllerMpd.prototype.updateDb = function (data) {
 	var self = this;
+	var pos = '';
+	var message = self.commandRouter.getI18nString('COMMON.SCAN_DB');
 
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.SCAN_DB'));
-	return self.sendMpdCommand('update', []);
+	if (data != undefined) {
+		pos = data.replace('music-library/', '')
+		message = pos + ': ' + message;
+	}
+    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
+	return self.sendMpdCommand('update', [pos]);
 };
 
 
@@ -2926,6 +2955,9 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 					]
 				}
 			};
+            if (singleBrowse) {
+            	response.navigation.prev ={'uri': 'music-library'}
+			}
 			var cmd = libMpd.cmd;
 
 			self.clientMpd.sendCommand(cmd("search album \"\"", []), function (err, msg) {
@@ -3092,7 +3124,6 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                         album: album,
                         type: 'song',
                         tracknumber: 0,
-                        albumart: albumart,
                         duration: time,
                         trackType: path.split('.').pop()
                     });
@@ -3157,6 +3188,9 @@ ControllerMpd.prototype.listArtists = function () {
         }]
         }
     };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
 
     var cmd = libMpd.cmd;
 	var artistlist = "artist";
@@ -3215,6 +3249,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
     var defer = libQ.defer();
 
     var splitted=curUri.split('/');
+    var albumart=self.getAlbumArt({artist:decodeURIComponent(splitted[index])},undefined,'users');
 
     var response = {
         "navigation": {
@@ -3241,6 +3276,13 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
                 }],
             "prev": {
                 "uri": previous
+            },
+            info: {
+                uri: curUri,
+                title:  decodeURIComponent(splitted[index]),
+                service: 'mpd',
+                type:  'artist',
+                albumart: albumart
             }
         }
     };
@@ -3408,6 +3450,9 @@ ControllerMpd.prototype.listGenres = function () {
             ]
         }
     };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
 
     var cmd = libMpd.cmd;
     self.clientMpd.sendCommand(cmd("list", ["genre"]), function (err, msg) {
@@ -3659,10 +3704,13 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
 }
 
 ControllerMpd.prototype.goto=function(data){
-    if(data.type=='artist')
-        return this.listArtist('artists://'+encodeURIComponent(data.value),2,'')
-    else
-        return this.listAlbumSongs("albums://"+encodeURIComponent(data.value),2);
+	
+    if (data.type=='artist') {
+        return this.listArtist('artists://'+encodeURIComponent(data.value),2,'', 'albums://'+encodeURIComponent(data.value)+'/')
+	} else if (data.type=='album'){
+        return this.listAlbumSongs("albums://"+encodeURIComponent(data.artist)+'/'+encodeURIComponent(data.album),2,'albums://'+encodeURIComponent(data.artist)+'/');
+	}
+
 
 }
 

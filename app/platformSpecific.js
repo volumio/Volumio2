@@ -2,8 +2,7 @@
 
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
-
-var dbUpdateState = false;
+var dbUpdateNotified = false;
 
 module.exports = PlatformSpecific;
 function PlatformSpecific(coreCommand) {
@@ -93,7 +92,8 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
 	var self = this;
 	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update'+data);
 
-	if (data === true) {
+	if (data === true && !dbUpdateNotified) {
+        dbUpdateNotified = true;
         var responseData = {
             title: self.coreCommand.getI18nString('COMMON.SCAN_DB'),
             message: self.coreCommand.getI18nString('COMMON.UPDATING_MUSIC_DB_WAIT_MESSAGE'),
@@ -101,7 +101,7 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
             buttons: [
                 {
                     name: self.coreCommand.getI18nString('COMMON.GOT_IT'),
-                    class: 'btn btn-ok',
+                    class: 'btn btn-info ng-scope',
                     emit:'',
                     payload:''
                 }

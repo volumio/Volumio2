@@ -114,7 +114,14 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('addToQueue', function (data) {
                 var timeStart = Date.now();
 
-                 self.commandRouter.addQueueItems(data);
+                 self.commandRouter.addQueueItems(data)
+                .then(function(){
+                    var item = data.uri;
+                    if (data.title) {
+                        item = data.title;
+                    }
+					self.printToastMessage('success', self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TITLE'),  item);
+                });
 			});
 
 			connWebSocket.on('replaceAndPlay', function (data) {
@@ -1135,7 +1142,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('updateDb', function (data) {
-				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', '');
+				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', data);
 			});
 
 
@@ -1780,6 +1787,112 @@ function InterfaceWebUI(context) {
                 if (remove != undefined) {
                     remove.then(function (result) {
                         selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('installToDisk', function (data) {
+                var selfConnWebSocket = this;
+
+                var installDisk = self.commandRouter.executeOnPlugin('system_controller', 'system', 'installToDisk', data);
+
+                if (installDisk != undefined) {
+                    installDisk.then(function (result) {
+                        selfConnWebSocket.emit('pushInstallToDisk', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('getMyVolumioStatus', function () {
+                var selfConnWebSocket = this;
+
+                var remove = self.commandRouter.getMyVolumioStatus();
+
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('getMyVolumioToken', function (data) {
+                var selfConnWebSocket = this;
+
+                var remove = self.commandRouter.getMyVolumioToken(data);
+
+                if (remove != undefined) {
+                    remove.then(function (result) {
+                        selfConnWebSocket.emit('pushMyVolumioToken', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('setMyVolumioToken', function (data) {
+                var selfConnWebSocket = this;
+
+                var token = self.commandRouter.setMyVolumioToken(data);
+
+                if (token != undefined) {
+                    token.then(function (result) {
+                        self.commandRouter.broadcastMessage('pushMyVolumioToken', {"token":result});
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('myVolumioLogout', function () {
+                var selfConnWebSocket = this;
+
+                self.commandRouter.broadcastMessage('pushMyVolumioLogout', '');
+
+                return self.commandRouter.myVolumioLogout();
+            });
+
+            connWebSocket.on('enableMyVolumioDevice', function (device) {
+                var selfConnWebSocket = this;
+
+                var enable = self.commandRouter.enableMyVolumioDevice(device);
+
+                if (enable != undefined) {
+                    enable.then(function (result) {
+                        //selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('disableMyVolumioDevice', function (device) {
+                var selfConnWebSocket = this;
+
+                var disable = self.commandRouter.disableMyVolumioDevice(device);
+
+                if (disable != undefined) {
+                    disable.then(function (result) {
+                        //selfConnWebSocket.emit('pushMyVolumioStatus', result);
+                    })
+                        .fail(function () {
+                        });
+                }
+            });
+
+            connWebSocket.on('deleteMyVolumioDevice', function (device) {
+                var selfConnWebSocket = this;
+
+                var deleteDevice = self.commandRouter.deleteMyVolumioDevice(device);
+
+                if (deleteDevice != undefined) {
+                    deleteDevice.then(function (result) {
+                        //selfConnWebSocket.emit('pushMyVolumioStatus', result);
                     })
                         .fail(function () {
                         });
