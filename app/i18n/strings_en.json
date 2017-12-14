@@ -278,8 +278,8 @@
     "INSTALL_TO_DISK_SIZE":"SIZE",
     "INSTALL_TO_DISK_MESSAGE_WARNING":". WARNING: Be careful to select the correct destination disk, as all data on it will be deleted!",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"System successfully installed to Disk",
-    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"In order to use your newly installed system, restart the system and remove any removable media"
-
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"In order to use your newly installed system, restart the system and remove any removable media",
+    "CREDITS_OPEN_SOURCE_LICENSES":"Credits and Open Source licenses"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

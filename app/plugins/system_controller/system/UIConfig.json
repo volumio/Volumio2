@@ -79,6 +79,20 @@
       "label": "TRANSLATE.SYSTEM.INSTALL_TO_DISK",
       "icon": "fa-hdd-o",
       "content": []
+    },
+    {
+      "id":"section_foss",
+      "type": "section",
+      "label": "TRANSLATE.SYSTEM.CREDITS_OPEN_SOURCE_LICENSES",
+      "icon": "fa-user-circle",
+      "content": [
+    {
+      "id":"credits_foss",
+      "element": "button",
+      "hidden": false,
+      "label": "TRANSLATE.SYSTEM.CREDITS_OPEN_SOURCE_LICENSES",
+      "onClick": {"type":"goto", "pageName":"credits"}
+    }]
     }
   ]
 }
