@@ -764,7 +764,8 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 
 	var defer = libQ.defer();
 	var sharesjson = {"nas":[]};
-	var systemShare = this.commandRouter.sharedVars.get('system.name').toUpperCase();
+	var systemShare = self.commandRouter.sharedVars.get('system.name').toUpperCase();
+
 	try {
 		var shares = execSync("/usr/bin/smbtree -N -b", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
 	} catch (err) {
@@ -791,7 +792,6 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		var i, j, n, fields, nas, nasname, share, key;
 		var backslash = /^\\/;
 		var nas_slashes = /^\\\\/;
-		var nas_ignore  = { 'VOLUMIO':true, systemShare: true };
 
 		// collate nas names as keys in an object (for easier referencing)
 		var nasobj = { };
@@ -806,7 +806,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 				nas = fields[1].replace(/\s*$/,'');
 				// remove leading backslashes
 				nasname = nas.replace(nas_slashes,'');
-				if (nasname in nas_ignore) continue;
+				if (nasname === systemShare) continue;
 				nasobj[nasname] = {"shares":[]};
 				continue;
 			}
