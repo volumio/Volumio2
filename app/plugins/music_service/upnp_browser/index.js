@@ -9,11 +9,17 @@ var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*s
 var nodetools=require('nodetools');
 var mm = require('musicmetadata');
 var Client = require('node-ssdp').Client;
-var client = new Client();
 var xml2js = require('xml2js');
 var http = require('http');
 var browseDLNAServer = require(__dirname + "/dlna-browser.js");
 var singleBrowse = false;
+
+
+try {
+    var client = new Client();
+} catch (e) {
+	console.log('SSDP Client error: '+e)
+}
 
 // Define the ControllerUPNPBrowser class
 module.exports = ControllerUPNPBrowser;
