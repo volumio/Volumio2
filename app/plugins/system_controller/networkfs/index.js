@@ -205,9 +205,9 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 			credentials = 'guest,';
 		}
 		if (options) {
-			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,"+options;
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,vers=2.0,"+options;
 		} else {
-			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft";
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,vers=2.0";
 		}
 
 	} else { // nfs
