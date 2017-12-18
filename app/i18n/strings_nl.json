@@ -228,9 +228,9 @@
     "SHUTDOWN":"Afsluiten"
   },
   "ALARM":{
-    "ALARM_CLOCK_TITLE":"Alarm Klok",
+    "ALARM_CLOCK_TITLE":"Wekker",
     "SLEEP_MODE_TITLE":"Slaap Modus",
-    "ALARM_CLOCK_SAVE":"Alarm gezet",
+    "ALARM_CLOCK_SAVE":"Wekker gezet",
     "SLEEP_MODE_SYSTEM_WILL":"Het systeem zal " ,
     "SLEEP_MODE_IN":" over ",
     "SLEEP_MODE_MINUTE":" minuten",
