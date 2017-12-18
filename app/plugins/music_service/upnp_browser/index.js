@@ -101,9 +101,19 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 			}
   	});
 	});
-	client.search('urn:schemas-upnp-org:device:MediaServer:1');
+
+    try {
+        client.search('urn:schemas-upnp-org:device:MediaServer:1');
+    } catch(e) {
+        console.log('UPNP Search error: '+e)
+    }
+
 	setInterval(() => {
-		client.search('urn:schemas-upnp-org:device:MediaServer:1');
+        try {
+            client.search('urn:schemas-upnp-org:device:MediaServer:1');
+		} catch(e) {
+        console.log('UPNP Search error: '+e)
+    	}
 	}, 50000);
 	this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 	//this.startDjmount();
