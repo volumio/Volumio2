@@ -259,6 +259,7 @@ volumioWizard.prototype.setSkip = function () {
 
     self.logger.info('Wizard skipped')
     self.commandRouter.executeOnPlugin('system_controller', 'system', 'setShowWizard', false);
+    self.commandRouter.broadcastMessage("closeWizard", '');
 };
 
 volumioWizard.prototype.setReboot = function (data) {
@@ -275,6 +276,8 @@ volumioWizard.prototype.setCloseWizard = function () {
 
     self.commandRouter.executeOnPlugin('system_controller', 'system', 'setShowWizard', false);
     self.logger.info('Wizard terminated Successfully');
+    self.commandRouter.broadcastMessage("closeWizard", '');
+
     if (I2Sreboot) {
         self.logger.info('Player Reboot required after I2S DAC has been enabled in wizard');
         self.pushReboot();
