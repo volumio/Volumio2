@@ -123,7 +123,12 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 ControllerUPNPBrowser.prototype.discover = function(){
 	var defer = libQ.defer();
 	var self = this;
-	client.search('urn:schemas-upnp-org:device:MediaServer:1');
+	try {
+        client.search('urn:schemas-upnp-org:device:MediaServer:1');
+	} catch(e) {
+        console.log('UPNP Search error: '+e)
+	}
+
 	setTimeout(function(){
 		defer.resolve(self.DLNAServers);
 	}, 2000);
