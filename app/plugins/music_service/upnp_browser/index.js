@@ -102,6 +102,7 @@ ControllerUPNPBrowser.prototype.onStart = function() {
   	});
 	});
 
+	self.logger.info('UPNP: Started search routine');
     try {
         client.search('urn:schemas-upnp-org:device:MediaServer:1');
     } catch(e) {
@@ -109,6 +110,7 @@ ControllerUPNPBrowser.prototype.onStart = function() {
     }
 
 	setInterval(() => {
+        self.logger.info('UPNP: Started search routine');
         try {
             client.search('urn:schemas-upnp-org:device:MediaServer:1');
 		} catch(e) {
@@ -123,6 +125,8 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 ControllerUPNPBrowser.prototype.discover = function(){
 	var defer = libQ.defer();
 	var self = this;
+
+    self.logger.info('UPNP: Started search routine');
 	try {
         client.search('urn:schemas-upnp-org:device:MediaServer:1');
 	} catch(e) {
