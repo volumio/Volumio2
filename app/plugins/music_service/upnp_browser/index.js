@@ -9,11 +9,17 @@ var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*s
 var nodetools=require('nodetools');
 var mm = require('musicmetadata');
 var Client = require('node-ssdp').Client;
-var client = new Client();
 var xml2js = require('xml2js');
 var http = require('http');
 var browseDLNAServer = require(__dirname + "/dlna-browser.js");
 var singleBrowse = false;
+
+
+try {
+    var client = new Client();
+} catch (e) {
+	console.log('SSDP Client error: '+e)
+}
 
 // Define the ControllerUPNPBrowser class
 module.exports = ControllerUPNPBrowser;
@@ -95,9 +101,19 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 			}
   	});
 	});
-	client.search('urn:schemas-upnp-org:device:MediaServer:1');
+
+    try {
+        client.search('urn:schemas-upnp-org:device:MediaServer:1');
+    } catch(e) {
+        console.log('UPNP Search error: '+e)
+    }
+
 	setInterval(() => {
-		client.search('urn:schemas-upnp-org:device:MediaServer:1');
+        try {
+            client.search('urn:schemas-upnp-org:device:MediaServer:1');
+		} catch(e) {
+        console.log('UPNP Search error: '+e)
+    	}
 	}, 50000);
 	this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 	//this.startDjmount();
