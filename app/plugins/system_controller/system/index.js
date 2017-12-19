@@ -78,6 +78,7 @@ ControllerSystem.prototype.getUIConfig = function () {
     var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
     var device = self.config.get('device', '');
     var showDiskInstaller = self.config.get('show_disk_installer', true);
+	var HDMIEnabled = self.config.get('hdmi_enabled', false);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -86,13 +87,15 @@ ControllerSystem.prototype.getUIConfig = function () {
 		{
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value', HDMIEnabled);
+
 
 	if (device != undefined && device.length > 0 && device === 'x86' && showDiskInstaller) {
 		var disks = self.getDisks();
         if (disks != undefined) {
             disks.then(function (result) {
 				if (result.available.length > 0) {
-                    uiconf.sections[3].hidden = false;
+                    uiconf.sections[4].hidden = false;
 					var disklist = result.available;
                     for (var i in disklist) {
                         var device = disklist[i];
@@ -102,7 +105,7 @@ ControllerSystem.prototype.getUIConfig = function () {
                         var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + '. ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
 						var onClick = {"type":"emit", "message":"installToDisk", "data":{"from": result.current, "target":device.device}, "askForConfirm": {"title": title, "message": message}}
 						var item = {"id": "install_to_disk"+device.device, "element":"button", "label": label, "description": description, "onClick" : onClick};
-                        uiconf.sections[3].content.push(item);
+                        uiconf.sections[4].content.push(item);
                     }
 				}
             })
@@ -913,3 +916,30 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
 	}
     self.commandRouter.broadcastMessage(emit, responseData);
 };
+
+ControllerSystem.prototype.saveHDMISettings = function (data) {
+    var self = this;
+    console.log(JSON.stringify(data))
+	var currentConf = self.config.get('hdmi_enabled', false);
+
+    if (currentConf |=  data['hdmi_enabled'])  {
+        self.config.set('hdmi_enabled', data['hdmi_enabled']);
+
+        var action = 'enable';
+        var immediate = 'start'
+        if (!data['hdmi_enabled']) {
+            action = 'disable';
+            immediate = 'stop';
+        }
+
+        exec('/usr/bin/sudo /bin/systemctl '+immediate+' volumio-kiosk.service && /usr/bin/sudo /bin/systemctl '+action+' volumio-kiosk.service',{uid:1000,gid:1000}, function (error, stdout, stderr) {
+            if (error !== null) {
+                console.log(error);
+                self.logger.info('Cannot '+action+' volumio-kiosk service: ' + error);
+            } else {
+                self.logger.info(action+ ' volumio-kiosk service success');
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.HDMI_UI'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
+            }
+        });
+	}
+}

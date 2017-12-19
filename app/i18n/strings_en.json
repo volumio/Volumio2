@@ -279,7 +279,10 @@
     "INSTALL_TO_DISK_MESSAGE_WARNING":". WARNING: Be careful to select the correct destination disk, as all data on it will be deleted!",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"System successfully installed to Disk",
     "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"In order to use your newly installed system, restart the system and remove any removable media",
-    "CREDITS_OPEN_SOURCE_LICENSES":"Credits and Open Source licenses"
+    "CREDITS_OPEN_SOURCE_LICENSES":"Credits and Open Source licenses",
+    "VIDEO_OUT_OPTIONS": "Video output options",
+    "HDMI_UI_DOC":"Show User Interface via HDMI Video Output. WARNING: This will degrade system performances",
+    "HDMI_UI":"User Interface via HDMI"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
