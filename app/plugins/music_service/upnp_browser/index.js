@@ -66,43 +66,41 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 		var location = server;
 		xmlToJson(headers.LOCATION, function(err, data) {
 			try{
-        if (err) {
-					//TODO: Handle this
-          return self.logger.error(err);
-        }
-        var server = {};
-        server.name = data.root.device[0].friendlyName[0];
-        server.UDN = data.root.device[0].UDN + "";
-        server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
-				server.lastTimeAlive = Date.now();
-				server.location = location.url + ":" + location.port;
-				var services = data.root.device[0].serviceList[0].service;
-				var ContentDirectoryService = false;
-				//Finding ContentDirectory Service
-				for(var s = 0; s < services.length; s++){
-					if(services[s].serviceType[0] == "urn:schemas-upnp-org:service:ContentDirectory:1"){
-						ContentDirectoryService = services[s];
-						server.location += ContentDirectoryService.controlURL[0];
-					}
-				}
+                if (err) {
+                    return self.logger.error(err);
+                }
+                var server = {};
+                server.name = data.root.device[0].friendlyName[0];
+                server.UDN = data.root.device[0].UDN + "";
+                server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
+                server.lastTimeAlive = Date.now();
+                server.location = location.url + ":" + location.port;
+                var services = data.root.device[0].serviceList[0].service;
+                var ContentDirectoryService = false;
+                //Finding ContentDirectory Service
+                for(var s = 0; s < services.length; s++){
+                    if(services[s].serviceType[0] == "urn:schemas-upnp-org:service:ContentDirectory:1"){
+                        ContentDirectoryService = services[s];
+                        server.location += ContentDirectoryService.controlURL[0];
+                    }
+                }
 
-				var duplicate = false;
-				for(var i = 0; i < self.DLNAServers.length; i++){
-					if(self.DLNAServers[i].UDN === server.UDN){
-						duplicate = true;
-						self.DLNAServers[i] = server;
-					}
-				}
-				if(!duplicate){
-					self.DLNAServers.push(server);
-				}
-			}catch(e){
+                var duplicate = false;
+                for(var i = 0; i < self.DLNAServers.length; i++){
+                    if(self.DLNAServers[i].UDN === server.UDN){
+                        duplicate = true;
+                        self.DLNAServers[i] = server;
+                    }
+                }
+                if(!duplicate){
+                    self.DLNAServers.push(server);
+                }
+			} catch(e){
                 self.logger.error(e);
 			}
   	});
 	});
 
-	self.logger.info('UPNP: Started search routine');
     try {
         client.search('urn:schemas-upnp-org:device:MediaServer:1');
     } catch(e) {
@@ -110,7 +108,6 @@ ControllerUPNPBrowser.prototype.onStart = function() {
     }
 
 	setInterval(() => {
-        self.logger.info('UPNP: Started search routine');
         try {
             client.search('urn:schemas-upnp-org:device:MediaServer:1');
 		} catch(e) {
@@ -126,7 +123,6 @@ ControllerUPNPBrowser.prototype.discover = function(){
 	var defer = libQ.defer();
 	var self = this;
 
-    self.logger.info('UPNP: Started search routine');
 	try {
         client.search('urn:schemas-upnp-org:device:MediaServer:1');
 	} catch(e) {
@@ -582,27 +578,16 @@ ControllerUPNPBrowser.prototype.getAlbumArt = function (data, path,icon) {
 };
 
 function xmlToJson(url, callback) {
-
-    var req = http.get(url, function(res) {
-        var xml = '';
-
-        res.on('data', function(chunk) {
-            xml += chunk;
+    unirest.get(url)
+		.timeout(3000)
+        .end(function (response) {
+        	if (response.status === 200) {
+                var parser = new xml2js.Parser();
+                parser.parseString(response.body, function(err, result) {
+                    callback(null, result);
+                });
+            } else {
+                callback('error', null);
+            }
         });
-
-        res.on('error', function(e) {
-            callback(e, null);
-        });
-
-        res.on('timeout', function(e) {
-            callback(e, null);
-        });
-
-        res.on('end', function() {
-            var parser = new xml2js.Parser();
-            parser.parseString(xml, function(err, result) {
-                callback(null, result);
-            });
-        });
-    });
 }
