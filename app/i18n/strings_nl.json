@@ -69,7 +69,7 @@
     "ISO_PLAYBACK":"ISO-weergave",
     "ISO_PLAYBACK_DOC":"Gebruik een experimentele MPD-versie waarmee ISO-bestanden kunnen worden afgespeeld, u verliest directe DSD-functies wanneer deze is ingeschakeld.",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Ondersteuning voor uitgebreid bestandsformaat.",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Deze instellingen regelen de mogelijkheid om een ​​breed scala aan audioformaten te lezen, maar het kan het maken van een muziekbibliotheekdatabase vertragen. Indien uitgeschakeld, leest het systeem nog steeds de meeste muziekformaten en zal het scannen van de muziekbibliotheek veel sneller verlopen."
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Deze instellingen regelen de mogelijkheid om een â€‹â€‹breed scala aan audioformaten te lezen, maar het kan het maken van een muziekbibliotheekdatabase vertragen. Indien uitgeschakeld, leest het systeem nog steeds de meeste muziekformaten en zal het scannen van de muziekbibliotheek veel sneller verlopen."
   },
   "NETWORK":{
     "NETWORK_SETTINGS":"Netwerk instellngen",
@@ -178,8 +178,7 @@
     "SETTINGS_SAVED_SUCCESSFULLY":"Instellingen opgeslagen",
     "SETTINGS_SAVE_ERROR":"Fout opgetreden tijdens het opslaan van de instellingen",
     "ERROR":"Fout",
-    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"De muziek wordt gescand en het pictogram linksonder blijft ronddraaien totdat uw bibliotheek succesvol is geïndexeerd. Aangezien het systeem mogelijk traag kan reageren tijdens deze bewerking, moet u het systeem niet gebruiken terwijl muziek wordt geïndexeerd.",
-    "GOT_IT":"Begrepen"
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"De muziek wordt gescand en het pictogram linksonder blijft ronddraaien totdat uw bibliotheek succesvol is geïndexeerd. Aangezien het systeem mogelijk traag kan reageren tijdens deze bewerking, moet u het systeem niet gebruiken terwijl muziek wordt geïndexeerd.",    "GOT_IT":"Begrepen"
   },
   "APPEARANCE":{
     "APPEARANCE":"Uiterlijk",
@@ -279,7 +278,10 @@
     "INSTALL_TO_DISK_MESSAGE_WARNING":". WAARSCHUWING: Wees alert dat u de juiste doelschijf selecteert. Alle data zal worden gewist!",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"Systeem succesvol geinstallerd op deze schijf",
     "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Om uw nieuw geïnstalleerde systeem te gebruiken, start u het systeem opnieuw op en verwijdert u alle verwisselbare media.",
-    "CREDITS_OPEN_SOURCE_LICENSES":"Credits en Open Source-licenties"
+    "CREDITS_OPEN_SOURCE_LICENSES":"Credits en Open Source-licenties",
+    "VIDEO_OUT_OPTIONS": "Video uitgang opties",
+    "HDMI_UI_DOC":"Gebruikersinterface weergeven via HDMI video uitgang. WAARSCHUWING: dit zal de systeemprestaties verminderen",
+    "HDMI_UI":"Gebruikersinterface via HDMI"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mijn Web Radiostations",
