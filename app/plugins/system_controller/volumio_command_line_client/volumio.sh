@@ -66,6 +66,7 @@ echo volumio | sudo -S systemctl stop volumio.service
 #VOLUMIO DEVELOPMENT
 
 pull() {
+cd /
 echo "Stopping Volumio"
 echo volumio | sudo -S systemctl stop volumio.service
 echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $1 $2 $3
