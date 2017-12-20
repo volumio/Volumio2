@@ -12,6 +12,7 @@ fi
 
 cd /home/volumio
 echo "Backing Up current Volumio folder in /volumio-current"
+[ -d /volumio-current ] && rm -rf /volumio-current
 mv /volumio /volumio-current
 echo "Cloning Volumio Backend repo"
 if [ -n "$BRANCH" ]; then
