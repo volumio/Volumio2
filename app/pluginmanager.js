@@ -1588,7 +1588,7 @@ PluginManager.prototype.checkIndex = function () {
 			{
 				self.logger.info("Found new core plugin "+category+"/"+plugin+". Adding it");
 
-				self.config.addConfigValue(key+'.enabled','boolean',true);
+				self.config.addConfigValue(key+'.enabled','boolean',coreConf.get(key+'.enabled'));
 				self.config.addConfigValue(key+'.status','string','STOPPED');
 
 			}
