@@ -33,9 +33,9 @@ clear
 
 [[VOLUMIO SERVICE CONTROL]]
 
-start                               Starts Volumio Service
+vstart                              Starts Volumio Service
 vstop                               Stops Volumio Service
-restart                             Restarts Volumio Service
+vrestart                            Restarts Volumio Service
 
 [[VOLUMIO DEVELOPMENT]]
 
@@ -55,7 +55,7 @@ plugin update                      updates the plugin
 
 #VOLUMIO SERVICE CONTROLS
 
-start() {
+vstart() {
 echo volumio | sudo -S systemctl start volumio.service
 }
 
@@ -127,20 +127,20 @@ case "$1" in
         stopairplay)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
         ;;
-        start)
-            start
+        vstart)
+            vstart
             ;;
-        start)
-            start
+        vstart)
+            vstart
             ;;
 
         vstop)
-            stop
+            vstop
             ;;
 
-        restart)
-            stop
-            start
+        vrestart)
+            vstop
+            vstart
             ;;
 
         status)
