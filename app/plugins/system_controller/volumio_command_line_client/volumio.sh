@@ -135,11 +135,11 @@ case "$1" in
             ;;
 
         vstop)
-            stop
+            vstop
             ;;
 
         restart)
-            stop
+            vstop
             start
             ;;
 
