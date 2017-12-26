@@ -251,8 +251,14 @@ AlarmClock.prototype.getSleep = function()
 	thisMoment.add(sleep_minute,"m");
 	var diff = moment.duration(thisMoment.diff(now));
 
-	sleep_hour =  diff.get("hours");
-	sleep_minute = diff.get("minutes");
+	// only return actual time if sleep timer is active
+	if (self.sleep.sleep_enabled == true) {
+    sleep_hour =  diff.get("hours");
+    sleep_minute = diff.get("minutes");
+	} else {
+		sleep_hour = 0;
+		sleep_minute = 0;
+	}
 
 	defer.resolve({
 		enabled:sleepTask.sleep_enabled,
@@ -319,12 +325,14 @@ AlarmClock.prototype.setSleep = function(data)
 			self.haltSchedule.cancel();
 			delete self.haltSchedule;
 
-			console.log("System is shutting down....");
 			setTimeout(function()
 			{
 				if (data.action == 'stop'){
+          self.commandRouter.pushConsoleMessage("Sleep timer expired.");
 					self.commandRouter.volumioStop();
-				} else {
+          self.getSleepConf().sleep_enabled = false;
+        } else {
+          console.log("System is shutting down....");
 				self.commandRouter.shutdown();
 				}
 			},5000);
