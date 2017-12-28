@@ -105,7 +105,13 @@
 	"ENABLE_CUSTOM_DNS":"啟用設定自訂 DNS 伺服器",
 	"PRIMARY_DNS":"主要 DNS",
   	"SECONDARYY_DNS":"次要 DNS",
-	"DNS_ERROR_INFO":"請正確填入兩個 DNS 伺服器 IP 位址"
+	"DNS_ERROR_INFO":"請正確填入兩個 DNS 伺服器 IP 位址",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"成功連接到無線網路",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED":"請進行下一步",
+    "WIRELESS_NETWORK_CONNECTION_ERROR":"連接到無線網路出錯 ",
+    "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"請重試或進行下一步",
+    "WIRELESS_NETWORK_CONNECTION_DEFER":"這會連接到無線網路",
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"當第一步完成"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"選擇一個別名顯示在 NAS 的掛載點中",
@@ -171,7 +177,9 @@
     "CONTINUE":"繼續",
     "SETTINGS_SAVED_SUCCESSFULLY":"成功儲存設定",
     "SETTINGS_SAVE_ERROR":"儲存設定時發生錯誤",
-	"ERROR":"錯誤"
+	"ERROR":"錯誤",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"正在掃描您的音樂，左下方的圖標將繼續轉動，直到您的所有音樂庫成功索引為止。 由於在此操作過程中系統的響應速度可能較慢，因此在索引音樂時請不要使用本系統",
+    "GOT_IT":"明白了"
   },
   "APPEARANCE":{
     "APPEARANCE":"外觀",
@@ -257,7 +265,23 @@
     "UPDATE_ALREADY_LATEST_VERSION":"已經是最新版本",
     "NO_UPDATE_AVAILABLE":"目前沒有更新",
     "CANNOT_REMOVE_MEDIA":"無法移除媒體",
-    "MEDIA_REMOVED_SUCCESSFULLY":"媒體移除成功"
+    "MEDIA_REMOVED_SUCCESSFULLY":"媒體移除成功",
+    "INSTALL_TO_DISK":"安裝到本機磁碟",
+    "INSTALLING_TO_DISK":"正在安裝到本機磁碟",
+    "INSTALLING_TO_DISK_MESSAGE":"正在安裝到本機磁碟, 請稍等",
+    "INSTALLING_TO_DISK_ERROR_MESSAGE":"安裝到本機磁碟出錯",
+    "INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"不能安裝到磁碟: 目的地磁碟必須比來源磁碟大",
+    "INSTALL_TO_DISK_DESC":"安裝到本機磁碟",
+    "INSTALL_TO_DISK_MESSAGE":"您確定要安裝到本機磁碟",
+    "INSTALL_TO_DISK_LABEL":"標籤",
+    "INSTALL_TO_DISK_SIZE":"大小",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":". 注意: 留意選擇正確目的地磁碟, 所有資料將會被移除!",
+    "INSTALLING_TO_DISK_SUCCESS_TITLE":"系統成功地安裝到本機磁碟",
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"為正常使用新安裝的系統, 請移除任何外接媒體及重新啟動",
+    "CREDITS_OPEN_SOURCE_LICENSES":"致謝與開放源碼授權",
+    "VIDEO_OUT_OPTIONS": "視訊輸出選項",
+    "HDMI_UI_DOC":"使用者介面經由 HDMI 視訊輸出. 注意:系統表現將會被降低",
+    "HDMI_UI":"使用者介面經由 HDMI"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"我的網路電台",
@@ -273,6 +297,12 @@
     "UNINSTALL":"移除",
     "UPDATING_PLUGIN":"更新外掛",
     "DOWNLOADING_FROM":"下載外掛從 ",
-    "DOWNLOADING":"外掛下載中"
+    "DOWNLOADING":"外掛下載中",
+    "NO_CONFIGURATION_AVAILABLE":"沒有設定"
+  },
+  "WIZARD":{
+    "CONGRATULATIONS":"恭喜",
+    "DEVICE_SUCCESSFULLY_CONFIGURED":"已經完成設定, 準備就緒",
+    "RUN_FIRST_CONFIG_WIZARD":"執行初次設定精靈"
   }
 }
