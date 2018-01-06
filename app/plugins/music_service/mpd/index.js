@@ -14,12 +14,13 @@ var parser = require('cue-parser');
 var mm = require('musicmetadata');
 var os = require('os');
 var execSync = require('child_process').execSync;
+var timSort = require('timsort');
 var ignoreupdate = false;
 //tracknumbers variable below adds track numbers to titles if set to true. Set to false for normal behavour.
 var tracknumbers = false;
 //compilation array below adds different strings used to describe albumartist in compilations or 'multiple artist' albums
 var compilation = ['Various','various','Various Artists','various artists','VA','va'];
-//atistsort variable below will list artists by albumartist if set to true or artist if set to false
+//artistsort variable below will list artists by albumartist if set to true or artist if set to false
 var artistsort = true;
 var dsd_autovolume = false;
 var singleBrowse = false;
@@ -2992,11 +2993,20 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 								uri: 'albums://' + encodeURIComponent(artistName) + '/'+ encodeURIComponent(albumName),
 						//Get correct album art from path- only download if not existent
 								albumart: self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path),'dot-circle-o')
-								};
+							};
 							response.navigation.lists[0].items.push(album);
-							}
-						}
-					}
+                        }
+                    }
+                }
+                // Sort albums by album artist, because the order produced by mpd is dependent on the
+                //  filesystem from which the albums were read, i.e. if audio files are stored in the
+                //  folders 'A' and 'B', then all albums in 'A' come before those in 'B'.
+                // Within 'A' and 'B' albums are typically sorted by album artist. Its partially
+                //  sorted nature makes the albums array a good candidate for Timsort.
+                //  https://en.wikipedia.org/wiki/Timsort
+                timSort.sort(response.navigation.lists[0].items, function (a, b) {
+                    return a.artist.localeCompare(b.artist);
+                });
 				//Save response in albumList cache for future use
 				memoryCache.set("cacheAlbumList", response);
 				if(ui) {
