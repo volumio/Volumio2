@@ -83,8 +83,12 @@ var searchOnline = function (defer, web) {
     }
 
 	var fileName = resolution;
-
-	fs.ensureDirSync(folder);
+	try {
+		fs.ensureDirSync(folder);
+	} catch(e) {
+		defer.reject(new Error(e));
+            	return defer.promise;
+	}
 	var infoPath = folder + 'info.json';
 
 	var infoJson = {};
