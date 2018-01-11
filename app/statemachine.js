@@ -630,7 +630,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
         var consumeAlbum=stateService.album;
         var consumeArtist=stateService.artist;
         var consumeAlbumArt='/albumart';
-				if(typeof trackBlock.albumart !== "undefined" && trackBlock.albumart != "" && trackBlock.albumart != "/albumart"){
+				if(trackBlock != undefined && typeof trackBlock.albumart !== "undefined" && trackBlock.albumart != "" && trackBlock.albumart != "/albumart"){
 					consumeAlbumArt = trackBlock.albumart;
 				}else if(consumeArtist)
         {
