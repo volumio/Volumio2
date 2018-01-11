@@ -2667,7 +2667,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
         self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
 
 		var urilow = uri.toLowerCase();
-        if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd')) {
+        if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd') || urilow.endsWith('.dsf')) {
 			self.dsdVolume();
         }
         // Clear the queue, add the first track, and start playback
@@ -3691,7 +3691,7 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
     var uri=this.sanitizeUri(trackBlock.uri);
 
     var urilow = trackBlock.uri.toLowerCase();
-    if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd')) {
+    if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd') || urilow.endsWith('.dsf')) {
     	setTimeout(function(){
             self.dsdVolume();
 		},5000)
@@ -3807,7 +3807,7 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
 
 ControllerMpd.prototype.dsdVolume=function(){
 	var self = this;
-
+	
 	if (dsd_autovolume) {
 		self.logger.info('Setting Volume to 100 automatically for DSD')
         self.commandRouter.volumiosetvolume(100);
