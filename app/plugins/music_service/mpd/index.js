@@ -3306,10 +3306,10 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 
     self.mpdReady
     .then(function() {
-        var artist=decodeURIComponent(splitted[index]);
+		var artist=decodeURIComponent(splitted[index]);
 		var VA = 0;
-        var cmd = libMpd.cmd;
-        var safeArtist = artist.replace(/"/g,'\\"');
+		var cmd = libMpd.cmd;
+		var safeArtist = artist.replace(/"/g,'\\"');
 
 		if (uriBegin === 'genres://')  {
 			var genre = decodeURIComponent(splitted[2]);
