@@ -2660,6 +2660,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
 
         var index=splitted[1];
         var uri=self.sanitizeUri(splitted[0]);
+        var safeUri = uri.replace(/"/g,'\\"');
 
         return self.sendMpdCommand('stop',[])
             .then(function()
@@ -2668,7 +2669,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
             })
             .then(function()
             {
-                return self.sendMpdCommand('load "'+uri+'"',[]);
+                return self.sendMpdCommand('load "'+safeUri+'"',[]);
             })
             .then(function()
             {
@@ -2688,6 +2689,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
         var defer = libQ.defer();
         var cmd = libMpd.cmd;
 
+        var safeUri = uri.replace(/"/g,'\\"');
 
         return self.sendMpdCommand('stop',[])
             .then(function()
@@ -2696,7 +2698,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
             })
             .then(function()
             {
-                return self.sendMpdCommand('add "'+uri+'"',[]);
+                return self.sendMpdCommand('add "'+safeUri+'"',[]);
             })
             .then(function()
             {
@@ -3724,7 +3726,8 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
 		},5000)
 
     }
-    return this.sendMpdCommand('add "'+uri+'"',[])
+    var safeUri = uri.replace(/"/g,'\\"');
+    return this.sendMpdCommand('add "'+safeUri+'"',[])
         .then(function(){
             return self.sendMpdCommand('consume 1',[]);
         });
