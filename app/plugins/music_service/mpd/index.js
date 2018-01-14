@@ -1191,8 +1191,9 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 		prev = sections.slice(0, sections.length - 1).join('/');
 
 		folderToList = sections.slice(1).join('/');
+		var safeFolderToList = folderToList.replace(/"/g,'\\"');
 
-		command += ' "' + folderToList + '"';
+		command += ' "' + safeFolderToList + '"';
 
 	}
 
@@ -2470,7 +2471,8 @@ ControllerMpd.prototype.scanFolder=function(uri)
             if (sections.length > 1) {
                 folderToList = sections.slice(2).join('/');
 
-                command += ' "' + folderToList + '"';
+                var safeFolderToList = folderToList.replace(/"/g,'\\"');
+                command += ' "' + safeFolderToList + '"';
 
             }
 
@@ -2561,7 +2563,8 @@ ControllerMpd.prototype.explodeISOFile = function (uri) {
     if (sections.length > 1) {
         folderToList = sections.slice(2).join('/');
 
-        command += ' "' + folderToList + '"';
+        var safeFolderToList = folderToList.replace(/"/g,'\\"');
+        command += ' "' + safeFolderToList + '"';
 
     }
 
