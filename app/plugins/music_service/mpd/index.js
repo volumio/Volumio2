@@ -1455,9 +1455,11 @@ ControllerMpd.prototype.listallFolder = function (uri) {
 ControllerMpd.prototype.search = function (query) {
 	var self = this;
 	var defer = libQ.defer();
-	var commandArtist = 'search artist '+' "' + query.value + '"';
-    var commandAlbum = 'search album '+' "' + query.value + '"';
-    var commandSong = 'search title '+' "' + query.value + '"';
+	var safeValue = query.value.replace(/"/g,'\\"');
+
+	var commandArtist = 'search artist '+' "' + safeValue + '"';
+	var commandAlbum = 'search album '+' "' + safeValue + '"';
+	var commandSong = 'search title '+' "' + safeValue + '"';
 	var artistcount = 0;
 	var albumcount = 0;
 	var trackcount = 0;
@@ -1904,9 +1906,10 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var splitted=uri.split('/');
         var argument=splitted[2];  //artist
         var value=splitted[3];	//album
+        var safeValue = value.replace(/"/g,'\\"')
 
         if(argument==='artist') {
-            var commandArtist = 'search artist '+' "' + value + '"';
+            var commandArtist = 'search artist '+' "' + safeValue + '"';
 
             self.mpdReady.then(function () {
                 self.clientMpd.sendCommand(cmd(commandArtist, []), function (err, msg) {
@@ -1966,10 +1969,10 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         }
         else if(argument==='album') {
 			if (compilation.indexOf(value)>-1) {  //artist is in Various Artists array
-				var commandArtist = 'search albumartist '+' "' + value + '"';
+				var commandArtist = 'search albumartist '+' "' + safeValue + '"';
 			}
 			else {
-			var commandAlbum = 'search album '+' "' + value + '"';
+			var commandAlbum = 'search album '+' "' + safeValue + '"';
 			}
             self.mpdReady.then(function () {
                 self.clientMpd.sendCommand(cmd(commandAlbum, []), function (err, msg) {
