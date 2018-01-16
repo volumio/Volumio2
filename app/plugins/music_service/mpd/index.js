@@ -1672,6 +1672,7 @@ ControllerMpd.prototype.searchFor = function (lines, startFrom, beginning) {
 
 		i++;
 	}
+    return '';
 };
 
 ControllerMpd.prototype.updateQueue = function () {
