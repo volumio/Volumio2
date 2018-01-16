@@ -2979,11 +2979,17 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 						if (!artistName) {
                             artistName = self.searchFor	(lines, i + 1, 'Artist:');
 						}
-					//********Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
-						if (albumsfound.indexOf(albumName + artistName) <0 ) { // Album/Artist is not in 'albumsfound' array
-							albumsfound.push(albumName + artistName);
-							var codedArtistName = encodeURIComponent(artistName);
-              				var codedAlbumName = encodeURIComponent(albumName);
+                        // This causes all orphaned tracks (tracks without an album) in the Albums view to be
+                        //  grouped into a single dummy-album, rather than creating one such dummy-album per artist.
+                        var albumId = albumName + artistName;
+                        if (!albumName) {
+                            albumId = '';
+                            albumName = '';
+                            artistName = '*';
+                        }
+					    // Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
+						if (albumsfound.indexOf(albumId) <0 ) { // Album/Artist is not in 'albumsfound' array
+							albumsfound.push(albumId);
 							var album = {
 								service:'mpd',
 								type: 'folder',
@@ -2991,14 +2997,14 @@ ControllerMpd.prototype.listAlbums = function (ui) {
 								artist: artistName,
 								album:'',
 								uri: 'albums://' + encodeURIComponent(artistName) + '/'+ encodeURIComponent(albumName),
-						//Get correct album art from path- only download if not existent
+						        // Get correct album art from path- only download if not existent
 								albumart: self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path),'dot-circle-o')
 								};
 							response.navigation.lists[0].items.push(album);
 							}
 						}
 					}
-				//Save response in albumList cache for future use
+				// Save response in albumList cache for future use
 				memoryCache.set("cacheAlbumList", response);
 				if(ui) {
 					defer.resolve(response);
@@ -3040,7 +3046,11 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 	else if (splitted[0] == 'albums:') { //album
 		var artist = decodeURIComponent(splitted[2]);
 		var albumName = decodeURIComponent(splitted[3]);
-		var findstring = "find album \"" + albumName + "\"" + " albumartist \"" + artist + "\" ";
+
+        var isOrphanAlbum = (uri === "albums://*/");
+        var artistSubQuery = isOrphanAlbum ? "" : " albumartist \"" + artist + "\" ";
+
+		var findstring = "find album \"" + albumName + "\"" + artistSubQuery;
 	}
 	else {  //artist
 		var artist = decodeURIComponent(splitted[2]);
@@ -3128,12 +3138,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                         duration: time,
                         trackType: path.split('.').pop()
                     });
-
-
                 }
-
-
-
             }
             if (duration != undefined && duration > 0) {
             	var durationminutes = Math.floor(duration/60);
@@ -3143,14 +3148,15 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 				}
 				duration = durationminutes + ':' + durationseconds;
 			}
+            var isOrphanAlbum = (uri === "albums://*/");
             duration =
             response.navigation.info = {
                 uri: uri,
                 service: 'mpd',
-                artist: artist,
+                artist: isOrphanAlbum ? '*' : artist,
                 album: album,
                 albumart: albumart,
-                year: year,
+                year: isOrphanAlbum ? '' : year,
                 type: 'album',
                 duration: duration
             };
@@ -3387,7 +3393,10 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                     uri: 'music-library/'+path
                 });
 
-                if(albums.indexOf(album)===-1) {
+                // The first expression in the following "if" statement prevents dummy-albums from being
+                //  created for orphaned tracks (tracks without an album). Such dummy-albums aren't required,
+                //  as orphaned tracks remain accessible from the tracks-list.
+                if(album !== '' && albums.indexOf(album)===-1) {
                     albums.push(album);
                     albumarts.push();
 
