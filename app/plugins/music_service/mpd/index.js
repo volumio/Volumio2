@@ -3567,7 +3567,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 								var track = self.searchFor(lines, i + 1, 'Track:');
 								var title = track + " - " + title1;
 							}
-                            var albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path),'fa-tags');;
+                            var albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path),'dot-circle-o');;
 
                             if (title) {
                                 title = title;
