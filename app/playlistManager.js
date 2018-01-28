@@ -27,7 +27,7 @@ PlaylistManager.prototype.createPlaylist = function (name) {
 
 	var defer = libQ.defer();
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Creating playlist ' + name);
+	self.commandRouter.pushConsoleMessage('Creating playlist ' + name);
 
 	var playlist = [];
 	var filePath = self.playlistFolder + name;
@@ -53,7 +53,7 @@ PlaylistManager.prototype.deletePlaylist = function (name) {
 
 	var defer = libQ.defer();
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Deleting playlist ' + name);
+	self.commandRouter.pushConsoleMessage('Deleting playlist ' + name);
 
 	var playlist = [];
 	var filePath = self.playlistFolder + name;
@@ -83,7 +83,7 @@ PlaylistManager.prototype.listPlaylist = function () {
 
 	var defer = libQ.defer();
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Listing playlists');
+	this.commandRouter.pushConsoleMessage('Listing playlists');
 
 	fs.readdir(this.playlistFolder, function(err,folderContents) {
 		defer.resolve(folderContents);
@@ -111,7 +111,7 @@ PlaylistManager.prototype.getPlaylistContent = function (name) {
 PlaylistManager.prototype.addToPlaylist = function (name, service, uri) {
 	var self = this;
 
-	//self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
+	//self.commandRouter.pushConsoleMessage('Adding uri '+uri+' to playlist '+name);
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'),
         uri +  self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_PLAYLIST') + name);
 	return self.commonAddToPlaylist(self.playlistFolder, name, service, uri);
@@ -120,7 +120,7 @@ PlaylistManager.prototype.addToPlaylist = function (name, service, uri) {
 PlaylistManager.prototype.addItemsToPlaylist = function (name, data) {
     var self = this;
 
-    //self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri '+uri+' to playlist '+name);
+    //self.commandRouter.pushConsoleMessage('Adding uri '+uri+' to playlist '+name);
     return self.commonAddToPlaylist(self.playlistFolder, name, service, uri);
 };
 
@@ -128,7 +128,7 @@ PlaylistManager.prototype.addItemsToPlaylist = function (name, data) {
 PlaylistManager.prototype.removeFromPlaylist = function (name, service, uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri ' + uri + ' to playlist ' + name);
+	self.commandRouter.pushConsoleMessage('Removing uri ' + uri + ' to playlist ' + name);
 
 	return self.commonRemoveFromPlaylist(self.playlistFolder, name, service, uri);
 };
@@ -136,7 +136,7 @@ PlaylistManager.prototype.removeFromPlaylist = function (name, service, uri) {
 PlaylistManager.prototype.playPlaylist = function (name) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Play playlist ' + name);
+	self.commandRouter.pushConsoleMessage('Play playlist ' + name);
 
 	if (name === 'favourites') {
         return self.playFavourites();
@@ -152,7 +152,7 @@ PlaylistManager.prototype.enqueue = function (name) {
 
 	var defer = libQ.defer();
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Enqueue ' + name);
+	self.commandRouter.pushConsoleMessage('Enqueue ' + name);
 
 	var filePath = self.playlistFolder + name;
 
@@ -219,7 +219,7 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri ' + uri + ' from favourites');
+	self.commandRouter.pushConsoleMessage('Removing uri ' + uri + ' from favourites');
 
 	if (service === 'webradio') {
 		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
@@ -232,7 +232,7 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 PlaylistManager.prototype.playFavourites = function () {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing favourites');
+	self.commandRouter.pushConsoleMessage('Playing favourites');
 
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder, 'favourites');
 };
@@ -248,7 +248,7 @@ PlaylistManager.prototype.getRadioFavouritesContent = function (name) {
 PlaylistManager.prototype.addToRadioFavourites = function (service, uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Adding uri ' + uri + ' to radio-favourites');
+	self.commandRouter.pushConsoleMessage('Adding uri ' + uri + ' to radio-favourites');
 
 	return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri);
 };
@@ -256,7 +256,7 @@ PlaylistManager.prototype.addToRadioFavourites = function (service, uri) {
 PlaylistManager.prototype.removeFromRadioFavourites = function (name, service, uri) {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Removing uri ' + uri + ' from radio-favourites');
+	self.commandRouter.pushConsoleMessage('Removing uri ' + uri + ' from radio-favourites');
 
 	return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri);
 };
@@ -264,7 +264,7 @@ PlaylistManager.prototype.removeFromRadioFavourites = function (name, service, u
 PlaylistManager.prototype.playRadioFavourites = function () {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing radio-favourites');
+	self.commandRouter.pushConsoleMessage('Playing radio-favourites');
 
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder, 'radio-favourites');
 };
@@ -365,7 +365,7 @@ PlaylistManager.prototype.removeFromMyWebRadio = function (name, service, uri) {
 PlaylistManager.prototype.playMyWebRadio = function () {
 	var self = this;
 
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Playing my-web-radio');
+	self.commandRouter.pushConsoleMessage('Playing my-web-radio');
 
 	return self.commonPlayPlaylist(self.favouritesPlaylistFolder, 'my-web-radio');
 };

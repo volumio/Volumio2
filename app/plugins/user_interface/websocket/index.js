@@ -253,15 +253,7 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('serviceUpdateTracklist', function (sService) {
-				var timeStart = Date.now();
-				self.logStart('Client requests Update Tracklist')
-					.then(function () {
-						self.commandRouter.serviceUpdateTracklist.call(self.commandRouter, sService);
-					})
-					.fail(self.pushError.bind(self))
-					.done(function () {
-						return self.logDone(timeStart);
-					});
+				return self.commandRouter.serviceUpdateTracklist(sService);
 			});
 
 			connWebSocket.on('rebuildLibrary', function () {
@@ -1701,7 +1693,6 @@ InterfaceWebUI.prototype.printConsoleMessage = function (message) {
 // Receive player queue updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushQueue');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
@@ -1715,7 +1706,6 @@ InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 // Push the library root
 InterfaceWebUI.prototype.pushLibraryFilters = function (browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryFilters');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
@@ -1726,7 +1716,6 @@ InterfaceWebUI.prototype.pushLibraryFilters = function (browsedata, connWebSocke
 // Receive music library data from commandRouter and send to requester
 InterfaceWebUI.prototype.pushLibraryListing = function (browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushLibraryListing');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
@@ -1737,7 +1726,6 @@ InterfaceWebUI.prototype.pushLibraryListing = function (browsedata, connWebSocke
 // Push the playlist view
 InterfaceWebUI.prototype.pushPlaylistIndex = function (browsedata, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushPlaylistIndex');
 
 	// If a specific client is given, push to just that client
 	if (connWebSocket) {
@@ -1761,7 +1749,7 @@ InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
 // Receive player state updates from commandRouter and broadcast to all connected clients
 InterfaceWebUI.prototype.pushState = function (state, connWebSocket) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'InterfaceWebUI::pushState');
+
 	if (connWebSocket) {
 		self.pushMultiroom(connWebSocket);
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushState', state);

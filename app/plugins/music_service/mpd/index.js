@@ -44,7 +44,7 @@ function ControllerMpd(context) {
 
 //MPD Play
 ControllerMpd.prototype.play = function (N) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::play ' + N);
+	this.commandRouter.pushConsoleMessage('ControllerMpd::play ' + N);
 	return this.sendMpdCommand('play', [N]);
 };
 
@@ -55,7 +55,7 @@ ControllerMpd.prototype.add = function (data) {
 };
 //MPD Remove
 ControllerMpd.prototype.remove = function (position) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::remove ' + position);
+	this.commandRouter.pushConsoleMessage('ControllerMpd::remove ' + position);
 	return this.sendMpdCommand('delete', [position]);
 };
 
@@ -65,19 +65,19 @@ ControllerMpd.prototype.remove = function (position) {
 
 //MPD Next
 ControllerMpd.prototype.next = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::next');
+	this.commandRouter.pushConsoleMessage('ControllerMpd::next');
 	return this.sendMpdCommand('next', []);
 };
 
 //MPD Previous
 ControllerMpd.prototype.previous = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::previous');
+	this.commandRouter.pushConsoleMessage('ControllerMpd::previous');
 	return this.sendMpdCommand('previous', []);
 };
 
 //MPD Seek
 ControllerMpd.prototype.seek = function (timepos) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::seek to ' + timepos);
+	this.commandRouter.pushConsoleMessage('ControllerMpd::seek to ' + timepos);
 	return this.sendMpdCommand('seekcur', [timepos]);
 };
 
@@ -100,25 +100,25 @@ ControllerMpd.prototype.repeat = function (repeatcmd) {
 
 // MPD clear
 ControllerMpd.prototype.clear = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clear');
+	this.commandRouter.pushConsoleMessage('ControllerMpd::clear');
 	return this.sendMpdCommand('clear', []);
 };
 
 // MPD enable output
 ControllerMpd.prototype.enableOutput = function (output) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Enable Output ' + output);
+	this.commandRouter.pushConsoleMessage('Enable Output ' + output);
 	return this.sendMpdCommand('enableoutput', [output]);
 };
 
 // MPD disable output
 ControllerMpd.prototype.disableOutput = function (output) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Disable Output ' + output);
+	this.commandRouter.pushConsoleMessage('Disable Output ' + output);
 	return this.sendMpdCommand('disableoutput', [output]);
 };
 
 //UpdateDB
 ControllerMpd.prototype.updateMpdDB = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'Update mpd DB');
+	this.commandRouter.pushConsoleMessage('Update mpd DB');
 	return this.sendMpdCommand('update', []);
 };
 
@@ -126,7 +126,7 @@ ControllerMpd.prototype.updateMpdDB = function () {
 ControllerMpd.prototype.addPlay = function (fileName) {
     var self=this;
 
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::addPlay');
+    this.commandRouter.pushConsoleMessage('ControllerMpd::addPlay');
 	this.commandRouter.pushToastMessage('Success', '', fileName + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 
 
@@ -184,7 +184,7 @@ ControllerMpd.prototype.addPlayCue = function (data) {
 // MPD music library
 ControllerMpd.prototype.getTracklist = function () {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::getTracklist');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::getTracklist');
 
 	return self.mpdReady
 		.then(function () {
@@ -262,7 +262,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function (sInput) {
 // Define a method to get the MPD state
 ControllerMpd.prototype.getState = function () {
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::getState');
+	this.commandRouter.pushConsoleMessage('ControllerMpd::getState');
 	var timeCurrentUpdate = Date.now();
 	this.timeLatestUpdate = timeCurrentUpdate;
 
@@ -307,7 +307,7 @@ ControllerMpd.prototype.getState = function () {
 // Stop the current status update thread if a newer one exists
 ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentThread) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::haltIfNewerUpdateRunning');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::haltIfNewerUpdateRunning');
 
 	if (self.timeLatestUpdate > timeCurrentThread) {
 		return libQ.reject('Alert: Aborting status update - newer one detected');
@@ -319,7 +319,7 @@ ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentTh
 // Announce updated MPD state
 ControllerMpd.prototype.pushState = function (state) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushState');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::pushState');
 
 	return self.commandRouter.servicePushState(state, self.servicename);
 };
@@ -327,7 +327,7 @@ ControllerMpd.prototype.pushState = function (state) {
 // Pass the error if we don't want to handle it
 ControllerMpd.prototype.pushError = function (sReason) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pushError');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::pushError');
 	self.commandRouter.pushConsoleMessage(sReason);
 
 	// Return a resolved empty promise to represent completion
@@ -337,15 +337,15 @@ ControllerMpd.prototype.pushError = function (sReason) {
 // Define a general method for sending an MPD command, and return a promise for its execution
 ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommand '+sCommand);
+	self.commandRouter.pushConsoleMessage('ControllerMpd::sendMpdCommand '+sCommand);
 
 	return self.mpdReady
 		.then(function () {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'sending command...');
+			self.commandRouter.pushConsoleMessage('sending command...');
 			return libQ.nfcall(self.clientMpd.sendCommand.bind(self.clientMpd), libMpd.cmd(sCommand, arrayParameters));
 		})
 		.then(function (response) {
-			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'parsing response...');
+			self.commandRouter.pushConsoleMessage('parsing response...');
 			var respobject = libMpd.parseKeyValueMessage.call(libMpd, response);
 			// If there's an error show an alert on UI
 			if ('error' in respobject) {
@@ -362,13 +362,13 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 // Command array takes the form [{command: sCommand, parameters: arrayParameters}, ...]
 ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::sendMpdCommandArray');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::sendMpdCommandArray');
 
 	return self.mpdReady
 		.then(function () {
 			return libQ.nfcall(self.clientMpd.sendCommands.bind(self.clientMpd),
 				libFast.map(arrayCommands, function (currentCommand) {
-                    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'COMMAND '+currentCommand);
+                    self.commandRouter.pushConsoleMessage('COMMAND '+currentCommand);
 					return libMpd.cmd(currentCommand.command, currentCommand.parameters);
 				})
 			);
@@ -379,7 +379,7 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 // Parse MPD's track info text into Volumio recognizable object
 ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseTrackInfo');
+	this.commandRouter.pushConsoleMessage('ControllerMpd::parseTrackInfo');
 
     //this.commandRouter.logger.info("OBJTRACKINFO "+JSON.stringify(objTrackInfo));
 	var resp = {};
@@ -460,7 +460,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 // Parse MPD's text playlist into a Volumio recognizable playlist object
 ControllerMpd.prototype.parsePlaylist = function (objQueue) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parsePlaylist');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::parsePlaylist');
 
 	// objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
 	// We want to convert to a straight array of trackIds
@@ -474,7 +474,7 @@ ControllerMpd.prototype.parseState = function (objState) {
 	var self = this;
 	//console.log(objState);
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::parseState');
+	this.commandRouter.pushConsoleMessage('ControllerMpd::parseState');
 
 	// Pull track duration out of status message
 	var nDuration = null;
@@ -578,13 +578,13 @@ ControllerMpd.prototype.parseState = function (objState) {
 
 ControllerMpd.prototype.logDone = function (timeStart) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+	self.commandRouter.pushConsoleMessage('------------------------------ ' + (Date.now() - timeStart) + 'ms');
 	return libQ.resolve();
 };
 
 ControllerMpd.prototype.logStart = function (sCommand) {
 	var self = this;
-	self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+	self.commandRouter.pushConsoleMessage('\n' + '---------------------------- ' + sCommand);
 	return libQ.resolve();
 };
 
@@ -1764,7 +1764,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path,icon) {
 ControllerMpd.prototype.reportUpdatedLibrary = function () {
 	var self = this;
 	// TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::DB Update Finished');
+	self.commandRouter.pushConsoleMessage('ControllerMpd::DB Update Finished');
 	//return self.commandRouter.pushToastMessage('Success', 'ASF', ' Added');
 };
 
@@ -2664,7 +2664,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
     else{
         var uri=self.sanitizeUri(track.uri);
 
-        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::clearAddPlayTracks '+uri);
+        self.commandRouter.pushConsoleMessage('ControllerMpd::clearAddPlayTracks '+uri);
 
 		var urilow = uri.toLowerCase();
         if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd') || urilow.endsWith('.dsf')) {
@@ -2695,7 +2695,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
 
 ControllerMpd.prototype.seek = function(position) {
     var self=this;
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::seek');
+    this.commandRouter.pushConsoleMessage('ControllerMpd::seek');
 
     var defer = libQ.defer();
     var command = 'seek ';
@@ -2717,20 +2717,20 @@ ControllerMpd.prototype.seek = function(position) {
 
 // MPD pause
 ControllerMpd.prototype.pause = function () {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::pause');
+    this.commandRouter.pushConsoleMessage('ControllerMpd::pause');
     return this.sendMpdCommand('pause', []);
 };
 
 // MPD resume
 ControllerMpd.prototype.resume = function () {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::resume');
+    this.commandRouter.pushConsoleMessage('ControllerMpd::resume');
     return this.sendMpdCommand('play', []);
 };
 
 
 // MPD stop
 ControllerMpd.prototype.stop = function () {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::stop');
+    this.commandRouter.pushConsoleMessage('ControllerMpd::stop');
     return this.sendMpdCommand('stop', []);
 };
 
@@ -2742,7 +2742,7 @@ ControllerMpd.prototype.sanitizeUri = function (uri) {
 ControllerMpd.prototype.reportUpdatedLibrary = function () {
     var self = this;
     // TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerMpd::DB Update Finished');
+    self.commandRouter.pushConsoleMessage('ControllerMpd::DB Update Finished');
     return self.commandRouter.pushToastMessage('Success', 'ASF', ' Added');
 };
 

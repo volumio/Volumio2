@@ -1091,13 +1091,6 @@ CoreCommandRouter.prototype.initPlayerControls = function () {
 	});
 };
 
-/* what is this?
- CoreCommandRouter.prototype.getConfiguration=function(componentCode)
- {
- console.log("_________ "+componentCode);
- }
- */
-
 
 /**
  * This method shall be used to push debug messages
@@ -1116,17 +1109,8 @@ CoreCommandRouter.prototype.pushErrorConsoleMessage = function (sMessage) {
 };
 
 CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
+	// Uncomment for more logging
 	this.logger.info(sMessage);
-	/*
-	 var self = this;
-	 return libQ.all(
-	 libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-	 var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-	 if( typeof thisInterface.printConsoleMessage === "function")
-	 return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
-	 })
-	 );
-	 */
 };
 
 CoreCommandRouter.prototype.pushToastMessage = function (type, title, message) {

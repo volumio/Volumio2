@@ -328,26 +328,26 @@ interfaceApi.prototype.printConsoleMessage = function (message) {
 // Receive player queue updates from commandRouter and broadcast to all connected clients
 interfaceApi.prototype.pushQueue = function (queue, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'interfaceApi::pushQueue');
+    self.commandRouter.pushConsoleMessage('interfaceApi::pushQueue');
 
 };
 
 // Push the library root
 interfaceApi.prototype.pushLibraryFilters = function (browsedata, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'interfaceApi::pushLibraryFilters');
+    self.commandRouter.pushConsoleMessage('interfaceApi::pushLibraryFilters');
 };
 
 // Receive music library data from commandRouter and send to requester
 interfaceApi.prototype.pushLibraryListing = function (browsedata, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'interfaceApi::pushLibraryListing');
+    self.commandRouter.pushConsoleMessage('interfaceApi::pushLibraryListing');
 };
 
 // Push the playlist view
 interfaceApi.prototype.pushPlaylistIndex = function (browsedata, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'interfaceApi::pushPlaylistIndex');
+    self.commandRouter.pushConsoleMessage('interfaceApi::pushPlaylistIndex');
 
 };
 
@@ -361,7 +361,7 @@ interfaceApi.prototype.pushMultiroom = function (selfConnWebSocket) {
 // Receive player state updates from commandRouter and broadcast to all connected clients
 interfaceApi.prototype.pushState = function (state, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'interfaceApi::pushState');
+    self.commandRouter.pushConsoleMessage('interfaceApi::pushState');
 };
 
 
@@ -380,13 +380,13 @@ interfaceApi.prototype.pushMultiroomDevices = function (msg) {
 
 interfaceApi.prototype.logDone = function (timeStart) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + '------------------------------ ' + (Date.now() - timeStart) + 'ms');
+    self.commandRouter.pushConsoleMessage('------------------------------ ' + (Date.now() - timeStart) + 'ms');
     return libQ.resolve();
 };
 
 interfaceApi.prototype.logStart = function (sCommand) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('\n' + '[' + Date.now() + '] ' + '---------------------------- ' + sCommand);
+    self.commandRouter.pushConsoleMessage('\n' + '---------------------------- ' + sCommand);
     return libQ.resolve();
 };
 
