@@ -61,44 +61,48 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 	}
 
 	client.on('response', function responseHandler(headers, code, rinfo) {
-		var urlraw = headers.LOCATION.replace('http://', '').split('/')[0].split(':');
-		var server = {'url': 'http://'+urlraw[0], 'port': urlraw[1], 'endpoint': headers}
-		var location = server;
-		xmlToJson(headers.LOCATION, function(err, data) {
-			try{
-                if (err) {
-                    return self.logger.error(err);
-                }
-                var server = {};
-                server.name = data.root.device[0].friendlyName[0];
-                server.UDN = data.root.device[0].UDN + "";
-                server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
-                server.lastTimeAlive = Date.now();
-                server.location = location.url + ":" + location.port;
-                var services = data.root.device[0].serviceList[0].service;
-                var ContentDirectoryService = false;
-                //Finding ContentDirectory Service
-                for(var s = 0; s < services.length; s++){
-                    if(services[s].serviceType[0] == "urn:schemas-upnp-org:service:ContentDirectory:1"){
-                        ContentDirectoryService = services[s];
-                        server.location += ContentDirectoryService.controlURL[0];
-                    }
-                }
+		if (headers != undefined && headers.LOCATION != undefined && headers.LOCATION.length > 0) {
+            var urlraw = headers.LOCATION.replace('http://', '').split('/')[0].split(':');
+            var server = {'url': 'http://'+urlraw[0], 'port': urlraw[1], 'endpoint': headers}
+            var location = server;
 
-                var duplicate = false;
-                for(var i = 0; i < self.DLNAServers.length; i++){
-                    if(self.DLNAServers[i].UDN === server.UDN){
-                        duplicate = true;
-                        self.DLNAServers[i] = server;
+            xmlToJson(headers.LOCATION, function(err, data) {
+                try{
+                    if (err) {
+                        return self.logger.error(err);
                     }
+                    var server = {};
+                    server.name = data.root.device[0].friendlyName[0];
+                    server.UDN = data.root.device[0].UDN + "";
+                    server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
+                    server.lastTimeAlive = Date.now();
+                    server.location = location.url + ":" + location.port;
+                    var services = data.root.device[0].serviceList[0].service;
+                    var ContentDirectoryService = false;
+                    //Finding ContentDirectory Service
+                    for(var s = 0; s < services.length; s++){
+                        if(services[s].serviceType[0] == "urn:schemas-upnp-org:service:ContentDirectory:1"){
+                            ContentDirectoryService = services[s];
+                            server.location += ContentDirectoryService.controlURL[0];
+                        }
+                    }
+
+                    var duplicate = false;
+                    for(var i = 0; i < self.DLNAServers.length; i++){
+                        if(self.DLNAServers[i].UDN === server.UDN){
+                            duplicate = true;
+                            self.DLNAServers[i] = server;
+                        }
+                    }
+                    if(!duplicate){
+                        self.DLNAServers.push(server);
+                    }
+                } catch(e){
+                    self.logger.error(e);
                 }
-                if(!duplicate){
-                    self.DLNAServers.push(server);
-                }
-			} catch(e){
-                self.logger.error(e);
-			}
-  	});
+            });
+		}
+
 	});
 
     try {
