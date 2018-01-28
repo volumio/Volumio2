@@ -142,8 +142,13 @@ CoreCommandRouter.prototype.volumioClearQueue = function () {
 
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
+	var self = this;
 	this.callCallback("volumiosetvolume", VolumeInteger);
-	return this.volumeControl.alsavolume(VolumeInteger);
+
+	var volSet = this.volumeControl.alsavolume(VolumeInteger);
+    volSet.then(function (result) {
+		 return self.volumioupdatevolume(result);
+    })
 };
 
 // Volumio Update Volume

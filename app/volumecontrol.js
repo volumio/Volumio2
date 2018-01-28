@@ -268,7 +268,9 @@ CoreVolumeController.prototype.updateVolumeScript = function (data) {
 // Public methods -----------------------------------------------------------------------------------
 CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 	var self = this;
+	var defer = libQ.defer();
 	self.logger.info('[' + Date.now() + '] ' + 'VolumeController::SetAlsaVolume' + VolumeInteger);
+
 	switch (VolumeInteger) {
 		case 'mute':
 			//Mute or Unmute, depending on state
@@ -282,7 +284,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 				self.setVolume(0, function (err) {
 					Volume.vol = 0
 					Volume.mute = true;
-					self.commandRouter.volumioupdatevolume(Volume);
+                    defer.resolve(Volume)
 				});
 			});
 			break;
@@ -295,7 +297,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 						Volume.vol = premutevolume;
 						Volume.mute = false;
 						currentvolume = premutevolume;
-						self.commandRouter.volumioupdatevolume(Volume);
+                        defer.resolve(Volume)
 
 					});
 			break;
@@ -330,7 +332,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 						Volume.mute = false;
                         currentvolume = VolumeInteger;
 						self.logger.info('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-						self.commandRouter.volumioupdatevolume(Volume);
+                        defer.resolve(Volume)
 
 					});
 				});
@@ -357,7 +359,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					Volume.vol = VolumeInteger
 					Volume.mute = false;
                     currentvolume = VolumeInteger;
-					self.commandRouter.volumioupdatevolume(Volume);
+                    defer.resolve(Volume)
 				});
 			});
 			break;
@@ -381,10 +383,11 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					Volume.vol = VolumeInteger;
 					Volume.mute = false;
 					currentvolume = VolumeInteger;
-					self.commandRouter.volumioupdatevolume(Volume);
+					defer.resolve(Volume)
 			});
 	}
 
+	return defer.promise
 };
 
 CoreVolumeController.prototype.retrievevolume = function () {
