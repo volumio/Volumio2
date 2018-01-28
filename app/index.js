@@ -1188,13 +1188,27 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 // Platform specific & Hardware related options, they can be found in platformSpecific.js
 // This allows to change system commands across different devices\environments
 CoreCommandRouter.prototype.shutdown = function () {
-	this.pluginManager.onVolumioShutdown();
-	this.platformspecific.shutdown();
+	var self = this;
+	
+	self.pluginManager.onVolumioShutdown().then( function() {
+		self.platformspecific.shutdown();
+	}).fail(function(e){
+		self.logger.info("Error in onVolumioShutdown Plugin Promise handling: "+ e);
+		self.platformspecific.shutdown();
+	});
+	
 };
 
 CoreCommandRouter.prototype.reboot = function () {
-	this.pluginManager.onVolumioReboot();
-	this.platformspecific.reboot();
+	var self = this;
+	
+	self.pluginManager.onVolumioReboot().then( function() {
+		 self.platformspecific.reboot();
+	}).fail(function(e){
+		self.logger.info("Error in onVolumioReboot Plugin Promise handling: "+ e);
+		self.platformspecific.reboot();
+	});
+	
 };
 
 CoreCommandRouter.prototype.networkRestart = function () {
@@ -1877,3 +1891,4 @@ CoreCommandRouter.prototype.deleteMyVolumioDevice = function (device) {
 
     return self.executeOnPlugin('system_controller', 'my_volumio', 'deleteMyVolumioDevice', device);
 }
+
