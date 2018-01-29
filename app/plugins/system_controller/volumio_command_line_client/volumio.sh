@@ -1,5 +1,6 @@
 #!/bin/bash
 LOGDUMP="/var/tmp/logondemand"
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 
 doc() {
