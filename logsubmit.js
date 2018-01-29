@@ -12,11 +12,6 @@ var commandArray = [
     "sudo journalctl -p 7"
 ];
 
-var logFile = "/tmp/logondemand";
-
-// Let's start fresh!
-execSync("date >" + logFile);
-
 var args = process.argv.slice(2);
 var description;
 if ( args[0] == undefined ) {
@@ -31,6 +26,11 @@ if ( args[0] == undefined ) {
         if (i < (n-1)) description = description + "\\'";
     }
 }
+
+var logFile = "/tmp/logondemand";
+
+// Let's start fresh!
+execSync("date >" + logFile);
 
 try {
     //If description is supplied, add it
