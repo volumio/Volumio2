@@ -3,8 +3,8 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 
 var commandArray = [
-	"cat /proc/version",
-	"cat /etc/os-release",
+    "cat /proc/version",
+    "cat /etc/os-release",
     "ifconfig",
     "iwconfig",
 	"aplay -l",
