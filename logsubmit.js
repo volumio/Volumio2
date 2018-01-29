@@ -12,6 +12,9 @@ var commandArray = [
     "sudo journalctl -p 7"
 ];
 
+// Up to two arguments may be given:
+// - a description, which is inserted in the output file
+// - an optional flag indicating the log should be saved locally, not uploaded
 var args = process.argv.slice(2);
 var description;
 if ( args[0] == undefined ) {
@@ -25,6 +28,11 @@ if ( args[0] == undefined ) {
         description = description + "'" + pieces[i] + "'";
         if (i < (n-1)) description = description + "\\'";
     }
+}
+
+var submit = 'yes';
+if ( args.length > 1 ) {
+    submit = 'no';
 }
 
 var logFile = "/tmp/logondemand";
@@ -77,6 +85,7 @@ var command = "/usr/bin/curl -X POST -H 'Content-Type: multipart/form-data'"
             + " -F 'variant=" + variant + "'"
             + " 'http://logs.volumio.org:7171/logs/v1'";
 
+if ( submit === 'yes' ) {
 exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
     if (error !== null) {
         console.log('Cannot send bug report: ' + error);
@@ -86,9 +95,12 @@ exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout
         console.log(stdout)
         execSync("rm " + logFile);
     }
-    execSync("rm /tmp/logfields");
 });
-
+} else {
+    console.log('Saving as: ' + storedLogFile);
+    execSync("mv -f " + logFile + " " + storedLogFile);
+}
+execSync("rm /tmp/logfields");
 
 function randomIntInc (low, high) {
     return Math.floor(Math.random() * (high - low + 1) + low);
