@@ -28,6 +28,7 @@ if ( args[0] == undefined ) {
 }
 
 var logFile = "/tmp/logondemand";
+var storedLogFile = "/var/tmp/logondemand";
 
 // Let's start fresh!
 execSync("date >" + logFile);
@@ -79,10 +80,12 @@ var command = "/usr/bin/curl -X POST -H 'Content-Type: multipart/form-data'"
 exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
     if (error !== null) {
         console.log('Cannot send bug report: ' + error);
+        console.log('Saving as: ' + storedLogFile);
+        execSync("mv -f " + logFile + " " + storedLogFile);
     } else {
         console.log(stdout)
+        execSync("rm " + logFile);
     }
-    execSync("rm " + logFile);
     execSync("rm /tmp/logfields");
 });
 
