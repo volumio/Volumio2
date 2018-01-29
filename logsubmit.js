@@ -43,7 +43,7 @@ execSync("date >" + logFile);
 
 try {
     //If description is supplied, add it
-    execSync("echo " + description + " >>" + logFile);
+    fs.appendFileSync(logFile, 'Description="' + description + '"\n');
 } catch (e) {
     console.log(e);
 }
