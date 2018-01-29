@@ -48,8 +48,6 @@ try {
     console.log(e);
 }
 
-execSync("cat /tmp/logfields >> " + logFile);
-
 for (var itemN in commandArray) {
     var item = commandArray[itemN];
     var itemWithoutput = item + " >>" + logFile + " 2>&1"
@@ -100,7 +98,6 @@ exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout
     console.log('Saving as: ' + storedLogFile);
     execSync("mv -f " + logFile + " " + storedLogFile);
 }
-execSync("rm /tmp/logfields");
 
 function randomIntInc (low, high) {
     return Math.floor(Math.random() * (high - low + 1) + low);
