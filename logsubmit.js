@@ -51,6 +51,11 @@ try {
 for (var itemN in commandArray) {
     var item = commandArray[itemN];
     var itemWithoutput = item + " >>" + logFile + " 2>&1"
+    try {
+        fs.appendFileSync(logFile, '\n# ' + item + ' ---------------' + '\n');
+    } catch(e) {
+        console.log(e);
+    }
     execSync(itemWithoutput);
 }
 
