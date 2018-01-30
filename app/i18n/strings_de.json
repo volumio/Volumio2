@@ -92,7 +92,7 @@
     	"HOTSPOT_NAME":"Name des Hotspots",
     	"HOTSPOT_PROTECTION":"Passwortgeschützter Hotspot",
     	"HOTSPOT_PASSWORD":"Hotspot-Passwort",
-		"HOTSPOT_PASSWORD_DOC":"Das Standardpasswort sollte durch ein Passwort aus mindestens 7 Zeichen ersetzt werden",
+		"HOTSPOT_PASSWORD_DOC":"Das Standardpasswort sollte durch ein Passwort aus mindestens 8 Zeichen ersetzt werden",
     	"HOTSPOT_CHANNEL":"Hotspot-Kanal",
 		"HOTSPOT_CHANNEL_DOC":"Die Wahl eines anderen Kanals kann in Umgebungen mit zahlreichen Funknetzen die Verbindungsqualität verbessern.",
 	  	"HOTSPOT_CONF_ERROR":"Fehler bei der Einrichtung des Hotspots",

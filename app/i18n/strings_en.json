@@ -92,7 +92,7 @@
     "HOTSPOT_NAME":"Hotspot Name",
     "HOTSPOT_PROTECTION":"Password Protected Hotspot",
     "HOTSPOT_PASSWORD":"Hotspot Password",
-	"HOTSPOT_PASSWORD_DOC":"Change the default Hotspot Password, use a passphrase of at least 7 characters",
+	"HOTSPOT_PASSWORD_DOC":"Change the default Hotspot Password, use a passphrase of at least 8 characters",
     "HOTSPOT_CHANNEL":"Hotspot Channel",
 	"HOTSPOT_CHANNEL_DOC":"Change the Hotspot Transmitting channel. This might be useful to improve wireless connection trough Hotspot in network-dense environments",
     "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
