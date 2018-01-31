@@ -92,7 +92,7 @@
     "HOTSPOT_NAME":"Nome dell'Hotspot",
     "HOTSPOT_PROTECTION":"Hotspot protetto",
     "HOTSPOT_PASSWORD":"Password Hotspot",
-    "HOTSPOT_PASSWORD_DOC":"Cambia la password predefinita dell'Hotspot. Usare una password di almeno 7 caratteri",
+    "HOTSPOT_PASSWORD_DOC":"Cambia la password predefinita dell'Hotspot. Usare una password di almeno 8 caratteri",
     "HOTSPOT_CHANNEL":"Canale Hotspot",
     "HOTSPOT_CHANNEL_DOC":"Cambia il canale di trasmissione dell'Hotspot. Questo può migliorare la tramissione dei dati via hotspot in ambienti con molte reti wifi",
     "HOTSPOT_CONF_ERROR":"Errore di configurazione dell'Hotspot",
