@@ -350,9 +350,15 @@ CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds,
 
 // MPD Stop
 CoreCommandRouter.prototype.serviceStop = function (sService) {
-	this.pushConsoleMessage('CoreCommandRouter::serviceStop');
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	return thisPlugin.stop();
+	
+	if (sService != undefined) {
+		this.pushConsoleMessage('CoreCommandRouter::serviceStop');
+		var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+		return thisPlugin.stop();
+	} else {
+		this.pushConsoleMessage('Received STOP, but no service to execute it');
+	}
+	
 };
 
 // MPD Pause
