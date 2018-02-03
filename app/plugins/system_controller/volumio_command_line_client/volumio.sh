@@ -42,6 +42,7 @@ vrestart                            Restarts Volumio Service
 pull                               Pulls latest github status on master from https://github.com/volumio/Volumio2.git
 pull -b <branch>                   Pulls branch <branch> from https://github.com/volumio/Volumio2.git
 pull -b <branch> <repository>      Pulls branch <branch> from git repository <repository>
+dev                                Start Volumio in develpment mode, with Nodemon and Remote Debugger
 kernelsource                       Gets Current Kernel source (Raspberry PI only)
 plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
@@ -73,6 +74,10 @@ echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command
 echo "Pull completed, restarting Volumio"
 echo volumio | sudo -S systemctl start volumio.service
 echo "Done"
+}
+
+dev() {
+sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/devmode.sh
 }
 
 kernelsource() {
@@ -156,6 +161,9 @@ case "$1" in
             ;;
 	    pull)
             pull $2 $3 $4
+            ;;
+        dev)
+        	dev
             ;;
 	    kernelsource)
 	        kernelsource
