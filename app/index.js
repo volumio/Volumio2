@@ -1566,9 +1566,22 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
             var name=names[j];
             var instance=this.pluginManager.getPlugin(category,name);
 
-            if(instance.loadI18NStrings)
-                instance.loadI18NStrings(language_code);
-
+            if (instance.getI18nFile) {
+              var pluginI18NFile = instance.getI18nFile(language_code);
+              if (pluginI18NFile && fs.pathExistsSync(pluginI18NFile)) {
+                var pluginI18nStrings = fs.readJSONSync(pluginI18NFile);
+      
+                for (var locale in pluginI18nStrings) {
+                  // check if locale does not already exist to avoid that volumio
+                  // strings get overwritten
+                  if (!this.i18nStrings[locale]) {
+                    this.i18nStrings[locale] = pluginI18nStrings[locale];
+                  } else {
+                    this.logger.info("Plugin " + name + " has duplicated i18n key " + locale + ". It is ignored.");
+                  }
+                }
+              }
+            }
         }
     }
 };
