@@ -7,7 +7,7 @@ var commandArray = [
     "cat /etc/os-release",
     "ifconfig",
     "iwconfig",
-	"aplay -l",
+    "aplay -l",
     "ps -ef",
     "sudo journalctl -p 7"
 ];
