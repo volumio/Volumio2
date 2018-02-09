@@ -111,7 +111,9 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Failed to connect to network ",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Please retry or proceed to next step",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"The unit will connect to network",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"when first setup will be completed"
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"when first setup will be completed",
+    "HOTSPOT_FALLBACK":"Hotspot fallback",
+    "HOTSPOT_FALLBACK_DOC":"If enabled, Hotspot will start when Wireless Network connection is lost. If disabled, the unit will keep on trying to reconnect to a known Wireless network"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts",

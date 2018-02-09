@@ -111,7 +111,9 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Impossibile connettersi alla rete ",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Riprovare o procedere al passo successivop",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Il sistema si connetterà alla rete",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"quando il setup iniziale sarà completato"
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"quando il setup iniziale sarà completato",
+    "HOTSPOT_FALLBACK":"Hotspot di riserva",
+    "HOTSPOT_FALLBACK_DOC":"Se abilitato, in caso di perdita della connessione senza fili, verrà abilitato l'hotspot. Se disabilitato, il sistema cercherà di riconnettersi a una rete senza fili conosciuta."
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Scegli un alias che verrà mostrato alla voce NAS",
