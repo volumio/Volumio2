@@ -1014,7 +1014,7 @@ ControllerWebradio.prototype.listSelection = function () {
                             title: station.title,
                             artist: '',
                             album: '',
-                            albumart: thumbnaiEndpoint + station.title + '.png',
+                            albumart: thumbnaiEndpoint + station.title + '.jpg',
                             uri: station.uri
                         };
                     object.navigation.lists[0].items.push(radio);
