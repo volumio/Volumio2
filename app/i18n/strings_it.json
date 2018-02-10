@@ -109,7 +109,7 @@
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"Connessione effettuata alla rete ",
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED":"Procedere al passo successivo",
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Impossibile connettersi alla rete ",
-    "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Riprovare o procedere al passo successivop",
+    "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"riprovare o procedere al passo successivo",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Il sistema si connetterà alla rete",
     "WIRELESS_NETWORK_CONNECTION_DEFER2":"quando il setup iniziale sarà completato",
     "HOTSPOT_FALLBACK":"Hotspot di riserva",
