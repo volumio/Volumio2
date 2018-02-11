@@ -196,7 +196,7 @@ function CoreVolumeController(commandRouter) {
                 });
                 if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1' || devicename == 'PianoDACPlus multicodec-0') {
                     amixer(['-M', 'set', '-c', device, 'Subwoofer', val + '%'], function (err) {
-                        cb(err);
+
                     });
                 }
             } else {
@@ -205,7 +205,7 @@ function CoreVolumeController(commandRouter) {
                 });
                 if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1' || devicename == 'PianoDACPlus multicodec-0') {
                     amixer(['set', '-c', device, 'Subwoofer', val + '%'], function (err) {
-                        cb(err);
+                       
                     });
                 }
             }
