@@ -74,7 +74,10 @@ ControllerUPNPBrowser.prototype.onStart = function() {
                     var server = {};
                     server.name = data.root.device[0].friendlyName[0];
                     server.UDN = data.root.device[0].UDN + "";
-                    server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
+                    server.icon = '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png';
+                    if(data.root.device[0].iconList[0] != undefined && data.root.device[0].iconList[0].icon[0].url != undefined) {
+                        server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
+					}
                     server.lastTimeAlive = Date.now();
                     server.location = location.url + ":" + location.port;
                     var services = data.root.device[0].serviceList[0].service;
