@@ -1227,6 +1227,14 @@ PluginManager.prototype.removePluginFromConfiguration = function (category,name)
 
 	self.plugins.remove(key);
 
+    try {
+        execSync('/bin/rm -rf /data/configuration/' + category +'/' + name, { uid: 1000, gid:1000, encoding: 'utf8' });
+        execSync('/bin/sync', { uid: 1000, gid:1000, encoding: 'utf8' });
+        self.logger.info("Successfully removed " + name + " configuration files");
+	} catch(e) {
+        self.logger.error("Cannot remove " + name + " configuration files");
+	}
+
 	defer.resolve();
 	return defer.promise;
 }
