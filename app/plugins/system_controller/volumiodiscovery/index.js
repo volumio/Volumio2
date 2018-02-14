@@ -195,7 +195,9 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 
 		self.browser.on('error',function(error){
 			self.context.coreCommand.pushConsoleMessage('mDNS Browse raised the following error ' + error);
-			self.startMDNSBrowse();
+			// Do not start mdns browser, since it will duplicate its instance
+			// Find a way to reinstantiate, if possible
+			//self.startMDNSBrowse();
 		});
 		self.browser.on('serviceUp', function(service) {
 
