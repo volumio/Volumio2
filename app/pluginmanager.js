@@ -1402,7 +1402,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 	if (installed != undefined) {
 		installed.then(function (installedPlugins) {
 			for (var e = 0; e <  installedPlugins.length; e++) {
-				var pluginpretty = {"prettyName":installedPlugins[e].prettyName,"version":installedPlugins[e].version};
+				var pluginpretty = {"prettyName":installedPlugins[e].prettyName,"version":installedPlugins[e].version,"category":installedPlugins[e].category};
 				myplugins.push(pluginpretty);
 			}
 		});
@@ -1454,9 +1454,11 @@ PluginManager.prototype.getAvailablePlugins = function () {
 			for(var a = 0; a <  plugins.length; a++) {
 				var availableName = plugins[a].prettyName;
 				var availableVersion = plugins[a].version;
+                var availableCategory = plugins[a].category;
 				for(var c = 0; c <  myplugins.length; c++) {
 					if(myplugins[c].prettyName === availableName) {
 						plugins[a].installed = true;
+                        plugins[a].category = myplugins[c].category;
 						var v = compareVersions(availableVersion, myplugins[c].version);
 						if (v === 1) {
 							plugins[a].updateAvailable = true
