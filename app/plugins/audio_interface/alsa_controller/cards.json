@@ -1,8 +1,27 @@
 {
   "cards": [
-    {"name": "ALSA", "prettyname": "Audio Jack", "defaultmixer": "PCM","type":"integrated"},
-    {"name": "sndrpihifiberry", "prettyname": "Hifiberry DAC", "type":"i2S"},
-    {"name": "IQaudIODAC", "prettyname": "IQaudIO DAC", "type":"i2S"},
-    {"name": "sndrpijustboomd", "prettyname": "JustBoom DAC Boards", "type":"i2S"}
+    {"name": "bcm2835 ALSA", "multidevice": false, "prettyname": "Audio Jack", "defaultmixer": "PCM","type":"integrated"},
+    {"name": "snd_rpi_hifiberry_dac", "multidevice": false, "prettyname": "Hifiberry DAC", "type":"i2S"},
+    {"name": "HiFiBerry Digi+ Pro HiFi wm8804-spdif-0", "multidevice": false, "prettyname": "HiFiBerry Digi+ Pro", "type":"i2S"},
+    {"name": "IQaudIODAC", "multidevice": false, "prettyname": "IQaudIO DAC", "type":"i2S"},
+    {"name": "sndrpijustboomd", "multidevice": false, "prettyname": "JustBoom DAC Boards", "type":"i2S"},
+    {"name": "atm7059_link", "multidevice": false, "prettyname": "HDMI Audio Out", "defaultmixer": "Digital","type":"integrated"},
+    {"name": "PianoDACPlus", "multidevice": false, "prettyname": "Allo Piano 2.1", "defaultmixer": "Digital","type":"i2S"},
+    {"name": "BossDAC", "multidevice": false, "prettyname": "Allo BOSS", "defaultmixer": "Digital","type":"i2S"},
+    {"name": "sndhdmi", "multidevice": false, "prettyname": "HDMI Out", "defaultmixer": "","type":"integrated"},
+    {"name": "audiocodec", "multidevice": false,"prettyname": "Analog Audio Out", "defaultmixer": "headphone volume","type":"integrated"},
+    {"name": "imxvt1613audio", "multidevice": false, "prettyname": "Analog Audio Out", "defaultmixer": "Speaker","type":"integrated"},
+    {"name": "imxhdmisoc", "multidevice": false,"prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
+    {"name": "imxaudiotda1998", "multidevice": false, "prettyname": "HDMI Audio Out", "defaultmixer": "Speaker","type":"integrated"},
+    {"name": "ODROID-DAC2", "multidevice": false, "prettyname": "HiFi Shield 2", "defaultmixer": "Digital","type":"i2S"},
+    {"name": "ODROID-DAC", "multidevice": false, "prettyname": "HiFi Shield/Shield+", "defaultmixer": "","type":"integrated"},
+    {"name": "ODROID-HDMI", "multidevice": false, "prettyname": "HDMI/ TOSLINK (S/PDIF)", "defaultmixer": "","type":"integrated"},
+    {"name": "sndspdif", "multidevice": false, "prettyname": "TOSLINK (S/PDIF)", "defaultmixer": "","type":"integrated"},
+    {"name": "snddaudio0", "multidevice": false, "prettyname": "ANALOG (DAC)", "defaultmixer": "","type":"integrated"},
+    {"name": "rockchipminiarm", "multidevice": false, "prettyname": "HDMI Audio Out", "defaultmixer": "","type":"integrated"},
+    {"name": "S/PDIF PCM snd-soc-dummy-dai-0", "multidevice": false, "prettyname": "TOSLINK (S/PDIF) ", "defaultmixer": "","type":"integrated"},
+    {"name": "HiFi-ASRC-FE (*)", "multidevice": false, "prettyname": "ANALOG (DAC)", "defaultmixer": "Digital","type":"integrated"},
+    {"name": "TinkerAudio OnBoard", "multidevice": true, "devices":[{"number":1, "prettyname": "SPDIF", "defaultmixer": "SPDIF"}, {"number":2, "prettyname": "Audio Jack Out", "defaultmixer": "Headphone,1"}],"type":"integrated"},
+    {"name": "rockchip", "multidevice": false, "prettyname": "Generic I2S", "defaultmixer": "","type":"integrated"}
   ]
 }

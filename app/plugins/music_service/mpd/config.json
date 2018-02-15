@@ -17,7 +17,7 @@
   },
   "dop": {
 	"type": "boolean",
-	"value": true
+	"value": false
   },
   "auto_update":{
     "type": "boolean",
@@ -51,9 +51,10 @@
       "type": "string",
       "value": ""
     }
-
-
-
+  },
+  "singleBrowse":{
+    "type": "boolean",
+    "value": false
   }
 
 }

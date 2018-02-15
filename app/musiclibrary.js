@@ -4,6 +4,7 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var libCrypto = require('crypto');
 var libBase64Url = require('base64-url');
+var fs=require('fs-extra');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
@@ -99,13 +100,19 @@ function CoreMusicLibrary (commandRouter) {
 	];
 
 	// The Browse Sources Array is the list showed on Browse Page
-	self.browseSources = [{name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
-		{name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
-		{name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
-        {name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
-        {name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
-        {name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
-		];
+	var sourcesJson = '/volumio/app/browsesources.json'
+    if (fs.existsSync(sourcesJson)) {
+        self.browseSources = fs.readJsonSync((sourcesJson),  'utf8', {throws: false});
+    } else {
+        self.browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
+            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.svg', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
+        ];
+    }
+
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
 	// This is okay because no part of Volumio requires a populated library to function.
@@ -266,11 +273,33 @@ CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
                 source.uri=data.uri;
                 source.plugin_type=data.plugin_type;
                 source.plugin_name=data.plugin_name;
+                if (data.albumart != undefined) {
+                    source.albumart=data.albumart;
+				}
             }
         }
     }
 	var response = self.getBrowseSources();
+
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+}
+
+CoreMusicLibrary.prototype.setSourceActive = function(uri) {
+    var self = this;
+
+        for(var i in self.browseSources)
+        {
+            var source=self.browseSources[i];
+            if(source.uri==uri) {
+				source.active = true;
+            } else {
+                source.active = false;
+			}
+        }
+
+    var response = self.getBrowseSources();
+
+    return self.commandRouter.broadcastMessage('pushBrowseSources', response);
 }
 
 CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
@@ -282,7 +311,15 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
     if (curUri.startsWith('favourites')) {
         return self.commandRouter.playListManager.listFavourites(curUri);
     }
-    else {
+    else if (curUri.startsWith('search')) {
+        var splitted = curUri.split('/');
+
+        return this.search({"value": splitted[2]});
+    } else if (curUri.startsWith('playlists') || curUri.startsWith('artists://') || curUri.startsWith('albums://') || curUri.startsWith('genres://')) {
+            return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
+    } else if (curUri.startsWith('upnp')) {
+    		return self.commandRouter.executeOnPlugin('music_service','upnp_browser','handleBrowseUri',curUri);
+	} else {
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
@@ -317,26 +354,95 @@ CoreMusicLibrary.prototype.search = function(data) {
 
         var executed=[];
 
-		for (var i = 0; i < self.browseSources.length; i++) {
-			var source=self.browseSources[i];
 
-            var key=source.plugin_type+'_'+source.plugin_name;
-            if(executed.indexOf(key)==-1)
+		var enableSelectiveSearch
+        enableSelectiveSearch=this.commandRouter.sharedVars.get("selective_search")
+
+		/*
+		 * New search method. If data structure contains fields service or plugin_name that field will be used to pick
+		 * a plugin for search. If that is not available (only root should be this case) then search will be performed
+		 * over all plugins.
+		 *
+		 * Examples:
+		 *
+		 * {"type":"any","value":"paolo","plugin_name":"mpd","plugin_type":"music_service","uri":"music-library"}
+		 *
+		 * {"type":"any","value":"sfff","uri":"albums://Nomadi/Ma%20Noi%20No!","service":"mpd"}
+		 *
+		 */
+        var searchAll=false
+
+        if(enableSelectiveSearch)
+        {
+            if (data.service || data.plugin_name)
             {
-                executed.push(key);
+                // checking if uri is /. Should revert to search to all
+                if(data.uri!== undefined && data.uri === '/')
+                {
+                    searchAll=true
+                } else {
+                    searchAll=false
+                }
 
-                var response;
-
-                response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
-
-                if (response != undefined) {
-                    deferArray.push(response);
-                };
+            } else {
+                searchAll=true
             }
-		}
+        } else {
+            searchAll=true
+        }
+
+		if(searchAll)
+        {
+            console.log("Searching all installed plugins")
+            /**
+             * Searching over all plugins
+             */
+
+            for (var i = 0; i < self.browseSources.length; i++) {
+                var source=self.browseSources[i];
+
+                var key=source.plugin_type+'_'+source.plugin_name;
+                if(executed.indexOf(key)==-1)
+                {
+                    executed.push(key);
+
+                    var response;
+
+                    response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
+
+                    if (response != undefined) {
+                        deferArray.push(response);
+                    }
+                }
+            }
+        } else {
+            var pluginName=''
+            var pluginType='music_service'
+
+            if(data.service)
+            {
+                pluginName=data.service
+            } else if(data.plugin_name) {
+                pluginName=data.plugin_name
+            }
+
+            if(data.plugin_type)
+            {
+                pluginType=data.plugin_type
+            }
+
+            console.log("Searching plugin "+pluginType+"/"+pluginName)
+
+            response = self.commandRouter.executeOnPlugin(pluginType,pluginName,'search',query);
+            if (response != undefined) {
+                deferArray.push(response);
+            }
+        }
 
 		libQ.all(deferArray)
             .then(function (result) {
+
+                console.log("GOT EVERYTHING, SHOWING SEARCH RESULT")
 
                 var searchResult={
                     "navigation": {
@@ -350,7 +456,6 @@ CoreMusicLibrary.prototype.search = function(data) {
                     if(result[i]!== undefined && result[i]!==null)
                         searchResult.navigation.lists=searchResult.navigation.lists.concat(result[i]);
                 }
-
                 defer.resolve(searchResult);
             })
             .fail(function (err) {
@@ -397,15 +502,43 @@ function flattenArrayToCSV(arrayInput) {
 CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 	var self = this;
 
-	console.log('Updating browse sources language')
-	self.browseSources[0].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
-	self.browseSources[1].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
-	self.browseSources[2].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
-    self.browseSources[3].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
-    self.browseSources[4].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
-    self.browseSources[5].name = self.commandRouter.getI18nString('COMMON.GENRES');
-	self.browseSources[6].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+	console.log('Updating browse sources language');
 
+	for (var i in  self.browseSources) {
+
+		if(self.browseSources[i]!==undefined) {
+			
+		switch(self.browseSources[i].uri) {
+			case 'favourites':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
+				break;
+			case 'playlists':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
+				break;
+			case 'music-library':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+				break;
+			case 'artists://':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
+				break;
+			case 'albums://':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
+				break;
+			case 'genres://':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.GENRES');
+				break;
+			case 'radio':
+				self.browseSources[i].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+				break;
+			case 'Last_100':
+				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.LAST_100');
+				break;
+			default:
+			console.log('Cannot find translation for source'+self.browseSources[i].name)
+		}
+
+		}
+	}
 }
 
 CoreMusicLibrary.prototype.goto=function(data){

@@ -39,7 +39,27 @@
         "type": "string",
         "value": "STOPPED"
       }
-    }
+    },
+    "last_100": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
+	"upnp_browser": {
+	  "enabled": {
+		"type": "boolean",
+		"value": true
+	  },
+	  "status": {
+		"type": "string",
+		"value": "STARTED"
+	  }
+	}
   },
   "audio_interface": {
     "upnp": {
@@ -93,6 +113,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "wizard": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "user_interface": {
@@ -110,6 +140,16 @@
       "enabled": {
         "type": "boolean",
         "value": false
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
+    "rest_api": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
       },
       "status": {
         "type": "string",

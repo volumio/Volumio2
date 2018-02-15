@@ -1,0 +1,22 @@
+{
+  "name": "upnp_browser",
+  "version": "1.0.0",
+  "description": "UPNP Browser plugin for Volumio2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Volumio",
+  "license": "ISC",
+  "volumio_info": {
+    "plugin_type": "music_service",
+    "boot_priority":9
+  },
+  "dependencies":{
+    "node-ssdp": "3.2.1",
+    "dlna-browser-utils": ">= 0.0.1",
+    "xml2js": "~0.4.19",
+    "xmlbuilder": "~8.2.2",
+    "html-entities": "1.2.1"
+  }
+}
