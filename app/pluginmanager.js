@@ -897,6 +897,7 @@ PluginManager.prototype.unzipPackage = function () {
 	var defer=libQ.defer();
 	var extractFolder='/data/temp/downloaded_plugin';
 
+    fs.ensureDirSync(extractFolder)
 	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, function (error) {
 	
 		if (error !== null) {
@@ -1463,16 +1464,16 @@ PluginManager.prototype.getAvailablePlugins = function () {
 				var availableName = plugins[a].prettyName;
 				var availableVersion = plugins[a].version;
                 var availableCategory = plugins[a].category;
+                var thisPlugin =  plugins[a];
+                thisPlugin.installed = false;
 				for(var c = 0; c <  myplugins.length; c++) {
 					if(myplugins[c].prettyName === availableName) {
-						plugins[a].installed = true;
-                        plugins[a].category = myplugins[c].category;
+                        thisPlugin.installed = true;
+                        thisPlugin.category = myplugins[c].category;
 						var v = compareVersions(availableVersion, myplugins[c].version);
 						if (v === 1) {
-							plugins[a].updateAvailable = true
+                            thisPlugin.updateAvailable = true
 						}
-					} else {
-						plugins[a].installed = false;
 					}
 				}
 			}
