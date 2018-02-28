@@ -817,6 +817,10 @@ ControllerWebradio.prototype.search = function (data) {
                 for (var i in response.body) {
                     var station = response.body[i];
                     if (station.streams.length > 0) {
+                        // some stream uris contain an end of line character
+                        // which must be removed
+                        var safeuri = station.streams[0].stream;
+                        safeuri = safeuri.replace(/\r?\n$/,'');
                         var radio = {
                             service: 'webradio',
                             type: 'webradio',
@@ -824,7 +828,7 @@ ControllerWebradio.prototype.search = function (data) {
                             artist: '',
                             album: '',
 
-                            uri: station.streams[0].stream
+                            uri: safeuri
                         };
                         if (station.image.url != undefined && station.image.url != null) {
                             radio.albumart = station.image.url;
