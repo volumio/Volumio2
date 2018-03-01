@@ -5,7 +5,7 @@
     {"name": "HiFiBerry Digi+ Pro HiFi wm8804-spdif-0", "multidevice": false, "prettyname": "HiFiBerry Digi+ Pro", "type":"i2S"},
     {"name": "IQaudIODAC", "multidevice": false, "prettyname": "IQaudIO DAC", "type":"i2S"},
     {"name": "sndrpijustboomd", "multidevice": false, "prettyname": "JustBoom DAC Boards", "type":"i2S"},
-    {"name": "atm7059_link", "multidevice": false, "prettyname": "HDMI Audio Out", "defaultmixer": "Digital","type":"integrated"},
+    {"name": "atm7059_link", "multidevice": true, "devices":[{"number":0, "prettyname": "Cheapo Audio Jack", "defaultmixer": "DAC PA"}, {"number":1, "prettyname": "HDMI Audio Out", "defaultmixer": ""}, {"number":2, "prettyname": "Cheapo S/PDIF", "defaultmixer": ""}],"type":"integrated"},
     {"name": "PianoDACPlus", "multidevice": false, "prettyname": "Allo Piano 2.1", "defaultmixer": "Digital","type":"i2S"},
     {"name": "BossDAC", "multidevice": false, "prettyname": "Allo BOSS", "defaultmixer": "Digital","type":"i2S"},
     {"name": "sndhdmi", "multidevice": false, "prettyname": "HDMI Out", "defaultmixer": "","type":"integrated"},
