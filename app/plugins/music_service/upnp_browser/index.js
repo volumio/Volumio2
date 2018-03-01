@@ -378,6 +378,8 @@ ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerUPNPBrowser::clearAddPlayTrack');
 
+	var safeUri = track.uri.replace(/"/g,'\\"');
+
 	return self.mpdPlugin.sendMpdCommand('stop',[])
 		.then(function()
 		{
@@ -385,10 +387,10 @@ ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
 		})
 		.then(function()
     {
-        return self.mpdPlugin.sendMpdCommand('load "'+track.uri+'"',[]);
+        return self.mpdPlugin.sendMpdCommand('load "'+safeUri+'"',[]);
     })
     .fail(function (e) {
-        return self.mpdPlugin.sendMpdCommand('add "'+track.uri+'"',[]);
+        return self.mpdPlugin.sendMpdCommand('add "'+safeUri+'"',[]);
     })
 		.then(function()
 		{
