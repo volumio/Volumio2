@@ -882,7 +882,7 @@ PluginManager.prototype.createFolder = function (folder) {
 	var defer=libQ.defer();
 
 	fs.mkdirs(folder, function (err) {
-		if (err) defer.reject(new Error());
+		if (err) defer.reject(new Error('Error creating folder: ' + e ));
 		else
 		{
 			defer.resolve(folder);
@@ -897,12 +897,16 @@ PluginManager.prototype.unzipPackage = function () {
 	var defer=libQ.defer();
 	var extractFolder='/data/temp/downloaded_plugin';
 
-    fs.ensureDirSync(extractFolder)
-	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, function (error) {
+	try {
+        fs.ensureDirSync(extractFolder)
+	} catch(e) {
+
+	}
+
+	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, {maxBuffer:816000}, function (error) {
 	
 		if (error !== null) {
-			console.log("ERROR: "+ error);
-			defer.reject(new Error());
+			defer.reject(new Error('Error unzipping plugin: ' + error));
 		}
 		else {
 			defer.resolve(extractFolder);
