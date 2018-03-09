@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"ISO Playback",
     "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Extended File Format Support",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster"
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster",
+    "USB_DAC_CONNECTED":"USB DAC Connected",
+    "NO_OUTPUT_DEVICE":"No Audio Output Available",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

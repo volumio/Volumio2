@@ -84,6 +84,9 @@ PlatformSpecific.prototype.startupSound = function () {
 				console.log(error);
 			}
                 self.coreCommand.closeModals();
+				setTimeout(function() {
+                    self.coreCommand.executeOnPlugin('audio_interface', 'alsa_controller', 'checkAudioDeviceAvailable', '');
+				},1000)
 			});
     	}
 }

@@ -133,6 +133,12 @@ case "$1" in
         stopairplay)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
         ;;
+        usbattach)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioAttach"
+        ;;
+        usbdetach)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioDetach"
+        ;;
         vstart)
             vstart
             ;;
