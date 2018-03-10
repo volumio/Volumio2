@@ -4,7 +4,7 @@
     "AUDIO_OUTPUT":"Audio uitvoer",
     "OUTPUT_DEVICE_DOC":"Uitvoer apparaat",
     "OUTPUT_DEVICE":"Uitvoer apparaat",
-    "ENABLE_I2S_DAC":"I2S DACs aanzetten",
+    "ENABLE_I2S_DAC":"I2S DACs inschakelen",
     "GAPLESS_MP3_PLAYBACK":"Speel MP3 af zonder tussenstilte",
     "VOLUME_NORMALIZATION":"Volume normalizatie",
     "VOLUME_NORMALIZATION_DOC":"Indien ingeschakeld zal het volume van elke track hetzelfde zijn. Dit kan de geluidskwaliteit verminderen.",
