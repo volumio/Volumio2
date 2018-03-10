@@ -111,7 +111,9 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Kan geen verbinding maken met het netwerk",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Probeer het opnieuw of ga door naar de volgende stap",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Het apparaat maakt verbinding met het netwerk",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"wanneer de eerste installatie voltooid is"
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"wanneer de eerste installatie voltooid is",
+    "HOTSPOT_FALLBACK":"Terugvallen op Hotspot",
+    "HOTSPOT_FALLBACK_DOC":"Indien ingeschakeld zal de Hotspot starten als de verbinding met het Draadloos Netwerk is weggevallen. Indien uitgeschakeld zal er worden geprobeerd om een verbinding te maken met een bekend draadloos netwerk."
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Kies een alias die weergegeven wordt in NAS Mounts",
