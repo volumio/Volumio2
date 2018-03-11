@@ -3,20 +3,18 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 
 var commandArray = [
-	"cat /proc/version",
-	"cat /etc/os-release",
+    "cat /proc/version",
+    "cat /etc/os-release",
     "ifconfig",
     "iwconfig",
-	"aplay -l",
+    "aplay -l",
     "ps -ef",
     "sudo journalctl -p 7"
 ];
 
-var logFile = "/tmp/logondemand";
-
-// Let's start fresh!
-execSync("date >" + logFile);
-
+// Up to two arguments may be given:
+// - a description, which is inserted in the output file
+// - an optional flag indicating the log should be saved locally, not uploaded
 var args = process.argv.slice(2);
 var description;
 if ( args[0] == undefined ) {
@@ -32,18 +30,32 @@ if ( args[0] == undefined ) {
     }
 }
 
+var submit = 'yes';
+if ( args.length > 1 ) {
+    submit = 'no';
+}
+
+var logFile = "/tmp/logondemand";
+var storedLogFile = "/var/tmp/logondemand";
+
+// Let's start fresh!
+execSync("date >" + logFile);
+
 try {
     //If description is supplied, add it
-    execSync("echo " + description + " >>" + logFile);
+    fs.appendFileSync(logFile, 'Description="' + description + '"\n');
 } catch (e) {
     console.log(e);
 }
 
-execSync("cat /tmp/logfields >> " + logFile);
-
 for (var itemN in commandArray) {
     var item = commandArray[itemN];
     var itemWithoutput = item + " >>" + logFile + " 2>&1"
+    try {
+        fs.appendFileSync(logFile, '\n# ' + item + ' ---------------' + '\n');
+    } catch(e) {
+        console.log(e);
+    }
     execSync(itemWithoutput);
 }
 
@@ -76,16 +88,21 @@ var command = "/usr/bin/curl -X POST -H 'Content-Type: multipart/form-data'"
             + " -F 'variant=" + variant + "'"
             + " 'http://logs.volumio.org:7171/logs/v1'";
 
+if ( submit === 'yes' ) {
 exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
     if (error !== null) {
         console.log('Cannot send bug report: ' + error);
+        console.log('Saving as: ' + storedLogFile);
+        execSync("mv -f " + logFile + " " + storedLogFile);
     } else {
         console.log(stdout)
+        execSync("rm " + logFile);
     }
-    execSync("rm " + logFile);
-    execSync("rm /tmp/logfields");
 });
-
+} else {
+    console.log('Saving as: ' + storedLogFile);
+    execSync("mv -f " + logFile + " " + storedLogFile);
+}
 
 function randomIntInc (low, high) {
     return Math.floor(Math.random() * (high - low + 1) + low);
