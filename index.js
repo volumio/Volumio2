@@ -1,7 +1,14 @@
 var argv = require('yargs').argv;
+var execSync = require('child_process').execSync;
+var fs = require('fs-extra');
+
 if (argv.d) {
 var njstrace = require('njstrace').inject();
 }
+
+var globals = fs.readJsonSync(__dirname + '/.globals.json');
+
+
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
 // Using port 3000 for the debug interface
@@ -35,4 +42,14 @@ var commandRouter = new (require('./app/index.js'))(httpServer);
 
 expressApp.get('/?*', function (req, res) {
         res.redirect('/');
+});
+
+process.on('uncaughtException', (error) => {
+    console.log('|||||||||||||||||||||||| WARNING: FATAL ERROR |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
+	console.log(error);
+	console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
+	execSync('/usr/local/bin/node /volumio/crashreport.js');
+	if (!globals.stoicMode) {
+		process.exit(1)
+	}
 });
