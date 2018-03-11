@@ -1,4 +1,6 @@
 #!/bin/bash
+LOGDUMP="/var/tmp/logondemand"
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 
 doc() {
@@ -50,6 +52,7 @@ plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
 plugin install                     installs the plugin locally
 plugin update                      updates the plugin
+logdump <description>              dump logs to $LOGDUMP instead of uploading
 "
 
 }
@@ -173,6 +176,9 @@ case "$1" in
             ;;
 	    kernelsource)
 	        kernelsource
+            ;;
+	    logdump)
+	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;
         plugin)
             if [ "$2" != "" ]; then

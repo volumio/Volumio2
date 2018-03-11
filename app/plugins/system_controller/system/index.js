@@ -453,7 +453,6 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
 		message.text = 'No info available';
 	}
-	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
 	// Must single-quote the message or the shell may interpret it and crash.
 	// single-quotes already within the message need to be escaped.
 	// The resulting string always starts and ends with single quotes.
