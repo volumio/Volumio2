@@ -33,7 +33,7 @@ function sendCrashReport() {
         + " -F 'logFile=@" + logFile + "'"
         + " -F desc=" + description
         + " -F 'variant=" + variant + "'"
-        + " 'http://192.168.1.6:7171/report/v1'";
+        + " http://logs.volumio.org:7171/report/v1'";
 
     exec(command , {uid: 1000, gid: 1000, encoding: 'utf8'}, function (error, stdout, stderr) {
         if (error !== null) {
