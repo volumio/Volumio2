@@ -536,7 +536,11 @@ function write_new_plugin(package, arch, plugins, index) {
     inquirer.prompt(question).then(function (answer) {
         var today = new Date();
         data.prettyName = package.volumio_info.prettyName;
-        data.icon = "fa-lightbulb-o";
+        if (package.icon != undefined) {
+            data.icon = package.icon;
+        } else {
+            data.icon = "fa-lightbulb-o";
+        }
         data.name = package.name;
         data.version = package.version;
         data.url = "http://volumio.github.io/volumio-plugins/" +
