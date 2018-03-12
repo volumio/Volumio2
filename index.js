@@ -48,8 +48,13 @@ process.on('uncaughtException', (error) => {
     console.log('|||||||||||||||||||||||| WARNING: FATAL ERROR |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
 	console.log(error);
 	console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
-	execSync('/usr/local/bin/node /volumio/crashreport.js');
-	if (!globals.stoicMode) {
+	if (error.message != undefined) {
+		var errorMessage = error.message;
+	} else {
+		var errorMessage = 'Unknown';
+	}
+	execSync('/usr/local/bin/node /volumio/crashreport.js "' + errorMessage + '"');
+	if (globals.exitOnException) {
 		process.exit(1)
 	}
 });
