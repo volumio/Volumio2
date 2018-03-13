@@ -330,7 +330,7 @@ CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds,
     if (sService != undefined) {
         var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 
-        if (typeof thisPlugin.clearAddPlayTracks === "function") {
+        if (thisPlugin != undefined && typeof thisPlugin.clearAddPlayTracks === "function") {
             return thisPlugin.clearAddPlayTracks(arrayTrackIds);
         } else {
             this.logger.error('WARNING: No clearAddPlayTracks method for service ' + sService);
@@ -344,7 +344,7 @@ CoreCommandRouter.prototype.serviceStop = function (sService) {
 	if (sService != undefined) {
 		this.pushConsoleMessage('CoreCommandRouter::serviceStop');
 		var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-        if (typeof thisPlugin.stop === "function") {
+        if (thisPlugin != undefined && typeof thisPlugin.stop === "function") {
             return thisPlugin.stop();
 		} else {
             this.logger.error('WARNING: No stop method for service ' + sService);
@@ -360,7 +360,7 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::servicePause');
 
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-    if (typeof thisPlugin.pause === "function") {
+    if (thisPlugin != undefined && typeof thisPlugin.pause === "function") {
         return thisPlugin.pause();
     } else {
         this.logger.error('WARNING: No pause method for service ' + sService);
@@ -376,11 +376,11 @@ CoreCommandRouter.prototype.serviceResume = function (sService) {
 
     if(state==='stop')
     {
-        if (typeof thisPlugin.clearAddPlayTracks === "function") {
+        if (thisPlugin != undefined && typeof thisPlugin.clearAddPlayTracks === "function") {
             thisPlugin.clearAddPlayTracks();
         }
     }
-    if (typeof thisPlugin.resume === "function") {
+    if (thisPlugin != undefined && typeof thisPlugin.resume === "function") {
         return thisPlugin.resume();
     }
 };
