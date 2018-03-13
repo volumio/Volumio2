@@ -314,7 +314,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 					else {
 						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_NOW') + ' ' + hostname);
 						self.logger.info('Hostname now is ' + newhostname);
-						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ newhostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
+						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ hostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
 						exec("/usr/bin/sudo /bin/chmod -R 777 /etc/avahi/services/", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
 								console.log('Cannot set permissions for /etc/avahi/services/: ' + error);
@@ -331,25 +331,10 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 							}
 
 						});
-
-
-
-
-
-
 						setTimeout(function () {
-							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-								uid: 1000,
-								gid: 1000
-							}, function (error, stdout, stderr) {
-								if (error !== null) {
-									console.log(error);
-									self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-								} else {
-									self.logger.info('Avahi Daemon Restarted')
-								}
-							});
-						}, 3000)
+							// Restarting AVAHI results in system crashing
+							//self.restartAvahi();
+						}, 10000)
 					}
 				});
 			});
@@ -359,6 +344,21 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 };
 
+ControllerSystem.prototype.restartAvahi = function () {
+    var self = this;
+
+    exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
+        uid: 1000,
+        gid: 1000
+    }, function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log(error);
+            self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
+        } else {
+            self.logger.info('Avahi Daemon Restarted')
+        }
+    });
+};
 
 
 
