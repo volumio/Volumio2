@@ -1307,7 +1307,7 @@ function InterfaceWebUI(context) {
 
                 if (returnedData != undefined) {
                     returnedData.then(function (data) {
-                        selfConnWebSocket.emit('pushMoveQueue', data);
+                        selfConnWebSocket.emit('pushQueue', data);
                     });
                 }
                 else self.logger.error("Error on moving item in list");
