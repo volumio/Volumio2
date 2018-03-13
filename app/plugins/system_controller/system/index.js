@@ -283,7 +283,6 @@ ControllerSystem.prototype.getData = function (data, key) {
 ControllerSystem.prototype.setHostname = function (hostname) {
 	var self = this;
 	var newhostname = hostname.toLowerCase().replace(/ /g,'-');
-	console.log('AAAAAAAAAAAAAAAAAAAAAAAAAA '+newhostname)
 
 	fs.writeFile('/etc/hostname', newhostname, function (err) {
 		if (err) {
