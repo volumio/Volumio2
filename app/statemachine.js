@@ -417,13 +417,13 @@ CoreStateMachine.prototype.getNextIndex = function () {
 };
 
 
-// Stop playback timer
+// Increase playback timer
 CoreStateMachine.prototype.increasePlaybackTimer = function () {
 	var self=this;
 
 	var now=Date.now();
 	this.currentSeek+=(now-this.playbackStart);
-
+	this.isConsume?  this.consumeState.seek = this.currentSeek : null;
 	if(this.runPlaybackTimer==true)
 	{
 		this.playbackStart=Date.now();
