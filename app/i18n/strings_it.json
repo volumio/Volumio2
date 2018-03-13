@@ -125,7 +125,8 @@
     "NETWORK_DRIVE":"Disco di rete",
     "SHARE_NOT_CONFIGURED":"Disco di rete non configurato",
     "SHARE_MOUNT_SUCCESS":"Disco di rete aggiunto correttamente",
-    "MOUNT_SHARE_ERROR":"Errore nell'aggiungere il disco di rete"
+    "MOUNT_SHARE_ERROR":"Errore nell'aggiungere il disco di rete",
+    "ERROR_PATH_UNDEFINED":"Inserire il percorso o il nome della Share"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Aggiunta",
