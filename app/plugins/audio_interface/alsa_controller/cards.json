@@ -24,6 +24,7 @@
     {"name": "TinkerAudio OnBoard", "multidevice": true, "devices":[{"number":1, "prettyname": "SPDIF", "defaultmixer": "SPDIF"}, {"number":2, "prettyname": "Audio Jack Out", "defaultmixer": "Headphone,1"}],"type":"integrated"},
     {"name": "rockchip", "multidevice": false, "prettyname": "Generic I2S", "defaultmixer": "","type":"integrated"},
     {"name": "snd-sun8i-i2s-dac", "multidevice": false, "prettyname": "I2S", "defaultmixer": "","type":"integrated"},
-    {"name": "H3 Audio Codec", "multidevice": false, "prettyname": "Onboard Audio", "defaultmixer": "DAC","type":"integrated"}
+    {"name": "H3 Audio Codec", "multidevice": false, "prettyname": "Onboard Audio", "defaultmixer": "DAC","type":"integrated"},
+    {"name": "HDA Intel PCH", "multidevice": true, "devices":[{"number":0, "prettyname": "Analog Out", "defaultmixer": ""},{"number":3, "prettyname": "HDMI", "defaultmixer": ""}]}
   ]
 }
