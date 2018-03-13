@@ -333,7 +333,7 @@ CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds,
         if (typeof thisPlugin.clearAddPlayTracks === "function") {
             return thisPlugin.clearAddPlayTracks(arrayTrackIds);
         } else {
-            self.logger.error('WARNING: No clearAddPlayTracks method for service ' + sService);
+            this.logger.error('WARNING: No clearAddPlayTracks method for service ' + sService);
         }
     }
 };
@@ -347,7 +347,7 @@ CoreCommandRouter.prototype.serviceStop = function (sService) {
         if (typeof thisPlugin.stop === "function") {
             return thisPlugin.stop();
 		} else {
-        	self.logger.error('WARNING: No stop method for service ' + sService);
+            this.logger.error('WARNING: No stop method for service ' + sService);
 		}
 
 	} else {
@@ -363,7 +363,7 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
     if (typeof thisPlugin.pause === "function") {
         return thisPlugin.pause();
     } else {
-        self.logger.error('WARNING: No pause method for service ' + sService);
+        this.logger.error('WARNING: No pause method for service ' + sService);
     }
 };
 
