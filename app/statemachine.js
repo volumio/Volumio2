@@ -1257,7 +1257,12 @@ CoreStateMachine.prototype.servicePause = function () {
 		return this.commandRouter.servicePause(this.volatileService);
 	}else{
 		var trackBlock = this.getTrack(this.currentPosition);
-		return this.commandRouter.servicePause(trackBlock.service);
+		if (trackBlock != undefined && trackBlock.service != undefined) {
+            return this.commandRouter.servicePause(trackBlock.service);
+		} else {
+            this.commandRouter.pushConsoleMessage('Error: no service or no trackblock to pause');
+		}
+
 	}
 };
 
