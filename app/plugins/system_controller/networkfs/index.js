@@ -880,7 +880,9 @@ ControllerNetworkfs.prototype.getLabelForSelect = function (options, key) {
 ControllerNetworkfs.prototype.onPlayerNameChanged = function () {
     var self = this;
 
-    return self.writeSMBConf();
+    setTimeout(function() {
+        return self.writeSMBConf();
+	}, 10000)
 };
 
 

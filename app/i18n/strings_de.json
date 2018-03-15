@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"ISO Wiedergabe",
     "ISO_PLAYBACK_DOC":"Experimentelle MPD Version verwenden, welche die Wiedergabe von ISO-Dateien unterstützt. Wiedergabe von DSD-Material wird dabei nicht unterstützt",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Erweiterte Dateiformat-Unterstützung",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate"
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate",
+    "USB_DAC_CONNECTED":"USB DAC verbunden",
+    "NO_OUTPUT_DEVICE":"Kein Audio-Gerät verfügbar",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Bitte verbinden Sie ein Audio-Gerät"	  
   },
   "NETWORK": {
 	"NETWORK_SETTINGS":"Netzwerkeinstellungen",
