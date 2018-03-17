@@ -51,6 +51,7 @@ plugin refresh                     updates plugin in the system
 plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
 plugin install                     installs the plugin locally
+plugin install path/to/package.zip  installs the plugin from the zip
 plugin update                      updates the plugin
 logdump <description>              dump logs to $LOGDUMP instead of uploading
 "
@@ -211,7 +212,7 @@ correspondent folder in data"
                     echo "This command will update the plugin on your device"
                     echo ""
                 fi
-               /usr/local/bin/node /volumio/pluginhelper.js $2
+               /usr/local/bin/node /volumio/pluginhelper.js $2 $3
             else
                 echo ""
                 echo "---- VOLUMIO PLUGIN HELPER ----"
@@ -223,6 +224,7 @@ correspondent folder in data"
                 echo "package   compresses the plugin"
                 echo "publish   publishes the plugin on git"
                 echo "install   installs the plugin locally"
+                echo "install path/to/package.zip  installs the plugin from the zip"
                 echo "update    updates the plugin"
                 echo ""
             fi
@@ -232,7 +234,3 @@ correspondent folder in data"
             exit 1
 
 esac
-
-
-
-
