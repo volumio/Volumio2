@@ -29,7 +29,7 @@ function init() {
             console.log("cloning repo:\ngit clone https://github.com/" + name +
                 "/volumio-plugins.git");
             try {
-                execSync("/usr/bin/git clone https://github.com/" + name +
+                execSync("/usr/bin/git clone --depth 5 --no-single-branch https://github.com/" + name +
                     "/volumio-plugins.git /home/volumio/volumio-plugins");
                 console.log("Done, please run command again");
                 process.exit(1);
@@ -357,7 +357,7 @@ function zip(){
                 console.log("Error installing node modules: " + e);
                 process.exit(1);
             }
-        }        
+        }
         var package = fs.readJsonSync("package.json");
         execSync("IFS=$'\\n'; /usr/bin/minizip -o -9 " + package.name +
             ".zip $(find -type f -not -name " + package.name + ".zip -printf '%P\\n')",
@@ -421,9 +421,9 @@ function publish() {
             catch (e){
                 console.log("Nothing to commit");
             }
-            
+
             zip();
-            
+
             execSync("/bin/mv " + package.name + ".zip /tmp/");
             process.chdir("../../../");
             execSync("/usr/bin/git checkout gh-pages");
