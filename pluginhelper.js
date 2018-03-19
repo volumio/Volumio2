@@ -661,16 +661,19 @@ function commit(package, arch) {
 
 // =============================== INSTALL ====================================
 
-function install(){
-    if(fs.existsSync("package.json")){
-        var package = fs.readJsonSync("package.json");
-        zip();
+function install(zip_file) {
+    const isZip = fs.existsSync(zip_file);
+    if(isZip || fs.existsSync("package.json")){
         if(!fs.existsSync("/tmp/plugins")) {
             execSync("/bin/mkdir /tmp/plugins/")
         }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
-        socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
-            + package.name + ".zip"})
+        if (!isZip) {
+        var package = fs.readJsonSync("package.json");
+        zip();
+        zip_file = `${process.cwd()}/${package.name}.zip`;
+        }
+        execSync(`/bin/mv ${zip_file} /tmp/plugins/${zip_file.split(/.*[\/|\\]/)[1]}`);
+        socket.emit('installPlugin', {url: `http://127.0.0.1:3000/plugin-serve/${zip_file.split(/.*[\/|\\]/)[1]}`})
         socket.on('installPluginStatus', function (data) {
             console.log("Progress: " + data.progress + "\nStatus :" + data.message)
             if(data.message == "Plugin Successfully Installed"){
@@ -713,7 +716,7 @@ function update() {
 
 // ================================ START =====================================
 var argument = process.argv[2];
-
+const pluginargs = process.argv[3];
 switch (argument){
     case "init":
         init()
@@ -728,7 +731,7 @@ switch (argument){
         publish()
         break;
     case "install":
-        install()
+        install(pluginargs)
         break;
     case "update":
         update()
