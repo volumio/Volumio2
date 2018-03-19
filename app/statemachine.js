@@ -90,6 +90,7 @@ CoreStateMachine.prototype.getState = function () {
             updatedb: false,
 			volatile: true,
 			trackType: this.volatileState.trackType,
+            disableUiControls: this.volatileState.disableUiControls,
             service: this.volatileState.service
         };
     }

@@ -30,7 +30,8 @@ function AirPlayInterface(context) {
         duration: 0,
         samplerate: '',
         bitdepth: '',
-        channels: 2
+        channels: 2,
+        disableUiControls: true
     };
 
 }
