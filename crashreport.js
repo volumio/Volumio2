@@ -5,7 +5,6 @@ var argv = require('yargs').argv;
 var logFile = "/tmp/crashdump";
 var lastCrashDescription = '/tmp/lastcrash';
 var description = 'Unknown';
-var variant = 'volumio';
 var fs = require('fs-extra');
 
 
@@ -52,13 +51,10 @@ function getVariant () {
     var nLines = file.length;
     var str;
     for (var l = 0; l < nLines; l++) {
-
         if (file[l].match(/VOLUMIO_VARIANT/i)) {
             str = file[l].split('=');
-            variant = str[1].replace(/\"/gi, "");
-            return variant;
-        } else {
-            return variant;
+            var variantRet = str[1].replace(/\"/gi, "");
+            return variantRet
         }
     }
 };
