@@ -407,8 +407,16 @@ function publish() {
             fs.writeJsonSync("package.json", package, {spaces:'\t'});
             try {
                 execSync("/usr/bin/git add *");
+
+            }
+            catch (e){
+                console.log("Nothing to add");
+            }
+
+            try {
                 execSync("/usr/bin/git commit -am \"updating plugin " +
                     package.name + " version " + package.version + "\"");
+
             }
             catch (e){
                 console.log("Nothing to commit");
@@ -494,7 +502,7 @@ function update_plugins(package, arch) {
                 }
                 if(j == plugins.categories[i].plugins.length && !plugFound &&
                     plugins.categories[i].plugins[j-1].name != package.name){
-                    write_new_plugin(package, arch, plugins, j);
+                    write_new_plugin(package, arch, plugins, i);
                     catFound = true;
                 }
             }
