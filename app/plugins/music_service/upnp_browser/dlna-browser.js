@@ -97,7 +97,8 @@ var browseServer = function(id, controlUrl, options, callback) {
         }
 
         // validate result included the expected entries
-        if ((result['Envelope']) &&
+        if ((result != undefined) &&
+            (result['Envelope']) &&
             (result['Envelope']['Body']) &&
             (result['Envelope']['Body'][0]) &&
             (result['Envelope']['Body'][0]['BrowseResponse']) &&
@@ -133,7 +134,12 @@ var browseServer = function(id, controlUrl, options, callback) {
               return;
             }
         } else {
-          callback(new Error('Did not get expected response from server:' + JSON.stringify(result)));
+          if (result != undefined) {
+              callback(new Error('Did not get expected response from server:' + JSON.stringify(result)));
+          } else {
+              callback(new Error('Did not get any response from server:'));
+          }
+
           return;
         }
       });

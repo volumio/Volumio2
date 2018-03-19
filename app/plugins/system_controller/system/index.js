@@ -296,7 +296,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
-					exec("/usr/bin/sudo /bin/hostname "+hostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+					exec("/usr/bin/sudo /bin/hostname "+ newhostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 						if (error !== null) {
 							console.log('Cannot set new hostname: ' + error);
 
@@ -325,46 +325,16 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 									if (err) {
 										console.log(err);
 									} else {
-										self.logger.info('Avahi name changed to '+ hostname);
-										/*
-										setTimeout(function () {
-											exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-												uid: 1000,
-												gid: 1000
-											}, function (error, stdout, stderr) {
-												if (error !== null) {
-													console.log(error);
-													self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-												} else {
-													self.logger.info('Avahi Daemon Restarted')
-												}
-											});
-										}, 3000)
-										 */
+										self.logger.info('Avahi name changed to '+ newhostname);
 									}
 								});
 							}
 
 						});
-
-
-
-
-
-
 						setTimeout(function () {
-							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-								uid: 1000,
-								gid: 1000
-							}, function (error, stdout, stderr) {
-								if (error !== null) {
-									console.log(error);
-									self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-								} else {
-									self.logger.info('Avahi Daemon Restarted')
-								}
-							});
-						}, 3000)
+							// Restarting AVAHI results in system crashing
+							//self.restartAvahi();
+						}, 10000)
 					}
 				});
 			});
@@ -374,6 +344,21 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 };
 
+ControllerSystem.prototype.restartAvahi = function () {
+    var self = this;
+
+    exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
+        uid: 1000,
+        gid: 1000
+    }, function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log(error);
+            self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
+        } else {
+            self.logger.info('Avahi Daemon Restarted')
+        }
+    });
+};
 
 
 

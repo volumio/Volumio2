@@ -75,7 +75,7 @@ ControllerUPNPBrowser.prototype.onStart = function() {
                     server.name = data.root.device[0].friendlyName[0];
                     server.UDN = data.root.device[0].UDN + "";
                     server.icon = '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png';
-                    if(data.root.device[0].iconList[0] != undefined && data.root.device[0].iconList[0].icon[0].url != undefined) {
+                    if(data.root.device[0].iconList[0] != undefined && data.root.device[0].iconList[0].icon[0] != undefined && data.root.device[0].iconList[0].icon[0].url != undefined) {
                         server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
 					}
                     server.lastTimeAlive = Date.now();

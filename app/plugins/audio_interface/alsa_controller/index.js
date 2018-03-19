@@ -784,6 +784,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
         	var id = aplaycard.id;
             for (var n = 0; n < carddata.cards.length; n++){
                 var cardname = carddata.cards[n].name.toString().trim();
+
                 if (cardname === name){
                     if(carddata.cards[n].multidevice) {
                         multi = true;
@@ -791,7 +792,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                         for (var j = 0; j < card.devices.length; j++) {
                             var subdevice = carddata.cards[n].devices[j].number;
                             name = carddata.cards[n].devices[j].prettyname;
-                            cards.push({id: id + ',' + subdevice, name: name});
+                            var deviceProc = '/proc/asound/card' + id + '/pcm' + subdevice + 'p';
+                            if (fs.existsSync(deviceProc)) {
+                                cards.push({id: id + ',' + subdevice, name: name});
+							}
                         }
 
                     } else {
@@ -799,7 +803,9 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                         name = carddata.cards[n].prettyname;
                     }
 
-                }
+                } else {
+                	multi = false;
+				}
             } if (!multi){
                 cards.push({id: id, name: name});
             }

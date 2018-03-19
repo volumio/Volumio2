@@ -210,25 +210,8 @@ CoreCommandRouter.prototype.volumioAddQueueUids = function (arrayUids) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueUids');
 	return this.musicLibrary.addQueueUids(arrayUids);
 };
-/*
 
- TODO: This should become the default entry point for adding music to any service
- // Volumio Add Queue Uri
- CoreCommandRouter.prototype.volumioAddQueueUri = function(data) {
- var self = this;
- self.pushConsoleMessage( 'CoreCommandRouter::volumioAddQueueUri');
- var service = data.service;
- var uri = data.uri;
- return self.executeOnPlugin('music_service', 'mpd', 'add', uri);
- }
- */
-// Volumio Rebuild Library
-CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
-	this.pushConsoleMessage('CoreCommandRouter::volumioRebuildLibrary');
-	return this.musicLibrary.buildLibrary();
-};
-
-// Volumio Get Library Index
+// TODO CLEANUP THIS FUNCTION
 CoreCommandRouter.prototype.volumioGetLibraryFilters = function (sUid) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioGetLibraryFilters');
 	return this.musicLibrary.getIndex(sUid);
@@ -341,11 +324,18 @@ CoreCommandRouter.prototype.volumioPushQueue = function (queue) {
 	);
 };
 
-// MPD Clear-Add-Play
+// Clear-Add-Play
 CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds, sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceClearAddPlayTracks');
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	return thisPlugin.clearAddPlayTracks(arrayTrackIds);
+    if (sService != undefined) {
+        var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+        if (thisPlugin != undefined && typeof thisPlugin.clearAddPlayTracks === "function") {
+            return thisPlugin.clearAddPlayTracks(arrayTrackIds);
+        } else {
+            this.logger.error('WARNING: No clearAddPlayTracks method for service ' + sService);
+        }
+    }
 };
 
 // MPD Stop
@@ -354,11 +344,15 @@ CoreCommandRouter.prototype.serviceStop = function (sService) {
 	if (sService != undefined) {
 		this.pushConsoleMessage('CoreCommandRouter::serviceStop');
 		var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-		return thisPlugin.stop();
+        if (thisPlugin != undefined && typeof thisPlugin.stop === "function") {
+            return thisPlugin.stop();
+		} else {
+            this.logger.error('WARNING: No stop method for service ' + sService);
+		}
+
 	} else {
 		this.pushConsoleMessage('Received STOP, but no service to execute it');
 	}
-	
 };
 
 // MPD Pause
@@ -366,23 +360,29 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::servicePause');
 
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	return thisPlugin.pause();
+    if (thisPlugin != undefined && typeof thisPlugin.pause === "function") {
+        return thisPlugin.pause();
+    } else {
+        this.logger.error('WARNING: No pause method for service ' + sService);
+    }
 };
 
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
 
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-
+    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 	var state=this.stateMachine.getState();
 
-	if(state==='stop')
-	{
-		thisPlugin.clearAddPlayTracks();
-	}
-
-	return thisPlugin.resume();
+    if(state==='stop')
+    {
+        if (thisPlugin != undefined && typeof thisPlugin.clearAddPlayTracks === "function") {
+            thisPlugin.clearAddPlayTracks();
+        }
+    }
+    if (thisPlugin != undefined && typeof thisPlugin.resume === "function") {
+        return thisPlugin.resume();
+    }
 };
 
 // Methods usually called by the service controllers --------------------------------------------------------------
@@ -1525,9 +1525,18 @@ CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
 
 
 CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
+	var defer = libQ.defer();
 	this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
 
-	return this.stateMachine.moveQueueItem(from,to);
+	if (from && to) {
+        return this.stateMachine.moveQueueItem(from,to);
+	} else {
+		this.logger.error('Cannot move item in queue, from or to parameter missing');
+        var queueArray=this.stateMachine.getQueue();
+        defer.resolve(queueArray);
+        return defer.promise
+	}
+
 };
 
 CoreCommandRouter.prototype.getI18nString = function (key) {

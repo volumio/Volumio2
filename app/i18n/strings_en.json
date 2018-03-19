@@ -125,7 +125,8 @@
 	  "NETWORK_DRIVE":"Network Drive",
 	  "SHARE_NOT_CONFIGURED":"This Share is not configured",
 	  "SHARE_MOUNT_SUCCESS":"Network Drive Added successfully",
-	  "MOUNT_SHARE_ERROR":"Error in adding network drive"
+	  "MOUNT_SHARE_ERROR":"Error in adding network drive",
+      "ERROR_PATH_UNDEFINED":"Please provide Share Name or Path" 
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",

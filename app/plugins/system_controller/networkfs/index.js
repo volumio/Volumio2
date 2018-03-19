@@ -350,6 +350,13 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		return defer.promise;
 	}
 
+	//Path is required
+	if (data['path'] == null) {
+        self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('NETWORKFS.ERROR_PATH_UNDEFINED'));
+        defer.reject(new Error('Share path must be defined'));
+        return defer.promise;
+	}
+
 	var ip = data['ip'];
 	var path = data['path'];
 	var fstype = data['fstype'];
@@ -873,7 +880,9 @@ ControllerNetworkfs.prototype.getLabelForSelect = function (options, key) {
 ControllerNetworkfs.prototype.onPlayerNameChanged = function () {
     var self = this;
 
-    return self.writeSMBConf();
+    setTimeout(function() {
+        return self.writeSMBConf();
+	}, 10000)
 };
 
 
