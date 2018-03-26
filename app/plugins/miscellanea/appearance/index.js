@@ -4,7 +4,7 @@ var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var libQ = require('kew');
 var path = require('path');
-var lwip = require('lwip');
+var Jimp = require("jimp");
 
 var backgroundPath = '/data/backgrounds';
 
@@ -229,14 +229,13 @@ volumioAppearance.prototype.generateThumbnails = function(){
                     //console.log('Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f+ ' exists');
                 } catch (e) {
                     console.log('Creating Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
-                    lwip.open(backgroundPath+'/'+f, function(err, image) {
-                        if (err) return console.log(err);
-                        image.resize(300, 200 , function(err, imageres) {
-                            if (err) return console.log(err);
-                            imageres.writeFile(backgroundPath+'/thumbnail-'+f, function(err) {
-                                if (err) return console.log(err);
-                            });
-                        });
+
+                    Jimp.read(backgroundPath+'/'+f).then(function (image) {
+                        image.resize(300, 200)
+                            .quality(60)
+                            .write(backgroundPath+'/thumbnail-'+f);
+                    }).catch(function (err) {
+                        console.error(err);
                     });
                 }
 
@@ -311,17 +310,21 @@ volumioAppearance.prototype.setLanguage = function(data)
         config.set('language_code', data.language.value);
         this.commandRouter.sharedVars.set('language_code',data.language.value);
     }
-    self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
-        self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
-    var data = self.getUiSettings();
-    self.commandRouter.updateBrowseSourcesLang();
+    if (!data.disallowReload) {
+        self.commandRouter.pushToastMessage('success',self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
+            self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
-    if (data != undefined) {
-        data.then(function (data) {
-            self.commandRouter.broadcastMessage('pushUiSettings', data);
-        });
+        var data = self.getUiSettings();
+        self.commandRouter.updateBrowseSourcesLang();
+
+        if (data != undefined) {
+            data.then(function (data) {
+                self.commandRouter.broadcastMessage('pushUiSettings', data);
+            });
+        }
     }
+
     return ('Done');
 };
 
@@ -381,7 +384,7 @@ volumioAppearance.prototype.selectRandomBacground = function(){
     var backgrounds = self.getBackgrounds();
     if (backgrounds != undefined) {
         backgrounds.then(function (result) {
-            var max = result.available.length;
+            var max = result.available.length-1;
             var random = Math.floor(Math.random() * (max - 0 + 1) + 0);
             var randomBackground = result.available[random];
             var setting = {'name':randomBackground.name, 'path':randomBackground.path}

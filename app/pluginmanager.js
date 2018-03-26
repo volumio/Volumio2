@@ -131,8 +131,8 @@ PluginManager.prototype.loadPlugin = function (folder) {
 	
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onVolumioStart(): push an error message and disable plugin
-				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing init routine. Please install updated version, or contact plugin developper");
-				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioStart: please update!");
+				//self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing init routine. Please install updated version, or contact plugin developper");
+				self.logger.error("ATTENTION!!!: Plugin " + name + " does not return adequate promise from onVolumioStart: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
 			
@@ -434,26 +434,99 @@ PluginManager.prototype.getPluginsMatrix = function () {
 
 PluginManager.prototype.onVolumioShutdown = function () {
 	var self = this;
+	var defer_onShutdownList=[];
+
+	self.logger.info("___________ PLUGINS: Run Shutdown Tasks ___________");
+
+/*
+	each plugin's onVolumioShutdown() is launched following plugins.json order.
+	Note: there is no resolution strategy: each plugin completes
+	at it's own pace, and in whatever order.
+	Should completion order matter, a new promise strategy should be
+	implemented below (chain by start order, or else...)
+*/
 
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
-			var plugin = value.instance;
-			if (plugin.onVolumioShutdown !== undefined)
-				plugin.onVolumioShutdown();
+			var plugin_defer = self.onVolumioShutdownPlugin(value.category,value.name);
+			defer_onShutdownList.push(plugin_defer);
 		}
 	});
+
+	return  libQ.all(defer_onShutdownList);
+};
+
+PluginManager.prototype.onVolumioShutdownPlugin = function (category, name) {
+	var self = this;
+	var defer=libQ.defer();
+
+	var plugin = self.getPlugin(category, name);
+
+	if(plugin!==undefined)
+	{
+		if(plugin.onVolumioShutdown!==undefined)
+		{
+			self.logger.info("PLUGIN onShutdown : "+name);
+			var myPromise = plugin.onVolumioShutdown();
+
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onVolumioShutdown(): push an error message
+				// self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Shutdown. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioShutdown: please update!");
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+		
+			return myPromise;
+		}
+	}
+
+	return defer.resolve();
 };
 
 PluginManager.prototype.onVolumioReboot = function () {
 	var self = this;
+	var defer_onRebootList=[];
+	self.logger.info("___________ PLUGINS: Run onVolumioReboot Tasks ___________");
+/*
+	each plugin's onVolumioReboot() is launched following plugins.json order.
+	Note: there is no resolution strategy: each plugin completes
+	at it's own pace, and in whatever order.
+	Should completion order matter, a new promise strategy should be
+	implemented below (chain by start order, or else...)
+*/
 
 	self.plugins.forEach(function (value, key) {
 		if (self.isEnabled(value.category, value.name)) {
-			var plugin = value.instance;
-			if (plugin.onVolumioReboot !== undefined)
-				plugin.onVolumioReboot();
+			var plugin_defer = self.onVolumioRebootPlugin(value.category,value.name);
+			defer_onRebootList.push(plugin_defer);
 		}
 	});
+
+	return libQ.all(defer_onRebootList);
+};
+
+PluginManager.prototype.onVolumioRebootPlugin = function (category, name) {
+	var self = this;
+	var defer=libQ.defer();
+	var plugin = self.getPlugin(category, name);
+
+	if(plugin!==undefined)
+	{
+		if(plugin.onVolumioReboot!==undefined)
+		{
+			self.logger.info("PLUGIN onReboot : "+name);
+			var myPromise = plugin.onVolumioReboot();
+			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+				// Handle non-compliant onVolumioReboot(): push an error message
+				// self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Reboot. Please install updated version, or contact plugin developper");
+				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioReboot: please update!");
+				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+			}
+			
+			return myPromise;
+		}
+	}
+	return defer.resolve();
 };
 
 PluginManager.prototype.getPlugin = function (category, name) {
@@ -504,18 +577,21 @@ PluginManager.prototype.installPlugin = function (url) {
 	var downloadCommand;
 
 	var currentMessage = "Downloading plugin at "+url;
+
 	var droppedFile = url.replace("http://127.0.0.1:3000/plugin-serve/", "");
 	self.logger.info(currentMessage);
 	advancedlog = currentMessage;
 
-	if (droppedFile == url)
+	if (droppedFile == url) {
 		downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
-	else
-		downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
+	}
+	else {
+		downloadCommand = "/bin/mv /tmp/plugins/" + droppedFile + " /tmp/downloaded_plugin.zip";
+	}
 
 	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
-	
+
 	exec(downloadCommand, function (error, stdout, stderr) {
 
 		if (error !== null) {
@@ -638,15 +714,23 @@ PluginManager.prototype.updatePlugin = function (data) {
 	var url = data.url;
 	var category = data.category;
 	var name = data.name;
+    var downloadCommand;
 
-	var currentMessage = 'Downloading from'+url;
-	self.logger.info(currentMessage);
-	advancedlog = currentMessage;
+    var currentMessage = "Downloading plugin at "+url;
+    var droppedFile = url.replace("http://127.0.0.1:3000/plugin-serve/", "");
+    self.logger.info(currentMessage);
+    advancedlog = currentMessage;
 
-	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading Update','title' : modaltitle, 'advancedLog': advancedlog});
+    if (droppedFile == url) {
+        downloadCommand = "/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'";
+	} else {
+        downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
+	}
+
+    self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
 
 
-	exec("/usr/bin/wget -O /tmp/downloaded_plugin.zip '" + url + "'", function (error, stdout, stderr) {
+    exec(downloadCommand, function (error, stdout, stderr) {
 
 		if (error !== null) {
 			currentMessage = "Cannot download file "+url+ ' - ' + error;
@@ -662,6 +746,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 			advancedlog = advancedlog + "<br>" + currentMessage;
 
 			var pluginFolder = '/data/temp/downloaded_plugin';
+            self.createFolder(pluginFolder);
 
 			self.stopPlugin(category,name)
 				.then(function(e)
@@ -797,7 +882,7 @@ PluginManager.prototype.createFolder = function (folder) {
 	var defer=libQ.defer();
 
 	fs.mkdirs(folder, function (err) {
-		if (err) defer.reject(new Error());
+		if (err) defer.reject(new Error('Error creating folder: ' + e ));
 		else
 		{
 			defer.resolve(folder);
@@ -812,11 +897,16 @@ PluginManager.prototype.unzipPackage = function () {
 	var defer=libQ.defer();
 	var extractFolder='/data/temp/downloaded_plugin';
 
-	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, function (error) {
+	try {
+        fs.ensureDirSync(extractFolder)
+	} catch(e) {
+
+	}
+
+	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, {maxBuffer:816000}, function (error) {
 	
 		if (error !== null) {
-			console.log("ERROR: "+ error);
-			defer.reject(new Error());
+			defer.reject(new Error('Error unzipping plugin: ' + error));
 		}
 		else {
 			defer.resolve(extractFolder);
@@ -846,6 +936,7 @@ PluginManager.prototype.renameFolder = function (folder) {
 			defer.reject(new Error());
 		}
 		else {
+
 			defer.resolve(newFolderName);
 		}
 	});
@@ -875,6 +966,7 @@ PluginManager.prototype.moveToCategory = function (folder) {
 					defer.reject(new Error());
 				}
 				else {
+                    execSync('/bin/sync', { uid: 1000, gid:1000, encoding: 'utf8' });
 					defer.resolve(newFolderName +'/'+name);
 				}
 			}));
@@ -1044,6 +1136,7 @@ PluginManager.prototype.pluginFolderCleanup = function () {
 	}
 
 	self.logger.info("Plugin folders cleanup completed");
+	defer.resolve();
 	return defer.promise;
 
 };
@@ -1138,6 +1231,14 @@ PluginManager.prototype.removePluginFromConfiguration = function (category,name)
 	self.config.delete(key);
 
 	self.plugins.remove(key);
+
+    try {
+        execSync('/bin/rm -rf /data/configuration/' + category +'/' + name, { uid: 1000, gid:1000, encoding: 'utf8' });
+        execSync('/bin/sync', { uid: 1000, gid:1000, encoding: 'utf8' });
+        self.logger.info("Successfully removed " + name + " configuration files");
+	} catch(e) {
+        self.logger.error("Cannot remove " + name + " configuration files");
+	}
 
 	defer.resolve();
 	return defer.promise;
@@ -1314,7 +1415,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 	if (installed != undefined) {
 		installed.then(function (installedPlugins) {
 			for (var e = 0; e <  installedPlugins.length; e++) {
-				var pluginpretty = {"prettyName":installedPlugins[e].prettyName,"version":installedPlugins[e].version};
+				var pluginpretty = {"prettyName":installedPlugins[e].prettyName,"version":installedPlugins[e].version,"category":installedPlugins[e].category};
 				myplugins.push(pluginpretty);
 			}
 		});
@@ -1366,15 +1467,17 @@ PluginManager.prototype.getAvailablePlugins = function () {
 			for(var a = 0; a <  plugins.length; a++) {
 				var availableName = plugins[a].prettyName;
 				var availableVersion = plugins[a].version;
+                var availableCategory = plugins[a].category;
+                var thisPlugin =  plugins[a];
+                thisPlugin.installed = false;
 				for(var c = 0; c <  myplugins.length; c++) {
 					if(myplugins[c].prettyName === availableName) {
-						plugins[a].installed = true;
+                        thisPlugin.installed = true;
+                        thisPlugin.category = myplugins[c].category;
 						var v = compareVersions(availableVersion, myplugins[c].version);
 						if (v === 1) {
-							plugins[a].updateAvailable = true
+                            thisPlugin.updateAvailable = true
 						}
-					} else {
-						plugins[a].installed = false;
 					}
 				}
 			}
@@ -1573,7 +1676,7 @@ PluginManager.prototype.checkIndex = function () {
 			{
 				self.logger.info("Found new core plugin "+category+"/"+plugin+". Adding it");
 
-				self.config.addConfigValue(key+'.enabled','boolean',true);
+				self.config.addConfigValue(key+'.enabled','boolean',coreConf.get(key+'.enabled'));
 				self.config.addConfigValue(key+'.status','string','STOPPED');
 
 			}

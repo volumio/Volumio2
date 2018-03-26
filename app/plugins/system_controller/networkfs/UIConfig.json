@@ -15,7 +15,8 @@
 		"label": "TRANSLATE.COMMON.SAVE",
 		"data": [
 		  "enable_web",
-		  "web_quality"
+		  "web_quality",
+		  "metadataimage"
 		]
 	  },
 	  "content": [
@@ -62,7 +63,21 @@
 			}
 		  ]
 
-		}
+		},
+		{
+		 "id": "metadataimage",
+			"element": "switch",
+			"doc" : "TRANSLATE.APPEARANCE.METADATA_IMAGE_DOC",
+			"label": "TRANSLATE.APPEARANCE.METADATA_IMAGE",
+			"value": false
+		},
+		  {
+		  "id":"albumartcache",
+		  "element": "button",
+		  "label": "TRANSLATE.APPEARANCE.ALBUMART_RESET_CACHE",
+		  "doc": "TRANSLATE.APPEARANCE.ALBUMART_RESET_CACHE_DOC",
+		  "onClick": {"type":"emit", "message":"callMethod", "data":{"endpoint":"miscellanea/albumart","method":"clearAlbumartCache","data":""}}
+		 }
 	  ]
 	},
 	  {
@@ -76,7 +91,8 @@
 			  "data": [
 				  "tracknumbers",
 				  "compilation",
-				  "artistsort"
+				  "artistsort",
+				  "ffmpegenable"
 			  ]
 		  },
 		  "content": [
@@ -114,6 +130,13 @@
 					  }
 				  ]
 
+			  },
+			  {
+				  "id": "ffmpegenable",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT_DOC",
+				  "label": "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT",
+				  "value": false
 			  }
 		  ]
 	  }

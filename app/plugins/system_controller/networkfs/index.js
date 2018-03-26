@@ -37,6 +37,8 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
 	config.loadFile(configFile);
 
 	self.initShares();
+    var boundMethod = self.onPlayerNameChanged.bind(self);
+    self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
     return libQ.resolve();
 };
@@ -87,6 +89,9 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', websize);
 			self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), websize));
 
+            var metadataimage = self.getAdditionalConf('miscellanea', 'albumart', 'metadataimage', false);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value', metadataimage);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), metadataimage));
 
             var tracknumbersConf = self.getAdditionalConf('music_service', 'mpd', 'tracknumbers', false);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', tracknumbersConf);
@@ -102,6 +107,9 @@ ControllerNetworkfs.prototype.getUIConfig = function () {
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', false);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'artist')
             }
+
+            var ffmpeg = self.getAdditionalConf('music_service', 'mpd', 'ffmpegenable', false);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[3].value', ffmpeg);
 
 			defer.resolve(uiconf);
 		})
@@ -197,9 +205,9 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 			credentials = 'guest,';
 		}
 		if (options) {
-			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,"+options;
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,"+options;
 		} else {
-			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto";
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft";
 		}
 
 	} else { // nfs
@@ -340,6 +348,13 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.ILLEGAL_CHARACTER_/'));
 		defer.reject(new Error('Share names cannot contain /'));
 		return defer.promise;
+	}
+
+	//Path is required
+	if (data['path'] == null) {
+        self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('NETWORKFS.ERROR_PATH_UNDEFINED'));
+        defer.reject(new Error('Share path must be defined'));
+        return defer.promise;
 	}
 
 	var ip = data['ip'];
@@ -756,6 +771,8 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 
 	var defer = libQ.defer();
 	var sharesjson = {"nas":[]};
+	var systemShare = self.commandRouter.sharedVars.get('system.name').toUpperCase();
+
 	try {
 		var shares = execSync("/usr/bin/smbtree -N -b", { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
 	} catch (err) {
@@ -782,7 +799,6 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 		var i, j, n, fields, nas, nasname, share, key;
 		var backslash = /^\\/;
 		var nas_slashes = /^\\\\/;
-		var nas_ignore  = { 'VOLUMIO':true };
 
 		// collate nas names as keys in an object (for easier referencing)
 		var nasobj = { };
@@ -797,7 +813,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
 				nas = fields[1].replace(/\s*$/,'');
 				// remove leading backslashes
 				nasname = nas.replace(nas_slashes,'');
-				if (nasname in nas_ignore) continue;
+				if (nasname === systemShare) continue;
 				nasobj[nasname] = {"shares":[]};
 				continue;
 			}
@@ -859,4 +875,53 @@ ControllerNetworkfs.prototype.getLabelForSelect = function (options, key) {
 	}
 
 	return 'Error';
+};
+
+ControllerNetworkfs.prototype.onPlayerNameChanged = function () {
+    var self = this;
+
+    setTimeout(function() {
+        return self.writeSMBConf();
+	}, 10000)
+};
+
+
+ControllerNetworkfs.prototype.writeSMBConf = function () {
+    var self = this;
+
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var nameraw = systemController.getConf('playerName');
+    var name = nameraw.charAt(0).toUpperCase() + nameraw.slice(1);
+    var smbConfFile = '/etc/samba/smb.conf';
+
+    exec('/usr/bin/sudo /bin/chmod 777 ' + smbConfFile, {uid:1000,gid:1000},
+        function (error, stdout, stderr) {
+            if(error != null) {
+                self.logger.info('Error setting smb.conf file perms: '+error);
+            } else {
+                self.logger.info('smb.conf Permissions set');
+                fs.readFile(__dirname + "/smb.conf.tmpl", 'utf8', function (err, data) {
+                    if (err) {
+                        return self.logger.log('Error reading Samba configuration template file: '+err);
+                    }
+                    var conf = data.replace(/{NAME}/g, name);
+
+                    fs.writeFile(smbConfFile, conf, 'utf8', function (err) {
+                        if (err) {
+                            self.logger.log('Error writing Samba configuration file: '+err);
+                        } else {
+                            exec("/usr/bin/sudo /bin/systemctl restart nmbd.service && /usr/bin/sudo /bin/systemctl restart smbd.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+                                if (error !== null) {
+                                    console.log(error);
+                                    self.logger.error('Cannot restart SAMBA')
+                                } else {
+                                    self.logger.info('SAMBA Restarted')
+                                }
+                            });
+
+						}
+                    });
+                });
+            }
+        });
 };

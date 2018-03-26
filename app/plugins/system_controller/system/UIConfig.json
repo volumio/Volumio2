@@ -31,8 +31,37 @@
           "doc": "TRANSLATE.SYSTEM.STARTUP_SOUND_DOC",
           "label": "TRANSLATE.SYSTEM.STARTUP_SOUND",
           "value": true
+        },
+        {
+          "id":"config_wizard",
+          "element": "button",
+          "label": "TRANSLATE.WIZARD.RUN_FIRST_CONFIG_WIZARD",
+          "onClick": {"type":"emit", "message":"runFirstConfigWizard", "data":""}
         }
 
+      ]
+    },
+    {
+      "id": "section_hdmi_settings",
+      "element": "section",
+      "hidden": true,
+      "label": "TRANSLATE.SYSTEM.VIDEO_OUT_OPTIONS",
+      "icon": "fa-desktop",
+      "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"saveHDMISettings"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "hdmi_enabled"
+        ]
+      },
+      "content": [
+        {
+          "id":"hdmi_enabled",
+          "element": "switch",
+          "doc": "TRANSLATE.SYSTEM.HDMI_UI_DOC",
+          "label": "TRANSLATE.SYSTEM.HDMI_UI",
+          "value": false
+        }
       ]
     },
     {"coreSection": "system-version"},
@@ -65,6 +94,28 @@
           }
       ]
 
+    },
+    {
+      "id":"section_install",
+      "type": "section",
+      "hidden": true,
+      "label": "TRANSLATE.SYSTEM.INSTALL_TO_DISK",
+      "icon": "fa-hdd-o",
+      "content": []
+    },
+    {
+      "id":"section_foss",
+      "type": "section",
+      "label": "TRANSLATE.SYSTEM.CREDITS_OPEN_SOURCE_LICENSES",
+      "icon": "fa-user-circle",
+      "content": [
+    {
+      "id":"credits_foss",
+      "element": "button",
+      "hidden": false,
+      "label": "TRANSLATE.SYSTEM.CREDITS_OPEN_SOURCE_LICENSES",
+      "onClick": {"type":"goto", "pageName":"credits"}
+    }]
     }
   ]
 }

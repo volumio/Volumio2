@@ -7,7 +7,8 @@ var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var nodetools = require('nodetools');
-var mm = require('musicmetadata');
+var exec = require('child_process').exec;
+var diskCache = true;
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -22,6 +23,7 @@ var logger = new (winston.Logger)({
 
 var albumArtRootFolder = '/data/albumart/web';
 var mountAlbumartFolder= '/data/albumart/folder';
+var mountMetadataFolder= '/data/albumart/metadata';
 
 var setFolder = function (newFolder) {
 	//logger.info("Setting folder " + newFolder);
@@ -30,6 +32,9 @@ var setFolder = function (newFolder) {
 
     mountAlbumartFolder= S(newFolder).ensureRight('/').s+'folder/';
     fs.ensureDirSync(mountAlbumartFolder);
+
+    mountMetadataFolder= S(newFolder).ensureRight('/').s+'metadata/';
+    fs.ensureDirSync(mountMetadataFolder);
 };
 
 var searchOnline = function (defer, web) {
@@ -78,8 +83,12 @@ var searchOnline = function (defer, web) {
     }
 
 	var fileName = resolution;
-
-	fs.ensureDirSync(folder);
+	try {
+		fs.ensureDirSync(folder);
+	} catch(e) {
+		defer.reject(new Error(e));
+            	return defer.promise;
+	}
 	var infoPath = folder + 'info.json';
 
 	var infoJson = {};
@@ -94,14 +103,28 @@ var searchOnline = function (defer, web) {
 
     if (fileSizeInBytes > 0)
     {
-        infoJson = fs.readJsonSync(infoPath, {throws: false});
+        try {
+            infoJson = fs.readJsonSync(infoPath, {throws: true});
+        } catch(e) {
+            //console.log("Invalid JSON " + infoPath);
+            defer.reject(new Error(err));
+            return defer.promise;
+        }
+
     }
 
 
     if (infoJson[resolution] == undefined) {
-        var decodedArtist=nodetools.urlDecode(artist);
-        var decodedAlbum=nodetools.urlDecode(album);
-        var decodedResolution=nodetools.urlDecode(resolution);
+
+        try {
+            var decodedArtist=nodetools.urlDecode(artist);
+            var decodedAlbum=nodetools.urlDecode(album);
+            var decodedResolution=nodetools.urlDecode(resolution);
+        } catch(e) {
+           //console.log("ERROR getting albumart info from JSON file: " + e);
+            defer.reject(new Error(err));
+            return defer.promise;
+        }
 
         if(decodedAlbum===''){
 			decodedAlbum = decodedAlbum|| null;
@@ -109,11 +132,10 @@ var searchOnline = function (defer, web) {
 
 		albumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
             if (err) {
-                console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
+                //console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
                 defer.reject(new Error(err));
                 return defer.promise;
-            }
-            else {
+            }  else {
                 if (url != undefined && url != '') {
                     var splitted = url.split('.');
                     var fileExtension = splitted[splitted.length - 1];
@@ -137,14 +159,12 @@ var searchOnline = function (defer, web) {
 
                     infoJson[resolution] = diskFileName;
 
-                }
-
-                else {
+                } else {
                     defer.reject(new Error('No albumart URL'));
                     return defer.promise;
                 }
             }
-			
+
             fs.writeJsonSync(infoPath, infoJson);
         });
 	}
@@ -153,7 +173,7 @@ var searchOnline = function (defer, web) {
 	}
 };
 
-var searchInFolder = function (defer, path, web) {
+var searchInFolder = function (defer, path, web, meta) {
 	var coverFolder = '';
 	var splitted = path.split('/');
 
@@ -193,12 +213,21 @@ var searchInFolder = function (defer, path, web) {
 			var coverFile = coverFolder + '/' + covers[i];
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
-                var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
-                //logger.info('Copying file to cache ['+cacheFile+']');
-                fs.ensureFileSync(cacheFile);
-                fs.copySync(coverFile,cacheFile);
-				defer.resolve(cacheFile);
-				return defer.promise;
+                var size = fs.statSync(coverFile).size;
+                // Limit the size of local arts to about 5MB
+                if (size < 5000000) {
+                    if (diskCache) {
+                        var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
+                        //logger.info('1: Copying file to cache ['+cacheFile+']');
+                        fs.ensureFileSync(cacheFile);
+                        fs.copySync(coverFile,cacheFile);
+                        defer.resolve(cacheFile);
+                    } else {
+                        defer.resolve(coverFile);
+                    }
+                    return defer.promise;
+                }
+
 			}
 		}
 
@@ -206,25 +235,88 @@ var searchInFolder = function (defer, path, web) {
 		for (var j in files) {
 			var fileName = S(files[j]);
 
-			//console.log(fileName.s);
 			if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG')|| fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
-				defer.resolve(coverFolder + '/' + fileName.s);
-				return defer.promise;
+                var coverFile = coverFolder + '/' + fileName.s;
+                var size = fs.statSync(coverFile).size;
+                // Limit the size of local arts to about 5MB
+                if (size < 5000000) {
+                    defer.resolve(coverFile);
+                    return defer.promise;
+                }
 			}
 
 		}
+
 	} else {
 		//logger.info('Folder ' + coverFolder + ' does not exist');
 	}
-	searchOnline(defer, web);
-
+	//searchOnline(defer, web);
+    searchMeta(defer, coverFolder, web, meta);
 };
+
+var searchMeta = function (defer, coverFolder, web, meta) {
+
+    if (meta === true && coverFolder != undefined) {
+
+	try {
+        var files = fs.readdirSync(coverFolder);
+	} catch(e) {
+        return searchOnline(defer, web);
+	}
+
+	var middleFileIndex = Math.floor(files.length/2);
+    var fileName = coverFolder + '/' + S(files[middleFileIndex]);
+
+    fs.stat(fileName, function (err, stats) {
+        if (err) {
+            return searchOnline(defer, web);
+        } else {
+            if (stats.isFile() && ( fileName.endsWith('.mp3') || fileName.endsWith('.flac') || fileName.endsWith('.aif') )) {
+                var cmd = '/usr/bin/exiftool "'+ fileName + '" | grep Picture';
+                exec(cmd, {uid: 1000, gid: 1000},  function (error, stdout, stderr) {
+                    if (error) {
+                        return searchOnline(defer, web);
+                    } else {
+                        if (stdout.length > 0 ) {
+                            var metaCacheFile = mountMetadataFolder+'/'+ coverFolder+'/metadata.jpeg';
+                            var extract = '/usr/bin/exiftool -b -Picture "'+ fileName + '" > "' + metaCacheFile + '"';
+
+                            try {
+                                fs.ensureFileSync(metaCacheFile);
+                            } catch(e) {
+                                console.log('ERROR: Cannot create metadata albumart folder: '+e)
+                            }
+
+
+                            exec(extract, {uid: 1000, gid: 1000, encoding: 'utf8'},  function (error, stdout, stderr) {
+                                if (error) {
+                                    return searchOnline(defer, web);
+                                } else {
+                                    console.log('Extracted metadata : '+metaCacheFile)
+                                    defer.resolve(metaCacheFile);
+                                    return defer.promise;
+                                }
+                            });
+                        } else {
+                            return searchOnline(defer, web);
+						}
+                    }
+                });
+            } else {
+                return searchOnline(defer, web);
+			}
+		}
+    });
+    } else {
+        searchOnline(defer, web);
+    }
+}
 
 /**
  *    This method searches for the album art, downloads it if needed
  *    and returns its file path. The return value is a promise
  **/
-var processRequest = function (web, path) {
+var processRequest = function (web, path, meta) {
 	var defer = Q.defer();
 
 	if (web == undefined && path == undefined) {
@@ -273,50 +365,28 @@ var processRequest = function (web, path) {
 
             fs.ensureDirSync(coverFolder);
             var cacheFilePath=mountAlbumartFolder+coverFolder+'/'+imageSize+'.jpeg';
+            var metaFilePath=mountMetadataFolder+coverFolder+'/metadata.jpeg';
             //logger.info(cacheFilePath);
 
 
             if(fs.existsSync(cacheFilePath))
             {
                 defer.resolve(cacheFilePath);
-            }
-            else {
+            } else if (fs.existsSync(metaFilePath)) {
+                defer.resolve(metaFilePath);
+			} else {
                 if (isFolder) {
-                    searchInFolder(defer, path, web);
+                    searchInFolder(defer, path, web, meta);
                 } else {
                     var starttime=Date.now();
-                    searchInFolder(defer, path, web);
-                    /*var parser = mm(fs.createReadStream(path), function (err, metadata) {
-                     if (err) {
-                     logger.info(err);
-                     searchInFolder(defer, path, web);
-                     }
-                     else {
-                     try {
-                     var stoptime=Date.now();
-                     logger.info("Parsing took "+(stoptime-starttime)+" milliseconds");
-                     if (metadata.picture != undefined && metadata.picture.length > 0) {
-                     logger.info("Found art in file " + path);
-
-                     fs.writeFile('/tmp/albumart', metadata.picture[0].data, function (err) {
-                     //console.log('file has been written');
-                     defer.resolve('/tmp/albumart');
-                     });
-                     }
-                     else searchInFolder(defer, path, web);
-                     }
-                     catch (ecc) {
-                     logger.info(ecc);
-                     }
-                     }
-                     });*/
+                    searchInFolder(defer, path, web, meta);
                 }
             }
 
 
 		} else {
 			//logger.info('File' + path + ' doesnt exist');
-			searchInFolder(defer, path, web);
+			searchInFolder(defer, path, web, meta);
 		}
 
 	}
@@ -343,6 +413,11 @@ var processExpressRequest = function (req, res) {
 	var web = req.query.web;
 	var path = req.query.path;
     var icon = req.query.icon;
+    var sourceicon = req.query.sourceicon;
+    var meta = false;
+    if (req.query.metadata != undefined && req.query.metadata === 'true') {
+        meta = true;
+    }
 
     if(rawQuery !== undefined && rawQuery !== null)
     {
@@ -359,9 +434,8 @@ var processExpressRequest = function (req, res) {
         }
     }
 
-
     //var starttime=Date.now();
-	var promise = processRequest(web, path);
+	var promise = processRequest(web, path, meta);
 	promise.then(function (filePath) {
 			//logger.info('Sending file ' + filePath);
 
@@ -371,11 +445,25 @@ var processExpressRequest = function (req, res) {
 			res.sendFile(filePath);
 		})
 		.fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=2628000')
 		    if(icon!==undefined){
-
-
-				res.setHeader('Cache-Control', 'public, max-age=2628000')
-                res.sendFile(__dirname + '/icons/'+icon+'.jpg');
+                res.sendFile(__dirname + '/icons/'+icon+'.svg');
+			} else if (sourceicon!==undefined) {
+                try {
+                	var corepluginurl = '/volumio/app/plugins/' + sourceicon;
+                	var pluginurl = '/data/plugins/' + sourceicon;
+                	if (fs.existsSync(corepluginurl)) {
+                        res.sendFile(corepluginurl);
+                	} else {
+                    	res.sendFile(pluginurl);
+                	}
+            	}	catch(e) {
+                    try{
+                        res.sendFile(__dirname + '/default.jpg');
+                    } catch(e) {
+                        res.sendFile(__dirname + '/default.png');
+                    }
+				}
 			} else {
 			    res.setHeader('Cache-Control', 'public, max-age=2628000')
                 try{

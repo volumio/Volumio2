@@ -5,6 +5,8 @@ var libQ = require('kew');
 var nodetools = require('nodetools');
 var enableweb = true;
 var defaultwebsize = 'large';
+var cacheid = '';
+var metadataimage = false;
 
 // Define the AlbumArt class
 module.exports = AlbumArt;
@@ -29,6 +31,12 @@ AlbumArt.prototype.onVolumioStart = function() {
 
 	enableweb = self.config.get('enableweb', true);
 	defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
+	cacheid = self.config.get('cacheid', 0);
+	if (cacheid === 0) {
+	    cacheid = Math.floor(Math.random() * 1000);
+	    self.config.set('cacheid',cacheid)
+    }
+    metadataimage = self.config.get('metadataimage', false);
 
 	//Starting server
 	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
@@ -111,31 +119,29 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 			size=defaultwebsize;
 		}
 
-        web = '?web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
+        web = '&web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
     }
 	} catch (e) {
 	console.log('Cannot compose Albumart path')
 	}
     var url = '/albumart';
+    url=url+'?cacheid='+cacheid;
 
-    if (web != undefined)
+    if (web != undefined) {
         url = url + web;
-
-    if (web != undefined && path != undefined)
-        url = url + '&';
-    else if (path != undefined)
-        url = url + '?';
-
-    if (path != undefined)
-        url = url + 'path=' + nodetools.urlEncode(path);
-
-    if(icon!==undefined)
-    {
-        if(url==='/albumart')
-            url=url+'?icon='+icon;
-        else url=url+'&icon='+icon;
     }
 
+    if (path != undefined) {
+        url = url + '&path=' + nodetools.urlEncode(path);
+    }
+
+    if(icon!==undefined) {
+        url=url+'&icon='+icon;
+    }
+
+    if (path != undefined) {
+        url=url+'&metadata='+metadataimage;
+    }
 
 
     return url;
@@ -165,5 +171,26 @@ AlbumArt.prototype.saveAlbumartOptions = function (data) {
 		defaultwebsize = data.web_quality.value;
 	}
 
+    if (data.metadataimage != undefined) {
+        self.config.set('metadataimage', data['metadataimage']);
+        metadataimage = data.metadataimage;
+    }
+
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
+};
+
+AlbumArt.prototype.clearAlbumartCache = function () {
+	var self = this;
+
+    exec('/bin/rm -rf /data/albumart/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+            if (error) {
+                console.log('Cannot Delete Albumart Cache DirectoryB: ' + error);
+                self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEAR_ERROR'));
+            } else {
+                cacheid++
+                self.config.set('cacheid', cacheid);
+                self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rebuildAlbumCache');
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEARED'));
+			}
+        });
 };

@@ -39,6 +39,7 @@ function CoreCommandRouter(server) {
 	this.callbacks = [];
 	this.sharedVars = new vconf();
     this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
+    this.sharedVars.addConfigValue('selective_search','boolean',true);
 
 	this.logger.info("-------------------------------------------");
 	this.logger.info("-----            Volumio2              ----");
@@ -55,6 +56,9 @@ function CoreCommandRouter(server) {
     this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
     this.pluginManager.checkIndex();
     this.pluginManager.pluginFolderCleanup();
+    this.configManager=new(require(__dirname+'/configManager.js'))(this.logger);
+
+
     this.pluginManager.loadPlugins();
     this.pluginManager.startPlugins();
 
@@ -78,6 +82,10 @@ function CoreCommandRouter(server) {
     this.pushConsoleMessage('BOOT COMPLETED');
 
     this.startupSound();
+
+
+    	this.closeModals();
+
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -134,8 +142,13 @@ CoreCommandRouter.prototype.volumioClearQueue = function () {
 
 // Volumio Set Volume
 CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
+	var self = this;
 	this.callCallback("volumiosetvolume", VolumeInteger);
-	return this.volumeControl.alsavolume(VolumeInteger);
+
+	var volSet = this.volumeControl.alsavolume(VolumeInteger);
+    volSet.then(function (result) {
+		 return self.volumioupdatevolume(result);
+    })
 };
 
 // Volumio Update Volume
@@ -156,6 +169,13 @@ CoreCommandRouter.prototype.volumioUpdateVolumeSettings = function (vol) {
 	if (this.volumeControl){
 		return this.volumeControl.updateVolumeSettings(vol);
 	}
+};
+
+CoreCommandRouter.prototype.updateVolumeScripts = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioUpdateVolumeScripts');
+    if (this.volumeControl){
+        return this.volumeControl.updateVolumeScript(data);
+    }
 };
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
@@ -190,25 +210,8 @@ CoreCommandRouter.prototype.volumioAddQueueUids = function (arrayUids) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddQueueUids');
 	return this.musicLibrary.addQueueUids(arrayUids);
 };
-/*
 
- TODO: This should become the default entry point for adding music to any service
- // Volumio Add Queue Uri
- CoreCommandRouter.prototype.volumioAddQueueUri = function(data) {
- var self = this;
- self.pushConsoleMessage( 'CoreCommandRouter::volumioAddQueueUri');
- var service = data.service;
- var uri = data.uri;
- return self.executeOnPlugin('music_service', 'mpd', 'add', uri);
- }
- */
-// Volumio Rebuild Library
-CoreCommandRouter.prototype.volumioRebuildLibrary = function () {
-	this.pushConsoleMessage('CoreCommandRouter::volumioRebuildLibrary');
-	return this.musicLibrary.buildLibrary();
-};
-
-// Volumio Get Library Index
+// TODO CLEANUP THIS FUNCTION
 CoreCommandRouter.prototype.volumioGetLibraryFilters = function (sUid) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioGetLibraryFilters');
 	return this.musicLibrary.getIndex(sUid);
@@ -239,6 +242,11 @@ CoreCommandRouter.prototype.volumioRemoveToBrowseSources = function (data) {
 CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
 	return this.musicLibrary.updateBrowseSources(name,data);
+};
+
+CoreCommandRouter.prototype.setSourceActive = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumiosetSourceActive' + data);
+    return this.musicLibrary.setSourceActive(data);
 };
 // Volumio Get Playlist Index
 CoreCommandRouter.prototype.volumioGetPlaylistIndex = function (sUid) {
@@ -275,7 +283,7 @@ CoreCommandRouter.prototype.volumioImportServicePlaylists = function () {
 CoreCommandRouter.prototype.volumioSearch = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::Search '+data);
 	var asd = this.musicLibrary.search(data);
-	console.log(asd)
+
 	return this.musicLibrary.search(data);
 };
 
@@ -316,18 +324,35 @@ CoreCommandRouter.prototype.volumioPushQueue = function (queue) {
 	);
 };
 
-// MPD Clear-Add-Play
+// Clear-Add-Play
 CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds, sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceClearAddPlayTracks');
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	return thisPlugin.clearAddPlayTracks(arrayTrackIds);
+    if (sService != undefined) {
+        var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+        if (thisPlugin != undefined && typeof thisPlugin.clearAddPlayTracks === "function") {
+            return thisPlugin.clearAddPlayTracks(arrayTrackIds);
+        } else {
+            this.logger.error('WARNING: No clearAddPlayTracks method for service ' + sService);
+        }
+    }
 };
 
 // MPD Stop
 CoreCommandRouter.prototype.serviceStop = function (sService) {
-	this.pushConsoleMessage('CoreCommandRouter::serviceStop');
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	return thisPlugin.stop();
+	
+	if (sService != undefined) {
+		this.pushConsoleMessage('CoreCommandRouter::serviceStop');
+		var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+        if (thisPlugin != undefined && typeof thisPlugin.stop === "function") {
+            return thisPlugin.stop();
+		} else {
+            this.logger.error('WARNING: No stop method for service ' + sService);
+		}
+
+	} else {
+		this.pushConsoleMessage('Received STOP, but no service to execute it');
+	}
 };
 
 // MPD Pause
@@ -335,23 +360,29 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::servicePause');
 
 	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	return thisPlugin.pause();
+    if (thisPlugin != undefined && typeof thisPlugin.pause === "function") {
+        return thisPlugin.pause();
+    } else {
+        this.logger.error('WARNING: No pause method for service ' + sService);
+    }
 };
 
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
 	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
 
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-
+    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
 	var state=this.stateMachine.getState();
 
-	if(state==='stop')
-	{
-		thisPlugin.clearAddPlayTracks();
-	}
-
-	return thisPlugin.resume();
+    if(state==='stop')
+    {
+        if (thisPlugin != undefined && typeof thisPlugin.clearAddPlayTracks === "function") {
+            thisPlugin.clearAddPlayTracks();
+        }
+    }
+    if (thisPlugin != undefined && typeof thisPlugin.resume === "function") {
+        return thisPlugin.resume();
+    }
 };
 
 // Methods usually called by the service controllers --------------------------------------------------------------
@@ -395,6 +426,18 @@ CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
         return this.stateMachine.addQueueItems(arrayItems);
     }
 };
+
+CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.stateMachine.clearQueue();
+
+    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
+        return this.playPlaylist(arrayItems.title)
+    } else  {
+        return this.stateMachine.addQueueItems(arrayItems);
+    }
+};
+
 
 
 // Volumio Check Favourites
@@ -966,11 +1009,39 @@ CoreCommandRouter.prototype.executeOnPlugin = function (type, name, method, data
 };
 
 CoreCommandRouter.prototype.getUIConfigOnPlugin = function (type, name, data) {
-	this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+	var self=this
+    this.pushConsoleMessage('CoreCommandRouter::getUIConfigOnPlugin');
+	var noConf = {"page": {"label": self.getI18nString('PLUGINS.NO_CONFIGURATION_AVAILABLE')}, "sections": []};
+
+	var defer=libQ.defer()
 
 	var thisPlugin = this.pluginManager.getPlugin(type, name);
 
-	return thisPlugin.getUIConfig(data);
+	try {
+        thisPlugin.getUIConfig(data)
+            .then(function(uiconf){
+                var filePath=__dirname + '/plugins/'+type+'/'+name+'/override.json'
+
+                self.overrideUIConfig(uiconf,filePath)
+                    .then(function(){
+                        defer.resolve(uiconf)
+                    })
+                    .fail(function()
+                    {
+                        defer.reject(new Error());
+                    })
+            })
+            .fail(function()
+            {
+                defer.reject(new Error("Error retrieving UIConfig from plugin "+name))
+            })
+	} catch(e) {
+        defer.resolve(noConf)
+	}
+
+
+
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.writePlayerControls = function (config) {
@@ -1026,13 +1097,6 @@ CoreCommandRouter.prototype.initPlayerControls = function () {
 	});
 };
 
-/* what is this?
- CoreCommandRouter.prototype.getConfiguration=function(componentCode)
- {
- console.log("_________ "+componentCode);
- }
- */
-
 
 /**
  * This method shall be used to push debug messages
@@ -1051,17 +1115,8 @@ CoreCommandRouter.prototype.pushErrorConsoleMessage = function (sMessage) {
 };
 
 CoreCommandRouter.prototype.pushConsoleMessage = function (sMessage) {
+	// Uncomment for more logging
 	this.logger.info(sMessage);
-	/*
-	 var self = this;
-	 return libQ.all(
-	 libFast.map(self.pluginManager.getPluginNames.call(self.pluginManager, 'user_interface'), function(sInterface) {
-	 var thisInterface = self.pluginManager.getPlugin.call(self.pluginManager, 'user_interface', sInterface);
-	 if( typeof thisInterface.printConsoleMessage === "function")
-	 return thisInterface.printConsoleMessage.call(thisInterface, sMessage);
-	 })
-	 );
-	 */
 };
 
 CoreCommandRouter.prototype.pushToastMessage = function (type, title, message) {
@@ -1139,13 +1194,27 @@ CoreCommandRouter.prototype.pushAirplay = function (data) {
 // Platform specific & Hardware related options, they can be found in platformSpecific.js
 // This allows to change system commands across different devices\environments
 CoreCommandRouter.prototype.shutdown = function () {
-	this.pluginManager.onVolumioShutdown();
-	this.platformspecific.shutdown();
+	var self = this;
+	
+	self.pluginManager.onVolumioShutdown().then( function() {
+		self.platformspecific.shutdown();
+	}).fail(function(e){
+		self.logger.info("Error in onVolumioShutdown Plugin Promise handling: "+ e);
+		self.platformspecific.shutdown();
+	});
+	
 };
 
 CoreCommandRouter.prototype.reboot = function () {
-	this.pluginManager.onVolumioReboot();
-	this.platformspecific.reboot();
+	var self = this;
+	
+	self.pluginManager.onVolumioReboot().then( function() {
+		 self.platformspecific.reboot();
+	}).fail(function(e){
+		self.logger.info("Error in onVolumioReboot Plugin Promise handling: "+ e);
+		self.platformspecific.reboot();
+	});
+	
 };
 
 CoreCommandRouter.prototype.networkRestart = function () {
@@ -1216,9 +1285,13 @@ CoreCommandRouter.prototype.volumioToggle = function () {
 	if (state.status != undefined) {
 		if(state.status==='stop' || state.status==='pause')
 		{
-        		return this.stateMachine.play();
-    		} else {
-        		return this.stateMachine.pause();
+			return this.stateMachine.play();
+		} else {
+			if(state.trackType == 'webradio') {
+				return this.stateMachine.stop();
+			} else {
+				return this.stateMachine.pause();
+			}
 		}
     }
 };
@@ -1452,9 +1525,18 @@ CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
 
 
 CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
+	var defer = libQ.defer();
 	this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
 
-	return this.stateMachine.moveQueueItem(from,to);
+	if (from && to) {
+        return this.stateMachine.moveQueueItem(from,to);
+	} else {
+		this.logger.error('Cannot move item in queue, from or to parameter missing');
+        var queueArray=this.stateMachine.getQueue();
+        defer.resolve(queueArray);
+        return defer.promise
+	}
+
 };
 
 CoreCommandRouter.prototype.getI18nString = function (key) {
@@ -1493,9 +1575,22 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
             var name=names[j];
             var instance=this.pluginManager.getPlugin(category,name);
 
-            if(instance.loadI18NStrings)
-                instance.loadI18NStrings(language_code);
-
+            if (instance.getI18nFile) {
+              var pluginI18NFile = instance.getI18nFile(language_code);
+              if (pluginI18NFile && fs.pathExistsSync(pluginI18NFile)) {
+                var pluginI18nStrings = fs.readJSONSync(pluginI18NFile);
+      
+                for (var locale in pluginI18nStrings) {
+                  // check if locale does not already exist to avoid that volumio
+                  // strings get overwritten
+                  if (!this.i18nStrings[locale]) {
+                    this.i18nStrings[locale] = pluginI18nStrings[locale];
+                  } else {
+                    this.logger.info("Plugin " + name + " has duplicated i18n key " + locale + ". It is ignored.");
+                  }
+                }
+              }
+            }
         }
     }
 };
@@ -1572,12 +1667,13 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
                 else {
                     var category=replaceKey.slice(0,dotIndex);
                     var key=replaceKey.slice(dotIndex+1);
-
-                    var value=dictionary[category][key];
-                    if(value===undefined)
+					
+                    if(dictionary[category]===undefined || dictionary[category][key]===undefined)
                     {
-                        value=defaultDictionary[category][key];
-                    }
+                        var value=defaultDictionary[category][key];
+                    } else {
+                        var value=dictionary[category][key];
+					}
                     parent[keys[i]]=value;
                 }
 
@@ -1588,6 +1684,59 @@ CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultD
         }
     }
 }
+
+CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
+    var self=this;
+    var methodDefer=libQ.defer();
+
+    fs.readJson(overrideFile, function(err,override){
+
+        if(err)
+        {
+            methodDefer.resolve()
+        }
+        else {
+            for(var i in override)
+            {
+                var attr=override[i]
+
+                var attribute_name=attr.attribute_name
+                var attribute_value=attr.value
+                var id=attr.id
+
+                self.overrideField(uiconfig,id,attribute_name,attribute_value)
+            }
+
+            methodDefer.resolve()
+        }
+    })
+
+    return methodDefer.promise;
+
+};
+
+CoreCommandRouter.prototype.overrideField = function (parent,id,attribute_name,attribute_value) {
+    var self=this;
+
+    if(typeof(parent)==='object')
+    {
+        if(parent.id===id)
+        {
+            parent[attribute_name]=attribute_value
+        } else {
+            var keys=Object.keys(parent);
+
+            for(var i in keys)
+            {
+                var obj=parent[keys[i]];
+
+                self.overrideField(obj,id,attribute_name,attribute_value);
+            }
+
+        }
+    }
+}
+
 
 CoreCommandRouter.prototype.updateBrowseSourcesLang = function () {
 	var self=this;
@@ -1645,3 +1794,129 @@ CoreCommandRouter.prototype.checkAndPerformSystemUpdates = function () {
 
     }
 }
+
+CoreCommandRouter.prototype.safeRemoveDrive = function (data) {
+    var self=this;
+    var defer = libQ.defer();
+
+    exec("/usr/bin/sudo /bin/umount /mnt/USB/"+data, function (error, stdout, stderr) {
+        if (error !== null) {
+            self.pushConsoleMessage(error);
+            self.pushToastMessage('error',data,
+                self.getI18nString('SYSTEM.CANNOT_REMOVE_MEDIA')+ ': ' +error);
+        } else {
+            self.pushToastMessage('success',self.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'),
+                self.getI18nString('SYSTEM.MEDIA_REMOVED_SUCCESSFULLY'));
+            self.executeOnPlugin('music_service', 'mpd', 'updateMpdDB', '/USB/');
+            execSync('/usr/bin/mpc update', { uid:1000, gid:1000, encoding: 'utf8' });
+            exec('/usr/bin/mpc idle update', {uid:1000, gid:1000, timeout: 10000}, function (error, stdout, stderr) {
+                if (error !== null) {
+                } else {
+                    var response = self.musicLibrary.executeBrowseSource('music-library/USB');
+                    if (response != undefined) {
+                        response.then(function (result) {
+                            defer.resolve(result);
+                        })
+                            .fail(function () {
+                                defer.reject();
+                            });
+                    }
+				}
+            });
+        }
+    });
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.closeModals = function () {
+    var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::Close All Modals sent');
+
+    return self.broadcastMessage('closeAllModals', '');
+}
+
+CoreCommandRouter.prototype.getMyVolumioToken = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioToken', '');
+
+    if (response != undefined) {
+        response.then(function (result) {
+            defer.resolve(result);
+        })
+            .fail(function () {
+                var jsonobject = {"tokenAvailable":false}
+                defer.resolve(jsonobject);
+            });
+    }
+
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.setMyVolumioToken = function (data) {
+    var self=this;
+    var defer = libQ.defer();
+
+    var response = self.executeOnPlugin('system_controller', 'my_volumio', 'setMyVolumioToken', data);
+
+    if (response != undefined) {
+        response.then(function (result) {
+            defer.resolve(result);
+        })
+            .fail(function () {
+
+                defer.resolve('');
+            });
+    }
+
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.getMyVolumioStatus = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioStatus', '');
+
+    if (response != undefined) {
+        response.then(function (result) {
+            defer.resolve(result);
+        })
+            .fail(function () {
+                var jsonobject = {"loggedIn":false}
+                defer.resolve(jsonobject);
+            });
+    }
+
+    return defer.promise;
+}
+
+CoreCommandRouter.prototype.myVolumioLogout = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'myVolumioLogout', '');
+}
+
+CoreCommandRouter.prototype.enableMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'enableMyVolumioDevice', device);
+}
+
+CoreCommandRouter.prototype.disableMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'disableMyVolumioDevice', device);
+}
+
+CoreCommandRouter.prototype.deleteMyVolumioDevice = function (device) {
+    var self=this;
+    var defer = libQ.defer();
+
+    return self.executeOnPlugin('system_controller', 'my_volumio', 'deleteMyVolumioDevice', device);
+}
+

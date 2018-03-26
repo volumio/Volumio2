@@ -65,7 +65,14 @@
 	"VERY_HIGH":"Sehr hoch",  
 	"HIGH":"Hoch",
 	"MEDIUM":"Medium",
-	"LOW":"Niedrig"
+	"LOW":"Niedrig",
+    "ISO_PLAYBACK":"ISO Wiedergabe",
+    "ISO_PLAYBACK_DOC":"Experimentelle MPD Version verwenden, welche die Wiedergabe von ISO-Dateien unterstützt. Wiedergabe von DSD-Material wird dabei nicht unterstützt",
+    "EXTENDED_FILE_FORMAT_SUPPORT":"Erweiterte Dateiformat-Unterstützung",
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate",
+    "USB_DAC_CONNECTED":"USB DAC verbunden",
+    "NO_OUTPUT_DEVICE":"Kein Audio-Gerät verfügbar",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Bitte verbinden Sie ein Audio-Gerät"	  
   },
   "NETWORK": {
 	"NETWORK_SETTINGS":"Netzwerkeinstellungen",
@@ -88,7 +95,7 @@
     	"HOTSPOT_NAME":"Name des Hotspots",
     	"HOTSPOT_PROTECTION":"Passwortgeschützter Hotspot",
     	"HOTSPOT_PASSWORD":"Hotspot-Passwort",
-		"HOTSPOT_PASSWORD_DOC":"Das Standardpasswort sollte durch ein Passwort aus mindestens 7 Zeichen ersetzt werden",
+		"HOTSPOT_PASSWORD_DOC":"Das Standardpasswort sollte durch ein Passwort aus mindestens 8 Zeichen ersetzt werden",
     	"HOTSPOT_CHANNEL":"Hotspot-Kanal",
 		"HOTSPOT_CHANNEL_DOC":"Die Wahl eines anderen Kanals kann in Umgebungen mit zahlreichen Funknetzen die Verbindungsqualität verbessern.",
 	  	"HOTSPOT_CONF_ERROR":"Fehler bei der Einrichtung des Hotspots",
@@ -97,11 +104,19 @@
 		"WIRELESS_ENABLED_DOC":"Funknetzwerk ein- oder ausschalten. Diese Einstellung kann die Klangqualität beeinflussen.",
 		"STATIC_IP_WARNING":"Warnung! Eine falsche statische IP-Adresse kann zu dauerhaftem Verbindungsverlust führen!",
 		"DNS_SETTINGS":"DNS-Einstellungen",
-		"ENABLE_CUSTOM_DNS_DOC":"Eine manuelle Wahl der DNS-Server kann helfen, Probleme bei der Internetverbindung von Volumio zu beheben.",
+		"ENABLE_CUSTOM_DNS_DOC":"Eine manuelle Wahl der DNS-Server kann helfen, Probleme bei der Internetverbindung zu beheben.",
 		"ENABLE_CUSTOM_DNS":"DNS-Server manuell einrichten",
 		"PRIMARY_DNS":"Primärer DNS",
  		"SECONDARYY_DNS":"Sekundärer DNS",
-		"DNS_ERROR_INFO":"Beide DNS-Server müssen gesetzt sein."
+		"DNS_ERROR_INFO":"Beide DNS-Server müssen gesetzt sein.",
+            "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"Erfolgreich mit dem Netzwerk verbunden",
+ 		"WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED":"Bitte mit dem nächsten Schritt fortfahren",
+ 		"WIRELESS_NETWORK_CONNECTION_ERROR":"Beim Verbinden mit dem Netzwerk ist ein Fehler aufgetreten",
+ 		"WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Bitte erneut versuchen oder mit dem nächsten Schritt fortfahren",
+ 		"WIRELESS_NETWORK_CONNECTION_DEFER":"Das Gerät wird sich mit dem Netzwerk verbinden,",
+ 		"WIRELESS_NETWORK_CONNECTION_DEFER2":"sobald die Ersteinrichtung abgeschlossen ist",
+	"HOTSPOT_FALLBACK":"Automatischer Hotspot-Modus",
+	"HOTSPOT_FALLBACK_DOC":"Wenn diese Option aktiviert ist, startet im Hotspot-Modus, sobald keine bekannte WLAN-Verbindung mehr verfügbar ist. Wenn diese Option inaktiv ist, versucht dauerhaft, ein bekanntes WLAN-Netzwerk zu finden."
   },
   "NETWORKFS":{
 	  "ALIAS_DOC":"Alias für das Netzwerklaufwerk vergeben",
@@ -144,7 +159,8 @@
 	"SEARCH_ALBUM_SECTION":"Alben",
 	"SEARCH_SONG_SECTION":"Titel",
 	"SCAN_DB_ERROR":"Fehler beim Einlesen der Datenbank",
-	"SCAN_DB":"Durchsuche Bibliothek",
+	"SCAN_DB":"Aktualisiere Musikbibliothek",
+	"RESCAN_DB":"Musikdatenbank neu aufbauen",
 	"ILLEGAL_CHARACTER_/":"Entferne verbotenes Zeichen /",
 	"FAVOURITES":"Favoriten",
 	"PLAYLISTS":"Wiedergabelisten",
@@ -166,7 +182,9 @@
 		"CONTINUE":"Weiter",
 		"SETTINGS_SAVED_SUCCESSFULLY":"Einstellungen gespeichert",
 		"SETTINGS_SAVE_ERROR":"Einstellungen konnten nicht gespeichert werden",
-		"ERROR":"Fehler"
+		"ERROR":"Fehler",
+	"UPDATING_MUSIC_DB_WAIT_MESSAGE":"Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
+	"GOT_IT":"Verstanden"
   },
   "APPEARANCE":{
 	"APPEARANCE":"Aussehen",
@@ -194,7 +212,13 @@
 	  "ALBUMARTIST":"Interpret des Albums (Feld: Albumartist)",
 	  "ARTIST":"Interpret (Feld: Artist)",
 	  "COMPILATION_METADATA_DOC":"Metadaten-Felder angeben, die bei Alben mit mehreren Interpreten (Compilations) den Albumartist spezifizieren. Bei Angabe mehrerer Felder durch Kommata abgetrennen.",
-	  "COMPILATION_METADATA":"Metadaten-Felder für gemischte Alben (Compilations)"
+	  "COMPILATION_METADATA":"Metadaten-Felder für gemischte Alben (Compilations)",
+	  "ALBUMART_CACHE_CLEARED":"Zurücksetzen des Albumbilder Caches erfolgreich",
+	  "ALBUMART_CACHE_CLEAR_ERROR":"Fehler beim Zurücksetzen des Albumbilder Caches. Versuche es in ein paar Minuten erneut",
+	  "ALBUMART_RESET_CACHE":"Albumbilder Cache zurücksetzen",
+	  "ALBUMART_RESET_CACHE_DOC":"Für bessere Leistung speichert das System Albenbilder im Cache zwischen. Dadurch werden Albenbilder neu hinzugefügter Titel nicht sofort angezeigt. Durch ein Zurücksetzen des Caches werden auch neu hinzugefügte Albenbilder angezeigt",
+	  "METADATA_IMAGE":"Eingebettete Albumbilder anzeigen",
+	  "METADATA_IMAGE_DOC":"Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern"
   },
   "MAIN_MENU":{
 	"MY_MUSIC":"Meine Musik",
@@ -238,21 +262,39 @@
 	"FACTORY_RESET":"Werkseinstellungen",
 	"FACTORY_RESET_DESCR":"Das System wird auf Werkseinstellungen zurückgesetzt",
 	"FACTORY_RESET_TITLE":"Bestätige das Zurücksetzen",
-	"FACTORY_RESET_MESSAGE":"Dies wird das System auf Werkseinstellungen zurück setzen, alle Einstellungen gehen verloren. Das System wird nach dem Zurücksetzen automatisch neu gestartet. Wirklich fortsetzen?",
+	"FACTORY_RESET_MESSAGE":"Dies wird das System auf Werkseinstellungen zurücksetzen, alle Einstellungen gehen verloren. Das System wird nach dem Zurücksetzen automatisch neu gestartet. Wirklich fortsetzen?",
 	"SYSTEM_CONFIGURATION_UPDATE":"Systemeinstellungen aktualisieren",
 	"SYSTEM_CONFIGURATION_UPDATE_SUCCESS":"Systemeinstellungen erfolgreich aktualisiert",
 	"SYSTEM_NAME":"Systemname",
 	"SYSTEM_NAME_ERROR":"Systemname kann nicht geändert werden",
 	"SYSTEM_NAME_NOW":"Systemname ist jetzt",
 	"UPDATE_ALREADY_LATEST_VERSION":"Die verwendete Version ist aktuell.",
-	"NO_UPDATE_AVAILABLE":"Keine Aktualisierungen verfügbar"
+	"NO_UPDATE_AVAILABLE":"Keine Aktualisierungen verfügbar",
+        "CANNOT_REMOVE_MEDIA":"Medium kann nicht ausgeworfen werden",
+    	"MEDIA_REMOVED_SUCCESSFULLY":"Medium erfolgreich ausgeworfen",
+	"INSTALL_TO_DISK":"Auf Laufwerk installieren",
+    	"INSTALLING_TO_DISK":"Auf Laufwerk installieren",
+    	"INSTALLING_TO_DISK_MESSAGE":"Installiere auf Laufwerk. Bitte warten!",
+    	"INSTALLING_TO_DISK_ERROR_MESSAGE":"Installation auf Laufwerk konnte nicht abgeschlossen werden.",
+    	"INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Installation konnte nicht abgeschlossen werden. Das Ziellaufwerk muss größer sein, als das Quelllaufwerk.",
+    	"INSTALL_TO_DISK_DESC":"Installation auf Laufwerk",
+    	"INSTALL_TO_DISK_MESSAGE":"Installation von Volumio auf Laufwerk bitte bestätigen",
+    	"INSTALL_TO_DISK_LABEL":"Bezeichnung",
+    	"INSTALL_TO_DISK_SIZE":"Größe",
+    	"INSTALL_TO_DISK_MESSAGE_WARNING":". ACHTUNG: Alle Daten auf dem Ziellaufwerk werden gelöscht!",
+    	"INSTALLING_TO_DISK_SUCCESS_TITLE":"Installation erfolgreich abgeschlossen",
+	"INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Um das neu installierte System jetzt zu verwenden, müssen alle Wechseldatenträger entfernt und das System neu gestartet werden.",
+	"CREDITS_OPEN_SOURCE_LICENSES":"Mitwirkende und OpenSource-Lizenzen",
+    	"VIDEO_OUT_OPTIONS": "Videoanzeige-Optionen",
+    	"HDMI_UI":"Benutzeroberfläche über HDMI anzeigen",
+	"HDMI_UI_DOC":"Zeige die Volumio-Benutzeroberfläche über den HDMI-Videoausgang an. ACHTUNG: Dies wird die Systemleistung negativ beeinflussen!"
   },
   "WEBRADIO":{
 	"MY_WEB_RADIOS":"Meine Radiosender",
-	"FAVOURITE_RADIOS":"Lieblings-Radiosender",
-	"TOP_500_RADIOS":"Top 500 Radiosender",
-	"BY_GENRE_RADIOS":"Nach Genre",
-	"BY_COUNTRY_RADIOS":"Nach Land",
+	"FAVOURITE_RADIOS":"Lieblingssender",
+	"TOP_500_RADIOS":"Die 500 besten Sender",
+	"BY_GENRE_RADIOS":"Sender nach Genre",
+	"BY_COUNTRY_RADIOS":"Sender nach Land",
 	"WEBRADIO":"Internetradio"
   },
   "PLUGINS":{
@@ -261,6 +303,13 @@
     	"UNINSTALL":"Deinstallieren",
     	"UPDATING_PLUGIN":"Plugin wird aktualisiert",
     	"DOWNLOADING_FROM":"Plugin herunterladen von ",
-    	"DOWNLOADING":"Plugin wird heruntergeladen"
+    	"DOWNLOADING":"Plugin wird heruntergeladen",
+	"NO_CONFIGURATION_AVAILABLE":"Konfiguration nicht verfügbar"
+  },
+  "WIZARD":{
+	  "CONGRATULATIONS":"Glückwunsch",
+	  "DEVICE_SUCCESSFULLY_CONFIGURED":"wurde eingerichtet und ist bereit für die Wiedergabe",
+	  "PLEASE_DONATE":"Wenn dir Volumio gefällt, unterstütze uns doch mit einer Spende.",
+	  "RUN_FIRST_CONFIG_WIZARD":"Einrichtungsassistent ausführen"
   }
 }

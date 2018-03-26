@@ -1,4 +1,6 @@
 #!/bin/bash
+LOGDUMP="/var/tmp/logondemand"
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 
 doc() {
@@ -33,25 +35,31 @@ clear
 
 [[VOLUMIO SERVICE CONTROL]]
 
-start                               Starts Volumio Service
+vstart                              Starts Volumio Service
 vstop                               Stops Volumio Service
-restart                             Restarts Volumio Service
+vrestart                            Restarts Volumio Service
 
 [[VOLUMIO DEVELOPMENT]]
 
-pull                               Pulls latest github status on master
+pull                               Pulls latest github status on master from https://github.com/volumio/Volumio2.git
+pull -b <branch>                   Pulls branch <branch> from https://github.com/volumio/Volumio2.git
+pull -b <branch> <repository>      Pulls branch <branch> from git repository <repository>
+dev                                Start Volumio in develpment mode, with Nodemon and Remote Debugger
 kernelsource                       Gets Current Kernel source (Raspberry PI only)
 plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
 plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
+plugin install                     installs the plugin locally
+plugin update                      updates the plugin
+logdump <description>              dump logs to $LOGDUMP instead of uploading
 "
 
 }
 
 #VOLUMIO SERVICE CONTROLS
 
-start() {
+vstart() {
 sudo systemctl start volumio.service
 }
 
@@ -62,12 +70,18 @@ sudo systemctl stop volumio.service
 #VOLUMIO DEVELOPMENT
 
 pull() {
+cd /
 echo "Stopping Volumio"
 sudo systemctl stop volumio.service
 sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+
 echo "Pull completed, restarting Volumio"
 sudo systemctl start volumio.service
 echo "Done"
+}
+
+dev() {
+sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/devmode.sh
 }
 
 kernelsource() {
@@ -123,20 +137,26 @@ case "$1" in
         stopairplay)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
         ;;
-        start)
-            start
+        usbattach)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioAttach"
+        ;;
+        usbdetach)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioDetach"
+        ;;
+        vstart)
+            vstart
             ;;
-        start)
-            start
+        vstart)
+            vstart
             ;;
 
         vstop)
-            stop
+            vstop
             ;;
 
-        restart)
-            stop
-            start
+        vrestart)
+            vstop
+            vstart
             ;;
 
         status)
@@ -150,10 +170,16 @@ case "$1" in
             fi
             ;;
 	    pull)
-            pull
+            pull $2 $3 $4
+            ;;
+        dev)
+        	dev
             ;;
 	    kernelsource)
 	        kernelsource
+            ;;
+	    logdump)
+	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;
         plugin)
             if [ "$2" != "" ]; then
@@ -177,6 +203,14 @@ correspondent folder in data"
                     echo ""
                     echo "This command will publish the plugin on volumio plugins store"
                     echo ""
+                elif [ "$2" == "install" ]; then
+                    echo ""
+                    echo "This command will install the plugin on your device"
+                    echo ""
+                elif [ "$2" == "update" ]; then
+                    echo ""
+                    echo "This command will update the plugin on your device"
+                    echo ""
                 fi
                /usr/local/bin/node /volumio/pluginhelper.js $2
             else
@@ -189,6 +223,8 @@ correspondent folder in data"
                 echo "refresh   copies the plugin in the system"
                 echo "package   compresses the plugin"
                 echo "publish   publishes the plugin on git"
+                echo "install   installs the plugin locally"
+                echo "update    updates the plugin"
                 echo ""
             fi
             ;;

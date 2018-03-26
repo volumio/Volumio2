@@ -8,6 +8,11 @@ var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
 var libMpd = require('mpd');
 var nodetools=require('nodetools');
+var variant = '';
+var selection = {};
+var retry = 0;
+var selectionEndpoint = 'https://radio-directory.firebaseapp.com/';
+
 
 // Define the ControllerWebradio class
 module.exports = ControllerWebradio;
@@ -28,22 +33,25 @@ ControllerWebradio.prototype.getConfigurationFiles = function()
 }
 
 ControllerWebradio.prototype.addToBrowseSources = function () {
-	var data = {name: 'Webradio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio'};
+	var data = {albumart: '/albumart?sourceicon=music_service/webradio/icon.svg', icon: 'fa fa-microphone', name: 'Webradio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio'};
 	this.commandRouter.volumioAddToBrowseSources(data);
 };
 
 
 ControllerWebradio.prototype.onStart = function() {
+    var  self = this;
     this.addToBrowseSources();
 
     this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+    this.getSelectionInfo();
+
     return libQ.resolve();
 };
 
 ControllerWebradio.prototype.handleBrowseUri=function(curUri)
 {
     var self=this;
-    console.log(curUri);
+    //console.log(curUri);
     var response;
 
     if (curUri.startsWith('radio')) {
@@ -65,6 +73,9 @@ ControllerWebradio.prototype.handleBrowseUri=function(curUri)
              if (curUri==='radio/top500') {
                     response = self.listTop500Radios(curUri);
             }
+            if (curUri==='radio/selection') {
+                response = self.listSelection();
+            }
              else if (curUri.startsWith('radio/byCountry')) {
                  if (curUri == 'radio/byCountry')
                      response = self.listRadioCountries(curUri);
@@ -79,70 +90,99 @@ ControllerWebradio.prototype.handleBrowseUri=function(curUri)
 }
 
 
-ControllerWebradio.prototype.listRoot=function()
-{  var self = this;
-    return libQ.resolve(
-        {
-            "navigation": {
-                "lists": [
-                    {
-                        "availableListViews": [
-                            "list"
-                        ],
-                        "items": [
-                            {
-                                service: 'radio',
-                                type: 'mywebradio-category',
-                                title: self.commandRouter.getI18nString('WEBRADIO.MY_WEB_RADIOS'),
-                                artist: '',
-                                album: '',
-                                icon: 'fa fa-heartbeat',
-                                uri: 'radio/myWebRadio'
-                            },
-                            {
-                                service: 'webradio',
-                                type: 'radio-favourites',
-                                title: self.commandRouter.getI18nString('WEBRADIO.FAVOURITE_RADIOS'),
-                                artist: '',
-                                album: '',
-                                icon: 'fa fa-heart',
-                                uri: 'radio/favourites'
-                            },
-                            {
-                                service: 'webradio',
-                                type: 'radio-category',
-                                title: self.commandRouter.getI18nString('WEBRADIO.TOP_500_RADIOS') + ' (Shoutcast)',
-                                artist: '',
-                                album: '',
-                                icon: 'fa fa-star',
-                                uri: 'radio/top500'
-                            },
-                            {
-                                service: 'webradio',
-                                type: 'radio-category',
-                                title: self.commandRouter.getI18nString('WEBRADIO.BY_GENRE_RADIOS') + ' (Shoutcast)',
-                                artist: '',
-                                album: '',
-                                icon: 'fa fa-tags',
-                                uri: 'radio/byGenre'
-                            },
-                            {
-                                service: 'webradio',
-                                type: 'radio-category',
-                                title: self.commandRouter.getI18nString('WEBRADIO.BY_COUNTRY_RADIOS') + ' (Dirble)',
-                                artist: '',
-                                album: '',
-                                icon: 'fa fa-globe',
-                                uri: 'radio/byCountry'
-                            }
-                        ]
-                    }
-                ],
-                "prev": {
-                    "uri": "/"
+ControllerWebradio.prototype.listRoot=function() {
+    var self = this;
+    var defer = libQ.defer();
+
+    var radioRoot = {
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "grid","list"
+                    ],
+                    "items": [
+                        {
+                            service: 'radio',
+                            type: 'mywebradio-category',
+                            title: self.commandRouter.getI18nString('WEBRADIO.MY_WEB_RADIOS'),
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-heartbeat',
+                            uri: 'radio/myWebRadio'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-favourites',
+                            title: self.commandRouter.getI18nString('WEBRADIO.FAVOURITE_RADIOS'),
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-heart',
+                            uri: 'radio/favourites'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: self.commandRouter.getI18nString('WEBRADIO.TOP_500_RADIOS') + ' (Shoutcast)',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-star',
+                            uri: 'radio/top500'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BY_GENRE_RADIOS') + ' (Shoutcast)',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-tags',
+                            uri: 'radio/byGenre'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BY_COUNTRY_RADIOS') + ' (Dirble)',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-globe',
+                            uri: 'radio/byCountry'
+                        }
+                    ]
                 }
+            ],
+            "prev": {
+                "uri": "/"
             }
+        }
+    }
+
+    var selectionObject = {
+        service: 'webradio',
+        type: 'radio-category',
+        title: '',
+        artist: '',
+        album: '',
+        uri: 'radio/selection'
+    };
+
+    if (retry < 3) {
+        var selectionInfo = self.getSelectionInfo();
+        selectionInfo.then(function(selection)
+        {
+            if (selection != undefined && selection.available) {
+                selectionObject.title = selection.name;
+                selectionObject.albumart = selection.albumart;
+                radioRoot.navigation.lists[0].items.unshift(selectionObject);
+                defer.resolve(radioRoot)
+            } else {
+                defer.resolve(radioRoot)
+            }
+
         });
+    } else {
+        defer.resolve(radioRoot)
+    }
+    return defer.promise
 }
 
 ControllerWebradio.prototype.listRadioGenres = function () {
@@ -374,9 +414,20 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
                             title: name,
                             artist: '',
                             album: '',
-                            icon: 'fa fa-microphone',
                             uri: 'http://yp.shoutcast.com' + base+'?id='+id
                         };
+                        try {
+                            var albumart = children[i].attr('logo').value();
+                            if (albumart != undefined && albumart.length > 0) {
+                                category.albumart = albumart;
+                            } else {
+                                category.icon = 'fa fa-microphone';
+                            }
+                        } catch (e) {
+                            category.icon = 'fa fa-microphone';
+                        }
+
+
 
                         response.navigation.lists[0].items.push(category);
                     }
@@ -398,9 +449,10 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 // Define a method to clear, add, and play an array of tracks
 ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
 
-	console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'+track)
     var self = this;
     self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerWebradio::clearAddPlayTrack');
+
+    var safeUri = track.uri.replace(/"/g,'\\"');
 
     return self.mpdPlugin.sendMpdCommand('stop',[])
         .then(function()
@@ -409,10 +461,10 @@ ControllerWebradio.prototype.clearAddPlayTrack = function(track) {
         })
         .then(function()
         {
-            return self.mpdPlugin.sendMpdCommand('load "'+track.uri+'"',[]);
+            return self.mpdPlugin.sendMpdCommand('load "'+safeUri+'"',[]);
         })
         .fail(function (e) {
-            return self.mpdPlugin.sendMpdCommand('add "'+track.uri+'"',[]);
+            return self.mpdPlugin.sendMpdCommand('add "'+safeUri+'"',[]);
         })
         .then(function()
         {
@@ -456,7 +508,7 @@ ControllerWebradio.prototype.seek = function(position) {
 
 ControllerWebradio.prototype.explodeUri = function(uri) {
     var self = this;
-
+    
     var defer=libQ.defer();
 
     defer.resolve({
@@ -508,7 +560,6 @@ ControllerWebradio.prototype.listRadioCountries = function () {
                 icon: 'fa fa-globe',
                 uri: 'radio/byCountry/' + data[i].country_code
             };
-
             response.navigation.lists[0].items.push(category);
         }
 
@@ -559,7 +610,7 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
 
     var paginationPromises = [];
 
-    for (var i = 0; i < 1; i++) {
+    for (var i = 1; i < 3; i++) {
         var dirbleDefer = libQ.defer();
         self.getStationsForCountry(id, 30, i, dirbleDefer.makeNodeResolver());
 
@@ -580,17 +631,22 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
                 );
 
                 for (var k in pageData) {
-                    if (pageData[k].streams.length > 0) {
+                    var radio = pageData[k];
+                    if (radio.streams.length > 0) {
                         var category = {
                             service: 'webradio',
                             type: 'webradio',
-                            title: pageData[k].name,
-                            id: pageData[k].id,
+                            title: radio.name,
+                            id: radio.id,
                             artist: '',
                             album: '',
-                            icon: 'fa fa-microphone',
-                            uri: pageData[k].streams[0].stream
+                            uri: radio.streams[0].stream
                         };
+                        if (radio.image.url != undefined && radio.image.url != null) {
+                            category.albumart = radio.image.url;
+                        } else {
+                            category.icon = 'fa fa-microphone';
+                        }
                         response.navigation.lists[0].items.push(category);
                     }
                 }
@@ -625,7 +681,6 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
     var promise = self.commandRouter.playListManager.getMyWebRadioContent()
     promise.then(function (data) {
         //console.log(data);
-
         data.sort(
             function (a, b) {
                 return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
@@ -735,7 +790,7 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
 };
 
 
-ControllerWebradio.prototype.search = function (query) {
+ControllerWebradio.prototype.search = function (data) {
     var self = this;
 
     var defer = libQ.defer();
@@ -750,8 +805,51 @@ ControllerWebradio.prototype.search = function (query) {
         ]
     };
 
-    var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
+    var search = data.value.toLowerCase();
+    //var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
+    var uri = 'http://api.dirble.com/v2/search?token=8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2';
 
+    unirest.post(uri)
+        .headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
+        .send({'query':search})
+        .timeout(1800)
+        .end(function (response) {
+           // console.log(response.body);
+            if (response.status === 200) {
+                for (var i in response.body) {
+                    var station = response.body[i];
+                    if (station.streams.length > 0) {
+                        // some stream uris contain an end of line character
+                        // which must be removed
+                        var safeuri = station.streams[0].stream;
+                        safeuri = safeuri.replace(/\r?\n$/,'');
+                        var radio = {
+                            service: 'webradio',
+                            type: 'webradio',
+                            title: station.name,
+                            artist: '',
+                            album: '',
+
+                            uri: safeuri
+                        };
+                        if (station.image.url != undefined && station.image.url != null) {
+                            radio.albumart = station.image.url;
+                        } else {
+                            radio.icon = 'fa fa-microphone';
+                        }
+                        list.items.push(radio);
+                    }
+                }
+                defer.resolve(list);
+            } else {
+                defer.resolve();
+            }
+
+        });
+
+
+
+    /*
     memoryCache.wrap(uri, function (cacheCallback) {
         var promise=libQ.defer();
 
@@ -817,6 +915,7 @@ ControllerWebradio.prototype.search = function (query) {
             defer.resolve();
         }
     });
+    */
     return defer.promise;
 };
 
@@ -835,3 +934,104 @@ ControllerWebradio.prototype.removeMyWebRadio = function (data) {
 	//addToMyWebRadio = function (service, radio_name, uri)
 }
 
+ControllerWebradio.prototype.getSelectionInfo = function () {
+    var defer = libQ.defer();
+
+    //TODO REFACTOR IN BETTER WAY
+
+    if (selection.available) {
+        defer.resolve(selection);
+    } else {
+        selection = {'available':false};
+        var variantInfo = this.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+        variantInfo.then(function(info)
+        {
+            if  (info != undefined && info.variant != undefined && info.variant.length > 0) {
+                variant = info.variant;
+            }
+
+            try {
+                var Request = unirest.get(selectionEndpoint + variant+'/selection.json');
+                Request.timeout(1500)
+                Request.query({
+                    token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
+                }).end(function (response) {
+                    if (response.status === 200) {
+                        try {
+                            selection = {'available' : true, 'name':response.body.info.name , 'albumart': response.body.info.albumart}
+                            defer.resolve(selection);
+                        } catch(e) {
+                            defer.resolve(selection);
+                            retry++
+                        }
+
+                    } else {
+                        defer.resolve(selection);
+                        retry++
+                    }
+                });
+            } catch(e) {
+                defer.resolve(selection);
+                retry++
+            }
+        });
+    }
+    return defer.promise
+}
+
+
+ControllerWebradio.prototype.listSelection = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    self.logger.info('Getting webradio selection');
+    try {
+
+    var object = {
+        "navigation": {
+            "lists": [
+                {
+                    "availableListViews": [
+                        "list"
+                    ],
+                    "items": [
+
+                    ]
+                }
+            ],
+            "prev": {
+                "uri": "radio"
+            }
+        }
+    };
+
+        var Request = unirest.get(selectionEndpoint + variant+'/selection.json');
+        var thumbnaiEndpoint = selectionEndpoint + variant + '/src/images/radio-thumbnails/';
+        Request.timeout(1500)
+        Request.query({
+            token: 'b5d113cd1f3465d39ede63b7cc51d9c0'
+        }).end(function (response) {
+            if (response.status === 200) {
+                for (var i in response.body.radios) {
+                    var station = response.body.radios[i];
+                        var radio = {
+                            service: 'webradio',
+                            type: 'webradio',
+                            title: station.title,
+                            artist: '',
+                            album: '',
+                            albumart: thumbnaiEndpoint + station.title + '.jpg',
+                            uri: station.uri
+                        };
+                    object.navigation.lists[0].items.push(radio);
+                }
+                defer.resolve(object);
+            } else {
+                defer.resolve(object);
+            }
+        });
+    } catch(e) {
+        defer.resolve(object);
+    }
+    return defer.promise
+}

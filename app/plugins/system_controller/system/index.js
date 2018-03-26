@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var calltrials = 0;
 
@@ -74,6 +75,10 @@ ControllerSystem.prototype.getUIConfig = function () {
 	var defer = libQ.defer();
 
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
+    var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
+    var device = self.config.get('device', '');
+    var showDiskInstaller = self.config.get('show_disk_installer', true);
+	var HDMIEnabled = self.config.get('hdmi_enabled', false);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -82,8 +87,64 @@ ControllerSystem.prototype.getUIConfig = function () {
 		{
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value', HDMIEnabled);
 
-			defer.resolve(uiconf);
+
+	if (device != undefined && device.length > 0 && device === 'x86' && showDiskInstaller) {
+		var disks = self.getDisks();
+        if (disks != undefined) {
+            disks.then(function (result) {
+				if (result.available.length > 0) {
+                    uiconf.sections[4].hidden = false;
+					var disklist = result.available;
+                    for (var i in disklist) {
+                        var device = disklist[i];
+                        var label = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK') + ' ' + device.name;
+                        var description = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ': ' + device.name + ' ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_SIZE') + ': ' + device.size;
+                        var title = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ' ' + device.name;
+                        var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + '. ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
+						var onClick = {"type":"emit", "message":"installToDisk", "data":{"from": result.current, "target":device.device}, "askForConfirm": {"title": title, "message": message}}
+						var item = {"id": "install_to_disk"+device.device, "element":"button", "label": label, "description": description, "onClick" : onClick};
+                        uiconf.sections[4].content.push(item);
+                    }
+				}
+            })
+                .fail(function () {
+                });
+        }
+
+	}
+
+
+    if (showLanguageSelector) {
+        self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
+            __dirname+'/../../../i18n/strings_en.json',
+            __dirname + '/language_selector.json')
+            .then(function(languageSelector)
+            {
+        	var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
+        	var language = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language');
+        	var language_code = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language_code');
+        	uiconf.sections.unshift(languageSelector);
+
+        	self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
+            value: language_code,
+            label: language
+        	});
+
+        	for (var n = 0; n < languagesdata.languages.length; n++){
+				self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[0].options', {
+                value: languagesdata.languages[n].code,
+                label: languagesdata.languages[n].name
+				});
+        	}
+                defer.resolve(uiconf);
+            })
+    } else {
+        defer.resolve(uiconf);
+	}
+
+
 		})
 		.fail(function()
 		{
@@ -168,10 +229,12 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
     var player_name = data['player_name'];
     var hostname = data['player_name'].split(" ").join("-");
-    var startup_sound = data['startup_sound'];
+    if (data['startup_sound'] != undefined) {
+        self.config.set('startupSound', data['startup_sound']);
+	}
 
     self.config.set('playerName', player_name);
-    self.config.set('startupSound', startup_sound);
+
 
 	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
 	self.setHostname(player_name);
@@ -229,11 +292,11 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 		else {
 			exec("/usr/bin/sudo /bin/chmod 777 /etc/hosts", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 				if (error !== null) {
-					console.log('Canot set permissions for /etc/hosts: ' + error);
+					console.log('Cannot set permissions for /etc/hosts: ' + error);
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
-					exec("/usr/bin/sudo /bin/hostname "+hostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+					exec("/usr/bin/sudo /bin/hostname "+ newhostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 						if (error !== null) {
 							console.log('Cannot set new hostname: ' + error);
 
@@ -252,9 +315,9 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_NOW') + ' ' + hostname);
 						self.logger.info('Hostname now is ' + newhostname);
 						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ hostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
-						exec("/usr/bin/sudo /bin/chmod 777 /etc/avahi/services/volumio.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						exec("/usr/bin/sudo /bin/chmod -R 777 /etc/avahi/services/", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								console.log('Canot set permissions for /etc/hosts: ' + error);
+								console.log('Cannot set permissions for /etc/avahi/services/: ' + error);
 
 							} else {
 								self.logger.info('Permissions for /etc/avahi/services/volumio.service')
@@ -262,46 +325,16 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 									if (err) {
 										console.log(err);
 									} else {
-										self.logger.info('Avahi name changed to '+ hostname);
-										/*
-										setTimeout(function () {
-											exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-												uid: 1000,
-												gid: 1000
-											}, function (error, stdout, stderr) {
-												if (error !== null) {
-													console.log(error);
-													self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-												} else {
-													self.logger.info('Avahi Daemon Restarted')
-												}
-											});
-										}, 3000)
-										 */
+										self.logger.info('Avahi name changed to '+ newhostname);
 									}
 								});
 							}
 
 						});
-
-
-
-
-
-
 						setTimeout(function () {
-							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-								uid: 1000,
-								gid: 1000
-							}, function (error, stdout, stderr) {
-								if (error !== null) {
-									console.log(error);
-									self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-								} else {
-									self.logger.info('Avahi Daemon Restarted')
-								}
-							});
-						}, 3000)
+							// Restarting AVAHI results in system crashing
+							//self.restartAvahi();
+						}, 10000)
 					}
 				});
 			});
@@ -311,6 +344,21 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 };
 
+ControllerSystem.prototype.restartAvahi = function () {
+    var self = this;
+
+    exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
+        uid: 1000,
+        gid: 1000
+    }, function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log(error);
+            self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
+        } else {
+            self.logger.info('Avahi Daemon Restarted')
+        }
+    });
+};
 
 
 
@@ -390,10 +438,20 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
 		message.text = 'No info available';
 	}
-	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
-	exec('/usr/local/bin/node /volumio/logsubmit.js "'+ message.text+'"', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	// Must single-quote the message or the shell may interpret it and crash.
+	// single-quotes already within the message need to be escaped.
+	// The resulting string always starts and ends with single quotes.
+	var description = '';
+	var pieces = message.text.split("'");
+	var n = pieces.length;
+	for (var i=0; i<n; i++) {
+		description = description + "'" + pieces[i] + "'";
+		if (i < (n-1)) description = description + "\\'";
+	}
+
+	exec("/usr/local/bin/node /volumio/logsubmit.js " + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			self.logger.info('Canot send bug report: ' + error);
+			self.logger.info('Cannot send bug report: ' + error);
 		} else {
 			self.logger.info('Log sent successfully, reply: '+stdout);
 			//if (stdout != undefined && stdout.status != undefined && stdout.status == 'OK' && stdout.link != undefined ) {
@@ -422,32 +480,57 @@ ControllerSystem.prototype.deleteUserData = function () {
     });
 };
 
+ControllerSystem.prototype.factoryReset = function () {
+    var self = this;
+
+    fs.writeFile('/boot/factory_reset', ' ', function (err) {
+        if (err) {
+            self.logger.info('Cannot Initiate factory reset');
+        } else {
+            self.logger.info('Created Factory Reset file, rebooting');
+            self.commandRouter.reboot();
+        }
+
+    });
+};
+
 
 ControllerSystem.prototype.deviceDetect = function (data) {
 	var self = this;
 	var defer = libQ.defer();
 	var device = '';
 
-	exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
-		if (error !== null) {
-			self.logger.info('Canot read proc/cpuinfo: ' + error);
+    var info = self.getSystemVersion();
+    var info = self.getSystemVersion();
+    info.then(function(infos)
+    {
+		if (infos != undefined && infos.hardware != undefined && infos.hardware === 'x86') {
+			device = 'x86';
+            defer.resolve(device);
+            self.deviceCheck(device);
 		} else {
-			var hardwareLine = stdout.split(":");
-			var cpuidparam = hardwareLine[1].replace(/\s/g, '');
-			var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'),  'utf8', {throws: false});
-			//self.logger.info('CPU ID ::'+cpuidparam+'::');
-			for(var i = 0; i < deviceslist.devices.length; i++)
-			{
-				if(deviceslist.devices[i].cpuid == cpuidparam)
-				{
-					defer.resolve(deviceslist.devices[i].name);
-					device = deviceslist.devices[i].name;
-					self.deviceCheck(device);
-				}
-			}
+            exec("cat /proc/cpuinfo | grep Hardware", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+                if (error !== null) {
+                    self.logger.info('Cannot read proc/cpuinfo: ' + error);
+                } else {
+                    var hardwareLine = stdout.split(":");
+                    var cpuidparam = hardwareLine[1].replace(/\s/g, '');
+                    var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'),  'utf8', {throws: false});
+                    //self.logger.info('CPU ID ::'+cpuidparam+'::');
+                    for(var i = 0; i < deviceslist.devices.length; i++)
+                    {
+                        if(deviceslist.devices[i].cpuid == cpuidparam)
+                        {
+                            defer.resolve(deviceslist.devices[i].name);
+                            device = deviceslist.devices[i].name;
+                            self.deviceCheck(device);
+                        }
+                    }
 
+                }
+            });
 		}
-	});
+    });
 
 	return defer.promise;
 };
@@ -543,3 +626,304 @@ ControllerSystem.prototype.checkPassword = function (data) {
 	return defer.promise;
 }
 
+ControllerSystem.prototype.getDisks = function () {
+	var self = this;
+	var defer = libQ.defer();
+	var availablearray = [];
+
+	var currentdiskRaw = execSync('/bin/mount | head -n 1 | cut -d " " -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+	var currentdisk = currentdiskRaw.replace(/[0-9]/g, '').replace('/dev/', '').replace(/\n/,'');
+
+
+	var disksraw = execSync('/bin/lsblk -P -o KNAME,SIZE,MODEL -d', { uid: 1000, gid: 1000, encoding: 'utf8'});
+	var disks = disksraw.split("\n");
+
+
+
+	for (var i = 0; i < disks.length; i++) {
+
+		if ((disks[i].indexOf(currentdisk) >= 0) || (disks[i].indexOf('loop') >= 0)) {
+
+		} else {
+			var disksarray = disks[i].split(' ');
+
+			var diskinfo = {'device': '', 'name': '', 'size': ''};
+			var count = 0;
+			for (var a = 0; a < disksarray.length; a++) {
+				count++
+				if (disksarray[a].indexOf('KNAME') >= 0) {
+					diskinfo.device = disksarray[a].replace('KNAME=', '').replace(/"/g, '');
+				}
+				if (disksarray[a].indexOf('SIZE') >= 0) {
+					diskinfo.size = disksarray[a].replace('SIZE=', '').replace(/"/g, '');
+				}
+				if (disksarray[a].indexOf('MODEL') >= 0) {
+					diskinfo.name = disksarray[a].replace('MODEL=', '').replace(/"/g, '');
+				}
+
+				if (count === 4) {
+
+					if ( diskinfo.device && diskinfo.size) {
+						availablearray.push(diskinfo);
+						diskinfo = {'device': '', 'name': '', 'size': ''};
+					}
+					count = 0;
+				}
+
+			}
+		}
+	}
+	var final = {'current': currentdisk, 'available': availablearray};
+	defer.resolve(final);
+	//console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBB'+JSON.stringify(final))
+
+	return defer.promise;
+}
+
+ControllerSystem.prototype.installToDisk = function () {
+	var self = this;
+	var defer = libQ.defer();
+	var copymessage = self.commandRouter.getI18nString('SYSTEM.COPYING_TO_DISK_MESSAGE');
+	var modaltitle = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
+
+	self.startInstall()
+		.then(self.pushMessage.bind(self, 'installPluginStatus', {
+			'progress': 5,
+			'message': copymessage,
+			'title' : modaltitle
+		}))
+		.then(self.ddToDisk.bind(self))
+		.then(function (e) {
+			currentMessage = 'Unpacking plugin';
+			advancedlog = advancedlog + "<br>" + currentMessage;
+			self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
+			return e;
+		})
+
+
+
+	return defer.promise;
+}
+
+
+ControllerSystem.prototype.startInstall = function () {
+	var self = this;
+	var defer=libQ.defer();
+	var time = 0;
+	var currentMessage = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_MESSAGE');
+	var modaltitle = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
+
+	self.pushMessage('volumioInstallStatus', {'progress': 1, 'message': currentMessage, 'title' : modaltitle})
+	setTimeout(function () {
+		defer.resolve();
+	}, 5000)
+
+
+	return defer.promise;
+}
+
+ControllerSystem.prototype.pushMessage = function (emit,payload) {
+	var self = this;
+	var defer=libQ.defer();
+
+	self.coreCommand.broadcastMessage(emit,payload);
+
+	defer.resolve();
+	return defer.promise;
+}
+
+ControllerSystem.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
+};
+
+ControllerSystem.prototype.getShowWizard = function () {
+    var self = this;
+
+    var show = self.config.get('show_wizard', false);
+
+    return  show
+};
+
+ControllerSystem.prototype.setShowWizard = function (data) {
+    var self = this;
+
+    self.config.set('show_wizard', data);
+};
+
+ControllerSystem.prototype.installToDisk = function (data) {
+    var self = this;
+
+    var ddsize = '';
+    var error = false;
+    if (data.from != undefined) {
+    	var source = '/dev/' + data.from;
+	}
+
+	if (data.target != undefined) {
+    	var target = '/dev/' + data.target;
+	}
+    self.notifyInstallToDiskStatus({'progress': 0, 'status':'started'});
+    var ddsizeRaw = execSync("/bin/lsblk -b | grep " + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+    ddsize = Math.ceil(ddsizeRaw/1024/1024);
+    var ddsizeRawDest = execSync("/bin/lsblk -b | grep " + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+
+    if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
+        error = true;
+        var sizeError = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_TARGET_SIZE');
+        self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': sizeError});
+    } else {
+        try {
+            var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source +' of=' + target +' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1',  {uid: 1000, gid: 1000, encoding: 'utf8'});
+        } catch(e) {
+            error = true;
+            self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot install on new Disk'});
+        }
+
+
+
+
+        var copyProgress = exec('tail -f /tmp/install_progress');
+
+
+        copyProgress.stdout.on('data', function(data) {
+            if (data.indexOf('%') >= 0) {
+                var progressRaw = data.split('(')[1].split('Mb)')[0];
+                var progress = Math.ceil((100*progressRaw)/ddsize);
+                if (progress <= 100) {
+                    if (progress >= 95) {
+                        progress = 95;
+                    }
+                    self.notifyInstallToDiskStatus({'progress':progress, 'status':'progress'});
+                }
+            }
+        });
+
+        copy.on('close', function(code) {
+            if (code === 0) {
+                self.logger.info('Successfully cloned system');
+
+                try {
+                    fs.unlinkSync('/tmp/boot');
+                    fs.unlinkSync('/tmp/imgpart');
+                } catch(e) {}
+
+                try {
+                    execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/umount ' + target + '1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('rm -rf /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    self.logger.info('Successfully prepared system for resize');
+                } catch (e) {
+                    self.logger.error('Cannot prepare system for resize');
+                    error = true;
+                    self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for resize'});
+                }
+
+                try {
+                    execSync('mkdir /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/mount ' + target + '2 /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/touch /tmp/imgpart/move-gpt', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('/usr/bin/sudo /bin/umount ' + target + '2', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    execSync('rm -rf /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+                    self.logger.info('Successfully prepared system for GPT');
+                } catch (e) {
+                    self.logger.error('Cannot prepare system for GPT');
+                    self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for GPT'});
+                    error = true;
+                }
+                if (!error) {
+                    self.notifyInstallToDiskStatus({'progress':100, 'status':'done'});
+                }
+            } else {
+                self.notifyInstallToDiskStatus({'progress':0, 'status':'error'});
+            }
+        });
+	}
+
+
+
+
+
+};
+
+ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
+	var self = this;
+	var progress = data.progress;
+	var status = data.status;
+	var title = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK');
+	var message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_MESSAGE');
+	var emit = '';
+
+    var responseData = {
+        progress : true,
+        progressNumber : progress,
+        title: title,
+        message: message,
+        size: 'lg',
+        buttons: [
+            {
+                name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                class: 'btn btn-info ng-scope',
+                emit:'',
+                payload:''
+            }
+        ]
+    }
+
+    if (status === 'started') {
+    	emit = 'openModal';
+    } else if (status === 'progress') {
+    	emit = 'modalProgress';
+    } else if (status === 'done') {
+    	emit = 'modalDone';
+        responseData.title = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_SUCCESS_TITLE');
+        responseData.message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_SUCCESS_MESSAGE');
+        var restartButton = {
+                name: self.commandRouter.getI18nString('COMMON.RESTART'),
+                class: 'btn btn-warning ng-scope',
+                emit:'reboot',
+                payload:''
+            };
+        responseData.buttons.push(restartButton);
+    } else if (status === 'error') {
+        emit = 'modalDone';
+        responseData.message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_MESSAGE') + ': ' + data.error;
+	}
+    self.commandRouter.broadcastMessage(emit, responseData);
+};
+
+ControllerSystem.prototype.saveHDMISettings = function (data) {
+    var self = this;
+    console.log(JSON.stringify(data))
+	var currentConf = self.config.get('hdmi_enabled', false);
+
+    if (currentConf |=  data['hdmi_enabled'])  {
+        self.config.set('hdmi_enabled', data['hdmi_enabled']);
+
+        var action = 'enable';
+        var immediate = 'start'
+        if (!data['hdmi_enabled']) {
+            action = 'disable';
+            immediate = 'stop';
+        }
+
+        exec('/usr/bin/sudo /bin/systemctl '+immediate+' volumio-kiosk.service && /usr/bin/sudo /bin/systemctl '+action+' volumio-kiosk.service',{uid:1000,gid:1000}, function (error, stdout, stderr) {
+            if (error !== null) {
+                console.log(error);
+                self.logger.info('Cannot '+action+' volumio-kiosk service: ' + error);
+            } else {
+                self.logger.info(action+ ' volumio-kiosk service success');
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.HDMI_UI'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
+            }
+        });
+	}
+}

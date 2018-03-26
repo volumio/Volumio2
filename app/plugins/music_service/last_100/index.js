@@ -137,7 +137,7 @@ last_100.prototype.handleBrowseUri = function (curUri) {
 }
 
 last_100.prototype.addToBrowseSources = function () {
-    var data = {name: 'Last_100', uri: 'Last_100', plugin_type:'music_service',
+    var data = {albumart: '/albumart?sourceicon=music_service/last_100/icon.svg', name: 'Last_100', uri: 'Last_100', plugin_type:'music_service',
         plugin_name:'last_100'};
     this.commandRouter.volumioAddToBrowseSources(data);
 };

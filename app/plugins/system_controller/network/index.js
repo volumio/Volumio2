@@ -101,9 +101,9 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 	var wirelessenabled = false;
 		try {
-		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/operstate", { uid: 1000, gid: 1000, encoding: 'utf8'});
+		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/flags", { uid: 1000, gid: 1000, encoding: 'utf8'});
 			var wirelessstatus = wirelessstatusraw.replace(/\r?\n/g, '');
-		if ( wirelessstatus == 'up') {
+		if ( wirelessstatus == '0x1003') {
 			wirelessenabled = true;
 			}
 			}catch (e) {
@@ -135,33 +135,36 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[4].content[0].value = config.get('enable_hotspot');
 			}
 			if (!wirelessenabled) {
+                uiconf.sections[4].hidden = true;
 				uiconf.sections[4].content[0].value = false;
 			}
 
+			uiconf.sections[4].content[1].value = config.get('hotspot_fallback', false);
+
 			if (config.get('hotspot_name') == undefined) {
-				uiconf.sections[4].content[1].value = 'Volumio';
+				uiconf.sections[4].content[2].value = 'Volumio';
 			} else {
-				uiconf.sections[4].content[1].value = config.get('hotspot_name');
+				uiconf.sections[4].content[2].value = config.get('hotspot_name');
 			}
 
 			if (config.get('hotspot_protection') == undefined) {
-				uiconf.sections[4].content[2].value = true;
+				uiconf.sections[4].content[3].value = true;
 			} else {
-				uiconf.sections[4].content[2].value = config.get('hotspot_protection');
+				uiconf.sections[4].content[3].value = config.get('hotspot_protection');
 			}
 
 			if (config.get('hotspot_password') == undefined) {
-				uiconf.sections[4].content[3].value = 'volumio2';
+				uiconf.sections[4].content[4].value = 'volumio2';
 			} else {
-				uiconf.sections[4].content[3].value = config.get('hotspot_password');
+				uiconf.sections[4].content[4].value = config.get('hotspot_password');
 			}
 
 			if (config.get('hotspot_channel') == undefined) {
-				uiconf.sections[4].content[4].value.value = 4;
-				uiconf.sections[4].content[4].value.label = '4';
+				uiconf.sections[4].content[5].value.value = 4;
+				uiconf.sections[4].content[5].value.label = '4';
 			} else {
-				uiconf.sections[4].content[4].value.value = Number(config.get('hotspot_channel'));
-				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
+				uiconf.sections[4].content[5].value.value = Number(config.get('hotspot_channel'));
+				uiconf.sections[4].content[5].value.label = config.get('hotspot_channel');
 			}
 
 			if (config.get('enable_custom_dns') == undefined) {
@@ -555,19 +558,22 @@ ControllerNetwork.prototype.saveHotspotSettings = function (data) {
 	var hotspot = config.get('enable_hotspot');
 	if (hotspot == undefined) {
 		config.addConfigValue('enable_hotspot', 'boolean', data.enable_hotspot);
+        config.addConfigValue('hotspot_fallback', 'boolean', data.hotspot_fallback);
 		config.addConfigValue('hotspot_name', 'string', data.hotspot_name);
 		config.addConfigValue('hotspot_protection', 'boolean', data.hotspot_protection);
 		config.addConfigValue('hotspot_password', 'string', data.hotspot_password);
 		config.addConfigValue('hotspot_channel', 'string', data.hotspot_channel.label);
-		self.rebuildHotspotConfig();
 	} else {
 		config.set('enable_hotspot', data.enable_hotspot);
+        config.set('hotspot_fallback', data.hotspot_fallback);
 		config.set('hotspot_name', data.hotspot_name);
 		config.set('hotspot_protection', data.hotspot_protection);
 		config.set('hotspot_password', data.hotspot_password);
 		config.set('hotspot_channel', data.hotspot_channel.label);
-		self.rebuildHotspotConfig();
 	}
+		setTimeout(function(){
+            self.rebuildHotspotConfig();
+        },1000)
 
 
 
@@ -587,7 +593,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 		fs.accessSync(hostapdedimax, fs.F_OK);
 		exec("/usr/bin/sudo /bin/chmod 777 "+ hostapdedimax, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 			if (error !== null) {
-				console.log('Canot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
+				console.log('Cannot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
 
 			} else {
 				self.logger.info('Permissions for /etc/hostapd/hostapd-edimax.conf')
@@ -627,7 +633,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 " + hostapd, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/hostapd/hostapd.conf: ' + error);
+			console.log('Cannot set permissions for /etc/hostapd/hostapd.conf: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/hostapd/hostapd.conf')
@@ -675,23 +681,44 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     var netstring='ctrl_interface=/var/run/wpa_supplicant' + os.EOL ;
 
     //searching network
-    if (data.pass.length <= 13) {
-        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
-    } else {
-        netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+	if (data.pass === undefined) {
+        netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=1' + os.EOL + '}'+os.EOL;
+	} else {
+		if (self.isWEPHEX(data.pass)) {
+            netstring += 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0=' + data.pass +  os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
+        }
+        if (self.isWEPASCII(data.pass)) {
+            netstring += 'network={' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + data.pass + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=1'+os.EOL+'}'+os.EOL;
+        }
+        if (self.isWPA(data.pass)){
+            netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+        } else {
+            self.logger.error('Not saving Password for network '+ data.ssid + ': shorter than 8 chars');
+        }
     }
 
     while(config.has('wirelessNetworksSSID['+index+']'))
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
+
         if(data.ssid!=configuredSSID && configuredSSID.length > 0)
         {
             var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 
-            if (configuredPASS.length <= 13) {
-                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL+'}' + os.EOL + 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0'+os.EOL + '}'+os.EOL;
+            if (configuredPASS === undefined) {
+                netstring +=  'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'priority=0' + os.EOL + '}'+os.EOL;
             } else {
-                netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0'+os.EOL + '}' + os.EOL ;
+                if (self.isWEPHEX(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0=' + configuredPASS + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWEPASCII(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'key_mgmt=NONE' + os.EOL + 'wep_key0="' + configuredPASS + '"' + os.EOL + 'wep_tx_keyidx=0' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWPA(configuredPASS)) {
+                    netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                } else {
+                    self.logger.error('Not saving Password for network ' + configuredSSID + ': shorter than 8 chars');
+                }
             }
         }
 
@@ -714,7 +741,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcpcd.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Canot set permissions for /etc/network/interfaces: ' + error);
+			console.log('Cannot set permissions for /etc/network/interfaces: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/network/interfaces set')
@@ -876,9 +903,7 @@ ControllerNetwork.prototype.getInfoNetwork = function () {
 ControllerNetwork.prototype.saveDnsSettings = function (data) {
 	var self = this;
 	var customdnsfile = '';
-	
-	console.log(data);
-		
+
 	if ((data.enable_custom_dns) && ((data.primary_dns.length < 7 || data.secondary_dns.length < 7))) {
 		self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('NETWORK.DNS_ERROR_INFO') );
 		return;
@@ -904,4 +929,100 @@ ControllerNetwork.prototype.saveDnsSettings = function (data) {
 			self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('NETWORK.DNS_SETTINGS'), self.commandRouter.getI18nString('COMMON.SETTINGS_SAVED_SUCCESSFULLY'));
 		}
 	});
+};
+
+ControllerNetwork.prototype.isHex = function (data) {
+    var self = this;
+
+    return /^[0-9A-Fa-f]+$/i.test(data)
+};
+
+ControllerNetwork.prototype.isWEPHEX = function (data) {
+    var self = this;
+
+    if (self.isHex(data)){
+    	if ((data.length === 10) || (data.length === 26) || (data.length === 32)) {
+    		return true
+		} else {
+    		return false
+		}
+    } else {
+    	return false
+	}
+
+};
+
+ControllerNetwork.prototype.isWEPASCII = function (data) {
+    var self = this;
+
+    if (!self.isHex(data)){
+        if ((data.length === 5) || (data.length === 13) || (data.length === 16)) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        return false
+    }
+
+};
+
+ControllerNetwork.prototype.isWPA = function (data) {
+    var self = this;
+
+     if ((data.length >= 8) && (data.length <= 63)){
+     	return true
+	 } else {
+     	return false
+	 }
+};
+
+ControllerNetwork.prototype.getWirelessInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var response = {"connected":false, "ssid":""}
+
+    ifconfig.status('wlan0', function (err, status) {
+        if (status != undefined) {
+            if (status.ipv4_address != undefined) {
+                if (status.ipv4_address != '192.168.211.1') {
+                    response.connected = true
+					response.ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
+                } else {
+
+                }
+                defer.resolve(response)
+            } else  {
+                defer.resolve(response)
+            }
+        } else {
+            defer.resolve(response)
+        }
+
+    });
+
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getWiredInfo = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var response = {"connected":false, "ip":""}
+
+    ifconfig.status('eth0', function (err, status) {
+        if (status != undefined) {
+            if (status.ipv4_address != undefined) {
+                response.connected = true;
+				response.ip = status.ipv4_address;
+                defer.resolve(response)
+            } else  {
+                defer.resolve(response)
+            }
+        } else {
+            defer.resolve(response)
+        }
+
+    });
+
+    return defer.promise
 };
