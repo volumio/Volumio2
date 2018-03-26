@@ -60,11 +60,11 @@ logdump <description>              dump logs to $LOGDUMP instead of uploading
 #VOLUMIO SERVICE CONTROLS
 
 vstart() {
-echo volumio | sudo -S systemctl start volumio.service
+sudo systemctl start volumio.service
 }
 
 vstop() {
-echo volumio | sudo -S systemctl stop volumio.service
+sudo systemctl stop volumio.service
 }
 
 #VOLUMIO DEVELOPMENT
@@ -72,10 +72,11 @@ echo volumio | sudo -S systemctl stop volumio.service
 pull() {
 cd /
 echo "Stopping Volumio"
-echo volumio | sudo -S systemctl stop volumio.service
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $1 $2 $3
+sudo systemctl stop volumio.service
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+
 echo "Pull completed, restarting Volumio"
-echo volumio | sudo -S systemctl start volumio.service
+sudo systemctl start volumio.service
 echo "Done"
 }
 
@@ -84,7 +85,7 @@ sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/d
 }
 
 kernelsource() {
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 
 case "$1" in
