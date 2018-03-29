@@ -256,10 +256,6 @@ function InterfaceWebUI(context) {
 				return self.commandRouter.serviceUpdateTracklist(sService);
 			});
 
-			connWebSocket.on('rebuildLibrary', function () {
-                return self.commandRouter.volumioRebuildLibrary();
-			});
-
 			connWebSocket.on('updateAllMetadata', function () {
                 return self.commandRouter.updateAllMetadata();
 			});
