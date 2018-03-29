@@ -126,23 +126,33 @@ app.route('/backgrounds-upload')
         var fstream;
         req.pipe(req.busboy);
         req.busboy.on('file', function (fieldname, file, filename) {
-            console.log("Uploading: " + filename);
+            var allowedExtensions = ['jpg', 'jpeg', 'png'];
+            var extension = filename.split('.').pop().toLowerCase();
 
-            try {
-                fs.ensureDirSync(backgrounddir)
-            } catch (err) {
-                console.log('Cannot Create Background DIR ')
+            if (allowedExtensions.indexOf(extension) > -1) {
+                console.log("Uploading: " + filename);
+
+                try {
+                    fs.ensureDirSync(backgrounddir)
+                } catch (err) {
+                    console.log('Cannot Create Background DIR ')
+                }
+
+                var properfilename = filename.replace(/ /g,'-');
+                fstream = fs.createWriteStream('/data/backgrounds/' + properfilename);
+                file.pipe(fstream);
+                fstream.on('close', function () {
+                    console.log("Upload Finished of " + properfilename);
+                    var socket= io.connect('http://localhost:3000');
+                    socket.emit('regenerateThumbnails', '');
+                    res.status(201);
+                    //res.redirect('/');
+                });
+            } else {
+                console.log("Background file format not allowed " + filename);
             }
-            var properfilename = filename.replace(/ /g,'-');
-            fstream = fs.createWriteStream('/data/backgrounds/' + properfilename);
-            file.pipe(fstream);
-            fstream.on('close', function () {
-                console.log("Upload Finished of " + properfilename);
-                var socket= io.connect('http://localhost:3000');
-                socket.emit('regenerateThumbnails', '');
-                res.status(201);
-                //res.redirect('/');
-            });
+
+
         });
     });
 
