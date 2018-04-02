@@ -173,7 +173,7 @@ PlaylistManager.prototype.enqueue = function (name) {
                         var item = {
                             service: data[i].service,
                             uri: data[i].uri,
-                            name: data[i].title,
+                            title: data[i].title,
                             artist: data[i].artist,
                             album: data[i].album,
                             albumart: data[i].albumart
@@ -619,32 +619,32 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 };
 
 PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
-	var self = this;
+    var self = this;
 
-	var defer = libQ.defer();
+    var defer = libQ.defer();
 
-	var filePath = folder + name;
+    var filePath = folder + name;
 
-	fs.exists(filePath, function (exists) {
-		if (!exists)
-			defer.resolve({success: false, reason: 'Playlist does not exist'});
-		else {
-			fs.readJson(filePath, function (err, data) {
-				if (err)
-					defer.resolve({success: false});
-				else {
-					self.commandRouter.volumioClearQueue();
+    fs.exists(filePath, function (exists) {
+        if (!exists)
+            defer.resolve({success: false, reason: 'Playlist does not exist'});
+        else {
+            fs.readJson(filePath, function (err, data) {
+                if (err)
+                    defer.resolve({success: false});
+                else {
+                    self.commandRouter.volumioClearQueue();
 
-					var uris = [];
-					for (var i in data) {
-						var uri;
-						var fullUri = S(data[i].uri);
+                    var array = [];
+                    for (var i in data) {
+                        var uri;
+                        var fullUri = S(data[i].uri);
 
-						if (fullUri.startsWith('music-library')) {
-							uri = fullUri.chompLeft('music-library/').s;
-						} /*else if (fullUri.startsWith('/')) {
-							uri = fullUri.chompLeft('/').s;
-						}*/ else uri = data[i].uri;
+                        if (fullUri.startsWith('music-library')) {
+                            uri = fullUri.chompLeft('music-library/').s;
+                        } /*else if (fullUri.startsWith('/')) {
+                            uri = fullUri.chompLeft('/').s;
+                        }*/ else uri = data[i].uri;
 
 
                         var service;
@@ -653,10 +653,19 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                             service='mpd';
                         else service=data[i].service;
 
-						uris.push({uri:uri,service:service});
-					}
+                        var item = {
+                            service: service,
+                            uri: uri,
+                            title: data[i].title,
+                            artist: data[i].artist,
+                            album: data[i].album,
+                            albumart: data[i].albumart
+                        }
 
-                    self.commandRouter.addQueueItems(uris)
+                        array.push(item);
+                    }
+
+                    self.commandRouter.addQueueItems(array)
                         .then(function()
                         {
                             self.commandRouter.volumioPlay(0);
@@ -666,15 +675,15 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                         {
                             defer.reject(new Error());
                         })
-					//self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clearAddPlayTracks', uris);
+                    //self.commandRouter.executeOnPlugin('music_service', 'mpd', 'clearAddPlayTracks', array);
 
-				}
-			});
-		}
+                }
+            });
+        }
 
-	});
+    });
 
-	return defer.promise;
+    return defer.promise;
 };
 
 PlaylistManager.prototype.commonGetPlaylistContent = function (folder, name) {
