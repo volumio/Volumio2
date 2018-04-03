@@ -1920,3 +1920,9 @@ CoreCommandRouter.prototype.deleteMyVolumioDevice = function (device) {
     return self.executeOnPlugin('system_controller', 'my_volumio', 'deleteMyVolumioDevice', device);
 }
 
+CoreCommandRouter.prototype.reloadUi = function () {
+    var self=this;
+    this.pushConsoleMessage('CoreCommandRouter::Reload Ui');
+
+    return self.broadcastMessage('reloadUi', '');
+}
