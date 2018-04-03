@@ -501,7 +501,6 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 	var device = '';
 
     var info = self.getSystemVersion();
-    var info = self.getSystemVersion();
     info.then(function(infos)
     {
 		if (infos != undefined && infos.hardware != undefined && infos.hardware === 'x86') {
@@ -903,10 +902,9 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
 
 ControllerSystem.prototype.saveHDMISettings = function (data) {
     var self = this;
-    console.log(JSON.stringify(data))
-	var currentConf = self.config.get('hdmi_enabled', false);
 
-    if (currentConf |=  data['hdmi_enabled'])  {
+	var currentConf = self.config.get('hdmi_enabled', false);
+	if (currentConf |=  data['hdmi_enabled'])  {
         self.config.set('hdmi_enabled', data['hdmi_enabled']);
 
         var action = 'enable';
@@ -927,3 +925,20 @@ ControllerSystem.prototype.saveHDMISettings = function (data) {
         });
 	}
 }
+
+ControllerSystem.prototype.versionChangeDetect = function () {
+    var self = this;
+
+    var info = self.getSystemVersion();
+    info.then(function(infos)
+    {
+        if (infos != undefined && infos.systemversion != undefined) {
+        	var systemVersion = self.config.get('system_version', 'none');
+        	if (systemVersion !== infos.systemversion) {
+        		self.config.set('system_version', infos.systemversion);
+        		self.logger.info('Version has changed, forcing UI Reload');
+        		return self.commandRouter.reloadUi();
+			}
+        }
+    });
+};
