@@ -113,7 +113,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement=function()
 	console.log("Discovery: StartAdv! " + forceRename);
 	try {
 		var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-		var name = systemController.getConf('playerName');
+		var name = systemController.getConf('playerName').toLowerCase();
 		var uuid = systemController.getConf('uuid');
 		var serviceName = config.get('service');
 		var servicePort = config.get('port');
