@@ -125,7 +125,8 @@
 	  	"NETWORK_DRIVE":"Netzwerklaufwerk",
 	  	"SHARE_NOT_CONFIGURED":"Netzwerklaufwerk nicht konfiguriert",
 	  	"SHARE_MOUNT_SUCCESS":"Netzwerklaufwerk hinzugefügt",
-		"MOUNT_SHARE_ERROR":"Netzwerklaufwerk konnte nicht hinzugefügt werden"
+		"MOUNT_SHARE_ERROR":"Netzwerklaufwerk konnte nicht hinzugefügt werden",
+	  	"ERROR_PATH_UNDEFINED":"Bitte den Namen oder Pfad des Netzwerklaufwerks angeben"
   },
   "PLAYLIST":{
 	"ADDED_TITLE":"Hinzugefügt",
@@ -184,7 +185,8 @@
 		"SETTINGS_SAVE_ERROR":"Einstellungen konnten nicht gespeichert werden",
 		"ERROR":"Fehler",
 	"UPDATING_MUSIC_DB_WAIT_MESSAGE":"Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
-	"GOT_IT":"Verstanden"
+	"GOT_IT":"Verstanden",
+	"MEDIA_SERVERS":"Medienserver"
   },
   "APPEARANCE":{
 	"APPEARANCE":"Aussehen",
