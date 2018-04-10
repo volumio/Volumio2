@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"ISO Playback",
     "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Extended File Format Support",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster"
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster",
+    "USB_DAC_CONNECTED":"USB DAC Connected",
+    "NO_OUTPUT_DEVICE":"No Audio Output Available",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -122,7 +125,8 @@
 	  "NETWORK_DRIVE":"Network Drive",
 	  "SHARE_NOT_CONFIGURED":"This Share is not configured",
 	  "SHARE_MOUNT_SUCCESS":"Network Drive Added successfully",
-	  "MOUNT_SHARE_ERROR":"Error in adding network drive"
+	  "MOUNT_SHARE_ERROR":"Error in adding network drive",
+      "ERROR_PATH_UNDEFINED":"Please provide Share Name or Path" 
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",
@@ -181,7 +185,8 @@
 	"SETTINGS_SAVE_ERROR":"Error in saving settings",
 	"ERROR":"Error",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Your music is being scanned and the icon on bottom left will keep spinning until all your library has been successfully indexed. Since the system might be less responsive during this operation, please don't use the system while music is being indexed ",
-    "GOT_IT":"Got it"
+    "GOT_IT":"Got it",
+    "MEDIA_SERVERS":"Media Servers"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",

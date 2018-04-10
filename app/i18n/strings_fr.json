@@ -69,8 +69,11 @@
     "ISO_PLAYBACK":"Lecture de fichier ISO",
     "ISO_PLAYBACK_DOC":"Utilise une version experimentale de MPD pour la lecture de fichiers ISO. Désactive DSD direct si activé",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Support de Extended File Format",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Active la possibilité de lire de plus nombreux formats audio. Cependant, cela ralentira la création de la bibliothèque musicale. Si désactivé Volumio pourra toujours lire la pluplart des fichiers et la création sera plus rapide."
-  	  },
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Active la possibilité de lire de plus nombreux formats audio. Cependant, cela ralentira la création de la bibliothèque musicale. Si désactivé Volumio pourra toujours lire la pluplart des fichiers et la création sera plus rapide.",
+    "USB_DAC_CONNECTED":"Dac USB DAC Connecté",
+    "NO_OUTPUT_DEVICE":"Pas de sortie audio disponible",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Connecté un péréphérique audio à ce matériel"
+    	  },
     "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau cablé",
@@ -111,8 +114,10 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Echec de connexion au réseau",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Réessayez ou passez à l'étape suivante",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Cet appareil va se connecter au réseau",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"Quand la configuration sera terminée"    
-  },
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"Quand la configuration sera terminée",
+    "HOTSPOT_FALLBACK":"Hotspot fallback",
+   "HOTSPOT_FALLBACK_DOC":"Si activé, le hotspot démarrera si la connexion Wifi est perdue. Si désactivé, le système essayera de se connecter àtout réseau connu."
+   },
   "NETWORKFS":{
   "ALIAS_DOC":"Choisir le nom qui sera affiché dans les disques NAS montés",
   "ERROR_UMOUNT":"Impossible d'enlever le dossier partagé",
@@ -120,7 +125,8 @@
 	"NETWORK_DRIVE":"Disque réseau",
 	"SHARE_NOT_CONFIGURED":"Ce partage n'est pas configuré",
 	"SHARE_MOUNT_SUCCESS":"Disque réseau ajouté avec succès!",
-  "MOUNT_SHARE_ERROR":"Une erreur est survenue en ajoutant un disque réseau"
+  "MOUNT_SHARE_ERROR":"Une erreur est survenue en ajoutant un disque réseau",
+	  "ERROR_PATH_UNDEFINED":"Donner un nom de partage ou un chemin d'accès"
   },
     "PLAYLIST":{
     "ADDED_TITLE":"Ajouté",
@@ -178,8 +184,9 @@
     "SETTINGS_SAVED_SUCCESSFULLY":"Réglages enregistrés avec succcès",
     "SETTINGS_SAVE_ERROR":"Erreur en enregistrant les réglages",
     "ERROR":"Erreur",
-    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Scan de votre musique en cours. Durant cette période le système peut être ralenti, pour votre confort d'écoute, évitez d'écouter de la musique ",
-    "GOT_IT":"Compris"  
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Scan de votre musique en cours. Durant cette période le système peut être ralenti, pour votre confort, évitez d'écouter de la musique ",
+    "GOT_IT":"Compris",
+   "MEDIA_SERVERS":"Servers Média"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -278,7 +285,11 @@
     "INSTALL_TO_DISK_SIZE":"TAILLE",
     "INSTALL_TO_DISK_MESSAGE_WARNING":" ATTENTION: Prenez soin de sélectionner le bon disque de destination, toutes les données vont être éffacées.",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"Système installé avec succès",
-    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Pour pouvoir utiliser le nouveau système, enlevez les médias amovibles et redémarrez l'appareil." 
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Pour pouvoir utiliser le nouveau système, enlevez les médias amovibles et redémarrez l'appareil.", 
+    "CREDITS_OPEN_SOURCE_LICENSES":"Credits et licenses Open Source",
+    "VIDEO_OUT_OPTIONS": "Options sortie video",
+    "HDMI_UI_DOC":"Affiche l'interface via la sortie Video HDMI. ATTENTION: Cela peut dégrader les perforances du système",
+    "HDMI_UI":"Interface utilisateur via HDMI"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",

@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"ISO Wiedergabe",
     "ISO_PLAYBACK_DOC":"Experimentelle MPD Version verwenden, welche die Wiedergabe von ISO-Dateien unterstützt. Wiedergabe von DSD-Material wird dabei nicht unterstützt",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Erweiterte Dateiformat-Unterstützung",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate"
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate",
+    "USB_DAC_CONNECTED":"USB DAC verbunden",
+    "NO_OUTPUT_DEVICE":"Kein Audio-Gerät verfügbar",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Bitte verbinden Sie ein Audio-Gerät"	  
   },
   "NETWORK": {
 	"NETWORK_SETTINGS":"Netzwerkeinstellungen",
@@ -122,7 +125,8 @@
 	  	"NETWORK_DRIVE":"Netzwerklaufwerk",
 	  	"SHARE_NOT_CONFIGURED":"Netzwerklaufwerk nicht konfiguriert",
 	  	"SHARE_MOUNT_SUCCESS":"Netzwerklaufwerk hinzugefügt",
-		"MOUNT_SHARE_ERROR":"Netzwerklaufwerk konnte nicht hinzugefügt werden"
+		"MOUNT_SHARE_ERROR":"Netzwerklaufwerk konnte nicht hinzugefügt werden",
+	  	"ERROR_PATH_UNDEFINED":"Bitte den Namen oder Pfad des Netzwerklaufwerks angeben"
   },
   "PLAYLIST":{
 	"ADDED_TITLE":"Hinzugefügt",
@@ -181,7 +185,8 @@
 		"SETTINGS_SAVE_ERROR":"Einstellungen konnten nicht gespeichert werden",
 		"ERROR":"Fehler",
 	"UPDATING_MUSIC_DB_WAIT_MESSAGE":"Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
-	"GOT_IT":"Verstanden"
+	"GOT_IT":"Verstanden",
+	"MEDIA_SERVERS":"Medienserver"
   },
   "APPEARANCE":{
 	"APPEARANCE":"Aussehen",

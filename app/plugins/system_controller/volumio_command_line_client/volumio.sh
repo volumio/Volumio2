@@ -1,4 +1,6 @@
 #!/bin/bash
+LOGDUMP="/var/tmp/logondemand"
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 
 doc() {
@@ -50,6 +52,7 @@ plugin package                     compresses the plugin
 plugin publish                     publishes the plugin on git
 plugin install                     installs the plugin locally
 plugin update                      updates the plugin
+logdump <description>              dump logs to $LOGDUMP instead of uploading
 "
 
 }
@@ -57,11 +60,11 @@ plugin update                      updates the plugin
 #VOLUMIO SERVICE CONTROLS
 
 vstart() {
-echo volumio | sudo -S systemctl start volumio.service
+sudo systemctl start volumio.service
 }
 
 vstop() {
-echo volumio | sudo -S systemctl stop volumio.service
+sudo systemctl stop volumio.service
 }
 
 #VOLUMIO DEVELOPMENT
@@ -69,10 +72,11 @@ echo volumio | sudo -S systemctl stop volumio.service
 pull() {
 cd /
 echo "Stopping Volumio"
-echo volumio | sudo -S systemctl stop volumio.service
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $1 $2 $3
+sudo systemctl stop volumio.service
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+
 echo "Pull completed, restarting Volumio"
-echo volumio | sudo -S systemctl start volumio.service
+sudo systemctl start volumio.service
 echo "Done"
 }
 
@@ -81,7 +85,7 @@ sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/d
 }
 
 kernelsource() {
-echo volumio | sudo -S sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 
 case "$1" in
@@ -133,6 +137,12 @@ case "$1" in
         stopairplay)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
         ;;
+        usbattach)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioAttach"
+        ;;
+        usbdetach)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioDetach"
+        ;;
         vstart)
             vstart
             ;;
@@ -167,6 +177,9 @@ case "$1" in
             ;;
 	    kernelsource)
 	        kernelsource
+            ;;
+	    logdump)
+	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;
         plugin)
             if [ "$2" != "" ]; then

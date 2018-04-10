@@ -274,6 +274,28 @@ function interfaceApi(context) {
                             res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                         });
                 }
+                else if(req.query.cmd == "usbAudioAttach"){
+                    var timeStart = Date.now();
+                    self.logStart('USB Audio Device Attached')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'usbAudioAttach', '');
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
+                else if(req.query.cmd == "usbAudioDetach"){
+                    var timeStart = Date.now();
+                    self.logStart('USB Audio Device Detached')
+                        .then(function () {
+                            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'usbAudioDetach', '');
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
                 else{
                     res.json({'Error': "command not recognized"});
                 }

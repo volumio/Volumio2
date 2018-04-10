@@ -387,7 +387,13 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
 	fs.exists(filePath, function (exists) {
 		if (!exists) {
-			fs.writeJsonSync(filePath, playlist);
+
+            try {
+                fs.writeJsonSync(filePath, playlist);
+			} catch(e) {
+                return defer.resolve({success: false});
+			}
+
 		}
 		if (service === 'mpd') {
 		    var listingDefer=libQ.defer();;

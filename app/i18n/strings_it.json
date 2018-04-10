@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"Riproduzione file ISO",
     "ISO_PLAYBACK_DOC":"Utilizza una versione sperimentale di MPD che permette la riproduzione di file ISO. La modalità DSD direct non è più disponibile se abilitato",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Supporto esteso di formati musicali",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Se abilitata, il sistema sarà in grado di supportare un maggior numero di formati, tuttavia la scansione della musica avverrà in maniera considerevolmente più lenta. Se disabilitata, il sistema sarà comunque in grado di leggere i formati di file più diffusi."
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Se abilitata, il sistema sarà in grado di supportare un maggior numero di formati, tuttavia la scansione della musica avverrà in maniera considerevolmente più lenta. Se disabilitata, il sistema sarà comunque in grado di leggere i formati di file più diffusi.",
+    "USB_DAC_CONNECTED":"DAC USB Connesso",
+    "NO_OUTPUT_DEVICE":"Nessuna uscita audio disponibile",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
@@ -122,7 +125,8 @@
     "NETWORK_DRIVE":"Disco di rete",
     "SHARE_NOT_CONFIGURED":"Disco di rete non configurato",
     "SHARE_MOUNT_SUCCESS":"Disco di rete aggiunto correttamente",
-    "MOUNT_SHARE_ERROR":"Errore nell'aggiungere il disco di rete"
+    "MOUNT_SHARE_ERROR":"Errore nell'aggiungere il disco di rete",
+    "ERROR_PATH_UNDEFINED":"Inserire il percorso o il nome della Share"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Aggiunta",
@@ -181,7 +185,8 @@
     "SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
     "ERROR":"Errore",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a destra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
-    "GOT_IT":"Capito"
+    "GOT_IT":"Capito",
+    "MEDIA_SERVERS":"Server multimediali"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

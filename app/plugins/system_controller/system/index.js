@@ -296,7 +296,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
-					exec("/usr/bin/sudo /bin/hostname "+hostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+					exec("/usr/bin/sudo /bin/hostname "+ newhostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 						if (error !== null) {
 							console.log('Cannot set new hostname: ' + error);
 
@@ -325,46 +325,16 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 									if (err) {
 										console.log(err);
 									} else {
-										self.logger.info('Avahi name changed to '+ hostname);
-										/*
-										setTimeout(function () {
-											exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-												uid: 1000,
-												gid: 1000
-											}, function (error, stdout, stderr) {
-												if (error !== null) {
-													console.log(error);
-													self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-												} else {
-													self.logger.info('Avahi Daemon Restarted')
-												}
-											});
-										}, 3000)
-										 */
+										self.logger.info('Avahi name changed to '+ newhostname);
 									}
 								});
 							}
 
 						});
-
-
-
-
-
-
 						setTimeout(function () {
-							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-								uid: 1000,
-								gid: 1000
-							}, function (error, stdout, stderr) {
-								if (error !== null) {
-									console.log(error);
-									self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-								} else {
-									self.logger.info('Avahi Daemon Restarted')
-								}
-							});
-						}, 3000)
+							// Restarting AVAHI results in system crashing
+							//self.restartAvahi();
+						}, 10000)
 					}
 				});
 			});
@@ -374,6 +344,21 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 };
 
+ControllerSystem.prototype.restartAvahi = function () {
+    var self = this;
+
+    exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
+        uid: 1000,
+        gid: 1000
+    }, function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log(error);
+            self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
+        } else {
+            self.logger.info('Avahi Daemon Restarted')
+        }
+    });
+};
 
 
 
@@ -453,7 +438,6 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
 		message.text = 'No info available';
 	}
-	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
 	// Must single-quote the message or the shell may interpret it and crash.
 	// single-quotes already within the message need to be escaped.
 	// The resulting string always starts and ends with single quotes.
@@ -516,7 +500,6 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 	var defer = libQ.defer();
 	var device = '';
 
-    var info = self.getSystemVersion();
     var info = self.getSystemVersion();
     info.then(function(infos)
     {
@@ -919,10 +902,9 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
 
 ControllerSystem.prototype.saveHDMISettings = function (data) {
     var self = this;
-    console.log(JSON.stringify(data))
-	var currentConf = self.config.get('hdmi_enabled', false);
 
-    if (currentConf |=  data['hdmi_enabled'])  {
+	var currentConf = self.config.get('hdmi_enabled', false);
+	if (currentConf |=  data['hdmi_enabled'])  {
         self.config.set('hdmi_enabled', data['hdmi_enabled']);
 
         var action = 'enable';
@@ -943,3 +925,20 @@ ControllerSystem.prototype.saveHDMISettings = function (data) {
         });
 	}
 }
+
+ControllerSystem.prototype.versionChangeDetect = function () {
+    var self = this;
+
+    var info = self.getSystemVersion();
+    info.then(function(infos)
+    {
+        if (infos != undefined && infos.systemversion != undefined) {
+        	var systemVersion = self.config.get('system_version', 'none');
+        	if (systemVersion !== infos.systemversion) {
+        		self.config.set('system_version', infos.systemversion);
+        		self.logger.info('Version has changed, forcing UI Reload');
+        		return self.commandRouter.reloadUi();
+			}
+        }
+    });
+};

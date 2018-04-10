@@ -101,9 +101,9 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 	var wirelessenabled = false;
 		try {
-		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/operstate", { uid: 1000, gid: 1000, encoding: 'utf8'});
+		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/flags", { uid: 1000, gid: 1000, encoding: 'utf8'});
 			var wirelessstatus = wirelessstatusraw.replace(/\r?\n/g, '');
-		if ( wirelessstatus == 'up') {
+		if ( wirelessstatus == '0x1003') {
 			wirelessenabled = true;
 			}
 			}catch (e) {
@@ -135,6 +135,7 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[4].content[0].value = config.get('enable_hotspot');
 			}
 			if (!wirelessenabled) {
+                uiconf.sections[4].hidden = true;
 				uiconf.sections[4].content[0].value = false;
 			}
 

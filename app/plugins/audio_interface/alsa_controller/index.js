@@ -784,6 +784,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
         	var id = aplaycard.id;
             for (var n = 0; n < carddata.cards.length; n++){
                 var cardname = carddata.cards[n].name.toString().trim();
+
                 if (cardname === name){
                     if(carddata.cards[n].multidevice) {
                         multi = true;
@@ -791,7 +792,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                         for (var j = 0; j < card.devices.length; j++) {
                             var subdevice = carddata.cards[n].devices[j].number;
                             name = carddata.cards[n].devices[j].prettyname;
-                            cards.push({id: id + ',' + subdevice, name: name});
+                            var deviceProc = '/proc/asound/card' + id + '/pcm' + subdevice + 'p';
+                            if (fs.existsSync(deviceProc)) {
+                                cards.push({id: id + ',' + subdevice, name: name});
+							}
                         }
 
                     } else {
@@ -799,7 +803,9 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                         name = carddata.cards[n].prettyname;
                     }
 
-                }
+                } else {
+                	multi = false;
+				}
             } if (!multi){
                 cards.push({id: id, name: name});
             }
@@ -876,7 +882,6 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 
 ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var self = this;
-
 
 	var mixers = [];
 	var currentcardname = '';
@@ -1352,3 +1357,46 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 
 	return defer.promise;
 }
+
+ControllerAlsa.prototype.usbAudioAttach  = function () {
+	var self = this;
+
+    var usbHotplug = self.config.get('usb_hotplug', false);
+    if (usbHotplug) {
+        var cards = self.getAlsaCards();
+        var usbCardName = self.getLabelForSelectedCard(cards, 5);
+        var usbData = {"disallowPush":true,"output_device":{"value":"5","label":usbCardName},"i2s":false};
+        self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.USB_DAC_CONNECTED'), usbCardName);
+        self.commandRouter.closeModals();
+        self.saveAlsaOptions(usbData);
+	}
+
+}
+
+ControllerAlsa.prototype.usbAudioDetach  = function () {
+    var self = this;
+
+    self.checkAudioDeviceAvailable();
+};
+
+ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
+    var self = this;
+
+    var cards = self.getAlsaCards();
+    if (cards.length === 0) {
+        var responseData = {
+            title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_OUTPUT_DEVICE'),
+            message: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_OUTPUT_DEVICE_MESSAGE'),
+            size: 'lg',
+            buttons: [
+                {
+                    name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                    class: 'btn btn-info ng-scope',
+                    emit:'',
+                    payload:''
+                }
+            ]
+        }
+        self.commandRouter.broadcastMessage("openModal", responseData);
+	}
+};

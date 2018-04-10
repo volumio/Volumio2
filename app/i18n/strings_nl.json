@@ -2,9 +2,9 @@
   "PLAYBACK_OPTIONS":{
     "PLAYBACK_OPTIONS_TITLE":"Afspeelopties",
     "AUDIO_OUTPUT":"Audio uitvoer",
-    "OUTPUT_DEVICE_DOC":"Uitvoer apparaat",
-    "OUTPUT_DEVICE":"Uitvoer apparaat",
-    "ENABLE_I2S_DAC":"I2S DACs aanzetten",
+    "OUTPUT_DEVICE_DOC":"Uitvoerapparaat",
+    "OUTPUT_DEVICE":"Uitvoerapparaat",
+    "ENABLE_I2S_DAC":"I2S DACs inschakelen",
     "GAPLESS_MP3_PLAYBACK":"Speel MP3 af zonder tussenstilte",
     "VOLUME_NORMALIZATION":"Volume normalizatie",
     "VOLUME_NORMALIZATION_DOC":"Indien ingeschakeld zal het volume van elke track hetzelfde zijn. Dit kan de geluidskwaliteit verminderen.",
@@ -69,10 +69,13 @@
     "ISO_PLAYBACK":"ISO-weergave",
     "ISO_PLAYBACK_DOC":"Gebruik een experimentele MPD-versie waarmee ISO-bestanden kunnen worden afgespeeld, u verliest directe DSD-functies wanneer deze is ingeschakeld.",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Ondersteuning voor uitgebreid bestandsformaat.",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Deze instellingen regelen de mogelijkheid om een ​​breed scala aan audioformaten te lezen, maar het kan het maken van een muziekbibliotheekdatabase vertragen. Indien uitgeschakeld, leest het systeem nog steeds de meeste muziekformaten en zal het scannen van de muziekbibliotheek veel sneller verlopen."
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Deze instellingen regelen de mogelijkheid om een ​​breed scala aan audioformaten te lezen, maar het kan het maken van een muziekbibliotheekdatabase vertragen. Indien uitgeschakeld, leest het systeem nog steeds de meeste muziekformaten en zal het scannen van de muziekbibliotheek veel sneller verlopen.",
+    "USB_DAC_CONNECTED":"USB DAC aangesloten",
+    "NO_OUTPUT_DEVICE":"Geen uitvoerapparaat beschikbaar",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Sluit a.u.b. een uitvoerapparaat aan."
   },
   "NETWORK":{
-    "NETWORK_SETTINGS":"Netwerk instellngen",
+    "NETWORK_SETTINGS":"Netwerkinstellngen",
     "WIRED_NETWORK":"Bedraad netwerk",
     "AUTOMATIC_IP":"Automatisch IP",
     "AUTOMATIC_IP_DOC":"Kies tussen DHCP en statische IP-configuratie.",
@@ -111,7 +114,9 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Kan geen verbinding maken met het netwerk",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Probeer het opnieuw of ga door naar de volgende stap",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Het apparaat maakt verbinding met het netwerk",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"wanneer de eerste installatie voltooid is"
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"wanneer de eerste installatie voltooid is",
+    "HOTSPOT_FALLBACK":"Terugvallen op Hotspot",
+    "HOTSPOT_FALLBACK_DOC":"Indien ingeschakeld zal de Hotspot starten als de verbinding met het Draadloos Netwerk is weggevallen. Indien uitgeschakeld zal er worden geprobeerd om een verbinding te maken met een bekend draadloos netwerk."
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Kies een alias die weergegeven wordt in NAS Mounts",
@@ -120,7 +125,8 @@
     "NETWORK_DRIVE":"Netwerkstation",
     "SHARE_NOT_CONFIGURED":"Deze share is niet geconfigureerd",
     "SHARE_MOUNT_SUCCESS":"Netwerkstation is succesvol toegevoegd",
-    "MOUNT_SHARE_ERROR":"Fout bij toevoegen van netwerkstation"
+    "MOUNT_SHARE_ERROR":"Fout bij toevoegen van netwerkstation",
+    "ERROR_PATH_UNDEFINED":"Geef de sharenaam of het pad op"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Toegevoegd",
@@ -179,7 +185,8 @@
     "SETTINGS_SAVE_ERROR":"Fout opgetreden tijdens het opslaan van de instellingen",
     "ERROR":"Fout",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"De muziek wordt gescand en het pictogram linksonder blijft ronddraaien totdat uw bibliotheek succesvol is geïndexeerd. Aangezien het systeem mogelijk traag kan reageren tijdens deze bewerking, moet u het systeem niet gebruiken terwijl muziek wordt geïndexeerd.",
-    "GOT_IT":"Begrepen"
+    "GOT_IT":"Begrepen",
+    "MEDIA_SERVERS":"Media Servers"
   },
   "APPEARANCE":{
     "APPEARANCE":"Uiterlijk",
@@ -217,7 +224,7 @@
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Mijn muziek",
-    "PLAYBACK_OPTIONS":"Afspeel Opties",
+    "PLAYBACK_OPTIONS":"Afspeelopties",
     "APPEARANCE":"Uiterlijk",
     "NETWORK":"Netwerk",
     "SYSTEM":"Systeem",

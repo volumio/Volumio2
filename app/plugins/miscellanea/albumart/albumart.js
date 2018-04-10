@@ -281,7 +281,13 @@ var searchMeta = function (defer, coverFolder, web, meta) {
                             var metaCacheFile = mountMetadataFolder+'/'+ coverFolder+'/metadata.jpeg';
                             var extract = '/usr/bin/exiftool -b -Picture "'+ fileName + '" > "' + metaCacheFile + '"';
 
-                            fs.ensureFileSync(metaCacheFile);
+                            try {
+                                fs.ensureFileSync(metaCacheFile);
+                            } catch(e) {
+                                console.log('ERROR: Cannot create metadata albumart folder: '+e)
+                            }
+
+
                             exec(extract, {uid: 1000, gid: 1000, encoding: 'utf8'},  function (error, stdout, stderr) {
                                 if (error) {
                                     return searchOnline(defer, web);

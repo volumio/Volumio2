@@ -1204,12 +1204,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 			var list = [];
             if (singleBrowse && uri === 'music-library') {
                 prev = '/';
-                var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: 'Favourites', uri: 'favourites', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: 'Playlists', uri: 'playlists', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: 'Artists', uri: 'artists://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: 'Albums', uri: 'albums://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: 'Genres', uri: 'genres://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: 'Media Servers', uri: 'upnp', type: 'title'}];
+                var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: self.commandRouter.getI18nString('COMMON.FAVOURITES'), uri: 'favourites', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: self.commandRouter.getI18nString('COMMON.ARTISTS'), uri: 'artists://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: self.commandRouter.getI18nString('COMMON.ALBUMS'), uri: 'albums://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: self.commandRouter.getI18nString('COMMON.MEDIA_SERVERS'), uri: 'upnp', type: 'title'}];
 
                 for (var i in browseSources) {
                     list.push(browseSources[i]);
