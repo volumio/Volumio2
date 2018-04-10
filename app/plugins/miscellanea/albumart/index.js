@@ -2,7 +2,6 @@
 
 var exec = require('child_process').exec;
 var libQ = require('kew');
-var nodetools = require('nodetools');
 var enableweb = true;
 var defaultwebsize = 'large';
 var cacheid = '';
@@ -102,11 +101,11 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
     if (data != undefined && data.artist != undefined && enableweb) {
         //performing decode since we cannot assume client will pass decoded strings
 
-        artist = nodetools.urlDecode(data.artist);
+        artist = decodeURIComponent(data.artist);
 
         if(data.album)
         {
-            album = nodetools.urlDecode(data.album);
+            album = decodeURIComponent(data.album);
         }
         else
         {
@@ -119,7 +118,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 			size=defaultwebsize;
 		}
 
-        web = '&web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
+        web = '&web=' + encodeURIComponent(artist) + '/' + encodeURIComponent(album) + '/'+size;
     }
 	} catch (e) {
 	console.log('Cannot compose Albumart path')
@@ -132,7 +131,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
     }
 
     if (path != undefined) {
-        url = url + '&path=' + nodetools.urlEncode(path);
+        url = url + '&path=' + encodeURIComponent(path);
     }
 
     if(icon!==undefined) {
