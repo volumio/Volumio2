@@ -53,7 +53,7 @@ CommandLineClient.prototype.getAdditionalConf = function (type, controller, data
 
 CommandLineClient.prototype.buildVolumeFiles = function () {
 	var self = this;
-
+	
 	var device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
 	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
     var mixer_type = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer_type');

@@ -12,7 +12,13 @@ fi
 
 cd /home/volumio
 echo "Backing Up current Volumio folder in /volumio-current"
+[ -d /volumio-current ] && rm -rf /volumio-current
 mv /volumio /volumio-current
+if [ 0 -ne $? ] ; then
+    echo " Backup failed, aborting"
+    exit 1
+fi
+
 echo "Cloning Volumio Backend repo"
 if [ -n "$BRANCH" ]; then
     echo "Cloning branch $BRANCH from repository $REPO"

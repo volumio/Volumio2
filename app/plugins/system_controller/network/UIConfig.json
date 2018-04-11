@@ -165,6 +165,7 @@
 		"label": "TRANSLATE.COMMON.SAVE",
 		"data": [
 		  "enable_hotspot",
+		  "hotspot_fallback",
 		  "hotspot_name",
 		  "hotspot_protection",
 		  "hotspot_password",
@@ -178,6 +179,17 @@
 		  "doc" : "TRANSLATE.NETWORK.ENABLE_HOTSPOT_DOC",
 		  "label": "TRANSLATE.NETWORK.ENABLE_HOTSPOT",
 		  "value": true
+		},
+		{
+		  "id": "hotspot_fallback",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.NETWORK.HOTSPOT_FALLBACK_DOC",
+		  "label": "TRANSLATE.NETWORK.HOTSPOT_FALLBACK",
+		  "value": false,
+		  "visibleIf": {
+			"field": "enable_hotspot",
+			"value": true
+		  }
 		},
 		{
 		  "id": "hotspot_name",

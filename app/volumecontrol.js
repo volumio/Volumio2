@@ -196,7 +196,7 @@ function CoreVolumeController(commandRouter) {
                 });
                 if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1' || devicename == 'PianoDACPlus multicodec-0') {
                     amixer(['-M', 'set', '-c', device, 'Subwoofer', val + '%'], function (err) {
-                        cb(err);
+
                     });
                 }
             } else {
@@ -205,7 +205,7 @@ function CoreVolumeController(commandRouter) {
                 });
                 if (devicename == 'PianoDACPlus'  || devicename == 'Allo Piano 2.1' || devicename == 'PianoDACPlus multicodec-0') {
                     amixer(['set', '-c', device, 'Subwoofer', val + '%'], function (err) {
-                        cb(err);
+                       
                     });
                 }
             }
@@ -268,7 +268,9 @@ CoreVolumeController.prototype.updateVolumeScript = function (data) {
 // Public methods -----------------------------------------------------------------------------------
 CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 	var self = this;
-	self.logger.info('[' + Date.now() + '] ' + 'VolumeController::SetAlsaVolume' + VolumeInteger);
+	var defer = libQ.defer();
+	self.logger.info('VolumeController::SetAlsaVolume' + VolumeInteger);
+
 	switch (VolumeInteger) {
 		case 'mute':
 			//Mute or Unmute, depending on state
@@ -282,7 +284,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 				self.setVolume(0, function (err) {
 					Volume.vol = 0
 					Volume.mute = true;
-					self.commandRouter.volumioupdatevolume(Volume);
+                    defer.resolve(Volume)
 				});
 			});
 			break;
@@ -290,12 +292,12 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			//UnMute
 					currentmute = false;
 					self.setVolume(premutevolume, function (err) {
-						self.logger.info('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+						self.logger.info('VolumeController::Volume ' + VolumeInteger);
 						//Log Volume Control
 						Volume.vol = premutevolume;
 						Volume.mute = false;
 						currentvolume = premutevolume;
-						self.commandRouter.volumioupdatevolume(Volume);
+                        defer.resolve(Volume)
 
 					});
 			break;
@@ -329,8 +331,8 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 						Volume.vol = VolumeInteger
 						Volume.mute = false;
                         currentvolume = VolumeInteger;
-						self.logger.info('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
-						self.commandRouter.volumioupdatevolume(Volume);
+						self.logger.info('VolumeController::Volume ' + vol);
+                        defer.resolve(Volume)
 
 					});
 				});
@@ -353,11 +355,11 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					VolumeInteger = 100;
 				}
 				self.setVolume(VolumeInteger, function (err) {
-					self.logger.info('[' + Date.now() + '] ' + 'VolumeController::Volume ' + vol);
+					self.logger.info('VolumeController::Volume ' + vol);
 					Volume.vol = VolumeInteger
 					Volume.mute = false;
                     currentvolume = VolumeInteger;
-					self.commandRouter.volumioupdatevolume(Volume);
+                    defer.resolve(Volume)
 				});
 			});
 			break;
@@ -376,22 +378,23 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 				VolumeInteger = 100;
 			}
 				self.setVolume(VolumeInteger, function (err) {
-					self.logger.info('[' + Date.now() + '] ' + 'VolumeController::Volume ' + VolumeInteger);
+					self.logger.info('VolumeController::Volume ' + VolumeInteger);
 					//Log Volume Control
 					Volume.vol = VolumeInteger;
 					Volume.mute = false;
 					currentvolume = VolumeInteger;
-					self.commandRouter.volumioupdatevolume(Volume);
+					defer.resolve(Volume)
 			});
 	}
 
+	return defer.promise
 };
 
 CoreVolumeController.prototype.retrievevolume = function () {
 	var self = this;
 	this.getVolume(function (err, vol) {
 		self.getMuted(function (err, mute) {
-			self.logger.info('[' + Date.now() + '] ' + 'VolumeController:: Volume=' + vol + ' Mute =' + mute);
+			self.logger.info('VolumeController:: Volume=' + vol + ' Mute =' + mute);
 			//Log Volume Control
 			 //Log Volume Control
                         if (vol == null) {

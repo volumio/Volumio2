@@ -83,8 +83,12 @@ var searchOnline = function (defer, web) {
     }
 
 	var fileName = resolution;
-
-	fs.ensureDirSync(folder);
+	try {
+		fs.ensureDirSync(folder);
+	} catch(e) {
+		defer.reject(new Error(e));
+            	return defer.promise;
+	}
 	var infoPath = folder + 'info.json';
 
 	var infoJson = {};
@@ -277,7 +281,13 @@ var searchMeta = function (defer, coverFolder, web, meta) {
                             var metaCacheFile = mountMetadataFolder+'/'+ coverFolder+'/metadata.jpeg';
                             var extract = '/usr/bin/exiftool -b -Picture "'+ fileName + '" > "' + metaCacheFile + '"';
 
-                            fs.ensureFileSync(metaCacheFile);
+                            try {
+                                fs.ensureFileSync(metaCacheFile);
+                            } catch(e) {
+                                console.log('ERROR: Cannot create metadata albumart folder: '+e)
+                            }
+
+
                             exec(extract, {uid: 1000, gid: 1000, encoding: 'utf8'},  function (error, stdout, stderr) {
                                 if (error) {
                                     return searchOnline(defer, web);

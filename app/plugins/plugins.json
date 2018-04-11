@@ -53,7 +53,7 @@
 	"upnp_browser": {
 	  "enabled": {
 		"type": "boolean",
-		"value": false
+		"value": true
 	  },
 	  "status": {
 		"type": "string",
@@ -224,16 +224,6 @@
       }
     },
     "volumio_command_line_client": {
-      "enabled": {
-        "type": "boolean",
-        "value": true
-      },
-      "status": {
-        "type": "string",
-        "value": "STARTED"
-      }
-    },
-    "my_volumio":  {
       "enabled": {
         "type": "boolean",
         "value": true

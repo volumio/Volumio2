@@ -8,7 +8,6 @@
     {"id": "plugin-manager", "name": "TRANSLATE.MAIN_MENU.PLUGINS", "state":"volumio.plugin-manager"},
     {"id": "modal", "name": "TRANSLATE.MAIN_MENU.ALARM", "params": {"modalName": "modal-alarm-clock"}},
     {"id": "modal", "name": "TRANSLATE.MAIN_MENU.SLEEP", "params": {"modalName": "modal-sleep"}},
-    {"id": "static-page","name": "TRANSLATE.MAIN_MENU.CREDITS","pageName": "credits"},
     {"id": "modal", "name": "TRANSLATE.MAIN_MENU.SHUTDOWN", "params": {"modalName": "modal-power-off"}},
 	{"id": "link", "name": "Volumio Shop", "params": {"url": "https://volumio.org/shop/"}}
   ]

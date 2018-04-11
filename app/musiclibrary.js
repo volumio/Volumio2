@@ -307,32 +307,38 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
 
     var response;
 	//console.log('--------------------------'+curUri)
-
-    if (curUri.startsWith('favourites')) {
-        return self.commandRouter.playListManager.listFavourites(curUri);
-    }
-    else if (curUri.startsWith('search')) {
-        var splitted = curUri.split('/');
-
-        return this.search({"value": splitted[2]});
-    } else if (curUri.startsWith('playlists') || curUri.startsWith('artists://') || curUri.startsWith('albums://') || curUri.startsWith('genres://')) {
-            return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
-    } else {
-        for(var i in self.browseSources)
-        {
-            var source=self.browseSources[i];
-
-            if(curUri.startsWith(source.uri))
-            {
-                return self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'handleBrowseUri',curUri);
-            }
+	if (curUri != undefined) {
+        if (curUri.startsWith('favourites')) {
+            return self.commandRouter.playListManager.listFavourites(curUri);
         }
+        else if (curUri.startsWith('search')) {
+            var splitted = curUri.split('/');
 
+            return this.search({"value": splitted[2]});
+        } else if (curUri.startsWith('playlists') || curUri.startsWith('artists://') || curUri.startsWith('albums://') || curUri.startsWith('genres://')) {
+            return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
+        } else if (curUri.startsWith('upnp')) {
+            return self.commandRouter.executeOnPlugin('music_service','upnp_browser','handleBrowseUri',curUri);
+        } else {
+            for(var i in self.browseSources)
+            {
+                var source=self.browseSources[i];
+
+                if(curUri.startsWith(source.uri))
+                {
+                    return self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'handleBrowseUri',curUri);
+                }
+            }
+
+            var promise=libQ.defer();
+            promise.resolve({});
+            return promise.promise;
+        }
+	} else {
         var promise=libQ.defer();
         promise.resolve({});
         return promise.promise;
-    }
-
+	}
 }
 
 
@@ -454,13 +460,6 @@ CoreMusicLibrary.prototype.search = function(data) {
                     if(result[i]!== undefined && result[i]!==null)
                         searchResult.navigation.lists=searchResult.navigation.lists.concat(result[i]);
                 }
-
-                fs.writeJson('searchResult.json', searchResult, err => {
-                    if (err) return console.error(err)
-
-                    console.log('success!')
-            })
-
                 defer.resolve(searchResult);
             })
             .fail(function (err) {

@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"ISO Wiedergabe",
     "ISO_PLAYBACK_DOC":"Experimentelle MPD Version verwenden, welche die Wiedergabe von ISO-Dateien unterstützt. Wiedergabe von DSD-Material wird dabei nicht unterstützt",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Erweiterte Dateiformat-Unterstützung",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate"
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate",
+    "USB_DAC_CONNECTED":"USB DAC verbunden",
+    "NO_OUTPUT_DEVICE":"Kein Audio-Gerät verfügbar",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Bitte verbinden Sie ein Audio-Gerät"	  
   },
   "NETWORK": {
 	"NETWORK_SETTINGS":"Netzwerkeinstellungen",
@@ -92,7 +95,7 @@
     	"HOTSPOT_NAME":"Name des Hotspots",
     	"HOTSPOT_PROTECTION":"Passwortgeschützter Hotspot",
     	"HOTSPOT_PASSWORD":"Hotspot-Passwort",
-		"HOTSPOT_PASSWORD_DOC":"Das Standardpasswort sollte durch ein Passwort aus mindestens 7 Zeichen ersetzt werden",
+		"HOTSPOT_PASSWORD_DOC":"Das Standardpasswort sollte durch ein Passwort aus mindestens 8 Zeichen ersetzt werden",
     	"HOTSPOT_CHANNEL":"Hotspot-Kanal",
 		"HOTSPOT_CHANNEL_DOC":"Die Wahl eines anderen Kanals kann in Umgebungen mit zahlreichen Funknetzen die Verbindungsqualität verbessern.",
 	  	"HOTSPOT_CONF_ERROR":"Fehler bei der Einrichtung des Hotspots",
@@ -101,7 +104,7 @@
 		"WIRELESS_ENABLED_DOC":"Funknetzwerk ein- oder ausschalten. Diese Einstellung kann die Klangqualität beeinflussen.",
 		"STATIC_IP_WARNING":"Warnung! Eine falsche statische IP-Adresse kann zu dauerhaftem Verbindungsverlust führen!",
 		"DNS_SETTINGS":"DNS-Einstellungen",
-		"ENABLE_CUSTOM_DNS_DOC":"Eine manuelle Wahl der DNS-Server kann helfen, Probleme bei der Internetverbindung von Volumio zu beheben.",
+		"ENABLE_CUSTOM_DNS_DOC":"Eine manuelle Wahl der DNS-Server kann helfen, Probleme bei der Internetverbindung zu beheben.",
 		"ENABLE_CUSTOM_DNS":"DNS-Server manuell einrichten",
 		"PRIMARY_DNS":"Primärer DNS",
  		"SECONDARYY_DNS":"Sekundärer DNS",
@@ -111,7 +114,9 @@
  		"WIRELESS_NETWORK_CONNECTION_ERROR":"Beim Verbinden mit dem Netzwerk ist ein Fehler aufgetreten",
  		"WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Bitte erneut versuchen oder mit dem nächsten Schritt fortfahren",
  		"WIRELESS_NETWORK_CONNECTION_DEFER":"Das Gerät wird sich mit dem Netzwerk verbinden,",
- 		"WIRELESS_NETWORK_CONNECTION_DEFER2":"sobald die Ersteinrichtung abgeschlossen ist"
+ 		"WIRELESS_NETWORK_CONNECTION_DEFER2":"sobald die Ersteinrichtung abgeschlossen ist",
+	"HOTSPOT_FALLBACK":"Automatischer Hotspot-Modus",
+	"HOTSPOT_FALLBACK_DOC":"Wenn diese Option aktiviert ist, startet im Hotspot-Modus, sobald keine bekannte WLAN-Verbindung mehr verfügbar ist. Wenn diese Option inaktiv ist, versucht dauerhaft, ein bekanntes WLAN-Netzwerk zu finden."
   },
   "NETWORKFS":{
 	  "ALIAS_DOC":"Alias für das Netzwerklaufwerk vergeben",
@@ -120,7 +125,8 @@
 	  	"NETWORK_DRIVE":"Netzwerklaufwerk",
 	  	"SHARE_NOT_CONFIGURED":"Netzwerklaufwerk nicht konfiguriert",
 	  	"SHARE_MOUNT_SUCCESS":"Netzwerklaufwerk hinzugefügt",
-		"MOUNT_SHARE_ERROR":"Netzwerklaufwerk konnte nicht hinzugefügt werden"
+		"MOUNT_SHARE_ERROR":"Netzwerklaufwerk konnte nicht hinzugefügt werden",
+	  	"ERROR_PATH_UNDEFINED":"Bitte den Namen oder Pfad des Netzwerklaufwerks angeben"
   },
   "PLAYLIST":{
 	"ADDED_TITLE":"Hinzugefügt",
@@ -177,7 +183,10 @@
 		"CONTINUE":"Weiter",
 		"SETTINGS_SAVED_SUCCESSFULLY":"Einstellungen gespeichert",
 		"SETTINGS_SAVE_ERROR":"Einstellungen konnten nicht gespeichert werden",
-		"ERROR":"Fehler"
+		"ERROR":"Fehler",
+	"UPDATING_MUSIC_DB_WAIT_MESSAGE":"Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
+	"GOT_IT":"Verstanden",
+	"MEDIA_SERVERS":"Medienserver"
   },
   "APPEARANCE":{
 	"APPEARANCE":"Aussehen",
@@ -264,14 +273,30 @@
 	"UPDATE_ALREADY_LATEST_VERSION":"Die verwendete Version ist aktuell.",
 	"NO_UPDATE_AVAILABLE":"Keine Aktualisierungen verfügbar",
         "CANNOT_REMOVE_MEDIA":"Medium kann nicht ausgeworfen werden",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Medium erfolgreich ausgeworfen"
+    	"MEDIA_REMOVED_SUCCESSFULLY":"Medium erfolgreich ausgeworfen",
+	"INSTALL_TO_DISK":"Auf Laufwerk installieren",
+    	"INSTALLING_TO_DISK":"Auf Laufwerk installieren",
+    	"INSTALLING_TO_DISK_MESSAGE":"Installiere auf Laufwerk. Bitte warten!",
+    	"INSTALLING_TO_DISK_ERROR_MESSAGE":"Installation auf Laufwerk konnte nicht abgeschlossen werden.",
+    	"INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Installation konnte nicht abgeschlossen werden. Das Ziellaufwerk muss größer sein, als das Quelllaufwerk.",
+    	"INSTALL_TO_DISK_DESC":"Installation auf Laufwerk",
+    	"INSTALL_TO_DISK_MESSAGE":"Installation von Volumio auf Laufwerk bitte bestätigen",
+    	"INSTALL_TO_DISK_LABEL":"Bezeichnung",
+    	"INSTALL_TO_DISK_SIZE":"Größe",
+    	"INSTALL_TO_DISK_MESSAGE_WARNING":". ACHTUNG: Alle Daten auf dem Ziellaufwerk werden gelöscht!",
+    	"INSTALLING_TO_DISK_SUCCESS_TITLE":"Installation erfolgreich abgeschlossen",
+	"INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Um das neu installierte System jetzt zu verwenden, müssen alle Wechseldatenträger entfernt und das System neu gestartet werden.",
+	"CREDITS_OPEN_SOURCE_LICENSES":"Mitwirkende und OpenSource-Lizenzen",
+    	"VIDEO_OUT_OPTIONS": "Videoanzeige-Optionen",
+    	"HDMI_UI":"Benutzeroberfläche über HDMI anzeigen",
+	"HDMI_UI_DOC":"Zeige die Volumio-Benutzeroberfläche über den HDMI-Videoausgang an. ACHTUNG: Dies wird die Systemleistung negativ beeinflussen!"
   },
   "WEBRADIO":{
 	"MY_WEB_RADIOS":"Meine Radiosender",
-	"FAVOURITE_RADIOS":"Lieblings-Radiosender",
-	"TOP_500_RADIOS":"Top 500 Radiosender",
-	"BY_GENRE_RADIOS":"Nach Genre",
-	"BY_COUNTRY_RADIOS":"Nach Land",
+	"FAVOURITE_RADIOS":"Lieblingssender",
+	"TOP_500_RADIOS":"Die 500 besten Sender",
+	"BY_GENRE_RADIOS":"Sender nach Genre",
+	"BY_COUNTRY_RADIOS":"Sender nach Land",
 	"WEBRADIO":"Internetradio"
   },
   "PLUGINS":{
@@ -280,11 +305,13 @@
     	"UNINSTALL":"Deinstallieren",
     	"UPDATING_PLUGIN":"Plugin wird aktualisiert",
     	"DOWNLOADING_FROM":"Plugin herunterladen von ",
-    	"DOWNLOADING":"Plugin wird heruntergeladen"
+    	"DOWNLOADING":"Plugin wird heruntergeladen",
+	"NO_CONFIGURATION_AVAILABLE":"Konfiguration nicht verfügbar"
   },
   "WIZARD":{
-	"CONGRATULATIONS":"Glückwunsch",
-    "DEVICE_SUCCESSFULLY_CONFIGURED":"wurde eingerichtet und ist bereit für die Wiedergabe",
-    "PLEASE_DONATE":"Wenn dir Volumio gefällt, unterstütze uns doch mit einer Spende."
+	  "CONGRATULATIONS":"Glückwunsch",
+	  "DEVICE_SUCCESSFULLY_CONFIGURED":"wurde eingerichtet und ist bereit für die Wiedergabe",
+	  "PLEASE_DONATE":"Wenn dir Volumio gefällt, unterstütze uns doch mit einer Spende.",
+	  "RUN_FIRST_CONFIG_WIZARD":"Einrichtungsassistent ausführen"
   }
 }

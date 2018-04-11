@@ -2,8 +2,7 @@
 
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
-
-var dbUpdateState = false;
+var dbUpdateNotified = false;
 
 module.exports = PlatformSpecific;
 function PlatformSpecific(coreCommand) {
@@ -16,9 +15,14 @@ PlatformSpecific.prototype.shutdown = function () {
 	var self = this;
 	execSync("/bin/sync", { uid: 1000, gid: 1000});
 	exec("/usr/bin/sudo systemctl poweroff", function (error, stdout, stderr) {
-		if (error !== null) {
+		if (error) {
 			self.coreCommand.pushConsoleMessage(error);
-		} else self.coreCommand.pushConsoleMessage('Shutting Down');
+		}
+		self.coreCommand.pushConsoleMessage('Shutting Down');
+        // Fallback in case above method does not work
+		setTimeout(function() {
+            execSync("/usr/bin/sudo /sbin/shutdown -h now", { uid: 1000, gid: 1000});
+		}, 3000)
 	});
 };
 
@@ -26,9 +30,14 @@ PlatformSpecific.prototype.reboot = function () {
 	var self = this;
 	execSync("/bin/sync", { uid: 1000, gid: 1000});
 	exec("/usr/bin/sudo systemctl reboot", function (error, stdout, stderr) {
-		if (error !== null) {
+		if (error) {
 			self.coreCommand.pushConsoleMessage(error);
-		} else self.coreCommand.pushConsoleMessage('Rebooting');
+		}
+		self.coreCommand.pushConsoleMessage('Rebooting');
+		// Fallback in case above method does not work
+        setTimeout(function() {
+            execSync("/usr/bin/sudo /sbin/reboot", { uid: 1000, gid: 1000});
+        }, 3000)
 	});
 };
 
@@ -85,6 +94,10 @@ PlatformSpecific.prototype.startupSound = function () {
 				console.log(error);
 			}
                 self.coreCommand.closeModals();
+				setTimeout(function() {
+                    self.coreCommand.executeOnPlugin('audio_interface', 'alsa_controller', 'checkAudioDeviceAvailable', '');
+                    self.coreCommand.executeOnPlugin('system_controller', 'system', 'versionChangeDetect', '');
+				},1000)
 			});
     	}
 }
@@ -93,7 +106,8 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
 	var self = this;
 	self.coreCommand.pushConsoleMessage('Command Router : Notfying DB Update'+data);
 
-	if (data === true) {
+	if (data === true && !dbUpdateNotified) {
+        dbUpdateNotified = true;
         var responseData = {
             title: self.coreCommand.getI18nString('COMMON.SCAN_DB'),
             message: self.coreCommand.getI18nString('COMMON.UPDATING_MUSIC_DB_WAIT_MESSAGE'),

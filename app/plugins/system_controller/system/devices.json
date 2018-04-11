@@ -9,5 +9,6 @@
   {"name":"Sparky", "cpuid":"gs705a"},
   {"name":"Pine64", "cpuid":"sun50iw1p1"},
   {"name":"BBB", "cpuid":"GenericAM33XX(FlattenedDeviceTree)"},
-  {"name":"Tinkerboard", "cpuid":"Rockchip(DeviceTree)"}
+  {"name":"Tinkerboard", "cpuid":"Rockchip(DeviceTree)"},
+  {"name":"NanoPi NEO2", "cpuid":"Allwinnersun50iw2Family"}
 ]}

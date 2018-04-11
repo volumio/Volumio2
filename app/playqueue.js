@@ -49,13 +49,13 @@ function CorePlayQueue(commandRouter, stateMachine) {
 
 // Get a promise for contents of play queue
 CorePlayQueue.prototype.getQueue = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getQueue');
+	this.commandRouter.pushConsoleMessage('CorePlayQueue::getQueue');
 	return this.arrayQueue;
 };
 
 // Get a array of contiguous trackIds which share the same service, starting at nStartIndex
 CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrackBlock');
+	this.commandRouter.pushConsoleMessage('CorePlayQueue::getTrackBlock');
 	// jpa hack workaround for now....
 	var goodIndex = Math.min(this.arrayQueue.length - 1, nStartIndex);
     if (this.arrayQueue[goodIndex]) {
@@ -85,16 +85,18 @@ CorePlayQueue.prototype.getTrackBlock = function (nStartIndex) {
 CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
     var self=this;
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::removeQueueItem '+nIndex.value);
+	this.commandRouter.pushConsoleMessage('CorePlayQueue::removeQueueItem '+nIndex.value);
 	var item=this.arrayQueue.splice(nIndex.value, 1);
 
     //this.commandRouter.logger.info(JSON.stringify(item));
     this.saveQueue();
 
+    var name = '';
+    if (item[0] && item[0].name) {
+        name = item[0].name;
+    }
     this.commandRouter.pushToastMessage('success',  this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TITLE'),
-        this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_1')+
-        item[0].name+
-        this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_2'));
+        this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_1')+ name + this.commandRouter.getI18nString('COMMON.REMOVE_QUEUE_TEXT_2'));
 
     var defer=libQ.defer();
     this.commandRouter.volumioPushQueue(this.arrayQueue)
@@ -112,7 +114,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     var self=this;
     var defer=libQ.defer();
 
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::addQueueItems');
+	this.commandRouter.pushConsoleMessage('CorePlayQueue::addQueueItems');
 
     //self.commandRouter.logger.info(arrayItems);
 
@@ -141,7 +143,9 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             if(service==='webradio' || item.uri.startsWith('cdda:'))
             {
                 item.name=item.title;
-                item.albumart="/albumart";
+                if (!item.albumart) {
+                    item.albumart="/albumart";
+                }
                 promiseArray.push(libQ.resolve(item));
             }
             else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
@@ -201,7 +205,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 };
 
 CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearAddPlayQueue');
+    this.commandRouter.pushConsoleMessage('CorePlayQueue::clearAddPlayQueue');
     this.arrayQueue = [];
     this.arrayQueue = this.arrayQueue.concat(arrayItems);
     this.saveQueue();
@@ -211,7 +215,7 @@ CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
 };
 
 CorePlayQueue.prototype.clearPlayQueue = function () {
-	this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::clearPlayQueue');
+	this.commandRouter.pushConsoleMessage('CorePlayQueue::clearPlayQueue');
 	this.arrayQueue = [];
     this.saveQueue();
 
@@ -220,7 +224,7 @@ CorePlayQueue.prototype.clearPlayQueue = function () {
 };
 
 CorePlayQueue.prototype.getTrack = function (index) {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::getTrack '+index);
+    this.commandRouter.pushConsoleMessage('CorePlayQueue::getTrack '+index);
 
     if(this.arrayQueue.length>index)
     {
@@ -230,7 +234,7 @@ CorePlayQueue.prototype.getTrack = function (index) {
 };
 
 CorePlayQueue.prototype.moveQueueItem = function (from,to) {
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::moveQueueItem '+from+' --> '+to);
+    this.commandRouter.pushConsoleMessage('CorePlayQueue::moveQueueItem '+from+' --> '+to);
 
     if(this.arrayQueue.length>to)
     {
@@ -243,7 +247,7 @@ CorePlayQueue.prototype.moveQueueItem = function (from,to) {
 
 CorePlayQueue.prototype.saveQueue = function () {
     var self=this;
-    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CorePlayQueue::saveQueue');
+    this.commandRouter.pushConsoleMessage('CorePlayQueue::saveQueue');
 
     fs.writeJson('/data/queue', self.arrayQueue, function (err) {
         if(err)

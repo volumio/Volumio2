@@ -69,7 +69,10 @@
     "ISO_PLAYBACK":"ISO Playback",
     "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Extended File Format Support",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster"
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster",
+    "USB_DAC_CONNECTED":"USB DAC Connected",
+    "NO_OUTPUT_DEVICE":"No Audio Output Available",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",
@@ -92,7 +95,7 @@
     "HOTSPOT_NAME":"Hotspot Name",
     "HOTSPOT_PROTECTION":"Password Protected Hotspot",
     "HOTSPOT_PASSWORD":"Hotspot Password",
-	"HOTSPOT_PASSWORD_DOC":"Change the default Hotspot Password, use a passphrase of at least 7 characters",
+	"HOTSPOT_PASSWORD_DOC":"Change the default Hotspot Password, use a passphrase of at least 8 characters",
     "HOTSPOT_CHANNEL":"Hotspot Channel",
 	"HOTSPOT_CHANNEL_DOC":"Change the Hotspot Transmitting channel. This might be useful to improve wireless connection trough Hotspot in network-dense environments",
     "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
@@ -111,7 +114,9 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Failed to connect to network ",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Please retry or proceed to next step",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"The unit will connect to network",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"when first setup will be completed"
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"when first setup will be completed",
+    "HOTSPOT_FALLBACK":"Hotspot fallback",
+    "HOTSPOT_FALLBACK_DOC":"If enabled, Hotspot will start when Wireless Network connection is lost. If disabled, the unit will keep on trying to reconnect to a known Wireless network"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Choose an Alias that will be displayed in NAS Mounts",
@@ -120,7 +125,8 @@
 	  "NETWORK_DRIVE":"Network Drive",
 	  "SHARE_NOT_CONFIGURED":"This Share is not configured",
 	  "SHARE_MOUNT_SUCCESS":"Network Drive Added successfully",
-	  "MOUNT_SHARE_ERROR":"Error in adding network drive"
+	  "MOUNT_SHARE_ERROR":"Error in adding network drive",
+      "ERROR_PATH_UNDEFINED":"Please provide Share Name or Path" 
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Added",
@@ -179,7 +185,8 @@
 	"SETTINGS_SAVE_ERROR":"Error in saving settings",
 	"ERROR":"Error",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Your music is being scanned and the icon on bottom left will keep spinning until all your library has been successfully indexed. Since the system might be less responsive during this operation, please don't use the system while music is being indexed ",
-    "GOT_IT":"Got it"
+    "GOT_IT":"Got it",
+    "MEDIA_SERVERS":"Media Servers"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -278,8 +285,11 @@
     "INSTALL_TO_DISK_SIZE":"SIZE",
     "INSTALL_TO_DISK_MESSAGE_WARNING":". WARNING: Be careful to select the correct destination disk, as all data on it will be deleted!",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"System successfully installed to Disk",
-    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"In order to use your newly installed system, restart the system and remove any removable media"
-
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"In order to use your newly installed system, restart the system and remove any removable media",
+    "CREDITS_OPEN_SOURCE_LICENSES":"Credits and Open Source licenses",
+    "VIDEO_OUT_OPTIONS": "Video output options",
+    "HDMI_UI_DOC":"Show User Interface via HDMI Video Output. WARNING: This will degrade system performances",
+    "HDMI_UI":"User Interface via HDMI"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

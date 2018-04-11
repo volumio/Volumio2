@@ -78,6 +78,7 @@ ControllerSystem.prototype.getUIConfig = function () {
     var showLanguageSelector = self.getAdditionalConf('miscellanea', 'appearance', 'language_on_system_page', false);
     var device = self.config.get('device', '');
     var showDiskInstaller = self.config.get('show_disk_installer', true);
+	var HDMIEnabled = self.config.get('hdmi_enabled', false);
 
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
@@ -86,13 +87,15 @@ ControllerSystem.prototype.getUIConfig = function () {
 		{
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName').capitalize());
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
+    self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value', HDMIEnabled);
+
 
 	if (device != undefined && device.length > 0 && device === 'x86' && showDiskInstaller) {
 		var disks = self.getDisks();
         if (disks != undefined) {
             disks.then(function (result) {
 				if (result.available.length > 0) {
-                    uiconf.sections[3].hidden = false;
+                    uiconf.sections[4].hidden = false;
 					var disklist = result.available;
                     for (var i in disklist) {
                         var device = disklist[i];
@@ -102,7 +105,7 @@ ControllerSystem.prototype.getUIConfig = function () {
                         var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + '. ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
 						var onClick = {"type":"emit", "message":"installToDisk", "data":{"from": result.current, "target":device.device}, "askForConfirm": {"title": title, "message": message}}
 						var item = {"id": "install_to_disk"+device.device, "element":"button", "label": label, "description": description, "onClick" : onClick};
-                        uiconf.sections[3].content.push(item);
+                        uiconf.sections[4].content.push(item);
                     }
 				}
             })
@@ -293,7 +296,7 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 				} else {
 					self.logger.info('Permissions for /etc/hosts set')
-					exec("/usr/bin/sudo /bin/hostname "+hostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+					exec("/usr/bin/sudo /bin/hostname "+ newhostname, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 						if (error !== null) {
 							console.log('Cannot set new hostname: ' + error);
 
@@ -312,9 +315,9 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_NOW') + ' ' + hostname);
 						self.logger.info('Hostname now is ' + newhostname);
 						var avahiconf = '<?xml version="1.0" standalone="no"?><service-group><name replace-wildcards="yes">'+ hostname +'</name><service><type>_http._tcp</type><port>80</port></service></service-group>';
-						exec("/usr/bin/sudo /bin/chmod 777 /etc/avahi/services/volumio.service", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+						exec("/usr/bin/sudo /bin/chmod -R 777 /etc/avahi/services/", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 							if (error !== null) {
-								console.log('Cannot set permissions for /etc/hosts: ' + error);
+								console.log('Cannot set permissions for /etc/avahi/services/: ' + error);
 
 							} else {
 								self.logger.info('Permissions for /etc/avahi/services/volumio.service')
@@ -322,46 +325,16 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 									if (err) {
 										console.log(err);
 									} else {
-										self.logger.info('Avahi name changed to '+ hostname);
-										/*
-										setTimeout(function () {
-											exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-												uid: 1000,
-												gid: 1000
-											}, function (error, stdout, stderr) {
-												if (error !== null) {
-													console.log(error);
-													self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-												} else {
-													self.logger.info('Avahi Daemon Restarted')
-												}
-											});
-										}, 3000)
-										 */
+										self.logger.info('Avahi name changed to '+ newhostname);
 									}
 								});
 							}
 
 						});
-
-
-
-
-
-
 						setTimeout(function () {
-							exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
-								uid: 1000,
-								gid: 1000
-							}, function (error, stdout, stderr) {
-								if (error !== null) {
-									console.log(error);
-									self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
-								} else {
-									self.logger.info('Avahi Daemon Restarted')
-								}
-							});
-						}, 3000)
+							// Restarting AVAHI results in system crashing
+							//self.restartAvahi();
+						}, 10000)
 					}
 				});
 			});
@@ -371,6 +344,21 @@ ControllerSystem.prototype.setHostname = function (hostname) {
 
 };
 
+ControllerSystem.prototype.restartAvahi = function () {
+    var self = this;
+
+    exec("/usr/bin/sudo /bin/systemctl restart avahi-daemon.service", {
+        uid: 1000,
+        gid: 1000
+    }, function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log(error);
+            self.commandRouter.pushToastMessage('alert', self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_NAME_ERROR'));
+        } else {
+            self.logger.info('Avahi Daemon Restarted')
+        }
+    });
+};
 
 
 
@@ -450,7 +438,6 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 	if (message == undefined || message.text == undefined || message.text.length < 1 ) {
 		message.text = 'No info available';
 	}
-	fs.appendFileSync('/tmp/logfields', 'Description="' + message.text + '"\r\n');
 	// Must single-quote the message or the shell may interpret it and crash.
 	// single-quotes already within the message need to be escaped.
 	// The resulting string always starts and ends with single quotes.
@@ -513,7 +500,6 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 	var defer = libQ.defer();
 	var device = '';
 
-    var info = self.getSystemVersion();
     var info = self.getSystemVersion();
     info.then(function(infos)
     {
@@ -912,4 +898,47 @@ ControllerSystem.prototype.notifyInstallToDiskStatus = function (data) {
         responseData.message = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_MESSAGE') + ': ' + data.error;
 	}
     self.commandRouter.broadcastMessage(emit, responseData);
+};
+
+ControllerSystem.prototype.saveHDMISettings = function (data) {
+    var self = this;
+
+	var currentConf = self.config.get('hdmi_enabled', false);
+	if (currentConf |=  data['hdmi_enabled'])  {
+        self.config.set('hdmi_enabled', data['hdmi_enabled']);
+
+        var action = 'enable';
+        var immediate = 'start'
+        if (!data['hdmi_enabled']) {
+            action = 'disable';
+            immediate = 'stop';
+        }
+
+        exec('/usr/bin/sudo /bin/systemctl '+immediate+' volumio-kiosk.service && /usr/bin/sudo /bin/systemctl '+action+' volumio-kiosk.service',{uid:1000,gid:1000}, function (error, stdout, stderr) {
+            if (error !== null) {
+                console.log(error);
+                self.logger.info('Cannot '+action+' volumio-kiosk service: ' + error);
+            } else {
+                self.logger.info(action+ ' volumio-kiosk service success');
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.HDMI_UI'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
+            }
+        });
+	}
+}
+
+ControllerSystem.prototype.versionChangeDetect = function () {
+    var self = this;
+
+    var info = self.getSystemVersion();
+    info.then(function(infos)
+    {
+        if (infos != undefined && infos.systemversion != undefined) {
+        	var systemVersion = self.config.get('system_version', 'none');
+        	if (systemVersion !== infos.systemversion) {
+        		self.config.set('system_version', infos.systemversion);
+        		self.logger.info('Version has changed, forcing UI Reload');
+        		return self.commandRouter.reloadUi();
+			}
+        }
+    });
 };
