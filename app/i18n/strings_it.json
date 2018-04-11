@@ -27,7 +27,7 @@
     "NO_HARDWARE_MIXER":"Nessun mixer hardware disponibile",
     "MIXER_CONTROLS":"Controllo volume",
     "MIXER_CONTROLS_UPDATE":"Impostazioni Volume aggiornate",
-    "I2S_DAC_ACTIVATED":"I2S DAC dttivato",
+    "I2S_DAC_ACTIVATED":"I2S DAC attivato",
     "I2S_DAC_ACTIVATED_MESSAGE":"è stato attivato, riavvia il sistema per rendere effettivi i cambiamenti",
     "I2S_DAC_DEACTIVATED":"I2S DAC disattivato",
     "I2S_DAC_DEACTIVATED_MESSAGE":"è stato disattivato, riavvia il sistema per rendere effettivi i cambiamenti",
