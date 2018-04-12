@@ -1,6 +1,12 @@
 const modclean = require('modclean');
 const execSync = require('child_process').execSync;
-const modulesFolder = process.cwd() + '/node_modules';
+var modulesFolder = modulesFolder = process.cwd() + '/node_modules';
+var  folder = process.cwd();
+
+if (process.argv[2]) {
+    modulesFolder = process.argv[2] + '/node_modules';
+    folder = process.argv[2];
+}
 
 console.log('Cleaning node modules in folder ' + modulesFolder);
 
@@ -11,7 +17,7 @@ try {
     console.log('Error, cannot determine size for ' + modulesFolder);
 }
 
-modclean(function(err, results) {
+modclean({"cwd":folder}, function(err, results) {
     if(err) {
         console.error('Error, cannot clean: ' + err);
         return;
