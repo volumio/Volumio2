@@ -3743,7 +3743,6 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
 }
 
 ControllerMpd.prototype.goto=function(data){
-
     if (data.type=='artist') {
         return this.listArtist('artists://'+encodeURIComponent(data.value),2,'', 'albums://'+encodeURIComponent(data.value)+'/')
 	} else if (data.type=='album'){
@@ -3846,7 +3845,7 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
 
 ControllerMpd.prototype.dsdVolume=function(){
 	var self = this;
-
+	
 	if (dsd_autovolume) {
 		self.logger.info('Setting Volume to 100 automatically for DSD')
         self.commandRouter.volumiosetvolume(100);

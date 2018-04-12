@@ -507,7 +507,7 @@ ControllerWebradio.prototype.seek = function(position) {
 
 ControllerWebradio.prototype.explodeUri = function(uri) {
     var self = this;
-
+    
     var defer=libQ.defer();
 
     defer.resolve({
@@ -828,7 +828,6 @@ ControllerWebradio.prototype.search = function (data) {
                             title: station.name,
                             artist: '',
                             album: '',
-
                             uri: safeuri
                         };
                         if (station.image.url != undefined && station.image.url != null) {
@@ -845,8 +844,6 @@ ControllerWebradio.prototype.search = function (data) {
             }
 
         });
-
-
 
     /*
     memoryCache.wrap(uri, function (cacheCallback) {
