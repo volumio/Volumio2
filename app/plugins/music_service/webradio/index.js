@@ -7,7 +7,6 @@ var pidof = require('pidof');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
 var libMpd = require('mpd');
-var nodetools=require('nodetools');
 var variant = '';
 var selection = {};
 var retry = 0;
@@ -806,7 +805,7 @@ ControllerWebradio.prototype.search = function (data) {
     };
 
     var search = data.value.toLowerCase();
-    //var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+nodetools.urlEncode(query.value)+'&limit=20';
+    //var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+encodeURIComponent(query.value)+'&limit=20';
     var uri = 'http://api.dirble.com/v2/search?token=8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2';
 
     unirest.post(uri)
@@ -829,7 +828,6 @@ ControllerWebradio.prototype.search = function (data) {
                             title: station.name,
                             artist: '',
                             album: '',
-
                             uri: safeuri
                         };
                         if (station.image.url != undefined && station.image.url != null) {
@@ -846,8 +844,6 @@ ControllerWebradio.prototype.search = function (data) {
             }
 
         });
-
-
 
     /*
     memoryCache.wrap(uri, function (cacheCallback) {

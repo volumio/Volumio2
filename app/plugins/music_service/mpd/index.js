@@ -7,7 +7,6 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
 var exec = require('child_process').exec;
-var nodetools = require('nodetools');
 var convert = require('convert-seconds');
 var pidof = require('pidof');
 var parser = require('cue-parser');
@@ -647,7 +646,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
             self.listAlbums();
         }
     })
-	
+
 	// Catch and log errors
 	self.clientMpd.on('error', function (err) {
 		self.logger.error('MPD error: ' + err);
@@ -1016,11 +1015,11 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			} else {
                 var conf12 = conf11.replace('"${ffmpeg}"', " ");
             }
-            
+
             for(var callback of self.registeredCallbacks)
             {
                var data = self.commandRouter.executeOnPlugin(callback.type, callback.plugin, callback.data);
-               conf12 += data;  
+               conf12 += data;
             }
 
             fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
@@ -2219,7 +2218,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
     }
     else if(uri.endsWith('.iso')) {
         var uriPath = '/mnt/' + self.sanitizeUri(uri);
-       
+
         var uris = self.scanFolder(uriPath);
         var response = [];
 
@@ -2870,7 +2869,7 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
     self.logger.info("CURURI: "+curUri);
 	var splitted=curUri.split('/');
 
-//music-library	
+//music-library
     if (curUri.startsWith('music-library')) {
         response = self.lsInfo(curUri);
     }
@@ -2910,7 +2909,7 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
         else
         {
             if(splitted.length==3) {  //No album name
-                response = self.listArtist(curUri,2,'artists://','artists://');  //Pass back to listArtist 
+                response = self.listArtist(curUri,2,'artists://','artists://');  //Pass back to listArtist
 			}
             else {  //Has album name
 				response = self.listAlbumSongs(curUri,3,'artists://'+ splitted[2]);  //Pass to listAlbumSongs with artist and album name
@@ -3744,7 +3743,6 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
 }
 
 ControllerMpd.prototype.goto=function(data){
-	
     if (data.type=='artist') {
         return this.listArtist('artists://'+encodeURIComponent(data.value),2,'', 'albums://'+encodeURIComponent(data.value)+'/')
 	} else if (data.type=='album'){
@@ -3867,4 +3865,3 @@ ControllerMpd.prototype.registerConfigCallback = function(callback){
     self.logger.info('register callback: ' + JSON.stringify(callback,null,4));
     self.registeredCallbacks.push(callback);
 }
-

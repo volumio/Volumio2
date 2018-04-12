@@ -3,7 +3,6 @@ var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
 var websocket = require('socket.io-client')
-var socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true})
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -32,10 +31,9 @@ function init() {
                 execSync("/usr/bin/git clone --depth 5 --no-single-branch https://github.com/" + name +
                     "/volumio-plugins.git /home/volumio/volumio-plugins");
                 console.log("Done, please run command again");
-                process.exit(1);
             }catch(e){
                 console.log("Unable to find repo, are you sure you forked it?")
-                process.exit(1);
+                process.exitCode = 1;
             }
         });
     }
@@ -44,20 +42,23 @@ function init() {
         exec("git config --get remote.origin.url", function (error, stdout, stderr) {
             if (error) {
                 console.error('exec error: ${error}');
-                process.exit(1);
+                process.exitCode = 1;
+                return;
             }
             var url = stdout;
             if (url == "https://github.com/volumio/volumio-plugins.git\n") {
                 exec("git config user.name", function (error, stdout, stderr) {
                     if (error) {
                         console.error('exec error: ${error}');
-                        process.exit(1);
+                        process.exitCode = 1;
+                        return;
                     }
                     var user = stdout;
                     if (user != 'volumio\n'){
                         console.log("Error, your repo is the original one, please " +
                             "fork it as suggested in the documentation!");
-                        process.exit(1);
+                        process.exitCode = 1;
+                        return;
                     }
                     else{
                         ask_category();
@@ -355,7 +356,8 @@ function zip(){
             }
             catch (e){
                 console.log("Error installing node modules: " + e);
-                process.exit(1);
+                process.exitCode = 1;
+                return;
             }
         }
         var package = fs.readJsonSync("package.json");
@@ -366,6 +368,7 @@ function zip(){
     }
     catch (e){
         console.log("Error compressing plugin: " + e);
+        process.exitCode = 1;
     }
 }
 
@@ -708,6 +711,60 @@ function update() {
     else {
         console.log("No package found")
         process.exit(1)
+    }
+}
+
+// =============================== INSTALL ====================================
+
+function install(){
+    if(fs.existsSync("package.json")){
+        let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
+        var package = fs.readJsonSync("package.json");
+        zip();
+        if(!fs.existsSync("/tmp/plugins")) {
+            execSync("/bin/mkdir /tmp/plugins/")
+        }
+        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
+            + package.name + ".zip"})
+        socket.on('installPluginStatus', function (data) {
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
+            if(data.message == "Plugin Successfully Installed"){
+                console.log("Done!");
+                socket.close()
+            }
+        })
+    }
+    else {
+        console.log("No package found")
+        process.exitCode = 1;
+    }
+}
+
+// ================================ UPDATE ====================================
+
+function update() {
+    if(fs.existsSync("package.json")){
+        let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
+        var package = fs.readJsonSync("package.json");
+        zip();
+        if(!fs.existsSync("/tmp/plugins")) {
+            execSync("/bin/mkdir /tmp/plugins/")
+        }
+        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        socket.emit('updatePlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
+            + package.name + ".zip", category: package.category, name: package.name})
+        socket.on('installPluginStatus', function (data) {
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
+            if(data.message == "Plugin Successfully Installed"){
+                console.log("Done!");
+                socket.close()
+            }
+        })
+    }
+    else {
+        console.log("No package found")
+        process.exitCode = 1;
     }
 }
 

@@ -6,7 +6,6 @@ var download = require('file-download');
 var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
-var nodetools = require('nodetools');
 var exec = require('child_process').exec;
 var diskCache = true;
 
@@ -117,9 +116,9 @@ var searchOnline = function (defer, web) {
     if (infoJson[resolution] == undefined) {
 
         try {
-            var decodedArtist=nodetools.urlDecode(artist);
-            var decodedAlbum=nodetools.urlDecode(album);
-            var decodedResolution=nodetools.urlDecode(resolution);
+            var decodedArtist = decodeURIComponent(artist);
+            var decodedAlbum = decodeURIComponent(album);
+            var decodedResolution = decodeURIComponent(resolution);
         } catch(e) {
            //console.log("ERROR getting albumart info from JSON file: " + e);
             defer.reject(new Error(err));
@@ -326,9 +325,9 @@ var processRequest = function (web, path, meta) {
 	}
 
 	if (path != undefined) {
-        path=nodetools.urlDecode(path);
+        path = decodeURIComponent(path);
 
-        path=sanitizeUri(path);
+        path = sanitizeUri(path);
 
         if(path.startsWith('/')){
         	if (path.startsWith('/tmp/')){

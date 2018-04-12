@@ -6,7 +6,6 @@ var libxmljs = require("libxmljs");
 var unirest = require('unirest');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
-var nodetools=require('nodetools');
 var mm = require('musicmetadata');
 var Client = require('node-ssdp').Client;
 var xml2js = require('xml2js');
