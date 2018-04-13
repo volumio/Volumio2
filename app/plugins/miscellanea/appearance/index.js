@@ -309,6 +309,14 @@ volumioAppearance.prototype.setLanguage = function(data)
         config.set('language', data.language.label);
         config.set('language_code', data.language.value);
         this.commandRouter.sharedVars.set('language_code',data.language.value);
+
+        var menu = self.commandRouter.getMenuItems();
+        if (menu != undefined) {
+            menu.then(function (menu) {
+                self.commandRouter.broadcastMessage('pushMenuItems', menu);
+                self.commandRouter.updateBrowseSourcesLang();
+            });
+        }
     }
 
     if (!data.disallowReload) {
@@ -316,8 +324,6 @@ volumioAppearance.prototype.setLanguage = function(data)
             self.commandRouter.getI18nString('APPEARANCE.NEW_LANGUAGE_SET'));
 
         var data = self.getUiSettings();
-        self.commandRouter.updateBrowseSourcesLang();
-
         if (data != undefined) {
             data.then(function (data) {
                 self.commandRouter.broadcastMessage('pushUiSettings', data);

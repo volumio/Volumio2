@@ -249,7 +249,7 @@ PluginManager.prototype.loadMyVolumioPlugins = function () {
     var defer_loadList=[];
     var priority_array = new HashMap();
 
-    var myVolumioPaths = ['/myvolumio/plusplugins','/data/myvolumio/plusplugins']
+    var myVolumioPaths = ['/myvolumio/plugins','/data/myvolumio/plugins']
 
     for (var ppaths in myVolumioPaths) {
         var folder = myVolumioPaths[ppaths];

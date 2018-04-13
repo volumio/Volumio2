@@ -543,6 +543,7 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 
 		}
 	}
+	return this.commandRouter.broadcastMessage('pushBrowseSources', self.browseSources);
 }
 
 CoreMusicLibrary.prototype.goto=function(data){

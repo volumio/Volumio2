@@ -58,7 +58,6 @@ function CoreCommandRouter(server) {
     this.pluginManager.pluginFolderCleanup();
     this.configManager=new(require(__dirname+'/configManager.js'))(this.logger);
 
-
     this.pluginManager.startPlugins();
 
     this.loadI18nStrings();
@@ -81,9 +80,7 @@ function CoreCommandRouter(server) {
     this.pushConsoleMessage('BOOT COMPLETED');
 
     this.startupSound();
-
-
-    	this.closeModals();
+	this.closeModals();
 
 }
 
@@ -1924,4 +1921,25 @@ CoreCommandRouter.prototype.reloadUi = function () {
     this.pushConsoleMessage('CoreCommandRouter::Reload Ui');
 
     return self.broadcastMessage('reloadUi', '');
+}
+
+CoreCommandRouter.prototype.getMenuItems = function () {
+    var self=this;
+    var defer = libQ.defer();
+    var lang_code = self.sharedVars.get('language_code');
+
+    self.i18nJson(__dirname+'/i18n/strings_'+lang_code+'.json',
+        __dirname+'/i18n/strings_en.json',
+        __dirname + '/mainmenu.json')
+        .then(function(menuItemsJson)
+        {
+            if (fs.existsSync('/myvolumio/')) {
+                var menuItems = [{"id": "my-volumio"}];
+                menuItems = menuItems.concat(menuItemsJson.menuItems);
+            } else {
+                var menuItems = menuItemsJson['menuItems'];
+            }
+            defer.resolve(menuItems);
+        });
+    return defer.promise
 }
