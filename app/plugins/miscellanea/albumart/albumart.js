@@ -448,15 +448,15 @@ var processExpressRequest = function (req, res) {
 		    if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
 			} else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
-                	var corepluginurl = '/volumio/app/plugins/' + sourceicon;
-                	var pluginurl = '/data/plugins/' + sourceicon;
-                	if (fs.existsSync(corepluginurl)) {
-                        res.sendFile(corepluginurl);
-                	} else {
-                    	res.sendFile(pluginurl);
-                	}
-            	}	catch(e) {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return res.sendFile(pluginIcon);
+                        }
+                    }
+                }catch(e) {
                     try{
                         res.sendFile(__dirname + '/default.jpg');
                     } catch(e) {
