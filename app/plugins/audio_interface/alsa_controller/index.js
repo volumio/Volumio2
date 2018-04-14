@@ -8,6 +8,9 @@ var libQ = require('kew');
 var libFsExtra = require('fs-extra');
 var spawn = require('child_process').spawn;
 
+var ignoreUsbAudioDetach = false;
+var ignoreUsbAudioAttach = false;
+
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
 function ControllerAlsa(context) {
@@ -1362,7 +1365,7 @@ ControllerAlsa.prototype.usbAudioAttach  = function () {
 	var self = this;
 
     var usbHotplug = self.config.get('usb_hotplug', false);
-    if (usbHotplug) {
+    if (usbHotplug && !ignoreUsbAudioAttach) {
         var cards = self.getAlsaCards();
         var usbCardName = self.getLabelForSelectedCard(cards, 5);
         var usbData = {"disallowPush":true,"output_device":{"value":"5","label":usbCardName},"i2s":false};
@@ -1376,7 +1379,9 @@ ControllerAlsa.prototype.usbAudioAttach  = function () {
 ControllerAlsa.prototype.usbAudioDetach  = function () {
     var self = this;
 
-    self.checkAudioDeviceAvailable();
+    if (!ignoreUsbAudioDetach) {
+        self.checkAudioDeviceAvailable();
+	}
 };
 
 ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
@@ -1399,4 +1404,16 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
         }
         self.commandRouter.broadcastMessage("openModal", responseData);
 	}
+};
+
+ControllerAlsa.prototype.ignoreUsbAudioDetach  = function (value) {
+    var self = this;
+
+    ignoreUsbAudioDetach = value;
+};
+
+ControllerAlsa.prototype.ignoreUsbAudioAttach  = function (value) {
+    var self = this;
+
+    ignoreUsbAudioAttach = value;
 };
