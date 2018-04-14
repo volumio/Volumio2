@@ -123,6 +123,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "my_music": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "user_interface": {
