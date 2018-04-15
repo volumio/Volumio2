@@ -1,0 +1,143 @@
+{
+  "page": {
+    "label": "TRANSLATE.COMMON.MY_MUSIC"
+  },
+  "sections": [
+    {"coreSection":"my-music"},
+	{"coreSection":"network-drives"},
+	{
+	  "id": "albumart_settings",
+	  "element": "section",
+	  "label": "TRANSLATE.APPEARANCE.ALBUMART_SETTINGS",
+	  "icon": "fa-file-image-o",
+	  "onSave": {"type":"controller", "endpoint":"miscellanea/albumart", "method":"saveAlbumartOptions"},
+	  "saveButton": {
+		"label": "TRANSLATE.COMMON.SAVE",
+		"data": [
+		  "enable_web",
+		  "web_quality",
+		  "metadataimage"
+		]
+	  },
+	  "content": [
+		{
+		  "id": "enable_web",
+		  "element": "switch",
+		  "doc" : "TRANSLATE.APPEARANCE.WEB_ALBUMART_ENABLE_DOC",
+		  "label": "TRANSLATE.APPEARANCE.WEB_ALBUMART_ENABLE",
+		  "value": true
+		},
+		{
+		  "id": "web_quality",
+		  "element": "select",
+		  "doc" : "TRANSLATE.APPEARANCE.WEB_ALBUMART_SIZE_DOC",
+		  "label": "TRANSLATE.APPEARANCE.WEB_ALBUMART_SIZE",
+		  "value":  {
+			"value":"large",
+			"label": "TRANSLATE.APPEARANCE.LARGE"
+		  },
+		  "visibleIf": {
+			"field": "enable_web",
+			"value": true
+		  },
+		  "options": [
+			{
+			  "value":"small",
+			  "label": "TRANSLATE.APPEARANCE.SMALL"
+			},
+			{
+			  "value":"medium",
+			  "label": "TRANSLATE.APPEARANCE.MEDIUM"
+			},
+			{
+			  "value":"large",
+			  "label": "TRANSLATE.APPEARANCE.LARGE"
+			},
+			{
+			  "value":"extralarge",
+			  "label": "TRANSLATE.APPEARANCE.EXTRALARGE"
+			},
+			{
+			  "value":"mega",
+			  "label": "TRANSLATE.APPEARANCE.MEGA"
+			}
+		  ]
+
+		},
+		{
+		 "id": "metadataimage",
+			"element": "switch",
+			"doc" : "TRANSLATE.APPEARANCE.METADATA_IMAGE_DOC",
+			"label": "TRANSLATE.APPEARANCE.METADATA_IMAGE",
+			"value": false
+		},
+		  {
+		  "id":"albumartcache",
+		  "element": "button",
+		  "label": "TRANSLATE.APPEARANCE.ALBUMART_RESET_CACHE",
+		  "doc": "TRANSLATE.APPEARANCE.ALBUMART_RESET_CACHE_DOC",
+		  "onClick": {"type":"emit", "message":"callMethod", "data":{"endpoint":"miscellanea/albumart","method":"clearAlbumartCache","data":""}}
+		 }
+	  ]
+	},
+	  {
+		  "id": "library_settings",
+		  "element": "section",
+		  "label": "TRANSLATE.APPEARANCE.MUSIC_LIBRARY_SETTINGS",
+		  "icon": "fa-music",
+		  "onSave": {"type":"controller", "endpoint":"music_service/mpd", "method":"saveMusicLibraryOptions"},
+		  "saveButton": {
+			  "label": "TRANSLATE.COMMON.SAVE",
+			  "data": [
+				  "tracknumbers",
+				  "compilation",
+				  "artistsort",
+				  "ffmpegenable"
+			  ]
+		  },
+		  "content": [
+			  {
+				  "id": "tracknumbers",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.APPEARANCE.SHOW_TRACKNUMBERS_DOC",
+				  "label": "TRANSLATE.APPEARANCE.SHOW_TRACKNUMBERS",
+				  "value": false
+			  },
+			  {
+				  "id": "compilation",
+				  "element": "input",
+				  "value": "",
+				  "doc" : "TRANSLATE.APPEARANCE.COMPILATION_METADATA_DOC",
+				  "label": "TRANSLATE.APPEARANCE.COMPILATION_METADATA"
+			  },
+			  {
+				  "id": "artistsort",
+				  "element": "select",
+				  "doc" : "TRANSLATE.APPEARANCE.ARTIST_SORTING_DOC",
+				  "label": "TRANSLATE.APPEARANCE.ARTIST_SORTING",
+				  "value":  {
+					  "value":true,
+					  "label": "albumartist"
+				  },
+				  "options": [
+					  {
+						  "value":true,
+						  "label": "albumartist"
+					  },
+					  {
+						  "value":false,
+						  "label": "artist"
+					  }
+				  ]
+
+			  },
+			  {
+				  "id": "ffmpegenable",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT_DOC",
+				  "label": "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT",
+				  "value": false
+			  }
+		  ]
+	  }
+]}
