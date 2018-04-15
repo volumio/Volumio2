@@ -413,6 +413,7 @@ var processExpressRequest = function (req, res) {
 	var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
+    var sectionimage = req.query.sectionimage;
     var meta = false;
     if (req.query.metadata != undefined && req.query.metadata === 'true') {
         meta = true;
@@ -447,7 +448,23 @@ var processExpressRequest = function (req, res) {
             res.setHeader('Cache-Control', 'public, max-age=2628000')
 		    if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
-			} else if (sourceicon!==undefined) {
+			} else if (sectionimage!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var sectionimageFile = pluginPaths[i] + sectionimage;
+                        if(fs.existsSync(sectionimageFile)) {
+                            return res.sendFile(sectionimageFile);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        res.sendFile(__dirname + '/default.jpg');
+                    } catch(e) {
+                        res.sendFile(__dirname + '/default.png');
+                    }
+                }
+            } else if (sourceicon!==undefined) {
                 var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
                     for (i = 0; i < pluginPaths.length; i++) {
