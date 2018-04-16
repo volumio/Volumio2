@@ -278,7 +278,7 @@ function interfaceApi(context) {
                     var timeStart = Date.now();
                     self.logStart('USB Audio Device Attached')
                         .then(function () {
-                            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'usbAudioAttach', '');
+                            self.commandRouter.usbAudioAttach();
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {
@@ -289,7 +289,7 @@ function interfaceApi(context) {
                     var timeStart = Date.now();
                     self.logStart('USB Audio Device Detached')
                         .then(function () {
-                            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'usbAudioDetach', '');
+                            self.commandRouter.usbAudioDetach();
                         })
                         .fail(self.pushError.bind(self))
                         .done(function () {

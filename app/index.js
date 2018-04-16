@@ -1943,3 +1943,27 @@ CoreCommandRouter.prototype.getMenuItems = function () {
         });
     return defer.promise
 }
+
+CoreCommandRouter.prototype.usbAudioAttach = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    if (typeof self.platformspecific.usbAudioAttach === "function") {
+        self.platformspecific.usbAudioAttach();
+    } else {
+        defer.resolve();
+	}
+    return defer.promise
+}
+
+CoreCommandRouter.prototype.usbAudioDetach = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    if (typeof self.platformspecific.usbAudioDetach === "function") {
+        self.platformspecific.usbAudioDetach();
+    } else {
+        defer.resolve();
+    }
+    return defer.promise
+}

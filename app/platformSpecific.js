@@ -130,3 +130,15 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
 	return self.coreCommand.broadcastMessage('dbUpdate', {'status':data});
 
 }
+
+PlatformSpecific.prototype.usbAudioAttach = function () {
+    var self = this;
+
+    return self.coreCommand.executeOnPlugin('audio_interface', 'alsa_controller', 'usbAudioAttach', '');
+}
+
+PlatformSpecific.prototype.usbAudioDetach = function () {
+    var self = this;
+
+    return self.coreCommand.executeOnPlugin('audio_interface', 'alsa_controller', 'usbAudioDetach', '');
+}
