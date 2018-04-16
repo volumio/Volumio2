@@ -85,21 +85,21 @@ PlatformSpecific.prototype.startupSound = function () {
     var startupSound = self.coreCommand.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'startupSound');
 
     if (startupSound){
-			var hwdev = '--device=plughw:' + outdev + ',0';
-			if (outdev === 'softvolume'){
-			hwdev = '-D softvolume';
-			}
-			exec('/usr/bin/aplay '+hwdev+' /volumio/app/startup.wav', function (error, stdout, stderr) {
-			if (error !== null) {
-				console.log(error);
-			}
-                self.coreCommand.closeModals();
-				setTimeout(function() {
-                    self.coreCommand.executeOnPlugin('audio_interface', 'alsa_controller', 'checkAudioDeviceAvailable', '');
-                    self.coreCommand.executeOnPlugin('system_controller', 'system', 'versionChangeDetect', '');
-				},1000)
-			});
+    	var hwdev = '--device=plughw:' + outdev + ',0';
+    	if (outdev === 'softvolume'){
+    		hwdev = '-D softvolume';
     	}
+		try {
+            execSync('/usr/bin/aplay '+hwdev+' /volumio/app/startup.wav');
+		} catch(e) {
+    		console.log('Cannot play startup sound')
+		}
+	}
+    self.coreCommand.closeModals();
+    setTimeout(function() {
+        self.coreCommand.executeOnPlugin('audio_interface', 'alsa_controller', 'checkAudioDeviceAvailable', '');
+        self.coreCommand.executeOnPlugin('system_controller', 'system', 'versionChangeDetect', '');
+    },1000)
 }
 
 PlatformSpecific.prototype.fileUpdate = function (data) {
