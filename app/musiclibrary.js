@@ -351,9 +351,9 @@ CoreMusicLibrary.prototype.search = function(data) {
 	var searcharray = [];
 	if (data.value) {
 		if (data.type) {
-			query = {"value": data.value, "type": data.type};
+			query = {"value": data.value, "type": data.type, "uri":data.uri};
 		} else {
-			query = {"value": data.value};
+			query = {"value": data.value, "uri":data.uri};
 		}
 
         var executed=[];

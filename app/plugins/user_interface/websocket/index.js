@@ -407,7 +407,6 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('search', function (data) {
 				var selfConnWebSocket = this;
-
 				var returnedData = self.musicLibrary.search(data);
 				returnedData.then(function (result) {
 					selfConnWebSocket.emit('pushBrowseLibrary', result);
