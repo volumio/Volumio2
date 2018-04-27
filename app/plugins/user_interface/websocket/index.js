@@ -1666,6 +1666,12 @@ function InterfaceWebUI(context) {
                 }
             });
 
+        connWebSocket.on('pinger', function (data) {
+            var selfConnWebSocket = this;
+
+            selfConnWebSocket.emit('ponger', data);
+        });
+
 	});
 };
 
