@@ -496,6 +496,42 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 	return defer.promise;
 };
 
+PluginManager.prototype.startPlugin = function (category, name) {
+    var self = this;
+    var defer=libQ.defer();
+
+    var plugin = self.getPlugin(category, name);
+
+    if(plugin!==undefined)
+    {
+        if(plugin.onStart!==undefined)
+        {
+            self.logger.info("PLUGIN START: "+name);
+            var myPromise = plugin.onStart();
+            self.config.set(category + '.' + name + '.status', "STARTED");
+
+            if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
+                // Handle non-compliant onStart(): push an error message and disable plugin
+                self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
+                self.logger.error("Plugin " + name + " does not return adequate promise from onStart: please update!");
+                myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
+            }
+
+            defer.resolve();
+            return myPromise;
+
+        }
+        else
+        {
+            self.config.set(category + '.' + name + '.status', "STARTED");
+            defer.resolve();
+        }
+
+    } else defer.resolve();
+
+    return defer.promise;
+};
+
 PluginManager.prototype.stopPlugin = function (category, name) {
 	var self = this;
 	var defer=libQ.defer();
@@ -1827,7 +1863,7 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
 			var folder=self.findPluginFolder(category,name);
 			return self.loadCorePlugin(folder);
 		})
-		.then(self.startPlugin.bind(self,category,name))
+		.then(self.startPlugin.bind(this,category,name))
 		.then(function(e)
 		{
 			self.logger.info("Done.");
