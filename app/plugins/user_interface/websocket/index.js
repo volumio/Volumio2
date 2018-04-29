@@ -593,6 +593,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('removeFromFavourites', function (data) {
 				var selfConnWebSocket = this;
+				
 				var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, data.service, data.uri);
 				returnedData.then(function () {
 					if (data.service === 'shoutcast') {
@@ -605,7 +606,21 @@ function InterfaceWebUI(context) {
 									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
 								});
 						}
-					} else {
+					} else if (data.service === 'streaming_services') {
+						setTimeout(()=> {
+                            var uri = data.uri.substring(0, data.uri.lastIndexOf("/") );
+                        	response = response=self.musicLibrary.executeBrowseSource(uri);
+                        if (response != undefined) {
+                            response.then(function (result) {
+                                selfConnWebSocket.emit('pushBrowseLibrary', result);
+                            })
+                                .fail(function () {
+                                    self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                });
+                        }
+						},600)
+                    }
+                    else  {
 					var response = self.commandRouter.playListManager.listFavourites();
 					if (response != undefined) {
 						response.then(function (result) {
