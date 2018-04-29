@@ -394,8 +394,9 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 		if (resp.uri.indexOf('cdda:///') >= 0) {
 			resp.trackType = 'CD Audio';
 			resp.title = resp.uri.replace('cdda:///', 'Track ');
-		}
-        else if (resp.uri.indexOf('http://') >= 0) {
+		}else if (resp.uri.indexOf('http://streaming.qobuz.com') >= 0) {
+            resp.trackType = 'qobuz';
+        }  else if (resp.uri.indexOf('http://') >= 0) {
             resp.service='dirble';
             if (objTrackInfo.file.indexOf('bbc') >= 0) {
                 objTrackInfo.Name = objTrackInfo.Name.replace(/_/g, ' ').replace('bbc', 'BBC');
