@@ -220,8 +220,12 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	}
 
 	var mountpoint = '/mnt/NAS/' +  mountid;
+	var createDir = true;
+    if (fs.existsSync(mountpoint)) {
+        createDir = false;
+    }
 
-	mountutil.mount(pointer, mountpoint, {"createDir": true, "fstype": fstype, "fsopts": fsopts}, function (result) {
+	mountutil.mount(pointer, mountpoint, {"createDir": createDir, "fstype": fstype, "fsopts": fsopts}, function (result) {
 		if (result.error) {
 
 			if (result.error.indexOf('Permission denied') >= 0) {
