@@ -1142,7 +1142,7 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
                 "name": name,
                 "service": 'mpd',
                 "type":  'play-playlist',
-                "albumart": '/albumart?sourceicon=music_service/mpd/playlisticon.svg'
+                "albumart": '/albumart?sourceicon=music_service/mpd/playlisticon.png'
             },
             "prev": {
                 "uri": "playlists"
@@ -1205,7 +1205,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
             if (singleBrowse && uri === 'music-library') {
                 prev = '/';
                 var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: self.commandRouter.getI18nString('COMMON.FAVOURITES'), uri: 'favourites', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'title'},
+                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: self.commandRouter.getI18nString('COMMON.ARTISTS'), uri: 'artists://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: self.commandRouter.getI18nString('COMMON.ALBUMS'), uri: 'albums://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'title'},
