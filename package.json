@@ -55,7 +55,6 @@
     "spotify-web-api-node": "^2.4.0",
     "string": "^3.3.3",
     "tail": "^1.2.2",
-    "telnet": "0.0.1",
     "underscore": "^1.8.3",
     "unirest": "^0.5.1",
     "v-conf": "^1.4.0",
