@@ -40,7 +40,6 @@
     "node-schedule": "^1.2.3",
     "node-ssdp": "^3.2.5",
     "node-uuid": "^1.4.8",
-    "onoff": "^1.1.2",
     "pidof": "^1.0.2",
     "pullr": "^0.3.2",
     "random-string": "^0.2.0",
