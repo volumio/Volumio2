@@ -17,7 +17,6 @@
     "compression": "^1.6.2",
     "connect-busboy": "0.0.2",
     "convert-seconds": "^1.0.1",
-    "cookie-parser": "^1.4.3",
     "cue-parser": "0.0.4",
     "ejs": "^2.5.6",
     "express": "^4.15.3",
