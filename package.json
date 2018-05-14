@@ -51,7 +51,6 @@
     "random-string": "^0.2.0",
     "serve-favicon": "^2.4.3",
     "shairport-sync-reader": "0.0.6",
-    "shelljs": "^0.7.8",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
     "sort-on": "^2.0.0",
