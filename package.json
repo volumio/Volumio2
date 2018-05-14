@@ -52,7 +52,6 @@
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
     "sort-on": "^2.0.0",
-    "spotify-web-api-node": "^2.4.0",
     "string": "^3.3.3",
     "tail": "^1.2.2",
     "underscore": "^1.8.3",
