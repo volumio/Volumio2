@@ -2,7 +2,6 @@ var express = require('express');
 var compression = require('compression')
 var path = require('path');
 var favicon = require('serve-favicon');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var restapi = require('./restapi.js');
@@ -43,7 +42,6 @@ dev.set('view engine', 'ejs');
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 dev.use(bodyParser.json());
 dev.use(bodyParser.urlencoded({ extended: false }));
-dev.use(cookieParser());
 dev.use(express.static(path.join(__dirname, 'dev')));
 
 dev.use('/', routes);
