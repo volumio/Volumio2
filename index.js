@@ -1,11 +1,5 @@
-var argv = require('yargs').argv;
 var execSync = require('child_process').execSync;
 var fs = require('fs-extra');
-
-if (argv.d) {
-var njstrace = require('njstrace').inject();
-}
-
 var globals = fs.readJsonSync(__dirname + '/.globals.json');
 
 
