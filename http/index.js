@@ -1,7 +1,6 @@
 var express = require('express');
 var compression = require('compression')
 var path = require('path');
-var favicon = require('serve-favicon');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var restapi = require('./restapi.js');
@@ -38,8 +37,6 @@ var allowCrossDomain = function(req, res, next) {
 dev.set('views', path.join(__dirname, 'dev/views'));
 dev.set('view engine', 'ejs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 dev.use(bodyParser.json());
 dev.use(bodyParser.urlencoded({ extended: false }));
 dev.use(express.static(path.join(__dirname, 'dev')));
