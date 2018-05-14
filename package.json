@@ -1,7 +1,8 @@
 {
   "name": "Volumio2",
-  "version": "2.0.0-alpha4",
+  "version": "2.0.0",
   "private": false,
+  "license": "GPL-3.0-only",
   "scripts": {
     "preinstall": "",
     "start": "nodejs ./index.js",
