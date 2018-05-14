@@ -3,7 +3,6 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libCrypto = require('crypto');
-var libBase64Url = require('base64-url');
 var fs=require('fs-extra');
 
 // Define the CoreMusicLibrary class
@@ -471,37 +470,6 @@ CoreMusicLibrary.prototype.search = function(data) {
 	}
 	return defer.promise;
 }
-
-
-// Helper functions ------------------------------------------------------------------------------------
-
-// Create a URL safe hashkey for a given string. The result will be a constant length string containing
-// upper and lower case letters, numbers, '-', and '_'.
-function convertStringToHashkey(input) {
-    if (input === null) {
-        input = '';
-
-    }
-
-	return libBase64Url.escape(libCrypto.createHash('sha256').update(input, 'utf8').digest('base64'));
-}
-
-// Takes a nested array of strings and produces a comma-delmited string. Example:
-// ['a', [['b', 'c'], 'd']] -> 'a, b, c, d'
-function flattenArrayToCSV(arrayInput) {
-	if (typeof arrayInput === "object") {
-		return libFast.reduce(arrayInput, function(sReturn, curEntry, nIndex) {
-			if (nIndex > 0) {
-				return sReturn + ", " + flattenArrayToCSV(curEntry);
-			} else {
-				return flattenArrayToCSV(curEntry);
-			}
-		},"");
-	} else {
-		return arrayInput;
-	}
-}
-
 
 CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 	var self = this;
