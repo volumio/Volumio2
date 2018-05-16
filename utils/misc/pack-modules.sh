@@ -15,6 +15,6 @@ echo "Cleaning modules"
 node /volumio/utils/misc/clean-node-modules.js /volumio
 
 echo "Packing modules..."
-tar zcf $NODE_MODULES_PACKAGE node_modules/*
+tar zcf $NODE_MODULES_PACKAGE node_modules/
 NODE_MODULES_PACKAGE_SIZE=`du -sbm ${NODE_MODULES_PACKAGE} | cut -f1`
 echo "Done, package size ${NODE_MODULES_PACKAGE_SIZE} MB"
