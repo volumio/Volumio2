@@ -82,13 +82,13 @@ function executeUpdate(socket) {
 
 function factoryReset() {
     console.log('Factory reset initiated, the system will restart now.')
-    //execSync('/usr/bin/sudo /bin/touch /boot/factory_reset', {uid: 1000, gid: 1000});
+    execSync('/bin/touch /boot/factory_reset', {uid: 1000, gid: 1000});
     return reboot()
 }
 
 function deleteUserData() {
     console.log('User data reset initiated, the system will restart now.')
-    //execSync('/usr/bin/sudo /bin/touch /boot/user_data', {uid: 1000, gid: 1000});
+    execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
     return reboot()
 }
 
@@ -106,5 +106,5 @@ function testMode() {
 function reboot() {
     console.log('Restarting');
     execSync('/bin/sync', {uid: 1000, gid: 1000});
-    //execSync('/usr/bin/sudo /sbin/reboot', {uid: 1000, gid: 1000});
+    execSync('/usr/bin/sudo /sbin/reboot', {uid: 1000, gid: 1000});
 }
