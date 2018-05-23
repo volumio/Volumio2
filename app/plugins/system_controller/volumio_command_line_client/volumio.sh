@@ -35,9 +35,9 @@ clear
 
 [[VOLUMIO SERVICE CONTROL]]
 
-vstart                              Starts Volumio Service
-vstop                               Stops Volumio Service
-vrestart                            Restarts Volumio Service
+vstart                             Starts Volumio Service
+vstop                              Stops Volumio Service
+vrestart                           Restarts Volumio Service
 
 [[VOLUMIO DEVELOPMENT]]
 
@@ -53,6 +53,12 @@ plugin publish                     publishes the plugin on git
 plugin install                     installs the plugin locally
 plugin update                      updates the plugin
 logdump <description>              dump logs to $LOGDUMP instead of uploading
+
+[[VOLUMIO UPDATER]]
+updater forceupdate                Updates to latest version
+updater factory                    Restores factory version and wipes all user data
+updater userdata                   Wipes all user data
+updater testmode                   Enables or disables Test mode, allowing to receive beta builds
 "
 
 }
@@ -227,6 +233,9 @@ correspondent folder in data"
                 echo "update    updates the plugin"
                 echo ""
             fi
+            ;;
+            updater)
+	        /usr/local/bin/node /volumio/update-helper.js $2
             ;;
         *)
             doc
