@@ -31,7 +31,7 @@ if (process.argv[2]) {
     console.log(errorMessage)
 }
 
-function forceUpdate() {
+function forceUpdate(data) {
     var socket = io.connect('http://localhost:3000');
 
     console.log('Checking for new Updates');
@@ -48,6 +48,10 @@ function forceUpdate() {
             ];
             inquirer.prompt(question).then((answer) => {
                 if (answer.executeUpdate) {
+                    if (data.clean) {
+                        console.log('Executing a clean update');
+                        execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
+                    }
                     executeUpdate(socket);
                 } else {
                     console.log('Exiting...');
@@ -63,8 +67,7 @@ function forceUpdate() {
 }
 
 function cleanUpdate() {
-    execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
-    forceUpdate();
+    forceUpdate({"clean":true});
 }
 
 function executeUpdate(socket) {
