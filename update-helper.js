@@ -4,7 +4,7 @@ var execSync = require('child_process').execSync;
 var io = require('socket.io-client');
 var inquirer = require('inquirer');
 
-var errorMessage = 'Error, please provide the required updater action: force-update | factory | userdata';
+var errorMessage = 'Error, please provide the required updater action: forceupdate | factory | userdata | testmode | cleanupdate';
 if (process.argv[2]) {
     var argument = process.argv[2];
 
@@ -20,6 +20,9 @@ if (process.argv[2]) {
             break;
         case "testmode":
             testMode()
+            break;
+        case "cleanupdate":
+            cleanUpdate()
             break;
         default:
             console.log(errorMessage);
@@ -57,6 +60,11 @@ function forceUpdate() {
         }
         //
     });
+}
+
+function cleanUpdate() {
+    execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
+    forceUpdate();
 }
 
 function executeUpdate(socket) {
