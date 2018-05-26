@@ -32,10 +32,15 @@ if (process.argv[2]) {
 }
 
 function forceUpdate(data) {
+    var clean = false;
     var socket = io.connect('http://localhost:3000');
 
     console.log('Checking for new Updates');
     socket.emit('updateCheck');
+
+    if (data.clean) {
+        clean = true;
+    }
 
     socket.on('updateReady', function(data) {
         if (data.updateavailable) {
@@ -48,7 +53,7 @@ function forceUpdate(data) {
             ];
             inquirer.prompt(question).then((answer) => {
                 if (answer.executeUpdate) {
-                    if (data.clean) {
+                    if (clean) {
                         console.log('Executing a clean update');
                         execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
                     }
