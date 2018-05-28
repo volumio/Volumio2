@@ -379,6 +379,15 @@ ControllerNetworkfs.prototype.addShare = function (data) {
 		path = path.replace(/\/+/g,'/');
 		path = path.replace(/^\//,'');
 	}
+	if (fstype == 'nfs') {
+		/* NFS mounts require an absolute path for the exported directory -
+		 * enforce a leading / on the path.
+		 */
+		path = path.replace(/^\s+/,'');
+		if ( ! path.startsWith('/') ) {
+			path = '/' + path;
+		}
+	}
 
 	var uuid = self.getShare(name, ip, path);
 	var response;
