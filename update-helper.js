@@ -38,7 +38,7 @@ function forceUpdate(data) {
     console.log('Checking for new Updates');
     socket.emit('updateCheck');
 
-    if (data.clean) {
+    if (data && data.clean) {
         clean = true;
     }
 
