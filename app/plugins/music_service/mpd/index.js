@@ -644,6 +644,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
     self.mpdReady.then(function () {
         if (startup) {
             startup = false;
+            self.checkUSBDrives();
             self.listAlbums();
         }
     })
@@ -3865,4 +3866,27 @@ ControllerMpd.prototype.registerConfigCallback = function(callback){
     var self = this;
     self.logger.info('register callback: ' + JSON.stringify(callback,null,4));
     self.registeredCallbacks.push(callback);
+}
+
+ControllerMpd.prototype.checkUSBDrives = function(){
+    var self = this;
+
+    var usbList = self.lsInfo('music-library/USB');
+    usbList.then((list)=>{
+        if (list.navigation.lists[0].items.length > 0) {
+        	var diskArray = list.navigation.lists[0].items;
+        	for (var i in diskArray) {
+                var disk = diskArray[i];
+                if  (disk.uri){
+                	var path = disk.uri.replace('music-library', '/mnt');
+                    if (!fs.existsSync(path)) {
+                        var mpdPath = path.replace('/mnt/','');
+                        return this.sendMpdCommand('update', ['USB']);
+                    }
+				}
+			}
+		}
+	}).fail((e)=>{
+    	self.logger.error('Error in refreshing USB drives list' + e);
+	})
 }
