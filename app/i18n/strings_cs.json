@@ -77,9 +77,9 @@
   "NETWORK": {
     "NETWORK_SETTINGS":"Nastavení sítě",
     "WIRED_NETWORK":"Kabelová síť",
-    "AUTOMATIC_IP":"Automatické IP",
-	"AUTOMATIC_IP_DOC":"Volba mezi DHCP a statickou IP adresou.",
-    "STATIC_IP":"Statická IP",
+    "AUTOMATIC_IP":"Automatická IP adresa",
+	"AUTOMATIC_IP_DOC":"Volba mezi automaticky přiřazenou (DHCP) a staticky definovanou IP adresou.",
+    "STATIC_IP":"Statická IP adresa",
     "NETMASK":"Síťová maska",
     "GATEWAY":"Výchozí brána",
     "WIRELESS_NETWORK":"Bezdrátová síť",
@@ -115,8 +115,8 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Zkuste znovu nebo pokračujte dalším krokem",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Přístroj se připojí k síti",
     "WIRELESS_NETWORK_CONNECTION_DEFER2":"když bude prvotní nastavení dokončeno",
-    "HOTSPOT_FALLBACK":"Záložní Hotspot",
-    "HOTSPOT_FALLBACK_DOC":"Pokud je povoleno, spustí se Hotspot dojde-li k odpojení od bezdrátové sítě. Pokud je zakázáno, bude se zařízení i nadále pokoušet znovupřipojit ke známé bezdrátové síti"
+    "HOTSPOT_FALLBACK":"Záložní přístupový bod",
+    "HOTSPOT_FALLBACK_DOC":"Pokud je povoleno, spustí se záložní přístupový bod dojde-li k odpojení od bezdrátové sítě. Pokud je zakázáno, bude se zařízení i nadále pokoušet znovupřipojit ke známé bezdrátové síti"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Zvolte jméno, které bude zobrazeno v seznamu síťových disků.",
