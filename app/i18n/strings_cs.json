@@ -7,7 +7,7 @@
     "ENABLE_I2S_DAC":"Povolit I2S DACs",
     "GAPLESS_MP3_PLAYBACK":"Přehrávání MP3 bez pauz",
     "VOLUME_NORMALIZATION":"Vyrovnání hlasitosti",
-	"VOLUME_NORMALIZATION_DOC":Pokud je povoleno, Volumio vyrovná hlasitost přehrávaných skladeb na stejnou úroveň. Může snížit kvalitu zvuku",
+	"VOLUME_NORMALIZATION_DOC":"Pokud je povoleno, Volumio vyrovná hlasitost přehrávaných skladeb na stejnou úroveň. Může snížit kvalitu zvuku",
     "AUDIO_BUFFER_SIZE":"Velikost vyrovnávací paměti",
 	"AUDIO_BUFFER_SIZE_DOC":"Nastavení velikosti audio zásobníku. Zvýšení hodnoty snižuje pravděpodobnost zadrhávání při přenosu dat po síti.",
     "BUFFER_BEFORE_PLAY":"Načíst před začátkem přehrávání",
