@@ -780,38 +780,46 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 
 	try {
+        var ignoredCards = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/ignoreCards.json'),  'utf8', {throws: false});
+	} catch(e) {
+        var ignoredCards = [];
+	}
+
+	try {
 		var aplaycards = self.getAplayInfo();
         for (var k = 0; k < aplaycards.length; k++){
-        	var aplaycard = aplaycards[k];
-        	var name = aplaycard.name;
-        	var id = aplaycard.id;
-            for (var n = 0; n < carddata.cards.length; n++){
-                var cardname = carddata.cards[n].name.toString().trim();
+            var aplaycard = aplaycards[k];
+            var name = aplaycard.name;
+            var id = aplaycard.id;
+        	if (!ignoredCards.includes(name)) {
+                for (var n = 0; n < carddata.cards.length; n++){
+                    var cardname = carddata.cards[n].name.toString().trim();
 
-                if (cardname === name){
-                    if(carddata.cards[n].multidevice) {
-                        multi = true;
-                        var card = carddata.cards[n];
-                        for (var j = 0; j < card.devices.length; j++) {
-                            var subdevice = carddata.cards[n].devices[j].number;
-                            name = carddata.cards[n].devices[j].prettyname;
-                            var deviceProc = '/proc/asound/card' + id + '/pcm' + subdevice + 'p';
-                            if (fs.existsSync(deviceProc)) {
-                                cards.push({id: id + ',' + subdevice, name: name});
-							}
+                    if (cardname === name){
+                        if(carddata.cards[n].multidevice) {
+                            multi = true;
+                            var card = carddata.cards[n];
+                            for (var j = 0; j < card.devices.length; j++) {
+                                var subdevice = carddata.cards[n].devices[j].number;
+                                name = carddata.cards[n].devices[j].prettyname;
+                                var deviceProc = '/proc/asound/card' + id + '/pcm' + subdevice + 'p';
+                                if (fs.existsSync(deviceProc)) {
+                                    cards.push({id: id + ',' + subdevice, name: name});
+                                }
+                            }
+
+                        } else {
+                            multi = false;
+                            name = carddata.cards[n].prettyname;
                         }
 
                     } else {
                         multi = false;
-                        name = carddata.cards[n].prettyname;
                     }
-
-                } else {
-                	multi = false;
-				}
-            } if (!multi){
-                cards.push({id: id, name: name});
-            }
+                } if (!multi){
+                    cards.push({id: id, name: name});
+                }
+			}
         }
 	} catch (e) {
 		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
