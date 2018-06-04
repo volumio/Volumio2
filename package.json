@@ -51,7 +51,7 @@
     "tail": "^1.2.2",
     "underscore": "^1.8.3",
     "unirest": "^0.5.1",
-    "v-conf": "^1.4.0",
+    "v-conf": "^1.4.1",
     "winston": "^2.3.1",
     "wireless-tools": "^0.19.0",
     "yargs": "^8.0.1"
