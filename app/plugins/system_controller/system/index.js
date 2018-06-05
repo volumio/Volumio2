@@ -227,25 +227,29 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
     var defer = libQ.defer();
 
-    var player_name = data['player_name'];
-    var hostname = data['player_name'].split(" ").join("-");
     if (data['startup_sound'] != undefined) {
         self.config.set('startupSound', data['startup_sound']);
+    }
+
+    var oldPlayerName = self.config.get('playerName');
+    var player_name = data['player_name'];
+    if (player_name !== oldPlayerName) {
+        var hostname = data['player_name'].split(" ").join("-");
+        self.config.set('playerName', player_name);
+        self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
+        self.setHostname(player_name);
+        self.commandRouter.sharedVars.set('system.name', player_name);
+        defer.resolve({});
+
+        for (var i in self.callbacks) {
+            var callback = self.callbacks[i];
+
+            callback.call(callback, player_name);
+        }
+	} else {
+        defer.resolve({});
 	}
 
-    self.config.set('playerName', player_name);
-
-
-	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('SYSTEM.SYSTEM_CONFIGURATION_UPDATE_SUCCESS'));
-	self.setHostname(player_name);
-	self.commandRouter.sharedVars.set('system.name', player_name);
-	defer.resolve({});
-
-    for (var i in self.callbacks) {
-        var callback = self.callbacks[i];
-
-        callback.call(callback, player_name);
-    }
     return defer.promise;
 };
 
