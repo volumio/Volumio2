@@ -656,8 +656,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 						trackType:stateService.trackType,
 						seek:stateService.seek,
 						duration:stateService.duration,
-						samplerate:trackBlock.samplerate,
-						bitdepth:trackBlock.bitdepth,
+						samplerate:stateService.samplerate,
+						bitdepth:stateService.bitdepth,
 						channels:stateService.channels,
 						stream:stateService.isStreaming
 					};
