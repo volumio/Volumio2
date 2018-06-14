@@ -946,3 +946,30 @@ ControllerSystem.prototype.versionChangeDetect = function () {
         }
     });
 };
+
+ControllerSystem.prototype.getMainDiskUsage = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var unity = ' MB';
+    var mainDiskUsageObj = {'size':'','used':'','free':'','usedPercentage':'','freePercentage':''};
+
+    exec("/bin/df -h -m | grep overlay", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+        if (error !== null) {
+            defer.reject({'error':error})
+        } else {
+        	try {
+                var mainDiskArray = stdout.toString().split(' ').filter(item => item.trim() !== '');
+                mainDiskUsageObj.size = mainDiskArray[1] + unity;
+                mainDiskUsageObj.used = mainDiskArray[2] + unity;
+                mainDiskUsageObj.free = mainDiskArray[3] + unity;
+                mainDiskUsageObj.usedPercentage = parseInt(mainDiskArray[4].replace('%', ''));
+                mainDiskUsageObj.freePercentage = 100 - mainDiskUsageObj.usedPercentage;
+                defer.resolve(mainDiskUsageObj);
+			} catch(e) {
+        		self.logger.error('Error in parsing main disk data: ' + e);
+                defer.reject({'error':error})
+			}
+        }
+    });
+    return defer.promise
+};
