@@ -94,7 +94,11 @@ var searchOnline = function (defer, web) {
 
 	if (fs.existsSync(infoPath) == false) {
 		fs.ensureFileSync(infoPath);
-		fs.writeJsonSync(infoPath, infoJson);
+        try {
+            fs.writeJsonSync(infoPath, infoJson);
+        } catch(e) {
+            console.log('Error in writing albumart JSON file: ' + e);
+        }
 	}
 
 	var stats = fs.statSync(infoPath);
@@ -163,8 +167,11 @@ var searchOnline = function (defer, web) {
                     return defer.promise;
                 }
             }
-
-            fs.writeJsonSync(infoPath, infoJson);
+            try {
+                fs.writeJsonSync(infoPath, infoJson);
+            } catch(e) {
+                console.log('Error in writing albumart JSON file: ' + e);
+            }
         });
 	}
 	else {
