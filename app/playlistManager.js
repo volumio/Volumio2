@@ -225,7 +225,12 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
 		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'radio-favourites',service,uri);
 	} else {
         self.commandRouter.executeOnPlugin('music_service', service,'removeFromFavourites',{uri:uri,service:service});
-        return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri);
+		return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder,'favourites',service,uri)
+			.then(function(data) {
+				if(data.success !== false)
+					self.commandRouter.emitFavourites({service: service, uri: uri, favourite: false});
+				return data;
+			});
     }
 };
 
@@ -577,42 +582,35 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 	var self = this;
 
 	var defer = libQ.defer();
-
-	var playlist = [];
 	var filePath = folder + name;
 
-	fs.exists(filePath, function (exists) {
-		if (!exists)
-			defer.resolve({success: false, reason: 'Playlist does not exist'});
-		else {
-			fs.readJson(filePath, function (err, data) {
-				if (err)
-					defer.resolve({success: false});
-				else {
-					var newData = [];
-
-					for (var i = 0; i < data.length; i++) {
-						if (!(data[i].service == service &&
-							data[i].uri == uri)) {
-							newData.push(data[i]);
-						}
-
-					}
-
-					fs.writeJson(filePath, newData, function (err) {
-						if (err) {
-							self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), uri);
-							defer.resolve(newData);
-						}
-						else {
-							self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'), uri);
-							defer.resolve(newData);
-						}
-					})
-				}
-			});
+	fs.readJson(filePath, function (err, data) {
+		if (err) {
+			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), uri);
+			defer.resolve({success: false, reason: 'Cannot open Playlist'});
 		}
+		else {
+			var removedItem;
 
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].service == service && data[i].uri == uri) {
+					removedItem = data.splice(i,1)[0];
+					break;
+				}
+			}
+
+			fs.writeJson(filePath, data, function (err) {
+				var itemName = removedItem ? (removedItem.title || uri) : uri;
+				if (err) {
+					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), itemName);
+					defer.resolve({success: false, reason: 'Cannot write Playlist'});
+				}
+				else {
+					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'), itemName);
+					defer.resolve(data);
+				}
+			})
+		}
 	});
 
 	return defer.promise;

@@ -964,45 +964,33 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 CoreStateMachine.prototype.checkFavourites = function (state) {
 
-	var defer = libQ.defer();
+	var self = this;
 	var response = {
 		service: state.service,
 		uri: state.uri,
 		favourite: false
 	};
 
-	if (state.uri != undefined && state.uri != null) {
-		var promise = this.commandRouter.playListManager.listFavourites();
-		var self = this;
-		promise.then(function (favList) {
-			/**
-			 * WARNING: The favourites section uses music-library/ to start each uri
-			 * This is not used in mpd uris, so we are adding it at the beginning of each uri
-			 */
-			var list = favList.navigation.lists[0].items;
-			var nFavs = list.length;
-			for (var i = 0; i < nFavs; i++) {
-				var match = self.sanitizeUri(state.uri);
-				var listUri= self.sanitizeUri(list[i].uri);
+	if (state.uri == undefined || state.uri == null)
+		return this.emitFavourites(response);
 
-				if (match === listUri) {
+	return this.commandRouter.playListManager.listFavourites()
+			.then(function (favList) {
+				/**
+				 * WARNING: The favourites section uses music-library/ to start each uri
+				 * This is not used in mpd uris, so we are adding it at the beginning of each uri
+				 */
+				var match = self.sanitizeUri(state.uri);
+				if(favList.navigation.lists[0].items.some(fav => self.sanitizeUri(fav.uri) === match)) {
 					response.favourite = true;
-					break;
 				}
-			}
-			self.emitFavourites(response);
-		});
-	}
-	else {
-		this.emitFavourites(response);
-		defer.resolve({});
-	}
-	return defer.promise;
+				return self.emitFavourites(response);
+			});
 };
 
 
 CoreStateMachine.prototype.emitFavourites = function (msg) {
-	this.commandRouter.emitFavourites(msg);
+	return libQ.resolve(this.commandRouter.emitFavourites(msg));
 };
 
 
