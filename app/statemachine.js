@@ -646,6 +646,18 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 				}
 
 				if (this.consumeIgnoreMetadata != undefined && this.consumeIgnoreMetadata) {
+					var sRate;
+					var bDepth;
+
+					if(stateService.service === 'streaming_services')
+					{
+						sRate= stateService.samplerate;
+						bDepth= stateService.bitdepth;
+					} else {
+						sRate= trackBlock.samplerate;
+						bDepth= trackBlock.bitdepth;
+					}
+
 					this.consumeState={
 						status:stateService.status,
 						title:trackBlock.name,
@@ -656,8 +668,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 						trackType:stateService.trackType,
 						seek:stateService.seek,
 						duration:stateService.duration,
-						samplerate:trackBlock.samplerate,
-						bitdepth:trackBlock.bitdepth,
+						samplerate:sRate,
+						bitdepth:bDepth,
 						channels:stateService.channels,
 						stream:stateService.isStreaming
 					};
