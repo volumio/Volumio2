@@ -1,3 +1,4 @@
+#!/usr/local/bin/node
 'use strict';
 
 var cluster = require('cluster');
