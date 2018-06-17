@@ -160,7 +160,7 @@
     "SEARCH_ALBUM_SECTION":"Albums",
     "SEARCH_SONG_SECTION":"Pistes",
     "SCAN_DB_ERROR":"Erreur lors du scan de la base de données",
-    "SCAN_DB":"Mise à jour de la base de donnée de musique",
+    "SCAN_DB":"Mise à jour de la base de données de musique",
 	  "RESCAN_DB":"Reconstruction de la base de données",
     "ILLEGAL_CHARACTER_/":"Suppression des caractères interdits : /",
     "FAVOURITES":"Favoris",
