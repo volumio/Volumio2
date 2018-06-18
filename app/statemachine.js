@@ -623,7 +623,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 
 	if (stateService.status === 'play') {
 		if (this.currentStatus === 'play') {
-			this.commandRouter.pushConsoleMessage('Received an update from plaugin. extracting info from payload');
+			this.commandRouter.pushConsoleMessage('Received an update from plugin. extracting info from payload');
 
 			// Checking if system is in consume mode. If it is the status shall be stored
 			if(this.isConsume && stateService)
@@ -649,7 +649,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 					var sRate;
 					var bDepth;
 
-					if(stateService.service === 'streaming_services')
+					if(stateService.trackType === 'qobuz')
 					{
 						sRate= stateService.samplerate;
 						bDepth= stateService.bitdepth;
