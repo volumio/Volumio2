@@ -306,7 +306,8 @@
     "UPDATING_PLUGIN":"Updating Plugin",
     "DOWNLOADING_FROM":"Downloading Plugin from ",
     "DOWNLOADING":"Downloading Plugin",
-    "NO_CONFIGURATION_AVAILABLE":"No configuration available"
+    "NO_CONFIGURATION_AVAILABLE":"No configuration available",
+    "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",

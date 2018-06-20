@@ -1538,18 +1538,24 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 CoreCommandRouter.prototype.getI18nString = function (key) {
     var splitted=key.split('.');
 
-	if(splitted.length==1)
-    {
-        if(this.i18nStrings[key]!==undefined)
-            return this.i18nStrings[key];
-        else return this.i18nStringsDefaults[key];
-    }
-    else {
-        if(this.i18nStrings[splitted[0]]!==undefined &&
-           this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
-            return this.i18nStrings[splitted[0]][splitted[1]];
-        else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
-    }
+    if (this.i18nStrings) {
+        if(splitted.length==1)
+        {
+            if(this.i18nStrings[key]!==undefined)
+                return this.i18nStrings[key];
+            else return this.i18nStringsDefaults[key];
+        }
+        else {
+            if(this.i18nStrings[splitted[0]]!==undefined &&
+                this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
+                return this.i18nStrings[splitted[0]][splitted[1]];
+            else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
+        }
+	} else {
+    	var emptyString = '';
+    	return emptyString
+	}
+
 };
 
 CoreCommandRouter.prototype.loadI18nStrings = function () {
@@ -1571,7 +1577,7 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
             var name=names[j];
             var instance=this.pluginManager.getPlugin(category,name);
 
-            if (instance.getI18nFile) {
+            if (instance && instance.getI18nFile) {
               var pluginI18NFile = instance.getI18nFile(language_code);
               if (pluginI18NFile && fs.pathExistsSync(pluginI18NFile)) {
                 var pluginI18nStrings = fs.readJSONSync(pluginI18NFile);

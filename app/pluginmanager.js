@@ -134,9 +134,16 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 		context.setEnvVariable('category', category);
 		context.setEnvVariable('name', name);
 
-		pluginInstance = new (require(folder + '/' + package_json.main))(context);
-
-		self.initializeConfiguration(package_json, pluginInstance, folder);
+		try {
+            pluginInstance = new (require(folder + '/' + package_json.main))(context);
+            self.initializeConfiguration(package_json, pluginInstance, folder);
+		} catch(e) {
+			self.logger.error('!!!! WARNING !!!!');
+            self.logger.error('The plugin ' + category + '/' + name + ' failed to load, setting it to stopped. Error: ' + e);
+            self.logger.error('!!!! WARNING !!!!');
+            self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
+            self.config.set(category + '.' + name + '.status', "STOPPED");
+        }
 
 		var pluginData = {
 			name: name,
@@ -146,7 +153,7 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 		};
 
 
-		if (pluginInstance.onVolumioStart !== undefined){
+		if (pluginInstance && pluginInstance.onVolumioStart !== undefined){
 			var myPromise = pluginInstance.onVolumioStart();
 	
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
@@ -327,9 +334,16 @@ PluginManager.prototype.loadMyVolumioPlugin = function (folder) {
     context.setEnvVariable('category', category);
     context.setEnvVariable('name', name);
 
-    pluginInstance = new (require(folder + '/' + package_json.main))(context);
-
-    self.initializeConfiguration(package_json, pluginInstance, folder);
+    try {
+        pluginInstance = new (require(folder + '/' + package_json.main))(context);
+        self.initializeConfiguration(package_json, pluginInstance, folder);
+    } catch(e) {
+        self.logger.error('!!!! WARNING !!!!');
+        self.logger.error('The plugin ' + category + '/' + name + ' failed to load, setting it to stopped. Error: ' + e);
+        self.logger.error('!!!! WARNING !!!!');
+        self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
+        self.config.set(category + '.' + name + '.status', "STOPPED");
+    }
 
     var pluginData = {
         name: name,
@@ -339,7 +353,7 @@ PluginManager.prototype.loadMyVolumioPlugin = function (folder) {
     };
 
 
-    if (pluginInstance.onVolumioStart !== undefined){
+    if (pluginInstance && pluginInstance.onVolumioStart !== undefined){
         var myPromise = pluginInstance.onVolumioStart();
 
         if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
@@ -467,7 +481,7 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 
 	var plugin = self.getPlugin(category, name);
 
-	if(plugin!==undefined)
+	if(plugin)
 	{
 		if(plugin.onStart!==undefined)
 		{
@@ -476,7 +490,7 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onStart(): push an error message and disable plugin
-				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
+                self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
 				self.logger.error("Plugin " + name + " does not return adequate promise from onStart: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
@@ -512,7 +526,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
 
             if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
                 // Handle non-compliant onStart(): push an error message and disable plugin
-                self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
+                self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
                 self.logger.error("Plugin " + name + " does not return adequate promise from onStart: please update!");
                 myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
             }
@@ -547,7 +561,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 			
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onStop(): push an error message and disable plugin
-				self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing stop routine. Please install updated version, or contact plugin developper");
+                self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
 				self.logger.error("Plugin " + name + " does not return adequate promise from onStop: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
@@ -739,7 +753,7 @@ PluginManager.prototype.onVolumioShutdownPlugin = function (category, name) {
 
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onVolumioShutdown(): push an error message
-				// self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Shutdown. Please install updated version, or contact plugin developper");
+				// self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
 				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioShutdown: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
@@ -786,7 +800,7 @@ PluginManager.prototype.onVolumioRebootPlugin = function (category, name) {
 			var myPromise = plugin.onVolumioReboot();
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onVolumioReboot(): push an error message
-				// self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing routine on Reboot. Please install updated version, or contact plugin developper");
+				// self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
 				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioReboot: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
