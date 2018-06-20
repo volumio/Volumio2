@@ -402,7 +402,7 @@ PluginManager.prototype.startMyVolumioPlugin = function (category,name) {
 
     var plugin = self.getPlugin(category, name);
 
-    if(plugin!==undefined)
+    if(plugin)
     {
         if(plugin.onStart!==undefined)
         {
@@ -516,7 +516,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
 
     var plugin = self.getPlugin(category, name);
 
-    if(plugin!==undefined)
+    if(plugin)
     {
         if(plugin.onStart!==undefined)
         {
@@ -552,7 +552,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 
 	var plugin = self.getPlugin(category, name);
 
-	if(plugin!==undefined)
+	if(plugin)
 	{
 		if(plugin.onStop!==undefined)
 		{
@@ -744,7 +744,7 @@ PluginManager.prototype.onVolumioShutdownPlugin = function (category, name) {
 
 	var plugin = self.getPlugin(category, name);
 
-	if(plugin!==undefined)
+	if(plugin)
 	{
 		if(plugin.onVolumioShutdown!==undefined)
 		{
@@ -792,7 +792,7 @@ PluginManager.prototype.onVolumioRebootPlugin = function (category, name) {
 	var defer=libQ.defer();
 	var plugin = self.getPlugin(category, name);
 
-	if(plugin!==undefined)
+	if(plugin)
 	{
 		if(plugin.onVolumioReboot!==undefined)
 		{
