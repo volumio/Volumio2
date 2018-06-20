@@ -672,7 +672,7 @@ function install(){
         if(!fs.existsSync("/tmp/plugins")) {
             execSync("/bin/mkdir /tmp/plugins/")
         }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        execSync("/bin/mv *.zip /tmp/plugins/" + package.name + ".zip");
         socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
             + package.name + ".zip"})
         socket.on('installPluginStatus', function (data) {
@@ -699,7 +699,7 @@ function update() {
         if(!fs.existsSync("/tmp/plugins")) {
             execSync("/bin/mkdir /tmp/plugins/")
         }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        execSync("/bin/mv *.zip /tmp/plugins/" + package.name + ".zip");
         socket.emit('updatePlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
             + package.name + ".zip", category: package.category, name: package.name})
         socket.on('installPluginStatus', function (data) {
