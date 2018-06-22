@@ -1562,10 +1562,27 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     var self=this;
     var language_code=this.sharedVars.get('language_code');
 
+    if (typeof language_code === 'undefined') {
+        this.logger.info("Warning: sharedVars language_code undefined. Forcing to 'en'");
+        language_code = 'en';
+    }
+
+    var i18nFile = __dirname + '/i18n/strings_' + language_code + '.json';
+
     this.logger.info("Loading i18n strings for locale "+language_code);
 
-    this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
-    this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+    try {
+        this.i18nStrings = fs.readJsonSync(i18nFile);
+    } catch( error ) {
+        if (error.code === 'ENOENT') {
+            this.logger.info('Warning: file '+i18nFile+' not found, defaulting to '+i18nDefaultFile);
+            language_code = 'en';
+            i18nFile = __dirname + '/i18n/strings_' + language_code + '.json';
+            this.i18nStrings = fs.readJsonSync(i18nFile);
+        } else {
+            throw error;
+        }
+    }
 
     var categories=this.pluginManager.getPluginCategories();
     for(var i in categories)
