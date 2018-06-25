@@ -2,7 +2,8 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
-var websocket = require('socket.io-client')
+var websocket = require('socket.io-client');
+var os = require('os');
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -317,7 +318,9 @@ function finalizing(path, package) {
         package.name);
 
     console.log("Installing dependencies locally");
+    execSync("/bin/rm package-lock.json");
     execSync("/usr/local/bin/npm install");
+    execSync("/bin/rm package-lock.json");
 
     console.log("\nCongratulation, your plugin has been succesfully created!\n" +
         "You can find it in: " + path + "\n");
@@ -352,7 +355,9 @@ function zip(){
         if(! fs.existsSync("node_modules")) {
             console.log("No modules found, running \"npm install\"");
             try{
+                execSync("/bin/rm package-lock.json");
                 execSync("/usr/local/bin/npm install");
+                execSync("/bin/rm package-lock.json");
             }
             catch (e){
                 console.log("Error installing node modules: " + e);
@@ -408,9 +413,9 @@ function publish() {
         inquirer.prompt(questions).then(function (answer) {
             package.version = answer.version;
             fs.writeJsonSync("package.json", package, {spaces:'\t'});
+            fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip");
             try {
                 execSync("/usr/bin/git add *");
-
             }
             catch (e){
                 console.log("Nothing to add");
