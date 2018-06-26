@@ -1603,7 +1603,7 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
             if (instance && instance.getI18nFile) {
               var pluginI18NFile = instance.getI18nFile(language_code);
               if (pluginI18NFile && fs.pathExistsSync(pluginI18NFile)) {
-                var pluginI18nStrings = fs.readJSONSync(pluginI18NFile);
+                var pluginI18nStrings = fs.readJsonSync(pluginI18NFile);
       
                 for (var locale in pluginI18nStrings) {
                   // check if locale does not already exist to avoid that volumio
