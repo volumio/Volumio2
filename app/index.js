@@ -1581,6 +1581,10 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
         i18nFile = __dirname + '/i18n/strings_' + language_code + '.json';
         try {
             this.i18nStrings = fs.readJsonSync(i18nFile);
+            // Flag the fallback to 'en' in the UI, to reduce confusion.
+            // NB we can't use the getI18nString method yet;
+            //    we must display untranslated strings.
+            this.pushToastMessage('warning', 'Language File Missing', 'Falling back to English' + ' ' + error.message);
         } catch( e ) {
             this.logger.error('File ' + i18nFile + ' not accessible, no fallback available');
         }
