@@ -6,6 +6,7 @@
 	{"name": "JustBoom DAC Boards", "dsp_options":["DSP Program","Clock Missing Period"]},
 	{"name": "JustBoom Digi Boards", "dsp_options":["Tx Source"]},
 	{"name": "HDMI Out", "dsp_options":["hdmi audio format Function"]},
-	{"name": "TauDAC - DM101", "dsp_options":["Anti-Clipping Mode","Dither","Filter"]}
+	{"name": "TauDAC - DM101", "dsp_options":["Anti-Clipping Mode","Dither","Filter"]},
+	{"name": "Volumio ESS 9028QM", "dsp_options":["FIR Filter Type","IIR Filter Select"]}
   ]
 }
