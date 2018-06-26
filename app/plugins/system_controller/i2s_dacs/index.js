@@ -189,7 +189,7 @@ ControllerI2s.prototype.eepromDetect = function () {
 
 		});
 	} catch(e) {
-		//self.i2cDetect();
+        defer.resolve({eeeprom:''});
 	}
 	return defer.promise;
 };
@@ -379,7 +379,6 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var response =  '';
 
 	var outdevicename = data;
-	console.log('PROC')
 
 	for(var k = 0; k < dacdata.devices.length; k++)
 	{
@@ -662,8 +661,7 @@ ControllerI2s.prototype.writeModulesFile = function (modules) {
 
 	exec("/usr/bin/sudo /bin/chmod 777 "+ modulesfile, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Cannot set permissions for /etc/modules: ' + error);
-
+            self.logger.error('Cannot set permissions for /etc/modules: ' + error);
 		} else {
 			var ws = fs.createWriteStream(modulesfile);
 			ws.cork();
