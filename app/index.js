@@ -1574,15 +1574,12 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     try {
         this.i18nStrings = fs.readJsonSync(i18nFile);
     } catch( error ) {
-        if (error.code === 'ENOENT') {
-            var i18nDefaultFile = __dirname + '/i18n/strings_' + 'en' + '.json';
-            this.logger.info('Warning: file '+i18nFile+' not found, defaulting to '+i18nDefaultFile);
-            language_code = 'en';
-            i18nFile = __dirname + '/i18n/strings_' + language_code + '.json';
-            this.i18nStrings = fs.readJsonSync(i18nFile);
-        } else {
-            throw error;
-        }
+        var i18nDefaultFile = __dirname + '/i18n/strings_' + 'en' + '.json';
+        this.logger.warn('File ' + i18nFile + ' not accessible, defaulting to ' + i18nDefaultFile);
+
+        language_code = 'en';
+        i18nFile = __dirname + '/i18n/strings_' + language_code + '.json';
+        this.i18nStrings = fs.readJsonSync(i18nFile);
     }
 
     var categories=this.pluginManager.getPluginCategories();
