@@ -1579,7 +1579,11 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
 
         language_code = 'en';
         i18nFile = __dirname + '/i18n/strings_' + language_code + '.json';
-        this.i18nStrings = fs.readJsonSync(i18nFile);
+        try {
+            this.i18nStrings = fs.readJsonSync(i18nFile);
+        } catch( e ) {
+            this.logger.error('File ' + i18nFile + ' not accessible, no fallback available');
+        }
     }
 
     var categories=this.pluginManager.getPluginCategories();
