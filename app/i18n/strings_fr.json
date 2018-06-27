@@ -306,7 +306,8 @@
     "UPDATING_PLUGIN":"Mettre à jour le plugin",
     "DOWNLOADING_FROM":"Télécharger le plugin depuis",
     "DOWNLOADING":"Téléchargement du Plugin en cours",
-    "NO_CONFIGURATION_AVAILABLE":"Pas de configuration disponible"
+    "NO_CONFIGURATION_AVAILABLE":"Pas de configuration disponible",
+    "PLUGIN_START_ERROR":"Le démarrage de ce plugin a échoué. Mettez le à jour ou contactez le developpeur"   
   },
    "WIZARD":{
    "CONGRATULATIONS":"Félicitations !",
