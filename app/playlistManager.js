@@ -288,11 +288,13 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 	var defer = libQ.defer();
 
 	var playlist = [];
-	var filePath = self.favouritesPlaylistFolder + 'my-web-radio';
+    var folder = self.favouritesPlaylistFolder;
+    var name = 'my-web-radio';
+    var filePath = folder + name;
 
 	fs.exists(filePath, function (exists) {
 		if (!exists) {
-			fs.writeJsonSync(filePath, playlist);
+            self.saveFavouritesFile(folder, name, playlist)
 		}
 
 		fs.readJson(filePath, function (err, data) {
@@ -313,17 +315,13 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 					data.push({service: service, name: radio_name, uri: uri});
 				}
 
-				fs.writeJson(filePath, data, function (err) {
-					if (err) {
-						self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
-						defer.resolve({success: false});
-					}
-
-					else {
-						defer.resolve({success: true});
-						self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
-					}
-				})
+                self.saveFavouritesFile(folder, name, output).then(function(){
+                    defer.resolve({success: true});
+                    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
+                }).fail(function(){
+                    self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
+                    defer.resolve({success: false});
+                })
 			}
 		});
 	});
@@ -337,11 +335,13 @@ PlaylistManager.prototype.removeFromMyWebRadio = function (name, service, uri) {
 	var defer = libQ.defer();
 
 	var playlist = [];
-	var filePath = self.favouritesPlaylistFolder + 'my-web-radio';
+	var folder = self.favouritesPlaylistFolder;
+	var filename = 'my-web-radio';
+	var filePath = folder + filename;
 
 	fs.exists(filePath, function (exists) {
 		if (!exists) {
-			fs.writeJsonSync(filePath, playlist);
+            self.saveFavouritesFile(folder, filename, playlist);
 		}
 
 		fs.readJson(filePath, function (err, data) {
@@ -355,11 +355,11 @@ PlaylistManager.prototype.removeFromMyWebRadio = function (name, service, uri) {
 					}
 				}
 
-				fs.writeJson(filePath, data, function (err) {
-					if (err)
-						defer.resolve({success: false});
-					else defer.resolve({success: true});
-				})
+				self.saveFavouritesFile(folder, filename, data).then(function(){
+                    defer.resolve({success:true});
+                }).fail(function(){
+                    defer.resolve({success:false});
+                })
 			}
 		});
 	});
@@ -391,198 +391,225 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 	}
 
 	fs.exists(filePath, function (exists) {
+	    var fileDefer;
+
+
 		if (!exists) {
+		    console.log("Setting default value for favourite "+folder+" "+name)
+                fileDefer=self.saveFavouritesFile(folder, name, playlist)
+		} else fileDefer=libQ.resolve();
 
-            try {
-                fs.writeJsonSync(filePath, playlist);
-			} catch(e) {
-                return defer.resolve({success: false});
-			}
+		fileDefer.then(function() {
+            if (service === 'mpd') {
+                var listingDefer=libQ.defer();
 
-		}
-		if (service === 'mpd') {
-		    var listingDefer=libQ.defer();;
+                var mpdPlugin = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 
-            var mpdPlugin = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-
-            if(uri.startsWith("genres://"))
-            {
-               mpdPlugin.listGenre(uri)
+                if(uri.startsWith("genres://"))
+                {
+                    mpdPlugin.listGenre(uri)
                     .then(function(entries){
-                    listingDefer.resolve(entries.navigation.lists[2].items);
-                }).fail(function(){
-                    listingDefer.reject(new Error());
-                })
-            }
-            else if(uri.startsWith("artists://"))
-            {
-                mpdPlugin.listArtist(uri,2,'')
+                        listingDefer.resolve(entries.navigation.lists[2].items);
+                    }).fail(function(){
+                        listingDefer.reject(new Error());
+                    })
+                }
+                else if(uri.startsWith("artists://"))
+                {
+                    mpdPlugin.listArtist(uri,2,'')
                     .then(function(entries){
                         listingDefer.resolve(entries.navigation.lists[1].items);
                     }).fail(function(){
-                    listingDefer.reject(new Error());
-                })
-            }
-            else if(uri.startsWith("albums://"))
-            {
-                mpdPlugin.listAlbumSongs(uri,2,'')
+                        listingDefer.reject(new Error());
+                    })
+                }
+                else if(uri.startsWith("albums://"))
+                {
+                    mpdPlugin.listAlbumSongs(uri,2,'')
                     .then(function(entries){
                         listingDefer.resolve(entries.navigation.lists[0].items);
                     }).fail(function(){
-                    listingDefer.reject(new Error());
-                })
-            }
-            else if (uri.startsWith("mnt/")) {
+                        listingDefer.reject(new Error());
+                    })
+                }
+                else if (uri.startsWith("mnt/")) {
 
-                var lsfolder = mpdPlugin.listallFolder(uri);
-                lsfolder.then(function (info) {
-                    var list = info.navigation.lists[0].items;
-                    var nItems = list.length;
-                    var entries = [];
-                    for (var i = 0; i < nItems; i++) {
-                        var item = list[i];
-                        if (item.type == 'song') {
-                            if (item.uri.indexOf('music-library/') >= 0) {
-                                var itemUri = item.uri.replace('music-library', '');
-                            } 
-                            else {
-                                var itemUri = item.uri;
+                    var lsfolder = mpdPlugin.listallFolder(uri);
+                    lsfolder.then(function (info) {
+                        var list = info.navigation.lists[0].items;
+                        var nItems = list.length;
+                        var entries = [];
+                        for (var i = 0; i < nItems; i++) {
+                            var item = list[i];
+                            if (item.type == 'song') {
+                                if (item.uri.indexOf('music-library/') >= 0) {
+                                    var itemUri = item.uri.replace('music-library', '');
+                                }
+                                else {
+                                    var itemUri = item.uri;
+                                }
+                                entries.push({
+                                    service: service,
+                                    uri: itemUri,
+                                    title: item.title,
+                                    artist: item.artist,
+                                    album: item.album,
+                                    albumart: item.albumart
+                                });
                             }
-                            entries.push({
-                                service: service,
-                                uri: itemUri,
-                                title: item.title,
-                                artist: item.artist,
-                                album: item.album,
-                                albumart: item.albumart
-                            });
-                        } 
-                    }
-                    listingDefer.resolve(entries);
-                });							
-			}
-		    else {
-                var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
-                prms.then(function (info) {
-                    //
-                    // Collate new entries
-                    //
-
-                    var list = info.navigation.lists[0].items;
-                    var nItems = list.length;
-
-                    var entries = [];
-                    for (var i = 0; i < nItems; i++) {
-                        var item = list[i];
-
-                        if (item.type == 'song') {
-                            var artUrl = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getAlbumArt', {
-                                artist: item.artist,
-                                album: item.album
-                            }, path, '');
-                            if (item.uri.indexOf('music-library/') >= 0) {
-                                var itemUri = item.uri.replace('music-library', '');
-                            } else var itemUri = item.uri;
-
-                            entries.push({
-                                service: service,
-                                uri: itemUri,
-                                title: item.title,
-                                artist: item.artist,
-                                album: item.album,
-                                albumart: artUrl
-                            });
-                        } else if (item.type == 'folder') {
-                            // TODO: Deal with folders
                         }
-                    }
+                        listingDefer.resolve(entries);
+                    });
+                }
+                else {
+                    var prms = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'lsInfo', uri);
+                    prms.then(function (info) {
+                        //
+                        // Collate new entries
+                        //
 
-                    listingDefer.resolve(entries);
+                        var list = info.navigation.lists[0].items;
+                        var nItems = list.length;
+
+                        var entries = [];
+                        for (var i = 0; i < nItems; i++) {
+                            var item = list[i];
+
+                            if (item.type == 'song') {
+                                var artUrl = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getAlbumArt', {
+                                    artist: item.artist,
+                                    album: item.album
+                                }, path, '');
+                                if (item.uri.indexOf('music-library/') >= 0) {
+                                    var itemUri = item.uri.replace('music-library', '');
+                                } else var itemUri = item.uri;
+
+                                entries.push({
+                                    service: service,
+                                    uri: itemUri,
+                                    title: item.title,
+                                    artist: item.artist,
+                                    album: item.album,
+                                    albumart: artUrl
+                                });
+                            } else if (item.type == 'folder') {
+                                // TODO: Deal with folders
+                            }
+                        }
+
+                        listingDefer.resolve(entries);
+                    });
+                }
+
+
+                listingDefer.then(function(entries)
+                {
+                    fs.readJson(filePath, function (err, data) {
+                        if (err)
+                        {
+                            console.log("ERR "+err)
+                            defer.resolve({success: false});
+                        }
+
+                        else {
+                            var output = data.concat(entries);
+                            console.log(filePath)
+
+                            self.saveFavouritesFile(folder, name, output).then(function(){
+                                var favourites = self.commandRouter.checkFavourites({uri: path});
+                                defer.resolve(favourites);
+                            }).fail(function(){
+                                defer.resolve({success:false});
+                            })
+                        }
+                    });
                 });
-            }
 
-
-            listingDefer.then(function(entries)
-            {
+            } else if (service === 'webradio') {
                 fs.readJson(filePath, function (err, data) {
                     if (err)
                         defer.resolve({success: false});
                     else {
-                        var output = data.concat(entries);
-                        console.log(filePath)
-                        fs.writeJson(filePath, output, function (err) {
-                            if (err!==undefined && err!==null)
-                                defer.resolve({success: false});
-                            else {
-                                var favourites = self.commandRouter.checkFavourites({uri: path});
-                                defer.resolve({});
-                            }
+                        data.push({
+                            service: service, uri: uri, title: title,
+                            icon: 'fa-microphone'
+                        });
+
+                        self.saveFavouritesFile(folder, name, output).then(function(){
+                            var favourites = self.commandRouter.checkFavourites({uri: path});
+                            defer.resolve(favourites);
+                        }).fail(function(){
+                            defer.resolve({success:false});
                         })
                     }
                 });
-            });
+            } else if (service === 'spop') {
+                var uriSplitted = uri.split(':');
+                var spotifyItem = self.commandRouter.executeOnPlugin('music_service', 'spop', 'getTrack', uriSplitted[2]);
+                spotifyItem.then(function (info) {
+                    var entries = [];
+                    var track = info[0];
+                    entries.push({
+                        service: service,
+                        uri: uri,
+                        title: track.name,
+                        artist: track.artist,
+                        album: track.album,
+                        albumart: track.albumart
+                    });
+                    fs.readJson(filePath, function (err, data) {
+                        if (err)
+                            defer.resolve({success: false});
+                        else {
+                            var output = data.concat(entries);
 
-		} else if (service === 'webradio') {
-			fs.readJson(filePath, function (err, data) {
-				if (err)
-					defer.resolve({success: false});
-				else {
-					data.push({
-						service: service, uri: uri, title: title,
-						icon: 'fa-microphone'
-					});
+                            self.saveFavouritesFile(folder, name, output).then(function(){
+                                var favourites = self.commandRouter.checkFavourites({uri: path});
+                                defer.resolve(favourites);
+                            }).fail(function(){
+                                defer.resolve({success:false});
+                            })
+                        }
+                    });
 
-					fs.writeJson(filePath, data, function (err) {
-						if (err)
-							defer.resolve({success: false});
-						else
-							var favourites = self.commandRouter.checkFavourites({uri: uri});
-						defer.resolve(favourites);
-					})
-				}
-			});
-		} else if (service === 'spop') {
-			var uriSplitted = uri.split(':');
-			var spotifyItem = self.commandRouter.executeOnPlugin('music_service', 'spop', 'getTrack', uriSplitted[2]);
-			spotifyItem.then(function (info) {
-				var entries = [];
-				var track = info[0];
-				entries.push({
-					service: service,
-					uri: uri,
-					title: track.name,
-					artist: track.artist,
-					album: track.album,
-					albumart: track.albumart
-				});
-				fs.readJson(filePath, function (err, data) {
-					if (err)
-						defer.resolve({success: false});
-					else {
-						var output = data.concat(entries);
-						fs.writeJson(filePath, output, function (err) {
-							if (err)
-								defer.resolve({success: false});
-							else
-								var favourites = self.commandRouter.checkFavourites({uri: path});
-							defer.resolve(favourites);
-						})
-					}
-				});
+                });
+            }
+        })
 
-			});
-		}
 	});
 
 	return defer.promise;
 };
 
 
+PlaylistManager.prototype.saveFavouritesFile = function(localFolder, fileName, data)
+{
+    var self=this;
+    var defer=libQ.defer();
+
+    if((this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === 'true'))
+    {
+        return self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'saveCloudFavourites', {
+            fileName:fileName,
+            data:data
+        });
+    } else {
+        fs.writeJson(localFolder + name, data, function (err) {
+            if (err)
+                defer.reject(new Error());
+            else defer.resolve();
+        })
+    }
+
+    return defer.promise;
+}
+
+
+
 PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, service, uri) {
 	var self = this;
 
 	var defer = libQ.defer();
-	var filePath = folder + name;
 
 	fs.readJson(filePath, function (err, data) {
 		if (err) {
@@ -599,17 +626,14 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 				}
 			}
 
-			fs.writeJson(filePath, data, function (err) {
-				var itemName = removedItem ? (removedItem.title || uri) : uri;
-				if (err) {
-					self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), itemName);
-					defer.resolve({success: false, reason: 'Cannot write Playlist'});
-				}
-				else {
-					self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'), itemName);
-					defer.resolve(data);
-				}
-			})
+			var itemName = removedItem ? (removedItem.title || uri) : uri;
+            self.saveFavouritesFile(folder, name, data).then(function(){
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'), itemName);
+                defer.resolve(data);
+            }).fail(function(){
+                self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), itemName);
+                defer.resolve({success: false, reason: 'Cannot write Playlist'});
+            });
 		}
 	});
 
@@ -762,7 +786,6 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
     var defer = libQ.defer();
 
     var playlist = [];
-    var filePath = folder + name;
 
     for(var i in data)
     {
@@ -776,12 +799,11 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
         });
     }
 
-    fs.writeJson(filePath,playlist,function(err)
-    {
-        if(err)
-            defer.reject(new Error('Cannot write playlist file'));
-        else defer.resolve();
-    });
+    self.saveFavouritesFile(folder,name, playlist).then(function(){
+        defer.resolve();
+    }).fail(function(){
+        defer.reject(new Error('Cannot write playlist file'));
+    })
 
     return defer.promise;
 };
