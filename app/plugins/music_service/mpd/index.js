@@ -3039,7 +3039,7 @@ ControllerMpd.prototype.listArtists = function () {
 
                     if(artist!=='') {		
                         var codedArtists=encodeURIComponent(artist);
-                        var albumart=self.getAlbumArt({artist:codedArtists},undefined,'users');
+                        var albumart=self.getAlbumArt({artist:codedArtists},undefined,'fa-users');
                         var item={
                             service: "mpd",
                             type: 'folder',
