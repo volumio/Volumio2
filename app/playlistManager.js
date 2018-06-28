@@ -512,6 +512,9 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         }
 
                         else {
+                            if(!data)
+                                data=[];
+
                             var output = data.concat(entries);
                             console.log(filePath)
 
@@ -527,15 +530,21 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
             } else if (service === 'webradio') {
                 fs.readJson(filePath, function (err, data) {
+                    console.log(err)
+                    console.log(data)
+
                     if (err)
                         defer.resolve({success: false});
                     else {
+                        if(!data)
+                            data=[];
+
                         data.push({
                             service: service, uri: uri, title: title,
                             icon: 'fa-microphone'
                         });
 
-                        self.saveFavouritesFile(folder, name, output).then(function(){
+                        self.saveFavouritesFile(folder, name, data).then(function(){
                             var favourites = self.commandRouter.checkFavourites({uri: path});
                             defer.resolve(favourites);
                         }).fail(function(){
@@ -561,6 +570,10 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         if (err)
                             defer.resolve({success: false});
                         else {
+
+                            if(!data)
+                                data=[];
+
                             var output = data.concat(entries);
 
                             self.saveFavouritesFile(folder, name, output).then(function(){
@@ -611,7 +624,7 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 
 	var defer = libQ.defer();
 
-	fs.readJson(filePath, function (err, data) {
+	fs.readJson(folder+name, function (err, data) {
 		if (err) {
 			self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('PLAYLIST.REMOVE_ERROR'), uri);
 			defer.resolve({success: false, reason: 'Cannot open Playlist'});
