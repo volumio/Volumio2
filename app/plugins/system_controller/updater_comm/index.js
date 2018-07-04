@@ -160,7 +160,7 @@ updater_comm.prototype.checkSystemIntegrity = function () {
         }
     }
 
-    exec('/usr/bin/md5deep -r -l -s -q /mnt/volumio/rootfs/volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
+    exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.error('Cannot read os relase file: ' + error);
             defer.resolve({'isSystemOk':false});

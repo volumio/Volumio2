@@ -77,7 +77,8 @@ function cleanUpdate() {
 
 function executeUpdate(socket) {
     console.log('Starting Update...');
-    socket.emit('update');
+    var payload = {'ignoreIntegrityCheck':true};
+    socket.emit('update', payload);
 
     socket.on('updateProgress', function(data) {
         if (data.progress && data.status) {
@@ -90,7 +91,7 @@ function executeUpdate(socket) {
             console.log('Cannot complete update, error')
         } else {
             console.log('Update completed successfully, restarting');
-            return reboot()
+            return reboot(socket)
         }
     });
 }
@@ -119,8 +120,11 @@ function testMode() {
     }
 }
 
-function reboot() {
+function reboot(socket) {
     console.log('Restarting');
+    if (socket) {
+        socket.emit('closeModals');
+    }
     execSync('/bin/sync', {uid: 1000, gid: 1000});
     execSync('/usr/bin/sudo /sbin/reboot', {uid: 1000, gid: 1000});
 }

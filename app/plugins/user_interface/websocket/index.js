@@ -864,8 +864,8 @@ function InterfaceWebUI(context) {
                 var checking = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.CHECKING_SYSTEM_INTEGRITY')};
                 selfConnWebSocket.emit('updateProgress', checking);
                 var integrityCheck = self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'checkSystemIntegrity');
-                integrityCheck.then((data)=> {
-					if (data && data.isSystemOk != undefined && data.isSystemOk) {
+                integrityCheck.then((integrity)=> {
+					if ((data.ignoreIntegrityCheck !== undefined && data.ignoreIntegrityCheck) || (integrity && integrity.isSystemOk != undefined && integrity.isSystemOk)) {
                         self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
                         var started = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.STARTING_SOFTWARE_UPDATE')};
                         selfConnWebSocket.emit('updateProgress', started);
