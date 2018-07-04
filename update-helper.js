@@ -24,6 +24,9 @@ if (process.argv[2]) {
         case "cleanupdate":
             cleanUpdate()
             break;
+        case "restorevolumio":
+            restoreVolumio()
+            break;
         default:
             console.log(errorMessage);
     }
@@ -127,4 +130,22 @@ function reboot(socket) {
     }
     execSync('/bin/sync', {uid: 1000, gid: 1000});
     execSync('/usr/bin/sudo /sbin/reboot', {uid: 1000, gid: 1000});
+}
+
+function restoreVolumio() {
+    console.log('Deleting Overlay content of /volumio folder');
+    try {
+        console.log('Mounting overlay partition');
+        execSync('/bin/mkdir /mnt/overlay', {uid: 1000, gid: 1000});
+        execSync('/bin/mount /dev/mmcblk0p3 /mnt/overlay', {uid: 1000, gid: 1000});
+        console.log('Overlay partition mounted, deleting /volumio folder on overlay');
+        execSync('/bin/rm -rf /mnt/overlay/volumio', {uid: 1000, gid: 1000});
+        console.log('Cleaning environment');
+        execSync('/usr/bin/sudo /bin/umount /mnt/overlay', {uid: 1000, gid: 1000});
+        execSync('/bin/rm -rf /mnt/overlay', {uid: 1000, gid: 1000});
+        execSync('/bin/sync', {uid: 1000, gid: 1000});
+        console.log('Done');
+    } catch (e) {
+        console.log('Could not restore /volumio folder: ' + e);
+    }
 }
