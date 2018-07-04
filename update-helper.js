@@ -4,7 +4,7 @@ var execSync = require('child_process').execSync;
 var io = require('socket.io-client');
 var inquirer = require('inquirer');
 
-var errorMessage = 'Error, please provide the required updater action: forceupdate | factory | userdata | testmode | cleanupdate';
+var errorMessage = 'Error, please provide the required updater action: forceupdate | factory | userdata | testmode | cleanupdate | restorevolumio';
 if (process.argv[2]) {
     var argument = process.argv[2];
 
