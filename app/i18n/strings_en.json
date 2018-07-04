@@ -292,9 +292,8 @@
     "HDMI_UI":"User Interface via HDMI",
     "STARTING_SOFTWARE_UPDATE":"Starting Software Update",
     "CHECKING_SYSTEM_INTEGRITY":"Checking system integrity",
-    "SYSTEM_INTEGRITY_CHECK_FAILED":"System Software Integrity check failed. System Software Update is not possible under those circumstances. Please execute a factory reset or delete user data, then retry.",
+    "SYSTEM_INTEGRITY_CHECK_FAILED":"System Software Integrity check failed, manually edited files were detected. System Software Update is not possible under those circumstances. Please execute a Factory Reset or Delete User Data, then retry.",
     "UPDATE_FAILED":"Update failed"
-
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
