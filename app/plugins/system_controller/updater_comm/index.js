@@ -145,3 +145,34 @@ updater_comm.prototype.setAdditionalConf = function () {
 	var self = this;
 	//Perform your installation tasks here
 };
+
+updater_comm.prototype.checkSystemIntegrity = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+    var nLines = file.length;
+    var str;
+    for (var l = 0; l < nLines; l++) {
+        if (file[l].match(/VOLUMIO_HASH/i)) {
+            str = file[l].split('=');
+            var defaultHash = str[1].replace(/\"/gi, "");
+        }
+    }
+
+    exec('/usr/bin/md5deep -r -l -s -q /mnt/volumio/rootfs/volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.error('Cannot read os relase file: ' + error);
+            defer.resolve({'isSystemOk':false});
+        } else {
+            var currentHash = stdout;
+            if (currentHash === defaultHash) {
+                defer.resolve({'isSystemOk':true});
+            } else {
+                defer.resolve({'isSystemOk':false});
+            }
+        }
+    });
+
+    return defer.promise
+};
