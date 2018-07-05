@@ -330,6 +330,7 @@
     "ERROR_UPDATE_FILE_NOT_FOUND":"Update file not found",
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Successfully updated to version",
     "SYSTEM_RESTART_REQUIRED":"Please restart your device.",
-    "SYSTEM_RESTART_IN":"Your device will restart in "
+    "SYSTEM_RESTART_IN":"Your device will restart in ",
+    "UPDATE":"Update"
   }
 }

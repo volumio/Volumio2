@@ -330,6 +330,7 @@
     "ERROR_UPDATE_FILE_NOT_FOUND":"File di aggiornamento non trovato",
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Aggiornamento eseguito con successo alla versione",
     "SYSTEM_RESTART_REQUIRED":"Si prega di riavviare il dispositivo",
-    "SYSTEM_RESTART_IN":"Il vostro dispositivo si riavverà in "
+    "SYSTEM_RESTART_IN":"Il vostro dispositivo si riavverà in ",
+    "UPDATE":"Aggiornamento"
   }
 }

@@ -853,7 +853,13 @@ function InterfaceWebUI(context) {
                 var selfConnWebSocket = this;
 
                 var updateMessage = JSON.parse(message)
-				self.logger.info("Update Ready: " + updateMessage);
+				self.logger.info("Update Ready: " + JSON.stringify(updateMessage));
+                try {
+                    updateMessage.title = updateMessage.title.replace('Update', self.commandRouter.getI18nString('UPDATER.UPDATE'));
+				} catch(e) {
+                	self.logger.error('Cannot translate update title: ' + e);
+				}
+
                 self.commandRouter.broadcastMessage('updateReady', updateMessage);
             });
 

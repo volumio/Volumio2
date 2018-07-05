@@ -63,13 +63,13 @@ updater_comm.prototype.notifyProgress = function () {
                         if (obj.message) {
                             obj.message = self.translateUpdateString(obj.message);
                         }
-                        if (message === 'UpdateDone') {
-                            return self.initRestartRoutine();
+                        if (message === 'updateDone') {
+                            return self.initRestartRoutine(obj.message);
                         } else {
                             self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
                         }
-                        console.log(message)
-                        console.log(obj)
+                        console.log(message);
+                        console.log(obj);
                     }
                 } catch (e) {
                     self.logger.error('Error in translating update message: ' + e);
@@ -97,7 +97,7 @@ updater_comm.prototype.translateUpdateString = function (string) {
     try {
         if (string.indexOf('Successfully updated to ') >= 0) {
             var version = string.split('"')[1];
-            var status = self.commandRouter.getI18nString('UPDATER.SUCCESSFULLY_UPDATED_TO_VERSION') + ' ' + version + '. ' + self.commandRouter.getI18nString('UPDATER.SYSTEM_RESTART_REQUIRED');
+            var status = self.commandRouter.getI18nString('UPDATER.SUCCESSFULLY_UPDATED_TO_VERSION') + ' ' + version + '. ' + self.commandRouter.getI18nString('UPDATER.SYSTEM_RESTART_IN');
             return status
         } else {
             switch(string) {
@@ -137,22 +137,25 @@ updater_comm.prototype.translateUpdateString = function (string) {
 
 }
 
-updater_comm.prototype.initRestartRoutine = function () {
+updater_comm.prototype.initRestartRoutine = function (string) {
     var self = this;
     var seconds = 15;
 
-    setInterval(()=>{
+    try {
+        setInterval(()=>{
         if (seconds !== 0) {
-            var message = self.commandRouter.getI18nString('UPDATER.SUCCESSFULLY_UPDATED_TO_VERSION') + ' ' + version + '. ' + self.commandRouter.getI18nString('UPDATER.SYSTEM_RESTART_IN') + ' ' + seconds;
-            var obj = { message: 'Successfully updated to "2.429" version. System restart required.', progress: 100, status: 'success' };
-            self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
+            var message = string + ' ' + seconds;
+            var obj = { message: message, progress: 100, status: 'success' };
+            self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':'updateDone','value':obj});
             seconds = seconds-1;
         } else {
             self.commandRouter.closeModals();
             return self.commandRouter.reboot();
         }
     }, 1000)
-
+    } catch(e) {
+        self.logger.error('Updater, cannot finalize update and restart: ' + e);
+    }
 };
 
 updater_comm.prototype.onStop = function () {
