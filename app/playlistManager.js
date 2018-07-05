@@ -293,37 +293,40 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
     var filePath = folder + name;
 
 	fs.exists(filePath, function (exists) {
+	    var fileDefer;
 		if (!exists) {
-            self.saveJSONFile(folder, name, playlist)
-		}
+            fileDefer=self.saveJSONFile(folder, name, playlist);
+		} else fileDefer=libQ.resolve();
 
-		fs.readJson(filePath, function (err, data) {
-			if (err)
-				defer.resolve({success: false});
-			else {
-				//searching for item with same name
-				var alreadyExists = false;
-
-				for (var i in data) {
-					if (data[i].name == radio_name) {
-						alreadyExists = true;
-						data[i].uri = uri;
-					}
-				}
-
-				if (alreadyExists == false) {
-					data.push({service: service, name: radio_name, uri: uri});
-				}
-
-                self.saveJSONFile(folder, name, output).then(function(){
-                    defer.resolve({success: true});
-                    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
-                }).fail(function(){
-                    self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
+		fileDefer.then(function(){
+            fs.readJson(filePath, function (err, data) {
+                if (err)
                     defer.resolve({success: false});
-                })
-			}
-		});
+                else {
+                    //searching for item with same name
+                    var alreadyExists = false;
+
+                    for (var i in data) {
+                        if (data[i].name == radio_name) {
+                            alreadyExists = true;
+                            data[i].uri = uri;
+                        }
+                    }
+
+                    if (alreadyExists == false) {
+                        data.push({service: service, name: radio_name, uri: uri});
+                    }
+
+                    self.saveJSONFile(folder, name, data).then(function(){
+                        defer.resolve({success: true});
+                        self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
+                    }).fail(function(){
+                        self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') , '');
+                        defer.resolve({success: false});
+                    })
+                }
+            });
+        })
 	});
 
 	return defer.promise;
