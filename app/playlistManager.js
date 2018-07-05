@@ -394,13 +394,19 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 	}
 
 	fs.exists(filePath, function (exists) {
-	    var fileDefer;
+	    var fileDefer=libQ.defer();
 
 
 		if (!exists) {
 		    console.log("Setting default value for favourite "+folder+" "+name)
-                fileDefer=self.saveJSONFile(folder, name, playlist)
-		} else fileDefer=libQ.resolve();
+                //fileDefer=self.saveJSONFile(folder, name, playlist)
+            fs.writeJson(folder + name, playlist, function (err) {
+                if (err)
+                    fileDefer.reject(new Error());
+                else fileDefer.resolve();
+            })
+
+		} else fileDefer.resolve();
 
 		fileDefer.then(function() {
             if (service === 'mpd') {
@@ -507,6 +513,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
                 listingDefer.then(function(entries)
                 {
+                    console.log("Reading filepath "+filePath)
                     fs.readJson(filePath, function (err, data) {
                         if (err)
                         {
@@ -515,6 +522,8 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                         }
 
                         else {
+
+                            console.log("Read this data "+data)
                             if(!data)
                                 data=[];
 
