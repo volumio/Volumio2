@@ -294,7 +294,7 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 
 	fs.exists(filePath, function (exists) {
 		if (!exists) {
-            self.saveFavouritesFile(folder, name, playlist)
+            self.saveJSONFile(folder, name, playlist)
 		}
 
 		fs.readJson(filePath, function (err, data) {
@@ -315,7 +315,7 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 					data.push({service: service, name: radio_name, uri: uri});
 				}
 
-                self.saveFavouritesFile(folder, name, output).then(function(){
+                self.saveJSONFile(folder, name, output).then(function(){
                     defer.resolve({success: true});
                     self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('WEBRADIO.WEBRADIO') + ' ' + self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), radio_name);
                 }).fail(function(){
@@ -341,7 +341,7 @@ PlaylistManager.prototype.removeFromMyWebRadio = function (name, service, uri) {
 
 	fs.exists(filePath, function (exists) {
 		if (!exists) {
-            self.saveFavouritesFile(folder, filename, playlist);
+            self.saveJSONFile(folder, filename, playlist);
 		}
 
 		fs.readJson(filePath, function (err, data) {
@@ -355,7 +355,7 @@ PlaylistManager.prototype.removeFromMyWebRadio = function (name, service, uri) {
 					}
 				}
 
-				self.saveFavouritesFile(folder, filename, data).then(function(){
+				self.saveJSONFile(folder, filename, data).then(function(){
                     defer.resolve({success:true});
                 }).fail(function(){
                     defer.resolve({success:false});
@@ -396,7 +396,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
 		if (!exists) {
 		    console.log("Setting default value for favourite "+folder+" "+name)
-                fileDefer=self.saveFavouritesFile(folder, name, playlist)
+                fileDefer=self.saveJSONFile(folder, name, playlist)
 		} else fileDefer=libQ.resolve();
 
 		fileDefer.then(function() {
@@ -518,7 +518,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                             var output = data.concat(entries);
                             console.log(filePath)
 
-                            self.saveFavouritesFile(folder, name, output).then(function(){
+                            self.saveJSONFile(folder, name, output).then(function(){
                                 var favourites = self.commandRouter.checkFavourites({uri: path});
                                 defer.resolve(favourites);
                             }).fail(function(){
@@ -544,7 +544,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                             icon: 'fa-microphone'
                         });
 
-                        self.saveFavouritesFile(folder, name, data).then(function(){
+                        self.saveJSONFile(folder, name, data).then(function(){
                             var favourites = self.commandRouter.checkFavourites({uri: path});
                             defer.resolve(favourites);
                         }).fail(function(){
@@ -576,7 +576,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
                             var output = data.concat(entries);
 
-                            self.saveFavouritesFile(folder, name, output).then(function(){
+                            self.saveJSONFile(folder, name, output).then(function(){
                                 var favourites = self.commandRouter.checkFavourites({uri: path});
                                 defer.resolve(favourites);
                             }).fail(function(){
@@ -595,7 +595,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 };
 
 
-PlaylistManager.prototype.saveFavouritesFile = function(localFolder, fileName, data)
+PlaylistManager.prototype.saveJSONFile = function(localFolder, fileName, data)
 {
     var self=this;
     var defer=libQ.defer();
@@ -607,7 +607,7 @@ PlaylistManager.prototype.saveFavouritesFile = function(localFolder, fileName, d
             data:data
         });
     } else {
-        fs.writeJson(localFolder + name, data, function (err) {
+        fs.writeJson(localFolder + fileName, data, function (err) {
             if (err)
                 defer.reject(new Error());
             else defer.resolve();
@@ -640,7 +640,7 @@ PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, ser
 			}
 
 			var itemName = removedItem ? (removedItem.title || uri) : uri;
-            self.saveFavouritesFile(folder, name, data).then(function(){
+            self.saveJSONFile(folder, name, data).then(function(){
                 self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'), itemName);
                 defer.resolve(data);
             }).fail(function(){
@@ -812,7 +812,7 @@ PlaylistManager.prototype.commonAddItemsToPlaylist = function (folder, name, dat
         });
     }
 
-    self.saveFavouritesFile(folder,name, playlist).then(function(){
+    self.saveJSONFile(folder,name, playlist).then(function(){
         defer.resolve();
     }).fail(function(){
         defer.reject(new Error('Cannot write playlist file'));
