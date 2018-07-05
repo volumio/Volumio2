@@ -318,5 +318,18 @@
     "DEVICE_SUCCESSFULLY_CONFIGURED":"è stato configurato ed è pronto per l'uso",
     "PLEASE_DONATE":"Se ti piace Volumio, considera di fare una donazione. Il tuo contributo può fare la differenza!",
     "RUN_FIRST_CONFIG_WIZARD":"Avvia la configurazione guidata"
+  },
+  "UPDATER":{
+    "PREPARING_UPDATE":"Aggiornamento in preparazione",
+    "CREATING_BACKUP":"Creazione del backup",
+    "DOWNLOADING_UPDATE":"Scaricando l'aggiornamento",
+    "CLEANING":"Rimozione dei file temporanei",
+    "FINALIZING_UPDATE":"Completando l'aggiornamento",
+    "ERROR":"Errore",
+    "ERROR_UPDATE_FAILED":"Errore: aggiornamento fallito, si prega di riavviare il dispositivo e riprovare",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"File di aggiornamento non trovato",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Aggiornamento eseguito con successo alla versione",
+    "SYSTEM_RESTART_REQUIRED":"Si prega di riavviare il dispositivo",
+    "SYSTEM_RESTART_IN":"Il vostro dispositivo si riavverà in "
   }
 }

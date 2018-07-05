@@ -318,5 +318,18 @@
     "DEVICE_SUCCESSFULLY_CONFIGURED":"has been configured and it's ready to play",
     "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!",
     "RUN_FIRST_CONFIG_WIZARD":"Run first config Wizard"
+  },
+  "UPDATER":{
+    "PREPARING_UPDATE":"Preparing update",
+    "CREATING_BACKUP":"Creating backup",
+    "DOWNLOADING_UPDATE":"Downloading new update",
+    "CLEANING":"Cleaning old files",
+    "FINALIZING_UPDATE":"Finalizing update",
+    "ERROR":"Error",
+    "ERROR_UPDATE_FAILED":"Error: update failed, please restart system and retry",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"Update file not found",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Successfully updated to version",
+    "SYSTEM_RESTART_REQUIRED":"Please restart your device.",
+    "SYSTEM_RESTART_IN":"Your device will restart in "
   }
 }

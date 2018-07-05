@@ -57,12 +57,22 @@ updater_comm.prototype.notifyProgress = function () {
                             obj.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
                             obj.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
                         }
+                        if (obj.status) {
+                            obj.status = self.translateUpdateString(obj.status);
+                        }
+                        if (obj.message) {
+                            obj.message = self.translateUpdateString(obj.message);
+                        }
+                        if (message === 'UpdateDone') {
+                            return self.initRestartRoutine();
+                        } else {
+                            self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
+                        }
                         console.log(message)
                         console.log(obj)
-                        self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
                     }
                 } catch (e) {
-                    
+                    self.logger.error('Error in translating update message: ' + e);
                 }
 
             });
@@ -78,6 +88,70 @@ updater_comm.prototype.notifyProgress = function () {
         var ilFileDescriptor = inotify.addWatch(ilFile);
     });
 
+
+};
+
+updater_comm.prototype.translateUpdateString = function (string) {
+    var self = this;
+
+    try {
+        if (string.indexOf('Successfully updated to ') >= 0) {
+            var version = string.split('"')[1];
+            var status = self.commandRouter.getI18nString('UPDATER.SUCCESSFULLY_UPDATED_TO_VERSION') + ' ' + version + '. ' + self.commandRouter.getI18nString('UPDATER.SYSTEM_RESTART_REQUIRED');
+            return status
+        } else {
+            switch(string) {
+                case 'Preparing update':
+                    return self.commandRouter.getI18nString('UPDATER.PREPARING_UPDATE');
+                    break;
+                case 'Creating backup':
+                    return self.commandRouter.getI18nString('UPDATER.CREATING_BACKUP');
+                    break;
+                case 'Downloading new update':
+                    return self.commandRouter.getI18nString('UPDATER.DOWNLOADING_UPDATE');
+                    break;
+                case 'Cleaning old files':
+                    return self.commandRouter.getI18nString('UPDATER.CLEANING');
+                    break;
+                case 'Finalizing update':
+                    return self.commandRouter.getI18nString('UPDATER.FINALIZING_UPDATE');
+                    break;
+                case 'Error':
+                    return self.commandRouter.getI18nString('UPDATER.ERROR');
+                    break;
+                case 'Error: update failed, please restart system and retry':
+                    return self.commandRouter.getI18nString('UPDATER.ERROR_UPDATE_FAILED');
+                    break;
+                case 'Update file not found':
+                    return self.commandRouter.getI18nString('UPDATER.ERROR_UPDATE_FILE_NOT_FOUND');
+                    break;
+                default:
+                    return string
+            }
+        }
+    } catch(e) {
+        self.logger.error('Cannot translate update string ' + string + ': ' + e);
+        return string
+    }
+
+
+}
+
+updater_comm.prototype.initRestartRoutine = function () {
+    var self = this;
+    var seconds = 15;
+
+    setInterval(()=>{
+        if (seconds !== 0) {
+            var message = self.commandRouter.getI18nString('UPDATER.SUCCESSFULLY_UPDATED_TO_VERSION') + ' ' + version + '. ' + self.commandRouter.getI18nString('UPDATER.SYSTEM_RESTART_IN') + ' ' + seconds;
+            var obj = { message: 'Successfully updated to "2.429" version. System restart required.', progress: 100, status: 'success' };
+            self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg':message,'value':obj});
+            seconds = seconds-1;
+        } else {
+            self.commandRouter.closeModals();
+            return self.commandRouter.reboot();
+        }
+    }, 1000)
 
 };
 
@@ -150,29 +224,35 @@ updater_comm.prototype.checkSystemIntegrity = function () {
     var self = this;
     var defer = libQ.defer();
 
-    var file = fs.readFileSync('/etc/os-release').toString().split('\n');
-    var nLines = file.length;
-    var str;
-    for (var l = 0; l < nLines; l++) {
-        if (file[l].match(/VOLUMIO_HASH/i)) {
-            str = file[l].split('=');
-            var defaultHash = str[1].replace(/\"/gi, "");
-        }
-    }
-
-    exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
-        if (error !== null) {
-            self.logger.error('Cannot read os relase file: ' + error);
-            defer.resolve({'isSystemOk':false});
-        } else {
-            var currentHash = stdout;
-            if (currentHash === defaultHash) {
-                defer.resolve({'isSystemOk':true});
-            } else {
-                defer.resolve({'isSystemOk':false});
+    if (fs.existsSync('/data/ignoresystemcheck')) {
+        defer.resolve({'isSystemOk':true});
+    } else {
+        var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+        var nLines = file.length;
+        var str;
+        for (var l = 0; l < nLines; l++) {
+            if (file[l].match(/VOLUMIO_HASH/i)) {
+                str = file[l].split('=');
+                var defaultHash = str[1].replace(/\"/gi, "");
             }
         }
-    });
+
+        exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
+            if (error !== null) {
+                self.logger.error('Cannot read os relase file: ' + error);
+                defer.resolve({'isSystemOk':false});
+            } else {
+                var currentHash = stdout;
+                if (currentHash === defaultHash) {
+                    defer.resolve({'isSystemOk':true});
+                } else {
+                    defer.resolve({'isSystemOk':false});
+                }
+            }
+        });
+    }
+
+
 
     return defer.promise
 };
