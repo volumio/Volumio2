@@ -209,11 +209,12 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('play', function (N) {
+                                var num = parseInt(N);
 
-				if (N == null) {
-					return self.commandRouter.volumioPlay();
-				} else if (N.value != undefined) {
-                   return self.commandRouter.volumioPlay(N.value);
+                                if (N == null || isNaN(num) ) {
+                                        return self.commandRouter.volumioPlay();
+                                } else {
+                                        return self.commandRouter.volumioPlay(num);
 				}
 			});
 
