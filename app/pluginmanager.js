@@ -140,6 +140,7 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 		} catch(e) {
 			self.logger.error('!!!! WARNING !!!!');
             self.logger.error('The plugin ' + category + '/' + name + ' failed to load, setting it to stopped. Error: ' + e);
+            self.logger.error('Stack trace: ' + e.stack);
             self.logger.error('!!!! WARNING !!!!');
             self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
             self.config.set(category + '.' + name + '.status', "STOPPED");
@@ -155,16 +156,16 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 
 		if (pluginInstance && pluginInstance.onVolumioStart !== undefined){
 			var myPromise = pluginInstance.onVolumioStart();
-	
+
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onVolumioStart(): push an error message and disable plugin
 				//self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing init routine. Please install updated version, or contact plugin developper");
 				self.logger.error("ATTENTION!!!: Plugin " + name + " does not return adequate promise from onVolumioStart: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
-			
+
 			self.corePlugins.set(key, pluginData);  // set in any case, so it can be started/stopped
-		
+
 			defer.resolve();
 			return myPromise;
 		}
@@ -178,8 +179,8 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
 	{
 	 	self.logger.info("Plugin " + name + " is not enabled");
 		defer.resolve();
-	}	
-	
+	}
+
 	return defer.promise;
 
 };
@@ -232,13 +233,13 @@ PluginManager.prototype.loadCorePlugins = function () {
 
 	}
 
-/*	
+/*
     each plugin's onVolumioStart() is launched by priority order.
 	Note: there is no resolution strategy: each plugin completes
 	at it's own pace, and in whatever order.
 	Should completion order matter, a new promise strategy should be
 	implemented below (chain by boot-priority order, or else...)
-*/	
+*/
 	priority_array.forEach(function(plugin_array) {
 		if (plugin_array != undefined) {
 			plugin_array.forEach(function(folder) {
@@ -246,7 +247,7 @@ PluginManager.prototype.loadCorePlugins = function () {
 			});
 		}
 	});
-	
+
 	return libQ.all(defer_loadList);
 };
 
@@ -557,25 +558,25 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 		if(plugin.onStop!==undefined)
 		{
 			var myPromise = plugin.onStop();
-			self.config.set(category + '.' + name + '.status', "STOPPED");					
-			
+			self.config.set(category + '.' + name + '.status', "STOPPED");
+
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onStop(): push an error message and disable plugin
                 self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
 				self.logger.error("Plugin " + name + " does not return adequate promise from onStop: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
-			
+
 			defer.resolve();
 			return myPromise;
-			
+
 		}
 		else
 		{
 			self.config.set(category + '.' + name + '.status', "STOPPED");
 			defer.resolve();
 		}
-				
+
 	} else defer.resolve();
 
 	return defer.promise;
@@ -587,20 +588,20 @@ PluginManager.prototype.startCorePlugins = function () {
 	var defer_startList=[];
 
 	self.logger.info("___________ START PLUGINS ___________");
-	
-/*	
+
+/*
     each plugin's onStart() is launched following plugins.json order.
 	Note: there is no resolution strategy: each plugin completes
 	at it's own pace, and in whatever order.
 	Should completion order matter, a new promise strategy should be
 	implemented below (chain by start order, or else...)
-*/	
+*/
 
 	self.corePlugins.forEach(function (value,key) {
 		defer_startList.push(self.startCorePlugin(value.category,value.name));
 	});
-	
-	return libQ.all(defer_startList);		
+
+	return libQ.all(defer_startList);
 };
 
 PluginManager.prototype.stopPlugins = function () {
@@ -609,19 +610,19 @@ PluginManager.prototype.stopPlugins = function () {
 
 	self.logger.info("___________ STOP PLUGINS ___________");
 
-/*	
+/*
     each plugin's onStop() is launched following plugins.json order.
 	Note: there is no resolution strategy: each plugin completes
 	at it's own pace, and in whatever order.
 	Should completion order matter, a new promise strategy should be
 	implemented below (chain by start order, or else...)
-*/	
+*/
 
 	self.corePlugins.forEach(function (value, key) {
 		defer_stopList.push(self.stopPlugin(value.category,value.name));
 	});
-	
-	return libQ.all(defer_stopList);		
+
+	return libQ.all(defer_stopList);
 };
 
 PluginManager.prototype.getPluginCategories = function () {
@@ -757,7 +758,7 @@ PluginManager.prototype.onVolumioShutdownPlugin = function (category, name) {
 				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioShutdown: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
-		
+
 			return myPromise;
 		}
 	}
@@ -804,7 +805,7 @@ PluginManager.prototype.onVolumioRebootPlugin = function (category, name) {
 				self.logger.error("Plugin " + name + " does not return adequate promise from onVolumioReboot: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
-			
+
 			return myPromise;
 		}
 	}
@@ -1188,14 +1189,14 @@ PluginManager.prototype.unzipPackage = function () {
 	}
 
 	exec("/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d " + extractFolder, {maxBuffer:816000}, function (error) {
-	
+
 		if (error !== null) {
 			defer.reject(new Error('Error unzipping plugin: ' + error));
 		}
 		else {
 			defer.resolve(extractFolder);
 		}
-	
+
 		self.rmDir('/tmp/downloaded_plugin.zip');
 	});
 
@@ -1214,7 +1215,7 @@ PluginManager.prototype.renameFolder = function (folder) {
 
 	var newFolderName=self.pluginPath[1]+name;
 
-	exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {	
+	exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {
 		if (error !== null) {
 			console.log("ERROR: "+ error);
 			defer.reject(new Error());
@@ -1224,7 +1225,7 @@ PluginManager.prototype.renameFolder = function (folder) {
 			defer.resolve(newFolderName);
 		}
 	});
-	
+
 	return defer.promise;
 }
 
@@ -1244,7 +1245,7 @@ PluginManager.prototype.moveToCategory = function (folder) {
 	fs.remove(newFolderName +'/'+name,function()
 	{
 		self.createFolder(newFolderName)
-			.then (exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {	
+			.then (exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {
 				if (error !== null) {
 					console.log("ERROR: "+ error);
 					defer.reject(new Error());
@@ -1254,8 +1255,8 @@ PluginManager.prototype.moveToCategory = function (folder) {
 					defer.resolve(newFolderName +'/'+name);
 				}
 			}));
-	});		
-	
+	});
+
 	return defer.promise;
 }
 
