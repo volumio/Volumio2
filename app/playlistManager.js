@@ -398,7 +398,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
 
 		if (!exists) {
-		    console.log("Setting default value for favourite "+folder+" "+name)
+		        //console.log("Setting default value for favourite "+folder+" "+name)
                 //fileDefer=self.saveJSONFile(folder, name, playlist)
             fs.writeJson(folder + name, playlist, function (err) {
                 if (err)
@@ -513,22 +513,21 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
                 listingDefer.then(function(entries)
                 {
-                    console.log("Reading filepath "+filePath)
+                    //console.log("Reading filepath "+filePath)
                     fs.readJson(filePath, function (err, data) {
                         if (err)
                         {
-                            console.log("ERR "+err)
+                            //console.log("ERR "+err)
                             defer.resolve({success: false});
                         }
 
                         else {
 
-                            console.log("Read this data "+data)
+                            //console.log("Read this data "+data)
                             if(!data)
                                 data=[];
 
                             var output = data.concat(entries);
-                            console.log(filePath)
 
                             self.saveJSONFile(folder, name, output).then(function(){
                                 var favourites = self.commandRouter.checkFavourites({uri: path});
@@ -542,9 +541,6 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 
             } else if (service === 'webradio') {
                 fs.readJson(filePath, function (err, data) {
-                    console.log(err)
-                    console.log(data)
-
                     if (err)
                         defer.resolve({success: false});
                     else {
@@ -614,7 +610,7 @@ PlaylistManager.prototype.saveJSONFile = function(localFolder, fileName, data)
 
     if((this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === 'true'))
     {
-        return self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'saveCloudFavourites', {
+        return self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'saveCloudItem', {
             fileName:fileName,
             data:data
         });
