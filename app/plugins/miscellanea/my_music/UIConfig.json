@@ -5,6 +5,7 @@
   "sections": [
     {"coreSection":"my-music"},
 	{"coreSection":"network-drives"},
+	{"coreSection":"my-music-plugin-enabler"},
 	{
 	  "id": "albumart_settings",
 	  "element": "section",

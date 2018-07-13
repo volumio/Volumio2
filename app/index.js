@@ -1973,3 +1973,16 @@ CoreCommandRouter.prototype.usbAudioDetach = function () {
     }
     return defer.promise
 }
+
+CoreCommandRouter.prototype.getMyMusicPlugins = function () {
+    var self=this;
+
+    return  this.pluginManager.getMyMusicPlugins();
+}
+
+CoreCommandRouter.prototype.enableDisableMyMusicPlugin = function (data) {
+    var self=this;
+
+    return  this.pluginManager.enableDisableMyMusicPlugin(data);
+}
+

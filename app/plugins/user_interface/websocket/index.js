@@ -1711,6 +1711,40 @@ function InterfaceWebUI(context) {
                 }
             });
 
+        	connWebSocket.on('getMyMusicPlugins', function () {
+            	var selfConnWebSocket = this;
+
+            	var myMusicPlugins = self.commandRouter.getMyMusicPlugins();
+				if (myMusicPlugins != undefined) {
+                    myMusicPlugins.then(function (plugins) {
+              	      selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
+            	    })
+                    .fail(function () {
+                    });
+           	 	}
+			});
+
+        connWebSocket.on('enableDisableMyMusicPlugin', function (data) {
+            var selfConnWebSocket = this;
+
+            var enableDisableMyMusicPlugin = self.commandRouter.enableDisableMyMusicPlugin(data);
+            enableDisableMyMusicPlugin.then(function(plugins) {
+                selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
+                var title = self.commandRouter.getI18nString('COMMON.DISABLED');
+                if (data.enabled) {
+                	title = self.commandRouter.getI18nString('COMMON.ENABLED');
+				}
+                selfConnWebSocket.emit('pushToastMessage', {
+                    type: 'success',
+                    title: title,
+                    message: data.prettyName
+                });
+			})
+            .fail(function (error) {
+                self.logger.error(error);
+            });
+        });
+
         connWebSocket.on('pinger', function (data) {
             var selfConnWebSocket = this;
 

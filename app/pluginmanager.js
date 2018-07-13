@@ -23,6 +23,7 @@ function PluginManager(ccommand, server) {
 
 	self.corePlugins = new HashMap();
     self.myVolumioPlugins = new HashMap();
+    self.myMusicPlugins = [];
 
 	fs.ensureDir('/data/plugins/', function (err) {
 		if (err) {
@@ -223,6 +224,10 @@ PluginManager.prototype.loadCorePlugins = function () {
 
 							plugin_array.push(pluginFolder);
 							priority_array.set(boot_priority, plugin_array);
+
+							if (package_json.volumio_info.is_my_music_plugin) {
+								self.addMyMusicPlugin(package_json);
+							}
 						}
 
 					}
@@ -291,6 +296,9 @@ PluginManager.prototype.loadMyVolumioPlugins = function () {
 
                             plugin_array.push(pluginFolder);
                             priority_array.set(boot_priority, plugin_array);
+                            if (package_json.volumio_info.is_my_music_plugin) {
+                                self.addMyMusicPlugin(package_json);
+                            }
                         }
 
                     }
@@ -412,7 +420,7 @@ PluginManager.prototype.startMyVolumioPlugin = function (category,name) {
 
             if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
                 // Handle non-compliant onStart(): push an error message and disable plugin
-                self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
+                //self.coreCommand.pushToastMessage('error',name + " Plugin","This plugin has failing start routine. Please install updated version, or contact plugin developper");
                 self.logger.error("Plugin " + name + " does not return adequate promise from onStart: please update!");
                 myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
             }
@@ -562,7 +570,7 @@ PluginManager.prototype.stopPlugin = function (category, name) {
 
 			if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
 				// Handle non-compliant onStop(): push an error message and disable plugin
-                self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
+                //self.coreCommand.pushToastMessage('error' , name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
 				self.logger.error("Plugin " + name + " does not return adequate promise from onStop: please update!");
 				myPromise = libQ.resolve();  // passing a fake promise to avoid crashes in new promise management
 			}
@@ -1995,3 +2003,71 @@ PluginManager.prototype.checkIndex = function () {
 
 	return defer.promise;
 }
+
+PluginManager.prototype.addMyMusicPlugin = function (pluginInfo) {
+    var self=this;
+
+    try {
+        self.logger.info('Adding plugin ' + pluginInfo.name + ' to MyMusic Plugins');
+        var plugin = {
+        	'prettyName':pluginInfo.volumio_info.prettyName,
+        	'name':pluginInfo.name,
+			'category':pluginInfo.volumio_info.plugin_type,
+			'hasConfiguration':pluginInfo.volumio_info.has_configuration
+		}
+        self.myMusicPlugins.push(plugin);
+	} catch (e) {
+    	self.logger.error('Cannot add ' + pluginInfo.name + ' to MyMusic Plugins, error: ' + e);
+	}
+}
+
+PluginManager.prototype.getMyMusicPlugins = function () {
+    var self=this;
+    var defer = libQ.defer();
+
+    for (var i in self.myMusicPlugins) {
+    	var plugin = self.myMusicPlugins[i];
+        plugin.active = false;
+        plugin.enabled = self.config.get(plugin.category + '.' + plugin.name + '.enabled');
+        if (self.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
+            plugin.active = true;
+		}
+	}
+
+    defer.resolve(self.myMusicPlugins);
+	return defer.promise
+}
+
+PluginManager.prototype.enableDisableMyMusicPlugin = function (data) {
+    var self=this;
+    var defer = libQ.defer();
+
+    if (data.enabled) {
+        self.logger.info('Enabling MyMusic plugin ' + data.name);
+        var enable = self.enableAndStartPlugin(data.category, data.name);
+        enable.then(function(result) {
+			var plugins = self.getMyMusicPlugins()
+			plugins.then(function(list){
+				defer.resolve(list);
+			})
+		})
+		.fail(function (e) {
+
+		})
+	} else {
+        self.logger.info('Disabling MyMusic plugin ' + data.name);
+        var disable = self.disableAndStopPlugin(data.category, data.name);
+        disable.then(function(result) {
+            var plugins = self.getMyMusicPlugins()
+            plugins.then(function(list){
+                defer.resolve(list);
+            })
+        })
+            .fail(function (e) {
+
+            })
+	}
+	return defer.promise
+}
+
+

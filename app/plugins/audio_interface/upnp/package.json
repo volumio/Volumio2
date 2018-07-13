@@ -9,7 +9,10 @@
   "author": "Volumio",
   "license": "ISC",
   "volumio_info":{
+    "prettyName": "UPNP Renderer",
     "plugin_type": "audio_interface",
-    "boot_priority":9
+    "boot_priority":9,
+    "is_my_music_plugin":false,
+    "has_configuration":false
   }
 }
