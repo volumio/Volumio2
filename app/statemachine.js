@@ -368,6 +368,7 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 
 		this.askedForPrefetch=false;
 		this.simulateStopStartDone=false;
+		this.prefetchDone=false;
 
 		setTimeout(this.increasePlaybackTimer.bind(this),250);
 	}
@@ -431,7 +432,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		if(remainingTime<5000 && this.askedForPrefetch==false)
+		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
@@ -453,7 +454,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			}
 		}
 
-		if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
+		if(remainingTime>=0 && remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
 		{
 
 			this.simulateStopStartDone=true;
