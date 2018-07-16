@@ -1425,3 +1425,22 @@ ControllerAlsa.prototype.ignoreUsbAudioAttach  = function (value) {
 
     ignoreUsbAudioAttach = value;
 };
+
+ControllerAlsa.prototype.checkCurrentAudioDeviceAvailable  = function () {
+    var self = this;
+
+    var currentDeviceNumber = self.config.get('outputdevice', 'none');
+    var cards = self.getAlsaCards();
+
+    if (cards.length === 0) {
+        return false
+    } else {
+    	var found = false
+    	for (var i in cards) {
+    		if (cards[i].id == currentDeviceNumber) {
+    			found = true;
+			}
+		}
+		return found
+	}
+};
