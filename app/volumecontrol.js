@@ -62,7 +62,7 @@ function CoreVolumeController(commandRouter) {
 
 		var ret = '';
 		var err = null;
-		var p = spawn('amixer', args);
+		var p = spawn('amixer', args, {uid:1000,gid:1000});
 
 		p.stdout.on('data', function (data) {
 			ret += data;
