@@ -336,26 +336,27 @@ CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds,
 
 // MPD Stop
 CoreCommandRouter.prototype.serviceStop = function (sService) {
-	
-	if (sService != undefined) {
-		this.pushConsoleMessage('CoreCommandRouter::serviceStop');
-		var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+    if (sService != undefined) {
+        this.pushConsoleMessage('CoreCommandRouter::serviceStop');
+        var thisPlugin = this.getMusicPlugin(sService);
         if (thisPlugin != undefined && typeof thisPlugin.stop === "function") {
             return thisPlugin.stop();
-		} else {
+        } else {
             this.logger.error('WARNING: No stop method for service ' + sService);
-		}
+        }
 
-	} else {
-		this.pushConsoleMessage('Received STOP, but no service to execute it');
-	}
+    } else {
+        this.pushConsoleMessage('Received STOP, but no service to execute it');
+        return libQ.resolve('');
+    }
 };
 
 // MPD Pause
 CoreCommandRouter.prototype.servicePause = function (sService) {
-	this.pushConsoleMessage('CoreCommandRouter::servicePause');
+    this.pushConsoleMessage('CoreCommandRouter::servicePause');
 
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+    var thisPlugin = this.getMusicPlugin(sService);
     if (thisPlugin != undefined && typeof thisPlugin.pause === "function") {
         return thisPlugin.pause();
     } else {
@@ -365,10 +366,10 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
-	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
+    this.pushConsoleMessage('CoreCommandRouter::serviceResume');
 
-    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	var state=this.stateMachine.getState();
+    var thisPlugin = this.getMusicPlugin(sService);
+    var state=this.stateMachine.getState();
 
     if(state==='stop')
     {
@@ -384,8 +385,19 @@ CoreCommandRouter.prototype.serviceResume = function (sService) {
 // Methods usually called by the service controllers --------------------------------------------------------------
 
 CoreCommandRouter.prototype.servicePushState = function (state, sService) {
-	this.pushConsoleMessage('CoreCommandRouter::servicePushState');
-	return this.stateMachine.syncState(state, sService);
+    this.pushConsoleMessage('CoreCommandRouter::servicePushState');
+    return this.stateMachine.syncState(state, sService);
+};
+
+CoreCommandRouter.prototype.getMusicPlugin = function (sService) {
+    // Check first if its a music service
+    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+    if (!thisPlugin) {
+        // check if its a audio interface
+        thisPlugin = this.pluginManager.getPlugin('audio_interface', sService);
+    }
+
+    return thisPlugin
 };
 
 // Methods usually called by the music library ---------------------------------------------------------------------
