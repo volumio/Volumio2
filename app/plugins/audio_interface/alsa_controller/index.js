@@ -1429,8 +1429,10 @@ ControllerAlsa.prototype.checkCurrentAudioDeviceAvailable  = function () {
     var self = this;
 
     var currentDeviceNumber = self.config.get('outputdevice', 'none');
+    if (currentDeviceNumber === 'softvolume') {
+    	currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+	}
     var cards = self.getAlsaCards();
-
     if (cards.length === 0) {
         return false
     } else {
