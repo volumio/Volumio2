@@ -213,9 +213,14 @@ updater_comm.prototype.setSystemConf = function (pluginName, varName) {
 	//Perform your installation tasks here
 };
 
-updater_comm.prototype.getAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
+updater_comm.prototype.getAdditionalConf = function (type, controller, data, def) {
+    var self = this;
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
 };
 
 updater_comm.prototype.setAdditionalConf = function () {
@@ -227,7 +232,8 @@ updater_comm.prototype.checkSystemIntegrity = function () {
     var self = this;
     var defer = libQ.defer();
 
-    if (fs.existsSync('/data/ignoresystemcheck')) {
+    var ignoreSystemCheck = self.getAdditionalConf('system_controller', 'system', 'ignoreSystemCheck', false)
+    if (fs.existsSync('/data/ignoresystemcheck') || ignoreSystemCheck) {
         defer.resolve({'isSystemOk':true});
     } else {
         var file = fs.readFileSync('/etc/os-release').toString().split('\n');
