@@ -654,6 +654,13 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		}
         data.mixer.value = mixers[0];
 	}
+    var outValue = self.config.get('outputdevice', 'none');
+    if (outValue === 'softvolume') {
+		var currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+		self.config.set('outputdevice', currentDeviceNumber);
+        self.config.delete('softvolumenumber');
+        self.commandRouter.sharedVars.set('alsa.outputdevice', currentDeviceNumber);
+    }
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
