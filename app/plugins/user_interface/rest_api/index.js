@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
 var bodyParser = require('body-parser');
 
+
 module.exports = interfaceApi;
 
 function interfaceApi(context) {
@@ -333,9 +334,17 @@ function interfaceApi(context) {
                     res.json(notFound);
                 }
             });
+        });
 
-
-
+    api.route('/pluginEndpoint')
+        .post(function (req, res) {
+            var result = self.executeRestEndpoint(req.body);
+            result.then(function(response) {
+                res.json({'success': true});
+            })
+            .fail(function(error){
+                res.json({'success': false, 'error': error});
+            })
         });
 
 }
@@ -435,4 +444,40 @@ interfaceApi.prototype.emitFavourites = function (value) {
 
 interfaceApi.prototype.broadcastMessage = function(emit,payload) {
 
+};
+
+interfaceApi.prototype.executeRestEndpoint = function(data) {
+    var self = this;
+    var executed = false;
+    var defer = libQ.defer();
+
+    var pluginsRestEndpoints = self.commandRouter.getPluginsRestEndpoints();
+    if (pluginsRestEndpoints.length && data.endpoint) {
+        for (var i in pluginsRestEndpoints) {
+            var endpoint = pluginsRestEndpoints[i];
+            if (data.endpoint === endpoint.endpoint) {
+                executed = true;
+                self.logger.info('Executing endpoint ' + endpoint.endpoint);
+                var execute = self.commandRouter.executeOnPlugin(endpoint.type, endpoint.name, endpoint.method, data.data);
+                if (Promise.resolve(execute) == execute) {
+                    execute.then(function(result) {
+                        defer.resolve(result);
+                    })
+                } else {
+                    defer.resolve('OK');
+                }
+            }
+        }
+        if (!executed) {
+            var message = 'No valid Plugin REST Endpoint: ' + data.endpoint
+            self.logger.info(message);
+            defer.reject(message);
+        }
+    } else {
+        var message = 'No valid Plugin REST Endpoint';
+        self.logger.info(message);
+        defer.reject(message);
+    }
+
+    return defer.promise
 };

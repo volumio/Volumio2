@@ -37,6 +37,7 @@ function CoreCommandRouter(server) {
 	});
 
 	this.callbacks = [];
+	this.pluginsRestEndpoints = [];
 	this.sharedVars = new vconf();
     this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
     this.sharedVars.addConfigValue('selective_search','boolean',true);
@@ -1998,3 +1999,19 @@ CoreCommandRouter.prototype.enableDisableMyMusicPlugin = function (data) {
     return  this.pluginManager.enableDisableMyMusicPlugin(data);
 }
 
+CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
+    var self=this;
+
+	if (data.endpoint && data.type && data.name && data.method) {
+        self.logger.info('Addning ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+        self.pluginsRestEndpoints.push(data)
+	} else {
+        self.logger.error('Not Adding plugin to REST Endpoints, missing parameters');
+	}
+}
+
+CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
+    var self=this;
+
+    return self.pluginsRestEndpoints
+}
