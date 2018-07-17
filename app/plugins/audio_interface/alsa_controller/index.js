@@ -639,9 +639,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
         self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', '');
     }
 
-
 	if (data.mixer_type.value === 'Hardware') {
-	if (data.mixer.value == 'SoftMaster'){
+	if (data.mixer.value == 'SoftMaster' || data.mixer.value == 'None'){
 		var value = self.config.get('outputdevice');
 		if (value == undefined){
 			value = 0;
@@ -652,8 +651,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		var index = mixers.indexOf('SoftMaster');
 		if (index > -1) {
 			mixers.splice(index, 1);
-			data.mixer.value = mixers[0];
 		}
+        data.mixer.value = mixers[0];
 	}
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
