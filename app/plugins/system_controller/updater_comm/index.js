@@ -3,8 +3,10 @@
 module.exports = updater_comm;
 var Inotify = require('inotify').Inotify;
 var inotify = new Inotify(); //persistent by default, new Inotify(false) //no persistent
+var io = require('socket.io-client');
 global.io = require('socket.io')(3005);
 global.exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 global.fs = require('fs');
 var libQ = require('kew');
 
@@ -158,6 +160,15 @@ updater_comm.prototype.initRestartRoutine = function (string) {
     }
 };
 
+updater_comm.prototype.onStart = function () {
+    var self = this;
+
+    setTimeout(()=>{
+        self.pushUpdatesSubscribe();
+    },30000)
+    return libQ.resolve();
+};
+
 updater_comm.prototype.onStop = function () {
 	var self = this;
 	inotify.removeWatch(self.ilFileDescriptor)
@@ -264,4 +275,35 @@ updater_comm.prototype.checkSystemIntegrity = function () {
 
 
     return defer.promise
+};
+
+updater_comm.prototype.pushUpdatesSubscribe = function () {
+    var self = this;
+
+    try {
+        var id = execSync('/usr/bin/md5sum /sys/class/net/eth0/address', {uid: 1000, gid: 1000}).toString().split(' ')[0];
+        var isHw = true;
+    } catch(e) {
+        var id = self.getAdditionalConf('system_controller', 'system', 'uuid', '0000000000000000000000000');
+        var isHw = false;
+    }
+    var systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+    systemInfo.then((info)=>{
+        var socket = io.connect('http://pushupdates.volumio.org');
+        var subscribeData = {
+            'id': id,
+            'systemversion': info.systemversion,
+            'variant': info.variant,
+            'hardware': info.hardware,
+            'isHw': isHw
+
+        };
+        socket.emit('pushUpdateSubscribe', subscribeData);
+        socket.on('ack', function(data) {
+            socket.disconnect();
+        });
+    })
+    .fail((e)=>{
+        console.log('PUPD' + e);
+    })
 };
