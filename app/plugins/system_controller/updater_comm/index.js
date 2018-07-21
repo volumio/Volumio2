@@ -288,6 +288,7 @@ updater_comm.prototype.pushUpdatesSubscribe = function () {
         var isHw = false;
     }
     var systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+    var name = self.getAdditionalConf('system_controller', 'system', 'playerName', 'none');
     systemInfo.then((info)=>{
         var socket = io.connect('http://pushupdates.volumio.org');
         var subscribeData = {
@@ -295,7 +296,8 @@ updater_comm.prototype.pushUpdatesSubscribe = function () {
             'systemversion': info.systemversion,
             'variant': info.variant,
             'hardware': info.hardware,
-            'isHw': isHw
+            'isHw': isHw,
+            'name': name
 
         };
         socket.emit('pushUpdateSubscribe', subscribeData);
