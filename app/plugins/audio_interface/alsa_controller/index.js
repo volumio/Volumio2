@@ -799,30 +799,37 @@ ControllerAlsa.prototype.getAlsaCards = function () {
             var id = aplaycard.id;
         	if (!ignoredCards.includes(name)) {
                 for (var n = 0; n < carddata.cards.length; n++){
+                    var ignore = false;
                     var cardname = carddata.cards[n].name.toString().trim();
-
                     if (cardname === name){
                         if(carddata.cards[n].multidevice) {
                             multi = true;
                             var card = carddata.cards[n];
                             for (var j = 0; j < card.devices.length; j++) {
-                                var subdevice = carddata.cards[n].devices[j].number;
-                                name = carddata.cards[n].devices[j].prettyname;
-                                var deviceProc = '/proc/asound/card' + id + '/pcm' + subdevice + 'p';
+                            	var currentCard = carddata.cards[n].devices[j];
+                                var subdevice = Number(currentCard.number);
+                                name = currentCard.prettyname;
+                                var deviceProc = '/proc/asound/card' + id + '/pcm' + (subdevice-1).toString() + 'p';
                                 if (fs.existsSync(deviceProc)) {
-                                    cards.push({id: id + ',' + subdevice, name: name});
+                                	if (!currentCard.ignore) {
+                                        if (currentCard.default !== undefined && currentCard.default) {
+                                            cards.unshift({id: id + ',' + subdevice, name: name});
+                                        } else {
+                                            cards.push({id: id + ',' + subdevice, name: name});
+                                        }
+                                    } else {
+                                        name = undefined;
+									}
                                 }
                             }
-
                         } else {
                             multi = false;
                             name = carddata.cards[n].prettyname;
                         }
-
                     } else {
                         multi = false;
                     }
-                } if (!multi){
+                } if (!multi && name !== undefined){
                     cards.push({id: id, name: name});
                 }
 			}
