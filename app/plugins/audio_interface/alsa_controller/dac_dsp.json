@@ -1,6 +1,7 @@
 {
   "cards": [
 	{"name": "Allo Piano 2.1", "dsp_options":["Subwoofer mode","Lowpass","Dual Mode"]},
+	{"name": "Allo Katana", "dsp_options":["DSP Program","Deemphasis","DoP"]},
 	{"name": "PianoDACPlus", "dsp_options":["Subwoofer mode","Lowpass","Dual Mode"]},
 	{"name": "Hifiberry DAC Plus", "dsp_options":["DSP Program","Clock Missing Period"]},
 	{"name": "JustBoom DAC Boards", "dsp_options":["DSP Program","Clock Missing Period"]},
