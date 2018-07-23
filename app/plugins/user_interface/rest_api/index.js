@@ -347,103 +347,81 @@ function interfaceApi(context) {
             })
         });
 
-}
+};
 
-// Receive console messages from commandRouter and broadcast to all connected clients
 interfaceApi.prototype.printConsoleMessage = function (message) {
     var self = this;
-
+    self.logger.debug("API:printConsoleMessage");
     return libQ.resolve();
 };
 
-// Receive player queue updates from commandRouter and broadcast to all connected clients
-interfaceApi.prototype.pushQueue = function (queue, connWebSocket) {
+interfaceApi.prototype.pushQueue = function (queue) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushQueue');
-
+    self.logger.debug("API:pushQueue");
 };
 
-// Push the library root
-interfaceApi.prototype.pushLibraryFilters = function (browsedata, connWebSocket) {
+interfaceApi.prototype.pushLibraryFilters = function (browsedata) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushLibraryFilters');
+    self.logger.debug("API:pushLibraryFilters");
 };
 
-// Receive music library data from commandRouter and send to requester
-interfaceApi.prototype.pushLibraryListing = function (browsedata, connWebSocket) {
+interfaceApi.prototype.pushLibraryListing = function (browsedata) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushLibraryListing');
+    self.logger.debug("API:pushLibraryListing");
 };
 
-// Push the playlist view
 interfaceApi.prototype.pushPlaylistIndex = function (browsedata, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushPlaylistIndex');
+    self.logger.debug("API:pushPlaylistIndex");
 
 };
 
-interfaceApi.prototype.pushMultiroom = function (selfConnWebSocket) {
+interfaceApi.prototype.pushMultiroom = function () {
     var self = this;
-    //console.log("pushMultiroom 2");
-    var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
-}
+    self.logger.debug("Api push multiroom");
+};
 
 
-// Receive player state updates from commandRouter and broadcast to all connected clients
-interfaceApi.prototype.pushState = function (state, connWebSocket) {
+interfaceApi.prototype.pushState = function (state) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushState');
+    self.logger.debug("API:pushState");
 };
 
 
 interfaceApi.prototype.printToastMessage = function (type, title, message) {
     var self = this;
-
+    self.logger.debug("API:printToastMessage");
 };
 
 interfaceApi.prototype.broadcastToastMessage = function (type, title, message) {
     var self = this;
-
+    self.logger.debug("API:broadcastToastMessage");
 };
 
 interfaceApi.prototype.pushMultiroomDevices = function (msg) {
-};
-
-interfaceApi.prototype.logDone = function (timeStart) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('------------------------------ ' + (Date.now() - timeStart) + 'ms');
-    return libQ.resolve();
+    self.logger.debug("API:pushMultiroomDevices");
 };
 
-interfaceApi.prototype.logStart = function (sCommand) {
-    var self = this;
-    self.commandRouter.pushConsoleMessage('\n' + '---------------------------- ' + sCommand);
-    return libQ.resolve();
-};
-
-// Pass the error if we don't want to handle it
 interfaceApi.prototype.pushError = function (error) {
-    if ((typeof error) === 'string') {
-        return this.commandRouter.pushConsoleMessage.call(this.commandRouter, 'Error: ' + error);
-    } else if ((typeof error) === 'object') {
-        return this.commandRouter.pushConsoleMessage.call(this.commandRouter, 'Error:\n' + error.stack);
-    }
-    // Return a resolved empty promise to represent completion
+    var self = this;
+    self.logger.error("API:pushError: " + error);
     return libQ.resolve();
 };
 
 interfaceApi.prototype.pushAirplay = function (value) {
-    this.logger.debug("Pushing airplay mode: s" + value);
+    var self = this;
+    self.logger.debug("API:pushAirplay");
 };
 
 interfaceApi.prototype.emitFavourites = function (value) {
     var self = this;
-
-    self.logger.info("Pushing Favourites " + JSON.stringify(value));
+    self.logger.debug("API:emitFavourites");
 };
 
 interfaceApi.prototype.broadcastMessage = function(emit,payload) {
-
+    var self = this;
+    self.logger.debug("API:emitFavourites");
 };
 
 interfaceApi.prototype.executeRestEndpoint = function(data) {
