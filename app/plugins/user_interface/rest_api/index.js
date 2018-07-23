@@ -424,6 +424,12 @@ interfaceApi.prototype.broadcastMessage = function(emit,payload) {
     self.logger.debug("API:emitFavourites");
 };
 
+interfaceApi.prototype.logStart = function (sCommand) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('\n' + '---------------------------- ' + sCommand);
+    return libQ.resolve();
+};
+
 interfaceApi.prototype.executeRestEndpoint = function(data) {
     var self = this;
     var executed = false;
