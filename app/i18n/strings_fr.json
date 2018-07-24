@@ -186,7 +186,9 @@
     "ERROR":"Erreur",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Scan de votre musique en cours. Durant cette période le système peut être ralenti, pour votre confort, évitez d'écouter de la musique ",
     "GOT_IT":"Compris",
-   "MEDIA_SERVERS":"Servers Média"
+    "MEDIA_SERVERS":"Serveurs Média",
+    "ENABLED":"Activé",
+    "DISABLED":"Désactivé"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -281,7 +283,7 @@
     "INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Impossible d'installer. Le disque de destination doit être plus gros que le disque source.",
     "INSTALL_TO_DISK_DESC":"Installer sur le disque",
     "INSTALL_TO_DISK_MESSAGE":"Confirmez que vous voulez installer Volumio sur le disque",
-   "INSTALL_TO_DISK_LABEL":"LABEL",
+    "INSTALL_TO_DISK_LABEL":"LABEL",
     "INSTALL_TO_DISK_SIZE":"TAILLE",
     "INSTALL_TO_DISK_MESSAGE_WARNING":" ATTENTION: Prenez soin de sélectionner le bon disque de destination, toutes les données vont être éffacées.",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"Système installé avec succès",
@@ -289,7 +291,11 @@
     "CREDITS_OPEN_SOURCE_LICENSES":"Credits et licenses Open Source",
     "VIDEO_OUT_OPTIONS": "Options sortie video",
     "HDMI_UI_DOC":"Affiche l'interface via la sortie Video HDMI. ATTENTION: Cela peut dégrader les perforances du système",
-    "HDMI_UI":"Interface utilisateur via HDMI"
+    "HDMI_UI":"Interface utilisateur via HDMI",
+    "STARTING_SOFTWARE_UPDATE":"Initialisation de la mise à jour",
+    "CHECKING_SYSTEM_INTEGRITY":"Vérification de l'integrité du système",
+    "SYSTEM_INTEGRITY_CHECK_FAILED":"La vérification de l'integrité a échoué car des fichiers modifiés manuellement ont été détecté. La mise à jour ne peut se faire dans ces conditions. Executez une remise en état d'origine .",
+    "UPDATE_FAILED":"Echec de la mise à jour"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
@@ -314,5 +320,19 @@
    "DEVICE_SUCCESSFULLY_CONFIGURED":"a été correctement configuré et est prèt à l'emploi!",
    "PLEASE_DONATE":"Si vous aimez Volumio, faites un don! Vous pouvez faire la différence pour ce projet",
    "RUN_FIRST_CONFIG_WIZARD":"Lancer l'assistant de configuration"
-   }
+   },
+   "UPDATER":{
+    "PREPARING_UPDATE":"Préparation de la mise à jour",
+    "CREATING_BACKUP":"Création d'une sauvegarde",
+    "DOWNLOADING_UPDATE":"Téléchargement de la mise à jour",
+    "CLEANING":"Suppression des fichiers précédents",
+    "FINALIZING_UPDATE":"Finalisation de la mise à jour",
+    "ERROR":"Erreur",
+    "ERROR_UPDATE_FAILED":"Erreur: La mise à jour a échoué, redémarrez le système et réessayez",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"Fichier de mise à jour non trouvé",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Mise à jour avec succès vers la version",
+    "SYSTEM_RESTART_REQUIRED":"Redémarrez votre système.",
+    "SYSTEM_RESTART_IN":"Votre système va redémmarrer dans ",
+    "UPDATE":"Mise à jour"
+   }	
 }
