@@ -559,14 +559,15 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
   }
 
 
-  if (this.isVolatile && stateService.status == 'play') {
+  if (this.isVolatile && (stateService.status == 'play' || stateService.status == 'pause')) {
     this.volatileService = sService;
-    this.currentStatus='play';
+    this.currentStatus=stateService.status;
     this.volatileState=stateService;
     this.pushState().fail(this.pushError.bind(this));
     return;
 	} else if (this.volatileState && stateService.status == 'stop'){
     this.volatileService = undefined;
+      this.pushState().fail(this.pushError.bind(this));
     //this.currentStatus='stop';
 		var trackBlock = this.getTrack(this.currentPosition);
 	} else if (this.isUpnp){
