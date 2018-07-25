@@ -2003,8 +2003,18 @@ CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
     var self=this;
 
 	if (data.endpoint && data.type && data.name && data.method) {
-        self.logger.info('Addning ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
-        self.pluginsRestEndpoints.push(data)
+		if (self.pluginsRestEndpoints.length) {
+			for (var i in self.pluginsRestEndpoints) {
+				var endpoint = self.pluginsRestEndpoints[i];
+				if (endpoint.endpoint === data.endpoint) {
+                    self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+					endpoint = data;
+				}
+			}
+		} else {
+            self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+            self.pluginsRestEndpoints.push(data)
+        }
 	} else {
         self.logger.error('Not Adding plugin to REST Endpoints, missing parameters');
 	}
