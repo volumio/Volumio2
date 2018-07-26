@@ -419,7 +419,7 @@ interfaceApi.prototype.emitFavourites = function (value) {
     self.logger.debug("API:emitFavourites");
 };
 
-interfaceApi.prototype.broadcastMessage = function(emit,payload) {
+interfaceApi.prototype.broadcastMessage = function() {
     var self = this;
     self.logger.debug("API:emitFavourites");
 };
