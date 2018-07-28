@@ -1651,53 +1651,53 @@ CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionar
 CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultDictionary) {
     var self=this;
 
-    var keys=Object.keys(parent);
+    try {
+        var keys=Object.keys(parent);
 
-    for(var i in keys)
-    {
-        var obj=parent[keys[i]];
-        var type=typeof(obj);
+        for(var i in keys)
+        {
+            var obj=parent[keys[i]];
+            var type=typeof(obj);
 
-        if(type==='object')
-        {
-           self.translateKeys(obj,dictionary,defaultDictionary);
-        }
-        else if(type==='string')
-        {
-            if(obj.startsWith("TRANSLATE."))
+            if(type==='object')
             {
-                var replaceKey=obj.slice(10);
-
-                var dotIndex=replaceKey.indexOf('.');
-
-                if(dotIndex==-1)
-                {
-                    var value=dictionary[replaceKey];
-                    if(value===undefined)
-                    {
-                        value=defaultDictionary[replaceKey];
-                    }
-                    parent[keys[i]]=value;
-                }
-                else {
-                    var category=replaceKey.slice(0,dotIndex);
-                    var key=replaceKey.slice(dotIndex+1);
-					
-                    if(dictionary[category]===undefined || dictionary[category][key]===undefined)
-                    {
-                        var value=defaultDictionary[category][key];
-                    } else {
-                        var value=dictionary[category][key];
-					}
-                    parent[keys[i]]=value;
-                }
-
-
-
+                self.translateKeys(obj,dictionary,defaultDictionary);
             }
+            else if(type==='string')
+            {
+                if(obj.startsWith("TRANSLATE."))
+                {
+                    var replaceKey=obj.slice(10);
 
+                    var dotIndex=replaceKey.indexOf('.');
+
+                    if(dotIndex==-1)
+                    {
+                        var value=dictionary[replaceKey];
+                        if(value===undefined)
+                        {
+                            value=defaultDictionary[replaceKey];
+                        }
+                        parent[keys[i]]=value;
+                    }
+                    else {
+                        var category=replaceKey.slice(0,dotIndex);
+                        var key=replaceKey.slice(dotIndex+1);
+
+                        if(dictionary[category]===undefined || dictionary[category][key]===undefined)
+                        {
+                            var value=defaultDictionary[category][key];
+                        } else {
+                            var value=dictionary[category][key];
+                        }
+                        parent[keys[i]]=value;
+                    }
+                }
+            }
         }
-    }
+	} catch(e) {
+    	self.logger.error('Cannot translate keys: ' + e);
+	}
 }
 
 CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
