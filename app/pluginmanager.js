@@ -59,6 +59,10 @@ function PluginManager(ccommand, server) {
 		if (file[l].match(/VOLUMIO_VARIANT/i)) {
 			var str = file[l].split('=');
 			variant = str[1].replace(/\"/gi, "");
+			// TEMPORARY UNTIL MYVOLUMIO GETS MERGED
+            if (variant === 'myvolumio') {
+                variant = 'volumio'
+            }
 		}
 		if (file[l].match(/VOLUMIO_HARDWARE/i)) {
 			var str = file[l].split('=');
