@@ -651,7 +651,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 					var sRate;
 					var bDepth;
 
-					if(stateService.trackType === 'qobuz')
+					if(stateService.trackType === 'qobuz' || stateService.trackType === 'tidal')
 					{
 						sRate= stateService.samplerate;
 						bDepth= stateService.bitdepth;
