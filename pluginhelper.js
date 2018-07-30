@@ -318,9 +318,13 @@ function finalizing(path, package) {
         package.name);
 
     console.log("Installing dependencies locally");
-    execSync("/bin/rm package-lock.json");
+    if (fs.existsSync(process.cwd + '/package-lock.json')) {
+        execSync("/bin/rm package-lock.json");
+    }
     execSync("/usr/local/bin/npm install");
-    execSync("/bin/rm package-lock.json");
+    if (fs.existsSync(process.cwd + '/package-lock.json')) {
+        execSync("/bin/rm package-lock.json");
+    }
 
     console.log("\nCongratulation, your plugin has been succesfully created!\n" +
         "You can find it in: " + path + "\n");
@@ -355,9 +359,13 @@ function zip(){
         if(! fs.existsSync("node_modules")) {
             console.log("No modules found, running \"npm install\"");
             try{
-                execSync("/bin/rm package-lock.json");
+                if (fs.existsSync(process.cwd + '/package-lock.json')) {
+                    execSync("/bin/rm package-lock.json");
+                }
                 execSync("/usr/local/bin/npm install");
-                execSync("/bin/rm package-lock.json");
+                if (fs.existsSync(process.cwd + '/package-lock.json')) {
+                    execSync("/bin/rm package-lock.json");
+                }
             }
             catch (e){
                 console.log("Error installing node modules: " + e);
