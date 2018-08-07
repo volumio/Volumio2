@@ -511,6 +511,11 @@ function update_plugins(package, arch) {
                             today.getDate() + "-" + (today.getMonth()+1) +
                             "-" + today.getFullYear();
                         plugins.categories[i].plugins[j].version = package.version;
+                        // Make sure url points to the zip file
+                        plugins.categories[i].plugins[j].url = "http://volumio.github.io/volumio-plugins/" +
+                            "plugins/volumio/" + arch + "/" +
+                            package.volumio_info.plugin_type + "/" +
+                            package.name + "/" + package.name + ".zip";
                         update_desc_details(package, plugins, i, j, arch);
                         plugFound = true;
                         catFound = true;
