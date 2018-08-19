@@ -218,7 +218,7 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 			},
 			"lists": [
 				{
-					"availableListViews": ["list"],
+					"availableListViews": ["grid","list"],
 					"items": [
 
 					]
@@ -256,6 +256,7 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 			}
 		}
 		if(data.item){
+            obj.navigation.lists[0].availableListViews = ["list"];
 			for(var i = 0; i < data.item.length; i++){
 				if(data.item[i].class == "object.item.audioItem.musicTrack"){
 					var item = data.item[i];
@@ -491,7 +492,7 @@ ControllerUPNPBrowser.prototype.search = function (query) {
 		"title": 'Media Servers',
 		"icon": "fa icon",
 		"availableListViews": [
-			"list"
+            "grid","list"
 		],
 		"items": [
 
