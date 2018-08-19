@@ -11,12 +11,13 @@ var xml2js = require('xml2js');
 var http = require('http');
 var browseDLNAServer = require(__dirname + "/dlna-browser.js");
 var singleBrowse = false;
+var debug = false;
 
 
 try {
     var client = new Client();
 } catch (e) {
-	console.log('SSDP Client error: '+e)
+    self.log('SSDP Client error: '+e)
 }
 
 // Define the ControllerUPNPBrowser class
@@ -109,14 +110,14 @@ ControllerUPNPBrowser.prototype.onStart = function() {
     try {
         client.search('urn:schemas-upnp-org:device:MediaServer:1');
     } catch(e) {
-        console.log('UPNP Search error: '+e)
+        self.log('UPNP Search error: '+e)
     }
 
 	setInterval(() => {
         try {
             client.search('urn:schemas-upnp-org:device:MediaServer:1');
 		} catch(e) {
-        console.log('UPNP Search error: '+e)
+        self.log('UPNP Search error: '+e)
     	}
 	}, 50000);
 	this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
@@ -131,7 +132,7 @@ ControllerUPNPBrowser.prototype.discover = function(){
 	try {
         client.search('urn:schemas-upnp-org:device:MediaServer:1');
 	} catch(e) {
-        console.log('UPNP Search error: '+e)
+        self.log('UPNP Search error: '+e)
 	}
 
 	setTimeout(function(){
@@ -241,13 +242,22 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
                     if (data.container[i].children > 0) {
                         type = 'folder';
                     }
-                    albumart = self.getAlbumartClass(data.container[i].class)
+                    var artist = "";
+                    if (data.container[i].artist) {
+                    	artist = data.container[i].artist;
+					}
+					var title = "";
+                    if (data.container[i].title) {
+                    	title = data.container[i].title;
+					}
+					var path = address + "@" + data.container[i].id;
+                    var albumart = self.getAlbumArt({artist:artist,album: title}, path, self.getAlbumartClass(data.container[i].class));
 
                     obj.navigation.lists[0].items.push({
                         "service": "upnp_browser",
                         "type": type,
                         "title": data.container[i].title,
-                        "artist": "",
+                        "artist": artist,
                         "albumart": albumart,
                         "album": "",
                         "uri": "upnp/folder/" + address + "@" + data.container[i].id
@@ -260,7 +270,9 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 			for(var i = 0; i < data.item.length; i++){
 				if(data.item[i].class == "object.item.audioItem.musicTrack"){
 					var item = data.item[i];
-					var albumart = '/albumart?icon=music';
+                    var path = address + "@" + item.id;
+
+					var albumart = self.getAlbumArt({artist:item.artist,album: item.album}, path, 'music');
                     if (item.image != undefined && item.image.length >0) {
                         albumart = item.image;
                     }
@@ -285,19 +297,29 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 			if(data && data.container && data.container[0] && data.container[0].parentId && data.container[0].parentId != "-1"){
 				obj.navigation.prev.uri = "upnp/" + address + "@" + data.container[0].parentId;
 				title = data.container[0].title;
-				albumart = self.getAlbumartClass(data.container[0].class)
+        		var artist = "";
+        		if (data.container[0].artist) {
+            		artist = data.container[0].artist;
+				}
+				var albumart = self.getAlbumArt({artist:artist,album: title}, path, self.getAlbumartClass(data.container[0].class));
 
 			}else{
 				obj.navigation.prev.uri = "upnp";
 			}
 			if (info) {
+
 				obj.navigation.info = {
 					'uri': curUri,
                     'service': "upnp_browser",
-            		'title': title,
 					'type': 'song',
             		'albumart': albumart
         		}
+                if (artist && artist.length) {
+                    obj.navigation.info.album = title;
+                    obj.navigation.info.artist = artist;
+                } else {
+                    obj.navigation.info.title = title;
+				}
     		}
 			defer.resolve(obj);
 		});
@@ -312,19 +334,19 @@ ControllerUPNPBrowser.prototype.getAlbumartClass = function (data) {
 
     switch(data) {
         case 'object.container.person.musicArtist':
-            albumart = '/albumart?icon=users';
+            albumart = 'users';
             break;
         case 'object.container.album.musicAlbum':
-            albumart = '/albumart?icon=dot-circle-o';
+            albumart = 'dot-circle-o';
             break;
         case 'object.container.genre.musicGenre':
-            albumart = '/albumart?sourceicon=music_service/mpd/genreicon.png';
+            albumart = 'none&sourceicon=music_service/mpd/genreicon.png';
             break;
         case 'object.container.playlistContainer':
-            albumart = '/albumart?sourceicon=music_service/mpd/playlisticon.svg';
+            albumart = 'none&sourceicon=music_service/mpd/playlisticon.svg';
             break;
         default:
-            albumart = '/albumart?icon=folder-o';
+            albumart = 'folder-o';
     }
     return albumart
 };
@@ -597,4 +619,10 @@ function xmlToJson(url, callback) {
                 callback('error', null);
             }
         });
-}
+};
+
+ControllerUPNPBrowser.prototype.log = function (message) {
+	if (debug) {
+		console.log(message);
+	}
+};
