@@ -6,7 +6,7 @@ var libxmljs = require("libxmljs");
 var unirest = require('unirest');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
-var mm = require('musicmetadata');
+var mm = require('music-metadata');
 var Client = require('node-ssdp').Client;
 var xml2js = require('xml2js');
 var http = require('http');
@@ -507,29 +507,26 @@ ControllerUPNPBrowser.prototype.search = function (query) {
 ControllerUPNPBrowser.prototype.parseTrack = function (uri) {
 	var self = this;
 
-	var defer = libQ.defer();
 	var readableStream = fs.createReadStream(uri);
-	var parser = mm(readableStream, function (err, metadata) {
-		if (err) {
-            self.logger.error(error);
-		}
-
+	return mm.parseStream(readableStream).then(function (metadata) {
+		var common = metadata.common;
 		var item = {
 			service : 'upnp_browser',
 			type: 'song',
-			title: metadata.title,
-			name: metadata.title,
-			artist: metadata.artist[0],
-			album: metadata.album,
-			albumart: self.getAlbumArt({artist:  metadata.artist[0], album: metadata.album}, '/'+uri.substring(0, uri.lastIndexOf("/")).replace('/mnt','')),
+			title: common.title,
+			name: common.title,
+			artist: common.artist,
+			album: common.album,
+      // Maybe use the album-art embedded in the metadata.common.picture?
+			albumart: self.getAlbumArt({artist: common.artist, album: common.album}, '/'+uri.substring(0, uri.lastIndexOf("/")).replace('/mnt','')),
 			uri: uri
 		};
-		defer.resolve(item)
 		readableStream.close();
+		return item;
+	}).catch(function (err) {
+    self.logger.error(err.message);
+    throw err;
 	});
-
-
-	return defer.promise;
 };
 
 ControllerUPNPBrowser.prototype.getContent = function (content) {
