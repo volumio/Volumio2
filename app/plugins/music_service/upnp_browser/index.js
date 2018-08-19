@@ -1,4 +1,3 @@
-////
 'use strict';
 
 var libQ = require('kew');
@@ -373,10 +372,8 @@ ControllerUPNPBrowser.prototype.getAlbumartClass = function (data) {
 
 // Define a method to clear, add, and play an array of tracks
 ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
-
 	var self = this;
 	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'ControllerUPNPBrowser::clearAddPlayTrack');
-
 	var safeUri = track.uri.replace(/"/g,'\\"');
 
 	return self.mpdPlugin.sendMpdCommand('stop',[])
@@ -385,6 +382,7 @@ ControllerUPNPBrowser.prototype.clearAddPlayTrack = function(track) {
 			return self.mpdPlugin.sendMpdCommand('clear',[]);
 		})
 		.then(function()
+
     {
         return self.mpdPlugin.sendMpdCommand('load "'+safeUri+'"',[]);
     })
@@ -506,9 +504,10 @@ ControllerUPNPBrowser.prototype.search = function (query) {
 
 ControllerUPNPBrowser.prototype.parseTrack = function (uri) {
 	var self = this;
+    var defer = libQ.defer();
 
 	var readableStream = fs.createReadStream(uri);
-	return mm.parseStream(readableStream).then(function (metadata) {
+	mm.parseStream(readableStream).then(function (metadata) {
 		var common = metadata.common;
 		var item = {
 			service : 'upnp_browser',
@@ -517,16 +516,18 @@ ControllerUPNPBrowser.prototype.parseTrack = function (uri) {
 			name: common.title,
 			artist: common.artist,
 			album: common.album,
-      // Maybe use the album-art embedded in the metadata.common.picture?
+      		// Maybe use the album-art embedded in the metadata.common.picture?
 			albumart: self.getAlbumArt({artist: common.artist, album: common.album}, '/'+uri.substring(0, uri.lastIndexOf("/")).replace('/mnt','')),
 			uri: uri
 		};
 		readableStream.close();
-		return item;
+		defer.resolve(item);
 	}).catch(function (err) {
-    self.logger.error(err.message);
-    throw err;
+    	self.logger.error(err.message);
+    	defer.reject(err.message);
 	});
+
+    return defer.promise
 };
 
 ControllerUPNPBrowser.prototype.getContent = function (content) {
