@@ -368,6 +368,7 @@ CoreStateMachine.prototype.startPlaybackTimer = function (nStartTime) {
 
 		this.askedForPrefetch=false;
 		this.simulateStopStartDone=false;
+		this.prefetchDone=false;
 
 		setTimeout(this.increasePlaybackTimer.bind(this),250);
 	}
@@ -431,7 +432,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		if(remainingTime<5000 && this.askedForPrefetch==false)
+		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
@@ -453,7 +454,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			}
 		}
 
-		if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
+		if(remainingTime>=0 && remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
 		{
 
 			this.simulateStopStartDone=true;
@@ -559,14 +560,15 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
   }
 
 
-  if (this.isVolatile && stateService.status == 'play') {
+  if (this.isVolatile && (stateService.status == 'play' || stateService.status == 'pause')) {
     this.volatileService = sService;
-    this.currentStatus='play';
+    this.currentStatus=stateService.status;
     this.volatileState=stateService;
     this.pushState().fail(this.pushError.bind(this));
     return;
 	} else if (this.volatileState && stateService.status == 'stop'){
     this.volatileService = undefined;
+      this.pushState().fail(this.pushError.bind(this));
     //this.currentStatus='stop';
 		var trackBlock = this.getTrack(this.currentPosition);
 	} else if (this.isUpnp){
@@ -649,7 +651,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 					var sRate;
 					var bDepth;
 
-					if(stateService.trackType === 'qobuz')
+					if(stateService.trackType === 'qobuz' || stateService.trackType === 'tidal')
 					{
 						sRate= stateService.samplerate;
 						bDepth= stateService.bitdepth;

@@ -66,34 +66,34 @@ ControllerMyMusic.prototype.getUIConfig = function () {
             .then(function(uiconf)
             {
                 var enableweb = self.getAdditionalConf('miscellanea', 'albumart', 'enableweb', true);
-                self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', enableweb);
-                self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), enableweb));
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', enableweb);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[0].options'), enableweb));
 
                 var websize = self.getAdditionalConf('miscellanea', 'albumart', 'defaultwebsize', 'large');
-                self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.value', websize);
-                self.configManager.setUIConfigParam(uiconf, 'sections[2].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[1].options'), websize));
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.value', websize);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[1].options'), websize));
 
                 var metadataimage = self.getAdditionalConf('miscellanea', 'albumart', 'metadataimage', false);
-                self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value', metadataimage);
-                self.configManager.setUIConfigParam(uiconf, 'sections[2].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[2].options'), metadataimage));
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value', metadataimage);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), metadataimage));
 
                 var tracknumbersConf = self.getAdditionalConf('music_service', 'mpd', 'tracknumbers', false);
-                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', tracknumbersConf);
+                self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value', tracknumbersConf);
 
                 var compilationConf = self.getAdditionalConf('music_service', 'mpd', 'compilation', 'Various,various,Various Artists,various artists,VA,va');
-                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].value', compilationConf);
+                self.configManager.setUIConfigParam(uiconf, 'sections[4].content[1].value', compilationConf);
 
                 var artistsortConf = self.getAdditionalConf('music_service', 'mpd', 'artistsort', true);
                 if (artistsortConf) {
-                    self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', true);
-                    self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'albumartist')
+                    self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.value', true);
+                    self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.label', 'albumartist')
                 } else {
-                    self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', false);
-                    self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', 'artist')
+                    self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.value', false);
+                    self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.label', 'artist')
                 }
 
                 var ffmpeg = self.getAdditionalConf('music_service', 'mpd', 'ffmpegenable', false);
-                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[3].value', ffmpeg);
+                self.configManager.setUIConfigParam(uiconf, 'sections[4].content[3].value', ffmpeg);
 
                 if (sconf) {
                     var insertInto = 2;

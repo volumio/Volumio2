@@ -639,9 +639,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
         self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', '');
     }
 
-
 	if (data.mixer_type.value === 'Hardware') {
-	if (data.mixer.value == 'SoftMaster'){
+	if (data.mixer.value == 'SoftMaster' || data.mixer.value == 'None'){
 		var value = self.config.get('outputdevice');
 		if (value == undefined){
 			value = 0;
@@ -652,9 +651,16 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		var index = mixers.indexOf('SoftMaster');
 		if (index > -1) {
 			mixers.splice(index, 1);
-			data.mixer.value = mixers[0];
 		}
+        data.mixer.value = mixers[0];
 	}
+    var outValue = self.config.get('outputdevice', 'none');
+    if (outValue === 'softvolume') {
+		var currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+		self.config.set('outputdevice', currentDeviceNumber);
+        self.config.delete('softvolumenumber');
+        self.commandRouter.sharedVars.set('alsa.outputdevice', currentDeviceNumber);
+    }
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
@@ -793,30 +799,37 @@ ControllerAlsa.prototype.getAlsaCards = function () {
             var id = aplaycard.id;
         	if (!ignoredCards.includes(name)) {
                 for (var n = 0; n < carddata.cards.length; n++){
+                    var ignore = false;
                     var cardname = carddata.cards[n].name.toString().trim();
-
                     if (cardname === name){
                         if(carddata.cards[n].multidevice) {
                             multi = true;
                             var card = carddata.cards[n];
                             for (var j = 0; j < card.devices.length; j++) {
-                                var subdevice = carddata.cards[n].devices[j].number;
-                                name = carddata.cards[n].devices[j].prettyname;
-                                var deviceProc = '/proc/asound/card' + id + '/pcm' + subdevice + 'p';
+                            	var currentCard = carddata.cards[n].devices[j];
+                                var subdevice = Number(currentCard.number);
+                                name = currentCard.prettyname;
+                                var deviceProc = '/proc/asound/card' + id + '/pcm' + (subdevice-1).toString() + 'p';
                                 if (fs.existsSync(deviceProc)) {
-                                    cards.push({id: id + ',' + subdevice, name: name});
+                                	if (!currentCard.ignore) {
+                                        if (currentCard.default !== undefined && currentCard.default) {
+                                            cards.unshift({id: id + ',' + subdevice, name: name});
+                                        } else {
+                                            cards.push({id: id + ',' + subdevice, name: name});
+                                        }
+                                    } else {
+                                        name = undefined;
+									}
                                 }
                             }
-
                         } else {
                             multi = false;
                             name = carddata.cards[n].prettyname;
                         }
-
                     } else {
                         multi = false;
                     }
-                } if (!multi){
+                } if (!multi && name !== undefined){
                     cards.push({id: id, name: name});
                 }
 			}
@@ -1424,4 +1437,25 @@ ControllerAlsa.prototype.ignoreUsbAudioAttach  = function (value) {
     var self = this;
 
     ignoreUsbAudioAttach = value;
+};
+
+ControllerAlsa.prototype.checkCurrentAudioDeviceAvailable  = function () {
+    var self = this;
+
+    var currentDeviceNumber = self.config.get('outputdevice', 'none');
+    if (currentDeviceNumber === 'softvolume') {
+    	currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+	}
+    var cards = self.getAlsaCards();
+    if (cards.length === 0) {
+        return false
+    } else {
+    	var found = false
+    	for (var i in cards) {
+    		if (cards[i].id == currentDeviceNumber) {
+    			found = true;
+			}
+		}
+		return found
+	}
 };

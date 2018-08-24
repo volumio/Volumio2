@@ -62,7 +62,7 @@ function CoreVolumeController(commandRouter) {
 
 		var ret = '';
 		var err = null;
-		var p = spawn('amixer', args);
+		var p = spawn('amixer', args, {uid:1000,gid:1000});
 
 		p.stdout.on('data', function (data) {
 			ret += data;
@@ -273,7 +273,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 
 	switch (VolumeInteger) {
 		case 'mute':
-			//Mute or Unmute, depending on state
+			//Mute 
 			self.getVolume(function (err, vol) {
 				if (vol == null) {
 					vol =  currentvolume
@@ -289,7 +289,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			});
 			break;
 		case 'unmute':
-			//UnMute
+			//Unmute
 					currentmute = false;
 					self.setVolume(premutevolume, function (err) {
 						self.logger.info('VolumeController::Volume ' + VolumeInteger);
@@ -302,16 +302,16 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 					});
 			break;
 		case 'toggle':
-			// mute or unmute, depending on cases
+			// Mute or unmute, depending on current state
 			if (Volume.mute){
-				self.alsavolume('unmute');
+				defer.resolve(self.alsavolume('unmute'));
 			}
 			else {
-				self.alsavolume('mute');
+				defer.resolve(self.alsavolume('mute'));
 			}
 			break;
 		case '+':
-			//Incrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
+			//Increase volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
 			self.setMuted(false, function (err) {
 				self.getVolume(function (err, vol) {
 					if (vol == null) {
@@ -339,7 +339,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			});
 			break;
 		case '-':
-			//Decrase Volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
+			//Decrease volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
 			self.getVolume(function (err, vol) {
 				if (vol == null) {
 					vol =  currentvolume
@@ -364,7 +364,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 			});
 			break;
 		default:
-			// Set the Volume with numeric value 0-100
+			// Set the volume with numeric value 0-100
 			if (VolumeInteger < 0){
 				VolumeInteger = 0;
 			}
@@ -394,9 +394,8 @@ CoreVolumeController.prototype.retrievevolume = function () {
 	var self = this;
 	this.getVolume(function (err, vol) {
 		self.getMuted(function (err, mute) {
-			self.logger.info('VolumeController:: Volume=' + vol + ' Mute =' + mute);
-			//Log Volume Control
-			 //Log Volume Control
+			//Log volume control
+			self.logger.info('VolumeController:: Volume=' + vol + ' Mute =' + mute);			
                         if (vol == null) {
                         vol = currentvolume,
                         mute = currentmute

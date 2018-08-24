@@ -853,7 +853,13 @@ function InterfaceWebUI(context) {
                 var selfConnWebSocket = this;
 
                 var updateMessage = JSON.parse(message)
-				self.logger.info("Update Ready: " + updateMessage);
+				self.logger.info("Update Ready: " + JSON.stringify(updateMessage));
+                try {
+                    updateMessage.title = updateMessage.title.replace('Update', self.commandRouter.getI18nString('UPDATER.UPDATE'));
+				} catch(e) {
+                	self.logger.error('Cannot translate update title: ' + e);
+				}
+
                 self.commandRouter.broadcastMessage('updateReady', updateMessage);
             });
 
@@ -861,11 +867,35 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('update', function (data) {
 				var selfConnWebSocket = this;
 				self.logger.info("Update: " + data);
+                var checking = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.CHECKING_SYSTEM_INTEGRITY')};
+                selfConnWebSocket.emit('updateProgress', checking);
+                var integrityCheck = self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'checkSystemIntegrity');
+                integrityCheck.then((integrity)=> {
+					if ((data.ignoreIntegrityCheck !== undefined && data.ignoreIntegrityCheck) || (integrity && integrity.isSystemOk != undefined && integrity.isSystemOk)) {
+                        self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
+                        var started = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.STARTING_SOFTWARE_UPDATE')};
+                        selfConnWebSocket.emit('updateProgress', started);
+                        self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
+					} else {
+                        self.commandRouter.closeModals();
+                        var responseData = {
+                            title: self.commandRouter.getI18nString('SYSTEM.UPDATE_FAILED'),
+                            message: self.commandRouter.getI18nString('SYSTEM.SYSTEM_INTEGRITY_CHECK_FAILED'),
+                            size: 'lg',
+                            buttons: [
+                                {
+                                    name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                                    class: 'btn btn-info ng-scope',
+                                    emit:'closeModals',
+                                    payload:''
+                                }
+                            ]
+                        }
+                        self.commandRouter.broadcastMessage("openModal", responseData);
+					}
+				})
 
-                self.commandRouter.broadcastMessage('ClientUpdate', {value:"now"});
-                var started = { 'downloadSpeed': '','eta': '5m','progress': 1, 'status': 'Starting Software Update'};
-                selfConnWebSocket.emit('updateProgress', started);
-                self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
+
 			});
 
 			connWebSocket.on('deleteUserData', function () {
@@ -1681,10 +1711,50 @@ function InterfaceWebUI(context) {
                 }
             });
 
+        	connWebSocket.on('getMyMusicPlugins', function () {
+            	var selfConnWebSocket = this;
+
+            	var myMusicPlugins = self.commandRouter.getMyMusicPlugins();
+				if (myMusicPlugins != undefined) {
+                    myMusicPlugins.then(function (plugins) {
+              	      selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
+            	    })
+                    .fail(function () {
+                    });
+           	 	}
+			});
+
+        connWebSocket.on('enableDisableMyMusicPlugin', function (data) {
+            var selfConnWebSocket = this;
+
+            var enableDisableMyMusicPlugin = self.commandRouter.enableDisableMyMusicPlugin(data);
+            enableDisableMyMusicPlugin.then(function(plugins) {
+                selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
+                var title = self.commandRouter.getI18nString('COMMON.DISABLED');
+                if (data.enabled) {
+                	title = self.commandRouter.getI18nString('COMMON.ENABLED');
+				}
+                selfConnWebSocket.emit('pushToastMessage', {
+                    type: 'success',
+                    title: title,
+                    message: data.prettyName
+                });
+			})
+            .fail(function (error) {
+                self.logger.error(error);
+            });
+        });
+
         connWebSocket.on('pinger', function (data) {
             var selfConnWebSocket = this;
 
             selfConnWebSocket.emit('ponger', data);
+        });
+
+        connWebSocket.on('closeModals', function () {
+            var selfConnWebSocket = this;
+
+            self.commandRouter.closeModals();
         });
 
 	});
@@ -1710,7 +1780,7 @@ InterfaceWebUI.prototype.pushQueue = function (queue, connWebSocket) {
 		return libQ.fcall(connWebSocket.emit.bind(connWebSocket), 'pushQueue', queue);
 		// Else push to all connected clients
 	} else {
-		return libQ.fcall(self.libSocketIO.emit.bind(self.libSocketIO), 'pushQueue', queue);
+		return libQ.fcall(self.libSocketIO.sockets.emit('pushQueue', queue));
 	}
 };
 
@@ -1768,7 +1838,7 @@ InterfaceWebUI.prototype.pushState = function (state, connWebSocket) {
 	} else {
 		// Push the updated state to all clients
 		self.pushMultiroom(self.libSocketIO);
-		return libQ.fcall(self.libSocketIO.emit.bind(self.libSocketIO), 'pushState', state);
+		return libQ.fcall(self.libSocketIO.sockets.emit('pushState', state));
 	}
 };
 

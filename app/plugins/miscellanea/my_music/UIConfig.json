@@ -5,6 +5,7 @@
   "sections": [
     {"coreSection":"my-music"},
 	{"coreSection":"network-drives"},
+	{"coreSection":"my-music-plugin-enabler"},
 	{
 	  "id": "albumart_settings",
 	  "element": "section",
@@ -67,6 +68,7 @@
 		{
 		 "id": "metadataimage",
 			"element": "switch",
+			"hidden":true,
 			"doc" : "TRANSLATE.APPEARANCE.METADATA_IMAGE_DOC",
 			"label": "TRANSLATE.APPEARANCE.METADATA_IMAGE",
 			"value": false
@@ -134,6 +136,7 @@
 			  {
 				  "id": "ffmpegenable",
 				  "element": "switch",
+				  "hidden":true,
 				  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT_DOC",
 				  "label": "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT",
 				  "value": false

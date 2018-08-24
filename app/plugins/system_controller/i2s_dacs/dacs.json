@@ -3,6 +3,7 @@
     {"id":"adafruit-max98357","name":"Adafruit MAX98357","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-boss-dac","name":"Allo BOSS","overlay":"allo-boss-dac-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-digione","name":"Allo DigiOne","overlay":"allo-digione","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
+    {"id":"allo-katana-dac","name":"Allo Katana","overlay":"allo-katana-dac-audio","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
     {"id":"piano-dac","name":"Allo Piano","overlay":"allo-piano-dac-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"allo-piano-dac-plus-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"applepi-dac","name":"ApplePi DAC","overlay":"applepi-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
@@ -35,7 +36,8 @@
     {"id":"speaker-phat","name":"Speaker pHAT","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"st400-dac-amp","name":"ST400 Dac (PCM5122) - Amp","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"taudac","name":"TauDAC - DM101","overlay":"taudac","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":"TauDAC-DM101","needsreboot":"yes"},
-    {"id":"terraberry-dac2","name":"Terra-Berry DAC 2","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"}
+    {"id":"terraberry-dac2","name":"Terra-Berry DAC 2","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
+    {"id":"es90x8q2m-dac","name":"Volumio ESS 9028QM","overlay":"es90x8q2m-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"48","needsreboot":"no"}
   ]},
   {"name":"Odroid C1+","data":[
     {"id":"odroid-hifi-shield","name":"HiFi Shield","overlay":"","alsanum":"2","mixer":"","modules":"","script":""}

@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
 var bodyParser = require('body-parser');
 
+
 module.exports = interfaceApi;
 
 function interfaceApi(context) {
@@ -333,77 +334,94 @@ function interfaceApi(context) {
                     res.json(notFound);
                 }
             });
-
-
-
         });
 
-}
+    api.route('/pluginEndpoint')
+        .post(function (req, res) {
+            var result = self.executeRestEndpoint(req.body);
+            result.then(function(response) {
+                res.json({'success': true});
+            })
+            .fail(function(error){
+                res.json({'success': false, 'error': error});
+            })
+        });
 
-// Receive console messages from commandRouter and broadcast to all connected clients
+};
+
 interfaceApi.prototype.printConsoleMessage = function (message) {
     var self = this;
-
+    self.logger.debug("API:printConsoleMessage");
     return libQ.resolve();
 };
 
-// Receive player queue updates from commandRouter and broadcast to all connected clients
-interfaceApi.prototype.pushQueue = function (queue, connWebSocket) {
+interfaceApi.prototype.pushQueue = function (queue) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushQueue');
-
+    self.logger.debug("API:pushQueue");
 };
 
-// Push the library root
-interfaceApi.prototype.pushLibraryFilters = function (browsedata, connWebSocket) {
+interfaceApi.prototype.pushLibraryFilters = function (browsedata) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushLibraryFilters');
+    self.logger.debug("API:pushLibraryFilters");
 };
 
-// Receive music library data from commandRouter and send to requester
-interfaceApi.prototype.pushLibraryListing = function (browsedata, connWebSocket) {
+interfaceApi.prototype.pushLibraryListing = function (browsedata) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushLibraryListing');
+    self.logger.debug("API:pushLibraryListing");
 };
 
-// Push the playlist view
 interfaceApi.prototype.pushPlaylistIndex = function (browsedata, connWebSocket) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushPlaylistIndex');
+    self.logger.debug("API:pushPlaylistIndex");
 
 };
 
-interfaceApi.prototype.pushMultiroom = function (selfConnWebSocket) {
+interfaceApi.prototype.pushMultiroom = function () {
     var self = this;
-    //console.log("pushMultiroom 2");
-    var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
-}
+    self.logger.debug("Api push multiroom");
+};
 
 
-// Receive player state updates from commandRouter and broadcast to all connected clients
-interfaceApi.prototype.pushState = function (state, connWebSocket) {
+interfaceApi.prototype.pushState = function (state) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('interfaceApi::pushState');
+    self.logger.debug("API:pushState");
 };
 
 
 interfaceApi.prototype.printToastMessage = function (type, title, message) {
     var self = this;
-
+    self.logger.debug("API:printToastMessage");
 };
 
 interfaceApi.prototype.broadcastToastMessage = function (type, title, message) {
     var self = this;
-
+    self.logger.debug("API:broadcastToastMessage");
 };
 
 interfaceApi.prototype.pushMultiroomDevices = function (msg) {
+    var self = this;
+    self.logger.debug("API:pushMultiroomDevices");
 };
 
-interfaceApi.prototype.logDone = function (timeStart) {
+interfaceApi.prototype.pushError = function (error) {
     var self = this;
-    self.commandRouter.pushConsoleMessage('------------------------------ ' + (Date.now() - timeStart) + 'ms');
+    self.logger.error("API:pushError: " + error);
     return libQ.resolve();
+};
+
+interfaceApi.prototype.pushAirplay = function (value) {
+    var self = this;
+    self.logger.debug("API:pushAirplay");
+};
+
+interfaceApi.prototype.emitFavourites = function (value) {
+    var self = this;
+    self.logger.debug("API:emitFavourites");
+};
+
+interfaceApi.prototype.broadcastMessage = function() {
+    var self = this;
+    self.logger.debug("API:emitFavourites");
 };
 
 interfaceApi.prototype.logStart = function (sCommand) {
@@ -412,27 +430,38 @@ interfaceApi.prototype.logStart = function (sCommand) {
     return libQ.resolve();
 };
 
-// Pass the error if we don't want to handle it
-interfaceApi.prototype.pushError = function (error) {
-    if ((typeof error) === 'string') {
-        return this.commandRouter.pushConsoleMessage.call(this.commandRouter, 'Error: ' + error);
-    } else if ((typeof error) === 'object') {
-        return this.commandRouter.pushConsoleMessage.call(this.commandRouter, 'Error:\n' + error.stack);
-    }
-    // Return a resolved empty promise to represent completion
-    return libQ.resolve();
-};
-
-interfaceApi.prototype.pushAirplay = function (value) {
-    this.logger.debug("Pushing airplay mode: s" + value);
-};
-
-interfaceApi.prototype.emitFavourites = function (value) {
+interfaceApi.prototype.executeRestEndpoint = function(data) {
     var self = this;
+    var executed = false;
+    var defer = libQ.defer();
 
-    self.logger.info("Pushing Favourites " + JSON.stringify(value));
-};
+    var pluginsRestEndpoints = self.commandRouter.getPluginsRestEndpoints();
+    if (pluginsRestEndpoints.length && data.endpoint) {
+        for (var i in pluginsRestEndpoints) {
+            var endpoint = pluginsRestEndpoints[i];
+            if (data.endpoint === endpoint.endpoint) {
+                executed = true;
+                self.logger.info('Executing endpoint ' + endpoint.endpoint);
+                var execute = self.commandRouter.executeOnPlugin(endpoint.type, endpoint.name, endpoint.method, data.data);
+                if (Promise.resolve(execute) == execute) {
+                    execute.then(function(result) {
+                        defer.resolve(result);
+                    })
+                } else {
+                    defer.resolve('OK');
+                }
+            }
+        }
+        if (!executed) {
+            var message = 'No valid Plugin REST Endpoint: ' + data.endpoint
+            self.logger.info(message);
+            defer.reject(message);
+        }
+    } else {
+        var message = 'No valid Plugin REST Endpoint';
+        self.logger.info(message);
+        defer.reject(message);
+    }
 
-interfaceApi.prototype.broadcastMessage = function(emit,payload) {
-
+    return defer.promise
 };

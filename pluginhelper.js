@@ -2,7 +2,8 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
-var websocket = require('socket.io-client')
+var websocket = require('socket.io-client');
+var os = require('os');
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -317,7 +318,13 @@ function finalizing(path, package) {
         package.name);
 
     console.log("Installing dependencies locally");
+    if (fs.existsSync(process.cwd + '/package-lock.json')) {
+        execSync("/bin/rm package-lock.json");
+    }
     execSync("/usr/local/bin/npm install");
+    if (fs.existsSync(process.cwd + '/package-lock.json')) {
+        execSync("/bin/rm package-lock.json");
+    }
 
     console.log("\nCongratulation, your plugin has been succesfully created!\n" +
         "You can find it in: " + path + "\n");
@@ -352,7 +359,13 @@ function zip(){
         if(! fs.existsSync("node_modules")) {
             console.log("No modules found, running \"npm install\"");
             try{
+                if (fs.existsSync(process.cwd + '/package-lock.json')) {
+                    execSync("/bin/rm package-lock.json");
+                }
                 execSync("/usr/local/bin/npm install");
+                if (fs.existsSync(process.cwd + '/package-lock.json')) {
+                    execSync("/bin/rm package-lock.json");
+                }
             }
             catch (e){
                 console.log("Error installing node modules: " + e);
@@ -408,9 +421,9 @@ function publish() {
         inquirer.prompt(questions).then(function (answer) {
             package.version = answer.version;
             fs.writeJsonSync("package.json", package, {spaces:'\t'});
+            fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip");
             try {
                 execSync("/usr/bin/git add *");
-
             }
             catch (e){
                 console.log("Nothing to add");
@@ -666,65 +679,13 @@ function commit(package, arch) {
 
 function install(){
     if(fs.existsSync("package.json")){
-        var package = fs.readJsonSync("package.json");
-        zip();
-        if(!fs.existsSync("/tmp/plugins")) {
-            execSync("/bin/mkdir /tmp/plugins/")
-        }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
-        socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
-            + package.name + ".zip"})
-        socket.on('installPluginStatus', function (data) {
-            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
-            if(data.message == "Plugin Successfully Installed"){
-                console.log("Done!");
-                process.exit(1)
-            }
-        })
-    }
-    else {
-        console.log("No package found")
-        process.exit(1)
-    }
-}
-
-// ================================ UPDATE ====================================
-
-function update() {
-    if(fs.existsSync("package.json")){
-        var package = fs.readJsonSync("package.json");
-        zip();
-        if(!fs.existsSync("/tmp/plugins")) {
-            execSync("/bin/mkdir /tmp/plugins/")
-        }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
-        socket.emit('updatePlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
-            + package.name + ".zip", category: package.category, name: package.name})
-        socket.on('installPluginStatus', function (data) {
-            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
-            if(data.message == "Plugin Successfully Installed"){
-                console.log("Done!");
-                process.exit(1)
-            }
-        })
-    }
-    else {
-        console.log("No package found")
-        process.exit(1)
-    }
-}
-
-// =============================== INSTALL ====================================
-
-function install(){
-    if(fs.existsSync("package.json")){
         let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
         var package = fs.readJsonSync("package.json");
         zip();
         if(!fs.existsSync("/tmp/plugins")) {
             execSync("/bin/mkdir /tmp/plugins/")
         }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        execSync("/bin/mv *.zip /tmp/plugins/" + package.name + ".zip");
         socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
             + package.name + ".zip"})
         socket.on('installPluginStatus', function (data) {
@@ -751,7 +712,7 @@ function update() {
         if(!fs.existsSync("/tmp/plugins")) {
             execSync("/bin/mkdir /tmp/plugins/")
         }
-        execSync("/bin/mv *.zip /tmp/plugins/" +package.name + ".zip");
+        execSync("/bin/mv *.zip /tmp/plugins/" + package.name + ".zip");
         socket.emit('updatePlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
             + package.name + ".zip", category: package.category, name: package.name})
         socket.on('installPluginStatus', function (data) {

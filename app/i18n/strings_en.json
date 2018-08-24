@@ -186,7 +186,9 @@
 	"ERROR":"Error",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Your music is being scanned and the icon on bottom left will keep spinning until all your library has been successfully indexed. Since the system might be less responsive during this operation, please don't use the system while music is being indexed ",
     "GOT_IT":"Got it",
-    "MEDIA_SERVERS":"Media Servers"
+    "MEDIA_SERVERS":"Media Servers",
+    "ENABLED":"Enabled",
+    "DISABLED":"Disabled"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -232,7 +234,8 @@
     "ALARM":"Alarm",
     "SLEEP":"Sleep",
     "CREDITS":"Credits",
-    "SHUTDOWN":"Shutdown"
+    "SHUTDOWN":"Shutdown",
+    "HELP":"Help"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Alarm Clock",
@@ -289,7 +292,11 @@
     "CREDITS_OPEN_SOURCE_LICENSES":"Credits and Open Source licenses",
     "VIDEO_OUT_OPTIONS": "Video output options",
     "HDMI_UI_DOC":"Show User Interface via HDMI Video Output. WARNING: This will degrade system performances",
-    "HDMI_UI":"User Interface via HDMI"
+    "HDMI_UI":"User Interface via HDMI",
+    "STARTING_SOFTWARE_UPDATE":"Starting Software Update",
+    "CHECKING_SYSTEM_INTEGRITY":"Checking system integrity",
+    "SYSTEM_INTEGRITY_CHECK_FAILED":"System Software Integrity check failed, manually edited files were detected. System Software Update is not possible under those circumstances. Please execute a Factory Reset or Delete User Data, then retry.",
+    "UPDATE_FAILED":"Update failed"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
@@ -306,12 +313,27 @@
     "UPDATING_PLUGIN":"Updating Plugin",
     "DOWNLOADING_FROM":"Downloading Plugin from ",
     "DOWNLOADING":"Downloading Plugin",
-    "NO_CONFIGURATION_AVAILABLE":"No configuration available"
+    "NO_CONFIGURATION_AVAILABLE":"No configuration available",
+    "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",
     "DEVICE_SUCCESSFULLY_CONFIGURED":"has been configured and it's ready to play",
     "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!",
     "RUN_FIRST_CONFIG_WIZARD":"Run first config Wizard"
+  },
+  "UPDATER":{
+    "PREPARING_UPDATE":"Preparing update",
+    "CREATING_BACKUP":"Creating backup",
+    "DOWNLOADING_UPDATE":"Downloading new update",
+    "CLEANING":"Cleaning old files",
+    "FINALIZING_UPDATE":"Finalizing update",
+    "ERROR":"Error",
+    "ERROR_UPDATE_FAILED":"Error: update failed, please restart system and retry",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"Update file not found",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Successfully updated to version",
+    "SYSTEM_RESTART_REQUIRED":"Please restart your device.",
+    "SYSTEM_RESTART_IN":"Your device will restart in ",
+    "UPDATE":"Update"
   }
 }

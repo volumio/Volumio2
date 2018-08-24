@@ -216,6 +216,7 @@
     "COMPILATION_METADATA_DOC":"Configura i campi di metadati utilizzati per identificare le raccolte o gli album di artisti vari, utilizza valori separati da virgole",
     "COMPILATION_METADATA":"Metadati per artisti vari",
     "ALBUMART_CACHE_CLEARED":"Cache Albumart eliminata con successo",
+    "ALBUMART_CACHE_CLEAR_ERROR":"Errore nel ripristinare la cache delle Albumart, si prega di riprovare",
     "ALBUMART_RESET_CACHE":"Elimina Cache Albumart",
     "ALBUMART_RESET_CACHE_DOC":"Il sistema immagazzina (cache) le albumart per migliorare le performance, questo meccanismo impedisce alle albumart aggiunte di recente di venire visualizzate. Eliminando la cache le ultime albumart verranno visualizzate",
     "METADATA_IMAGE":"Mostra Albumart integrate",
@@ -231,7 +232,8 @@
     "ALARM":"Sveglie",
     "SLEEP":"Sleep",
     "CREDITS":"Crediti",
-    "SHUTDOWN":"Spegni"
+    "SHUTDOWN":"Spegni",
+    "HELP":"Aiuto"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Sveglia",
@@ -288,7 +290,11 @@
     "CREDITS_OPEN_SOURCE_LICENSES":"Crediti e licenze Open Source",
     "VIDEO_OUT_OPTIONS": "Opzioni dell'uscita video",
     "HDMI_UI_DOC":"Mostra l'interfaccia grafica tramite l'uscita video HDMI. ATTENZIONE: Il sistema potrà avere minori prestazioni",
-    "HDMI_UI":"Interfaccia tramite uscita HDMI"
+    "HDMI_UI":"Interfaccia tramite uscita HDMI",
+    "STARTING_SOFTWARE_UPDATE":"Aggiornamento di sistema iniziato",
+    "CHECKING_SYSTEM_INTEGRITY":"Controllo dell'integrità del sistema in corso",
+    "SYSTEM_INTEGRITY_CHECK_FAILED":"Il controllo dell'integrità del Sistema è fallito, sono stati rilevati files modificati manualmente. L'aggiornamento di sistema non è possibile in queste circorstanze. Eseguire un ripristino ai dati di fabbrica oppure Cancella i dati utente e riprovare.",
+    "UPDATE_FAILED":"Update failed"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",
@@ -305,12 +311,27 @@
     "UPDATING_PLUGIN":"Aggiornamento Plugin",
     "DOWNLOADING_FROM":"Scaricando il Plugin da ",
     "DOWNLOADING":"Scaricando il Plugin",
-    "NO_CONFIGURATION_AVAILABLE":"Nessuna configurazione disponibile"
+    "NO_CONFIGURATION_AVAILABLE":"Nessuna configurazione disponibile",
+    "PLUGIN_START_ERROR":"Avvio del plugin è fallito. Aggiorna il plugin o contatta lo sviluppatore."
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulazioni",
     "DEVICE_SUCCESSFULLY_CONFIGURED":"è stato configurato ed è pronto per l'uso",
     "PLEASE_DONATE":"Se ti piace Volumio, considera di fare una donazione. Il tuo contributo può fare la differenza!",
     "RUN_FIRST_CONFIG_WIZARD":"Avvia la configurazione guidata"
+  },
+  "UPDATER":{
+    "PREPARING_UPDATE":"Aggiornamento in preparazione",
+    "CREATING_BACKUP":"Creazione del backup",
+    "DOWNLOADING_UPDATE":"Scaricando l'aggiornamento",
+    "CLEANING":"Rimozione dei file temporanei",
+    "FINALIZING_UPDATE":"Completando l'aggiornamento",
+    "ERROR":"Errore",
+    "ERROR_UPDATE_FAILED":"Errore: aggiornamento fallito, si prega di riavviare il dispositivo e riprovare",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"File di aggiornamento non trovato",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Aggiornamento eseguito con successo alla versione",
+    "SYSTEM_RESTART_REQUIRED":"Si prega di riavviare il dispositivo",
+    "SYSTEM_RESTART_IN":"Il vostro dispositivo si riavverà in ",
+    "UPDATE":"Aggiornamento"
   }
 }

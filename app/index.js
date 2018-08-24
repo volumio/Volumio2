@@ -37,6 +37,7 @@ function CoreCommandRouter(server) {
 	});
 
 	this.callbacks = [];
+	this.pluginsRestEndpoints = [];
 	this.sharedVars = new vconf();
     this.sharedVars.registerCallback('language_code',this.loadI18nStrings.bind(this));
     this.sharedVars.addConfigValue('selective_search','boolean',true);
@@ -336,26 +337,27 @@ CoreCommandRouter.prototype.serviceClearAddPlayTracks = function (arrayTrackIds,
 
 // MPD Stop
 CoreCommandRouter.prototype.serviceStop = function (sService) {
-	
-	if (sService != undefined) {
-		this.pushConsoleMessage('CoreCommandRouter::serviceStop');
-		var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+
+    if (sService != undefined) {
+        this.pushConsoleMessage('CoreCommandRouter::serviceStop');
+        var thisPlugin = this.getMusicPlugin(sService);
         if (thisPlugin != undefined && typeof thisPlugin.stop === "function") {
             return thisPlugin.stop();
-		} else {
+        } else {
             this.logger.error('WARNING: No stop method for service ' + sService);
-		}
+        }
 
-	} else {
-		this.pushConsoleMessage('Received STOP, but no service to execute it');
-	}
+    } else {
+        this.pushConsoleMessage('Received STOP, but no service to execute it');
+        return libQ.resolve('');
+    }
 };
 
 // MPD Pause
 CoreCommandRouter.prototype.servicePause = function (sService) {
-	this.pushConsoleMessage('CoreCommandRouter::servicePause');
+    this.pushConsoleMessage('CoreCommandRouter::servicePause');
 
-	var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+    var thisPlugin = this.getMusicPlugin(sService);
     if (thisPlugin != undefined && typeof thisPlugin.pause === "function") {
         return thisPlugin.pause();
     } else {
@@ -365,10 +367,10 @@ CoreCommandRouter.prototype.servicePause = function (sService) {
 
 // MPD Resume
 CoreCommandRouter.prototype.serviceResume = function (sService) {
-	this.pushConsoleMessage('CoreCommandRouter::serviceResume');
+    this.pushConsoleMessage('CoreCommandRouter::serviceResume');
 
-    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
-	var state=this.stateMachine.getState();
+    var thisPlugin = this.getMusicPlugin(sService);
+    var state=this.stateMachine.getState();
 
     if(state==='stop')
     {
@@ -384,8 +386,19 @@ CoreCommandRouter.prototype.serviceResume = function (sService) {
 // Methods usually called by the service controllers --------------------------------------------------------------
 
 CoreCommandRouter.prototype.servicePushState = function (state, sService) {
-	this.pushConsoleMessage('CoreCommandRouter::servicePushState');
-	return this.stateMachine.syncState(state, sService);
+    this.pushConsoleMessage('CoreCommandRouter::servicePushState');
+    return this.stateMachine.syncState(state, sService);
+};
+
+CoreCommandRouter.prototype.getMusicPlugin = function (sService) {
+    // Check first if its a music service
+    var thisPlugin = this.pluginManager.getPlugin('music_service', sService);
+    if (!thisPlugin) {
+        // check if its a audio interface
+        thisPlugin = this.pluginManager.getPlugin('audio_interface', sService);
+    }
+
+    return thisPlugin
 };
 
 // Methods usually called by the music library ---------------------------------------------------------------------
@@ -1538,18 +1551,24 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from,to) {
 CoreCommandRouter.prototype.getI18nString = function (key) {
     var splitted=key.split('.');
 
-	if(splitted.length==1)
-    {
-        if(this.i18nStrings[key]!==undefined)
-            return this.i18nStrings[key];
-        else return this.i18nStringsDefaults[key];
-    }
-    else {
-        if(this.i18nStrings[splitted[0]]!==undefined &&
-           this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
-            return this.i18nStrings[splitted[0]][splitted[1]];
-        else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
-    }
+    if (this.i18nStrings) {
+        if(splitted.length==1)
+        {
+            if(this.i18nStrings[key]!==undefined)
+                return this.i18nStrings[key];
+            else return this.i18nStringsDefaults[key];
+        }
+        else {
+            if(this.i18nStrings[splitted[0]]!==undefined &&
+                this.i18nStrings[splitted[0]][splitted[1]]!==undefined)
+                return this.i18nStrings[splitted[0]][splitted[1]];
+            else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
+        }
+	} else {
+    	var emptyString = '';
+    	return emptyString
+	}
+
 };
 
 CoreCommandRouter.prototype.loadI18nStrings = function () {
@@ -1571,7 +1590,7 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
             var name=names[j];
             var instance=this.pluginManager.getPlugin(category,name);
 
-            if (instance.getI18nFile) {
+            if (instance && instance.getI18nFile) {
               var pluginI18NFile = instance.getI18nFile(language_code);
               if (pluginI18NFile && fs.pathExistsSync(pluginI18NFile)) {
                 var pluginI18nStrings = fs.readJSONSync(pluginI18NFile);
@@ -1632,53 +1651,53 @@ CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionar
 CoreCommandRouter.prototype.translateKeys = function (parent,dictionary,defaultDictionary) {
     var self=this;
 
-    var keys=Object.keys(parent);
+    try {
+        var keys=Object.keys(parent);
 
-    for(var i in keys)
-    {
-        var obj=parent[keys[i]];
-        var type=typeof(obj);
+        for(var i in keys)
+        {
+            var obj=parent[keys[i]];
+            var type=typeof(obj);
 
-        if(type==='object')
-        {
-           self.translateKeys(obj,dictionary,defaultDictionary);
-        }
-        else if(type==='string')
-        {
-            if(obj.startsWith("TRANSLATE."))
+            if(type==='object')
             {
-                var replaceKey=obj.slice(10);
-
-                var dotIndex=replaceKey.indexOf('.');
-
-                if(dotIndex==-1)
-                {
-                    var value=dictionary[replaceKey];
-                    if(value===undefined)
-                    {
-                        value=defaultDictionary[replaceKey];
-                    }
-                    parent[keys[i]]=value;
-                }
-                else {
-                    var category=replaceKey.slice(0,dotIndex);
-                    var key=replaceKey.slice(dotIndex+1);
-					
-                    if(dictionary[category]===undefined || dictionary[category][key]===undefined)
-                    {
-                        var value=defaultDictionary[category][key];
-                    } else {
-                        var value=dictionary[category][key];
-					}
-                    parent[keys[i]]=value;
-                }
-
-
-
+                self.translateKeys(obj,dictionary,defaultDictionary);
             }
+            else if(type==='string')
+            {
+                if(obj.startsWith("TRANSLATE."))
+                {
+                    var replaceKey=obj.slice(10);
 
+                    var dotIndex=replaceKey.indexOf('.');
+
+                    if(dotIndex==-1)
+                    {
+                        var value=dictionary[replaceKey];
+                        if(value===undefined)
+                        {
+                            value=defaultDictionary[replaceKey];
+                        }
+                        parent[keys[i]]=value;
+                    }
+                    else {
+                        var category=replaceKey.slice(0,dotIndex);
+                        var key=replaceKey.slice(dotIndex+1);
+
+                        if(dictionary[category]===undefined || dictionary[category][key]===undefined)
+                        {
+                            var value=defaultDictionary[category][key];
+                        } else {
+                            var value=dictionary[category][key];
+                        }
+                        parent[keys[i]]=value;
+                    }
+                }
+            }
         }
-    }
+	} catch(e) {
+    	self.logger.error('Cannot translate keys: ' + e);
+	}
 }
 
 CoreCommandRouter.prototype.overrideUIConfig = function (uiconfig, overrideFile) {
@@ -1966,4 +1985,43 @@ CoreCommandRouter.prototype.usbAudioDetach = function () {
         defer.resolve();
     }
     return defer.promise
+}
+
+CoreCommandRouter.prototype.getMyMusicPlugins = function () {
+    var self=this;
+
+    return  this.pluginManager.getMyMusicPlugins();
+}
+
+CoreCommandRouter.prototype.enableDisableMyMusicPlugin = function (data) {
+    var self=this;
+
+    return  this.pluginManager.enableDisableMyMusicPlugin(data);
+}
+
+CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
+    var self=this;
+
+	if (data.endpoint && data.type && data.name && data.method) {
+		if (self.pluginsRestEndpoints.length) {
+			for (var i in self.pluginsRestEndpoints) {
+				var endpoint = self.pluginsRestEndpoints[i];
+				if (endpoint.endpoint === data.endpoint) {
+                    self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+					endpoint = data;
+				}
+			}
+		} else {
+            self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+            self.pluginsRestEndpoints.push(data)
+        }
+	} else {
+        self.logger.error('Not Adding plugin to REST Endpoints, missing parameters');
+	}
+}
+
+CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
+    var self=this;
+
+    return self.pluginsRestEndpoints
 }
