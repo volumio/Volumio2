@@ -844,9 +844,11 @@ function InterfaceWebUI(context) {
 
 			//Updater
 			connWebSocket.on('updateCheck', function () {
+                var selfConnWebSocket = this;
 
+                var checkingMessage = {"changeLogLink":"","description":self.commandRouter.getI18nString('UPDATER.CHECKING_FOR_UPDATES_WAIT'),"title":self.commandRouter.getI18nString('UPDATER.CHECKING_FOR_UPDATES'),"updateavailable":false}
+                selfConnWebSocket.emit('updateReady', checkingMessage);
                 self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
-
 			});
 
             connWebSocket.on('ClientUpdateReady', function (message) {

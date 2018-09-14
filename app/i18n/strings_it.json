@@ -332,6 +332,8 @@
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Aggiornamento eseguito con successo alla versione",
     "SYSTEM_RESTART_REQUIRED":"Si prega di riavviare il dispositivo",
     "SYSTEM_RESTART_IN":"Il vostro dispositivo si riavverà in ",
-    "UPDATE":"Aggiornamento"
+    "UPDATE":"Aggiornamento",
+    "CHECKING_FOR_UPDATES":"Controllando gli Aggiornamenti",
+    "CHECKING_FOR_UPDATES_WAIT":"Attendere"
   }
 }

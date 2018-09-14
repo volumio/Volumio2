@@ -334,6 +334,8 @@
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Successfully updated to version",
     "SYSTEM_RESTART_REQUIRED":"Please restart your device.",
     "SYSTEM_RESTART_IN":"Your device will restart in ",
-    "UPDATE":"Update"
+    "UPDATE":"Update",
+    "CHECKING_FOR_UPDATES":"Checking for Updates",
+    "CHECKING_FOR_UPDATES_WAIT":"Please Wait"
   }
 }
