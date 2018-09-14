@@ -855,7 +855,8 @@ function InterfaceWebUI(context) {
                 var updateMessage = JSON.parse(message)
 				self.logger.info("Update Ready: " + JSON.stringify(updateMessage));
                 try {
-                    updateMessage.title = updateMessage.title.replace('Update', self.commandRouter.getI18nString('UPDATER.UPDATE'));
+                    updateMessage.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
+                    updateMessage.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
 				} catch(e) {
                 	self.logger.error('Cannot translate update title: ' + e);
 				}
