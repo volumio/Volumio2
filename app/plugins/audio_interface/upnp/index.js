@@ -3,13 +3,13 @@
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var os = require('os');
-var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js');
+var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js')
 var ip = require('ip');
 var libQ = require('kew');
 var net = require('net');
 var mpdPort = 6599;
 var mpdAddress = '0.0.0.0';
-
+var server;
 // Define the UpnpInterface class
 module.exports = UpnpInterface;
 
@@ -36,7 +36,7 @@ UpnpInterface.prototype.onVolumioStart = function () {
     var remoteport = 6600;
     var remoteaddr = "127.0.0.1";
 
-    var server = net.createServer(function (socket) {
+    self.server = net.createServer(function (socket) {
         socket.setEncoding('utf8');
 
 
@@ -80,7 +80,7 @@ UpnpInterface.prototype.onVolumioStart = function () {
         });
 
     });
-    server.listen(localport);
+    self.server.listen(localport);
     return libQ.resolve();
 };
 
@@ -113,7 +113,22 @@ UpnpInterface.prototype.getCurrentIP = function () {
 
 UpnpInterface.prototype.onStop = function () {
     var self = this;
-    //Perform startup tasks here
+    var defer = libQ.defer();
+
+    exec('/usr/bin/sudo /bin/systemctl stop upmpdcli.service', function (error, stdout, stderr) {
+        if (error) {
+            self.logger.error('Cannot kill upmpdcli '+error);
+            defer.reject('');
+        } else {
+            self.server.close(function () {
+                self.server.unref();
+                defer.resolve('');
+            });
+        }
+    });
+
+
+    return defer.promise;
 };
 
 UpnpInterface.prototype.onRestart = function () {
