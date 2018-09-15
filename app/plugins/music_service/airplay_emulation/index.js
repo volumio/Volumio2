@@ -57,7 +57,8 @@ AirPlayInterface.prototype.onStart = function () {
     onDemand = this.config.get('on_demand', false);
 
     if (onDemand) {
-
+        var data = {"albumart": "/albumart?sourceicon=music_service/airplay_emulation/shairporticon.png", "name": "Shairport-Sync", "uri": "airplayOnDemand","plugin_type":"music_service","plugin_name": "airplay_emulation", "static":true};
+        this.commandRouter.volumioAddToBrowseSources(data);
     } else {
         self.startShairportSync();
     }
@@ -69,6 +70,7 @@ AirPlayInterface.prototype.onStart = function () {
 AirPlayInterface.prototype.onStop = function () {
     var self = this;
 
+    this.commandRouter.volumioRemoveToBrowseSources('Shairport-Sync');
     this.stopShairportSync();
     return libQ.resolve();
 };
@@ -137,6 +139,11 @@ AirPlayInterface.prototype.startShairportSync = function () {
         conf = conf.replace("${name}", name);
         conf = conf.replace("${device}", outdev);
         conf = conf.replace("${mixer}", mixer);
+        var onDemand_line = '';
+        if (!onDemand){
+            onDemand_line = 'run_this_after_play_ends = "/usr/local/bin/volumio stopairplay";'
+        }
+        conf = conf.replace('"${run_this_after_play_ends}"', onDemand_line)
 
 
         fs.writeFile("/etc/shairport-sync.conf", conf, 'utf8', function (err) {
@@ -199,14 +206,11 @@ AirPlayInterface.prototype.playerNameCallback = function () {
 
 AirPlayInterface.prototype.startShairportSyncMeta = function () {
     var self = this;
-    pipeReader = new ShairportReader({ address: '127.0.0.1', port: '5555' });
-
+    var pipeReader = new ShairportReader({ address: '127.0.0.1', port: '5555' });
 
     // Play begin
     pipeReader.on('pbeg', function(data) {
-        self.context.coreCommand.volumioStop();
-        self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
-        self.logger.info("Airplay started streaming");
+        self.context.coreCommand.pushConsoleMessage("Airplay started streaming");
 
         self.obj.status='play';
         self.obj.title="";
@@ -216,11 +220,14 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
         self.obj.duration=0;
         self.obj.albumart="/albumart";
 
-        self.context.coreCommand.stateMachine.setVolatile({
-            service:"airplay",
-            callback: self.unsetVol.bind(self)
-        });
-
+        if (!onDemand) {
+            self.context.coreCommand.volumioStop();
+            self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
+            self.context.coreCommand.stateMachine.setVolatile({
+                service:"airplay",
+                callback: self.unsetVol.bind(self)
+            });
+        }
     })
 
     pipeReader.on('meta', function(meta) {
@@ -249,6 +256,14 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
             self.obj.bitdepth='16 bit';
         }
 
+        if (meta.caps != undefined && meta.caps == 1) {
+            self.obj.status='play';
+        }
+
+        if (meta.caps != undefined && meta.caps == 2) {
+            self.obj.status='pause';
+        }
+
         self.obj.albumart=self.getAlbumArt({artist:self.obj.artist,album: self.obj.album},'');
 
         self.pushAirplayMeta();
@@ -259,10 +274,32 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 
         var samplerate = (self.obj.samplerate.replace(' KHz', '')*1000);
         var duration = Math.round(parseFloat((meta.end-meta.start)/samplerate));
-        var seek = Math.round(parseFloat((meta.current-meta.start)/samplerate));
+        var seek = (Math.round(parseFloat((meta.current-meta.start)/samplerate)))*1000;
 
+        self.obj.status='play';
         self.obj.duration= duration;
         self.obj.seek = seek;
+        self.pushAirplayMeta();
+    })
+
+    pipeReader.on('pvol', function(pvol) {
+
+
+        //if (pvol.airplay === -144) {
+        //    self.commandRouter.volumiosetvolume('mute');
+        //}
+    })
+
+    pipeReader.on('pend', function(pend) {
+
+        self.obj.title="";
+        self.obj.artist="";
+        self.obj.album="";
+        self.obj.seek=0;
+        self.obj.duration=0;
+        self.obj.albumart="/albumart";
+        self.obj.samplerate='';
+        self.obj.bitdepth='';
         self.pushAirplayMeta();
     })
 
@@ -318,3 +355,40 @@ AirPlayInterface.prototype.stop = function () {
     defer.resolve('');
     return defer.promise
 };
+
+AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
+    var self = this;
+
+    this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
+
+    try {
+        this.commandRouter.volumioStop().then(()=>{
+
+            self.context.coreCommand.volumioStop();
+        self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
+        self.context.coreCommand.stateMachine.setVolatile({
+            service:"airplay",
+            callback: self.unsetVol.bind(self)
+        });
+    });
+
+    } catch(e) {
+        self.context.coreCommand.volumioStop();
+        self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
+        self.context.coreCommand.stateMachine.setVolatile({
+            service:"airplay",
+            callback: self.unsetVol.bind(self)
+        });
+    }
+
+
+
+    self.startShairportSync();
+};
+
+AirPlayInterface.prototype.handleBrowseUri = function (uri) {
+    var self = this;
+
+    console.log(uri)
+};
+
