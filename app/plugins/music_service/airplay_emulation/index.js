@@ -6,6 +6,8 @@ var spawn = require('child_process').spawn;
 var config = new (require('v-conf'))();
 var libQ = require('kew');
 var ShairportReader = require('./shairport-sync-reader/shairport-sync-reader.js');
+var pipeReader;
+var onDemand = false;
 
 
 // Define the UpnpInterface class
@@ -16,7 +18,7 @@ function AirPlayInterface(context) {
     // Save a reference to the parent commandRouter
     this.context = context;
     this.commandRouter = this.context.coreCommand;
-
+    this.logger = this.commandRouter.logger;
     this.obj={
         status: 'play',
         service:'airplay',
@@ -38,20 +40,37 @@ function AirPlayInterface(context) {
 
 AirPlayInterface.prototype.onVolumioStart = function () {
     var self = this;
-    this.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Shairport Sync');
+    self.logger.info('Starting Shairport Sync');
+
+    this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+    this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
+    var configFile = this.commandRouter.pluginManager.getConfigurationFile(this.context, 'config.json');
+    this.config = new (require('v-conf'))();
+    this.config.loadFile(configFile);
 
     return libQ.resolve();
 };
 
 AirPlayInterface.prototype.onStart = function () {
-    this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
-    this.commandRouter.sharedVars.registerCallback('system.name', this.playerNameCallback.bind(this));
+    var self = this;
+
+    onDemand = this.config.get('on_demand', false);
+
+    if (onDemand) {
+
+    } else {
+        self.startShairportSync();
+    }
 
     this.startShairportSync();
     return libQ.resolve();
 };
 
 AirPlayInterface.prototype.onStop = function () {
+    var self = this;
+
+    this.stopShairportSync();
+    return libQ.resolve();
 };
 
 AirPlayInterface.prototype.onRestart = function () {
@@ -122,19 +141,32 @@ AirPlayInterface.prototype.startShairportSync = function () {
 
         fs.writeFile("/etc/shairport-sync.conf", conf, 'utf8', function (err) {
             if (err) return console.log(err);
-            startAirPlay(self);
+            startShairportSync(self);
         });
     });
 };
 
-function startAirPlay(self) {
+function startShairportSync(self) {
     exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
         if (error !== null) {
-            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-sync error: ' + error);
+            self.logger.info('Shairport-sync error: ' + error);
         }
         else {
-            self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Shairport-Sync Started');
-                self.startAirplayMeta();
+            self.logger.info('Shairport-Sync Started');
+                self.startShairportSyncMeta();
+        }
+    });
+}
+
+AirPlayInterface.prototype.stopShairportSync = function () {
+    var self = this;
+
+    exec("sudo systemctl stop airplay", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Shairport-sync error: ' + error);
+        }
+        else {
+            self.logger.info('Shairport-Sync Stopped');
         }
     });
 }
@@ -142,28 +174,39 @@ function startAirPlay(self) {
 AirPlayInterface.prototype.outputDeviceCallback = function () {
     var self = this;
 
-    self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting Shairport Sync');
-    self.startShairportSync()
+    self.logger.info('Output device has changed, restarting Shairport Sync');
+
+    if (onDemand) {
+
+    } else {
+        self.startShairportSync();
+    }
+
 }
 
 
 AirPlayInterface.prototype.playerNameCallback = function () {
     var self = this;
 
-    self.context.coreCommand.pushConsoleMessage('System name has changed, restarting Shairport Sync');
-    self.startShairportSync()
+    self.logger.info('System name has changed, restarting Shairport Sync');
+
+    if (onDemand) {
+
+    } else {
+        self.startShairportSync();
+    }
 }
 
-AirPlayInterface.prototype.startAirplayMeta = function () {
+AirPlayInterface.prototype.startShairportSyncMeta = function () {
     var self = this;
-    var pipeReader = new ShairportReader({ address: '127.0.0.1', port: '5555' });
+    pipeReader = new ShairportReader({ address: '127.0.0.1', port: '5555' });
 
 
     // Play begin
     pipeReader.on('pbeg', function(data) {
         self.context.coreCommand.volumioStop();
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
-        self.context.coreCommand.pushConsoleMessage("Airplay started streaming");
+        self.logger.info("Airplay started streaming");
 
         self.obj.status='play';
         self.obj.title="";
@@ -259,15 +302,19 @@ AirPlayInterface.prototype.airPlayStop = function () {
 
 AirPlayInterface.prototype.unsetVol = function () {
     var self = this;
+    console.log('STOPPING SHAIRPORT');
 
-};
-
-AirPlayInterface.prototype.stop = function () {
-    var self = this;
-
+    stopAirPlay(self);
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
     var self = this;
     return self.context.coreCommand.executeOnPlugin(type, controller, 'getConfigParam', data);
+};
+
+AirPlayInterface.prototype.stop = function () {
+    var self = this;
+    var defer = libQ.defer();
+    defer.resolve('');
+    return defer.promise
 };
