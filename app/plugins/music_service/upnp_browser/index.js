@@ -10,15 +10,9 @@ var Client = require('node-ssdp').Client;
 var xml2js = require('xml2js');
 var http = require('http');
 var browseDLNAServer = require(__dirname + "/dlna-browser.js");
+var client;
 var singleBrowse = false;
 var debug = false;
-
-
-try {
-    var client = new Client();
-} catch (e) {
-    self.log('SSDP Client error: '+e)
-}
 
 // Define the ControllerUPNPBrowser class
 module.exports = ControllerUPNPBrowser;
@@ -58,6 +52,12 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 	if (!singleBrowseConf) {
         this.addToBrowseSources();
 	}
+
+    try {
+        client = new Client();
+    } catch (e) {
+        self.log('SSDP Client error: '+e)
+    }
 
 	client.on('response', function responseHandler(headers, code, rinfo) {
 		if (headers != undefined && headers.LOCATION != undefined && headers.LOCATION.length > 0) {
@@ -123,6 +123,15 @@ ControllerUPNPBrowser.prototype.onStart = function() {
 	this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 	//this.startDjmount();
 	return libQ.resolve();
+};
+
+ControllerUPNPBrowser.prototype.onStop = function() {
+    var self = this;
+
+    this.commandRouter.volumioRemoveToBrowseSources('Media Servers');
+    client.stop();
+
+    return libQ.resolve();
 };
 
 ControllerUPNPBrowser.prototype.discover = function(){
