@@ -485,6 +485,7 @@ PluginManager.prototype.getPackageJson = function (folder) {
 
 PluginManager.prototype.isEnabled = function (category, pluginName) {
 	var self = this;
+
 	return self.config.get(category + '.' + pluginName + '.enabled');
 };
 

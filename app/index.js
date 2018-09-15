@@ -2025,3 +2025,9 @@ CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
 
     return self.pluginsRestEndpoints
 }
+
+CoreCommandRouter.prototype.getPluginEnabled = function (category, pluginName) {
+    var self=this;
+
+    return this.pluginManager.isEnabled(category, pluginName);
+}
