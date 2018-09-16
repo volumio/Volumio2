@@ -294,7 +294,11 @@
     "STARTING_SOFTWARE_UPDATE":"Aggiornamento di sistema iniziato",
     "CHECKING_SYSTEM_INTEGRITY":"Controllo dell'integrità del sistema in corso",
     "SYSTEM_INTEGRITY_CHECK_FAILED":"Il controllo dell'integrità del Sistema è fallito, sono stati rilevati files modificati manualmente. L'aggiornamento di sistema non è possibile in queste circorstanze. Eseguire un ripristino ai dati di fabbrica oppure Cancella i dati utente e riprovare.",
-    "UPDATE_FAILED":"Update failed"
+    "UPDATE_FAILED":"Update failed",
+    "DELETE_FOLDER":"Eliminazione cartella",
+    "DELETING_FOLDER":"Eliminando la cartella",
+    "SUCCESSFULLY_DELETED_FOLDER":"Cartella eliminata correttamente",
+    "ERROR_DELETING_FOLDER":"Errore nell'eliminazione della cartella"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

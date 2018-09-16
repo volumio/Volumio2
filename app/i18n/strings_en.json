@@ -296,7 +296,11 @@
     "STARTING_SOFTWARE_UPDATE":"Starting Software Update",
     "CHECKING_SYSTEM_INTEGRITY":"Checking system integrity",
     "SYSTEM_INTEGRITY_CHECK_FAILED":"System Software Integrity check failed, manually edited files were detected. System Software Update is not possible under those circumstances. Please execute a Factory Reset or Delete User Data, then retry.",
-    "UPDATE_FAILED":"Update failed"
+    "UPDATE_FAILED":"Update failed",
+    "DELETE_FOLDER":"Delete folder",
+    "DELETING_FOLDER":"Deleting folder",
+    "SUCCESSFULLY_DELETED_FOLDER":"Successfully deleted folder",
+    "ERROR_DELETING_FOLDER":"Error in deleting folder"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

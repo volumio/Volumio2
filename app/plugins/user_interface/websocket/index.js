@@ -742,9 +742,6 @@ function InterfaceWebUI(context) {
 						}
 					});
 				}
-				else console.log("Plugin multiroom or method getMultiroom not found");
-
-
 			});
 
 
@@ -1760,6 +1757,20 @@ function InterfaceWebUI(context) {
             var selfConnWebSocket = this;
 
             self.commandRouter.closeModals();
+        });
+
+        connWebSocket.on('deleteFolder', function (data) {
+            var selfConnWebSocket = this;
+            //self.printToastMessage('success', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'),  self.commandRouter.getI18nString('SYSTEM.DELETING_FOLDER') + ' ' + data.item.uri);
+            var deleteFolder = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'deleteFolder', data);
+            deleteFolder.then(function(data) {
+                self.printToastMessage('success', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'),  self.commandRouter.getI18nString('SYSTEM.SUCCESSFULLY_DELETED_FOLDER'));
+                selfConnWebSocket.emit('pushBrowseLibrary', data);
+			})
+			.fail(function (error) {
+                self.printToastMessage('error', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'),  self.commandRouter.getI18nString('SYSTEM.ERROR_DELETING_FOLDER'));
+				self.logger.error(error);
+            });
         });
 
 	});

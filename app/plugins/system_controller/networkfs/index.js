@@ -937,6 +937,14 @@ ControllerNetworkfs.prototype.writeSMBConf = function () {
                 });
             }
         });
+
+    exec('/usr/bin/sudo /bin/chmod 777 /data/INTERNAL', {uid:1000,gid:1000},function (error, stdout, stderr) {
+        if (error != null) {
+            self.logger.info('Error setting /data/internal perms: ' + error);
+        } else {
+			self.logger.info('Internal perms successfully set');
+        }
+    });
 };
 
 ControllerNetworkfs.prototype.onVolumioReboot = function () {

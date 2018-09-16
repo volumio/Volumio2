@@ -1126,7 +1126,6 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var defer = libQ.defer();
 	var name = uri.split('/')[1];
-	console.log(uri)
 
     var response={
         "navigation": {
@@ -1262,11 +1261,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                             } else {
                                 var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
                             }
-
                             if (namearr.length == 2 && namearr[0] == 'USB') {
                                 dirtype = 'remdisk';
                                 diricon = 'fa fa-usb';
-                            } else {
+                            } else if (uri.indexOf('music-library/INTERNAL') >= 0) {
+                                dirtype = 'internal-folder';
+							} else {
                                 dirtype = 'folder';
                             }
 
@@ -3908,4 +3908,43 @@ ControllerMpd.prototype.checkUSBDrives = function(){
 	}).fail((e)=>{
     	self.logger.error('Error in refreshing USB drives list' + e);
 	})
+}
+
+ControllerMpd.prototype.deleteFolder = function(data){
+    var self = this;
+    var defer = libQ.defer();
+
+    if (data && data.curUri && data.item && data.item.uri) {
+    	var folderToDelete = data.item.uri.replace('music-library','/mnt');
+        exec('/usr/bin/sudo /bin/rm -rf "' + folderToDelete + '"', {uid:1000, gid:1000},
+            function (error, stdout, stderr) {
+                if (error){
+                    self.logger.error('Cannot delete folder: ' + error);
+                    defer.reject('Cannot delete folder ' + data.curUri)
+                } else {
+                    var list = self.lsInfo(data.curUri);
+                    list.then((list) => {
+						var items = list.navigation.lists[0].items;
+                    	for (var i in items) {
+                    		if (items[i].uri === data.item.uri) {
+                                list.navigation.lists[0].items.splice(i, 1);
+							}
+						}
+						defer.resolve(list)
+                }).
+                    fail((e) => {
+                        self.logger.error('Error in refreshing USB drives list' + e);
+                        defer.reject(e)
+                })
+                }
+        });
+
+	}
+
+    exec('/bin/sync', {uid:1000, gid:1000}, function (error, stdout, stderr) {
+    	if (error) {
+    		self.logger.error('Cannot execute sync')
+		}
+        });
+	return defer.promise
 }
