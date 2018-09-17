@@ -8,6 +8,7 @@ var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var calltrials = 0;
+var additionalSVInfo;
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -402,10 +403,13 @@ ControllerSystem.prototype.getSystemVersion = function () {
 			str = file[l].split('=');
 			releaseinfo.hardware = str[1].replace(/\"/gi, "");
 		}
-
 	}
-	defer.resolve(releaseinfo);
 
+	if (additionalSVInfo) {
+        releaseinfo.additionalSVInfo = additionalSVInfo;
+	}
+
+	defer.resolve(releaseinfo);
 
 	return defer.promise;
 };
@@ -972,4 +976,10 @@ ControllerSystem.prototype.getMainDiskUsage = function () {
         }
     });
     return defer.promise
+};
+
+ControllerSystem.prototype.setAdditionalSVInfo = function (data) {
+    var self = this;
+	self.logger.info('Setting Additional System Software info: ' + data);
+    additionalSVInfo = data;
 };
