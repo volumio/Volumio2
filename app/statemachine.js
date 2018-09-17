@@ -1095,7 +1095,25 @@ CoreStateMachine.prototype.play = function (index) {
 		});
 };
 
-// Volumio Play Command
+// Volumio Volatile Play
+CoreStateMachine.prototype.volatilePlay = function () {
+    var self=this;
+    this.commandRouter.pushConsoleMessage('CoreStateMachine::volatilePlay');
+
+    if(this.isVolatile){
+        var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof thisPlugin.play === "function") {
+            thisPlugin.play();
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No play method for volatile plugin ' + this.volatileService);
+        }
+    } else {
+        this.commandRouter.pushConsoleMessage('WARNING: Received volatile play command but volumio is not on volatile state');
+	}
+}
+
+
+// Volumio Seek Command
 CoreStateMachine.prototype.seek = function (position) {
 	var self=this;
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::seek');

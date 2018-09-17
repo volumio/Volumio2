@@ -1285,6 +1285,13 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 	}
 };
 
+// Volumio Play
+CoreCommandRouter.prototype.volumioVolatilePlay = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioVolatilePlay');
+
+    return this.stateMachine.volatilePlay();
+};
+
 // Volumio Toggle
 CoreCommandRouter.prototype.volumioToggle = function () {
     this.pushConsoleMessage('CoreCommandRouter::volumioToggle');

@@ -217,6 +217,15 @@ function InterfaceWebUI(context) {
 				}
 			});
 
+        	connWebSocket.on('volatilePlay', function (N) {
+
+            	if (N == null) {
+                	return self.commandRouter.volumioVolatilePlay();
+            	} else if (N.value != undefined) {
+                	return self.commandRouter.volumioVolatilePlay(N.value);
+            	}
+        	});
+
 			connWebSocket.on('pause', function () {
 
 				return self.commandRouter.volumioPause();
