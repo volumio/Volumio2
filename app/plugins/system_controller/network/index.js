@@ -207,13 +207,13 @@ ControllerNetwork.prototype.setUIConfig = function (data) {
 ControllerNetwork.prototype.getConf = function (varName) {
 	var self = this;
 
-	return self.config.get(varName);
+	return config.get(varName);
 };
 
 ControllerNetwork.prototype.setConf = function (varName, varValue) {
 	var self = this;
 
-	self.config.set(varName, varValue);
+	config.set(varName, varValue);
 };
 
 //Optional functions exposed for making development easier and more clear
@@ -1025,4 +1025,24 @@ ControllerNetwork.prototype.getWiredInfo = function () {
     });
 
     return defer.promise
+};
+
+ControllerNetwork.prototype.wirelessEnable = function () {
+    var self = this;
+
+    config.set('wireless_enabled', true);
+
+    setTimeout(()=>{
+        self.commandRouter.wirelessRestart();
+	},500)
+};
+
+ControllerNetwork.prototype.wirelessDisable = function () {
+    var self = this;
+
+    config.set('wireless_enabled', false);
+
+    setTimeout(()=>{
+        self.commandRouter.wirelessRestart();
+	},500)
 };
