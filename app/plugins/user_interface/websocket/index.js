@@ -853,7 +853,7 @@ function InterfaceWebUI(context) {
                 var selfConnWebSocket = this;
 
                 var checkingMessage = {"changeLogLink":"","description":self.commandRouter.getI18nString('UPDATER.CHECKING_FOR_UPDATES_WAIT'),"title":self.commandRouter.getI18nString('UPDATER.CHECKING_FOR_UPDATES'),"updateavailable":false}
-                selfConnWebSocket.emit('updateReady', checkingMessage);
+                selfConnWebSocket.emit('updateWaitMsg', checkingMessage);
                 self.commandRouter.broadcastMessage('ClientUpdateCheck', 'search-for-upgrade');
 			});
 
