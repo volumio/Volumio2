@@ -392,3 +392,15 @@ AirPlayInterface.prototype.handleBrowseUri = function (uri) {
     console.log(uri)
 };
 
+AirPlayInterface.prototype.stopAirplay = function () {
+    var self = this;
+
+    self.logger.info('Stopping airplay');
+
+    if (onDemand) {
+        self.stopShairportSync();
+    } else {
+        self.startShairportSync();
+    }
+};
+
