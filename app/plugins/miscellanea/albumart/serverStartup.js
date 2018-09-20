@@ -3,63 +3,50 @@
 
 var cluster = require('cluster');
 
-
 if (cluster.isMaster) {
+  // Count the machine's CPUs
+  var cpuCount = require('os').cpus().length;
 
-    // Count the machine's CPUs
-    var cpuCount = require('os').cpus().length;
+  if (cpuCount > 1) { cpuCount = cpuCount - 1; }
 
-    if(cpuCount>1)
-        cpuCount=cpuCount-1;
-    
-    console.log("Forking "+cpuCount+" albumart workers");
-    // Create a worker for each CPU
-    for (var i = 0; i < cpuCount; i += 1) {
-        cluster.fork();
-    }
+  console.log('Forking ' + cpuCount + ' albumart workers');
+  // Create a worker for each CPU
+  for (var i = 0; i < cpuCount; i += 1) {
+    cluster.fork();
+  }
+} else {
+  var express = require('express');
+  console.log('Starting albumart workers');
 
-}
-else {
+  var albumart = require(__dirname + '/albumart.js');
+  var app = express();
 
-    var express = require('express');
-    console.log("Starting albumart workers");
+  albumart.setFolder(process.argv[3]);
 
-    var albumart = require(__dirname + '/albumart.js');
-    var app = express();
+  app.get('/albumart', albumart.processExpressRequest);
 
-    albumart.setFolder(process.argv[3]);
-
-    app.get('/albumart', albumart.processExpressRequest);
-
-    app.use(function (err, req, res, next) {
-        /**
+  app.use(function (err, req, res, next) {
+    /**
          * Replace with Winston logging
          **/
-        console.log('An internal error occurred while serving an albumart. Details: ' + err.stack);
+    console.log('An internal error occurred while serving an albumart. Details: ' + err.stack);
 
-        /**
+    /**
          * Sending back error code 500
          **/
-        try{
-            res.sendFile(__dirname + '/default.jpg');
-        } catch(e) {
-            res.sendFile(__dirname + '/default.png');
-        }
-    });
+    try {
+      res.sendFile(__dirname + '/default.jpg');
+    } catch (e) {
+      res.sendFile(__dirname + '/default.png');
+    }
+  });
 
-    app.listen(process.argv[2]);
+  app.listen(process.argv[2]);
 }
 
 cluster.on('exit', function (worker) {
-
-    // Replace the dead worker,
-    // we're not sentimental
-    console.log('Worker %d died :(', worker.id);
-    cluster.fork();
-
+  // Replace the dead worker,
+  // we're not sentimental
+  console.log('Worker %d died :(', worker.id);
+  cluster.fork();
 });
-
-
-
-
-
