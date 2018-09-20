@@ -1,5 +1,5 @@
 var express = require('express');
-var compression = require('compression')
+var compression = require('compression');
 var path = require('path');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
@@ -7,7 +7,7 @@ var restapi = require('./restapi.js');
 var busboy = require('connect-busboy');
 var path = require('path');
 var fs = require('fs-extra');
-var io=require('socket.io-client');
+var io = require('socket.io-client');
 var libUUID = require('node-uuid');
 
 var app = express();
@@ -18,20 +18,18 @@ var background = express();
 var plugindir = '/tmp/plugins';
 var backgrounddir = '/data/backgrounds';
 
-var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+var allowCrossDomain = function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
-    // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
-        res.sendStatus(200);
-    }
-    else {
-        next();
-    }
+  // intercept OPTIONS method
+  if (req.method == 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
 };
-
 
 // view engine setup
 dev.set('views', path.join(__dirname, 'dev/views'));
@@ -43,7 +41,7 @@ dev.use(express.static(path.join(__dirname, 'dev')));
 
 dev.use('/', routes);
 
-app.use(compression())
+app.use(compression());
 app.use(express.static(path.join(__dirname, 'www')));
 app.use(busboy());
 app.use(allowCrossDomain);
@@ -52,12 +50,11 @@ app.use('/dev', dev);
 app.use('/api', restapi);
 app.use('/plugin-serve', plugin);
 
-
 // catch 404 and forward to error handler
-dev.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+dev.use(function (req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
 // error handlers
@@ -65,98 +62,91 @@ dev.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (dev.get('env') === 'development') {
-    dev.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
+  dev.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
     });
+  });
 }
 
 // production error handler
 // no stacktraces leaked to user
-dev.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
+dev.use(function (err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
 });
 
-
-
 app.route('/plugin-upload')
-    .post(function (req, res, next) {
+  .post(function (req, res, next) {
+    var fstream;
+    req.pipe(req.busboy);
+    req.busboy.on('file', function (fieldname, file, filename) {
+      console.log('Uploading: ' + filename);
+      var uniquename = libUUID.v4() + '.zip';
+      console.log("Created safe filename as '" + uniquename + "'");
 
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
-            console.log("Uploading: " + filename);
-            var uniquename = libUUID.v4() + '.zip';
-            console.log("Created safe filename as '"+uniquename+"'");
-
-            try {
-                fs.ensureDirSync(plugindir)
-            } catch (err) {
-                console.log('Cannot Create Plugin Dir ' + plugindir)
-            }
-            //Path where image will be uploaded
-            fstream = fs.createWriteStream(plugindir + '/' + uniquename);
-            file.pipe(fstream);
-            fstream.on('close', function () {
-                console.log("Upload Finished of " + filename + " as " + uniquename);
-                var socket= io.connect('http://localhost:3000');
-                var pluginurl= 'http://127.0.0.1:3000/plugin-serve/' + uniquename;
-                socket.emit('installPlugin', { url:pluginurl});
-                res.sendStatus(200);
-                //res.redirect('/');
-            });
-        });
+      try {
+        fs.ensureDirSync(plugindir);
+      } catch (err) {
+        console.log('Cannot Create Plugin Dir ' + plugindir);
+      }
+      // Path where image will be uploaded
+      fstream = fs.createWriteStream(plugindir + '/' + uniquename);
+      file.pipe(fstream);
+      fstream.on('close', function () {
+        console.log('Upload Finished of ' + filename + ' as ' + uniquename);
+        var socket = io.connect('http://localhost:3000');
+        var pluginurl = 'http://127.0.0.1:3000/plugin-serve/' + uniquename;
+        socket.emit('installPlugin', { url: pluginurl});
+        res.sendStatus(200);
+        // res.redirect('/');
+      });
     });
+  });
 
 app.route('/backgrounds-upload')
-    .post(function (req, res, next) {
+  .post(function (req, res, next) {
+    var fstream;
+    req.pipe(req.busboy);
+    req.busboy.on('file', function (fieldname, file, filename) {
+      var allowedExtensions = ['jpg', 'jpeg', 'png'];
+      var extension = filename.split('.').pop().toLowerCase();
 
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
-            var allowedExtensions = ['jpg', 'jpeg', 'png'];
-            var extension = filename.split('.').pop().toLowerCase();
+      if (allowedExtensions.indexOf(extension) > -1) {
+        console.log('Uploading: ' + filename);
 
-            if (allowedExtensions.indexOf(extension) > -1) {
-                console.log("Uploading: " + filename);
+        try {
+          fs.ensureDirSync(backgrounddir);
+        } catch (err) {
+          console.log('Cannot Create Background DIR ');
+        }
 
-                try {
-                    fs.ensureDirSync(backgrounddir)
-                } catch (err) {
-                    console.log('Cannot Create Background DIR ')
-                }
-
-                var properfilename = filename.replace(/ /g,'-');
-                fstream = fs.createWriteStream('/data/backgrounds/' + properfilename);
-                file.pipe(fstream);
-                fstream.on('close', function () {
-                    console.log("Upload Finished of " + properfilename);
-                    var socket= io.connect('http://localhost:3000');
-                    socket.emit('regenerateThumbnails', '');
-                    res.status(201);
-                    //res.redirect('/');
-                });
-            } else {
-                console.log("Background file format not allowed " + filename);
-            }
-
-
+        var properfilename = filename.replace(/ /g, '-');
+        fstream = fs.createWriteStream('/data/backgrounds/' + properfilename);
+        file.pipe(fstream);
+        fstream.on('close', function () {
+          console.log('Upload Finished of ' + properfilename);
+          var socket = io.connect('http://localhost:3000');
+          socket.emit('regenerateThumbnails', '');
+          res.status(201);
+          // res.redirect('/');
         });
+      } else {
+        console.log('Background file format not allowed ' + filename);
+      }
     });
+  });
 
 plugin.use(express.static(path.join(plugindir)));
 background.use(express.static(path.join(backgrounddir)));
 app.use('/backgrounds', express.static('/data/backgrounds/'));
 app.use('/cover-art', express.static('/var/lib/mpd/music/'));
 app.use('/music', express.static('/'));
-
 
 module.exports.app = app;
 module.exports.dev = dev;
