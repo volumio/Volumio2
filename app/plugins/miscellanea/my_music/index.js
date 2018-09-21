@@ -96,7 +96,7 @@ ControllerMyMusic.prototype.getUIConfig = function () {
                 self.configManager.setUIConfigParam(uiconf, 'sections[4].content[3].value', ffmpeg);
 
                 if (sconf) {
-                    var insertInto = 2;
+                    var insertInto = 3;
                 	for (var i in sconf.sections) {
                 		var streamingSection = sconf.sections[i];
                         uiconf.sections.splice(insertInto, 0, streamingSection);
