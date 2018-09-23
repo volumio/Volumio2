@@ -7,6 +7,7 @@ var config = new (require('v-conf'))();
 var libQ = require('kew');
 var ShairportReader = require('./shairport-sync-reader/shairport-sync-reader.js');
 var pipeReader;
+var seekTimer;
 var onDemand = false;
 
 
@@ -308,7 +309,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 
 AirPlayInterface.prototype.pushAirplayMeta = function () {
     var self = this;
-
+    self.seekTimerAction();
     self.context.coreCommand.servicePushState(self.obj, 'airplay');
 }
 
@@ -341,7 +342,7 @@ AirPlayInterface.prototype.unsetVol = function () {
     var self = this;
     console.log('STOPPING SHAIRPORT');
 
-    stopAirPlay(self);
+    self.stopAirplay();
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
@@ -381,8 +382,6 @@ AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
         });
     }
 
-
-
     self.startShairportSync();
 };
 
@@ -404,3 +403,18 @@ AirPlayInterface.prototype.stopAirplay = function () {
     }
 };
 
+AirPlayInterface.prototype.seekTimerAction = function() {
+    var self = this;
+
+    if (this.obj.status === 'play') {
+        if (seekTimer === undefined) {
+            seekTimer = setInterval(()=>{
+                this.obj.seek = this.obj.seek + 1000;
+            //console.log('SEEK: ' + this.obj.seek);
+        }, 1000)
+        }
+    } else {
+        clearInterval(seekTimer);
+        seekTimer = undefined;
+    }
+};
