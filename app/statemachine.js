@@ -20,6 +20,7 @@ function CoreStateMachine(commandRouter) {
     this.volatileService="";
     this.volatileState={};
 	this.isVolatile = false;
+    this.currentDisableVolumeControl = false;
     /**
      * This field tells the system if it is currenty running in consume mode
      * @type {boolean} true or false wether the system is in consume mode
@@ -86,6 +87,7 @@ CoreStateMachine.prototype.getState = function () {
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
+            disableVolumeControl: this.currentDisableVolumeControl,
             stream: this.volatileState.stream,
             updatedb: false,
 			volatile: true,
@@ -128,6 +130,7 @@ CoreStateMachine.prototype.getState = function () {
                 consume: false,
                 volume: this.currentVolume,
                 mute: this.currentMute,
+                disableVolumeControl: this.currentDisableVolumeControl,
                 stream: this.consumeState.stream,
                 updatedb: false,
                 volatile: true,
@@ -172,6 +175,7 @@ CoreStateMachine.prototype.getState = function () {
                 repeatSingle: this.currentRepeatSingleSong,
                 consume: this.currentConsume,
                 volume: this.currentVolume,
+                disableVolumeControl: this.currentDisableVolumeControl,
                 mute: this.currentMute,
                 stream: trackBlock.trackType,
                 updatedb: this.currentUpdate,
@@ -206,6 +210,7 @@ CoreStateMachine.prototype.getEmptyState = function () {
         service: 'mpd',
         volume: this.currentVolume,
         mute: this.currentMute,
+        disableVolumeControl: this.currentDisableVolumeControl,
         random:this.currentRandom,
         repeat: this.currentRepeat,
         repeatSingle: this.currentRepeatSingleSong,
@@ -489,6 +494,7 @@ CoreStateMachine.prototype.updateVolume = function (Volume) {
 
 	this.currentVolume = Volume.vol;
 	this.currentMute = Volume.mute;
+	this.currentDisableVolumeControl = Volume.disableVolumeControl;
 	this.pushState().fail(this.pushError.bind(this));
 };
 
