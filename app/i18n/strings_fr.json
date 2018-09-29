@@ -296,7 +296,11 @@
     "STARTING_SOFTWARE_UPDATE":"Initialisation de la mise à jour",
     "CHECKING_SYSTEM_INTEGRITY":"Vérification de l'integrité du système",
     "SYSTEM_INTEGRITY_CHECK_FAILED":"La vérification de l'integrité a échoué car des fichiers modifiés manuellement ont été détecté. La mise à jour ne peut se faire dans ces conditions. Executez une remise en état d'origine .",
-    "UPDATE_FAILED":"Echec de la mise à jour"
+    "UPDATE_FAILED":"Echec de la mise à jour",
+    "DELETE_FOLDER":"Effacer le dossier",
+    "DELETING_FOLDER":"Effacement du dossier",
+    "SUCCESSFULLY_DELETED_FOLDER":"Dossier éffacé avec succès",
+    "ERROR_DELETING_FOLDER":"Erreur d'éffacement du dossier"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
@@ -334,6 +338,8 @@
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Mise à jour avec succès vers la version",
     "SYSTEM_RESTART_REQUIRED":"Redémarrez votre système.",
     "SYSTEM_RESTART_IN":"Votre système va redémmarrer dans ",
-    "UPDATE":"Mise à jour"
+    "UPDATE":"Mise à jour",
+    "CHECKING_FOR_UPDATES":"Recherche de mise à jour",
+    "CHECKING_FOR_UPDATES_WAIT":"Merci de patienter"
    }	
 }
