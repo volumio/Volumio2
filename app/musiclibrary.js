@@ -13,6 +13,7 @@ function CoreMusicLibrary (commandRouter) {
 
 	// Save a reference to the parent commandRouter
 	self.commandRouter = commandRouter;
+    self.logger = self.commandRouter.logger;
 
 	// Start up a extra metadata handler
 	//self.metadataCache = new (require('./metadatacache.js'))(self);
@@ -444,15 +445,14 @@ CoreMusicLibrary.prototype.search = function(data) {
 
 		libQ.all(deferArray)
             .then(function (result) {
-
-                console.log("GOT EVERYTHING, SHOWING SEARCH RESULT")
+				self.logger.info('All search sources collected, pushing search results');
 
                 var searchResult={
                     "navigation": {
+                    	"isSearchResult": true,
                         "lists": []
                     }
                 };
-
 
                 for(var i in result)
                 {
@@ -462,7 +462,7 @@ CoreMusicLibrary.prototype.search = function(data) {
                 defer.resolve(searchResult);
             })
             .fail(function (err) {
-                console.log('Search error in Plugin: '+source.plugin_name+". Details: "+err);
+                self.loger.error('Search error in Plugin: '+source.plugin_name+". Details: "+err);
                 defer.reject(new Error());
             });
 	} else {
