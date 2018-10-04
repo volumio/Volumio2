@@ -2009,22 +2009,25 @@ CoreCommandRouter.prototype.enableDisableMyMusicPlugin = function (data) {
 CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
     var self=this;
 
-	if (data.endpoint && data.type && data.name && data.method) {
-		if (self.pluginsRestEndpoints.length) {
-			for (var i in self.pluginsRestEndpoints) {
-				var endpoint = self.pluginsRestEndpoints[i];
-				if (endpoint.endpoint === data.endpoint) {
+    if (data.endpoint && data.type && data.name && data.method) {
+        if (self.pluginsRestEndpoints.length) {
+            for (var i in self.pluginsRestEndpoints) {
+                var endpoint = self.pluginsRestEndpoints[i];
+                if (endpoint.endpoint === data.endpoint) {
                     self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
-					endpoint = data;
-				}
-			}
-		} else {
+                    endpoint = data;
+                } else {
+                    self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+                    self.pluginsRestEndpoints.push(data);
+                }
+            }
+        } else {
             self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
-            self.pluginsRestEndpoints.push(data)
+            self.pluginsRestEndpoints.push(data);
         }
-	} else {
+    } else {
         self.logger.error('Not Adding plugin to REST Endpoints, missing parameters');
-	}
+    }
 }
 
 CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
