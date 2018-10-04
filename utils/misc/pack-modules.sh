@@ -9,6 +9,16 @@ if [ -f $NODE_MODULES_PACKAGE ]; then
    rm $NODE_MODULES_PACKAGE
 fi
 
+if [ -d "/volumio/node_modules/@firebase" ]; then
+   echo "Clearing unused firebase modules"
+   rm -rf /volumio/node_modules/@firebase/firestore
+   rm -rf /volumio/node_modules/@firebase/firestore-types
+   rm -rf /volumio/node_modules/@firebase/functions
+   rm -rf /volumio/node_modules/@firebase/functions-types
+   rm -rf /volumio/node_modules/@firebase/messaging
+   rm -rf /volumio/node_modules/@firebase/messagging-types
+fi
+
 cd /volumio
 
 echo "Cleaning modules"
