@@ -299,8 +299,8 @@
     "UPDATE_FAILED":"Echec de la mise à jour",
     "DELETE_FOLDER":"Effacer le dossier",
     "DELETING_FOLDER":"Effacement du dossier",
-    "SUCCESSFULLY_DELETED_FOLDER":"Dossier éffacé avec succès",
-    "ERROR_DELETING_FOLDER":"Erreur d'éffacement du dossier"
+    "SUCCESSFULLY_DELETED_FOLDER":"Dossier effacé avec succès",
+    "ERROR_DELETING_FOLDER":"Erreur d'effacement du dossier"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
