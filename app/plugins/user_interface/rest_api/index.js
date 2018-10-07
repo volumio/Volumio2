@@ -345,8 +345,16 @@ function interfaceApi(context) {
             .fail(function(error){
                 res.json({'success': false, 'error': error});
             })
+        })
+        .get(function (req, res) {
+            var result = self.executeRestEndpoint(req.query);
+            result.then(function(response) {
+                res.json({'success': true});
+            })
+            .fail(function(error){
+                res.json({'success': false, 'error': error});
+            })
         });
-
 };
 
 interfaceApi.prototype.printConsoleMessage = function (message) {
@@ -434,7 +442,7 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
     var self = this;
     var executed = false;
     var defer = libQ.defer();
-
+    
     var pluginsRestEndpoints = self.commandRouter.getPluginsRestEndpoints();
     if (pluginsRestEndpoints.length && data.endpoint) {
         for (var i in pluginsRestEndpoints) {
