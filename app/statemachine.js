@@ -1324,8 +1324,9 @@ CoreStateMachine.prototype.stop = function (promisedResponse) {
 			this.stopPlaybackTimer();
 			this.pushState().fail(this.pushError.bind(this));
 			return this.serviceStop();
-		}
-		else return libQ.resolve();
+		} else {
+			return libQ.resolve();
+        }
 	}
 };
 
@@ -1342,6 +1343,8 @@ CoreStateMachine.prototype.serviceStop = function () {
 		} else if (this.isUpnp) {
 			var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 			return mpdPlugin.stop();
+		} else {
+            return libQ.resolve();
 		}
 	}
 };
