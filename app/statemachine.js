@@ -68,6 +68,10 @@ CoreStateMachine.prototype.getState = function () {
 			this.volatileState.trackType = '';
 		}
 
+        if (this.volatileState.albumart === undefined) {
+            this.volatileState.albumart = '/albumart';
+        }
+
         return {
             status: this.volatileState.status,
             title: this.volatileState.title,
