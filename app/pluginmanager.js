@@ -1037,7 +1037,11 @@ PluginManager.prototype.executeInstallationScript = function (folder) {
       defer.reject(new Error());
     } else {
       self.logger.info('Executing install.sh');
-      exec('echo volumio | sudo -S sh ' + installScript + ' > /tmp/installog', {uid: 1000, gid: 1000, maxBuffer: 2024000}, function (error, stdout, stderr) {
+      if (!fs.accessSync(installScript, fs.constants.X_OK)) {
+        self.logger.warn('Plugin script is not executable');
+        execSync(`chmod +x ${installScript}`);
+      }
+      exec('echo volumio | sudo -S ' + installScript + ' > /tmp/installog', {uid: 1000, gid: 1000, maxBuffer: 2024000}, function (error, stdout, stderr) {
         if (error !== undefined && error !== null) {
           self.logger.info('Install script return the error ' + error);
           defer.reject(new Error());
@@ -1063,7 +1067,11 @@ PluginManager.prototype.executeUninstallationScript = function (category, name) 
       defer.reject(new Error());
     } else {
       self.logger.info('Executing uninstall.sh');
-      exec('echo volumio | sudo -S sh ' + installScript + ' > /tmp/installog', {uid: 1000, gid: 1000, maxBuffer: 2024000}, function (error, stdout, stderr) {
+      if (!fs.accessSync(installScript, fs.constants.X_OK)) {
+        self.logger.warn('Plugin script is not executable');
+        execSync(`chmod +x ${installScript}`);
+      }
+      exec('echo volumio | sudo -S ' + installScript + ' > /tmp/installog', {uid: 1000, gid: 1000, maxBuffer: 2024000}, function (error, stdout, stderr) {
         if (error !== undefined && error !== null) {
           self.logger.info('Uninstall script return the error ' + error);
           defer.reject(new Error());
