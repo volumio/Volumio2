@@ -189,7 +189,8 @@
     "MEDIA_SERVERS":"Server multimediali",
     "ENABLED":"Abilitato",
     "DISABLED":"Disabilitato",
-    "NO_RESULTS":"Nessun risultato"
+    "NO_RESULTS":"Nessun risultato",
+    "REMOVE_FAIL":"Rimozione non riuscita"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

@@ -189,7 +189,8 @@
     "MEDIA_SERVERS":"Media Servers",
     "ENABLED":"Enabled",
     "DISABLED":"Disabled",
-    "NO_RESULTS":"No results"
+    "NO_RESULTS":"No results",
+    "REMOVE_FAIL":"Could not remove"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",

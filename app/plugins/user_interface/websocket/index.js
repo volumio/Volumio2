@@ -398,7 +398,7 @@ function InterfaceWebUI(context) {
 						selfConnWebSocket.emit('pushBackup', result);
 					})
 						.fail(function () {
-							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR) , 'Could not retrieve backup');
 						});
 				}
 
@@ -410,7 +410,7 @@ function InterfaceWebUI(context) {
 				var response = self.commandRouter.restorePluginsConf()
 					.then(self.commandRouter.restorePluginsConf())
 					.fail(function () {
-							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not restore configuration');
 						});
 			});
 
@@ -473,12 +473,12 @@ function InterfaceWebUI(context) {
 								selfConnWebSocket.emit('pushBrowseLibrary', result2);
 							})
 								.fail(function () {
-									self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), 'An error occurred while browsing the folder.');
+									self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 								});
 						}
 						})
 						.fail(function () {
-							self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), 'An error occurred while Searching');
+                            self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 						});
 				}
 			});
@@ -510,7 +510,7 @@ function InterfaceWebUI(context) {
 							selfConnWebSocket.emit('pushBrowseLibrary', result);
 						})
 							.fail(function () {
-								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 							});
 					}
 				});
@@ -557,7 +557,7 @@ function InterfaceWebUI(context) {
 							selfConnWebSocket.emit('pushBrowseLibrary', result);
 						})
 							.fail(function () {
-								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 							});
 					}
 				});
@@ -612,7 +612,7 @@ function InterfaceWebUI(context) {
 									selfConnWebSocket.emit('pushBrowseLibrary', result);
 								})
 								.fail(function () {
-									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                    self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 								});
 						}
 					} else if (data.service === 'streaming_services') {
@@ -624,7 +624,7 @@ function InterfaceWebUI(context) {
                                 selfConnWebSocket.emit('pushBrowseLibrary', result);
                             })
                                 .fail(function () {
-                                    self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                    self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
                                 });
                         }
 						},600)
@@ -636,7 +636,7 @@ function InterfaceWebUI(context) {
 								selfConnWebSocket.emit('pushBrowseLibrary', result);
 							})
 							.fail(function () {
-								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 							});
 					}
 					}
