@@ -62,7 +62,8 @@
     "winston": "^2.3.1",
     "wireless-tools": "^0.19.0",
     "yargs": "^8.0.1",
-    "firebase": "^4.12.1"
+    "firebase": "^4.12.1",
+    "require-from-string": "^2.0.2"
   },
   "devDependencies": {
     "fs-extra": "^3.0.1",
