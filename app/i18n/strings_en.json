@@ -188,7 +188,8 @@
     "GOT_IT":"Got it",
     "MEDIA_SERVERS":"Media Servers",
     "ENABLED":"Enabled",
-    "DISABLED":"Disabled"
+    "DISABLED":"Disabled",
+    "NO_RESULTS":"No results"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",

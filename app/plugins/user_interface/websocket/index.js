@@ -367,7 +367,7 @@ function InterfaceWebUI(context) {
 							selfConnWebSocket.emit('pushBrowseLibrary', result);
 						})
 						.fail(function () {
-							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.NO_RESULTS'));
 						});
 				}
 
@@ -473,12 +473,12 @@ function InterfaceWebUI(context) {
 								selfConnWebSocket.emit('pushBrowseLibrary', result2);
 							})
 								.fail(function () {
-									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+									self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), 'An error occurred while browsing the folder.');
 								});
 						}
 						})
 						.fail(function () {
-							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
+							self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), 'An error occurred while Searching');
 						});
 				}
 			});

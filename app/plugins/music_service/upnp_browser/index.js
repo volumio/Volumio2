@@ -73,9 +73,10 @@ ControllerUPNPBrowser.prototype.onStart = function() {
                     var server = {};
                     server.name = data.root.device[0].friendlyName[0];
                     server.UDN = data.root.device[0].UDN + "";
-                    server.icon = '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png';
-                    if(data.root.device[0].iconList[0] != undefined && data.root.device[0].iconList[0].icon[0] != undefined && data.root.device[0].iconList[0].icon[0].url != undefined) {
+                    try {
                         server.icon = "http://" + urlraw[0] + ":" + urlraw[1] + data.root.device[0].iconList[0].icon[0].url;
+					} catch(e) {
+                        server.icon = '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png';
 					}
                     server.lastTimeAlive = Date.now();
                     server.location = location.url + ":" + location.port;
@@ -239,8 +240,8 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 
 	browseDLNAServer(id, address, {}, (err, data) => {
 		if(err){
-            self.logger.error(err);
-			return;
+            self.logger.error('Error browsing' + id + ':' + err);
+            return defer.reject('');
 		}
 		if(data.container){
 			for(var i = 0; i < data.container.length; i++){
@@ -301,7 +302,7 @@ ControllerUPNPBrowser.prototype.listUPNP = function (data) {
 		browseDLNAServer(id, address, {browseFlag: "BrowseMetadata"}, (err, data) => {
 			if(err){
                 self.logger.error(err);
-				return;
+                return defer.reject('');
 			}
 			if(data && data.container && data.container[0] && data.container[0].parentId && data.container[0].parentId != "-1"){
 				obj.navigation.prev.uri = "upnp/" + address + "@" + data.container[0].parentId;
