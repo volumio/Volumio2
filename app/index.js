@@ -2008,18 +2008,21 @@ CoreCommandRouter.prototype.enableDisableMyMusicPlugin = function (data) {
 
 CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
     var self=this;
+    var updated = false;
 
     if (data.endpoint && data.type && data.name && data.method) {
         if (self.pluginsRestEndpoints.length) {
             for (var i in self.pluginsRestEndpoints) {
                 var endpoint = self.pluginsRestEndpoints[i];
                 if (endpoint.endpoint === data.endpoint) {
-                    self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+                    updated = true;
                     endpoint = data;
-                } else {
-                    self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
-                    self.pluginsRestEndpoints.push(data);
+                    return self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
                 }
+            }
+            if (!updated) {
+                self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+                self.pluginsRestEndpoints.push(data);
             }
         } else {
             self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
