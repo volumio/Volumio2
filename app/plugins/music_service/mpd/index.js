@@ -2061,12 +2061,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeArtistName = artistName.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
-		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
-		}
-		else {
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
-		}
+        var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 
 		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {
             var list = [];
@@ -2157,6 +2152,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         // Escape any " within the strings used to construct the 'find' cmd
         var safeGenreName = genreName.replace(/"/g,'\\"');
         var safeArtistName = artistName.replace(/"/g,'\\"');
+        var safeAlbumartist = albumartist.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
 		if(splitted.length==4) {
@@ -2167,7 +2163,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 				var GetMatches = "find genre \"" + safeGenreName + "\" album \"" + safeAlbumName + "\"";
 			}
 			else {                                      //artist is NOT in compilation array so use artist
-				var GetMatches = "find genre \"" + safeGenreName + "\" artist \"" +  safeArtistName + "\" album \"" + safeAlbumName + "\"";
+				var GetMatches = "find genre \"" + safeGenreName + "\" albumartist \"" +  safeAlbumartist + "\" album \"" + safeAlbumName + "\"";
 			}
         }
 
@@ -3079,7 +3075,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 			var findstring = "find album \"" + safeAlbumName + "\" genre \"" + safeGenre + "\" ";
 		}
 		else {
-			var findstring = "find album \"" + safeAlbumName + "\" artist \"" + safeAlbumartist + "\" genre \"" + safeGenre + "\" ";
+			var findstring = "find album \"" + safeAlbumName + "\" albumartist \"" + safeAlbumartist + "\" genre \"" + safeGenre + "\" ";
 		}
 	}
 	else if (splitted[0] == 'albums:') { //album
@@ -3098,12 +3094,10 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 		var albumName = decodeURIComponent(splitted[3]);
 		var safeArtist = artist.replace(/"/g,'\\"');
 		var safeAlbumName = albumName.replace(/"/g,'\\"');
-		if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
-			var typeofartist = 'albumartist';
-		}
-		else {                                      //artist is NOT in compilation array so use artist
-			var typeofartist = 'artist';
-		}
+        // We no longer check compilation status to determine the 'type of artist' (artist vs albumartist)
+        // Simply use both for Compilation albums and regular
+        var typeofartist = 'albumartist';
+
 		var findstring = "find album \"" + safeAlbumName + "\" " + typeofartist + " \"" + safeArtist + "\" ";
 	}
     var response={
@@ -3351,17 +3345,9 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 		}
 
 		else {
-			if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
-				var findartist = "find albumartist \"" + safeArtist + "\"";
+            var findartist = "find albumartist \"" + safeArtist + "\"";
+			if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so set VA = 1
 				VA = 1;
-			}
-			else {                                      //artist is NOT in compilation array so use artist or albumartist
-				if (artistsort) {						//Fix - now set by artistsort variable
-					var findartist = "find albumartist \"" + safeArtist + "\"";
-				}
-				else {
-					var findartist = "find artist \"" + safeArtist + "\"";
-				}
 			}
 		}
 
