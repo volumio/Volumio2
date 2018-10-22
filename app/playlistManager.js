@@ -295,6 +295,7 @@ PlaylistManager.prototype.addToMyWebRadio = function (service, radio_name, uri) 
 	fs.exists(filePath, function (exists) {
 	    var fileDefer;
 		if (!exists) {
+            playlist.push({service: service, name: radio_name, uri: uri});
             fileDefer=self.saveJSONFile(folder, name, playlist);
 		} else fileDefer=libQ.resolve();
 
