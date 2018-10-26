@@ -190,7 +190,9 @@
     "ENABLED":"Enabled",
     "DISABLED":"Disabled",
     "NO_RESULTS":"No results",
-    "REMOVE_FAIL":"Could not remove"
+    "REMOVE_FAIL":"Could not remove",
+    "CONNECTED":"Connected",
+    "DISCONNECTED":"Disconnected"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",

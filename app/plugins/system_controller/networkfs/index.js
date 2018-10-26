@@ -7,7 +7,9 @@ var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
 var libUUID = require('node-uuid');
+var udev = require("udev");
 var S = require('string');
+var mountPoint = '/mnt/'
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -37,6 +39,7 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
 	config.loadFile(configFile);
 
 	self.initShares();
+	self.initUdevWatcher();
     var boundMethod = self.onPlayerNameChanged.bind(self);
     self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
@@ -993,3 +996,148 @@ ControllerNetworkfs.prototype.umountShare = function (data) {
 		}
     }
 };
+
+// FS AUTOMOUNT
+
+ControllerNetworkfs.prototype.umountShare = function (data) {
+    var self = this;
+
+    var defer = libQ.defer();
+    var key = "NasMounts." + data['id'];
+
+    if (config.has(key)) {
+        var mountidraw = config.get(key + '.name');
+        var mountid = mountidraw.replace(/[\s\n\\]/g, "_");
+        var mountpoint = '/mnt/NAS/' + mountid;
+        try {
+            execSync("/usr/bin/sudo /bin/umount -f " + mountpoint, { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
+        } catch(e) {
+            self.logger.error('Cannot umount share ' + mountid + ' : ' + e);
+        }
+    }
+};
+
+ControllerNetworkfs.prototype.initUdevWatcher = function() {
+    var self = this;
+
+    self.logger.info('Starting Udev Watcher for removable devices');
+    var monitor = udev.monitor();
+
+    monitor.on('add', function (device) {
+		if (device.DEVTYPE) {
+            deviceAddAction(device)
+        }
+    });
+
+    monitor.on('remove', function (device) {
+        if (device.DEVTYPE) {
+            deviceRemoveAction(device)
+        }
+    });
+
+    function deviceAddAction(device) {
+        switch(device.DEVTYPE) {
+            case 'partition':
+                self.mountDevice(device);
+                break;
+            case 'disk':
+                console.log('asd')
+                break;
+            default:
+                break;
+        }
+    }
+
+    function deviceRemoveAction(device) {
+        switch(device.DEVTYPE) {
+            case 'partition':
+                self.umountDevice(device);
+                break;
+            case 'disk':
+                console.log('asd')
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+ControllerNetworkfs.prototype.mountDevice = function(device){
+	var self = this;
+
+    if (device.ID_FS_LABEL && device.DEVNAME && device.ID_FS_TYPE) {
+        self.logger.info('Mounting Device ' +device.ID_FS_LABEL);
+        var mountFolder = mountPoint + 'USB/' + device.ID_FS_LABEL;
+        if (!fs.existsSync(mountFolder)) {
+            this.createMountFolder(mountFolder);
+        }
+        self.mountPartition({'label':device.ID_FS_LABEL,'devName':device.DEVNAME,'fsType':device.ID_FS_TYPE, 'mountFolder':mountFolder})
+    }
+}
+
+ControllerNetworkfs.prototype.umountDevice = function(device){
+    var self = this;
+	console.log(device)
+    if (device.ID_FS_LABEL && device.DEVNAME && device.ID_FS_TYPE) {
+        var mountFolder = mountPoint + 'USB/' + device.ID_FS_LABEL;
+        if (fs.existsSync(mountFolder)) {
+            self.umountPartition({'label':device.ID_FS_LABEL,'devName':device.DEVNAME,'mountFolder':mountFolder})
+        }
+    }
+}
+
+ControllerNetworkfs.prototype.createMountFolder = function(mountFolder){
+    var self = this;
+
+    try {
+        execSync('/bin/mkdir -m 777 "' + mountFolder + '"', {uid:1000,gid:1000})
+    } catch (e) {
+        self.logger.error('Failed to create folder ' + e);
+    }
+}
+
+ControllerNetworkfs.prototype.deleteMountFolder = function (mountFolder){
+    var self = this;
+
+    try {
+        execSync('/bin/rm -rf "' + mountFolder + '"', {uid:1000,gid:1000})
+    } catch (e) {
+        self.logger.error('Failed to delete Folder ' + e );
+    }
+}
+
+ControllerNetworkfs.prototype.mountPartition = function(partitionData){
+    var self = this;
+
+	if (partitionData.fsType === 'vfat' || partitionData.fsType === 'ntfs') {
+    	var options = 'noatime,dmask=0000,fmask=0000';
+	} else {
+        var options = 'noatime';
+	}
+	var mountCMD = ' /usr/bin/sudo /bin/mount "' + partitionData.devName + '" "' + partitionData.mountFolder + '" -o ' + options;
+	try {
+        execSync(mountCMD, {uid:1000,gid:1000});
+        execSync('/usr/bin/mpc update', {uid:1000,gid:1000});
+        var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.CONNECTED');
+        self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
+    } catch (e) {
+        self.logger.error('Failed to mount ' + partitionData.label + ': ' + e );
+    }
+}
+
+ControllerNetworkfs.prototype.umountPartition = function(partitionData){
+    var self = this;
+    var umountCMD = '/usr/bin/sudo /bin/umount -f "' + partitionData.devName + '"';
+
+    try {
+        execSync(umountCMD, {uid:1000,gid:1000});
+        setTimeout(()=>{
+            self.deleteMountFolder(partitionData.mountFolder)
+        	execSync('/usr/bin/mpc update', {uid:1000,gid:1000});
+        	var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.DISCONNECTED');
+        	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
+		},2000)
+    } catch (e) {
+        self.logger.error('Failed to mount ' + partitionData.label + ': ' + e );
+    }
+}
