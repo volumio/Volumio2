@@ -440,8 +440,8 @@ PluginManager.prototype.getPluginCategories = function () {
 			categories.push(metadata.category);
 	}
 
-  // XXX Get categories from MyVolumioPluginManager
-	return categories;
+  let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
+  return categories.concat(myVolumioCategories);
 };
 
 PluginManager.prototype.getPluginNames = function (category) {
@@ -456,8 +456,8 @@ PluginManager.prototype.getPluginNames = function (category) {
 			names.push(metadata.name);
 	}
 
-  // XXX Get names from MyVolumioPluginManager
-	return names;
+  let myVolumioNames = self.myVolumioPluginManager.getPluginNames();
+  return names.concat(myVolumioNames);
 };
 
 /**
