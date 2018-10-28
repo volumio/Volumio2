@@ -173,7 +173,7 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
       defer.resolve();
     }
   } else {
-	 	self.logger.info('Plugin ' + name + ' is not enabled');
+    self.logger.info('Plugin ' + name + ' is not enabled');
     defer.resolve();
   }
 
@@ -226,11 +226,11 @@ PluginManager.prototype.loadCorePlugins = function () {
 
   /*
     each plugin's onVolumioStart() is launched by priority order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by boot-priority order, or else...)
-*/
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by boot-priority order, or else...)
+  */
   priority_array.forEach(function (plugin_array) {
     if (plugin_array != undefined) {
       plugin_array.forEach(function (folder) {
@@ -288,12 +288,12 @@ PluginManager.prototype.loadMyVolumioPlugins = function () {
   }
 
   /*
-        each plugin's onVolumioStart() is launched by priority order.
-        Note: there is no resolution strategy: each plugin completes
-        at it's own pace, and in whatever order.
-        Should completion order matter, a new promise strategy should be
-        implemented below (chain by boot-priority order, or else...)
-    */
+    each plugin's onVolumioStart() is launched by priority order.
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by boot-priority order, or else...)
+  */
   priority_array.forEach(function (plugin_array) {
     if (plugin_array != undefined) {
       plugin_array.forEach(function (folder) {
@@ -365,12 +365,12 @@ PluginManager.prototype.startMyVolumioPlugins = function () {
   var defer_startList = [];
 
   /*
-        each plugin's onStart() is launched following plugins.json order.
-        Note: there is no resolution strategy: each plugin completes
-        at it's own pace, and in whatever order.
-        Should completion order matter, a new promise strategy should be
-        implemented below (chain by start order, or else...)
-    */
+    each plugin's onStart() is launched following plugins.json order.
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by start order, or else...)
+  */
 
   self.myVolumioPlugins.forEach(function (value, key) {
     defer_startList.push(self.startMyVolumioPlugin(value.category, value.name));
@@ -454,7 +454,7 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 
   if (plugin) {
     if (plugin.onStart !== undefined) {
-		    var myPromise = plugin.onStart();
+      var myPromise = plugin.onStart();
       self.config.set(category + '.' + name + '.status', 'STARTED');
 
       if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
@@ -542,11 +542,11 @@ PluginManager.prototype.startCorePlugins = function () {
 
   /*
     each plugin's onStart() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
-*/
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by start order, or else...)
+  */
 
   self.corePlugins.forEach(function (value, key) {
     defer_startList.push(self.startCorePlugin(value.category, value.name));
@@ -563,11 +563,11 @@ PluginManager.prototype.stopPlugins = function () {
 
   /*
     each plugin's onStop() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
-*/
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by start order, or else...)
+  */
 
   self.corePlugins.forEach(function (value, key) {
     defer_stopList.push(self.stopPlugin(value.category, value.name));
@@ -668,12 +668,12 @@ PluginManager.prototype.onVolumioShutdown = function () {
   self.logger.info('___________ PLUGINS: Run Shutdown Tasks ___________');
 
   /*
-	each plugin's onVolumioShutdown() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
-*/
+    each plugin's onVolumioShutdown() is launched following plugins.json order.
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by start order, or else...)
+  */
 
   self.corePlugins.forEach(function (value, key) {
     if (self.isEnabled(value.category, value.name)) {
@@ -715,12 +715,12 @@ PluginManager.prototype.onVolumioReboot = function () {
   var defer_onRebootList = [];
   self.logger.info('___________ PLUGINS: Run onVolumioReboot Tasks ___________');
   /*
-	each plugin's onVolumioReboot() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
-*/
+    each plugin's onVolumioReboot() is launched following plugins.json order.
+    Note: there is no resolution strategy: each plugin completes
+    at it's own pace, and in whatever order.
+    Should completion order matter, a new promise strategy should be
+    implemented below (chain by start order, or else...)
+  */
 
   self.corePlugins.forEach(function (value, key) {
     if (self.isEnabled(value.category, value.name)) {
@@ -772,9 +772,9 @@ PluginManager.prototype.getPlugin = function (category, name) {
 PluginManager.prototype.getConfigurationFile = function (context, fileName) {
   var self = this;
   return S(self.configurationFolder).ensureRight('/').s +
-		S(context.getEnvVariable('category')).ensureRight('/').s +
-		S(context.getEnvVariable('name')).ensureRight('/').s +
-		fileName;
+    S(context.getEnvVariable('category')).ensureRight('/').s +
+    S(context.getEnvVariable('name')).ensureRight('/').s +
+    fileName;
 };
 
 PluginManager.prototype.checkRequiredConfigurationParameters = function (requiredFile, configFile) {
@@ -1787,7 +1787,7 @@ PluginManager.prototype.findPluginFolder = function (category, name) {
 
 PluginManager.prototype.getPrettyName = function (package_json) {
   if (package_json.volumio_info !== undefined &&
-		package_json.volumio_info.prettyName !== undefined) { return package_json.volumio_info.prettName; } else return package_json.name;
+    package_json.volumio_info.prettyName !== undefined) { return package_json.volumio_info.prettName; } else return package_json.name;
 };
 
 PluginManager.prototype.checkIndex = function () {
@@ -1849,14 +1849,14 @@ PluginManager.prototype.addMyMusicPlugin = function (pluginInfo) {
   try {
     self.logger.info('Adding plugin ' + pluginInfo.name + ' to MyMusic Plugins');
     var plugin = {
-        	'prettyName': pluginInfo.volumio_info.prettyName,
-        	'name': pluginInfo.name,
+      'prettyName': pluginInfo.volumio_info.prettyName,
+      'name': pluginInfo.name,
       'category': pluginInfo.volumio_info.plugin_type,
       'hasConfiguration': pluginInfo.volumio_info.has_configuration
     };
     self.myMusicPlugins.push(plugin);
   } catch (e) {
-    	self.logger.error('Cannot add ' + pluginInfo.name + ' to MyMusic Plugins, error: ' + e);
+    self.logger.error('Cannot add ' + pluginInfo.name + ' to MyMusic Plugins, error: ' + e);
   }
 };
 
@@ -1865,7 +1865,7 @@ PluginManager.prototype.getMyMusicPlugins = function () {
   var defer = libQ.defer();
 
   for (var i in self.myMusicPlugins) {
-    	var plugin = self.myMusicPlugins[i];
+    var plugin = self.myMusicPlugins[i];
     plugin.active = false;
     plugin.enabled = self.config.get(plugin.category + '.' + plugin.name + '.enabled');
     if (self.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
