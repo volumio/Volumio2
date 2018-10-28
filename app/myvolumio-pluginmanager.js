@@ -29,10 +29,11 @@ MyVolumioPluginManager.prototype.startPlugins = function () {
 };
 
 MyVolumioPluginManager.prototype.getPackageJson = function (folder) {
+  let self = this;
   try {
     return fs.readJsonSync(folder + '/package.json');
-  } catch (ex) {
-    // XXX Do something here
+  } catch (err) {
+    self.logger.error('Could not read package.json file: ' + err);
   }
 };
 
