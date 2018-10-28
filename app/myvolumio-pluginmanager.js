@@ -5,7 +5,7 @@ const path = require('path');
 const HashMap = require('hashmap');
 const libQ = require('kew');
 const libFast = require('fast.js');
-const vconf = require('v-conf');
+const Vconf = require('v-conf');
 
 module.exports = MyVolumioPluginManager;
 
@@ -16,7 +16,7 @@ function MyVolumioPluginManager (ccommand, server) {
   self.coreCommand = ccommand;
   self.logger = ccommand.logger;
 
-  self.configManager = new (require(path.join(__dirname + '/configManager.js')))(self.logger);
+  self.configManager = new (require(path.join(__dirname, '/configManager.js')))(self.logger);
 }
 
 MyVolumioPluginManager.prototype.startPlugins = function () {
@@ -62,7 +62,7 @@ MyVolumioPluginManager.prototype.initializeConfiguration = function (packageJson
 
 MyVolumioPluginManager.prototype.checkRequiredConfigurationParameters = function (requiredFile, configFile) {
   // loading config file
-  var configJson = new (vconf)();
+  var configJson = new (Vconf)();
   configJson.loadFile(configFile);
 
   // loading required configuration parameters
