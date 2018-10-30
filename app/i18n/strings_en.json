@@ -1,6 +1,6 @@
 {
   "PLAYBACK_OPTIONS":{
-    "PLAYBACK_OPTIONS_TITLE":"Playback options",
+    "PLAYBACK_OPTIONS_TITLE":"General Playback options",
     "AUDIO_OUTPUT":"Audio Output",
     "OUTPUT_DEVICE_DOC":"Select the Audio Output Device from the ones available in your system",
     "OUTPUT_DEVICE":"Output Device",
@@ -44,6 +44,7 @@
 	"MIXER_TYPE_DOC":"Select the Mixer Type: None = No volume control, Software = Volume control but loss of Audio Quality, Hardware = Best of both worlds, provides ability to change volume without loss of quality",
 	"ADVANCED_AUDIO_TWEAKS":"Advanced Audio Tweaks",
 	"AUDIO_RESAMPLING":"Audio Resampling",
+    "AUDIO_RESAMPLING_DOC":"This settings controls Audio Resampling options. For local file playback only (does not apply to Shairport and Third Party services like ROON",
 	"AUDIO_RESAMPLING_SETTINGS_SAVED":"Audio Resampling Settings saved",
 	"TARGET_BITDEPTH":"Target bit depth",
 	"TARGET_SAMPLERATE":"Target sample rate",

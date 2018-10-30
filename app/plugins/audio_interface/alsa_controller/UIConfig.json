@@ -253,6 +253,7 @@
         {
           "id": "mixer",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
@@ -267,6 +268,7 @@
         {
           "id": "volumestart",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME",
           "value":  {
@@ -325,6 +327,7 @@
         {
           "id": "volumemax",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL",
           "value":  {
@@ -378,6 +381,7 @@
         {
           "id": "volumesteps",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS",
           "value":  {
@@ -418,6 +422,7 @@
           "element": "select",
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE",
+          "hidden": true,
           "value":  {
             "value":"logarithmic",
             "label": "TRANSLATE.PLAYBACK_OPTIONS.NATURAL"
@@ -437,6 +442,7 @@
         {
           "id": "mpdvolume",
           "element": "switch",
+          "hidden": false,
           "doc":"TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME",
           "value":false
@@ -463,7 +469,7 @@
 		{
 		  "id": "resampling",
 		  "element": "switch",
-		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING_DOC",
 		  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
 		  "value": false
 		},

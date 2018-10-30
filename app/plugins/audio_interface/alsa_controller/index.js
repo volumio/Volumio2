@@ -181,10 +181,17 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
 			if (activemixer_type == 'None') {
 				var activemixer_type_lang = self.commandRouter.getI18nString('COMMON.NONE');
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[3].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[4].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[6].hidden', true);
 			} else if (activemixer_type == 'Software'){
 				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE');
 			} else if (activemixer_type == 'Hardware'){
 				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE');
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].hidden', false);
 			} else {
 				var activemixer_type_lang = activemixer_type;
 			}
@@ -362,7 +369,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				}
 			}
 
-			defer.resolve(uiconf);
+            var rConf = self.commandRouter.getUIConfigOnPlugin('music_service', 'raat', '');
+			rConf.then((conf)=>{
+				if (conf.sections.length) {
+                    uiconf.sections.splice(4, 0, conf.sections[0]);
+                    defer.resolve(uiconf);
+				} else {
+					defer.resolve(uiconf);
+				}
+			})
+			.fail(()=>{
+            	defer.resolve(uiconf);
+			})
 		})
 		.fail(function()
 		{
