@@ -362,7 +362,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				}
 			}
 
-			defer.resolve(uiconf);
+            var rConf = self.commandRouter.getUIConfigOnPlugin('music_service', 'raat', '');
+			rConf.then((conf)=>{
+				if (conf.sections.length) {
+                    uiconf.sections.splice(3, 0, conf.sections[0]);
+                    defer.resolve(uiconf);
+				} else {
+					defer.resolve(uiconf);
+				}
+			})
+			.fail(()=>{
+            	defer.resolve(uiconf);
+			})
 		})
 		.fail(function()
 		{

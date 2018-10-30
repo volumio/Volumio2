@@ -1,6 +1,6 @@
 {
   "PLAYBACK_OPTIONS":{
-    "PLAYBACK_OPTIONS_TITLE":"Opzioni di Riproduzione",
+    "PLAYBACK_OPTIONS_TITLE":"Opzioni di Riproduzione Generali",
     "AUDIO_OUTPUT":"Uscita Audio",
     "OUTPUT_DEVICE_DOC":"Periferica Audio",
     "OUTPUT_DEVICE":"Periferica Audio",
@@ -45,6 +45,7 @@
     "ADVANCED_AUDIO_TWEAKS":"Impostazioni avanzate dell'audio",
     "AUDIO_RESAMPLING":"Resampling Audio",
     "AUDIO_RESAMPLING_SETTINGS_SAVED":"Impostazioni del resampling salvate correttamente",
+    "AUDIO_RESAMPLING_DOC":"Controlla le impostazioni di resampling dell'audio. Valida solo per la riproduzione di files locali (non viene applicata a  Shairport e servizi di terze parti come ROON)",
     "TARGET_BITDEPTH":"Bit depth",
     "TARGET_SAMPLERATE":"Sample rate",
     "NATIVE":"Nativa",
