@@ -424,3 +424,12 @@ volumioAppearance.prototype.getConfigParam = function (key) {
     var self = this;
     return config.get(key);
 };
+
+volumioAppearance.prototype.updateMusicLibraryBrowseSourcesVisibility = function (data) {
+    var self = this;
+    self.commandRouter.updateMusicLibraryBrowseSourcesVisibility(data);
+};
+volumioAppearance.prototype.getBrowseSourcesVisibility = function () {
+    var self = this;
+    self.commandRouter.getBrowseSourcesVisibility(data);
+};

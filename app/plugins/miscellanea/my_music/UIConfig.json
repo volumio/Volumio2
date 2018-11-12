@@ -142,5 +142,75 @@
 				  "value": false
 			  }
 		  ]
+		},
+		{
+		  "id": "browse_sources_visibiilty",
+		  "element": "section",
+		  "label": "TRANSLATE.APPEARANCE.BROWSE_SOURCES_VISIBILITY",
+		  "icon": "fa-sliders",
+		  "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"updateMusicLibraryBrowseSourcesVisibility"},
+		  "saveButton": {
+			  "label": "TRANSLATE.COMMON.SAVE",
+			  "data": [
+				  "favourites",
+				  "playlists",
+				  "music-library",
+				  "artists://",
+				  "albums://",
+				  "genres://",
+				  "radio",
+				  "Last_100"
+			  ]
+		  },
+		  "content": [
+			  {
+				  "id": "favourites",
+				  "element": "switch",
+				  "label": "TRANSLATE.COMMON.FAVOURITES",
+				  "value": true
+			  },
+			  {
+				  "id": "playlists",
+				  "element": "switch",
+				  "value": true,
+				  "label": "TRANSLATE.COMMON.PLAYLISTS"
+			  },
+			  {
+				  "id": "music-library",
+				  "element": "switch",
+				  "label": "TRANSLATE.COMMON.MUSIC_LIBRARY",
+				  "value": true
+			  },
+			  {
+				  "id": "artists://",
+				  "element": "switch",
+				  "label": "TRANSLATE.COMMON.ARTISTS",
+				  "value": true
+			  },
+			  {
+				  "id": "albums://",
+				  "element": "switch",
+				  "label": "TRANSLATE.COMMON.ALBUMS",
+				  "value": true
+			  },
+			  {
+				  "id": "genres://",
+				  "element": "switch",
+				  "label": "TRANSLATE.COMMON.GENRES",
+				  "value": true
+			  },
+			  {
+				  "id": "radio",
+				  "element": "switch",
+				  "label": "TRANSLATE.WEBRADIO.WEBRADIO",
+				  "value": true
+			  },
+			  {
+				  "id": "Last_100",
+				  "element": "switch",
+				  "label": "TRANSLATE.COMMON.LAST_100",
+				  "value": true
+			  }
+		  ]
 	  }
 ]}

@@ -103,8 +103,13 @@ ControllerMyMusic.prototype.getUIConfig = function () {
                         insertInto++
 					}
 				}
-
-                defer.resolve(uiconf);
+ 
+                var browseSourcesVisibility = self.commandRouter.getBrowseSourcesVisibility();
+                uiconf.sections[5].content.forEach( function(element) {
+                    if (typeof browseSourcesVisibility[element.id] == 'boolean' )
+                        element.value = browseSourcesVisibility[element.id];
+                });  
+                  defer.resolve(uiconf);
             })
             .fail(function()
             {

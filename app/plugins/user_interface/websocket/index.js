@@ -352,7 +352,6 @@ function InterfaceWebUI(context) {
 
 				selfConnWebSocket.emit('pushBrowseSources', response);
 			});
-
 			connWebSocket.on('browseLibrary', function (data) {
 				var selfConnWebSocket = this;
 

@@ -106,7 +106,9 @@
     "UI_CONFIG_SELECT_LANGUAGE":"Escoge idioma",
     "NEW_LANGUAGE_SET":"Idioma cambiado.",
     "NEW_BACKGROUND_APPLIED":"Se ha cambiado el fondo.",
-    "BACKGROUND_DELETED":"Fondo eliminado."
+    "BACKGROUND_DELETED":"Fondo eliminado.",
+    "BROWSE_SOURCES_VISIBILITY":"Visibilidad de los soruces de hojear"
+
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Mi Música",

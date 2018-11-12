@@ -7,6 +7,33 @@ var fs=require('fs-extra');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
+
+CoreMusicLibrary.prototype.sources_json = '/data/configuration/music_service/browsesources.json';
+CoreMusicLibrary.prototype.builtin_browse_sources =  [
+	{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', 
+	name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:'',
+	visible:true,builtin:true},
+	{albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', 
+	name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd',
+	visible:true,builtin:true},
+	{albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', 
+	name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd',
+	visible:true,builtin:true},
+	{albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',
+	name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd',
+	visible:true,builtin:true},
+	{albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',
+	name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd',
+	visible:true,builtin:true},
+	{albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',
+	name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd',
+	visible:true,builtin:true}	,
+	{albumart: '/albumart?sourceicon=music_service/webradio/icon.png',
+	icon: "fa fa-microphone",
+	name: 'Web Radio', uri: 'radio',plugin_type:'music_service',plugin_name:'webradio',
+	visible:true,installed:true}
+    ];
+
 function CoreMusicLibrary (commandRouter) {
 	// This fixed variable will let us refer to 'this' object at deeper scopes
 	var self = this;
@@ -99,19 +126,11 @@ function CoreMusicLibrary (commandRouter) {
 		}
 	];
 
-	// The Browse Sources Array is the list showed on Browse Page
-	var sourcesJson = '/volumio/app/browsesources.json'
-    if (fs.existsSync(sourcesJson)) {
-        self.browseSources = fs.readJsonSync((sourcesJson),  'utf8', {throws: false});
-    } else {
-        self.browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
-            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
-            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
-            {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
-            {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
-            {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
-        ];
-    }
+	/*
+	// The Browse Sources Array is basis the list showed on Browse Page
+    */	
+    self.browseSources = self.ensureBrowseSourcesFile();
+
 
 
 	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
@@ -125,7 +144,91 @@ function CoreMusicLibrary (commandRouter) {
 	//	.fail(libFast.bind(self.pushError, self));
 }
 
+// return the browseSources that are configured visible and either builtin or installed plugins
+CoreMusicLibrary.prototype.visibileBrowseSources = function() {
+	var self=this;
+	return self.browseSources.filter(function(source) 
+	{
+		var visible = (source.visible == undefined || source.visible) &&
+		( source.builtin || source.installed );
+		return visible;
+	}
+	);
+}
+
+
 // Public methods -----------------------------------------------------------------------------------
+
+// handle  update of browse source visibility
+CoreMusicLibrary.prototype.updateBrowseSourcesVisibility=function(data){
+	var self = this;
+	var dirty = false;
+	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::updateBrowseSourcesVisibility '+JSON.stringify(data));
+	for (var i=0; i < self.browseSources.length; i++) {
+		var element = self.browseSources[i];
+		var visible = data[element.uri];
+		if ( typeof visible == "boolean" && element.eneabled != visible ){
+			element.visible = visible;
+			dirty = true;
+		}
+	}
+    if (dirty)
+		 self.writeBrowseSources();
+	var response = self.getBrowseSources();
+	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+}
+
+CoreMusicLibrary.prototype.getBrowseSourcesVisibility=function(data){
+	var self = this;
+	var response={};
+	self.browseSources.forEach(function(element) {
+		if ( element.visible == undefined )
+			response[element.uri] = true;
+		else
+            response[element.uri] = Boolean(element.visible);
+	});
+	return response;
+}
+
+// returns the music sources from file
+CoreMusicLibrary.prototype.readBrowseSources=function() {
+	var self = this;
+	var sources = fs.readJsonSync((CoreMusicLibrary.prototype.sources_json),  'utf8', {throws: false});
+	return sources;
+
+}
+
+// makes sure there's a usable browse source config file
+CoreMusicLibrary.prototype.ensureBrowseSourcesFile=function() {
+	var self = this;
+		var sources;
+		if (fs.existsSync(CoreMusicLibrary.prototype.sources_json)) {
+			try {
+			sources = self.readBrowseSources();
+			self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::ensureBrowseSourcesFile loaded from '+CoreMusicLibrary.prototype.sources_json);
+			return sources;
+			} catch (e) {
+				self.commandRouter.pushConsoleMessage('[' + Date.now() + '] '
+				+CoreMusicLibrary.prototype.sources_json+" not JSON: "+e);
+			}
+		} 
+		sources = CoreMusicLibrary.prototype.builtin_browse_sources;
+		self.writeBrowseSources();
+		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::ensureBrowseSourcesFile initialized to '+CoreMusicLibrary.prototype.sources_json);
+		return sources;
+}
+
+CoreMusicLibrary.prototype.writeBrowseSources=function() {
+	var self = this;
+	try {
+		fs.writeFileSync(CoreMusicLibrary.prototype.sources_json, JSON.stringify(self.browseSources, null, 2), 'utf8');
+		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] updated '+CoreMusicLibrary.prototype.sources_json);
+	} catch( e) {
+		self.commandRouter.pushConsoleMessage('[' + Date.now() + '] could not update '+
+		CoreMusicLibrary.prototype.sources_json+' '+e);
+	}
+}
+
 
 // Return a music library view for a given object UID
 CoreMusicLibrary.prototype.getListing = function(sUid, objOptions) {
@@ -214,9 +317,7 @@ CoreMusicLibrary.prototype.pushError = function(sReason) {
 
 CoreMusicLibrary.prototype.getBrowseSources = function() {
 	var self = this;
-
-
-	return self.browseSources;
+	return self.visibileBrowseSources();
 
 }
 
@@ -226,22 +327,35 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 	if(data.name!= undefined) {
 	    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
 
-        var replaced=false;
+		var replaced=false;
+		data.installed = true;
+		var dirty = false;
 
         //searching for existing browse source
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
-            if(source.name===data.name)
+            if(source.uri===data.uri)
             {
-                source.uri=data.uri;
-                source.plugin_type=data.plugin_type;
-                source.plugin_name=data.plugin_name;
+				if ( source.plugin_type != data.plugin_type) {
+				    dirty=true;
+					source.plugin_type=data.plugin_type;
+			    }
+				if ( source.plugin_name != data.plugin_name) {
+				    dirty = true;
+					source.plugin_name=data.plugin_name;
+			    }
+				if ( data.installed != true ) {
+					data.installed = true;
+					dirty = truel;
+				}
                 replaced=true;
             }
         }
-        if(replaced===false)
-            self.browseSources.push(data);
+        if(replaced===false) 
+			self.browseSources.push(data);
+		if ( dirty ) 
+		    self.writeBrowseSources();
 	}
 	var response = self.getBrowseSources();
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
@@ -249,7 +363,7 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
 
 CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
     var self = this;
-
+//TODO: hmm
     if(name!= undefined) {
         self.browseSources=self.browseSources.filter(function(x){
             if(x.name!==name)
@@ -263,22 +377,30 @@ CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
 CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
     var self = this;
 
+	var browseSourcesDirty = false;
     if(data.name!= undefined) {
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
             if(source.name==name)
             {
+                dirty = dirty || source.name != data.name;
                 source.name=data.name;
+                dirty = dirty || source.uri != data.uri;
                 source.uri=data.uri;
+                dirty = dirty || source.plugin_type != data.plugin_type;
                 source.plugin_type=data.plugin_type;
-                source.plugin_name=data.plugin_name;
+                dirty = dirty || source.plugin_name != data.plugin_name;
+				source.plugin_name=data.plugin_name;
                 if (data.albumart != undefined) {
+                    dirty = dirty || source.albumart != data.albumart;
                     source.albumart=data.albumart;
 				}
-            }
+           }
         }
-    }
+	}
+	if ( browseSourcesDirty )
+	    self.writeBrowseSources();
 	var response = self.getBrowseSources();
 
 	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
@@ -511,7 +633,7 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 
 		}
 	}
-	return this.commandRouter.broadcastMessage('pushBrowseSources', self.browseSources);
+	return this.commandRouter.broadcastMessage('pushBrowseSources', self.getBrowseSources());
 }
 
 CoreMusicLibrary.prototype.goto=function(data){
