@@ -1582,11 +1582,13 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     var self=this;
     var language_code=this.sharedVars.get('language_code');
 
+	this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+	
     try {
-	this.logger.info("Loading i18n strings for locale "+language_code);
+        this.logger.info("Loading i18n strings for locale "+language_code);
     	this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
     } catch(e){
-    	this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+        this.logger.error("Failed to load i18n strings for locale "+language_code);
     }
     
     var categories=this.pluginManager.getPluginCategories();
