@@ -72,7 +72,7 @@ function PluginManager (ccommand, server) {
 		}
 	}
 
-  self.myVolumioPluginManager = new (require(__dirname + '/myvolumio-pluginmanager'))(self.coreCommand, self.websocketServer);
+  self.myVolumioPluginManager = new (require(__dirname + '/myvolumio-pluginmanager'))(self.coreCommand, self.websocketServer, self.configManager);
 }
 
 PluginManager.prototype.startPlugins = function () {
