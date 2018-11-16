@@ -81,7 +81,7 @@ pull() {
 cd /
 echo "Stopping Volumio"
 sudo systemctl stop volumio.service
-sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $@
 
 echo "Pull completed, restarting Volumio"
 sudo systemctl start volumio.service
