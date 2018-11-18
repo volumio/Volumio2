@@ -9,29 +9,6 @@ var mountutil = require('linux-mountutils');
 var libUUID = require('node-uuid');
 var S = require('string');
 
-function properQuote(str) {
-    // returns str as a single-quoted string, safe for exposure to a shell.
-    var output = '';
-
-    var quotedquote = "'"  // turn on single quoting
-                    + '"'  // turn on double quoting
-                    + "'"  // so we can quote this single quote
-                    + '"'  // turn off double quoting
-                    + "'"; // turn off single quoting
-
-    var pieces = str.split("'");
-    var n = pieces.length;
-
-    for (var i=0; i<n; i++) {
-        output = output + pieces[i];
-        if (i < (n-1)) output = output + quotedquote;
-    }
-
-    output = "'" + output + "'";
-
-    return output;
-}
-
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
 
@@ -225,14 +202,14 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 		if (config.get(key + '.user') !== 'undefined' && config.get(key + '.user') !== '') {
 			var u = config.get(key + '.user');
 			var p = config.get(key + '.password');
-			u = properQuote(u);
-			p = properQuote(p);
+			u = self.properQuote(u);
+			p = self.properQuote(p);
 			credentials = 'username=' + u + ',' + 'password=' + p + ',';
 		} else {
 			credentials = 'guest,';
 		}
 		if (options) {
-			options = properQuote(options);
+			options = self.properQuote(options);
 			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,"+options;
 		} else {
 			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft";
@@ -241,7 +218,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
 	} else { // nfs
 		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
 		if (options) {
-			options = properQuote(options);
+			options = self.properQuote(options);
 			fsopts ="ro,soft,noauto,"+options;
 		} else {
 			fsopts ="ro,soft,noauto";
@@ -1022,3 +999,26 @@ ControllerNetworkfs.prototype.umountShare = function (data) {
 		}
     }
 };
+
+ControllerNetworkfs.prototype.properQuote = function (str) {
+    // returns str as a single-quoted string, safe for exposure to a shell.
+    var output = '';
+
+    var quotedquote = "'"  // turn on single quoting
+        + '"'  // turn on double quoting
+        + "'"  // so we can quote this single quote
+        + '"'  // turn off double quoting
+        + "'"; // turn off single quoting
+
+    var pieces = str.split("'");
+    var n = pieces.length;
+
+    for (var i=0; i<n; i++) {
+        output = output + pieces[i];
+        if (i < (n-1)) output = output + quotedquote;
+    }
+
+    output = "'" + output + "'";
+
+    return output;
+}
