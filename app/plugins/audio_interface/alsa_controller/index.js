@@ -10,6 +10,7 @@ var spawn = require('child_process').spawn;
 
 var ignoreUsbAudioDetach = false;
 var ignoreUsbAudioAttach = false;
+var volumioDeviceName = '';
 
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
@@ -170,6 +171,10 @@ ControllerAlsa.prototype.getUIConfig = function () {
 						label: i2soptions[i].label
 					});
 				}
+			}
+
+			if (volumioDeviceName === 'primo') {
+                uiconf.sections[0].content[1].hidden = true;
 			}
 
 			var mixers = self.getMixerControls(value);
@@ -827,13 +832,20 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                             	var currentCard = carddata.cards[n].devices[j];
                                 var subdevice = Number(currentCard.number);
                                 name = currentCard.prettyname;
-                                var deviceProc = '/proc/asound/card' + id + '/pcm' + (subdevice-1).toString() + 'p';
+                                if (volumioDeviceName === 'primo') {
+									if (name === 'Audio Jack Out') {
+                                        currentCard.ignore = true;
+									}
+								}
+                                var deviceProc = '/proc/asound/card' + id + '/pcm' + (subdevice).toString() + 'p';
                                 if (fs.existsSync(deviceProc)) {
                                 	if (!currentCard.ignore) {
                                         if (currentCard.default !== undefined && currentCard.default) {
                                             cards.unshift({id: id + ',' + subdevice, name: name});
+                                            name = undefined;
                                         } else {
                                             cards.push({id: id + ',' + subdevice, name: name});
+                                            name = undefined;
                                         }
                                     } else {
                                         name = undefined;
@@ -848,6 +860,11 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                         multi = false;
                     }
                 } if (!multi && name !== undefined){
+                    if (volumioDeviceName === 'primo') {
+                        if (name === 'ES90x8Q2M DAC') {
+                            name = 'Analog RCA Output';
+                        }
+                    }
                     cards.push({id: id, name: name});
                 }
 			}
@@ -863,6 +880,7 @@ ControllerAlsa.prototype.getAplayInfo = function () {
     var self = this;
     var defer = libQ.defer();
     var cards = [];
+    var namesArray = [];
     try {
         var aplaycmd = execSync('/usr/bin/aplay -l', {uid: 1000, gid: 1000, encoding: 'utf8'});
             var currentCard;
@@ -876,9 +894,13 @@ ControllerAlsa.prototype.getAplayInfo = function () {
                     if (num != currentCard) {
                         cards.push(card);
                     }
+                    namesArray.push(name);
                     currentCard = num;
                 }
             }
+            if (namesArray.includes('TinkerAudio OnBoard') && namesArray.includes('ES90x8Q2M DAC')){
+                volumioDeviceName = 'primo';
+			}
 	} catch (e) {
         console.log('Cannot get aplay -l output: '+e);
         return cards
