@@ -1,5 +1,6 @@
 'use strict';
 
+/* eslint no-unused-vars: "off" */ // Template workaround
 var libQ = require('kew');
 var fs = require('fs-extra');
 
@@ -48,11 +49,11 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('removeQueueItem', function (nIndex) {
-      return self.commandRouter.volumioRemoveQueueItem.call(self.commandRouter, nIndex);
+      return self.commandRouter.volumioRemoveQueueItem(self.commandRouter, nIndex);
     });
 
     connWebSocket.on('addQueueUids', function (arrayUids) {
-      return self.commandRouter.volumioAddQueueUids.call(self.commandRouter, arrayUids);
+      return self.commandRouter.volumioAddQueueUids(self.commandRouter, arrayUids);
     });
 
     connWebSocket.on('addToQueue', function (data) {
@@ -76,7 +77,7 @@ function InterfaceWebUI (context) {
     connWebSocket.on('replaceAndPlayCue', function (data) {
       var timeStart = Date.now();
 
-      if (data.service == undefined || data.service == 'mpd') {
+      if (data.service === undefined || data.service === 'mpd') {
         var uri = data.uri;
         var arr = uri.split('/');
         arr.shift();
@@ -105,7 +106,7 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('addPlayCue', function (data) {
-      if (data.service == undefined || data.service == 'mpd') {
+      if (data.service === undefined || data.service === 'mpd') {
         var uri = data.uri;
         var arr = uri.split('/');
         arr.shift();
@@ -144,11 +145,11 @@ function InterfaceWebUI (context) {
       var timeStart = Date.now();
       self.logStart('Client requests get library listing')
         .then(function () {
-          return self.commandRouter.volumioGetLibraryListing.call(self.commandRouter, objParams.uid, objParams.options);
+          return self.commandRouter.volumioGetLibraryListing(self.commandRouter, objParams.uid, objParams.options);
         })
         .then(function (objBrowseData) {
           if (objBrowseData) {
-            return self.pushLibraryListing.call(self, objBrowseData, selfConnWebSocket);
+            return self.pushLibraryListing(self, objBrowseData, selfConnWebSocket);
           }
         })
         .fail(self.pushError.bind(self))
@@ -163,11 +164,11 @@ function InterfaceWebUI (context) {
       var timeStart = Date.now();
       self.logStart('Client requests get library index')
         .then(function () {
-          return self.commandRouter.volumioGetLibraryFilters.call(self.commandRouter, sUid);
+          return self.commandRouter.volumioGetLibraryFilters(self.commandRouter, sUid);
         })
         .then(function (objBrowseData) {
           if (objBrowseData) {
-            return self.pushLibraryFilters.call(self, objBrowseData, selfConnWebSocket);
+            return self.pushLibraryFilters(self, objBrowseData, selfConnWebSocket);
           }
         })
         .fail(self.pushError.bind(self))
@@ -182,11 +183,11 @@ function InterfaceWebUI (context) {
       var timeStart = Date.now();
       self.logStart('Client requests get playlist index')
         .then(function () {
-          return self.commandRouter.volumioGetPlaylistIndex.call(self.commandRouter, sUid);
+          return self.commandRouter.volumioGetPlaylistIndex(self.commandRouter, sUid);
         })
         .then(function (objBrowseData) {
           if (objBrowseData) {
-            return self.pushPlaylistIndex.call(self, objBrowseData, selfConnWebSocket);
+            return self.pushPlaylistIndex(self, objBrowseData, selfConnWebSocket);
           }
         })
         .fail(self.pushError.bind(self))
@@ -196,20 +197,20 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('play', function (N) {
-      if (N == null) {
+      if (N === null) {
         return self.commandRouter.volumioPlay();
-      } else if (N.value != undefined) {
+      } else if (N.value !== undefined) {
         return self.commandRouter.volumioPlay(N.value);
       }
     });
 
-        	connWebSocket.on('volatilePlay', function (N) {
-            	if (N == null) {
-                	return self.commandRouter.volumioVolatilePlay();
-            	} else if (N.value != undefined) {
-                	return self.commandRouter.volumioVolatilePlay(N.value);
-            	}
-        	});
+    connWebSocket.on('volatilePlay', function (N) {
+      if (N === null) {
+        return self.commandRouter.volumioVolatilePlay();
+      } else if (N.value !== undefined) {
+        return self.commandRouter.volumioVolatilePlay(N.value);
+      }
+    });
 
     connWebSocket.on('pause', function () {
       return self.commandRouter.volumioPause();
@@ -280,14 +281,12 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('callMethod', function (dataJson) {
-      var promise;
-
       var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
       var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
 
       self.logger.info('CALLMETHOD: ' + category + ' ' + name + ' ' + dataJson.method + ' ' + dataJson.data);
       var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
-      if (promise != undefined) {
+      if (promise !== undefined) {
         connWebSocket.emit(promise.message, promise.payload);
       } else {
       }
@@ -299,12 +298,12 @@ function InterfaceWebUI (context) {
       var splitted = data.page.split('/');
       var response;
 
-      if (splitted.length == 2) {
+      if (splitted.length === 2) {
         response = self.commandRouter.getUIConfigOnPlugin(splitted[0], splitted[1], {});
         response.then(function (config) {
           selfConnWebSocket.emit('pushUiConfig', config);
         });
-      } else if (splitted.length == 3) {
+      } else if (splitted.length === 3) {
         selfConnWebSocket.emit('pushUiConfig', {'page': {'label': ''}, 'sections': [{'coreSection': splitted[2]}]});
       } else {
         response = self.commandRouter.getUIConfigOnPlugin('system_controller', splitted[0], {});
@@ -338,7 +337,7 @@ function InterfaceWebUI (context) {
 
       response = self.musicLibrary.executeBrowseSource(curUri);
 
-      if (response != undefined) {
+      if (response !== undefined) {
         response.then(function (result) {
           selfConnWebSocket.emit('pushBrowseLibrary', result);
         })
@@ -368,7 +367,7 @@ function InterfaceWebUI (context) {
 
       var response = self.commandRouter.loadBackup(data);
 
-      if (response != undefined) {
+      if (response !== undefined) {
         response.then(function (result) {
           selfConnWebSocket.emit('pushBackup', result);
         })
@@ -418,7 +417,7 @@ function InterfaceWebUI (context) {
 
       response = self.commandRouter.executeOnPlugin('music_service', 'webradio', 'addMyWebRadio', data);
 
-      if (response != undefined) {
+      if (response !== undefined) {
         response.then(function (result) {
           selfConnWebSocket.emit('pushAddWebRadio', result);
         })
@@ -435,11 +434,11 @@ function InterfaceWebUI (context) {
 
       response = self.commandRouter.executeOnPlugin('music_service', 'webradio', 'removeMyWebRadio', data);
 
-      if (response != undefined) {
+      if (response !== undefined) {
         response.then(function (result) {
           var response2 = self.musicLibrary.executeBrowseSource('radio/myWebRadio');
 
-          if (response2 != undefined) {
+          if (response2 !== undefined) {
             response2.then(function (result2) {
               selfConnWebSocket.emit('pushBrowseLibrary', result2);
             })
@@ -473,7 +472,7 @@ function InterfaceWebUI (context) {
         selfConnWebSocket.emit('pushListPlaylist', data);
         var response = self.musicLibrary.executeBrowseSource('playlists');
 
-        if (response != undefined) {
+        if (response !== undefined) {
           response.then(function (result) {
             selfConnWebSocket.emit('pushBrowseLibrary', result);
           })
@@ -494,7 +493,7 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('addToPlaylist', function (data) {
-			    var selfConnWebSocket = this;
+      var selfConnWebSocket = this;
 
       var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
       returnedData.then(function (data) {
@@ -513,7 +512,7 @@ function InterfaceWebUI (context) {
       var returnedData = self.commandRouter.playListManager.removeFromPlaylist(data.name, 'mpd', data.uri);
       returnedData.then(function (name) {
         var response = self.musicLibrary.executeBrowseSource('playlists/' + playlistname);
-        if (response != undefined) {
+        if (response !== undefined) {
           response.then(function (result) {
             selfConnWebSocket.emit('pushBrowseLibrary', result);
           })
@@ -560,8 +559,8 @@ function InterfaceWebUI (context) {
       var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, data.service, data.uri);
       returnedData.then(function () {
         if (data.service === 'shoutcast') {
-          response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'listRadioFavourites');
-          if (response != undefined) {
+          var response = self.commandRouter.executeOnPlugin('music_service', 'shoutcast', 'listRadioFavourites');
+          if (response !== undefined) {
             response.then(function (result) {
               selfConnWebSocket.emit('pushBrowseLibrary', result);
             })
@@ -572,8 +571,8 @@ function InterfaceWebUI (context) {
         } else if (data.service === 'streaming_services') {
           setTimeout(() => {
             var uri = data.uri.substring(0, data.uri.lastIndexOf('/'));
-                        	response = response = self.musicLibrary.executeBrowseSource(uri);
-            if (response != undefined) {
+            response = response = self.musicLibrary.executeBrowseSource(uri);
+            if (response !== undefined) {
               response.then(function (result) {
                 selfConnWebSocket.emit('pushBrowseLibrary', result);
               })
@@ -583,8 +582,8 @@ function InterfaceWebUI (context) {
             }
           }, 600);
         } else {
-          var response = self.commandRouter.playListManager.listFavourites();
-          if (response != undefined) {
+          response = self.commandRouter.playListManager.listFavourites();
+          if (response !== undefined) {
             response.then(function (result) {
               selfConnWebSocket.emit('pushBrowseLibrary', result);
             })
@@ -676,9 +675,9 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'getMultiroom', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
-          if (data != undefined) {
+          if (data !== undefined) {
             selfConnWebSocket.emit('pushMultiroom', data);
           }
         });
@@ -735,7 +734,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessNetworks', '');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushWirelessNetworks', data);
         });
@@ -745,12 +744,12 @@ function InterfaceWebUI (context) {
     connWebSocket.on('saveWirelessNetworkSettings', function (data) {
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', data);
 
-      /* if (returnedData != undefined) {
-				 returnedData.then(function (data) {
-				 selfConnWebSocket.emit('pushSaveWirelessNetworkSettings', data);
-				 });
-				 }
-				 else console.log("Error on returning wireless networks"); */
+      /* if (returnedData !== undefined) {
+         returnedData.then(function (data) {
+         selfConnWebSocket.emit('pushSaveWirelessNetworkSettings', data);
+         });
+         }
+         else console.log("Error on returning wireless networks"); */
     });
 
     connWebSocket.on('getInfoNetwork', function () {
@@ -786,7 +785,7 @@ function InterfaceWebUI (context) {
           updateMessage.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
         }
       } catch (e) {
-                	self.logger.error('Cannot translate update title: ' + e);
+        self.logger.error('Cannot translate update title: ' + e);
       }
 
       self.commandRouter.broadcastMessage('updateReady', updateMessage);
@@ -795,13 +794,13 @@ function InterfaceWebUI (context) {
     connWebSocket.on('update', function (data) {
       var selfConnWebSocket = this;
       self.logger.info('Update: ' + data);
-      var checking = { 'downloadSpeed': '', 'eta': '5m', 'progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.CHECKING_SYSTEM_INTEGRITY')};
+      var checking = {'downloadSpeed': '', 'eta': '5m', 'progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.CHECKING_SYSTEM_INTEGRITY')};
       selfConnWebSocket.emit('updateProgress', checking);
       var integrityCheck = self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'checkSystemIntegrity');
       integrityCheck.then((integrity) => {
-        if ((data.ignoreIntegrityCheck !== undefined && data.ignoreIntegrityCheck) || (integrity && integrity.isSystemOk != undefined && integrity.isSystemOk)) {
+        if ((data.ignoreIntegrityCheck !== undefined && data.ignoreIntegrityCheck) || (integrity && integrity.isSystemOk !== undefined && integrity.isSystemOk)) {
           self.commandRouter.broadcastMessage('ClientUpdate', {value: 'now'});
-          var started = { 'downloadSpeed': '', 'eta': '5m', 'progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.STARTING_SOFTWARE_UPDATE')};
+          var started = {'downloadSpeed': '', 'eta': '5m', 'progress': 1, 'status': self.commandRouter.getI18nString('SYSTEM.STARTING_SOFTWARE_UPDATE')};
           selfConnWebSocket.emit('updateProgress', started);
           self.commandRouter.executeOnPlugin('system_controller', 'updater_comm', 'notifyProgress', '');
         } else {
@@ -842,9 +841,9 @@ function InterfaceWebUI (context) {
       self.logger.info('Received Get System Version');
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
-          if (data != undefined) {
+          if (data !== undefined) {
             selfConnWebSocket.emit('pushSystemVersion', data);
           }
         });
@@ -852,14 +851,14 @@ function InterfaceWebUI (context) {
     });
 
     /**
-			 * Executes the getMyCollectionStats method on the MPD plugin
-			 */
+    * Executes the getMyCollectionStats method on the MPD plugin
+    */
     connWebSocket.on('getMyCollectionStats', function (data) {
       var selfConnWebSocket = this;
 
       var returnedData = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getMyCollectionStats', '');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushMyCollectionStats', data);
         });
@@ -867,8 +866,8 @@ function InterfaceWebUI (context) {
     });
 
     /**
-			 * Executes the rescanDb method on the MPD plugin. No response is foreseen
-			 */
+    * Executes the rescanDb method on the MPD plugin. No response is foreseen
+    */
     connWebSocket.on('rescanDb', function (data) {
       self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
     });
@@ -878,19 +877,19 @@ function InterfaceWebUI (context) {
     });
 
     /**
-			 * New share APIs
-			 */
+    * New share APIs
+    */
     connWebSocket.on('addShare', function (data) {
       var selfConnWebSocket = this;
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'addShare', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (datas) {
           selfConnWebSocket.emit(datas.emit, datas.data);
           setTimeout(function () {
             var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
-            if (listdata != undefined) {
+            if (listdata !== undefined) {
               listdata.then(function (datalist) {
                 selfConnWebSocket.emit('pushListShares', datalist);
               });
@@ -905,12 +904,12 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'deleteShare', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (datas) {
           selfConnWebSocket.emit(datas.emit, datas.data);
           setTimeout(function () {
             var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
-            if (listdata != undefined) {
+            if (listdata !== undefined) {
               listdata.then(function (datalist) {
                 selfConnWebSocket.emit('pushListShares', datalist);
               });
@@ -925,7 +924,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushListShares', data);
         });
@@ -937,7 +936,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'infoShare', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushInfoShare', data);
         });
@@ -949,12 +948,12 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'editShare', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (datas) {
           selfConnWebSocket.emit(datas.emit, datas.data);
           setTimeout(function () {
             var listdata = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listShares', '');
-            if (listdata != undefined) {
+            if (listdata !== undefined) {
               listdata.then(function (datalist) {
                 selfConnWebSocket.emit('pushListShares', datalist);
               });
@@ -969,7 +968,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'listUsbDrives', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushListUsbDrives', data);
         });
@@ -989,17 +988,17 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.installPlugin(data.url);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushInstallPlugin', data);
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               self.broadcastMessage('pushInstalledPlugins', installedPLugins);
             });
           }
           var available = self.commandRouter.getAvailablePlugins();
-          if (available != undefined) {
+          if (available !== undefined) {
             available.then(function (AvailablePlugins) {
               selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
             });
@@ -1013,18 +1012,18 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.updatePlugin(data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushInstallPlugin', data);
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               self.logger.info(JSON.stringify(installedPLugins));
               selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
             });
           }
           var available = self.commandRouter.getAvailablePlugins();
-          if (available != undefined) {
+          if (available !== undefined) {
             available.then(function (AvailablePlugins) {
               selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
             });
@@ -1038,18 +1037,18 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.unInstallPlugin(data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushUnInstallPlugin', data);
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               self.logger.info(JSON.stringify(installedPLugins));
               selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
             });
           }
           var available = self.commandRouter.getAvailablePlugins();
-          if (available != undefined) {
+          if (available !== undefined) {
             available.then(function (AvailablePlugins) {
               selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
             });
@@ -1063,11 +1062,11 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.enablePlugin(data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushEnablePlugin', data);
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               self.logger.info(JSON.stringify(installedPLugins));
               selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
@@ -1082,11 +1081,11 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.disablePlugin(data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushDisablePlugin', data);
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               self.logger.info(JSON.stringify(installedPLugins));
               selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
@@ -1101,11 +1100,11 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.modifyPluginStatus(data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushModifyPluginStatus', data);
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               self.logger.info(JSON.stringify(installedPLugins));
               selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
@@ -1120,7 +1119,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.getInstalledPlugins();
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (installedPLugins) {
           self.logger.info(JSON.stringify(installedPLugins));
           selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
@@ -1133,7 +1132,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.getAvailablePlugins();
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (AvailablePlugins) {
           selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
         });
@@ -1145,7 +1144,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.getPluginDetails(data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (Details) {
           selfConnWebSocket.emit('openModal', Details);
         });
@@ -1154,30 +1153,30 @@ function InterfaceWebUI (context) {
 
     connWebSocket.on('pluginManager', function (data) {
       var selfConnWebSocket = this;
-
+      var returnedData;
       if (data.action === 'getUiConfig') {
         return self.commandRouter.executeOnPlugin(data.category, data.name, 'getUiConfig');
       } else if (data.action === 'setUiConfig') {
         return self.commandRouter.executeOnPlugin(data.category, data.name, 'setUiConfig', data);
       } else if (data.action === 'enable') {
-        var returnedData = self.commandRouter.enableAndStartPlugin(data.category, data.name);
+        returnedData = self.commandRouter.enableAndStartPlugin(data.category, data.name);
 
         returnedData.then(function (data) {
           var installed = self.commandRouter.getInstalledPlugins();
-          if (installed != undefined) {
+          if (installed !== undefined) {
             installed.then(function (installedPLugins) {
               selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
             });
           }
         });
       } else if (data.action === 'disable') {
-        var returnedData = self.commandRouter.disableAndStopPlugin(data.category, data.name);
+        returnedData = self.commandRouter.disableAndStopPlugin(data.category, data.name);
 
-        if (returnedData != undefined) {
+        if (returnedData !== undefined) {
           returnedData.then(function (data) {
             selfConnWebSocket.emit('pushDisablePlugin', data);
             var installed = self.commandRouter.getInstalledPlugins();
-            if (installed != undefined) {
+            if (installed !== undefined) {
               installed.then(function (installedPLugins) {
                 selfConnWebSocket.emit('pushInstalledPlugins', installedPLugins);
               });
@@ -1198,10 +1197,10 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.volumioSaveQueueToPlaylist(data.name);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushSaveQueueToPlaylist', data);
-		    });
+        });
       } else self.logger.error('Error on saving queue to playlist');
     });
 
@@ -1210,7 +1209,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.volumioConsume(data.value);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushSetConsume', data);
         });
@@ -1222,7 +1221,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.volumioMoveQueue(data.from, data.to);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushQueue', data);
         });
@@ -1234,7 +1233,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushUiSettings', data);
         });
@@ -1246,7 +1245,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushBackgrounds', data);
         });
@@ -1258,14 +1257,14 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'setBackgrounds', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         var backgrounds = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
-        if (backgrounds != undefined) {
+        if (backgrounds !== undefined) {
           backgrounds.then(function (backgroundsdata) {
             selfConnWebSocket.emit('pushBackgrounds', backgroundsdata);
             var returnedData2 = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
 
-            if (returnedData2 != undefined) {
+            if (returnedData2 !== undefined) {
               returnedData2.then(function (data2) {
                 selfConnWebSocket.emit('pushUiSettings', data2);
               });
@@ -1280,7 +1279,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'deleteBackgrounds', data);
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (backgroundsdata) {
           selfConnWebSocket.emit('pushBackgrounds', backgroundsdata);
         });
@@ -1292,9 +1291,9 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'generateThumbnails', '');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         var backgrounds = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getBackgrounds', '');
-        if (backgrounds != undefined) {
+        if (backgrounds !== undefined) {
           backgrounds.then(function (backgroundsdata) {
             setTimeout(function () {
               self.libSocketIO.sockets.emit('pushBackgrounds', backgroundsdata);
@@ -1309,7 +1308,7 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'discoverShares', '');
 
-      if (returnedData != undefined) {
+      if (returnedData !== undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushNetworkSharesDiscovery', data);
         });
@@ -1347,7 +1346,7 @@ function InterfaceWebUI (context) {
 
       var wizardConfig = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'getWizardConfig', data);
 
-      if (wizardConfig != undefined) {
+      if (wizardConfig !== undefined) {
         wizardConfig.then(function (data) {
           selfConnWebSocket.emit('pushUiConfig', data);
         });
@@ -1360,7 +1359,7 @@ function InterfaceWebUI (context) {
       // var languages =  {'defaultLanguage':{'language': 'English', 'code': 'en'}, 'available':[{'language': 'English', 'code': 'en'},{'language': 'Italiano', 'code': 'it'}]};
       var languages = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getAvailableLanguages', '');
 
-      if (languages != undefined) {
+      if (languages !== undefined) {
         languages.then(function (data) {
           selfConnWebSocket.emit('pushAvailableLanguages', data);
         });
@@ -1372,7 +1371,7 @@ function InterfaceWebUI (context) {
       var disallowReload = false;
       var value = data.defaultLanguage.code;
       var label = data.defaultLanguage.language;
-      if (data.disallowReload != undefined) {
+      if (data.disallowReload !== undefined) {
         disallowReload = data.disallowReload;
       }
       var languagedata = {'language': {'value': value, 'label': label}, 'disallowReload': disallowReload};
@@ -1399,7 +1398,7 @@ function InterfaceWebUI (context) {
 
       var audiolist = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAudioDevices', '');
 
-      if (audiolist != undefined) {
+      if (audiolist !== undefined) {
         audiolist.then(function (data) {
           selfConnWebSocket.emit('pushOutputDevices', data);
         });
@@ -1429,7 +1428,7 @@ function InterfaceWebUI (context) {
 
       var check = self.commandRouter.executeOnPlugin('system_controller', 'system', 'checkPassword', data);
 
-      if (check != undefined) {
+      if (check !== undefined) {
         check.then(function (data) {
           selfConnWebSocket.emit('checkPassword', data);
         });
@@ -1441,7 +1440,7 @@ function InterfaceWebUI (context) {
 
       var connectWifiWizard = self.commandRouter.executeOnPlugin('miscellanea', 'wizard', 'connectWirelessNetwork', data);
 
-      if (connectWifiWizard != undefined) {
+      if (connectWifiWizard !== undefined) {
         connectWifiWizard.then(function (data) {
           selfConnWebSocket.emit('pushWizardWirelessConnResults', data);
         });
@@ -1453,7 +1452,7 @@ function InterfaceWebUI (context) {
 
       var remove = self.commandRouter.safeRemoveDrive(data);
 
-      if (remove != undefined) {
+      if (remove !== undefined) {
         remove.then(function (result) {
           selfConnWebSocket.emit('pushBrowseLibrary', result);
         })
@@ -1467,7 +1466,7 @@ function InterfaceWebUI (context) {
 
       var installDisk = self.commandRouter.executeOnPlugin('system_controller', 'system', 'installToDisk', data);
 
-      if (installDisk != undefined) {
+      if (installDisk !== undefined) {
         installDisk.then(function (result) {
           selfConnWebSocket.emit('pushInstallToDisk', result);
         })
@@ -1481,7 +1480,7 @@ function InterfaceWebUI (context) {
 
       var remove = self.commandRouter.getMyVolumioStatus();
 
-      if (remove != undefined) {
+      if (remove !== undefined) {
         remove.then(function (result) {
           selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
@@ -1495,7 +1494,7 @@ function InterfaceWebUI (context) {
 
       var remove = self.commandRouter.getMyVolumioToken(data);
 
-      if (remove != undefined) {
+      if (remove !== undefined) {
         remove.then(function (result) {
           selfConnWebSocket.emit('pushMyVolumioToken', result);
         })
@@ -1509,7 +1508,7 @@ function InterfaceWebUI (context) {
 
       var token = self.commandRouter.setMyVolumioToken(data);
 
-      if (token != undefined) {
+      if (token !== undefined) {
         token.then(function (result) {
           self.commandRouter.broadcastMessage('pushMyVolumioToken', {'token': result});
         })
@@ -1531,7 +1530,7 @@ function InterfaceWebUI (context) {
 
       var enable = self.commandRouter.enableMyVolumioDevice(device);
 
-      if (enable != undefined) {
+      if (enable !== undefined) {
         enable.then(function (result) {
           // selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
@@ -1545,7 +1544,7 @@ function InterfaceWebUI (context) {
 
       var disable = self.commandRouter.disableMyVolumioDevice(device);
 
-      if (disable != undefined) {
+      if (disable !== undefined) {
         disable.then(function (result) {
           // selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
@@ -1559,7 +1558,7 @@ function InterfaceWebUI (context) {
 
       var deleteDevice = self.commandRouter.deleteMyVolumioDevice(device);
 
-      if (deleteDevice != undefined) {
+      if (deleteDevice !== undefined) {
         deleteDevice.then(function (result) {
           // selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
@@ -1568,17 +1567,17 @@ function InterfaceWebUI (context) {
       }
     });
 
-        	connWebSocket.on('getMyMusicPlugins', function () {
-            	var selfConnWebSocket = this;
+    connWebSocket.on('getMyMusicPlugins', function () {
+      var selfConnWebSocket = this;
 
-            	var myMusicPlugins = self.commandRouter.getMyMusicPlugins();
-      if (myMusicPlugins != undefined) {
+      var myMusicPlugins = self.commandRouter.getMyMusicPlugins();
+      if (myMusicPlugins !== undefined) {
         myMusicPlugins.then(function (plugins) {
-              	      selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
-            	    })
+          selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
+        })
           .fail(function () {
           });
-           	 	}
+      }
     });
 
     connWebSocket.on('enableDisableMyMusicPlugin', function (data) {
@@ -1589,7 +1588,7 @@ function InterfaceWebUI (context) {
         selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
         var title = self.commandRouter.getI18nString('COMMON.DISABLED');
         if (data.enabled) {
-                	title = self.commandRouter.getI18nString('COMMON.ENABLED');
+          title = self.commandRouter.getI18nString('COMMON.ENABLED');
         }
         selfConnWebSocket.emit('pushToastMessage', {
           type: 'success',
@@ -1690,7 +1689,7 @@ InterfaceWebUI.prototype.pushMultiroom = function (selfConnWebSocket) {
   var volumiodiscovery = self.commandRouter.pluginManager.getPlugin('system_controller', 'volumiodiscovery');
   if (volumiodiscovery) {
     var response = volumiodiscovery.getDevices();
-    if (response != undefined) {
+    if (response !== undefined) {
       selfConnWebSocket.emit('pushMultiRoomDevices', response);
     }
   }
@@ -1751,9 +1750,9 @@ InterfaceWebUI.prototype.logStart = function (sCommand) {
 // Pass the error if we don't want to handle it
 InterfaceWebUI.prototype.pushError = function (error) {
   if ((typeof error) === 'string') {
-    return this.commandRouter.pushConsoleMessage.call(this.commandRouter, 'Error: ' + error);
+    return this.commandRouter.pushConsoleMessage(this.commandRouter, 'Error: ' + error);
   } else if ((typeof error) === 'object') {
-    return this.commandRouter.pushConsoleMessage.call(this.commandRouter, 'Error:\n' + error.stack);
+    return this.commandRouter.pushConsoleMessage(this.commandRouter, 'Error:\n' + error.stack);
   }
   // Return a resolved empty promise to represent completion
   return libQ.resolve();
