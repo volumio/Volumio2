@@ -372,7 +372,7 @@ function InterfaceWebUI (context) {
           selfConnWebSocket.emit('pushBackup', result);
         })
           .fail(function () {
-            self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not retrieve backup');
+            self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), 'Could not retrieve backup');
           });
       }
     });
@@ -383,7 +383,7 @@ function InterfaceWebUI (context) {
       var response = self.commandRouter.restorePluginsConf()
         .then(self.commandRouter.restorePluginsConf())
         .fail(function () {
-          self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not restore configuration');
+          self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), 'Could not restore configuration');
         });
     });
 
