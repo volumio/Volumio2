@@ -602,7 +602,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('removeFromFavourites', function (data) {
 				var selfConnWebSocket = this;
-				
+
 				var returnedData = self.commandRouter.playListManager.removeFromFavourites(data.name, data.service, data.uri);
 				returnedData.then(function () {
 					if (data.service === 'shoutcast') {
@@ -935,7 +935,7 @@ function InterfaceWebUI(context) {
 						}
 					});
 				}
-				else console.log("Plugin multiroom or method getMultiroom not found");
+				else console.log("Plugin system or method getSystemVersion not found");
 
 
 			});
@@ -1936,6 +1936,3 @@ InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
 		this.libSocketIO.sockets.emit(emit,payload);
 	}
 };
-
-
-
