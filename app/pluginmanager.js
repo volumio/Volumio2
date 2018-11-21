@@ -1772,6 +1772,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 					if(myplugins[c].prettyName === availableName) {
                         thisPlugin.installed = true;
                         thisPlugin.category = myplugins[c].category;
+                        thisPlugin.version = myplugins[c].version;
 						var v = compareVersions(availableVersion, myplugins[c].version);
 						if (v === 1) {
                             thisPlugin.updateAvailable = true
