@@ -1052,6 +1052,9 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		self.setConfigParam({key: 'mixer', value: defaultmixer});
 		this.updateVolumeSettings();
 	}
+	setTimeout(()=>{
+        self.commandRouter.retrieveVolumeLevels();
+	}, 2500)
 
 }
 
