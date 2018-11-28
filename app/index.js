@@ -155,7 +155,7 @@ CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
 };
 
 // Volumio Retrieve Volume
-CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
+CoreCommandRouter.prototype.volumioretrievevolume = function () {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRetrievevolume');
 	return this.volumeControl.retrievevolume();
 };

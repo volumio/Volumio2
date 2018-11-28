@@ -411,12 +411,14 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 
 CoreVolumeController.prototype.retrievevolume = function () {
 	var self = this;
+	var defer = libQ.defer();
 	if (mixertype === 'None') {
         Volume.vol = 100;
         Volume.mute = false;
         Volume.disableVolumeControl = true;
         return libQ.resolve(Volume)
             .then(function (Volume) {
+                defer.resolve(Volume);
                 self.commandRouter.volumioupdatevolume(Volume);
             });
 	} else if (mixertype === 'Software') {
@@ -436,6 +438,7 @@ CoreVolumeController.prototype.retrievevolume = function () {
                 Volume.disableVolumeControl = false;
                 return libQ.resolve(Volume)
                     .then(function (Volume) {
+                        defer.resolve(Volume);
                         self.commandRouter.volumioupdatevolume(Volume);
                     });
             }
@@ -444,7 +447,7 @@ CoreVolumeController.prototype.retrievevolume = function () {
             this.getVolume(function (err, vol) {
                 self.getMuted(function (err, mute) {
                     if (err) {
-                        currentmute = false;
+                        mute = false;
                     }
                     //Log volume control
                     self.logger.info('VolumeController:: Volume=' + vol + ' Mute =' + mute);
@@ -459,9 +462,11 @@ CoreVolumeController.prototype.retrievevolume = function () {
                     Volume.disableVolumeControl = false;
                     return libQ.resolve(Volume)
                         .then(function (Volume) {
+                            defer.resolve(Volume);
                             self.commandRouter.volumioupdatevolume(Volume);
                         });
                 });
             });
         }
+    return defer.promise
 };

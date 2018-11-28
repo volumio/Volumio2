@@ -360,7 +360,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentVolume = null;
 			self.currentMute = null;
 			self.currentUpdate = false;
-			return self.getcurrentVolume();
+			self.getcurrentVolume();
 		});
 };
 
@@ -507,7 +507,12 @@ CoreStateMachine.prototype.updateVolume = function (Volume) {
 //Gets current Volume and Mute Status
 CoreStateMachine.prototype.getcurrentVolume = function () {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::getcurrentVolume');
-	this.commandRouter.volumioretrievevolume();
+	this.commandRouter.volumioretrievevolume().then((volumeData)=>{
+    	self.currentVolume = volumeData.vol;
+    	self.currentMute = volumeData.mute;
+    	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
+	})
+
 	this.updateTrackBlock();
 	return libQ.resolve();
 };
