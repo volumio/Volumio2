@@ -445,7 +445,6 @@ CoreVolumeController.prototype.retrievevolume = function () {
         });
     } else {
             this.getVolume(function (err, vol) {
-                console.log(err)
                 self.getMuted(function (err, mute) {
                     if (err) {
                         mute = false;
