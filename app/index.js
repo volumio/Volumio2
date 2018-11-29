@@ -175,6 +175,11 @@ CoreCommandRouter.prototype.updateVolumeScripts = function (data) {
     }
 };
 
+CoreCommandRouter.prototype.retrieveVolumeLevels = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioRetrieveVolumeLevels');
+    return this.stateMachine.getcurrentVolume();
+};
+
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
 	if (this.callbacks[name] == undefined) {
 		this.callbacks[name] = [];
