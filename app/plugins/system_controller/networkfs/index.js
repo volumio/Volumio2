@@ -9,7 +9,8 @@ var mountutil = require('linux-mountutils');
 var libUUID = require('node-uuid');
 var udev = require("udev");
 var S = require('string');
-var mountPoint = '/mnt/'
+var _ = require('underscore');
+var mountPoint = '/mnt/';
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -165,7 +166,9 @@ ControllerNetworkfs.prototype.initShares = function () {
 	var keys = config.getKeys('NasMounts');
 	for (var i in keys) {
 		var key = keys[i];
-		self.mountShare({init:true, key:key});
+		if (key !== 'mountedFolders') {
+            self.mountShare({init:true, key:key});
+		}
 	}
 };
 
@@ -1041,7 +1044,6 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
                 self.mountDevice(device);
                 break;
             case 'disk':
-                console.log('asd')
                 break;
             default:
                 break;
@@ -1054,7 +1056,6 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
                 self.umountDevice(device);
                 break;
             case 'disk':
-                console.log('asd')
                 break;
             default:
                 break;
@@ -1077,7 +1078,7 @@ ControllerNetworkfs.prototype.mountDevice = function(device){
 
 ControllerNetworkfs.prototype.umountDevice = function(device){
     var self = this;
-	console.log(device)
+
     if (device.ID_FS_LABEL && device.DEVNAME && device.ID_FS_TYPE) {
         var mountFolder = mountPoint + 'USB/' + device.ID_FS_LABEL;
         if (fs.existsSync(mountFolder)) {
@@ -1117,7 +1118,7 @@ ControllerNetworkfs.prototype.mountPartition = function(partitionData){
 	var mountCMD = ' /usr/bin/sudo /bin/mount "' + partitionData.devName + '" "' + partitionData.mountFolder + '" -o ' + options;
 	try {
         execSync(mountCMD, {uid:1000,gid:1000});
-        execSync('/usr/bin/mpc update', {uid:1000,gid:1000});
+        self.storeMountedFolder(partitionData.mountFolder);
         var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.CONNECTED');
         self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
     } catch (e) {
@@ -1132,12 +1133,66 @@ ControllerNetworkfs.prototype.umountPartition = function(partitionData){
     try {
         execSync(umountCMD, {uid:1000,gid:1000});
         setTimeout(()=>{
-            self.deleteMountFolder(partitionData.mountFolder)
-        	execSync('/usr/bin/mpc update', {uid:1000,gid:1000});
+            self.deleteMountFolder(partitionData.mountFolder);
         	var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.DISCONNECTED');
         	self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
-		},2000)
+		},4000)
     } catch (e) {
-        self.logger.error('Failed to mount ' + partitionData.label + ': ' + e );
+        self.logger.error('Failed to umount ' + partitionData.label + ': ' + e );
+    }
+    setTimeout(()=>{
+        self.deleteMountedFolder(partitionData.mountFolder);
+	},5000)
+
+}
+
+ControllerNetworkfs.prototype.storeMountedFolder = function(mountFolder){
+    var self = this;
+
+    var mountedFoldersArray = self.retrieveMountedFolder();
+    if (!_.contains(mountedFoldersArray, mountFolder)) {
+        mountedFoldersArray.push(mountFolder)
+        self.saveMountedFolder(mountedFoldersArray)
+        var clearFolder = mountFolder.replace('/mnt/USB/', '');
+        execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+        self.logger.info('Scanning new location : ' + '"' + clearFolder + '"');
+    };
+}
+
+ControllerNetworkfs.prototype.deleteMountedFolder = function(mountFolder){
+    var self = this;
+
+    var mountedFoldersArray = self.retrieveMountedFolder();
+    if (_.contains(mountedFoldersArray, mountFolder)) {
+        mountedFoldersArray = _.without(mountedFoldersArray, mountFolder);
+        self.saveMountedFolder(mountedFoldersArray)
+        var clearFolder = mountFolder.replace('/mnt/USB/', '');
+        execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+        self.logger.info('Scanning removed location : ' + '"' + clearFolder + '"');
     }
 }
+
+ControllerNetworkfs.prototype.retrieveMountedFolder = function(){
+    var self = this;
+	var mountedFoldersArray = [];
+	
+    var mountedFoldersArrayConf = config.get('mountedFolders', 'default');
+    if (mountedFoldersArrayConf !== 'default') {
+        mountedFoldersArray = mountedFoldersArrayConf;
+    }
+
+    return mountedFoldersArray
+}
+
+ControllerNetworkfs.prototype.saveMountedFolder = function(mountedFoldersArray){
+    var self = this;
+
+    var mountedFoldersArrayConf = config.get('mountedFolders', 'default');
+    if (mountedFoldersArrayConf === 'default') {
+        config.addConfigValue('mountedFolders','array',mountedFoldersArray);
+    } else {
+        config.set('mountedFolders.value', mountedFoldersArray);
+	}
+}
+
+
