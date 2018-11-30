@@ -9,7 +9,7 @@ global.exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 global.fs = require('fs');
 var libQ = require('kew');
-
+require('dotenv').config();
 
 function updater_comm(context) {
 	var self = this;
@@ -164,7 +164,9 @@ updater_comm.prototype.onStart = function () {
     var self = this;
 
     setTimeout(()=>{
-        self.pushUpdatesSubscribe();
+        if (process.env.commWebsocket){
+            self.pushUpdatesSubscribe();
+        }
     },30000)
     return libQ.resolve();
 };
@@ -303,6 +305,7 @@ updater_comm.prototype.pushUpdatesSubscribe = function () {
         socket.emit('pushUpdateSubscribe', subscribeData);
         socket.on('ack', function(data) {
             socket.disconnect();
+
         });
     })
     .fail((e)=>{

@@ -10,5 +10,8 @@
   "license": "ISC",
   "volumio_info": {
     "plugin_type": "system_controller"
+  },
+  "dependencies": {
+    "dotenv": "^6.1.0"
   }
 }
