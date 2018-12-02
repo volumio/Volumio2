@@ -32,4 +32,3 @@ node_modules
 spotify-login.txt
 .idea
 *.iml
-*.env

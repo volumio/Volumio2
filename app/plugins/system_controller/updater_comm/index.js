@@ -9,7 +9,6 @@ global.exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 global.fs = require('fs');
 var libQ = require('kew');
-require('dotenv').config();
 
 function updater_comm(context) {
 	var self = this;
@@ -164,7 +163,7 @@ updater_comm.prototype.onStart = function () {
     var self = this;
 
     setTimeout(()=>{
-        if (process.env.commWebsocket){
+        if (process.env.PUSH_UPDATES_COMM){
             self.pushUpdatesSubscribe();
         }
     },30000)
