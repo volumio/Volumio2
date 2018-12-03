@@ -11,6 +11,7 @@ var udev = require("udev");
 var S = require('string');
 var _ = require('underscore');
 var mountPoint = '/mnt/';
+var mountPointFile = '/data/mountPoints';
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -1150,49 +1151,60 @@ ControllerNetworkfs.prototype.storeMountedFolder = function(mountFolder){
     var self = this;
 
     var mountedFoldersArray = self.retrieveMountedFolder();
-    if (!_.contains(mountedFoldersArray, mountFolder)) {
-        mountedFoldersArray.push(mountFolder)
-        self.saveMountedFolder(mountedFoldersArray)
-        var clearFolder = mountFolder.replace('/mnt/USB/', '');
-        execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
-        self.logger.info('Scanning new location : ' + '"' + clearFolder + '"');
-    };
+    mountedFoldersArray.then((data)=>{
+    	console.log(data)
+    	if (!_.contains(data, mountFolder)) {
+        	var mountedFoldersArray = data.push(mountFolder)
+        	self.saveMountedFolder(mountedFoldersArray)
+        	var clearFolder = mountFolder.replace('/mnt/USB/', '');
+        	execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+        	self.logger.info('Scanning new location : ' + '"' + clearFolder + '"');
+    	}
+	})
 }
 
 ControllerNetworkfs.prototype.deleteMountedFolder = function(mountFolder){
     var self = this;
 
     var mountedFoldersArray = self.retrieveMountedFolder();
-    if (_.contains(mountedFoldersArray, mountFolder)) {
-        mountedFoldersArray = _.without(mountedFoldersArray, mountFolder);
-        self.saveMountedFolder(mountedFoldersArray)
-        var clearFolder = mountFolder.replace('/mnt/USB/', '');
-        execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
-        self.logger.info('Scanning removed location : ' + '"' + clearFolder + '"');
-    }
+    mountedFoldersArray.then((data)=>{
+        if (_.contains(data, mountFolder)) {
+        	var mountedFoldersArray = _.without(data, mountFolder);
+        	self.saveMountedFolder(mountedFoldersArray)
+        	var clearFolder = mountFolder.replace('/mnt/USB/', '');
+        	execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+        	self.logger.info('Scanning removed location : ' + '"' + clearFolder + '"');
+    	}
+	})
 }
 
 ControllerNetworkfs.prototype.retrieveMountedFolder = function(){
     var self = this;
-	var mountedFoldersArray = [];
-	
-    var mountedFoldersArrayConf = config.get('mountedFolders', 'default');
-    if (mountedFoldersArrayConf !== 'default') {
-        mountedFoldersArray = mountedFoldersArrayConf;
-    }
+    var defer = libQ.defer();
 
-    return mountedFoldersArray
+    fs.readJson(mountPointFile, function(err, result) {
+        if (err)  {
+            defer.resolve([]);
+        } else {
+        	if (result.mountedFolders) {
+                defer.resolve(result.mountedFolders)
+			} else {
+                defer.resolve([]);
+			}
+        }
+    });
+    return defer.promise
 }
 
 ControllerNetworkfs.prototype.saveMountedFolder = function(mountedFoldersArray){
     var self = this;
+	var content = {"mountedFolders":mountedFoldersArray};
 
-    var mountedFoldersArrayConf = config.get('mountedFolders', 'default');
-    if (mountedFoldersArrayConf === 'default') {
-        config.addConfigValue('mountedFolders','array',mountedFoldersArray);
-    } else {
-        config.set('mountedFolders.value', mountedFoldersArray);
-	}
+    fs.writeJson(mountPointFile, content, function(err, result) {
+        if (err)  {
+            self.logger.error('Could Not Save Mounted folders info: ' + err);
+        }
+    })
 }
 
 
