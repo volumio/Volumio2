@@ -1027,6 +1027,11 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
     self.logger.info('Starting Udev Watcher for removable devices');
     var monitor = udev.monitor();
 
+    var devices = udev.list();
+	for (var i in devices) {
+        deviceAddAction(devices[i]);
+	}
+
     monitor.on('add', function (device) {
         if (device.DEVTYPE) {
             deviceAddAction(device)
@@ -1040,6 +1045,7 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
     });
 
     function deviceAddAction(device) {
+    	console.log(device)
         switch(device.DEVTYPE) {
             case 'partition':
                 self.mountDevice(device);
@@ -1052,6 +1058,7 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
     }
 
     function deviceRemoveAction(device) {
+        console.log(device)
         switch(device.DEVTYPE) {
             case 'partition':
                 self.umountDevice(device);
@@ -1067,23 +1074,54 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
 ControllerNetworkfs.prototype.mountDevice = function(device){
     var self = this;
 
-    if (device.ID_FS_LABEL && device.DEVNAME && device.ID_FS_TYPE) {
-        self.logger.info('Mounting Device ' +device.ID_FS_LABEL);
-        var mountFolder = removableMountPoint + 'USB/' + device.ID_FS_LABEL;
-        if (!fs.existsSync(mountFolder)) {
-            this.createMountFolder(mountFolder);
-        }
-        self.mountPartition({'label':device.ID_FS_LABEL,'devName':device.DEVNAME,'fsType':device.ID_FS_TYPE, 'mountFolder':mountFolder})
+    if (device.ID_FS_LABEL) {
+    	var fsLabel = device.ID_FS_LABEL;
+	} else if (device.ID_FS_UUID) {
+        var fsLabel = device.ID_FS_UUID;
+	} else {
+    	self.logger.error('Cannot associate FS Label, not mounting');
+	}
+
+    if (fsLabel && device.DEVNAME && device.ID_FS_TYPE) {
+    	if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio') {
+            self.logger.info('Mounting Device ' + fsLabel);
+            if (fsLabel === 'issd' || fsLabel === 'ihdd') {
+                var mountFolder = removableMountPoint + 'INTERNAL/';
+                self.switchInternalMemoryPosition();
+            } else {
+                var mountFolder = removableMountPoint + 'USB/' + fsLabel;
+            }
+
+            if (!fs.existsSync(mountFolder)) {
+                this.createMountFolder(mountFolder);
+            }
+            self.mountPartition({'label':fsLabel,'devName':device.DEVNAME,'fsType':device.ID_FS_TYPE, 'mountFolder':mountFolder})
+		} else {
+    		self.logger.info('Ignoring mount for partition: ' + fsLabel);
+		}
+
     }
 }
 
 ControllerNetworkfs.prototype.umountDevice = function(device){
     var self = this;
 
-    if (device.ID_FS_LABEL && device.DEVNAME && device.ID_FS_TYPE) {
-        var mountFolder = removableMountPoint + 'USB/' + device.ID_FS_LABEL;
+    if (device.ID_FS_LABEL) {
+        var fsLabel = device.ID_FS_LABEL;
+    } else if (device.ID_FS_UUID) {
+        var fsLabel = device.ID_FS_UUID;
+    } else {
+        self.logger.error('Cannot associate FS Label, not mounting');
+    }
+
+    if (fsLabel && device.DEVNAME && device.ID_FS_TYPE) {
+        if (fsLabel === 'issd' || fsLabel === 'ihdd') {
+            var mountFolder = removableMountPoint + 'INTERNAL/';
+        } else {
+            var mountFolder = removableMountPoint + 'USB/' + fsLabel;
+		}
         if (fs.existsSync(mountFolder)) {
-            self.umountPartition({'label':device.ID_FS_LABEL,'devName':device.DEVNAME,'mountFolder':mountFolder})
+            self.umountPartition({'label':fsLabel,'devName':device.DEVNAME,'mountFolder':mountFolder})
         }
     }
 }
@@ -1102,9 +1140,38 @@ ControllerNetworkfs.prototype.deleteMountFolder = function (mountFolder){
     var self = this;
 
     try {
-        execSync('/bin/rm -rf "' + mountFolder + '"', {uid:1000,gid:1000})
+        execSync('/bin/rm -rf "' + mountFolder + '"', {uid:1000,gid:1000});
     } catch (e) {
         self.logger.error('Failed to delete Folder ' + e );
+    }
+}
+
+ControllerNetworkfs.prototype.switchInternalMemoryPosition = function(){
+    var self = this;
+
+    if (fs.existsSync('/mnt/INTERNAL')) {
+        try {
+            var internalPosition = execSync("ls -l /mnt/INTERNAL | awk 'NF{ print $NF }'", {uid:1000,gid:1000}).toString().replace('\n', '');
+            console.log('INTERNAL ')
+            console.log('---' + internalPosition + '---')
+            if (internalPosition === '/data/INTERNAL') {
+                self.logger.info('Removing Internal Memory Position');
+                execSync('/bin/rm -rf /mnt/INTERNAL', {uid:1000,gid:1000});
+            }
+        } catch (e) {
+            self.logger.error('Failed to switch to internal Position ' + e );
+        }
+    }
+}
+
+ControllerNetworkfs.prototype.bindInternalMemoryPosition = function(){
+    var self = this;
+
+    try {
+    	self.logger.info('Binding Internal Memory position');
+        execSync('/usr/bin/sudo /bin/mount -o bind /mnt/INTERNAL /data/INTERNAL', {uid:1000,gid:1000});
+    } catch (e) {
+        self.logger.error('Failed to bind internal Position ' + e );
     }
 }
 
@@ -1116,7 +1183,7 @@ ControllerNetworkfs.prototype.mountPartition = function(partitionData){
     } else {
         var options = 'noatime';
     }
-    var mountCMD = ' /usr/bin/sudo /bin/mount "' + partitionData.devName + '" "' + partitionData.mountFolder + '" -o ' + options;
+    var mountCMD = '/usr/bin/sudo /bin/mount "' + partitionData.devName + '" "' + partitionData.mountFolder + '" -o ' + options;
     console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
     console.log(mountCMD)
     try {
@@ -1180,8 +1247,9 @@ ControllerNetworkfs.prototype.deleteMountedFolder = function(mountFolder){
         if (_.contains(data, mountFolder)) {
         var mountedFoldersArray = _.without(data, mountFolder);
         self.saveMountedFolder(mountedFoldersArray)
-        var clearFolder = mountFolder.replace('/mnt/USB/', '');
+        var clearFolder = mountFolder.replace('/mnt/', '');
         execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+        console.log('/usr/bin/mpc update "' + clearFolder + '"')
         self.logger.info('Scanning removed location : ' + '"' + clearFolder + '"');
     }
 })
