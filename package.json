@@ -66,6 +66,7 @@
     "v-conf": "^1.4.2",
     "winston": "^2.3.1",
     "wireless-tools": "^0.19.0",
+    "xmlbuilder": "^10.1.1",
     "yargs": "^8.0.1"
   },
   "devDependencies": {
