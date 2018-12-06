@@ -17,7 +17,6 @@
     ]
   },
   "dependencies": {
-    "album-art": "https://github.com/lacymorrow/album-art.git#4b4ad3ffcf509687787d70031b0993c9e8ab8487",
     "body-parser": "^1.17.2",
     "cache-manager": "^2.4.0",
     "compare-versions": "^3.0.1",
