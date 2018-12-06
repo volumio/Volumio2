@@ -80,7 +80,6 @@ ControllerSystem.prototype.getUIConfig = function () {
     var device = self.config.get('device', '');
     var showDiskInstaller = self.config.get('show_disk_installer', true);
 	var HDMIEnabled = self.config.get('hdmi_enabled', false);
-
 	self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
 		__dirname+'/../../../i18n/strings_en.json',
 		__dirname + '/UIConfig.json')
@@ -91,7 +90,7 @@ ControllerSystem.prototype.getUIConfig = function () {
     self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value', HDMIEnabled);
 
 
-	if (device != undefined && device.length > 0 && device === 'x86' && showDiskInstaller) {
+	if (device != undefined && device.length > 0 && (device === 'Tinkerboard' || device === 'x86') && showDiskInstaller) {
 		var disks = self.getDisks();
         if (disks != undefined) {
             disks.then(function (result) {
@@ -646,10 +645,14 @@ ControllerSystem.prototype.getDisks = function () {
 	var disks = disksraw.split("\n");
 
 
+    if (currentdisk === 'mmcblkp') {
+        currentdiskRaw = execSync('/bin/mount | head -n 1 | cut -d " " -f 1 | cut -d "/" -f 3 | cut -d "p" -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+		currentdisk = currentdiskRaw.replace(/\n/,'');
+    }
 
 	for (var i = 0; i < disks.length; i++) {
 
-		if ((disks[i].indexOf(currentdisk) >= 0) || (disks[i].indexOf('loop') >= 0)) {
+		if ((disks[i].indexOf(currentdisk) >= 0) || (disks[i].indexOf('loop') >= 0) || (disks[i].indexOf('rpmb') >= 0) || (disks[i].indexOf('boot') >= 0)) {
 
 		} else {
 			var disksarray = disks[i].split(' ');
@@ -667,9 +670,11 @@ ControllerSystem.prototype.getDisks = function () {
 				if (disksarray[a].indexOf('MODEL') >= 0) {
 					diskinfo.name = disksarray[a].replace('MODEL=', '').replace(/"/g, '');
 				}
+				if (diskinfo.device.indexOf('mmcblk') >= 0) {
+				   diskinfo.name = 'eMMC/SD';
+				}
 
-				if (count === 4) {
-
+				if (count === 3) {
 					if ( diskinfo.device && diskinfo.size) {
 						availablearray.push(diskinfo);
 						diskinfo = {'device': '', 'name': '', 'size': ''};
@@ -776,9 +781,9 @@ ControllerSystem.prototype.installToDisk = function (data) {
     	var target = '/dev/' + data.target;
 	}
     self.notifyInstallToDiskStatus({'progress': 0, 'status':'started'});
-    var ddsizeRaw = execSync("/bin/lsblk -b | grep " + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+    var ddsizeRaw = execSync("/bin/lsblk -b | grep -w " + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
     ddsize = Math.ceil(ddsizeRaw/1024/1024);
-    var ddsizeRawDest = execSync("/bin/lsblk -b | grep " + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+    var ddsizeRawDest = execSync("/bin/lsblk -b | grep -w " + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
 
     if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
         error = true;
@@ -819,8 +824,11 @@ ControllerSystem.prototype.installToDisk = function (data) {
                     fs.unlinkSync('/tmp/boot');
                     fs.unlinkSync('/tmp/imgpart');
                 } catch(e) {}
-
+                //TODO: remove resize sentinel once initrd for arm devices have been aligned with x86
                 try {
+                    if (target === '/dev/mmcblk0' || target === '/dev/mmcblk1') {
+                        target = target + 'p';
+                    }
                     execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
                     execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
                     execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
@@ -834,19 +842,6 @@ ControllerSystem.prototype.installToDisk = function (data) {
                     self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for resize'});
                 }
 
-                try {
-                    execSync('mkdir /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                    execSync('/usr/bin/sudo /bin/mount ' + target + '2 /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                    execSync('/bin/touch /tmp/imgpart/move-gpt', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                    execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                    execSync('/usr/bin/sudo /bin/umount ' + target + '2', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                    execSync('rm -rf /tmp/imgpart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-                    self.logger.info('Successfully prepared system for GPT');
-                } catch (e) {
-                    self.logger.error('Cannot prepare system for GPT');
-                    self.notifyInstallToDiskStatus({'progress':0, 'status':'error', 'error': 'Cannot prepare system for GPT'});
-                    error = true;
-                }
                 if (!error) {
                     self.notifyInstallToDiskStatus({'progress':100, 'status':'done'});
                 }
