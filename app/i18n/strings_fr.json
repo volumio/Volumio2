@@ -1,6 +1,6 @@
 {
   "PLAYBACK_OPTIONS":{
-    "PLAYBACK_OPTIONS_TITLE":"Options de lecture",
+    "PLAYBACK_OPTIONS_TITLE":"Options de lecture générales",
     "AUDIO_OUTPUT":"Sortie Audio",
     "OUTPUT_DEVICE_DOC":"Périphérique de sortie",
     "OUTPUT_DEVICE":"Périphérique de sortie",
@@ -45,6 +45,7 @@
       "ADVANCED_AUDIO_TWEAKS":"Réglages audio avancés",
 	    "AUDIO_RESAMPLING":"Rééchantillonage",
 	    "AUDIO_RESAMPLING_SETTINGS_SAVED":"Réglage du rééchantillonage enregistré",
+	       "AUDIO_RESAMPLING_DOC":"Controle les options de réechantillonage. Pour la lecture de fichiers locaux uniquement (ne s'applique pas à Shairport ou services tiers comme ROON)", 
 	    "TARGET_BITDEPTH":"Nombre de bits cible",
 	    "TARGET_SAMPLERATE":"Fréquence d'échantillonage",
       "NATIVE":"Native",
@@ -91,7 +92,7 @@
     "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès",
     "HOTSPOT_SETTINGS":"Configuration du Hotspot WiFi",
     "ENABLE_HOTSPOT":"Activer le Hotspot",
-	 "ENABLE_HOTSPOT_DOC":"Si le hotspot est activé et que la connection Wifi est perdue (ou si aucune connection Wifi n'a été configurée), le système démarrera le hotspot automatiquement. A désactiver uniquement si vous ne voulez pas ce comportement",
+	 "ENABLE_HOTSPOT_DOC":"Le hotspot sera activé automatiquement si la connection Wifi est perdue (ou si aucune connection Wifi n'a été configurée). A désactiver uniquement si vous ne voulez pas ce comportement",
     "HOTSPOT_NAME":"Nom du Hotspot",
     "HOTSPOT_PROTECTION":"Protection par mot de passe du Hotspot",
     "HOTSPOT_PASSWORD":"Mot de passe du Hotspot",
