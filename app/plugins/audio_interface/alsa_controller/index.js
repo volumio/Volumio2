@@ -898,7 +898,7 @@ ControllerAlsa.prototype.getAplayInfo = function () {
                     currentCard = num;
                 }
             }
-            if (namesArray.includes('TinkerAudio OnBoard') && namesArray.includes('ES90x8Q2M DAC')){
+            if ((namesArray.includes('TinkerAudio OnBoard') || namesArray.includes('USB Audio OnBoard')) && namesArray.includes('ES90x8Q2M DAC')){
                 volumioDeviceName = 'primo';
 			}
 	} catch (e) {
