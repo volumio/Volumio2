@@ -603,19 +603,17 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
      *
      */
 	if(this.consumeUpdateService){
-		if(this.consumeUpdateService!=sService)
-		{
+		if(this.consumeUpdateService!=sService) {
 			this.commandRouter.pushConsoleMessage('CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification. Current '+this.consumeUpdateService+" Received "+sService);
 			if (this.consumeUpdateService == 'upnp') {
-        this.consumeUpdateService = 'mpd';
-        sService = 'mpd';
+        		this.consumeUpdateService = 'mpd';
+        		sService = 'mpd';
 			} else {
-        return;
+        		return;
 			}
 		}
 	} else {
-		if(trackBlock!=undefined && trackBlock.service!==sService)
-		{
+		if((trackBlock!=undefined && trackBlock.service!==sService) && trackBlock.service !== 'upnp_browser') {
 			this.commandRouter.pushConsoleMessage('Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
 			return;
 		}
