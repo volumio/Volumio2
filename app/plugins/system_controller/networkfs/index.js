@@ -1053,7 +1053,6 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
     });
 
     function deviceAddAction(device) {
-    	console.log(device)
         switch(device.DEVTYPE) {
             case 'partition':
                 self.mountDevice(device);
@@ -1066,7 +1065,6 @@ ControllerNetworkfs.prototype.initUdevWatcher = function() {
     }
 
     function deviceRemoveAction(device) {
-        console.log(device)
         switch(device.DEVTYPE) {
             case 'partition':
                 self.umountDevice(device);
@@ -1159,9 +1157,7 @@ ControllerNetworkfs.prototype.switchInternalMemoryPosition = function(){
 
     if (fs.existsSync('/mnt/INTERNAL')) {
         try {
-            var internalPosition = execSync("ls -l /mnt/INTERNAL | awk 'NF{ print $NF }'", {uid:1000,gid:1000}).toString().replace('\n', '');
-            console.log('INTERNAL ')
-            console.log('---' + internalPosition + '---')
+            var internalPosition = execSync("/bin/readlink -f /mnt/INTERNAL", {uid:1000,gid:1000}).toString().replace('\n', '');
             if (internalPosition === '/data/INTERNAL') {
                 self.logger.info('Removing Internal Memory Position');
                 execSync('/bin/rm -rf /mnt/INTERNAL', {uid:1000,gid:1000});
@@ -1192,8 +1188,6 @@ ControllerNetworkfs.prototype.mountPartition = function(partitionData){
         var options = 'noatime';
     }
     var mountCMD = '/usr/bin/sudo /bin/mount "' + partitionData.devName + '" "' + partitionData.mountFolder + '" -o ' + options;
-    console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
-    console.log(mountCMD)
     try {
         execSync(mountCMD, {uid:1000,gid:1000});
         self.storeMountedFolder(partitionData.mountFolder);
@@ -1207,7 +1201,6 @@ ControllerNetworkfs.prototype.mountPartition = function(partitionData){
 ControllerNetworkfs.prototype.umountPartition = function(partitionData){
     var self = this;
     var umountCMD = '/usr/bin/sudo /bin/umount -f "' + partitionData.devName + '"';
-    console.log(umountCMD)
 
     try {
         execSync(umountCMD, {uid:1000,gid:1000});
@@ -1230,19 +1223,12 @@ ControllerNetworkfs.prototype.storeMountedFolder = function(mountFolder){
 
     var mountedFoldersArray = self.retrieveMountedFolder();
     mountedFoldersArray.then((data)=>{
-        console.log('STORE DATA')
-    console.log(data)
-    if (!_.contains(data, mountFolder)) {
-        console.log('MOUNTED ARRAY 1 ' )
-        console.log(data)
-        data.push(mountFolder)
-        console.log('MOUNTED ARRAY 1 ' )
-        console.log(data)
-        self.saveMountedFolder(data)
-        var clearFolder = mountFolder.replace('/mnt/USB/', '');
-        execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
-        console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-        self.logger.info('Scanning new location : ' + '"' + clearFolder + '"');
+        if (!_.contains(data, mountFolder)) {
+            data.push(mountFolder);
+            self.saveMountedFolder(data);
+            var clearFolder = mountFolder.replace('/mnt/USB/', '').replace('/mnt/', '');
+            execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+            self.logger.info('Scanning new location : ' + '"' + clearFolder + '"');
     }
 })
 }
@@ -1253,13 +1239,12 @@ ControllerNetworkfs.prototype.deleteMountedFolder = function(mountFolder){
     var mountedFoldersArray = self.retrieveMountedFolder();
     mountedFoldersArray.then((data)=>{
         if (_.contains(data, mountFolder)) {
-        var mountedFoldersArray = _.without(data, mountFolder);
-        self.saveMountedFolder(mountedFoldersArray)
-        var clearFolder = mountFolder.replace('/mnt/', '');
-        execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
-        console.log('/usr/bin/mpc update "' + clearFolder + '"')
-        self.logger.info('Scanning removed location : ' + '"' + clearFolder + '"');
-    }
+            var mountedFoldersArray = _.without(data, mountFolder);
+            self.saveMountedFolder(mountedFoldersArray)
+            var clearFolder = mountFolder.replace('/mnt/', '');
+            execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid:1000,gid:1000});
+            self.logger.info('Scanning removed location : ' + '"' + clearFolder + '"');
+        }
 })
 }
 
@@ -1272,8 +1257,6 @@ ControllerNetworkfs.prototype.retrieveMountedFolder = function(){
             defer.resolve([]);
         } else {
             if (result && result.mountedFolders) {
-                console.log('READ')
-                console.log(result)
                 defer.resolve(result.mountedFolders)
             } else {
                 defer.resolve([]);
@@ -1286,8 +1269,6 @@ ControllerNetworkfs.prototype.retrieveMountedFolder = function(){
 ControllerNetworkfs.prototype.saveMountedFolder = function(mountedFoldersArray){
     var self = this;
     var content = {"mountedFolders":mountedFoldersArray};
-    console.log('CONTENT SAVE')
-    console.log(content)
     fs.writeJson(mountPointFile, content, function(err, result) {
         if (err)  {
             self.logger.error('Could Not Save Mounted folders info: ' + err);
