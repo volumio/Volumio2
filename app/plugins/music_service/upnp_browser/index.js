@@ -636,3 +636,15 @@ ControllerUPNPBrowser.prototype.log = function (message) {
 		console.log(message);
 	}
 };
+
+ControllerUPNPBrowser.prototype.prefetch = function (trackBlock) {
+    var self=this;
+    this.logger.info("Doing Prefetch in UPNP");
+    var uri=trackBlock.uri;
+
+    var safeUri = uri.replace(/"/g,'\\"');
+    return self.mpdPlugin.sendMpdCommand('add "'+safeUri+'"',[])
+    	.then(function(){
+        	return self.mpdPlugin.sendMpdCommand('consume 1',[]);
+    	});
+}

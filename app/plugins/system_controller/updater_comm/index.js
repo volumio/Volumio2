@@ -10,7 +10,6 @@ var execSync = require('child_process').execSync;
 global.fs = require('fs');
 var libQ = require('kew');
 
-
 function updater_comm(context) {
 	var self = this;
 
@@ -164,7 +163,9 @@ updater_comm.prototype.onStart = function () {
     var self = this;
 
     setTimeout(()=>{
-        self.pushUpdatesSubscribe();
+        if (process.env.PUSH_UPDATES_COMM === "true"){
+            self.pushUpdatesSubscribe();
+        }
     },30000)
     return libQ.resolve();
 };
@@ -303,6 +304,7 @@ updater_comm.prototype.pushUpdatesSubscribe = function () {
         socket.emit('pushUpdateSubscribe', subscribeData);
         socket.on('ack', function(data) {
             socket.disconnect();
+
         });
     })
     .fail((e)=>{

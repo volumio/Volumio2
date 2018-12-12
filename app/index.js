@@ -155,7 +155,7 @@ CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
 };
 
 // Volumio Retrieve Volume
-CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
+CoreCommandRouter.prototype.volumioretrievevolume = function () {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRetrievevolume');
 	return this.volumeControl.retrievevolume();
 };
@@ -173,6 +173,11 @@ CoreCommandRouter.prototype.updateVolumeScripts = function (data) {
     if (this.volumeControl){
         return this.volumeControl.updateVolumeScript(data);
     }
+};
+
+CoreCommandRouter.prototype.retrieveVolumeLevels = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioRetrieveVolumeLevels');
+    return this.stateMachine.getcurrentVolume();
 };
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
@@ -1582,11 +1587,15 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     var self=this;
     var language_code=this.sharedVars.get('language_code');
 
-    this.logger.info("Loading i18n strings for locale "+language_code);
-
-    this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
-    this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
-
+	this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+	
+    try {
+        this.logger.info("Loading i18n strings for locale "+language_code);
+    	this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+    } catch(e){
+        this.logger.error("Failed to load i18n strings for locale "+language_code);
+    }
+    
     var categories=this.pluginManager.getPluginCategories();
     for(var i in categories)
     {
@@ -2043,4 +2052,10 @@ CoreCommandRouter.prototype.getPluginEnabled = function (category, pluginName) {
     var self=this;
 
     return this.pluginManager.isEnabled(category, pluginName);
+}
+
+CoreCommandRouter.prototype.getSystemVersion = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
 }

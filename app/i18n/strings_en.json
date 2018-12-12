@@ -1,6 +1,6 @@
 {
   "PLAYBACK_OPTIONS":{
-    "PLAYBACK_OPTIONS_TITLE":"Playback options",
+    "PLAYBACK_OPTIONS_TITLE":"General Playback options",
     "AUDIO_OUTPUT":"Audio Output",
     "OUTPUT_DEVICE_DOC":"Select the Audio Output Device from the ones available in your system",
     "OUTPUT_DEVICE":"Output Device",
@@ -44,6 +44,7 @@
 	"MIXER_TYPE_DOC":"Select the Mixer Type: None = No volume control, Software = Volume control but loss of Audio Quality, Hardware = Best of both worlds, provides ability to change volume without loss of quality",
 	"ADVANCED_AUDIO_TWEAKS":"Advanced Audio Tweaks",
 	"AUDIO_RESAMPLING":"Audio Resampling",
+    "AUDIO_RESAMPLING_DOC":"This settings controls Audio Resampling options. For local file playback only (does not apply to Shairport and Third Party services like ROON)",
 	"AUDIO_RESAMPLING_SETTINGS_SAVED":"Audio Resampling Settings saved",
 	"TARGET_BITDEPTH":"Target bit depth",
 	"TARGET_SAMPLERATE":"Target sample rate",
@@ -91,13 +92,13 @@
     "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted",
     "HOTSPOT_SETTINGS":"Hotspot Settings",
     "ENABLE_HOTSPOT":"Enable Hotspot",
-	"ENABLE_HOTSPOT_DOC":"If Hotspot is enabled when connection to Wireless Network is dropped (or if no Wireless network has been configured), the system will start Hotspot automatically. Disable ONLY if you don't want such behavior",
+    "ENABLE_HOTSPOT_DOC":"The system will start an enabled hotspot automatically if the wireless network is dropped or no wireless network has been configured. Disable the hotspot feature to prevent this happening.",
     "HOTSPOT_NAME":"Hotspot Name",
     "HOTSPOT_PROTECTION":"Password Protected Hotspot",
     "HOTSPOT_PASSWORD":"Hotspot Password",
-	"HOTSPOT_PASSWORD_DOC":"Change the default Hotspot Password, use a passphrase of at least 8 characters",
+    "HOTSPOT_PASSWORD_DOC":"Change the default Hotspot Password, use a passphrase of at least 8 characters",
     "HOTSPOT_CHANNEL":"Hotspot Channel",
-	"HOTSPOT_CHANNEL_DOC":"Change the Hotspot Transmitting channel. This might be useful to improve wireless connection trough Hotspot in network-dense environments",
+	  "HOTSPOT_CHANNEL_DOC":"Change the Hotspot Transmitting channel. This might be useful to improve wireless connection trough Hotspot in network-dense environments",
     "HOTSPOT_CONF_ERROR":"Hotspot Configuration Error",
     "HOTSPOT_PW_LENGTH":"Hotspot Password must be at least 8 characters long",
 	"WIRELESS_ENABLED":"Wireless Networking",
@@ -322,7 +323,10 @@
     "DOWNLOADING_FROM":"Downloading Plugin from ",
     "DOWNLOADING":"Downloading Plugin",
     "NO_CONFIGURATION_AVAILABLE":"No configuration available",
-    "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer"
+    "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer",
+    "CONFIRM_PLUGIN_INSTALL":"Install Plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warning, community plugins are developed by third parties developer and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin",
+    "INSTALL":"Install"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",

@@ -63,6 +63,10 @@ function PluginManager(ccommand, server) {
             if (variant === 'myvolumio') {
                 variant = 'volumio'
             }
+            process.env.WARNING_ON_PLUGIN_INSTALL = false;
+            if (variant !== 'volumio') {
+                process.env.WARNING_ON_PLUGIN_INSTALL = true;
+			}
 		}
 		if (file[l].match(/VOLUMIO_HARDWARE/i)) {
 			var str = file[l].split('=');
@@ -872,6 +876,7 @@ PluginManager.prototype.installPlugin = function (url) {
 	var defer=libQ.defer();
 	var modaltitle= 'Installing Plugin';
 	var advancedlog = '';
+	var ended = false;
 	var downloadCommand;
 
 	var currentMessage = "Downloading plugin at "+url;
@@ -950,11 +955,15 @@ PluginManager.prototype.installPlugin = function (url) {
 						tail.on("line", function(data) {
 							if (data == 'plugininstallend') {
 								console.log('Plugin install end detected on script');
+                                ended = true;
 								tail.unwatch();
+								ended = true;
 							} else {
-								self.logger.info(data);
-								advancedlog = advancedlog + "<br>" + data;
-								self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
+                                self.logger.info(data);
+								if (ended === false) {
+                                    advancedlog = advancedlog + "<br>" + data;
+                                    self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
+								}
 							}
 						});
 					});
@@ -1772,6 +1781,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
 					if(myplugins[c].prettyName === availableName) {
                         thisPlugin.installed = true;
                         thisPlugin.category = myplugins[c].category;
+                        thisPlugin.version = myplugins[c].version;
 						var v = compareVersions(availableVersion, myplugins[c].version);
 						if (v === 1) {
                             thisPlugin.updateAvailable = true

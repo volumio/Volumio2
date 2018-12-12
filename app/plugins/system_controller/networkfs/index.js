@@ -184,47 +184,53 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
         var trial = 0;
     }
 
-    var key = 'NasMounts.' + shareid;
-    var fstype = config.get(key + '.fstype');
-    var options = config.get(key + '.options');
-    var path = config.get(key + '.path');
-    var mountidraw = config.get(key + '.name');
-    // Check we have sane data - operating on undefined values will crash us
-    if (fstype === 'undefined' || path === 'undefined') {
-        console.log('Unable to retrieve config for share '  + shareid + ', returning early');
-        return defer.promise;
-    }
-    var pointer;
-    var fsopts;
-    var credentials;
-    var responsemessage = {status:""};
-    // The local mountpoint path must not contain these characters, because
-    // they get specially encoded in /etc/mtab and cause mount/umount failures.
-    // See getmntent(7).
-    var mountid = mountidraw.replace(/[\s\n\\]/g,"_");
+	var key = 'NasMounts.' + shareid;
+	var fstype = config.get(key + '.fstype');
+	var options = config.get(key + '.options');
+	var path = config.get(key + '.path');
+	var mountidraw = config.get(key + '.name');
+	// Check we have sane data - operating on undefined values will crash us
+	if (fstype === 'undefined' || path === 'undefined') {
+		console.log('Unable to retrieve config for share '  + shareid + ', returning early');
+		return defer.promise;
+	}
+	var pointer;
+	var fsopts;
+	var credentials;
+	var responsemessage = {status:""};
+	// The local mountpoint path must not contain these characters, because
+	// they get specially encoded in /etc/mtab and cause mount/umount failures.
+	// See getmntent(7).
+	var mountid = mountidraw.replace(/[\s\n\\]/g,"_");
 
-    if (fstype == "cifs") {
-        pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
-        //Password-protected mount
-        if (config.get(key + '.user') !== 'undefined' && config.get(key + '.user') !== '') {
-            credentials = 'username=' + config.get(key + '.user') + ',' + 'password=' + config.get(key + '.password') + ",";
-        } else {
-            credentials = 'guest,';
-        }
-        if (options) {
-            fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,"+options;
-        } else {
-            fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft";
-        }
+	if (fstype == "cifs") {
+		pointer = '//' + config.get('NasMounts.' + shareid + '.ip') + '/' + path;
+		//Password-protected mount
+		if (config.get(key + '.user') !== 'undefined' && config.get(key + '.user') !== '') {
+			var u = config.get(key + '.user');
+			var p = config.get(key + '.password');
+			u = self.properQuote(u);
+			p = self.properQuote(p);
+			credentials = 'username=' + u + ',' + 'password=' + p + ',';
+		} else {
+			credentials = 'guest,';
+		}
+		if (options) {
+			options = self.properQuote(options);
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft,"+options;
+		} else {
+			fsopts = credentials + "ro,dir_mode=0777,file_mode=0666,iocharset=utf8,noauto,soft";
+		}
 
-    } else { // nfs
-        pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
-        if (options) {
-            fsopts ="ro,soft,noauto,"+options;
-        } else {
-            fsopts ="ro,soft,noauto";
-        }
-    }
+	} else { // nfs
+		pointer = config.get('NasMounts.' + shareid + '.ip') + ':' + path;
+		if (options) {
+			options = self.properQuote(options);
+			fsopts ="ro,soft,noauto,"+options;
+		} else {
+			fsopts ="ro,soft,noauto";
+		}
+	}
 
     var mountpoint = '/mnt/NAS/' +  mountid;
     var createDir = true;
@@ -1285,4 +1291,27 @@ ControllerNetworkfs.prototype.saveMountedFolder = function(mountedFoldersArray){
             self.logger.error('Could Not Save Mounted folders info: ' + err);
         }
     })
+};
+
+ControllerNetworkfs.prototype.properQuote = function (str) {
+    // returns str as a single-quoted string, safe for exposure to a shell.
+    var output = '';
+
+    var quotedquote = "'"  // turn on single quoting
+        + '"'  // turn on double quoting
+        + "'"  // so we can quote this single quote
+        + '"'  // turn off double quoting
+        + "'"; // turn off single quoting
+
+    var pieces = str.split("'");
+    var n = pieces.length;
+
+    for (var i=0; i<n; i++) {
+        output = output + pieces[i];
+        if (i < (n-1)) output = output + quotedquote;
+    }
+
+    output = "'" + output + "'";
+
+    return output;
 }

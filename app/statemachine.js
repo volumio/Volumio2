@@ -360,7 +360,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentVolume = null;
 			self.currentMute = null;
 			self.currentUpdate = false;
-			return self.getcurrentVolume();
+			self.getcurrentVolume();
 		});
 };
 
@@ -507,7 +507,12 @@ CoreStateMachine.prototype.updateVolume = function (Volume) {
 //Gets current Volume and Mute Status
 CoreStateMachine.prototype.getcurrentVolume = function () {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::getcurrentVolume');
-	this.commandRouter.volumioretrievevolume();
+	this.commandRouter.volumioretrievevolume().then((volumeData)=>{
+    	self.currentVolume = volumeData.vol;
+    	self.currentMute = volumeData.mute;
+    	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
+	})
+
 	this.updateTrackBlock();
 	return libQ.resolve();
 };
@@ -598,19 +603,17 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
      *
      */
 	if(this.consumeUpdateService){
-		if(this.consumeUpdateService!=sService)
-		{
+		if(this.consumeUpdateService!=sService) {
 			this.commandRouter.pushConsoleMessage('CONSUME SERVICE: Received update from a service different from the one supposed to be playing music. Skipping notification. Current '+this.consumeUpdateService+" Received "+sService);
 			if (this.consumeUpdateService == 'upnp') {
-        this.consumeUpdateService = 'mpd';
-        sService = 'mpd';
+        		this.consumeUpdateService = 'mpd';
+        		sService = 'mpd';
 			} else {
-        return;
+        		return;
 			}
 		}
 	} else {
-		if(trackBlock!=undefined && trackBlock.service!==sService)
-		{
+		if((trackBlock!=undefined && trackBlock.service!==sService) && trackBlock.service !== 'upnp_browser') {
 			this.commandRouter.pushConsoleMessage('Received update from a service different from the one supposed to be playing music. Skipping notification.Current '+trackBlock.service+" Received "+sService);
 			return;
 		}
