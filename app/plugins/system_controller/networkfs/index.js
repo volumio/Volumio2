@@ -41,7 +41,9 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
     config.loadFile(configFile);
 
     self.initShares();
-    self.initUdevWatcher();
+    if (process.env.NODE_MOUNT_HANDLER === "true") {
+        self.initUdevWatcher();
+    }
     var boundMethod = self.onPlayerNameChanged.bind(self);
     self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
