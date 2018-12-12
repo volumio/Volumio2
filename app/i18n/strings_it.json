@@ -321,7 +321,10 @@
     "DOWNLOADING_FROM":"Scaricando il Plugin da ",
     "DOWNLOADING":"Scaricando il Plugin",
     "NO_CONFIGURATION_AVAILABLE":"Nessuna configurazione disponibile",
-    "PLUGIN_START_ERROR":"Avvio del plugin è fallito. Aggiorna il plugin o contatta lo sviluppatore."
+    "PLUGIN_START_ERROR":"Avvio del plugin è fallito. Aggiorna il plugin o contatta lo sviluppatore.",
+    "CONFIRM_PLUGIN_INSTALL":"Installa Plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Attenzione, i plugin sono sviluppati da terze parti e potrebbero inficiare le prestazioni del sistema o comportare instabilità. Volete proseguire con l'installazione",
+    "INSTALL":"Installa"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulazioni",
