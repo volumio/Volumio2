@@ -70,7 +70,7 @@
     "ISO_PLAYBACK":"ISO Playback",
     "ISO_PLAYBACK_DOC":"Use an experimental MPD version which allows ISO Files playback, you will loose DSD direct capabilities when enabled",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Extended File Format Support",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This settings controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster",
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This setting controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster",
     "USB_DAC_CONNECTED":"USB DAC Connected",
     "NO_OUTPUT_DEVICE":"No Audio Output Available",
     "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit"
@@ -296,7 +296,7 @@
     "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"In order to use your newly installed system, restart the system and remove any removable media",
     "CREDITS_OPEN_SOURCE_LICENSES":"Credits and Open Source licenses",
     "VIDEO_OUT_OPTIONS": "Video output options",
-    "HDMI_UI_DOC":"Show User Interface via HDMI Video Output. WARNING: This will degrade system performances",
+    "HDMI_UI_DOC":"Show User Interface via HDMI Video Output. WARNING: This will degrade system performance",
     "HDMI_UI":"User Interface via HDMI",
     "STARTING_SOFTWARE_UPDATE":"Starting Software Update",
     "CHECKING_SYSTEM_INTEGRITY":"Checking system integrity",
