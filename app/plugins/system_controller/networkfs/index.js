@@ -1191,8 +1191,13 @@ ControllerNetworkfs.prototype.mountPartition = function(partitionData){
     try {
         execSync(mountCMD, {uid:1000,gid:1000});
         self.storeMountedFolder(partitionData.mountFolder);
-        var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.CONNECTED');
-        self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
+        if (partitionData.label === 'issd' || partitionData.label === 'ihdd') {
+            self.bindInternalMemoryPosition();
+        } else {
+            var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.CONNECTED');
+            self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), message);
+        }
+
     } catch (e) {
         self.logger.error('Failed to mount ' + partitionData.label + ': ' + e );
     }
