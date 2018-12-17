@@ -303,7 +303,9 @@
     "DELETE_FOLDER":"Eliminazione cartella",
     "DELETING_FOLDER":"Eliminando la cartella",
     "SUCCESSFULLY_DELETED_FOLDER":"Cartella eliminata correttamente",
-    "ERROR_DELETING_FOLDER":"Errore nell'eliminazione della cartella"
+    "ERROR_DELETING_FOLDER":"Errore nell'eliminazione della cartella",
+    "SHOW_ADVANCED_SETTINGS":"Mostra impostazioni avanzate",
+    "SHOW_ADVANCED_SETTINGS_DOC":"Se abilitato, il sistema mostrerà le impostazioni avanzate. E' consigliato modificare queste impostazioni solo ad utenti esperti"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

@@ -2059,3 +2059,9 @@ CoreCommandRouter.prototype.getSystemVersion = function () {
 
     return this.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
 }
+
+CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getAdvancedSettingsStatus', '');
+}

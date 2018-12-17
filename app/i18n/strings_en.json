@@ -305,7 +305,9 @@
     "DELETE_FOLDER":"Delete folder",
     "DELETING_FOLDER":"Deleting folder",
     "SUCCESSFULLY_DELETED_FOLDER":"Successfully deleted folder",
-    "ERROR_DELETING_FOLDER":"Error in deleting folder"
+    "ERROR_DELETING_FOLDER":"Error in deleting folder",
+    "SHOW_ADVANCED_SETTINGS":"Show Advanced Settings",
+    "SHOW_ADVANCED_SETTINGS_DOC":"When enabled, the system will show some advanced settings to allow advanced tweakings. Those settings should be operated by experts only"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
