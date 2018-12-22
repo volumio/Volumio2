@@ -45,6 +45,8 @@ ControllerSystem.prototype.onVolumioStart = function () {
     this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
 	this.commandRouter.sharedVars.addConfigValue('system.name', 'string', self.config.get('playerName'));
 
+    process.env.ADVANCED_SETTINGS_MODE = this.config.get('advanced_settings_mode', true);
+
 	self.deviceDetect();
 	self.callHome();
 
@@ -87,6 +89,12 @@ ControllerSystem.prototype.getUIConfig = function () {
 		{
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName'));
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
+    var advancedSettingsStatus = self.getAdvancedSettingsStatus();
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value', advancedSettingsStatus);
+    if (process.env.SHOW_ADVANCED_SETTINGS_MODE_SELECTOR === 'true') {
+        self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].hidden', false);
+	}
+
     self.configManager.setUIConfigParam(uiconf,'sections[1].content[0].value', HDMIEnabled);
 
 
@@ -229,6 +237,11 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
 
     if (data['startup_sound'] != undefined) {
         self.config.set('startupSound', data['startup_sound']);
+    }
+
+    if (data['advanced_settings'] != undefined) {
+        self.config.set('advanced_settings_mode', data['advanced_settings']);
+        process.env.ADVANCED_SETTINGS_MODE = data['advanced_settings'];
     }
 
     var oldPlayerName = self.config.get('playerName');
@@ -977,4 +990,13 @@ ControllerSystem.prototype.setAdditionalSVInfo = function (data) {
     var self = this;
 	self.logger.info('Setting Additional System Software info: ' + data);
     additionalSVInfo = data;
+};
+
+ControllerSystem.prototype.getAdvancedSettingsStatus = function () {
+    var self = this;
+    if (process.env.ADVANCED_SETTINGS_MODE === 'true') {
+    	return true
+	} else {
+    	return false
+	}
 };

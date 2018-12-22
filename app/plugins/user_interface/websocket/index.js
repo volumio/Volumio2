@@ -1086,26 +1086,31 @@ function InterfaceWebUI(context) {
             connWebSocket.on('installPlugin', function (data) {
                 var selfConnWebSocket = this;
 
-                var returnedData = self.commandRouter.installPlugin(data.url);
-
-                if (returnedData != undefined) {
-                    returnedData.then(function (data) {
-                        selfConnWebSocket.emit('pushInstallPlugin', data);
-						var installed = self.commandRouter.getInstalledPlugins();
-						if (installed != undefined) {
-							installed.then(function (installedPLugins) {
-								self.broadcastMessage('pushInstalledPlugins',installedPLugins);
-							});
-						}
-						var available = self.commandRouter.getAvailablePlugins();
-						if (available != undefined) {
-							available.then(function (AvailablePlugins) {
-								selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
-							});
-						}
-                    });
-                }
-                else self.logger.error("Error on installing plugin");
+                if (process.env.WARNING_ON_PLUGIN_INSTALL === "true" && data.confirm !== true) {
+					data.confirm = true;
+                    return selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-info', 'emit':'closeModals','payload':''},{'name':self.commandRouter.getI18nString('PLUGINS.INSTALL'), 'class':'btn btn-warning', 'emit':'installPlugin', 'payload':data}]});
+                } else {
+                    var returnedData = self.commandRouter.installPlugin(data.url);
+                    if (returnedData != undefined) {
+                        returnedData.then(function (data) {
+                            selfConnWebSocket.emit('pushInstallPlugin', data);
+                            var installed = self.commandRouter.getInstalledPlugins();
+                            if (installed != undefined) {
+                                installed.then(function (installedPLugins) {
+                                    self.broadcastMessage('pushInstalledPlugins',installedPLugins);
+                                });
+                            }
+                            var available = self.commandRouter.getAvailablePlugins();
+                            if (available != undefined) {
+                                available.then(function (AvailablePlugins) {
+                                    selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
+                                });
+                            }
+                        });
+                    } else {
+                        self.logger.error("Error on installing plugin");
+                    }
+				}
             });
 
 			connWebSocket.on('updatePlugin', function (data) {
@@ -1308,8 +1313,7 @@ function InterfaceWebUI(context) {
             connWebSocket.on('preUninstallPlugin', function (data) {
                 var selfConnWebSocket = this;
 
-
-                selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('PLUGINS.UNINSTALL'), 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-warning'}]});
+                selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-info'},{'name':self.commandRouter.getI18nString('PLUGINS.UNINSTALL'), 'class':'btn btn-warning', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}}]});
 
             });
 

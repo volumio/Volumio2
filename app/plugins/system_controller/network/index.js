@@ -185,9 +185,16 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[5].content[2].value = config.get('secondary_dns');
 			}
 
+            var advancedSettingsStatus = self.commandRouter.getAdvancedSettingsStatus();
+            if (advancedSettingsStatus === false) {
+                uiconf.sections[1].hidden = true;
+                uiconf.sections[2].hidden = true;
+                uiconf.sections[4].hidden = true;
+                uiconf.sections[5].hidden = true;
+            }
 			//console.log(uiconf);
-
 			defer.resolve(uiconf);
+
 		})
 		.fail(function()
 		{

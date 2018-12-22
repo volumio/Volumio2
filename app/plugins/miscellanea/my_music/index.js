@@ -64,7 +64,11 @@ ControllerMyMusic.prototype.getUIConfig = function () {
             __dirname+'/../../../i18n/strings_en.json',
             __dirname + '/UIConfig.json')
             .then(function(uiconf)
-            {
+            {   var advancedSettingsStatus = self.commandRouter.getAdvancedSettingsStatus();
+                if (advancedSettingsStatus === false) {
+                    uiconf.sections[3].hidden = true;
+                    uiconf.sections[4].hidden = true;
+                }
                 var enableweb = self.getAdditionalConf('miscellanea', 'albumart', 'enableweb', true);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', enableweb);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[0].options'), enableweb));

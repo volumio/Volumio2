@@ -1,6 +1,7 @@
 { "devices":[
   {"name":"Raspberry PI","data":[
     {"id":"adafruit-max98357","name":"Adafruit MAX98357","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
+    {"id":"adafruit-uda1334a","name":"Adafruit UDA1334A","overlay":"hifiberry-dac,i2s-mmap","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-boss-dac","name":"Allo BOSS","overlay":"allo-boss-dac-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-digione","name":"Allo DigiOne","overlay":"allo-digione","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-katana-dac","name":"Allo Katana","overlay":"allo-katana-dac-audio","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},

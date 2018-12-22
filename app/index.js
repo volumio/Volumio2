@@ -2053,3 +2053,15 @@ CoreCommandRouter.prototype.getPluginEnabled = function (category, pluginName) {
 
     return this.pluginManager.isEnabled(category, pluginName);
 }
+
+CoreCommandRouter.prototype.getSystemVersion = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+}
+
+CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getAdvancedSettingsStatus', '');
+}

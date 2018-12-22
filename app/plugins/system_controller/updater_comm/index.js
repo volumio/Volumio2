@@ -163,7 +163,7 @@ updater_comm.prototype.onStart = function () {
     var self = this;
 
     setTimeout(()=>{
-        if (process.env.PUSH_UPDATES_COMM){
+        if (process.env.PUSH_UPDATES_COMM === "true"){
             self.pushUpdatesSubscribe();
         }
     },30000)
