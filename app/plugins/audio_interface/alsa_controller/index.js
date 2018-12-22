@@ -869,6 +869,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                 }
 			}
         }
+        if (volumioDeviceName === 'primo') {
+            cards.unshift(cards[2]);
+            cards.splice(3, 1);
+        }
 	} catch (e) {
 		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 		cards.push({id: '', name: namestring});
@@ -1400,7 +1404,12 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 
 	}
 
-	var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+    if (volumioDeviceName === 'primo') {
+        var i2soptions = [];
+    } else {
+        var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+	}
+
 	var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
 	if(i2soptions.length > 0) {
