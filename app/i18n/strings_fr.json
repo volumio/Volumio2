@@ -74,7 +74,8 @@
     "USB_DAC_CONNECTED":"Dac USB DAC Connecté",
     "NO_OUTPUT_DEVICE":"Pas de sortie audio disponible",
     "NO_OUTPUT_DEVICE_MESSAGE":"Connecté un péréphérique audio à ce matériel"
-    	  },
+    },
+	
     "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau cablé",
@@ -189,7 +190,11 @@
     "GOT_IT":"Compris",
     "MEDIA_SERVERS":"Serveurs Média",
     "ENABLED":"Activé",
-    "DISABLED":"Désactivé"
+    "DISABLED":"Désactivé",
+    "NO_RESULTS":"Pas de résultat",
+    "REMOVE_FAIL":"Impossible de retirer",
+    "CONNECTED":"Connecté",
+    "DISCONNECTED":"Déconnecté"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -301,7 +306,9 @@
     "DELETE_FOLDER":"Effacer le dossier",
     "DELETING_FOLDER":"Effacement du dossier",
     "SUCCESSFULLY_DELETED_FOLDER":"Dossier effacé avec succès",
-    "ERROR_DELETING_FOLDER":"Erreur d'effacement du dossier"
+    "ERROR_DELETING_FOLDER":"Erreur d'effacement du dossier",
+    "SHOW_ADVANCED_SETTINGS":"Montrer les réglages avancés",
+    "SHOW_ADVANCED_SETTINGS_DOC":"Si activé, donne accès à des réglages avancés. Pour les experts seulement"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
@@ -319,7 +326,10 @@
     "DOWNLOADING_FROM":"Télécharger le plugin depuis",
     "DOWNLOADING":"Téléchargement du Plugin en cours",
     "NO_CONFIGURATION_AVAILABLE":"Pas de configuration disponible",
-    "PLUGIN_START_ERROR":"Le démarrage de ce plugin a échoué. Mettez le à jour ou contactez le developpeur"   
+    "PLUGIN_START_ERROR":"Le démarrage de ce plugin a échoué. Mettez le à jour ou contactez le developpeur",
+    "CONFIRM_PLUGIN_INSTALL":"Installer le Plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Attention, les plugins developpés pades tierces parties peuvent conduire à des instabilités ou des comportements anormaux du système. Etes vous sur de vouloir installer ce plugin?",
+    "INSTALL":"Installer"
   },
    "WIZARD":{
    "CONGRATULATIONS":"Félicitations !",
