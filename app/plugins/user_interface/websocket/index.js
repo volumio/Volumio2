@@ -618,7 +618,7 @@ function InterfaceWebUI(context) {
 					} else if (data.service === 'streaming_services') {
 						setTimeout(()=> {
                             var uri = data.uri.substring(0, data.uri.lastIndexOf("/") );
-                        	response = response=self.musicLibrary.executeBrowseSource(uri);
+                        	response = self.musicLibrary.executeBrowseSource(uri);
                         if (response != undefined) {
                             response.then(function (result) {
                                 selfConnWebSocket.emit('pushBrowseLibrary', result);
