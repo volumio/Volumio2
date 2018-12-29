@@ -44,6 +44,7 @@
     "MIXER_TYPE_DOC":"Selecteer het mixertype: Geen = Geen volumeregeling, Software = Volumeregeling maar verlies van audiokwaliteit, Hardware = beste van beide werelden, biedt de mogelijkheid om het volume te veranderen zonder kwaliteitsverlies.",
     "ADVANCED_AUDIO_TWEAKS":"Geavanceerde audio-aanpassingen",
     "AUDIO_RESAMPLING":"Audio herbemonstering",
+    "AUDIO_RESAMPLING_DOC":"Deze instellingen regelen de opties voor het herbemonsteren van audio. Alleen voor het afspelen van lokale bestanden (geldt niet voor Shairport en diensten van derden zoals ROON).",
     "AUDIO_RESAMPLING_SETTINGS_SAVED":"Audio herbemonstering instellingen opgeslagen",
     "TARGET_BITDEPTH":"Doel bit diepte",
     "TARGET_SAMPLERATE":"Doel sample snelheid",
@@ -186,7 +187,13 @@
     "ERROR":"Fout",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE":"De muziek wordt gescand en het pictogram linksonder blijft ronddraaien totdat uw bibliotheek succesvol is geïndexeerd. Aangezien het systeem mogelijk traag kan reageren tijdens deze bewerking, moet u het systeem niet gebruiken terwijl muziek wordt geïndexeerd.",
     "GOT_IT":"Begrepen",
-    "MEDIA_SERVERS":"Media Servers"
+    "MEDIA_SERVERS":"Media Servers",
+    "ENABLED":"Ingeschakeld",
+    "DISABLED":"Uitgeschakeld",
+    "NO_RESULTS":"Geen resultaten",
+    "REMOVE_FAIL":"Kon niet verwijderen",
+    "CONNECTED":"Verbonden",
+    "DISCONNECTED":"Verbinding verbroken"
   },
   "APPEARANCE":{
     "APPEARANCE":"Uiterlijk",
@@ -232,7 +239,8 @@
     "ALARM":"Wekker",
     "SLEEP":"Slaap",
     "CREDITS":"Credits",
-    "SHUTDOWN":"Afsluiten"
+    "SHUTDOWN":"Afsluiten",
+    "HELP":"Help"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Wekker",
@@ -289,7 +297,17 @@
     "CREDITS_OPEN_SOURCE_LICENSES":"Credits en Open Source-licenties",
     "VIDEO_OUT_OPTIONS": "Videouitgang opties",
     "HDMI_UI_DOC":"Gebruikersinterface weergeven via HDMI videouitgang. WAARSCHUWING: dit zal de systeemprestaties verminderen",
-    "HDMI_UI":"Gebruikersinterface via HDMI"
+    "HDMI_UI":"Gebruikersinterface via HDMI",
+    "STARTING_SOFTWARE_UPDATE":"Software-update starten",
+    "CHECKING_SYSTEM_INTEGRITY":"Systeemintegriteit controleren",
+    "SYSTEM_INTEGRITY_CHECK_FAILED":"Systeemsoftware-integriteitscontrole mislukt, handmatig bewerkte bestanden werden gedetecteerd. Systeemsoftware-update is onder deze omstandigheden niet mogelijk. Voer een fabrieksreset uit of verwijder gebruikersgegevens en probeer het dan opnieuw.",
+    "UPDATE_FAILED":"Update failed",
+    "DELETE_FOLDER":"Delete folder",
+    "DELETING_FOLDER":"Deleting folder",
+    "SUCCESSFULLY_DELETED_FOLDER":"Successfully deleted folder",
+    "ERROR_DELETING_FOLDER":"Error in deleting folder",
+    "SHOW_ADVANCED_SETTINGS":"Show Advanced Settings",
+    "SHOW_ADVANCED_SETTINGS_DOC":"When enabled, the system will show some advanced settings to allow advanced tweakings. Those settings should be operated by experts only"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mijn Web Radiostations",
@@ -306,12 +324,32 @@
     "UPDATING_PLUGIN":"Plug-in bijwerken",
     "DOWNLOADING_FROM":"Plug-in downloaden van ",
     "DOWNLOADING":"Download Plug-in",
-    "NO_CONFIGURATION_AVAILABLE":"Geen configuratie beschikbaar"
+    "NO_CONFIGURATION_AVAILABLE":"Geen configuratie beschikbaar",
+    "PLUGIN_START_ERROR":"Deze plugin start niet. Installeer een bijgewerkte versie of neem contact op met de ontwikkelaar van de plugin",
+    "CONFIRM_PLUGIN_INSTALL":"Install plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Waarschuwing, community plugins zijn ontwikkeld door externe ontwikkelaars en kunnen resulteren in onverwacht gedrag en systeeminstabiliteit. Weet u zeker dat u deze plugin wilt installeren?",
+    "INSTALL":"Installeren"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Gefeliciteerd!",
     "DEVICE_SUCCESSFULLY_CONFIGURED":"is geconfigureerd en is klaar om muziek af te spelen",
     "PLEASE_DONATE":"Indien u Volumio gebruikt, wilt u dan een donatie in overweging nemen? U kunt het verschil maken voor dit project!",
     "RUN_FIRST_CONFIG_WIZARD":"Voer de eerste configuratie-wizard uit."
+  },
+  "UPDATER":{
+    "PREPARING_UPDATE":"Update voorbereiden",
+    "CREATING_BACKUP":"Back-up maken",
+    "DOWNLOADING_UPDATE":"Nieuwe update downloaden",
+    "CLEANING":"Opschonen van oude bestanden",
+    "FINALIZING_UPDATE":"Update afronden",
+    "ERROR":"Fout",
+    "ERROR_UPDATE_FAILED":"Fout: update mislukt, herstart het systeem en probeer het opnieuw",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"Update bestand niet gevonden",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Succesvol bijgewerkt naar versie",
+    "SYSTEM_RESTART_REQUIRED":"Start uw apparaat opnieuw op",
+    "SYSTEM_RESTART_IN":"Uw apparaat wordt opnieuw opgestart over ",
+    "UPDATE":"Update",
+    "CHECKING_FOR_UPDATES":"Controleren op updates",
+    "CHECKING_FOR_UPDATES_WAIT":"Even geduld a.u.b."
   }
 }
