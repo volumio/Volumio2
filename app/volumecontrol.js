@@ -113,7 +113,7 @@ function CoreVolumeController(commandRouter) {
             } else {
                 var volumeParamsArray = ['get', '-c', device, mixer];
             }
-            amixer(['get', '-c', device, mixer], function (err, data) {
+            amixer(volumeParamsArray, function (err, data) {
                 if (err) {
                     cb(err);
                 } else {
