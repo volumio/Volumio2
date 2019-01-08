@@ -14,6 +14,7 @@ volume                             Gives Current Volume Information
 volume <desired volume>            Sets Volume at desired level 0-100
 volume mute                        Mutes
 volume unmute                      Unmutes
+volume toggle                      Mutes/Unmutes
 volume plus                        Increases Volume of one step
 volume minus                       Decreases Volume of one step
 seek plus                          Forwards 10 seconds in the song
@@ -27,6 +28,7 @@ random                             Toggles randomization of queue
 
 play
 pause
+toggle                             Toggles between play/pause
 next
 previous
 stop
