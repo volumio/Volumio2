@@ -28,6 +28,7 @@ random                             Toggles randomization of queue
 
 play
 pause
+toggle                             Toggles between play/pause
 next
 previous
 stop
