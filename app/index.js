@@ -1593,7 +1593,8 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
         this.logger.info("Loading i18n strings for locale "+language_code);
     	this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
     } catch(e){
-        this.logger.error("Failed to load i18n strings for locale "+language_code);
+        this.logger.error("Failed to load i18n strings for locale "+language_code + ": " +e);
+        this.i18nStrings = this.i18nStringsDefaults;
     }
     
     var categories=this.pluginManager.getPluginCategories();
@@ -1633,7 +1634,7 @@ CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionar
 
 
 	try {
-		fs.statSync(dictionaryFile);
+		fs.readJsonSync(dictionaryFile);
 	} catch(e) {
 		dictionaryFile = defaultDictionaryFile;
 	}
