@@ -108,7 +108,8 @@
     "ENABLE_CUSTOM_DNS":"允许定制的DNS",
     "PRIMARY_DNS":"主DNS",
     "SECONDARYY_DNS":"附DNS",
-    "DNS_ERROR_INFO":"请正确填写2个DNS服务地址。"
+    "DNS_ERROR_INFO":"请正确填写2个DNS服务地址。",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"成功与....网络连接,请继续进行下一步"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"设置一个别名显示在NAS的挂载点中",
