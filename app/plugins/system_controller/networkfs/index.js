@@ -1091,7 +1091,7 @@ ControllerNetworkfs.prototype.mountDevice = function(device){
     if (fsLabel && device.DEVNAME && device.ID_FS_TYPE) {
     	if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio') {
             self.logger.info('Mounting Device ' + fsLabel);
-            if (fsLabel === 'issd' || fsLabel === 'ihdd') {
+            if (fsLabel === 'issd' || fsLabel === 'ihdd' || fsLabel === 'Internal SSD' || fsLabel === 'Internal HDD') {
                 var mountFolder = removableMountPoint + 'INTERNAL/';
                 self.switchInternalMemoryPosition();
             } else {
@@ -1121,7 +1121,7 @@ ControllerNetworkfs.prototype.umountDevice = function(device){
     }
 
     if (fsLabel && device.DEVNAME && device.ID_FS_TYPE) {
-        if (fsLabel === 'issd' || fsLabel === 'ihdd') {
+        if (fsLabel === 'issd' || fsLabel === 'ihdd' || fsLabel === 'Internal SSD' || fsLabel === 'Internal HDD') {
             var mountFolder = removableMountPoint + 'INTERNAL/';
         } else {
             var mountFolder = removableMountPoint + 'USB/' + fsLabel;
@@ -1191,7 +1191,7 @@ ControllerNetworkfs.prototype.mountPartition = function(partitionData){
     try {
         execSync(mountCMD, {uid:1000,gid:1000});
         self.storeMountedFolder(partitionData.mountFolder);
-        if (partitionData.label === 'issd' || partitionData.label === 'ihdd') {
+        if (partitionData.label === 'issd' || partitionData.label === 'ihdd' || partitionData.label === 'Internal SSD' || partitionData.label === 'Internal HDD') {
             self.bindInternalMemoryPosition();
         } else {
             var message = partitionData.label + ' ' + self.commandRouter.getI18nString('COMMON.CONNECTED');
