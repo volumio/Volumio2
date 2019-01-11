@@ -914,7 +914,14 @@ ControllerAlsa.prototype.getAplayInfo = function () {
                 }
             }
             if ((namesArray.includes('TinkerAudio OnBoard') || namesArray.includes('USB Audio OnBoard')) && namesArray.includes('ES90x8Q2M DAC')){
-                volumioDeviceName = 'primo';
+            	try {
+                    var sysVariant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString();
+				} catch(e) {
+            		self.logger.error('Could not read volumio variant: ' + e);
+				}
+				if (sysVariant === 'volumio') {
+            		volumioDeviceName = 'primo';
+				}
 			}
 	} catch (e) {
         console.log('Cannot get aplay -l output: '+e);
@@ -1415,7 +1422,7 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 
 	}
 
-    if (volumioDeviceName === 'primo') {
+    if (volumioDeviceName === 'primo' || self.config.get('ignore_i2s', false)) {
         var i2soptions = [];
     } else {
         var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
