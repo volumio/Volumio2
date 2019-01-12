@@ -915,12 +915,12 @@ ControllerAlsa.prototype.getAplayInfo = function () {
             }
             if ((namesArray.includes('TinkerAudio OnBoard') || namesArray.includes('USB Audio OnBoard')) && namesArray.includes('ES90x8Q2M DAC')){
             	try {
-                    var sysVariant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString();
+                    var sysVariant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString().replace('\n','');
 				} catch(e) {
             		self.logger.error('Could not read volumio variant: ' + e);
 				}
 				if (sysVariant === 'volumio') {
-            		volumioDeviceName = 'primo';
+            				volumioDeviceName = 'primo';
 				}
 			}
 	} catch (e) {
