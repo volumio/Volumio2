@@ -134,7 +134,10 @@ PlaylistManager.prototype.removeFromPlaylist = function (name, service, uri) {
 };
 
 PlaylistManager.prototype.playPlaylist = function (name) {
-	var self = this;
+    var self = this;
+    
+	// notify potential clients / plugins of the playlist requested
+	self.commandRouter.broadcastMessage('playingPlaylist', name);
 
 	self.commandRouter.pushConsoleMessage('Play playlist ' + name);
 
