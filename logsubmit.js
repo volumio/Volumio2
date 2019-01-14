@@ -9,7 +9,8 @@ var commandArray = [
   'iwconfig',
   'aplay -l',
   'ps -ef',
-  'sudo journalctl -p 7'
+  'sudo journalctl -p 7',
+  'cat /var/log/mpd.log'
 ];
 
 // Up to two arguments may be given:
