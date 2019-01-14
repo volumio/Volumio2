@@ -6,9 +6,11 @@ var commandArray = [
   'cat /proc/version',
   'cat /etc/os-release',
   'ifconfig',
-  'iwconfig',
+  'sudo iwconfig',
   'aplay -l',
   'ps -ef',
+  'df -h',
+  'mount',
   'sudo journalctl -p 7',
   'cat /var/log/mpd.log'
 ];
