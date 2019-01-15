@@ -700,6 +700,9 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		var outdevice = self.config.get('outputdevice');
 		if (outdevice != 'softvolume'){
 			self.enableSoftMixer(outdevice);
+			var outdevice = 'softvolume';
+            self.config.set('outputdevice', outdevice);
+            self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
 		}
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
