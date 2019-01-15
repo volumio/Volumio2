@@ -700,6 +700,9 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		var outdevice = self.config.get('outputdevice');
 		if (outdevice != 'softvolume'){
 			self.enableSoftMixer(outdevice);
+			var outdevice = 'softvolume';
+            self.config.set('outputdevice', outdevice);
+            self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
 		}
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
@@ -976,6 +979,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var mixertpye = '';
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
+    var outputdevice = self.config.get('outputdevice');
 
     var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
@@ -1016,6 +1020,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
                     defaultmixer = carddata.cards[n].defaultmixer;
                     self.logger.info('Found match in Cards Database: setting mixer '+ defaultmixer + ' for card ' + currentcardname);
+                    self.commandRouter.sharedVars.set('alsa.outputdevicemixer', defaultmixer);
 
                 }
 			}
@@ -1047,18 +1052,26 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
                         }
 					}
 				}
-				if (mixers[0] && mixers[0] != 'SoftMaster') {
-					defaultmixer = mixers[0].toString()
-					self.logger.info('Setting mixer ' + defaultmixer + ' for card ' + currentcardname);
-					this.mixertype = 'Hardware';
-
-
+                if (outputdevice === 'softvolume') {
+                    self.logger.info('Setting default mixerSoftMaster for Softvolume device');
+                    this.mixertype = 'Software';
+                    defaultmixer = 'SoftMaster';
+                    self.commandRouter.sharedVars.set('alsa.outputdevicemixer', defaultmixer);
 				} else {
-					self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
-					this.mixertype = 'None';
-					//defaultmixer = 'SoftMaster';
-					//self.enableSoftMixer(device);
+                    if (mixers[0] && mixers[0] != 'SoftMaster') {
+                        defaultmixer = mixers[0].toString()
+                        self.logger.info('Setting mixer ' + defaultmixer + ' for card ' + currentcardname);
+                        this.mixertype = 'Hardware';
+                        self.commandRouter.sharedVars.set('alsa.outputdevicemixer', defaultmixer);
+                    } else {
+                        self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
+                        this.mixertype = 'None';
+                        self.commandRouter.sharedVars.set('alsa.outputdevicemixer', none);
+                        //defaultmixer = 'SoftMaster';
+                        //self.enableSoftMixer(device);
+                    }
 				}
+
 			}
 		} catch (e) {}
 	}
@@ -1312,7 +1325,6 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 	var valvolumemax = self.config.get('volumemax');
 	var valmixer = self.config.get('mixer');
 	var valmixertype = self.config.get('mixer_type');
-
 
 	if (valdevice != 'softvolume') {
 		if (cards[valdevice]!= undefined){
