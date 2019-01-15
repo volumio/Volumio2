@@ -2061,11 +2061,15 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeArtistName = artistName.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
+
 		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
 			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 		}
 		else {
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+            // This section is commented beacuse, although correct it results in some albums not playing.
+            // Until we find a better way to handle this we search just for album
+			//var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+            var GetAlbum = "find album \""+safeAlbumName+"\"";
 		}
 
 		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {
