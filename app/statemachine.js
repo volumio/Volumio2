@@ -511,9 +511,10 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
     	self.currentVolume = volumeData.vol;
     	self.currentMute = volumeData.mute;
     	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
+    	this.updateTrackBlock();
+    	self.commandRouter.volumioretrievevolume();
 	})
 
-	this.updateTrackBlock();
 	return libQ.resolve();
 };
 
