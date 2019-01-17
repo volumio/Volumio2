@@ -24,6 +24,8 @@
     {"id":"justboom-digi","name":"JustBoom Digi Boards","overlay":"justboom-digi","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":["JustBoom Digi HAT","JustBoom Digi HAT v1.1"],"needsreboot":"yes"},
     {"id":"mamboberry-dac","name":"Mamboberry LS DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"nanosound-dac","name":"NanoSound DAC","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
+    {"id":"osa-dacberry-one-plus","name":"OSA DACBerry ONE+","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
+    {"id":"osa-dacberry-pro","name":"OSA DACBerry PRO","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
     {"id":"502-dac","name":"PI 2 Design 502DAC","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"502-dac-pro","name":"PI 2 Design 502DAC Pro","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"503hta-hybrid","name":"PI 2 Design 503HTA Hybrid Tube Amp","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
