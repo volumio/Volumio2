@@ -2066,3 +2066,40 @@ CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
 
     return this.executeOnPlugin('system_controller', 'system', 'getAdvancedSettingsStatus', '');
 }
+
+
+// ==========================  AUDIO OUTPUTS ==============================
+
+
+CoreCommandRouter.prototype.addAudioOutput = function (data) {
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('audio_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('audio_interface', sInterface);
+			if (typeof thisInterface.addAudioOutput === "function")
+				return thisInterface.addAudioOutput(data);
+		})
+	);
+};
+
+CoreCommandRouter.prototype.updateAudioOutput = function (data) {
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('audio_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('audio_interface', sInterface);
+			if (typeof thisInterface.updateAudioOutput === "function")
+				return thisInterface.updateAudioOutput(data);
+		})
+	);
+};
+
+CoreCommandRouter.prototype.addAudioOutput = function (data) {
+	var self = this;
+	return libQ.all(
+		libFast.map(this.pluginManager.getPluginNames('audio_interface'), function (sInterface) {
+			var thisInterface = self.pluginManager.getPlugin('audio_interface', sInterface);
+			if (typeof thisInterface.removeAudioOutput === "function")
+				return thisInterface.removeAudioOutput(data);
+		})
+	);
+};
