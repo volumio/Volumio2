@@ -649,3 +649,8 @@ ControllerUPNPBrowser.prototype.prefetch = function (trackBlock) {
         	return self.mpdPlugin.sendMpdCommand('consume 1',[]);
     	});
 }
+
+ControllerUPNPBrowser.prototype.addToFavourites = function (data) {
+    var self=this;
+    console.log(data)
+}

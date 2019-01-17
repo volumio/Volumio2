@@ -206,12 +206,13 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 
 	if (title){
 		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), title + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
-	} else self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), uri + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+	} else {
+	    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), uri + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+    }
 
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
-        self.commandRouter.executeOnPlugin('music_service', service,'addToFavourites',{uri:uri,service:service});
         return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
 	}
 };
@@ -595,6 +596,43 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                     });
 
                 });
+            } else {
+                var explodedUri = self.commandRouter.executeOnPlugin('music_service', service,'explodeUri',uri);
+                explodedUri.then(function(info){
+                    var entries = [];
+                    var track = info[0];
+                    entries.push({
+                        service: service,
+                        uri: uri,
+                        title: track.name,
+                        artist: track.artist,
+                        album: track.album,
+                        albumart: track.albumart
+                    });
+                    fs.readJson(filePath, function (err, data) {
+                        if (err)
+                            defer.resolve({success: false});
+                        else {
+
+                            if(!data)
+                                data=[];
+
+                            var output = data.concat(entries);
+
+                            self.saveJSONFile(folder, name, output).then(function(){
+                                var favourites = self.commandRouter.checkFavourites({uri: path});
+                                defer.resolve(favourites);
+                            }).fail(function(){
+                                defer.resolve({success:false});
+                            })
+                        }
+                    });
+
+                    })
+                    .fail(function(err){
+                        self.logger.error('Could not add to playlist: ' + uri);
+                    })
+
             }
         })
 
