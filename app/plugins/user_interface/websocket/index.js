@@ -1324,9 +1324,9 @@ function InterfaceWebUI(context) {
 				if (outputs != undefined) {
 					self.logger.info(JSON.stringify(outputs));
 					selfConnWebSocket.emit('pushAudioOutputs', outputs);
-					});
+					};
 				}
-			})
+			)
 
 
 

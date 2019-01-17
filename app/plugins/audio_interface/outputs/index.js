@@ -105,13 +105,14 @@ outputs.prototype.addAudioOutput = function (data) {
 
 	self.logger.info("Adding audio output: ", data.id);
 
-	if(data.id && data.name && data.type && data.icon && data.available &&
-	data.enabled && data.volumeAvailable && data.volume && data.mute){
+	if(data.id && data.name && data.type && data.icon && data.available !== undefined &&
+	data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume && data.mute !== undefined){
 		this.output["availableOutputs"].push(data);
-		this.pushAudioOutput();
+		this.pushAudioOutputs();
 	}
 	else {
-		self.logger.error("Error: format not recognized");
+		self.logger.error("Audio Outputs: can't add new output, because of " +
+			"missing parameters");
 	}
 }
 
@@ -121,8 +122,8 @@ outputs.prototype.updateAudioOutput = function (data) {
 	self.logger.info("Updating audio output: ", data.id);
 
 
-	if(data.id && data.name && data.type && data.icon && data.available &&
-		data.enabled && data.volumeAvailable && data.volume && data.mute) {
+	if(data.id && data.name && data.type && data.icon && data.available !== undefined &&
+		data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume && data.mute !== undefined){
 		var i = 0;
 		var list = this.output["availableOutputs"];
 		var found = false;
@@ -137,10 +138,11 @@ outputs.prototype.updateAudioOutput = function (data) {
 			this.output["availableOutputs"][i] = data;
 		}
 
-		this.pushAudioOutput();
+		this.pushAudioOutputs();
 	}
 	else {
-		self.logger.error("Error: format not recognized");
+		self.logger.error("Audio Outputs: can't add new output, because of " +
+			"missing parameters");
 	}
 }
 
@@ -163,16 +165,16 @@ outputs.prototype.removeAudioOutput = function (id) {
 		this.output["availableOutputs"][i].splice(i, 1);
 	}
 
-	this.pushAudioOutput();
+	self.pushAudioOutputs();
 }
 
-outputs.prototype.getAudioOutput = function () {
+outputs.prototype.getAudioOutputs = function () {
 	var self = this;
 
 	return self.output;
 }
 
-outputs.prototype.pushAudioOutput = function () {
+outputs.prototype.pushAudioOutputs = function () {
 	var self = this;
 
 	self.commandRouter.broadcastMessage('pushAudioOutputs', self.output);
