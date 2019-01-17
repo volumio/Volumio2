@@ -493,6 +493,7 @@ ControllerUPNPBrowser.prototype.explodeUri = function(uri) {
 						var obj = {
 							"service": "upnp_browser",
 							"uri": item.source,
+							"realUri":uri,
 							"type": "song",
 							"albumart": albumart,
 							"artist": item.artist,
