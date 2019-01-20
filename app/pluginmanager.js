@@ -76,9 +76,8 @@ function PluginManager(ccommand, server) {
 	var myVolumioPMPath = '/myvolumio/app/myvolumio-pluginmanager';
     if (fs.existsSync(myVolumioPMPath)) {
     	this.logger.info('MYVOLUMIO Environment detected');
-        self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager);
+        self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager, self.config);
     }
-
 }
 
 PluginManager.prototype.startPlugins = function () {
