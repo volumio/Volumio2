@@ -1317,6 +1317,17 @@ function InterfaceWebUI(context) {
 
             });
 
+            connWebSocket.on('getAudioOutputs', function (data) {
+				var selfConnWebSocket = this;
+
+				var outputs = self.commandRouter.getAudioOutputs();
+				if (outputs != undefined) {
+					self.logger.info(JSON.stringify(outputs));
+					selfConnWebSocket.emit('pushAudioOutputs', outputs);
+					};
+				}
+			)
+
 
 
 	connWebSocket.on('saveQueueToPlaylist', function (data) {

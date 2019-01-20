@@ -62,6 +62,12 @@
 	}
   },
   "audio_interface": {
+    "outputs": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      }
+    },
     "upnp": {
       "enabled": {
         "type": "boolean",
