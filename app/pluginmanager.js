@@ -73,7 +73,12 @@ function PluginManager(ccommand, server) {
 		}
 	}
 
-  self.myVolumioPluginManager = new (require(__dirname + '/myvolumio-pluginmanager'))(self.coreCommand, self.websocketServer, self.configManager);
+	var myVolumioPMPath = __dirname + '/myvolumio-pluginmanager';
+    if (fs.existsSync(myVolumioPMPath)) {
+    	this.logger.info('MYVOLUMIO Environment detected');
+        self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager);
+    }
+
 }
 
 PluginManager.prototype.startPlugins = function () {
@@ -85,7 +90,9 @@ PluginManager.prototype.startPlugins = function () {
     this.loadCorePlugins();
     this.startCorePlugins();
 
-    this.myVolumioPluginManager.startPlugins();
+    if (this.myVolumioPluginManager !== undefined) {
+        this.myVolumioPluginManager.startPlugins();
+	}
 }
 
 
@@ -440,9 +447,12 @@ PluginManager.prototype.getPluginCategories = function () {
 		if (libFast.indexOf(categories, metadata.category) == -1)
 			categories.push(metadata.category);
 	}
+  if (self.myVolumioPluginManager !== undefined) {
+      let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
+      categories.concat(myVolumioCategories);
+  }
 
-  let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
-  return categories.concat(myVolumioCategories);
+  return categories
 };
 
 PluginManager.prototype.getPluginNames = function (category) {
@@ -457,8 +467,12 @@ PluginManager.prototype.getPluginNames = function (category) {
 			names.push(metadata.name);
 	}
 
-  let myVolumioNames = self.myVolumioPluginManager.getPluginNames();
-  return names.concat(myVolumioNames);
+  if (self.myVolumioPluginManager !== undefined) {
+      let myVolumioNames = self.myVolumioPluginManager.getPluginNames();
+      names.concat(myVolumioNames);
+  }
+
+  return names
 };
 
 /**
@@ -608,9 +622,11 @@ PluginManager.prototype.getPlugin = function (category, name) {
 	var self = this;
 	if (self.corePlugins.get(category + '.' + name)) {
 		return self.corePlugins.get(category + '.' + name).instance;
-	} else {
+	} else if (self.myVolumioPluginManager !== undefined) {
         return self.myVolumioPluginManager.getPlugin(category, name);
-    }
+    } else {
+		self.logger.error('Could not retrieve plugin ' + category + ' ' + name);
+	}
 };
 
 /**
