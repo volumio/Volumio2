@@ -165,6 +165,15 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         .then(function(content){
             for(var j in content)
             {
+                /**
+                 * Cycling through items
+                 */
+                for(var k in content[j])
+                {
+                    var track=content[j][k]
+                    track.realUri=track.uri;
+                }
+
                 if(content[j].samplerate===undefined)
                 {
                     content[j].samplerate=self.defaultSampleRate;
@@ -187,6 +196,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
                 }
                 else  self.arrayQueue = self.arrayQueue.concat(content[j]);
 
+                    console.log(content[j])
             }
 
             self.saveQueue();
@@ -208,6 +218,21 @@ CorePlayQueue.prototype.clearAddPlayQueue = function (arrayItems) {
     this.commandRouter.pushConsoleMessage('CorePlayQueue::clearAddPlayQueue');
     this.arrayQueue = [];
     this.arrayQueue = this.arrayQueue.concat(arrayItems);
+
+    for(var i in this.arrayQueue) {
+        var item = this.arrayQueue[i];
+
+        if (item.uri != undefined) {
+            /**
+             * Copying uri as realUri so that any plugin accessing getStreamUrl can have a
+             * copy of the original uri
+             */
+            item.realUri = item.uri;
+
+        }
+    }
+
+
     this.saveQueue();
 
     this.commandRouter.serviceClearAddPlayTracks(arrayItems,arrayItems[0].service);
