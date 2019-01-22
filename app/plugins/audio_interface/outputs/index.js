@@ -106,9 +106,21 @@ outputs.prototype.addAudioOutput = function (data) {
 	self.logger.info("Adding audio output: ", data.id);
 
 	if(data.id && data.name && data.type && data.icon && data.available !== undefined &&
-	data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume && data.mute !== undefined){
-		this.output["availableOutputs"].push(data);
-		this.pushAudioOutputs();
+	data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume !== undefined && data.mute !== undefined){
+		let i = 0;
+		let existing = false;
+		while (i < output["availableOutputs"].length && !existing){
+			if (output["availableOutputs"][i].id === data.id){
+				existing = true;
+			}
+		}
+		if(!existing) {
+			this.output["availableOutputs"].push(data);
+			this.pushAudioOutputs();
+		}
+		else{
+			self.logger.error("Can't add: ", data.id, " otuput is already in list");
+		}
 	}
 	else {
 		self.logger.error("Audio Outputs: can't add new output, because of " +
