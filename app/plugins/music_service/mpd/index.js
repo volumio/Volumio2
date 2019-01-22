@@ -1271,13 +1271,17 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                             }
 
                             name = namearr.pop();
-                            list.push({
-                                type: dirtype,
-                                title: name,
-                                service:'mpd',
-                                albumart: albumart,
-                                uri: s0 + path
-                            });
+
+                            // exclude hidden folders (eg. ".Trashes")
+                            if (!name.startsWith('.')) {
+                                list.push({
+                                    type: dirtype,
+                                    title: name,
+                                    service:'mpd',
+                                    albumart: albumart,
+                                    uri: s0 + path
+                                });
+                            }
                         }
                         else if (line.indexOf('playlist:') === 0) {
                             path = line.slice(10);
