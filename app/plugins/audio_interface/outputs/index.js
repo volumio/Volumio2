@@ -109,8 +109,8 @@ outputs.prototype.addAudioOutput = function (data) {
 	data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume !== undefined && data.mute !== undefined){
 		let i = 0;
 		let existing = false;
-		while (i < output["availableOutputs"].length && !existing){
-			if (output["availableOutputs"][i].id === data.id){
+		while (i < self.output["availableOutputs"].length && !existing){
+			if (self.output["availableOutputs"][i].id === data.id){
 				existing = true;
 			}
 		}
