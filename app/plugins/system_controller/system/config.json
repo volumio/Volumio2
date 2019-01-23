@@ -22,9 +22,5 @@
   "show_wizard": {
     "value": true,
     "type": "boolean"
-  },
-  "hdmi_enabled": {
-    "value": true,
-    "type": "boolean"
   }
 }
