@@ -2080,6 +2080,7 @@ CoreCommandRouter.prototype.addAudioOutput = function (data) {
 	} else {
 		this.logger.error('WARNING: No Audio Output plugin found');
 	}
+
 };
 
 CoreCommandRouter.prototype.updateAudioOutput = function (data) {

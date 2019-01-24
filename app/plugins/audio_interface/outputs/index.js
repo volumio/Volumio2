@@ -103,23 +103,25 @@ outputs.prototype.setConf = function(varName, varValue) {
 outputs.prototype.addAudioOutput = function (data) {
 	var self = this;
 
-	self.logger.info("Adding audio output: ", data.id);
+	let new_output = data;
 
-	if(data.id && data.name && data.type && data.icon && data.available !== undefined &&
-	data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume !== undefined && data.mute !== undefined){
+	self.logger.info("Adding audio output: ", new_output.id);
+
+	if(new_output.id && new_output.name && new_output.type){
 		let i = 0;
 		let existing = false;
-		while (i < self.output["availableOutputs"].length && !existing){
-			if (self.output["availableOutputs"][i].id === data.id){
+		while (i < self.output.availableOutputs.length && !existing){
+			if (self.output.availableOutputs[i].id === new_output.id){
 				existing = true;
 			}
+			i += 1;
 		}
 		if(!existing) {
-			this.output["availableOutputs"].push(data);
+			self.output.availableOutputs.push(new_output);
 			this.pushAudioOutputs();
 		}
 		else{
-			self.logger.error("Can't add: ", data.id, " otuput is already in list");
+			self.logger.error("Can't add: ", new_output.id, " otuput is already in list");
 		}
 	}
 	else {
@@ -131,23 +133,24 @@ outputs.prototype.addAudioOutput = function (data) {
 outputs.prototype.updateAudioOutput = function (data) {
 	var self = this;
 
-	self.logger.info("Updating audio output: ", data.id);
+	var new_output = data;
+
+	self.logger.info("Updating audio output: ", new_output.id);
 
 
-	if(data.id && data.name && data.type && data.icon && data.available !== undefined &&
-		data.enabled !== undefined && data.volumeAvailable !== undefined && data.volume && data.mute !== undefined){
+	if(new_output.id && new_output.name && new_output.type){
 		var i = 0;
-		var list = this.output["availableOutputs"];
+		var list = self.output.availableOutputs;
 		var found = false;
 
 		while (i < list.length && !found) {
-			i += 1;
-			if (list[i].id == data.id)
+			if (list[i].id == new_output.id)
 				found = true;
+			i += 1;
 		}
 
-		if (i < this.output["availableOutputs"].length) {
-			this.output["availableOutputs"][i] = data;
+		if (i < self.output.availableOutputs.length) {
+			self.output.availableOutputs[i] = new_output;
 		}
 
 		this.pushAudioOutputs();
@@ -161,20 +164,20 @@ outputs.prototype.updateAudioOutput = function (data) {
 outputs.prototype.removeAudioOutput = function (id) {
 	var self = this;
 
-	self.logger.info("Removing audio output: ", data.id);
+	self.logger.info("Removing audio output: ", id);
 
 	var i = 0;
-	var list = this.output["availableOutputs"];
+	var list = self.output.availableOutputs;
 	var found = false;
 
 	while (i < list.length && !found) {
-		i += 1;
 		if (list[i].id == id)
 			found = true;
+		i += 1;
 	}
 
-	if (i < this.output["availableOutputs"].length) {
-		this.output["availableOutputs"][i].splice(i, 1);
+	if (i < self.output.availableOutputs.length) {
+		self.output.availableOutputs[i].splice(i, 1);
 	}
 
 	self.pushAudioOutputs();
