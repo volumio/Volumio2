@@ -73,7 +73,7 @@ function PluginManager(ccommand, server) {
 		}
 	}
 
-	var myVolumioPMPath = __dirname + '/myvolumio-pluginmanager';
+	var myVolumioPMPath = '/myvolumio/app/myvolumio-pluginmanager';
     if (fs.existsSync(myVolumioPMPath)) {
     	this.logger.info('MYVOLUMIO Environment detected');
         self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager);
@@ -447,10 +447,10 @@ PluginManager.prototype.getPluginCategories = function () {
 		if (libFast.indexOf(categories, metadata.category) == -1)
 			categories.push(metadata.category);
 	}
-  if (self.myVolumioPluginManager !== undefined) {
-      let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
-      categories.concat(myVolumioCategories);
-  }
+	if (self.myVolumioPluginManager !== undefined) {
+		let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
+		categories.concat(myVolumioCategories);
+	}
 
   return categories
 };
