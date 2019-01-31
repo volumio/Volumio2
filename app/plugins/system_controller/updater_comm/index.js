@@ -291,23 +291,25 @@ updater_comm.prototype.pushUpdatesSubscribe = function () {
     var systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
     var name = self.getAdditionalConf('system_controller', 'system', 'playerName', 'none');
     systemInfo.then((info)=>{
-        var socket = io.connect('http://pushupdates.volumio.org');
-        var subscribeData = {
-            'id': id,
-            'systemversion': info.systemversion,
-            'variant': info.variant,
-            'hardware': info.hardware,
-            'isHw': isHw,
-            'name': name
-
-        };
-        socket.emit('pushUpdateSubscribe', subscribeData);
-        socket.on('ack', function(data) {
-            socket.disconnect();
-
-        });
+        try {
+            var socket = io.connect('http://pushupdates.volumio.org');
+            var subscribeData = {
+                'id': id,
+                'systemversion': info.systemversion,
+                'variant': info.variant,
+                'hardware': info.hardware,
+                'isHw': isHw,
+                'name': name
+            };
+            socket.emit('pushUpdateSubscribe', subscribeData);
+            socket.on('ack', function(data) {
+                socket.disconnect();
+            });
+        } catch(e) {
+            self.logger.error('Could not establish connection with Push Updates Facility: ' + e);
+        }
     })
     .fail((e)=>{
-        console.log('PUPD' + e);
+        self.logger.error('Could not retrieve system info and connect to Push Updates Facility: ' + e);
     })
 };
