@@ -2747,15 +2747,19 @@ ControllerMpd.prototype.seek = function(position) {
     var command = 'seek ';
     var cmd = libMpd.cmd;
 
-
+    if (self.clientMpd !== undefined) {
         self.clientMpd.sendCommand(cmd(command, ['0',position/1000]), function (err, msg) {
             if (msg) {
                 self.logger.info(msg);
             }
-            else self.logger.info(err);
+            else self.logger.error(err);
 
             defer.resolve();
         });
+	} else {
+    	self.logger.error('Could not seek because there is no mpd connection')
+	}
+
 
     return defer.promise;
 };
