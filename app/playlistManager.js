@@ -390,7 +390,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 	var filePath = folder + name;
 	var path = uri;
 
-	if (uri.indexOf('music-library/') >= 0) {
+	if (uri && uri.indexOf('music-library/') >= 0) {
 		path = uri.replace('music-library/', '/mnt/');
 		uri = uri.replace('music-library/', 'mnt/');
 	}
