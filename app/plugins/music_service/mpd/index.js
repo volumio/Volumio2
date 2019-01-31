@@ -1396,7 +1396,10 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				}
 			});
 		});
-	});
+	}).fail(function (e) {
+            self.logger.error('Could not execute lsinfo on URI: ' + uri + ' error: ' + e);
+            defer.reject('')
+        });
 	return defer.promise;
 };
 
