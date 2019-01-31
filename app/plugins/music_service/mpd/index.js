@@ -2475,10 +2475,14 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
     if(  ((uri.indexOf(".iso") < 0) && (uri.indexOf(".ISO") < 0)) && (stat != undefined && stat.isDirectory()) )
     {
-        var files=libFsExtra.readdirSync(uri);
-
-        for(var i in files)
-            uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+    	try {
+            var files=libFsExtra.readdirSync(uri);
+            for(var i in files) {
+                uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+            }
+		} catch(e) {
+            console.log("Failed to stat '" + uri + "'");
+		}
     }
     else if (isofile){
 
