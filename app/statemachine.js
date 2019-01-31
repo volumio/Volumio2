@@ -457,7 +457,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
                 this.commandRouter.pushConsoleMessage("Prefetching next song");
 
 				var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
-				if(typeof(plugin.prefetch) === typeof(Function))
+				if(plugin && typeof(plugin.prefetch) === typeof(Function))
 				{
 					this.prefetchDone=true;
 					plugin.prefetch(nextTrackBlock);
