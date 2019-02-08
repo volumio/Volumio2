@@ -29,59 +29,59 @@ outputs.prototype.onVolumioStart = function()
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
 
-    return libQ.resolve();
+	return libQ.resolve();
 }
 
 outputs.prototype.onStart = function() {
-    var self = this;
+	var self = this;
 	var defer=libQ.defer();
 
 
 	// Once the Plugin has successfull started resolve the promise
 	defer.resolve();
 
-    return defer.promise;
+	return defer.promise;
 };
 
 outputs.prototype.onStop = function() {
-    var self = this;
-    var defer=libQ.defer();
+	var self = this;
+	var defer=libQ.defer();
 
-    // Once the Plugin has successfull stopped resolve the promise
-    defer.resolve();
+	// Once the Plugin has successfull stopped resolve the promise
+	defer.resolve();
 
-    return libQ.resolve();
+	return libQ.resolve();
 };
 
 outputs.prototype.onRestart = function() {
-    var self = this;
-    // Optional, use if you need it
+	var self = this;
+	// Optional, use if you need it
 };
 
 
 // Configuration Methods -----------------------------------------------------------------------------
 
 outputs.prototype.getUIConfig = function() {
-    var defer = libQ.defer();
-    var self = this;
+	var defer = libQ.defer();
+	var self = this;
 
-    var lang_code = this.commandRouter.sharedVars.get('language_code');
+	var lang_code = this.commandRouter.sharedVars.get('language_code');
 
-    self.commandRouter.i18nJson(__dirname+'/i18n/strings_'+lang_code+'.json',
-        __dirname+'/i18n/strings_en.json',
-        __dirname + '/UIConfig.json')
-        .then(function(uiconf)
-        {
+	self.commandRouter.i18nJson(__dirname+'/i18n/strings_'+lang_code+'.json',
+		__dirname+'/i18n/strings_en.json',
+		__dirname + '/UIConfig.json')
+		.then(function(uiconf)
+		{
 
 
-            defer.resolve(uiconf);
-        })
-        .fail(function()
-        {
-            defer.reject(new Error());
-        });
+			defer.resolve(uiconf);
+		})
+		.fail(function()
+		{
+			defer.reject(new Error());
+		});
 
-    return defer.promise;
+	return defer.promise;
 };
 
 
@@ -100,6 +100,11 @@ outputs.prototype.setConf = function(varName, varValue) {
 	//Perform your installation tasks here
 };
 
+/**
+ * This function adds an output to the list, checking whether it's already there
+ * notifies the system via broadcast
+ * @param data: a json containing the new output parameters
+ */
 outputs.prototype.addAudioOutput = function (data) {
 	var self = this;
 
@@ -108,20 +113,16 @@ outputs.prototype.addAudioOutput = function (data) {
 	self.logger.info("Adding audio output: ", new_output.id);
 
 	if(new_output.id && new_output.name && new_output.type){
-		let i = 0;
-		let existing = false;
-		while (i < self.output.availableOutputs.length && !existing){
-			if (self.output.availableOutputs[i].id === new_output.id){
-				existing = true;
-			}
-			i += 1;
-		}
-		if(!existing) {
+
+		let i = self.checkElement(new_output.id)
+
+		if(!(i >= 0)) {
 			self.output.availableOutputs.push(new_output);
-			this.pushAudioOutputs();
+
+			self.pushAudioOutputs();
 		}
 		else{
-			self.logger.error("Can't add: ", new_output.id, " otuput is already in list");
+			self.logger.error("Can't add: ", new_output.id, " output is already in list");
 		}
 	}
 	else {
@@ -130,6 +131,11 @@ outputs.prototype.addAudioOutput = function (data) {
 	}
 }
 
+/**
+ * This function updates an output already in the list with new parameters,
+ * notifies the system via broadcast
+ * @param data: a json containing the new parameters
+ */
 outputs.prototype.updateAudioOutput = function (data) {
 	var self = this;
 
@@ -137,23 +143,15 @@ outputs.prototype.updateAudioOutput = function (data) {
 
 	self.logger.info("Updating audio output: ", new_output.id);
 
-
 	if(new_output.id && new_output.name && new_output.type){
-		var i = 0;
-		var list = self.output.availableOutputs;
-		var found = false;
 
-		while (i < list.length && !found) {
-			if (list[i].id == new_output.id)
-				found = true;
-			i += 1;
+		let i = self.checkElement(new_output.id);
+
+		if (i >= 0) {
+			self.output.availableOutputs[i-1] = new_output;
+
+			self.pushAudioOutputs();
 		}
-
-		if (i < self.output.availableOutputs.length) {
-			self.output.availableOutputs[i] = new_output;
-		}
-
-		this.pushAudioOutputs();
 	}
 	else {
 		self.logger.error("Audio Outputs: can't add new output, because of " +
@@ -161,26 +159,46 @@ outputs.prototype.updateAudioOutput = function (data) {
 	}
 }
 
+/**
+ * This function removes an output from the list, checking whether present,
+ * notifies the system via broadcast
+ * @param id: the id of the output to be removed
+ */
 outputs.prototype.removeAudioOutput = function (id) {
 	var self = this;
 
 	self.logger.info("Removing audio output: ", id);
 
-	var i = 0;
-	var list = self.output.availableOutputs;
-	var found = false;
+	let i = self.checkElement(id);
 
-	while (i < list.length && !found) {
-		if (list[i].id == id)
-			found = true;
+	if (i >= 0) {
+		self.output.availableOutputs.splice(i-1);
+
+		self.pushAudioOutputs();
+	}
+}
+
+/**
+ * This function checks the existence of an id in the list, returns the position
+ * @param id: the output to find
+ * @returns the corresponding index or -1
+ */
+outputs.prototype.checkElement = function (id) {
+	var self = this;
+	let i = 0;
+	let existing = false;
+
+	while (i < self.output.availableOutputs.length && !existing){
+		if (self.output.availableOutputs[i].id === id){
+			existing = true;
+		}
 		i += 1;
 	}
 
-	if (i < self.output.availableOutputs.length) {
-		self.output.availableOutputs[i].splice(i, 1);
-	}
-
-	self.pushAudioOutputs();
+	if(existing)
+		return i;
+	else
+		return -1;
 }
 
 outputs.prototype.getAudioOutputs = function () {
@@ -189,8 +207,17 @@ outputs.prototype.getAudioOutputs = function () {
 	return self.output;
 }
 
+/**
+ * This function broadcasts the outputs list
+ */
 outputs.prototype.pushAudioOutputs = function () {
 	var self = this;
 
-	self.commandRouter.broadcastMessage('pushAudioOutputs', self.output);
+	self.commandRouter.broadcastMessage('pushAudioOutputs', self.getAudioOutputs());
+}
+
+outputs.prototype.setOutputs = function (data) {
+	var self = this;
+
+	self.output = data;
 }
