@@ -1172,6 +1172,11 @@ CoreCommandRouter.prototype.broadcastMessage = function (msg, value) {
 
 CoreCommandRouter.prototype.pushMultiroomDevices = function (data) {
 	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+    if (audioOutputPlugin != undefined && typeof audioOutputPlugin.pushOutputsState === "function") {
+        audioOutputPlugin.pushOutputsState(data);
+    }
 	return libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
@@ -1189,6 +1194,7 @@ CoreCommandRouter.prototype.pushMultiroom = function (data) {
 			if (typeof thisInterface.pushMultiroom === "function")
 				return thisInterface.pushMultiroom(data);
 		})
+
 	);
 };
 
