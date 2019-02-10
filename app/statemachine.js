@@ -114,8 +114,7 @@ CoreStateMachine.prototype.getState = function () {
             this.consumeState.samplerate = '';
             this.consumeState.bitdepth =  '';
         }
-
-
+			
             return {
                 status: this.consumeState.status,
                 position: this.currentPosition,
@@ -125,7 +124,7 @@ CoreStateMachine.prototype.getState = function () {
                 albumart: this.consumeState.albumart,
                 uri: this.consumeState.uri,
                 trackType: this.consumeState.trackType,
-                seek: this.consumeState.seek,
+                seek: this.currentSeek,
                 duration: this.consumeState.duration,
                 samplerate: this.consumeState.samplerate,
                 bitdepth: this.consumeState.bitdepth,
