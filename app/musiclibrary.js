@@ -544,7 +544,6 @@ CoreMusicLibrary.prototype.setDisabledBrowseSources=function(data){
             }
         }
 	} catch(e) {
-		self.logger.error('Failed to build disabled source index: ' + error);
 		visibleSources = data;
 	}
 

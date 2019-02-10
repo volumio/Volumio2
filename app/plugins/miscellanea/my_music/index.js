@@ -250,8 +250,13 @@ ControllerMyMusic.prototype.updateMusicLibraryBrowseSourcesVisibility = function
 ControllerMyMusic.prototype.getDisabledSources = function () {
     var self=this;
     // Workaround to read arrays in v-conf
-    var disabledSourcesString = self.config.get('sources_disabled', []);
-    var disabledSourcesArray = disabledSourcesString.split('|');
+    try {
+        var disabledSourcesString = self.config.get('sources_disabled', []);
+        var disabledSourcesArray = disabledSourcesString.split('|');
+    } catch(e) {
+        var disabledSourcesArray = [];
+    }
+
     return disabledSourcesArray;
 };
 
