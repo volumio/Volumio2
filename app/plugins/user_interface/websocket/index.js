@@ -1317,6 +1317,8 @@ function InterfaceWebUI(context) {
 
             });
 
+            // ======================== AUDIO OUTPUTS ==========================
+
             connWebSocket.on('getAudioOutputs', function (data) {
 				var selfConnWebSocket = this;
 
@@ -1326,7 +1328,25 @@ function InterfaceWebUI(context) {
 					selfConnWebSocket.emit('pushAudioOutputs', outputs);
 					};
 				}
-			)
+			);
+
+			connWebSocket.on('enableAudioOutput', function (data) {
+				let selfConnWebSocket = this;
+
+				self.commandRouter.enableAudioOutput(data);
+			});
+
+		connWebSocket.on('disableAudioOutput', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.disableAudioOutput(data);
+		});
+
+		connWebSocket.on('setAudioOutputVolume', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.setAudioOutputVolume(data);
+		});
 
 
 

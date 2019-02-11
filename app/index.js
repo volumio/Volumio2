@@ -2074,7 +2074,7 @@ CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
 }
 
 
-// ==========================  AUDIO OUTPUTS ==============================
+// ============================  AUDIO OUTPUTS =================================
 
 
 CoreCommandRouter.prototype.addAudioOutput = function (data) {
@@ -2117,6 +2117,39 @@ CoreCommandRouter.prototype.getAudioOutputs = function () {
 	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
 	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.getAudioOutputs === "function") {
 		return audioOutputPlugin.getAudioOutputs();
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.enableAudioOutput = function (data) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.enableAudioOutput === "function") {
+		return audioOutputPlugin.enableAudioOutput(data);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.disableAudioOutput = function (id) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.disableAudioOutput === "function") {
+		return audioOutputPlugin.disableAudioOutput(id);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.setAudioOutputVolume = function (data) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.setAudioOutputVolume === "function") {
+		return audioOutputPlugin.setAudioOutputVolume(data);
 	} else {
 		this.logger.error('WARNING: No Audio Output plugin found');
 	}

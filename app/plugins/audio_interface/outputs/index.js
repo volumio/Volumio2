@@ -148,6 +148,7 @@ outputs.prototype.updateAudioOutput = function (data) {
 		let i = self.checkElement(new_output.id);
 
 		if (i >= 0) {
+			new_output.plugin = self.output.availableOutputs[i-1].plugin;
 			self.output.availableOutputs[i-1] = new_output;
 
 			self.pushAudioOutputs();
@@ -162,14 +163,14 @@ outputs.prototype.updateAudioOutput = function (data) {
 /**
  * This function removes an output from the list, checking whether present,
  * notifies the system via broadcast
- * @param id: the id of the output to be removed
+ * @param data: the id of the output to be removed
  */
-outputs.prototype.removeAudioOutput = function (id) {
+outputs.prototype.removeAudioOutput = function (data) {
 	var self = this;
 
-	self.logger.info("Removing audio output: ", id);
+	self.logger.info("Removing audio output: ", data.id);
 
-	let i = self.checkElement(id);
+	let i = self.checkElement(data.id);
 
 	if (i >= 0) {
 		self.output.availableOutputs.splice(i-1);
@@ -201,23 +202,112 @@ outputs.prototype.checkElement = function (id) {
 		return -1;
 }
 
-outputs.prototype.getAudioOutputs = function () {
-	var self = this;
-
-	return self.output;
-}
-
 /**
  * This function broadcasts the outputs list
  */
 outputs.prototype.pushAudioOutputs = function () {
 	var self = this;
 
-	self.commandRouter.broadcastMessage('pushAudioOutputs', self.getAudioOutputs());
+	self.commandRouter.broadcastMessage('pushAudioOutputs', self.output);
 }
 
-outputs.prototype.setOutputs = function (data) {
+outputs.prototype.getAudioOutputs = function () {
 	var self = this;
 
-	self.output = data;
+	return self.output;
+}
+
+outputs.prototype.enableAudioOutput = function (data) {
+	let self = this;
+
+	if (data && data.id) {
+		let i = self.checkElement(data.id);
+
+		if(i >= 0){
+			let path = self.output.availableOutputs[i-1].plugin;
+
+			let type = path.split("/")[0];
+
+			let name = path.split("/")[1];
+
+			self.commandRouter.executeOnPlugin(type, name, "enableAudioOutput", data)
+				.then(function () {
+				})
+				.fail(function () {
+					self.commandRouter.pushToastMessage('error',
+						'plugin output failure', 'Failed to enable audio output: ' + data.id);
+				})
+		}
+		else {
+			self.logger.error('Could not enable audio output: ' + data.id +
+				' device not found');
+		}
+	} else {
+		self.logger.error('Could not enable audio output: missing data or id field');
+	}
+
+
+
+}
+
+outputs.prototype.disableAudioOutput = function (data) {
+	let self = this;
+
+	if (data && data.id) {
+		let i = self.checkElement(data.id);
+
+		if(i >= 0) {
+			let path = self.output.availableOutputs[i - 1].plugin;
+
+			let type = path.split("/")[0];
+
+			let name = path.split("/")[1];
+
+			self.commandRouter.executeOnPlugin(type, name, "disableAudioOutput", data)
+				.then(function () {
+				})
+				.fail(function () {
+					self.commandRouter.pushToastMessage('error',
+						'plugin output failure', 'Failed to disable audio output' + data.id);
+				})
+		}
+		else {
+			self.logger.error('Could not disable audio output: ' + data.id +
+				' device not found');
+		}
+	}
+	else{
+		self.logger.error('Could not disable audio output: missing data or id field');
+	}
+}
+
+outputs.prototype.setAudioOutputVolume = function (data) {
+	let self = this;
+
+	if (data && data.id) {
+		let i = self.checkElement(data.id);
+
+		if(i >= 0) {
+			let path = self.output.availableOutputs[i - 1].plugin;
+
+			let type = path.split("/")[0];
+
+			let name = path.split("/")[1];
+
+			self.commandRouter.executeOnPlugin(type, name, "setAudioOutputVolume", data)
+				.then(function () {
+				})
+				.fail(function () {
+					self.commandRouter.pushToastMessage('error',
+						'plugin output failure', 'Failed to set audio output volume of ' + data.id);
+				})
+		}
+		else {
+			self.logger.error('Could not set audio output volume: ' + data.id +
+				' device not found');
+		}
+	}
+	else{
+		self.logger.error('Could not set audio output volume: missing data or id field');
+	}
 }
