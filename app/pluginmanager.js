@@ -1201,8 +1201,8 @@ PluginManager.prototype.pluginFolderCleanup = function () {
 							self.logger.debug("Plugin "+pluginName+" found. Leaving it untouched.");
 						}
 						else {
-							self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Removing folder.");
-							fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
+							self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Not Starting it.");
+							//fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
 						}
 					}
 					else
