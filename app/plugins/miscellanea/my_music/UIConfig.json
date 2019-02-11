@@ -142,5 +142,18 @@
 				  "value": false
 			  }
 		  ]
+	  },
+	  {
+		  "id": "browse_sources_visibiilty",
+		  "element": "section",
+		  "label": "TRANSLATE.APPEARANCE.BROWSE_SOURCES_VISIBILITY",
+		  "icon": "fa-sliders",
+		  "onSave": {"type":"controller", "endpoint":"miscellanea/my_music", "method":"updateMusicLibraryBrowseSourcesVisibility"},
+		  "saveButton": {
+		  "label": "TRANSLATE.COMMON.SAVE",
+		  "data": [
+		  ]
+	  },
+		  "content": []
 	  }
 ]}

@@ -1243,6 +1243,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                             var diricon = 'fa fa-folder-open-o';
                             path = line.slice(11);
                             var namearr = path.split('/');
+                            name = namearr[namearr.length - 1];
+
+                            // early out to exclude hidden folders (eg. ".Trashes")
+                            if (name.startsWith('.')) {
+                                continue;
+                            }
 
                             if (uri === 'music-library') {
                                 switch(path) {
@@ -1266,11 +1272,10 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                                 diricon = 'fa fa-usb';
                             } else if (uri.indexOf('music-library/INTERNAL') >= 0) {
                                 dirtype = 'internal-folder';
-							} else {
+                            } else {
                                 dirtype = 'folder';
                             }
-
-                            name = namearr.pop();
+                            
                             list.push({
                                 type: dirtype,
                                 title: name,

@@ -231,6 +231,11 @@ CoreCommandRouter.prototype.volumioGetBrowseSources = function () {
 	return this.musicLibrary.getBrowseSources();
 };
 
+CoreCommandRouter.prototype.volumioGetVisibleBrowseSources = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioGetVisibleSources');
+    return this.musicLibrary.getVisibleBrowseSources();
+};
+
 CoreCommandRouter.prototype.volumioAddToBrowseSources = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddToBrowseSources' + data);
 	return this.musicLibrary.addToBrowseSources(data);
@@ -242,7 +247,7 @@ CoreCommandRouter.prototype.volumioRemoveToBrowseSources = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources');
 	return this.musicLibrary.updateBrowseSources(name,data);
 };
 

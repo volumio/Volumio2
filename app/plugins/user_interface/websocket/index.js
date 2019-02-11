@@ -348,7 +348,7 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				var response;
 
-				response = self.commandRouter.volumioGetBrowseSources();
+				response = self.commandRouter.volumioGetVisibleBrowseSources();
 
 				selfConnWebSocket.emit('pushBrowseSources', response);
 			});

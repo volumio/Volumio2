@@ -215,9 +215,14 @@ CoreMusicLibrary.prototype.pushError = function(sReason) {
 CoreMusicLibrary.prototype.getBrowseSources = function() {
 	var self = this;
 
-
 	return self.browseSources;
+}
 
+CoreMusicLibrary.prototype.getVisibleBrowseSources = function() {
+    var self = this;
+
+    var visibleSources = self.setDisabledBrowseSources(self.browseSources);
+    return visibleSources;
 }
 
 CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
@@ -244,7 +249,7 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
             self.browseSources.push(data);
 	}
 	var response = self.getBrowseSources();
-	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+	return self.pushBrowseSources(response);
 }
 
 CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
@@ -257,13 +262,13 @@ CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
         });
     }
 	var response = self.getBrowseSources();
-	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+	return self.pushBrowseSources(response);
 }
 
 CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
     var self = this;
 
-    if(data.name!= undefined) {
+    if(data && data.name!= undefined) {
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
@@ -281,7 +286,7 @@ CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
     }
 	var response = self.getBrowseSources();
 
-	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+	return self.pushBrowseSources(response);
 }
 
 CoreMusicLibrary.prototype.setSourceActive = function(uri) {
@@ -299,7 +304,7 @@ CoreMusicLibrary.prototype.setSourceActive = function(uri) {
 
     var response = self.getBrowseSources();
 
-    return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+    return self.pushBrowseSources(response);
 }
 
 CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
@@ -511,11 +516,39 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 
 		}
 	}
-	return this.commandRouter.broadcastMessage('pushBrowseSources', self.browseSources);
+	return this.pushBrowseSources(self.browseSources);
 }
 
 CoreMusicLibrary.prototype.goto=function(data){
     var response = this.commandRouter.executeOnPlugin('music_service','mpd','goto',data);
     return response;
-
 }
+
+CoreMusicLibrary.prototype.pushBrowseSources=function(data){
+	var self = this;
+
+	var visibleSources = self.setDisabledBrowseSources(data);
+    return this.commandRouter.broadcastMessage('pushBrowseSources', visibleSources);
+}
+
+CoreMusicLibrary.prototype.setDisabledBrowseSources=function(data){
+	var self = this;
+	var visibleSources = [];
+
+	try {
+        var disabledSources = self.commandRouter.executeOnPlugin('miscellanea','my_music','getDisabledSources','');
+        for (var i in data) {
+            var source = data[i];
+            if (!disabledSources.includes(source.uri)) {
+                visibleSources.push(source)
+            }
+        }
+	} catch(e) {
+		visibleSources = data;
+	}
+
+    return visibleSources;
+}
+
+
+
