@@ -256,21 +256,30 @@ updater_comm.prototype.checkSystemIntegrity = function () {
                 str = file[l].split('=');
                 var defaultHash = str[1].replace(/\"/gi, "");
             }
+            if (file[l].match(/VOLUMIO_VARIANT/i)) {
+                str = file[l].split('=');
+                var thisVariant = str[1].replace(/\"/gi, "");
+            }
         }
 
-        exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
-            if (error !== null) {
-                self.logger.error('Cannot read os relase file: ' + error);
-                defer.resolve({'isSystemOk':false});
-            } else {
-                var currentHash = stdout;
-                if (currentHash === defaultHash) {
-                    defer.resolve({'isSystemOk':true});
-                } else {
+        if (thisVariant && thisVariant !== 'volumio') {
+            defer.resolve({'isSystemOk':true});
+        } else {
+            exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
+                if (error !== null) {
+                    self.logger.error('Cannot read os relase file: ' + error);
                     defer.resolve({'isSystemOk':false});
+                } else {
+                    var currentHash = stdout;
+                    if (currentHash === defaultHash) {
+                        defer.resolve({'isSystemOk':true});
+                    } else {
+                        defer.resolve({'isSystemOk':false});
+                    }
                 }
-            }
-        });
+            });
+        }
+
     }
 
 
