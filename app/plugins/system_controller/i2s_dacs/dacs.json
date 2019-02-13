@@ -33,16 +33,15 @@
     {"id":"phat-dac","name":"pHAT DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"picade-hat","name":"Picade HAT","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes","eeprom_name":["Picade HAT"]},
     {"id":"pisound","name":"pisound","overlay":"pisound","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"no"},
-    {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
+    {"id":"raspiaudio","name":"raspiaudio","overlay":"googlevoicehat-soundcard","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"} ,
+	  {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"speaker-phat","name":"Speaker pHAT","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"st400-dac-amp","name":"ST400 Dac (PCM5122) - Amp","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"taudac","name":"TauDAC - DM101","overlay":"taudac","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":"TauDAC-DM101","needsreboot":"yes"},
     {"id":"terraberry-dac2","name":"Terra-Berry DAC 2","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
-    {"id":"es90x8q2m-dac","name":"Volumio ESS 9028QM","overlay":"es90x8q2m-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"48","needsreboot":"no"},
-    {"id":"raspiaudio","name":"raspiaudio","overlay":"googlevoicehat-soundcard","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"}
-  ]},	  
+    {"id":"es90x8q2m-dac","name":"Volumio ESS 9028QM","overlay":"es90x8q2m-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"48","needsreboot":"no"}
   ]},
   {"name":"Odroid C1+","data":[
     {"id":"odroid-hifi-shield","name":"HiFi Shield","overlay":"","alsanum":"2","mixer":"","modules":"","script":""}
