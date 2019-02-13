@@ -20,8 +20,6 @@ function outputs(context) {
 
 }
 
-
-
 outputs.prototype.onVolumioStart = function()
 {
 	var self = this;
@@ -58,7 +56,6 @@ outputs.prototype.onRestart = function() {
 	// Optional, use if you need it
 };
 
-
 // Configuration Methods -----------------------------------------------------------------------------
 
 outputs.prototype.getUIConfig = function() {
@@ -83,7 +80,6 @@ outputs.prototype.getUIConfig = function() {
 
 	return defer.promise;
 };
-
 
 outputs.prototype.setUIConfig = function(data) {
 	var self = this;
@@ -211,12 +207,22 @@ outputs.prototype.pushAudioOutputs = function () {
 	self.commandRouter.broadcastMessage('pushAudioOutputs', self.output);
 }
 
+/**
+ * This function returns the outputs list
+ * @returns {"availableOutputs":[any]}
+ */
 outputs.prototype.getAudioOutputs = function () {
 	var self = this;
 
 	return self.output;
 }
 
+/**
+ * This function enables an audio output, given its ID. Checks its presence in
+ * the list, retrieves the plugin that added it and asks that plugin to enable it.
+ * It expects a promise.
+ * @param data
+ */
 outputs.prototype.enableAudioOutput = function (data) {
 	let self = this;
 
@@ -245,11 +251,14 @@ outputs.prototype.enableAudioOutput = function (data) {
 	} else {
 		self.logger.error('Could not enable audio output: missing data or id field');
 	}
-
-
-
 }
 
+/**
+ * This function disables an audio output, given its ID. Checks its presence in
+ * the list, retrieves the plugin that added it and asks that plugin to disable it.
+ * It expects a promise.
+ * @param data
+ */
 outputs.prototype.disableAudioOutput = function (data) {
 	let self = this;
 
@@ -281,10 +290,18 @@ outputs.prototype.disableAudioOutput = function (data) {
 	}
 }
 
+/**
+ * This function changes an audio output's volume, given its ID. Checks its
+ * presence in the list, retrieves the plugin that added it and asks that plugin
+ * to change the volume/mute.
+ * It expects a promise.
+ * @param data
+ */
 outputs.prototype.setAudioOutputVolume = function (data) {
 	let self = this;
 
-	if (data && data.id) {
+	if (data && data.id && parseInt(data.volume) * 0 === 0 && typeof data.mute === "boolean") {
+		data.volume = parseInt(data.volume);
 		let i = self.checkElement(data.id);
 
 		if(i >= 0) {
@@ -308,6 +325,6 @@ outputs.prototype.setAudioOutputVolume = function (data) {
 		}
 	}
 	else{
-		self.logger.error('Could not set audio output volume: missing data or id field');
+		self.logger.error('Could not set audio output volume: missing data, id, volume or mute fields');
 	}
 }
