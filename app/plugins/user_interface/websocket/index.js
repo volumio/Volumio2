@@ -1324,7 +1324,6 @@ function InterfaceWebUI(context) {
 
 				var outputs = self.commandRouter.getAudioOutputs();
 				if (outputs != undefined) {
-					self.logger.info(JSON.stringify(outputs));
 					selfConnWebSocket.emit('pushAudioOutputs', outputs);
 					};
 				}

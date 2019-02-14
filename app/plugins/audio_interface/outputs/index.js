@@ -17,7 +17,7 @@ function outputs(context) {
 	this.configManager = this.context.configManager;
 
 	this.output = {"availableOutputs": []};
-
+	this.current_output = {};
 }
 
 outputs.prototype.onVolumioStart = function()
@@ -102,9 +102,9 @@ outputs.prototype.setConf = function(varName, varValue) {
  * @param data: a json containing the new output parameters
  */
 outputs.prototype.addAudioOutput = function (data) {
-	var self = this;
+	let self = this;
 
-	let new_output = data;
+	let new_output = JSON.parse(JSON.stringify(data));
 
 	self.logger.info("Adding audio output: ", new_output.id);
 
@@ -115,7 +115,7 @@ outputs.prototype.addAudioOutput = function (data) {
 		if(!(i >= 0)) {
 			self.output.availableOutputs.push(new_output);
 
-			self.pushAudioOutputs();
+			self.pushAudioOutputs(self.output);
 		}
 		else{
 			self.logger.error("Can't add: ", new_output.id, " output is already in list");
@@ -133,9 +133,13 @@ outputs.prototype.addAudioOutput = function (data) {
  * @param data: a json containing the new parameters
  */
 outputs.prototype.updateAudioOutput = function (data) {
-	var self = this;
+	let self = this;
 
-	var new_output = data;
+	//self.logger.info("\nUPDATEAUDIOOUTPUT - OUTPUTS\n");
+	//self.logger.info(data, "\n\n\n");
+	//self.logger.info(JSON.stringify(self.output.availableOutputs));
+
+	let new_output = JSON.parse(JSON.stringify(data));
 
 	self.logger.info("Updating audio output: ", new_output.id);
 
@@ -145,9 +149,10 @@ outputs.prototype.updateAudioOutput = function (data) {
 
 		if (i >= 0) {
 			new_output.plugin = self.output.availableOutputs[i-1].plugin;
-			self.output.availableOutputs[i-1] = new_output;
 
-			self.pushAudioOutputs();
+				self.output.availableOutputs[i - 1] = new_output;
+
+				self.pushAudioOutputs(self.output);
 		}
 	}
 	else {
@@ -162,7 +167,7 @@ outputs.prototype.updateAudioOutput = function (data) {
  * @param data: the id of the output to be removed
  */
 outputs.prototype.removeAudioOutput = function (data) {
-	var self = this;
+	let self = this;
 
 	self.logger.info("Removing audio output: ", data.id);
 
@@ -171,7 +176,7 @@ outputs.prototype.removeAudioOutput = function (data) {
 	if (i >= 0) {
 		self.output.availableOutputs.splice(i-1);
 
-		self.pushAudioOutputs();
+		self.pushAudioOutputs(self.output);
 	}
 }
 
@@ -181,7 +186,7 @@ outputs.prototype.removeAudioOutput = function (data) {
  * @returns the corresponding index or -1
  */
 outputs.prototype.checkElement = function (id) {
-	var self = this;
+	let self = this;
 	let i = 0;
 	let existing = false;
 
@@ -201,10 +206,16 @@ outputs.prototype.checkElement = function (id) {
 /**
  * This function broadcasts the outputs list
  */
-outputs.prototype.pushAudioOutputs = function () {
-	var self = this;
+outputs.prototype.pushAudioOutputs = function (data) {
+	let self = this;
 
-	self.commandRouter.broadcastMessage('pushAudioOutputs', self.output);
+	//self.logger.info(JSON.stringify(data));
+	//self.logger.info(JSON.stringify(self.current_output));
+
+	if(JSON.stringify(data) !== JSON.stringify(self.current_output)) {
+		self.commandRouter.broadcastMessage('pushAudioOutputs', data);
+		self.current_output = JSON.parse(JSON.stringify(data));
+	}
 }
 
 /**
@@ -212,7 +223,7 @@ outputs.prototype.pushAudioOutputs = function () {
  * @returns {"availableOutputs":[any]}
  */
 outputs.prototype.getAudioOutputs = function () {
-	var self = this;
+	let self = this;
 
 	return self.output;
 }
@@ -227,6 +238,7 @@ outputs.prototype.enableAudioOutput = function (data) {
 	let self = this;
 
 	if (data && data.id) {
+
 		let i = self.checkElement(data.id);
 
 		if(i >= 0){
