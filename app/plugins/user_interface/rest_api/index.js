@@ -309,6 +309,11 @@ function interfaceApi(context) {
     api.use('/v1', api);
     api.use(bodyParser.json());
 
+    api.route('/ping')
+        .get(function (req, res) {
+            res.send('pong');
+        });
+
     api.route('/getstate')
         .get(function (req, res) {
 
