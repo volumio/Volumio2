@@ -392,6 +392,9 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.file != undefined) {
 		resp.uri = objTrackInfo.file;
 		resp.trackType = objTrackInfo.file.split('.').pop();
+		if (resp.trackType.length > 10) {
+            resp.trackType = '';
+        }
 		if (resp.uri.indexOf('cdda:///') >= 0) {
 			resp.trackType = 'CD Audio';
 			resp.title = resp.uri.replace('cdda:///', 'Track ');
