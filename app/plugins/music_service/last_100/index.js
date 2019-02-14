@@ -211,7 +211,7 @@ last_100.prototype.parseStreamingUri = function (data) {
     var self = this;
     try {
         var queue = this.commandRouter.volumioGetQueue();
-        var currentSong = queue[data.position];
+        var currentSong = Object.assign({}, queue[data.position]);
         if (currentSong.realUri) {
             currentSong.uri = currentSong.realUri;
         }
