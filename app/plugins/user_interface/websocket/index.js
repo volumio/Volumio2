@@ -406,6 +406,10 @@ function InterfaceWebUI(context) {
 					});
 			});
 
+			connWebSocket.on('setConcertMode', function (data) {
+                return self.commandRouter.volumioConcertMode(data.value);
+			});
+
 			connWebSocket.on('serviceUpdateTracklist', function (sService) {
 				var timeStart = Date.now();
 				self.logStart('Client requests Update Tracklist')
@@ -561,8 +565,8 @@ function InterfaceWebUI(context) {
 			});
 
 			connWebSocket.on('getBrowseSources', function (date) {
-				
-				//Refresh cacheAlbumList			
+
+				//Refresh cacheAlbumList
 				var mpdPlugin = self.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 				//mpdPlugin.listAlbums();
 				self.logger.info('cacheAlbumList being updated');

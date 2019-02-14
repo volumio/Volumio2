@@ -228,6 +228,30 @@ function interfaceApi(context) {
                             res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                         });
                 }
+                else if(req.query.cmd == "concert-mode"){
+                    var value = req.query.value;
+                    if(value == "true"){
+                        value = true;
+                    }
+                    else if (value == "false"){
+                        value = false;
+                    }
+
+                    var timeStart = Date.now();
+                    self.logStart('Client requests Concert Mode ' + value)
+                        .then(function () {
+                            if(value != undefined) {
+                                return self.commandRouter.volumioConcertMode(value, false);
+                            }
+                            else{
+                                return self.commandRouter.concertModeToggle();
+                            }
+                        })
+                        .fail(self.pushError.bind(self))
+                        .done(function () {
+                            res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                        });
+                }
                 else if(req.query.cmd == "random"){
                     var value = req.query.value;
                     if(value == "true"){

@@ -13,7 +13,8 @@ function CoreStateMachine(commandRouter) {
 	this.currentPosition=0;
 	this.currentConsume=false;
     this.currentRepeat=false;
-    this.currentRepeatSingleSong=false;
+	this.currentRepeatSingleSong=false;
+    this.currentConcertMode=false;
 	this.prefetchDone=false;
 	this.askedForPrefetch=false;
 	this.simulateStopStartDone=false;
@@ -83,6 +84,7 @@ CoreStateMachine.prototype.getState = function () {
             random: false,
             repeat: false,
             repeatSingle:false,
+            concertMode:false,
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
@@ -124,6 +126,7 @@ CoreStateMachine.prototype.getState = function () {
                 random: false,
                 repeat: false,
                 repeatSingle:false,
+                concertMode: this.currentConcertMode,
                 consume: false,
                 volume: this.currentVolume,
                 mute: this.currentMute,
@@ -169,6 +172,7 @@ CoreStateMachine.prototype.getState = function () {
                 random: this.currentRandom,
                 repeat: this.currentRepeat,
                 repeatSingle: this.currentRepeatSingleSong,
+                concertMode: this.currentConcertMode,
                 consume: this.currentConsume,
                 volume: this.currentVolume,
                 mute: this.currentMute,
@@ -208,6 +212,7 @@ CoreStateMachine.prototype.getEmptyState = function () {
         random:this.currentRandom,
         repeat: this.currentRepeat,
         repeatSingle: this.currentRepeatSingleSong,
+        concertMode: this.currentConcertMode,
         updatedb: this.currentUpdate,
         consume: this.currentConsume
     };
@@ -345,6 +350,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
 			self.currentChannels = null;
 			self.currentRandom = null;
 			self.currentRepeat = null;
+			self.currentConcertMode = null;
 			self.currentVolume = null;
 			self.currentMute = null;
 			self.currentUpdate = false;
@@ -471,9 +477,19 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			this.nextRandomIndex=undefined;
 
             this.askedForPrefetch=false;
-			this.pushState.bind(this);
 
-			this.startPlaybackTimer();
+			if(this.currentConcertMode === false)
+			{
+				this.startPlaybackTimer();
+			}
+			else
+			{
+				this.commandRouter.pushConsoleMessage('CoreStateMachine::activeConcertMode');
+				this.pause()
+				this.stopPlaybackTimer();
+			}
+
+			this.pushState.bind(this);
 
 		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
 	}
@@ -1171,7 +1187,17 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 
 				return libQ.resolve();
 			})
-			.then(self.play.bind(self))
+			.then(function ()
+			{
+				if(self.currentConcertMode)
+				{
+					self.pause.bind(self)
+				}
+				else
+				{
+					self.play.bind(self)
+				}
+			})
 			.then(self.updateTrackBlock.bind(self));
 		}
 	}
@@ -1384,6 +1410,14 @@ CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
 	    this.currentRepeatSingleSong=repeatSingle;
 
 	this.pushState().fail(this.pushError.bind(this));
+};
+
+CoreStateMachine.prototype.setConcertMode = function (value) {
+    this.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreStateMachine::setConcertMode '+value);
+
+    this.currentConcertMode=value;
+
+    this.pushState().fail(this.pushError.bind(this));
 };
 
 CoreStateMachine.prototype.setConsume = function (value) {

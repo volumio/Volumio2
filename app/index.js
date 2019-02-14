@@ -1425,6 +1425,35 @@ CoreCommandRouter.prototype.repeatToggle = function () {
     return self.stateMachine.setRepeat(repeat, false);
 }
 
+CoreCommandRouter.prototype.volumioConcertMode = function (concertMode) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioConcertMode');
+
+    this.writePlayerControls({
+        concertMode: concertMode
+    });
+
+    return this.stateMachine.setConcertMode(concertMode);
+};
+
+CoreCommandRouter.prototype.concertModeToggle = function () {
+    var self = this;
+
+    var state = self.stateMachine.getState();
+
+    if(state.concertMode){
+        var concertMode = false;
+    }
+    else{
+        var concertMode = true;
+    }
+
+    this.writePlayerControls({
+        concertMode: concertMode
+    });
+
+    return self.stateMachine.setConcertMode(concertMode, false);
+}
+
 CoreCommandRouter.prototype.volumioConsume = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioConsume');
 	return this.stateMachine.setConsume(data);
