@@ -141,8 +141,6 @@ outputs.prototype.updateAudioOutput = function (data) {
 
 	let new_output = JSON.parse(JSON.stringify(data));
 
-	self.logger.info("Updating audio output: ", new_output.id);
-
 	if(new_output.id && new_output.name && new_output.type){
 
 		let i = self.checkElement(new_output.id);
