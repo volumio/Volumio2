@@ -595,8 +595,12 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.addToFavourites(data.service, data.uri, data.title);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('urifavourites', data);
-				});
+					if (data !== undefined) {
+                        selfConnWebSocket.emit('urifavourites', data);
+					}
+				}).fail(function () {
+                        self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+                    });
 
 			});
 

@@ -213,7 +213,15 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
-        return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+        var plugin = this.commandRouter.pluginManager.getPlugin('music_service', service);
+        if(plugin && typeof(plugin.addToFavourites) === typeof(Function))
+        {
+            self.logger.info('Adding ' + uri + ' to favourites with specific ' + service + ' method');
+            return plugin.addToFavourites({uri:uri,service:service});
+        } else {
+            self.logger.info('Adding ' + uri + ' to favourites using generic method');
+            return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+        }
 	}
 };
 
