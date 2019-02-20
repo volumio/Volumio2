@@ -20,8 +20,7 @@ function outputs(context) {
 	this.current_output = {};
 }
 
-outputs.prototype.onVolumioStart = function()
-{
+outputs.prototype.onVolumioStart = function() {
 	var self = this;
 	var configFile=this.commandRouter.pluginManager.getConfigurationFile(this.context,'config.json');
 	this.config = new (require('v-conf'))();
@@ -112,7 +111,7 @@ outputs.prototype.addAudioOutput = function (data) {
 
 		let i = self.checkElement(new_output.id)
 
-		if(!(i >= 0)) {
+		if(i < 0) {
 			self.output.availableOutputs.push(new_output);
 
 			self.pushAudioOutputs(self.output);
@@ -172,7 +171,7 @@ outputs.prototype.removeAudioOutput = function (data) {
 	let i = self.checkElement(data.id);
 
 	if (i >= 0) {
-		self.output.availableOutputs.splice(i-1);
+		self.output.availableOutputs.splice(i-1, 1);
 
 		self.pushAudioOutputs(self.output);
 	}
@@ -315,6 +314,7 @@ outputs.prototype.setAudioOutputVolume = function (data) {
 		let i = self.checkElement(data.id);
 
 		if(i >= 0) {
+
 			let path = self.output.availableOutputs[i - 1].plugin;
 
 			let type = path.split("/")[0];
