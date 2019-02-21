@@ -185,7 +185,7 @@
     "SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
     "SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
     "ERROR":"Errore",
-    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a destra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a sinistra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
     "GOT_IT":"Capito",
     "MEDIA_SERVERS":"Server multimediali",
     "ENABLED":"Abilitato",
@@ -225,7 +225,8 @@
     "ALBUMART_RESET_CACHE":"Elimina Cache Albumart",
     "ALBUMART_RESET_CACHE_DOC":"Il sistema immagazzina (cache) le albumart per migliorare le performance, questo meccanismo impedisce alle albumart aggiunte di recente di venire visualizzate. Eliminando la cache le ultime albumart verranno visualizzate",
     "METADATA_IMAGE":"Mostra Albumart integrate",
-    "METADATA_IMAGE_DOC":"Se abilitato, quando non sono state trovate albumart nella cartella del file, il sistema estrarrà le albumart dai file stessi, ove presenti. Questo impatterà negativamente nel tempo di visualizzazione delle albumart"
+    "METADATA_IMAGE_DOC":"Se abilitato, quando non sono state trovate albumart nella cartella del file, il sistema estrarrà le albumart dai file stessi, ove presenti. Questo impatterà negativamente nel tempo di visualizzazione delle albumart",
+    "BROWSE_SOURCES_VISIBILITY":"Icone Sorgenti"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"La Mia Musica",

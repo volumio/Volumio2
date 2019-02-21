@@ -256,21 +256,30 @@ updater_comm.prototype.checkSystemIntegrity = function () {
                 str = file[l].split('=');
                 var defaultHash = str[1].replace(/\"/gi, "");
             }
+            if (file[l].match(/VOLUMIO_VARIANT/i)) {
+                str = file[l].split('=');
+                var thisVariant = str[1].replace(/\"/gi, "");
+            }
         }
 
-        exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
-            if (error !== null) {
-                self.logger.error('Cannot read os relase file: ' + error);
-                defer.resolve({'isSystemOk':false});
-            } else {
-                var currentHash = stdout;
-                if (currentHash === defaultHash) {
-                    defer.resolve({'isSystemOk':true});
-                } else {
+        if (thisVariant && thisVariant !== 'volumio') {
+            defer.resolve({'isSystemOk':true});
+        } else {
+            exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
+                if (error !== null) {
+                    self.logger.error('Cannot read os relase file: ' + error);
                     defer.resolve({'isSystemOk':false});
+                } else {
+                    var currentHash = stdout;
+                    if (currentHash === defaultHash) {
+                        defer.resolve({'isSystemOk':true});
+                    } else {
+                        defer.resolve({'isSystemOk':false});
+                    }
                 }
-            }
-        });
+            });
+        }
+
     }
 
 
@@ -291,23 +300,25 @@ updater_comm.prototype.pushUpdatesSubscribe = function () {
     var systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
     var name = self.getAdditionalConf('system_controller', 'system', 'playerName', 'none');
     systemInfo.then((info)=>{
-        var socket = io.connect('http://pushupdates.volumio.org');
-        var subscribeData = {
-            'id': id,
-            'systemversion': info.systemversion,
-            'variant': info.variant,
-            'hardware': info.hardware,
-            'isHw': isHw,
-            'name': name
-
-        };
-        socket.emit('pushUpdateSubscribe', subscribeData);
-        socket.on('ack', function(data) {
-            socket.disconnect();
-
-        });
+        try {
+            var socket = io.connect('http://pushupdates.volumio.org');
+            var subscribeData = {
+                'id': id,
+                'systemversion': info.systemversion,
+                'variant': info.variant,
+                'hardware': info.hardware,
+                'isHw': isHw,
+                'name': name
+            };
+            socket.emit('pushUpdateSubscribe', subscribeData);
+            socket.on('ack', function(data) {
+                socket.disconnect();
+            });
+        } catch(e) {
+            self.logger.error('Could not establish connection with Push Updates Facility: ' + e);
+        }
     })
     .fail((e)=>{
-        console.log('PUPD' + e);
+        self.logger.error('Could not retrieve system info and connect to Push Updates Facility: ' + e);
     })
 };

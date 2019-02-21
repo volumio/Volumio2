@@ -6,10 +6,13 @@ var commandArray = [
   'cat /proc/version',
   'cat /etc/os-release',
   'ifconfig',
-  'iwconfig',
+  'sudo iwconfig',
   'aplay -l',
   'ps -ef',
-  'sudo journalctl -p 7'
+  'df -h',
+  'mount',
+  'sudo journalctl -p 7',
+  'cat /var/log/mpd.log'
 ];
 
 // Up to two arguments may be given:
@@ -56,7 +59,12 @@ for (var itemN in commandArray) {
   } catch (e) {
     console.log(e);
   }
-  execSync(itemWithoutput);
+  try {
+      execSync(itemWithoutput);
+  } catch(e) {
+      // A command has failed
+  }
+
 }
 
 // remove sensitive information

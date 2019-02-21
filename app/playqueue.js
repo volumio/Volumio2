@@ -249,7 +249,7 @@ CorePlayQueue.prototype.saveQueue = function () {
     var self=this;
     this.commandRouter.pushConsoleMessage('CorePlayQueue::saveQueue');
 
-    fs.writeJson('/data/queue', self.arrayQueue, function (err) {
+    fs.writeJson('/data/queue', self.arrayQueue, {spaces: 2}, function (err) {
         if(err)
             self.commandRouter.logger.info("An error occurred saving queue to disk: "+err);
     });

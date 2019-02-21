@@ -209,13 +209,22 @@ PlaylistManager.prototype.addToFavourites = function (service, uri, title) {
 
 	if (title){
 		self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), title + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
-	} else self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), uri + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+	} else {
+	    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.ADDED_TITLE'), uri + self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+    }
 
 	if (service === 'webradio') {
 		return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri, title);
 	} else {
-        self.commandRouter.executeOnPlugin('music_service', service,'addToFavourites',{uri:uri,service:service});
-        return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+        var plugin = this.commandRouter.pluginManager.getPlugin('music_service', service);
+        if(plugin && typeof(plugin.addToFavourites) === typeof(Function))
+        {
+            self.logger.info('Adding ' + uri + ' to favourites with specific ' + service + ' method');
+            return plugin.addToFavourites({uri:uri,service:service});
+        } else {
+            self.logger.info('Adding ' + uri + ' to favourites using generic method');
+            return self.commonAddToPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri);
+        }
 	}
 };
 
@@ -392,7 +401,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
 	var filePath = folder + name;
 	var path = uri;
 
-	if (uri.indexOf('music-library/') >= 0) {
+	if (uri && uri.indexOf('music-library/') >= 0) {
 		path = uri.replace('music-library/', '/mnt/');
 		uri = uri.replace('music-library/', 'mnt/');
 	}
@@ -598,6 +607,43 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                     });
 
                 });
+            } else {
+                var explodedUri = self.commandRouter.executeOnPlugin('music_service', service,'explodeUri',uri);
+                explodedUri.then(function(info){
+                    var entries = [];
+                    var track = info[0];
+                    entries.push({
+                        service: service,
+                        uri: uri,
+                        title: track.name,
+                        artist: track.artist,
+                        album: track.album,
+                        albumart: track.albumart
+                    });
+                    fs.readJson(filePath, function (err, data) {
+                        if (err)
+                            defer.resolve({success: false});
+                        else {
+
+                            if(!data)
+                                data=[];
+
+                            var output = data.concat(entries);
+
+                            self.saveJSONFile(folder, name, output).then(function(){
+                                var favourites = self.commandRouter.checkFavourites({uri: path});
+                                defer.resolve(favourites);
+                            }).fail(function(){
+                                defer.resolve({success:false});
+                            })
+                        }
+                    });
+
+                    })
+                    .fail(function(err){
+                        self.logger.error('Could not add to playlist: ' + uri);
+                    })
+
             }
         })
 

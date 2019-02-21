@@ -348,7 +348,7 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				var response;
 
-				response = self.commandRouter.volumioGetBrowseSources();
+				response = self.commandRouter.volumioGetVisibleBrowseSources();
 
 				selfConnWebSocket.emit('pushBrowseSources', response);
 			});
@@ -595,8 +595,12 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.addToFavourites(data.service, data.uri, data.title);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('urifavourites', data);
-				});
+					if (data !== undefined) {
+                        selfConnWebSocket.emit('urifavourites', data);
+					}
+				}).fail(function () {
+                        self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+                    });
 
 			});
 
@@ -1316,6 +1320,36 @@ function InterfaceWebUI(context) {
                 selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-info'},{'name':self.commandRouter.getI18nString('PLUGINS.UNINSTALL'), 'class':'btn btn-warning', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}}]});
 
             });
+
+            // ======================== AUDIO OUTPUTS ==========================
+
+            connWebSocket.on('getAudioOutputs', function (data) {
+				var selfConnWebSocket = this;
+
+				var outputs = self.commandRouter.getAudioOutputs();
+				if (outputs != undefined) {
+					selfConnWebSocket.emit('pushAudioOutputs', outputs);
+					};
+				}
+			);
+
+			connWebSocket.on('enableAudioOutput', function (data) {
+				let selfConnWebSocket = this;
+
+				self.commandRouter.enableAudioOutput(data);
+			});
+
+		connWebSocket.on('disableAudioOutput', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.disableAudioOutput(data);
+		});
+
+		connWebSocket.on('setAudioOutputVolume', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.setAudioOutputVolume(data);
+		});
 
 
 

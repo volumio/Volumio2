@@ -466,10 +466,12 @@ ControllerUPNPBrowser.prototype.explodeUri = function(uri) {
 	var self = this;
 
 	var defer=libQ.defer();
+	var entranceUri = uri;
 	uri = uri.replace("upnp/", "");//Removing upnp/
 	var folder = uri.startsWith("folder/");
-	if(folder)
-		uri = uri.replace("folder/");
+	if (folder) {
+        uri = uri.replace("folder/");
+	}
 	var address = uri.split("@")[0];//Getting server address
 	var id = uri.split("@")[1];//Getting item ID
 	var browseFlag = folder ? "BrowseDirectChildren" : "BrowseMetadata";
@@ -493,6 +495,7 @@ ControllerUPNPBrowser.prototype.explodeUri = function(uri) {
 						var obj = {
 							"service": "upnp_browser",
 							"uri": item.source,
+							"realUri": entranceUri,
 							"type": "song",
 							"albumart": albumart,
 							"artist": item.artist,
@@ -647,4 +650,4 @@ ControllerUPNPBrowser.prototype.prefetch = function (trackBlock) {
     	.then(function(){
         	return self.mpdPlugin.sendMpdCommand('consume 1',[]);
     	});
-}
+};

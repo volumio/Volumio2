@@ -33,6 +33,11 @@ echo "Copying UI"
 cp -rp /volumio-current/http/www /volumio/http/www
 echo "Getting Network Manager"
 wget https://raw.githubusercontent.com/volumio/Build/master/volumio/bin/wireless.js -O /volumio/app/plugins/system_controller/network/wireless.js
+if [ -d "/volumio-current/app/myvolumio-pluginmanager/" ]; then
+  echo "Copying MyVolumio plugin manager"
+  cp -rp /volumio-current/app/myvolumio-pluginmanager/ /volumio/app/myvolumio-pluginmanager/
+fi
+
 echo "Setting Proper permissions"
 chown -R volumio:volumio /volumio
 chmod a+x /volumio/app/plugins/system_controller/network/wireless.js

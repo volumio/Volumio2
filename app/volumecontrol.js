@@ -70,7 +70,18 @@ function CoreVolumeController(commandRouter) {
 		});
 
 		p.stderr.on('data', function (data) {
-			err = new Error('Alsa Mixer Error: ' + data);
+            try {
+                // Avoid to pass pulse introduced error in parsing
+                //console.log('---' + data.toString().replace(/\n/g, '') + '---');
+                if (data.toString().replace(/\n/g, '') === 'No protocol specified' || data.toString().replace(/\n/g, '') === 'xcb_connection_has_error() returned true') {
+                    // ignoring those errors
+                    //console.log('IGNORING')
+                } else {
+                    err = new Error('Alsa Mixer Error: ' + data);
+                }
+            } catch(e) {
+                err = new Error('Alsa Mixer Error: ' + data);
+            }
 		});
 
 		p.on('close', function () {

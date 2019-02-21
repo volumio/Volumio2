@@ -392,6 +392,9 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.file != undefined) {
 		resp.uri = objTrackInfo.file;
 		resp.trackType = objTrackInfo.file.split('.').pop();
+		if (resp.trackType.length > 10) {
+            resp.trackType = '';
+        }
 		if (resp.uri.indexOf('cdda:///') >= 0) {
 			resp.trackType = 'CD Audio';
 			resp.title = resp.uri.replace('cdda:///', 'Track ');
@@ -1243,6 +1246,12 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                             var diricon = 'fa fa-folder-open-o';
                             path = line.slice(11);
                             var namearr = path.split('/');
+                            name = namearr[namearr.length - 1];
+
+                            // early out to exclude hidden folders (eg. ".Trashes")
+                            if (name.startsWith('.')) {
+                                continue;
+                            }
 
                             if (uri === 'music-library') {
                                 switch(path) {
@@ -1266,11 +1275,10 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                                 diricon = 'fa fa-usb';
                             } else if (uri.indexOf('music-library/INTERNAL') >= 0) {
                                 dirtype = 'internal-folder';
-							} else {
+                            } else {
                                 dirtype = 'folder';
                             }
-
-                            name = namearr.pop();
+                            
                             list.push({
                                 type: dirtype,
                                 title: name,
@@ -1396,7 +1404,10 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				}
 			});
 		});
-	});
+	}).fail(function (e) {
+            self.logger.error('Could not execute lsinfo on URI: ' + uri + ' error: ' + e);
+            defer.reject('')
+        });
 	return defer.promise;
 };
 
@@ -2061,11 +2072,15 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeArtistName = artistName.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
+
 		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
 			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 		}
 		else {
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+            // This section is commented beacuse, although correct it results in some albums not playing.
+            // Until we find a better way to handle this we search just for album
+			//var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+            var GetAlbum = "find album \""+safeAlbumName+"\"";
 		}
 
 		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {
@@ -2468,10 +2483,14 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
     if(  ((uri.indexOf(".iso") < 0) && (uri.indexOf(".ISO") < 0)) && (stat != undefined && stat.isDirectory()) )
     {
-        var files=libFsExtra.readdirSync(uri);
-
-        for(var i in files)
-            uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+    	try {
+            var files=libFsExtra.readdirSync(uri);
+            for(var i in files) {
+                uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+            }
+		} catch(e) {
+            console.log("Failed to stat '" + uri + "'");
+		}
     }
     else if (isofile){
 
@@ -2736,15 +2755,19 @@ ControllerMpd.prototype.seek = function(position) {
     var command = 'seek ';
     var cmd = libMpd.cmd;
 
-
+    if (self.clientMpd !== undefined) {
         self.clientMpd.sendCommand(cmd(command, ['0',position/1000]), function (err, msg) {
             if (msg) {
                 self.logger.info(msg);
             }
-            else self.logger.info(err);
+            else self.logger.error(err);
 
             defer.resolve();
         });
+	} else {
+    	self.logger.error('Could not seek because there is no mpd connection')
+	}
+
 
     return defer.promise;
 };
