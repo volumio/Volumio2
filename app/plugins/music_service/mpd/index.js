@@ -1278,7 +1278,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                             } else {
                                 dirtype = 'folder';
                             }
-                            
+
                             list.push({
                                 type: dirtype,
                                 title: name,
@@ -1340,7 +1340,11 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                             else {
                                 var title1 = self.searchFor(lines, i + 1, 'Title:');
                                 var track = self.searchFor(lines, i + 1, 'Track:');
-                                var title = track + " - " + title1;
+                                if(track && title1) {
+                                    var title = track + " - " + title1;
+                                } else {
+                                    var title = title1;
+                                }
                             }
                             var year,albumart,tracknumber,duration,composer,genre;
                             if(self.commandRouter.sharedVars.get('extendedMetas'))
@@ -1445,7 +1449,11 @@ ControllerMpd.prototype.listallFolder = function (uri) {
                         else {
                             var title1 = self.searchFor(lines, i + 1, 'Title:');
                             var track = self.searchFor(lines, i + 1, 'Track:');
-                            var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
                         }
                         var albumart = self.getAlbumArt({artist: albumartist, album: album},self.getParentFolder('/mnt/' + path),'fa-tags');
 
@@ -1595,7 +1603,11 @@ ControllerMpd.prototype.search = function (query) {
 						else {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
 						}
                         if (title == undefined) {
                             title = name[count - 1];
@@ -1965,7 +1977,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 								else {
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
-									var title = track + " - " + title1 + "HERE";
+                                    if(track && title1) {
+                                        var title = track + " - " + title1;
+                                    } else {
+                                        var title = title1;
+                                    }
 								}
                                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2029,7 +2045,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 								else {
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
-									var title = track + " - " + title1 + "HERE";
+                                    if(track && title1) {
+                                        var title = track + " - " + title1;
+                                    } else {
+                                        var title = title1;
+                                    }
 								}
 								var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2105,7 +2125,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 						else {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
 						}
                         var albumart=self.getAlbumArt({artist: artist, album: album,icon:'dot-circle-o'}, self.getParentFolder('/mnt/'+path));
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -2213,7 +2237,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 						else {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
 						}
                         var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -2401,7 +2429,11 @@ ControllerMpd.prototype.exploderArtist=function(err,msg,defer) {
 				else {
 					var title1 = self.searchFor(lines, i + 1, 'Title:');
 					var track = self.searchFor(lines, i + 1, 'Track:');
-					var title = track + " - " + title1;
+                    if(track && title1) {
+                        var title = track + " - " + title1;
+                    } else {
+                        var title = title1;
+                    }
 				}
                 var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -2544,7 +2576,11 @@ ControllerMpd.prototype.scanFolder=function(uri)
 								else {
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
-									var title = track + " - " + title1;
+                                    if(track && title1) {
+                                        var title = track + " - " + title1;
+                                    } else {
+                                        var title = title1;
+                                    }
 								}
                                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2636,7 +2672,11 @@ ControllerMpd.prototype.explodeISOFile = function (uri) {
                         else {
                             var title1 = self.searchFor(lines, i + 1, 'Title:');
                             var track = self.searchFor(lines, i + 1, 'Track:');
-                            var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
                         }
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -3181,7 +3221,11 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 					else {
 						var title1 = self.searchFor(lines, i + 1, 'Title:');
 						var track = self.searchFor(lines, i + 1, 'Track:');
-						var title = track + " - " + title1;
+                        if(track && title1) {
+                            var title = track + " - " + title1;
+                        } else {
+                            var title = title1;
+                        }
 					}
                     var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -3441,7 +3485,11 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
 				else {
 					var title1 = self.searchFor(lines, i + 1, 'Title:');
 					var track = self.searchFor(lines, i + 1, 'Track:');
-					var title = track + " - " + title1;
+                    if(track && title1) {
+                        var title = track + " - " + title1;
+                    } else {
+                        var title = title1;
+                    }
 				}
                 var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
 
@@ -3638,14 +3686,18 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
 							var albumartist = self.searchFor(lines, i + 1, 'AlbumArtist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
-					//Include track number if tracknumber variable is set to 'true'
+					        //Include track number if tracknumber variable is set to 'true'
 							if (!tracknumbers) {
 								var title = self.searchFor(lines, i + 1, 'Title:');
 							}
 							else {
 								var title1 = self.searchFor(lines, i + 1, 'Title:');
 								var track = self.searchFor(lines, i + 1, 'Track:');
-								var title = track + " - " + title1;
+                                if(track && title1 ) {
+                                    var title = track + " - " + title1;
+                                } else {
+                                    var title = title1;
+                                }
 							}
                             var albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path),'dot-circle-o');;
 
@@ -3889,7 +3941,7 @@ ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
 
 ControllerMpd.prototype.dsdVolume=function(){
 	var self = this;
-	
+
 	if (dsd_autovolume) {
 		self.logger.info('Setting Volume to 100 automatically for DSD')
         self.commandRouter.volumiosetvolume(100);
