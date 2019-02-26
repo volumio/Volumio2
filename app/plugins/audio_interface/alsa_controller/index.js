@@ -662,7 +662,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
-	
+
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
@@ -1074,7 +1074,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
                     } else {
                         self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
                         this.mixertype = 'None';
-                        self.commandRouter.sharedVars.set('alsa.outputdevicemixer', none);
+                        self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'None');
                         //defaultmixer = 'SoftMaster';
                         //self.enableSoftMixer(device);
                     }
