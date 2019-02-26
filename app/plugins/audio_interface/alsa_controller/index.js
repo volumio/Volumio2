@@ -662,11 +662,16 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	var self = this;
 
 	var defer = libQ.defer();
-
+	
 	self.setConfigParam({key: 'volumestart', value: data.volumestart.value});
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
 	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
+	var currentState = self.commandRouter.volumioGetState();
+	if (currentState && currentState.volume !== undefined && currentState.mute !== undefined) {
+		var currentVolume = currentState.volume;
+		var currentMute =  currentState.mute;
+	}
 
     var mpdvalue = self.config.get('mpdvolume', false)
     if (mpdvalue != data.mpdvolume) {
@@ -688,6 +693,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 			mixers.splice(index, 1);
 		}
         data.mixer.value = mixers[0];
+
 	}
     var outValue = self.config.get('outputdevice', 'none');
     if (outValue === 'softvolume') {
@@ -695,11 +701,13 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 		self.config.set('outputdevice', currentDeviceNumber);
         self.config.delete('softvolumenumber');
         self.commandRouter.sharedVars.set('alsa.outputdevice', currentDeviceNumber);
+        self.restorePreviousVolumeLevel(currentVolume, currentMute, false);
     }
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
 		if (outdevice != 'softvolume'){
+            self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
 			self.enableSoftMixer(outdevice);
 			var outdevice = 'softvolume';
             self.config.set('outputdevice', outdevice);
@@ -1541,4 +1549,22 @@ ControllerAlsa.prototype.checkCurrentAudioDeviceAvailable  = function () {
 		}
 		return found
 	}
+};
+
+ControllerAlsa.prototype.restorePreviousVolumeLevel  = function (volume, mute, softmixer) {
+    var self = this;
+
+    self.logger.info('Restoring Previous Volume level: ' + volume + ' ' + mute + ' ' + softmixer);
+    if (softmixer) {
+        self.commandRouter.volumiosetvolume(100);
+	}
+
+    setTimeout(()=>{
+        self.commandRouter.volumiosetvolume(parseInt(volume));
+        if (mute) {
+        	//self.commandRouter.volumiosetvolume('mute');
+        } else {
+        	//self.commandRouter.volumiosetvolume('unmute');
+        }
+    }, 4500)
 };
