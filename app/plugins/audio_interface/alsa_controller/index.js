@@ -698,11 +698,12 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
     var outValue = self.config.get('outputdevice', 'none');
     if (outValue === 'softvolume') {
 		var currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+        self.disableSoftMixer(currentDeviceNumber);
 		self.config.set('outputdevice', currentDeviceNumber);
         self.config.delete('softvolumenumber');
         self.commandRouter.sharedVars.set('alsa.outputdevice', currentDeviceNumber);
-        self.restorePreviousVolumeLevel(currentVolume, currentMute, false);
     }
+    self.restorePreviousVolumeLevel(currentVolume, currentMute, false);
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
@@ -721,13 +722,11 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
             this.config.set('outputdevice', outdevice);
             self.config.delete('softvolumenumber');
             self.restartMpd.bind(self);
+            self.disableSoftMixer(outdevice);
 		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
-		self.disableSoftMixer(outdevice);
 	}
 	self.setConfigParam({key: 'mixer_type', value: data.mixer_type.value});
-
-
 
 	self.logger.info('Volume configurations have been set');
 	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', data.mixer.value);
