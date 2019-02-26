@@ -180,6 +180,13 @@ CoreCommandRouter.prototype.retrieveVolumeLevels = function () {
     return this.stateMachine.getcurrentVolume();
 };
 
+CoreCommandRouter.prototype.setStartupVolume = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumiosetStartupVolume');
+    if (this.volumeControl){
+        return this.volumeControl.setStartupVolume();
+    }
+};
+
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
 	if (this.callbacks[name] == undefined) {
 		this.callbacks[name] = [];

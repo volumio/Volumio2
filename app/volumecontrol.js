@@ -482,3 +482,13 @@ CoreVolumeController.prototype.retrievevolume = function () {
         }
     return defer.promise
 };
+
+CoreVolumeController.prototype.setStartupVolume = function () {
+    var self = this;
+
+    var startupVolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumestart');
+    if (startupVolume != 'disabled') {
+        self.logger.info('VolumeController:: Setting startup Volume ' + startupVolume);
+        return self.commandRouter.volumiosetvolume(parseInt(startupVolume));
+    }
+};
