@@ -539,10 +539,10 @@ ControllerMpd.prototype.parseState = function (objState) {
 				var nSampleRateRaw = '11.2 MHz';
 				nBitDepth = '1 bit'
 			} else {
-				var nSampleRateRaw = nSampleRateRaw + ' KHz';
+				var nSampleRateRaw = nSampleRateRaw + ' kHz';
 			}
 		} else {
-			var nSampleRateRaw = nSampleRateRaw + ' KHz';
+			var nSampleRateRaw = nSampleRateRaw + ' kHz';
 		}
 		nSampleRate = nSampleRateRaw;
 

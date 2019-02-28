@@ -250,10 +250,10 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
         }
 
         if (meta.assr != undefined && meta.assr.length > 0) {
-            self.obj.samplerate=meta.assr/1000+' KHz';
+            self.obj.samplerate=meta.assr/1000+' kHz';
             self.obj.bitdepth='16 bit';
         } else {
-            self.obj.samplerate='44.1 KHz';
+            self.obj.samplerate='44.1 kHz';
             self.obj.bitdepth='16 bit';
         }
 
@@ -273,7 +273,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 
     pipeReader.on('prgr', function(meta) {
 
-        var samplerate = (self.obj.samplerate.replace(' KHz', '')*1000);
+        var samplerate = (self.obj.samplerate.replace(' kHz', '')*1000);
         var duration = Math.round(parseFloat((meta.end-meta.start)/samplerate));
         var seek = (Math.round(parseFloat((meta.current-meta.start)/samplerate)))*1000;
 
