@@ -1227,10 +1227,13 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::next');
 
 	if(this.isVolatile){
-		var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-		volatilePlugin.next();
-	}else{
-
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.next === "function") {
+            volatilePlugin.next();
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.volatileService);
+        }
+	} else{
 		//self.setConsumeUpdateService(undefined);
 		if (this.isConsume && this.consumeState.service != undefined) {
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
@@ -1364,7 +1367,11 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 
 	if(this.isVolatile){
 		var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-		volatilePlugin.previous();
+        if (typeof volatilePlugin.previous === "function") {
+            volatilePlugin.previous();
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No previous method for plugin ' + this.volatileService);
+        }
 	}else{
 		//self.setConsumeUpdateService(undefined);
 		this.commandRouter.pushConsoleMessage('CoreStateMachine::previous');
