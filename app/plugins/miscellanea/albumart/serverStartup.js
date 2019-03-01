@@ -11,7 +11,7 @@ if (cluster.isMaster) {
 
     if(cpuCount>1)
         cpuCount=cpuCount-1;
-    
+
     console.log("Forking "+cpuCount+" albumart workers");
     // Create a worker for each CPU
     for (var i = 0; i < cpuCount; i += 1) {
@@ -28,9 +28,7 @@ else {
     var app = express();
 
     albumart.setFolder(process.argv[3]);
-
-    app.get('/albumart', albumart.processExpressRequest);
-
+    
     app.use(function (err, req, res, next) {
         /**
          * Replace with Winston logging

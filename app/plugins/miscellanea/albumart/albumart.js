@@ -8,6 +8,7 @@ var uuid = require('node-uuid');
 var exec = require('child_process').exec;
 var apiKey = '4cb074e4b8ec4ee9ad3eb37d6f7eb240';
 var diskCache = true;
+var io=require('socket.io-client');
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -414,8 +415,7 @@ var processRequest = function (web, path, meta) {
  *    To achieve this assign this function to a path like /:artist/:album/:resolution
  **/
 var processExpressRequest = function (req, res) {
-    var rawQuery=req._parsedUrl.query;
-
+  var rawQuery=req._parsedUrl.query;
 	var web = req.query.web;
 	var path = req.query.path;
     var icon = req.query.icon;
@@ -563,6 +563,62 @@ var retrieveAlbumart = function (artist, album, size, cb) {
     });
 };
 
+
+var uploadAlbumart = function (req, res, next) {
+  var rawQuery=req._parsedUrl.query;
+  var web = req.query.web;
+  var path = req.query.path;
+  var albumartdir;
+  if(rawQuery !== undefined && rawQuery !== null)
+  {
+      var splitted=rawQuery.split('&');
+      for(var i in splitted)
+      {
+        var itemSplitted=splitted[i].split('=');
+        if(itemSplitted[0]==='web')
+          web=itemSplitted[1];
+        else if(itemSplitted[0]==='path')
+          path=itemSplitted[1];
+      }
+  }
+  var fstream;
+  req.pipe(req.busboy);
+  req.busboy.on('file', function (fieldname, file, filename) {
+    var allowedExtensions = ['jpg', 'jpeg', 'png'];
+    var extension = filename.split('.').pop().toLowerCase();
+    if (allowedExtensions.indexOf(extension) > -1) {
+      var properfilename = filename.replace(/ /g,'-');
+      if (path != undefined && path != "") {
+        path = decodeURIComponent(path);
+        path = sanitizeUri(path);
+        if(path.startsWith('/')){
+          path = '/folder/mnt' + path ;
+        }
+        else {
+          path = '/folder/mnt/' + path ;
+        }
+        albumartdir = path;
+      }
+      else{
+        web = web.substr(0,web.lastIndexOf("/"));
+        albumartdir = '/web/'+web;
+      }
+      fstream = fs.createWriteStream('/data/albumart'+ albumartdir + '/user.'+ extension);
+      file.pipe(fstream);
+      fstream.on('close', function () {
+        console.log("Upload Finished of " + properfilename);
+        var socket= io.connect('http://localhost:3000');
+        socket.emit('regenerateThumbnails', '');
+        res.status(201);
+      });
+      } else {
+          console.log("Albumart file format not allowed " + filename);
+      }
+    });
+};
+
+
 module.exports.processExpressRequest = processExpressRequest;
 module.exports.processRequest = processRequest;
 module.exports.setFolder = setFolder;
+module.exports.uploadAlbumart = uploadAlbumart;
