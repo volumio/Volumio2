@@ -525,7 +525,16 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 }
 
 CoreMusicLibrary.prototype.goto=function(data){
-    var response = this.commandRouter.executeOnPlugin('music_service','mpd','goto',data);
+	var stateMachine = this.commandRouter.stateMachine
+	var curState=stateMachine.getTrack(stateMachine.currentPosition);
+
+	var response;
+
+	if(curState) {
+		data.uri = curState.uri
+		response = this.commandRouter.executeOnPlugin('music_service',curState.service,'goto',data);
+	}
+	else response = this.commandRouter.executeOnPlugin('music_service','mpd','goto',data);
     return response;
 }
 
