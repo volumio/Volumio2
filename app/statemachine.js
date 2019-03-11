@@ -1351,12 +1351,13 @@ CoreStateMachine.prototype.serviceStop = function () {
 		var trackBlock = this.getTrack(this.currentPosition);
 		if (trackBlock && trackBlock.service){
 			return this.commandRouter.serviceStop(trackBlock.service);
-		} else if (this.isUpnp) {
-			var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-			return mpdPlugin.stop();
-		} else {
-            return libQ.resolve();
-		}
+            //} else if (this.isUpnp) {
+            // var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+            // return mpdPlugin.stop();
+        } else {
+            var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+            return mpdPlugin.stop();
+        }
 	}
 };
 
