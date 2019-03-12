@@ -228,7 +228,8 @@
     "ALBUMART_RESET_CACHE":"Réinitialiser le cache des images des albums",
     "ALBUMART_RESET_CACHE_DOC":"Volumio met en cache les images des albums pour améliorer la performance, cependant cela empèche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums ",
     "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
-    "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement"
+    "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement",
+    "BROWSE_SOURCES_VISIBILITY":"Visibilité des Sources"  
    },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
