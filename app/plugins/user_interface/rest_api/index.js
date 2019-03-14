@@ -31,7 +31,7 @@ function interfaceApi(context) {
             else
                 res.json(notFound);
         });
-
+    /*
     api.route('/backup/config/')
         .get(function (req, res) {
             var response = self.commandRouter.getPluginsConf();
@@ -41,7 +41,7 @@ function interfaceApi(context) {
             else
                 res.json(notFound);
         });
-
+    */
 
     api.route('/restore/playlists/')
         .post(function (req, res) {
@@ -55,7 +55,7 @@ function interfaceApi(context) {
             }
         });
 
-
+    /*
     api.route('/restore/config/')
         .post(function (req, res) {
             var response = {'Error': "Error: impossible to restore configurations"};
@@ -68,7 +68,7 @@ function interfaceApi(context) {
                 res.json(response);
             }
         });
-
+    */
     api.route('/commands')
         .get(function (req, res) {
             var response = {'Error': "Error: impossible to execute command"};
@@ -309,6 +309,11 @@ function interfaceApi(context) {
     api.use('/v1', api);
     api.use(bodyParser.json());
 
+    api.route('/ping')
+        .get(function (req, res) {
+            res.send('pong');
+        });
+
     api.route('/getstate')
         .get(function (req, res) {
 
@@ -345,8 +350,16 @@ function interfaceApi(context) {
             .fail(function(error){
                 res.json({'success': false, 'error': error});
             })
+        })
+        .get(function (req, res) {
+            var result = self.executeRestEndpoint(req.query);
+            result.then(function(response) {
+                res.json({'success': true});
+            })
+            .fail(function(error){
+                res.json({'success': false, 'error': error});
+            })
         });
-
 };
 
 interfaceApi.prototype.printConsoleMessage = function (message) {
@@ -434,7 +447,7 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
     var self = this;
     var executed = false;
     var defer = libQ.defer();
-
+    
     var pluginsRestEndpoints = self.commandRouter.getPluginsRestEndpoints();
     if (pluginsRestEndpoints.length && data.endpoint) {
         for (var i in pluginsRestEndpoints) {

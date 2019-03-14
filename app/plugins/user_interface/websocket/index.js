@@ -348,7 +348,7 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 				var response;
 
-				response = self.commandRouter.volumioGetBrowseSources();
+				response = self.commandRouter.volumioGetVisibleBrowseSources();
 
 				selfConnWebSocket.emit('pushBrowseSources', response);
 			});
@@ -367,7 +367,7 @@ function InterfaceWebUI(context) {
 							selfConnWebSocket.emit('pushBrowseLibrary', result);
 						})
 						.fail(function () {
-							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.NO_RESULTS'));
 						});
 				}
 
@@ -398,7 +398,7 @@ function InterfaceWebUI(context) {
 						selfConnWebSocket.emit('pushBackup', result);
 					})
 						.fail(function () {
-							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR) , 'Could not retrieve backup');
 						});
 				}
 
@@ -410,7 +410,7 @@ function InterfaceWebUI(context) {
 				var response = self.commandRouter.restorePluginsConf()
 					.then(self.commandRouter.restorePluginsConf())
 					.fail(function () {
-							self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+							self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not restore configuration');
 						});
 			});
 
@@ -473,12 +473,12 @@ function InterfaceWebUI(context) {
 								selfConnWebSocket.emit('pushBrowseLibrary', result2);
 							})
 								.fail(function () {
-									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+									self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 								});
 						}
 						})
 						.fail(function () {
-							self.printToastMessage('error', "Search error", 'An error occurred while Searching');
+                            self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 						});
 				}
 			});
@@ -510,7 +510,7 @@ function InterfaceWebUI(context) {
 							selfConnWebSocket.emit('pushBrowseLibrary', result);
 						})
 							.fail(function () {
-								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 							});
 					}
 				});
@@ -557,7 +557,7 @@ function InterfaceWebUI(context) {
 							selfConnWebSocket.emit('pushBrowseLibrary', result);
 						})
 							.fail(function () {
-								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 							});
 					}
 				});
@@ -595,8 +595,12 @@ function InterfaceWebUI(context) {
 
 				var returnedData = self.commandRouter.playListManager.addToFavourites(data.service, data.uri, data.title);
 				returnedData.then(function (data) {
-					selfConnWebSocket.emit('urifavourites', data);
-				});
+					if (data !== undefined) {
+                        selfConnWebSocket.emit('urifavourites', data);
+					}
+				}).fail(function () {
+                        self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('PLAYLIST.ADDED_TO_FAVOURITES'));
+                    });
 
 			});
 
@@ -612,19 +616,19 @@ function InterfaceWebUI(context) {
 									selfConnWebSocket.emit('pushBrowseLibrary', result);
 								})
 								.fail(function () {
-									self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                    self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 								});
 						}
 					} else if (data.service === 'streaming_services') {
 						setTimeout(()=> {
                             var uri = data.uri.substring(0, data.uri.lastIndexOf("/") );
-                        	response = response=self.musicLibrary.executeBrowseSource(uri);
+                        	response = self.musicLibrary.executeBrowseSource(uri);
                         if (response != undefined) {
                             response.then(function (result) {
                                 selfConnWebSocket.emit('pushBrowseLibrary', result);
                             })
                                 .fail(function () {
-                                    self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                    self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
                                 });
                         }
 						},600)
@@ -636,7 +640,7 @@ function InterfaceWebUI(context) {
 								selfConnWebSocket.emit('pushBrowseLibrary', result);
 							})
 							.fail(function () {
-								self.printToastMessage('error', "Browse error", 'An error occurred while browsing the folder.');
+                                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
 							});
 					}
 					}
@@ -935,9 +939,6 @@ function InterfaceWebUI(context) {
 						}
 					});
 				}
-				else console.log("Plugin multiroom or method getMultiroom not found");
-
-
 			});
 
 			/**
@@ -1086,26 +1087,31 @@ function InterfaceWebUI(context) {
             connWebSocket.on('installPlugin', function (data) {
                 var selfConnWebSocket = this;
 
-                var returnedData = self.commandRouter.installPlugin(data.url);
-
-                if (returnedData != undefined) {
-                    returnedData.then(function (data) {
-                        selfConnWebSocket.emit('pushInstallPlugin', data);
-						var installed = self.commandRouter.getInstalledPlugins();
-						if (installed != undefined) {
-							installed.then(function (installedPLugins) {
-								self.broadcastMessage('pushInstalledPlugins',installedPLugins);
-							});
-						}
-						var available = self.commandRouter.getAvailablePlugins();
-						if (available != undefined) {
-							available.then(function (AvailablePlugins) {
-								selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
-							});
-						}
-                    });
-                }
-                else self.logger.error("Error on installing plugin");
+                if (process.env.WARNING_ON_PLUGIN_INSTALL === "true" && data.confirm !== true) {
+					data.confirm = true;
+                    return selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-info', 'emit':'closeModals','payload':''},{'name':self.commandRouter.getI18nString('PLUGINS.INSTALL'), 'class':'btn btn-warning', 'emit':'installPlugin', 'payload':data}]});
+                } else {
+                    var returnedData = self.commandRouter.installPlugin(data.url);
+                    if (returnedData != undefined) {
+                        returnedData.then(function (data) {
+                            selfConnWebSocket.emit('pushInstallPlugin', data);
+                            var installed = self.commandRouter.getInstalledPlugins();
+                            if (installed != undefined) {
+                                installed.then(function (installedPLugins) {
+                                    self.broadcastMessage('pushInstalledPlugins',installedPLugins);
+                                });
+                            }
+                            var available = self.commandRouter.getAvailablePlugins();
+                            if (available != undefined) {
+                                available.then(function (AvailablePlugins) {
+                                    selfConnWebSocket.emit('pushAvailablePlugins',AvailablePlugins);
+                                });
+                            }
+                        });
+                    } else {
+                        self.logger.error("Error on installing plugin");
+                    }
+				}
             });
 
 			connWebSocket.on('updatePlugin', function (data) {
@@ -1308,10 +1314,39 @@ function InterfaceWebUI(context) {
             connWebSocket.on('preUninstallPlugin', function (data) {
                 var selfConnWebSocket = this;
 
-
-                selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('PLUGINS.UNINSTALL'), 'class':'btn btn-info', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}},{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-warning'}]});
+                selfConnWebSocket.emit('openModal', {'title':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL'), 'message':self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_UNINSTALL_MESSAGE')+'?', 'buttons':[{'name':self.commandRouter.getI18nString('COMMON.CANCEL'),'class':'btn btn-info'},{'name':self.commandRouter.getI18nString('PLUGINS.UNINSTALL'), 'class':'btn btn-warning', 'emit':'unInstallPlugin', 'payload':{'category':data.category,'name':data.name}}]});
 
             });
+
+            // ======================== AUDIO OUTPUTS ==========================
+
+            connWebSocket.on('getAudioOutputs', function (data) {
+				var selfConnWebSocket = this;
+
+				var outputs = self.commandRouter.getAudioOutputs();
+				if (outputs != undefined) {
+					selfConnWebSocket.emit('pushAudioOutputs', outputs);
+					};
+				}
+			);
+
+			connWebSocket.on('enableAudioOutput', function (data) {
+				let selfConnWebSocket = this;
+
+				self.commandRouter.enableAudioOutput(data);
+			});
+
+		connWebSocket.on('disableAudioOutput', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.disableAudioOutput(data);
+		});
+
+		connWebSocket.on('setAudioOutputVolume', function (data) {
+			let selfConnWebSocket = this;
+
+			self.commandRouter.setAudioOutputVolume(data);
+		});
 
 
 
@@ -1545,7 +1580,6 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var audiolist = self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAudioDevices', '');
-
 				if (audiolist != undefined) {
 					audiolist.then(function (data) {
 						selfConnWebSocket.emit('pushOutputDevices', data);

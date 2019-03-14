@@ -1,6 +1,6 @@
 {
   "PLAYBACK_OPTIONS":{
-    "PLAYBACK_OPTIONS_TITLE":"Options de lecture",
+    "PLAYBACK_OPTIONS_TITLE":"Options de lecture générales",
     "AUDIO_OUTPUT":"Sortie Audio",
     "OUTPUT_DEVICE_DOC":"Périphérique de sortie",
     "OUTPUT_DEVICE":"Périphérique de sortie",
@@ -45,6 +45,7 @@
       "ADVANCED_AUDIO_TWEAKS":"Réglages audio avancés",
 	    "AUDIO_RESAMPLING":"Rééchantillonage",
 	    "AUDIO_RESAMPLING_SETTINGS_SAVED":"Réglage du rééchantillonage enregistré",
+	       "AUDIO_RESAMPLING_DOC":"Controle les options de réechantillonage. Pour la lecture de fichiers locaux uniquement (ne s'applique pas à Shairport ou services tiers comme ROON)", 
 	    "TARGET_BITDEPTH":"Nombre de bits cible",
 	    "TARGET_SAMPLERATE":"Fréquence d'échantillonage",
       "NATIVE":"Native",
@@ -73,7 +74,8 @@
     "USB_DAC_CONNECTED":"Dac USB DAC Connecté",
     "NO_OUTPUT_DEVICE":"Pas de sortie audio disponible",
     "NO_OUTPUT_DEVICE_MESSAGE":"Connecté un péréphérique audio à ce matériel"
-    	  },
+    },
+	
     "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau cablé",
@@ -91,7 +93,7 @@
     "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès",
     "HOTSPOT_SETTINGS":"Configuration du Hotspot WiFi",
     "ENABLE_HOTSPOT":"Activer le Hotspot",
-	 "ENABLE_HOTSPOT_DOC":"Si le hotspot est activé et que la connection Wifi est perdue (ou si aucune connection Wifi n'a été configurée), le système démarrera le hotspot automatiquement. A désactiver uniquement si vous ne voulez pas ce comportement",
+	 "ENABLE_HOTSPOT_DOC":"Le hotspot sera activé automatiquement si la connection Wifi est perdue (ou si aucune connection Wifi n'a été configurée). A désactiver uniquement si vous ne voulez pas ce comportement",
     "HOTSPOT_NAME":"Nom du Hotspot",
     "HOTSPOT_PROTECTION":"Protection par mot de passe du Hotspot",
     "HOTSPOT_PASSWORD":"Mot de passe du Hotspot",
@@ -188,7 +190,11 @@
     "GOT_IT":"Compris",
     "MEDIA_SERVERS":"Serveurs Média",
     "ENABLED":"Activé",
-    "DISABLED":"Désactivé"
+    "DISABLED":"Désactivé",
+    "NO_RESULTS":"Pas de résultat",
+    "REMOVE_FAIL":"Impossible de retirer",
+    "CONNECTED":"Connecté",
+    "DISCONNECTED":"Déconnecté"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -296,7 +302,13 @@
     "STARTING_SOFTWARE_UPDATE":"Initialisation de la mise à jour",
     "CHECKING_SYSTEM_INTEGRITY":"Vérification de l'integrité du système",
     "SYSTEM_INTEGRITY_CHECK_FAILED":"La vérification de l'integrité a échoué car des fichiers modifiés manuellement ont été détecté. La mise à jour ne peut se faire dans ces conditions. Executez une remise en état d'origine .",
-    "UPDATE_FAILED":"Echec de la mise à jour"
+    "UPDATE_FAILED":"Echec de la mise à jour",
+    "DELETE_FOLDER":"Effacer le dossier",
+    "DELETING_FOLDER":"Effacement du dossier",
+    "SUCCESSFULLY_DELETED_FOLDER":"Dossier effacé avec succès",
+    "ERROR_DELETING_FOLDER":"Erreur d'effacement du dossier",
+    "SHOW_ADVANCED_SETTINGS":"Montrer les réglages avancés",
+    "SHOW_ADVANCED_SETTINGS_DOC":"Si activé, donne accès à des réglages avancés. Pour les experts seulement"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
@@ -314,7 +326,10 @@
     "DOWNLOADING_FROM":"Télécharger le plugin depuis",
     "DOWNLOADING":"Téléchargement du Plugin en cours",
     "NO_CONFIGURATION_AVAILABLE":"Pas de configuration disponible",
-    "PLUGIN_START_ERROR":"Le démarrage de ce plugin a échoué. Mettez le à jour ou contactez le developpeur"   
+    "PLUGIN_START_ERROR":"Le démarrage de ce plugin a échoué. Mettez le à jour ou contactez le developpeur",
+    "CONFIRM_PLUGIN_INSTALL":"Installer le Plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Attention, les plugins developpés pades tierces parties peuvent conduire à des instabilités ou des comportements anormaux du système. Etes vous sur de vouloir installer ce plugin?",
+    "INSTALL":"Installer"
   },
    "WIZARD":{
    "CONGRATULATIONS":"Félicitations !",
@@ -334,6 +349,8 @@
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Mise à jour avec succès vers la version",
     "SYSTEM_RESTART_REQUIRED":"Redémarrez votre système.",
     "SYSTEM_RESTART_IN":"Votre système va redémmarrer dans ",
-    "UPDATE":"Mise à jour"
+    "UPDATE":"Mise à jour",
+    "CHECKING_FOR_UPDATES":"Recherche de mise à jour",
+    "CHECKING_FOR_UPDATES_WAIT":"Merci de patienter"
    }	
 }

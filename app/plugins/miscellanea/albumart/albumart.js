@@ -1,12 +1,12 @@
 'use strict';
 
-var albumart = require('album-art');
 var Q = require('kew');
 var download = require('file-download');
 var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var exec = require('child_process').exec;
+var apiKey = '4cb074e4b8ec4ee9ad3eb37d6f7eb240';
 var diskCache = true;
 
 var winston = require('winston');
@@ -133,7 +133,7 @@ var searchOnline = function (defer, web) {
 			decodedAlbum = decodedAlbum|| null;
 		}
 
-		albumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
+        retrieveAlbumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
             if (err) {
                 //console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
                 defer.reject(new Error(err));
@@ -502,6 +502,66 @@ var sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
 }
 
+// Included this code as an effort to reduce dependencies
+// Original code at https://github.com/lacymorrow/album-art/tree/66755c918ece5093cf32d49f6263144f6669d695
+// Copyright MIT © Lacy Morrow https://lacymorrow.github.io/
+
+var retrieveAlbumart = function (artist, album, size, cb) {
+    if (typeof artist !== 'string') {
+        return cb('No valid artist supplied', '');
+    }
+    if (typeof album === 'function') {
+        cb = album;
+        album = size = null;
+    } else if (typeof size === 'function') {
+        cb = size;
+        size = null;
+    }
+
+    var data = '';
+    var sizes = ['small', 'medium', 'large', 'extralarge', 'mega'];
+    var method = (album === null) ? 'artist' : 'album';
+    var http = require('http');
+    var artist = artist.replace ("&", "and");
+    var options = {
+        host: 'ws.audioscrobbler.com',
+        port: 80,
+        path: encodeURI('/2.0/?format=json&api_key=' + apiKey + '&method=' + method + '.getinfo&artist=' + artist + '&album=' + album)
+    };
+    http.get(options, function(resp){
+        resp.on('data', function(chunk){
+            data += chunk;
+        });
+        resp.on('end', function(){
+            try {
+                var json = JSON.parse(data);
+            } catch(e) {
+                return cb('JSON Error: ' + e, '');
+            }
+
+            if (typeof(json.error) !== 'undefined'){
+                // Error
+                return cb('JSON Error: ' + json.message, '');
+            } else if (sizes.indexOf(size) !== -1 && json[method] && json[method].image){
+                // Return image in specific size
+                json[method].image.forEach(function(e, i) {
+                    if (e.size === size){
+                        cb(null, e['#text']);
+                    }
+                });
+            } else if (json[method] && json[method].image) {
+                // Return largest image
+                var i = json[method].image.length - 2;
+                cb(null, json[method].image[i]['#text']);
+            } else {
+                // No image art found
+                cb('Error: No image found.', '');
+            }
+        });
+    }).on("error", function(e){
+        return cb('Got error: ' + e.message);
+    });
+};
 
 module.exports.processExpressRequest = processExpressRequest;
 module.exports.processRequest = processRequest;

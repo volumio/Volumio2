@@ -1,7 +1,6 @@
+var dotenv = require('dotenv').config({ path: __dirname + '/.env' });
 var execSync = require('child_process').execSync;
 var fs = require('fs-extra');
-var globals = fs.readJsonSync(__dirname + '/.globals.json');
-
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
 // Using port 3000 for the debug interface
@@ -45,7 +44,7 @@ process.on('uncaughtException', (error) => {
     var errorMessage = 'Unknown';
   }
   execSync('/usr/local/bin/node /volumio/crashreport.js "' + errorMessage + '"');
-  if (globals.exitOnException) {
+  if (process.env.EXIT_ON_EXCEPTION === "true") {
     process.exit(1);
   }
 });
