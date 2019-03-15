@@ -125,7 +125,7 @@ volumioAppearance.prototype.getUIConfig = function () {
             var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
             var language = config.get('language');
             var language_code = config.get('language_code');
-
+            var allLanguagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/allLanguages.json'),  'utf8', {throws: false});
 
             self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value', {
                 value: language_code,
@@ -139,6 +139,39 @@ volumioAppearance.prototype.getUIConfig = function () {
                 });
             }
 
+
+            self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', {
+              value: language_code,
+              label: language
+          });
+          for (var n = 0; n < allLanguagesdata.languages.length; n++){
+
+              self.configManager.pushUIConfigParam(uiconf, 'sections[1].content[0].options', {
+                  value: allLanguagesdata.languages[n].code,
+                  label: allLanguagesdata.languages[n].nativeName
+              });
+          }
+
+         var translations = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
+            for(var key1 in translations)
+            {
+              for(var key2 in translations[key1])
+              {
+                uiconf.sections[1].saveButton.data.push("translation"+key2);
+              self.configManager.pushUIConfigParam(uiconf, 'sections[1].content', {
+                id: "translation"+key2,
+                element: "input",
+                type: "text",
+                label: self.commandRouter.getI18nString(key1+'.'+key2),
+                attributes: [
+                  {placeholder: translations[key1][key2]},
+                  {maxlength: 40}
+                ],
+                value: translations[key1][key2]
+              });
+              }
+
+            }
 
             defer.resolve(uiconf);
         })
@@ -424,3 +457,8 @@ volumioAppearance.prototype.getConfigParam = function (key) {
     var self = this;
     return config.get(key);
 };
+
+volumioAppearance.prototype.setTranslation = function (data){
+  var self = this;
+  console.log("date recieved",data);
+}

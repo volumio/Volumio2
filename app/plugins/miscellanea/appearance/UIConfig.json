@@ -33,6 +33,37 @@
         }
       ]
     },
+    {
+      "id": "traslation_language_selector",
+      "element": "section",
+      "label": "TRANSLATE.APPEARANCE.UI_CONFIG_LANGUAGE",
+      "icon": "fa-language",
+      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setTranslation"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "translation_language"
+        ]
+      },
+      "value":  {
+        "value": "0",
+        "label": "Unknown"
+      },
+      "content": [
+        {
+          "id": "translation_language",
+          "element": "select",
+          "doc": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE_DOC",
+          "label": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
+          "value":  {
+            "value":0,
+            "label": "0"
+          },
+          "options": [
+          ]
+        }
+      ]
+    },
     {"coreSection": "ui-settings"}
   ]
 }
