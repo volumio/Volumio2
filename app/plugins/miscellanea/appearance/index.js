@@ -232,7 +232,7 @@ volumioAppearance.prototype.generateThumbnails = function(){
         files.forEach(function(f) {
             numberfile++;
             if (f.indexOf("thumbnail-") >= 0) {
-            } else  {
+            } else {
 
                 //console.log('Processing file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
                 try {
@@ -441,33 +441,32 @@ volumioAppearance.prototype.showTranslation = function (data){
   totalWords = 0;
   totalTranslated = 0;
   var nsections = 1;
-  if(data && data.translation_language && data.translation_language.value)
-  {
+  if(data && data.translation_language && data.translation_language.value){
     translationLanguage = data.translation_language.value;
     var respconfig = self.commandRouter.getUIConfigOnPlugin('miscellanea', 'appearance', {});
     respconfig.then(function(configuration){
       var translations = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
-      fileName = "strings_"+translationLanguage;
+      fileName = 'strings_'+ translationLanguage;
       for(var category in translations)
       {
-        var labelname = self.labelFormatting(category);
+        var labelName = self.labelFormatting(category);
         nsections ++
         var sect = 'sections';
-        var sectCon = 'sections['+nsections+'].content'
+        var sectCon = 'sections['+ nsections +'].content'
         configuration.sections.splice(nsections,0,{
-          id: "translation_selector"+nsections,
-          element: "section",
-          label: labelname,
-          icon: "fa-language",
-          onSave: {type:"controller", endpoint:"miscellanea/appearance", method:"setTranslation"},
+          id: 'translation_selector' + nsections,
+          element: 'section',
+          label: labelName,
+          icon: 'fa-language',
+          onSave: {type:'controller', endpoint:'miscellanea/appearance', method:'setTranslation'},
           saveButton: {
-            label: self.commandRouter.getI18nString("COMMON.SAVE"),
+            label: self.commandRouter.getI18nString('COMMON.SAVE'),
             data: [
             ]
           },
           value:  {
-            value: "0",
-            label: "Unknown"
+            value: '0',
+            label: 'Unknown'
           },
           content: [
             {
@@ -477,12 +476,12 @@ volumioAppearance.prototype.showTranslation = function (data){
         for(var item in translations[category])
         {
           totalWords ++;
-          var translate =self.readTranslation(category+'.'+item);
-          configuration.sections[nsections].saveButton.data.push(fileName+"-"+category+"-"+item);
+          var translate = self.readTranslation(category + '.' + item);
+          configuration.sections[nsections].saveButton.data.push(fileName + '-' + category + '-' + item);
           self.configManager.pushUIConfigParam(configuration, sectCon, {
-            id: fileName+"-"+category+"-"+item,
-            element: "input",
-            type: "text",
+            id: fileName + '-' + category + '-' + item,
+            element: 'input',
+            type: 'text',
             label:translations[category][item],
             attributes: [
               {placeholder: translations[category][item]},
@@ -492,19 +491,17 @@ volumioAppearance.prototype.showTranslation = function (data){
           });
         }
       }
-      self.logger.info("Total Words =", totalWords);
-      self.logger.info("Total Words Translated=", totalTranslated);
-      self.logger.info("Percentage translated =", (Math.trunc((totalTranslated/totalWords)*100))+"%");
+      self.logger.info('Total Words =', totalWords);
+      self.logger.info('Total Words Translated =', totalTranslated);
+      self.logger.info('Percentage translated =', (Math.trunc((totalTranslated/totalWords)*100))+'%');
       self.commandRouter.broadcastMessage('pushUiConfig', configuration);
     })
     .fail(function(e)
     {
       self.logger.info(e);
     })
-  }
-  else
-  {
-    self.logger.info("Error in receiving data");
+  } else {
+    self.logger.info('Error in receiving data');
   }
 }
 
@@ -514,7 +511,7 @@ volumioAppearance.prototype.setTranslation = function (data){
   var selectedLanguage;
   try {
     try{
-      selectedLanguage = fs.readJsonSync(__dirname+'/../../../i18n/strings_'+language+'.json');
+      selectedLanguage = fs.readJsonSync(__dirname + '/../../../i18n/strings_' + language + '.json');
     }
     catch(err)
     {
@@ -522,77 +519,68 @@ volumioAppearance.prototype.setTranslation = function (data){
     }
     for(var translationID in data)
     {
-      if(data[translationID]!== "")
-      {
-        var idSplitted=translationID.split('-');
-        if(selectedLanguage[idSplitted[1]] === undefined)
-        {
-          selectedLanguage[idSplitted[1]]={}
+      if(data[translationID] !== ''){
+        var idSplitted = translationID.split('-');
+        if(selectedLanguage[idSplitted[1]] === undefined){
+          selectedLanguage[idSplitted[1]] = {};
         }
-        selectedLanguage[idSplitted[1]][idSplitted[2]]= data[translationID];
+        selectedLanguage[idSplitted[1]][idSplitted[2]] = data[translationID];
       }
     }
-    self.logger.info("Translation file saved");
-    fs.outputJsonSync('/data/strings_'+language+'.json', selectedLanguage, {spaces: 2});
+    fs.outputJsonSync('/data/strings_' + language + '.json', selectedLanguage, {spaces: 2});
+    self.logger.info('Translation file saved');
 	} catch(e) {
-		self.logger.info(e);
+        self.logger.info("Error in saving the translation file");
+        self.logger.error(e);
 	}
 }
 
 volumioAppearance.prototype.readTranslation = function (key){
   var self = this;
-  var splitted=key.split('.');
+  var splitted = key.split('.');
   try
   {
-    var i18nStrings = fs.readJsonSync(__dirname+'/../../../i18n/strings_'+translationLanguage+'.json');
+    var i18nStrings = fs.readJsonSync(__dirname + '/../../../i18n/strings_' + translationLanguage + '.json');
     if (i18nStrings) {
-      if(splitted.length==1)
-      {
-        if(i18nStrings[key]!==undefined)
+      if(splitted.length == 1){
+        if(i18nStrings[key] !== undefined)
           return i18nStrings[key];
-        else return ("")
-      }
-      else {
-        if(i18nStrings[splitted[0]]!==undefined && i18nStrings[splitted[0]][splitted[1]]!==undefined)
-          {
+        else return ('');
+      } else {
+        if(i18nStrings[splitted[0]] !== undefined && i18nStrings[splitted[0]][splitted[1]] !== undefined){
             totalTranslated ++;
             return i18nStrings[splitted[0]][splitted[1]];
           }
-        else return ("")
+        else return ('');
       }
     } else {
       var emptyString = '';
-      return emptyString
+      return emptyString;
     }
   }
   catch(e) {
     var emptyString = '';
-    return emptyString
+    return emptyString;
   }
 }
 
-volumioAppearance.prototype.labelFormatting = function (labelname){
-    var label = "";
-    var labelname = labelname.toLowerCase();
-        if(labelname.indexOf('_')>-1)
+volumioAppearance.prototype.labelFormatting = function (labelName){
+    var label = '';
+    var labelName = labelName.toLowerCase();
+        if(labelName.indexOf('_') > -1)
         {
-          var labelsplit = labelname.split("_");
-          for(var i =0; i<labelsplit.length; i++)
+          var labelsplit = labelName.split('_');
+          for(var i = 0; i < labelsplit.length; i++)
           {
             labelsplit[i] = labelsplit[i].charAt(0).toUpperCase() + labelsplit[i].slice(1);
-            if(i<labelsplit.length-1)
-            {
-                label = label+labelsplit[i]+" ";
-            }
-            else
-            {
+            if(i < labelsplit.length-1){
+                label = label+labelsplit[i]+' ';
+            } else {
                 label = label+labelsplit[i];
             }
           }
+        } else {
+            label = labelName.charAt(0).toUpperCase() + labelName.slice(1);
         }
-        else
-        {
-            label = labelname.charAt(0).toUpperCase() + labelname.slice(1);
-        }
-    return label
+    return label;
 }
