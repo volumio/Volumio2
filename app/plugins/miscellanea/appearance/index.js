@@ -8,6 +8,8 @@ var Jimp = require("jimp");
 
 var backgroundPath = '/data/backgrounds';
 var translationLanguage = '';
+var totalWords = 0;
+var totalTranslated = 0;
 
 // Define the volumioAppearance class
 module.exports = volumioAppearance;
@@ -160,10 +162,6 @@ volumioAppearance.prototype.getUIConfig = function () {
         {
             defer.reject(new Error());
         })
-
-
-    /*var uiconf = fs.readJsonSync(__dirname + '/UIConfig.json');
-     */
     return defer.promise;
 };
 
@@ -421,8 +419,6 @@ volumioAppearance.prototype.getAvailableLanguages = function() {
 
     var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'), 'utf8', {throws: false});
     var defer = libQ.defer();
-
-
     var available = [];
     for (var n = 0; n < languagesdata.languages.length; n++) {
         var language = {"language":languagesdata.languages[n].name, "code":languagesdata.languages[n].code }
@@ -441,95 +437,103 @@ volumioAppearance.prototype.getConfigParam = function (key) {
 
 volumioAppearance.prototype.showTranslation = function (data){
   var self = this;
-  translationLanguage = data.translation_language.value;
-  var respconfig = self.commandRouter.getUIConfigOnPlugin('miscellanea', 'appearance', {});
-  respconfig.then(function(configuration)
-        {
-
-          //self.configManager.setUIConfigParam(configuration, 'sections[2].hidden', false)
-          configuration.sections[2].hidden = false;
-          var translations = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
-            for(var key1 in translations)
-            {
-              for(var key2 in translations[key1])
-              {
-                var translate =self.readTranslation(key1+'.'+key2);
-                configuration.sections[2].saveButton.data.push("translation_"+key2);
-                  self.configManager.pushUIConfigParam(configuration, 'sections[2].content', {
-                    id: "translation_"+key2,
-                    element: "input",
-                    type: "text",
-                    label:translations[key1][key2],
-                    attributes: [
-                      {placeholder: translations[key1][key2] },
-                      {maxlength: 200}
-                    ],
-                    value: translate
-                  });
-              }
-            }
-          self.commandRouter.broadcastMessage('pushUiConfig', configuration);
-        })
-  .fail(function(e)
+  var fileName = '';
+  totalWords = 0;
+  totalTranslated = 0;
+  var nsections = 1;
+  if(data && data.translation_language && data.translation_language.value)
   {
-    self.logger.info(e);
-  })
+    translationLanguage = data.translation_language.value;
+    var respconfig = self.commandRouter.getUIConfigOnPlugin('miscellanea', 'appearance', {});
+    respconfig.then(function(configuration){
+      var translations = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
+      fileName = "strings_"+translationLanguage;
+      for(var category in translations)
+      {
+        var labelname = self.labelFormatting(category);
+        nsections ++
+        var sect = 'sections';
+        var sectCon = 'sections['+nsections+'].content'
+        configuration.sections.splice(nsections,0,{
+          id: "translation_selector"+nsections,
+          element: "section",
+          label: labelname,
+          icon: "fa-language",
+          onSave: {type:"controller", endpoint:"miscellanea/appearance", method:"setTranslation"},
+          saveButton: {
+            label: self.commandRouter.getI18nString("COMMON.SAVE"),
+            data: [
+            ]
+          },
+          value:  {
+            value: "0",
+            label: "Unknown"
+          },
+          content: [
+            {
+            }
+          ]
+        });
+        for(var item in translations[category])
+        {
+          totalWords ++;
+          var translate =self.readTranslation(category+'.'+item);
+          configuration.sections[nsections].saveButton.data.push(fileName+"-"+category+"-"+item);
+          self.configManager.pushUIConfigParam(configuration, sectCon, {
+            id: fileName+"-"+category+"-"+item,
+            element: "input",
+            type: "text",
+            label:translations[category][item],
+            attributes: [
+              {placeholder: translations[category][item]},
+              {maxlength: 200}
+            ],
+            value: translate
+          });
+        }
+      }
+      self.logger.info("Total Words =", totalWords);
+      self.logger.info("Total Words Translated=", totalTranslated);
+      self.logger.info("Percentage translated =", (Math.trunc((totalTranslated/totalWords)*100))+"%");
+      self.commandRouter.broadcastMessage('pushUiConfig', configuration);
+    })
+    .fail(function(e)
+    {
+      self.logger.info(e);
+    })
+  }
+  else
+  {
+    self.logger.info("Error in receiving data");
+  }
 }
 
 volumioAppearance.prototype.setTranslation = function (data){
   var self = this;
-  var id = "";
   var language = translationLanguage;
+  var selectedLanguage;
   try {
-    var defaultLanguage = fs.readJsonSync(__dirname+'/../../../i18n/strings_en.json');
-    var selecLang = fs.readJsonSync(__dirname+'/../../../i18n/strings_'+language+'.json')
-    var found = false;
-    var addedElements = [];
-    var index = 0;
-    for(var x in data)
+    try{
+      selectedLanguage = fs.readJsonSync(__dirname+'/../../../i18n/strings_'+language+'.json');
+    }
+    catch(err)
     {
-      index = 0;
-      id = x.replace("translation_","");
-      found = false;
-      for (var key1 in selecLang)
+      selectedLanguage = {};
+    }
+    for(var translationID in data)
+    {
+      if(data[translationID]!== "")
       {
-        for(var key2 in selecLang[key1])
+        var idSplitted=translationID.split('-');
+        if(selectedLanguage[idSplitted[1]] === undefined)
         {
-          if(id === key2 && addedElements.includes(key2+index.toString())===false)
-          {
-            if(found === false)
-            {
-              console.log("index =",index);
-              found = true;
-              addedElements.push(key2+index.toString())
-            }
-          }
-          else{
-            index ++;
-          }
+          selectedLanguage[idSplitted[1]]={}
         }
-      }
-      if(found == false)
-      {
-        //search the position in the default language (eng) and put in the
-        for (var defkey1 in defaultLanguage)
-        {
-          for(var defkey2 in defaultLanguage[defkey1])
-          {
-            if(id === defkey2)
-            {
-              if(selecLang[defkey1] === undefined)
-              {
-                selecLang[defkey1] = {};
-              }
-              selecLang[defkey1][defkey2] = data[x];
-            }
-          }
-        }
+        selectedLanguage[idSplitted[1]][idSplitted[2]]= data[translationID];
       }
     }
     self.logger.info("Translation file saved");
-    fs.outputJsonSync('/data/strings_'+language+'.json', selecLang, {spaces: 2});
+    fs.outputJsonSync('/data/strings_'+language+'.json', selectedLanguage, {spaces: 2});
 	} catch(e) {
 		self.logger.info(e);
 	}
@@ -538,7 +542,6 @@ volumioAppearance.prototype.setTranslation = function (data){
 volumioAppearance.prototype.readTranslation = function (key){
   var self = this;
   var splitted=key.split('.');
-  var i18nStringsDefaults=fs.readJsonSync(__dirname+'/../../../i18n/strings_en.json');
   try
   {
     var i18nStrings = fs.readJsonSync(__dirname+'/../../../i18n/strings_'+translationLanguage+'.json');
@@ -547,13 +550,15 @@ volumioAppearance.prototype.readTranslation = function (key){
       {
         if(i18nStrings[key]!==undefined)
           return i18nStrings[key];
-        else return i18nStringsDefaults[key];
+        else return ("")
       }
       else {
-        if(i18nStrings[splitted[0]]!==undefined &&
-          i18nStrings[splitted[0]][splitted[1]]!==undefined)
-          return i18nStrings[splitted[0]][splitted[1]];
-        else return i18nStringsDefaults[splitted[0]][splitted[1]];
+        if(i18nStrings[splitted[0]]!==undefined && i18nStrings[splitted[0]][splitted[1]]!==undefined)
+          {
+            totalTranslated ++;
+            return i18nStrings[splitted[0]][splitted[1]];
+          }
+        else return ("")
       }
     } else {
       var emptyString = '';
@@ -561,8 +566,33 @@ volumioAppearance.prototype.readTranslation = function (key){
     }
   }
   catch(e) {
-    self.logger.info(e);
     var emptyString = '';
     return emptyString
   }
+}
+
+volumioAppearance.prototype.labelFormatting = function (labelname){
+    var label = "";
+    var labelname = labelname.toLowerCase();
+        if(labelname.indexOf('_')>-1)
+        {
+          var labelsplit = labelname.split("_");
+          for(var i =0; i<labelsplit.length; i++)
+          {
+            labelsplit[i] = labelsplit[i].charAt(0).toUpperCase() + labelsplit[i].slice(1);
+            if(i<labelsplit.length-1)
+            {
+                label = label+labelsplit[i]+" ";
+            }
+            else
+            {
+                label = label+labelsplit[i];
+            }
+          }
+        }
+        else
+        {
+            label = labelname.charAt(0).toUpperCase() + labelname.slice(1);
+        }
+    return label
 }

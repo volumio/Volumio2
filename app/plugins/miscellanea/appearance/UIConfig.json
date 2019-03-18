@@ -36,7 +36,7 @@
     {
       "id": "translation_language_selector",
       "element": "section",
-      "label": "TRANSLATE.APPEARANCE.UI_CONFIG_LANGUAGE",
+      "label": "Custom Translation",
       "icon": "fa-language",
       "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"showTranslation"},
       "saveButton": {
@@ -53,7 +53,6 @@
         {
           "id": "translation_language",
           "element": "select",
-          "doc": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE_DOC",
           "label": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
           "value":  {
             "value":0,
@@ -61,27 +60,6 @@
           },
           "options": [
           ]
-        }
-      ]
-    },
-    {
-      "id": "translation_selector",
-      "element": "section",
-      "label": "TRANSLATE.APPEARANCE.UI_CONFIG_LANGUAGE",
-      "icon": "fa-language",
-      "hidden": true,
-      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setTranslation"},
-      "saveButton": {
-        "label": "TRANSLATE.COMMON.SAVE",
-        "data": [
-        ]
-      },
-      "value":  {
-        "value": "0",
-        "label": "Unknown"
-      },
-      "content": [
-        {
         }
       ]
     },
