@@ -343,6 +343,9 @@ AirPlayInterface.prototype.unsetVol = function () {
     console.log('STOPPING SHAIRPORT');
 
     self.stopAirplay();
+    setTimeout(()=>{
+        return libQ.resolve()
+    },500)
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
