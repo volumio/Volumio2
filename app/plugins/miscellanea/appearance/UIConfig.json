@@ -34,11 +34,11 @@
       ]
     },
     {
-      "id": "traslation_language_selector",
+      "id": "translation_language_selector",
       "element": "section",
       "label": "TRANSLATE.APPEARANCE.UI_CONFIG_LANGUAGE",
       "icon": "fa-language",
-      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setTranslation"},
+      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"showTranslation"},
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
@@ -61,6 +61,27 @@
           },
           "options": [
           ]
+        }
+      ]
+    },
+    {
+      "id": "translation_selector",
+      "element": "section",
+      "label": "TRANSLATE.APPEARANCE.UI_CONFIG_LANGUAGE",
+      "icon": "fa-language",
+      "hidden": true,
+      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setTranslation"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+        ]
+      },
+      "value":  {
+        "value": "0",
+        "label": "Unknown"
+      },
+      "content": [
+        {
         }
       ]
     },
