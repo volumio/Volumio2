@@ -1,0 +1,23 @@
+{
+  "name": "filesystem_scanner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cue-parser": "0.0.4",
+    "kew": "^0.7.0",
+    "music-metadata": "^3.5.3",
+    "sequelize": "^5.1.0",
+    "sqlite3": "^4.0.6",
+    "underscore": "^1.8.3"
+  }
+}

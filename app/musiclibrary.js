@@ -2,7 +2,6 @@
 
 var libQ = require('kew');
 var libFast = require('fast.js');
-var libCrypto = require('crypto');
 var fs=require('fs-extra');
 
 // Define the CoreMusicLibrary class

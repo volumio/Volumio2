@@ -13,6 +13,8 @@ var parser = require('cue-parser');
 var mm = require('music-metadata');
 var os = require('os');
 var execSync = require('child_process').execSync;
+var MusicLibrary = require('./musiclibrary/musiclibrary');
+
 var ignoreupdate = false;
 //tracknumbers variable below adds track numbers to titles if set to true. Set to false for normal behavour.
 var tracknumbers = false;
@@ -35,6 +37,7 @@ function ControllerMpd(context) {
 	this.configManager = this.context.configManager;
     this.config = new (require('v-conf'))();
     this.registeredCallbacks = [];
+    this._library = new MusicLibrary();
 }
 
 // Public Methods ---------------------------------------------------------------------------------------
@@ -653,7 +656,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
             self.checkUSBDrives();
             self.listAlbums();
         }
-    })
+    });
 
 	// Catch and log errors
 	self.clientMpd.on('error', function (err) {
@@ -1506,6 +1509,18 @@ ControllerMpd.prototype.search = function (query) {
     deferArray.push(libQ.defer());
     deferArray.push(libQ.defer());
 
+    this._library.searchAll(safeValue).then(function(result){
+    	console.log('searchAll', result);
+
+		// subList.push({
+		// 	service: 'mpd',
+		// 	type: 'folder',
+		// 	title: artist,
+		// 	uri: 'artists://' + encodeURIComponent(artist),
+		// 	albumart: self.getAlbumArt({artist: artist},undefined,'users')
+		// });
+	});
+
     var cmd = libMpd.cmd;
 //ARTIST
     self.mpdReady.then(function () {
@@ -1686,14 +1701,14 @@ ControllerMpd.prototype.search = function (query) {
             list.push(songList);
         }
 
-		list=list.filter(function(v){return !!(v)==true;})
+		list=list.filter(function(v){return !!v;});
 
         defer.resolve(list);
     }).fail(function(err){
         self.commandRouter.logger.info("PARSING RESPONSE ERROR "+err);
 
         defer.resolve();
-    })
+    });
 	return defer.promise;
 };
 
