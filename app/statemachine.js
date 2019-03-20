@@ -725,9 +725,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     if(trackBlock!==undefined)
                     {
                         if (stateService.duration !== undefined) {
-							trackBlock.duration = stateService.duration;
-							// fix playlist stops issue
-							this.currentSongDuration=trackBlock.duration*1000;
+                            trackBlock.duration = stateService.duration;
+                            // fix playlist stops issue
+                            this.currentSongDuration=trackBlock.duration*1000;
                         }
 
                         if (stateService.samplerate !== undefined && trackBlock.samplerate === undefined) {
