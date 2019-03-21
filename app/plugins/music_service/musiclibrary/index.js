@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var libQ = require('kew');
 var Sequelize = require('sequelize');
 var FileScanner = require('./lib/fileScanner');
 var metadata = require('./lib/metadata');
@@ -10,6 +11,9 @@ module.exports = MusicLibrary;
 
 var ROOT = '/mnt';
 
+var PLUGIN_PROTOCOL = 'musiclibrary';
+var PLUGIN_NAME = 'musiclibrary';
+
 
 var config = {
 	debounceTime: 1000,
@@ -19,12 +23,13 @@ var config = {
 /**
  *
  */
-function MusicLibrary(commandRouter) {
+function MusicLibrary(context) {
 	var self = this;
 
 	// Save a reference to the parent commandRouter
-	// self.commandRouter = commandRouter;
-	// self.logger = self.commandRouter.logger;
+	this.context = context;
+	this.commandRouter = this.context.coreCommand;
+	this.logger = this.context.logger;
 
 
 	/**
@@ -110,8 +115,8 @@ function MusicLibrary(commandRouter) {
 
 		// parse metadata
 		return metadata.parseFile(location)
-			.then(function(metadata) {
-				return iterateArrayAsync(metadata, updateMetadata);
+			.then(function(metadataArr) {
+				return iterateArrayAsync(metadataArr, updateMetadata);
 			})
 			.fail(function(err) {
 				console.error(err);
@@ -196,33 +201,15 @@ function MusicLibrary(commandRouter) {
 
 
 /**
- * @typedef {object} SearchResult
- * @property {string} service
- * @property {'song'|'folder'} type
- * @property {string} [title]
- * @property {string} [artist]
- * @property {string} [album]
- * @property {string} uri
- * @property {string} albumart
- */
-
-
-/**
- * @typedef {object} SearchQuery
- * @property {string} value
- */
-
-
-/**
  * @param {SearchQuery} query
  * @return {Promise<SearchResult[]>}
  */
 MusicLibrary.prototype.search = function(query) {
-	console.log('MusicLibrary.search', query);
-	var safeValue = query.value.replace(/"/g, '\\"');
+	var self = this;
 
-	var PLUGIN_PROTOCOL = 'musiclibrary';
-	var PLUGIN_NAME = 'musiclibrary';
+	console.log('MusicLibrary.search', query);
+	console.time('MusicLibrary.search');
+	var safeValue = query.value.replace(/"/g, '\\"');
 
 	return this._model.AudioMetadata.findAll({
 		where: {
@@ -233,19 +220,60 @@ MusicLibrary.prototype.search = function(query) {
 			}
 		},
 		limit: 10
-	}).then(function (records) {
-		return records.map(function(record){
+	}).then(function(records) {
+		return records.map(function(record) {
 			return {
+				// service: 'music-library',
 				service: PLUGIN_NAME,
 				type: 'song',
 				title: record.title || '',
 				artist: record.artist || '',
 				album: record.album || '',
-				uri: PLUGIN_PROTOCOL + '://' + record.location
+				albumart: '',
+				uri: PLUGIN_PROTOCOL + '://' + record.location.replace(ROOT + path.sep, '')
 			};
 		});
-	});
+	}).then(function(tracks) {
+		console.log('MusicLibrary.search: found %s track(s)', tracks.length);
 
+		var trackdesc = self.commandRouter.getI18nString(tracks.length > 1 ? 'COMMON.TRACKS' : 'COMMON.TRACK');
+		var title = self.commandRouter.getI18nString('COMMON.FOUND');
+		return [{
+			'title': title + ' ' + tracks.length + ' ' + trackdesc + ' \'' + query.value + '\'',
+			'availableListViews': [
+				'list'
+			],
+			'items': tracks
+		}];
+	}).then(function(searchResult) {
+		console.timeEnd('MusicLibrary.search');
+		return searchResult;
+	});
+	// TODO: errors in promise are not printed in console =(
+};
+
+
+/**
+ * @param {SearchQuery} query
+ */
+MusicLibrary.prototype.searchSong = function(query) {
+	// TODO: search songs
+};
+
+
+/**
+ * @param {SearchQuery} query
+ */
+MusicLibrary.prototype.searchArtist = function(query) {
+	// TODO: search artists
+};
+
+
+/**
+ * @param {SearchQuery} query
+ */
+MusicLibrary.prototype.searchAlbum = function(query) {
+	// TODO: search albums
 };
 
 
@@ -254,4 +282,27 @@ MusicLibrary.prototype.search = function(query) {
  */
 MusicLibrary.prototype.isScanning = function() {
 	return this._fileScanner.isScanning;
+};
+
+
+/**
+ * @return {Promise<string>}
+ */
+MusicLibrary.prototype.explodeUri = function(uri) {
+	var result = {
+		uri: uri.replace(PLUGIN_PROTOCOL + '://', ''),
+		service: 'mpd',
+		name: 'TODO',
+		artist: 'TODO',
+		album: 'TODO',
+		type: 'track',
+		tracknumber: 0,
+		albumart: '',
+		duration: '',
+		samplerate: '',
+		bitdepth: '',
+		trackType: uri.split('.').pop()
+	};
+
+	return libQ.resolve([result]);
 };

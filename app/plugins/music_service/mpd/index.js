@@ -1507,6 +1507,9 @@ ControllerMpd.prototype.search = function (query) {
     deferArray.push(libQ.defer());
     deferArray.push(libQ.defer());
 
+
+	console.time('MPD.search');
+
     var cmd = libMpd.cmd;
 //ARTIST
     self.mpdReady.then(function () {
@@ -1689,6 +1692,8 @@ ControllerMpd.prototype.search = function (query) {
 
 		list=list.filter(function(v){return !!v;});
 
+
+		console.timeEnd('MPD.search');
         defer.resolve(list);
     }).fail(function(err){
         self.commandRouter.logger.info("PARSING RESPONSE ERROR "+err);
@@ -2458,7 +2463,6 @@ ControllerMpd.prototype.exploderArtist=function(err,msg,defer) {
                 });
             }
         }
-
         defer.resolve(list);
 
     }

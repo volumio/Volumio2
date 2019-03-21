@@ -116,7 +116,7 @@ function _parseCue(filename) {
 		var location = path.join(path.dirname(filename), fileData.name);
 		return libQ.nfcall(fs.stat, location).then(function(stats) {
 			if (!stats.isFile()) {
-				console.warn('metadata._parseCue: Referred file but has wrong format:', location);
+				console.warn('metadata._parseCue: Referred file has wrong format:', location);
 				return;
 			}
 			return _parseCommon(location);
@@ -145,6 +145,7 @@ function _parseCue(filename) {
 
 
 /**
+ * Convert metadata from 'music-metadata' format to 'AudioMetadata'
  * @param {string} location
  * @param {IAudioMetadata} metadata
  * @return {AudioMetadata}
@@ -176,6 +177,7 @@ function mm2custom(location, metadata) {
 }
 
 /**
+ * Convert metadata from 'cue-parser' format to 'AudioMetadata'
  * @param {string} location
  * @param {CueSheet} cuesheet
  * @param {number} fileIndex
@@ -247,7 +249,7 @@ function _getRemData(rem, name) {
 	 }
  * ]
  * @param {ICueIndex[]} indexes
- * @return {number}
+ * @return {number} number of seconds
  */
 function _getOffset(indexes) {
 	/**
