@@ -11,7 +11,7 @@
  * @property {string} title
  * @property {number} year
  * @property {number} disk
- * @property {number} track
+ * @property {number} tracknumber
 
  * @property {any} [extra]
  * @property {boolean} [favorite]
@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
 		year: DataTypes.INTEGER,
 
 		disk: DataTypes.INTEGER,  // Disk or media number
-		track: DataTypes.INTEGER, // Track number on the media
+		tracknumber: DataTypes.INTEGER, // Track number on the media
 
 
 		/**

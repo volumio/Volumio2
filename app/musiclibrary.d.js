@@ -22,3 +22,22 @@
  * @typedef {object} SearchQuery
  * @property {string} value
  */
+
+
+
+/**
+ * @typedef {object} TrackInfo
+ * @property {string} uri
+ * @property {string} service
+ * @property {string} name	 	- track title
+ * @property {string} artist	- track artist
+ * @property {string} album	 	- track album
+ * @property {'track'} type
+ * @property {number} tracknumber
+ * @property {string} albumart
+ *
+ * @property {string} duration
+ * @property {string} samplerate
+ * @property {string} bitdepth
+ * @property {string} trackType - file extension
+ */

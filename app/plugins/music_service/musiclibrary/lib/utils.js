@@ -1,4 +1,3 @@
-
 var fs = require('fs');
 var path = require('path');
 
@@ -7,7 +6,8 @@ var libQ = require('kew');
 
 module.exports = {
 	readdir: readdir,
-	iterateArrayAsync: iterateArrayAsync
+	iterateArrayAsync: iterateArrayAsync,
+	parseQueryParams: parseQueryParams
 };
 
 /**
@@ -85,7 +85,7 @@ function iterateArrayAsync(array, iterator) {
 			libQ.resolve().then(function() {
 				return iterator(array[i], i, array);
 			}).then(function(iterationResult) {
-				if( typeof iterationResult != 'undefined'){
+				if (typeof iterationResult != 'undefined') {
 					result.push(iterationResult);
 				}
 			}).then(__iteration).fail(function(err) {
@@ -97,4 +97,26 @@ function iterateArrayAsync(array, iterator) {
 	__iteration();
 
 	return defer.promise;
+}
+
+
+/**
+ * Parse string 'a=1&b=2&c=3' into object {a:1, b:2, c:3}
+ * @param {string} query
+ * @param {string} [groupSeparator='&']
+ * @param {string} [valueSeparator='=']
+ * @return {*}
+ */
+function parseQueryParams(query, groupSeparator, valueSeparator) {
+	groupSeparator = groupSeparator || '&';
+	valueSeparator = valueSeparator || '=';
+	var result = {};
+	var groups = query.split(groupSeparator);
+	for (var i = 0; i < groups.length; i++) {
+		var tokens = groups[i].split(valueSeparator, 2) || [];
+		if (tokens[0]) {
+			result[tokens[0]] = tokens[1];
+		}
+	}
+	return result;
 }

@@ -167,7 +167,7 @@ function mm2custom(location, metadata) {
 		year: parseInt(metadata.common.year) || null,
 
 		disk: parseInt(metadata.common.disk.no) || null,
-		track: parseInt(metadata.common.track.no) || null,
+		tracknumber: parseInt(metadata.common.track.no) || null,
 
 		extra: metadata.common,
 
@@ -202,7 +202,7 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		title: trackData.title,
 		year: parseInt(_getRemData(trackData.rem, 'DATE')) || null,
 		// disk: undefined,
-		track: parseInt(trackData.number) || null,
+		tracknumber: parseInt(trackData.number) || null,
 
 		extra: trackData,
 

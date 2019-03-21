@@ -4,6 +4,7 @@ var libQ = require('kew');
 var Sequelize = require('sequelize');
 var FileScanner = require('./lib/fileScanner');
 var metadata = require('./lib/metadata');
+var parseQueryParams = require('./lib/utils').parseQueryParams;
 var iterateArrayAsync = require('./lib/utils').iterateArrayAsync;
 
 module.exports = MusicLibrary;
@@ -230,7 +231,7 @@ MusicLibrary.prototype.search = function(query) {
 				artist: record.artist || '',
 				album: record.album || '',
 				albumart: '',
-				uri: PLUGIN_PROTOCOL + '://' + record.location.replace(ROOT + path.sep, '')
+				uri: self._getTrackUri(record)
 			};
 		});
 	}).then(function(tracks) {
@@ -286,23 +287,73 @@ MusicLibrary.prototype.isScanning = function() {
 
 
 /**
- * @return {Promise<string>}
+ * @param {AudioMetadata} track
+ * @return {string}
+ * @private
+ */
+MusicLibrary.prototype._getTrackUri = function(track) {
+	var params = track.trackOffset !== null ? 'trackoffset=' + track.trackOffset : null;
+	return track.location.replace(ROOT + path.sep, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
+};
+
+/**
+ * @param {string} uri
+ * @return {{location:string, trackOffset:number}} - primary key for AudioMetadata
+ * @private
+ */
+MusicLibrary.prototype._parseTrackUri = function(uri) {
+	var parts = uri.split('?');
+
+	var location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT + path.sep);
+	var params = parseQueryParams(parts[1] || '');
+	console.log('_parseTrackUri', uri, location);
+	return {
+		location: location,
+		trackOffset: params.trackoffset
+	};
+};
+
+
+/**
+ * Load track info from database
+ * @param {string} location
+ * @param {number} [trackOffset]
+ * @return {Promise<AudioMetadata>}
+ */
+MusicLibrary.prototype.getTrack = function(location, trackOffset) {
+	trackOffset = typeof trackOffset == 'undefined' ? null : trackOffset;
+	return this._model.AudioMetadata.findOne({
+		where: {
+			location: location,
+			trackOffset: trackOffset
+		}
+	});
+};
+
+
+/**
+ * @return {Promise<TrackInfo>}
+ * @implement
  */
 MusicLibrary.prototype.explodeUri = function(uri) {
-	var result = {
-		uri: uri.replace(PLUGIN_PROTOCOL + '://', ''),
-		service: 'mpd',
-		name: 'TODO',
-		artist: 'TODO',
-		album: 'TODO',
-		type: 'track',
-		tracknumber: 0,
-		albumart: '',
-		duration: '',
-		samplerate: '',
-		bitdepth: '',
-		trackType: uri.split('.').pop()
-	};
+	var trackInfo = this._parseTrackUri(uri);
+	return this.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
 
-	return libQ.resolve([result]);
+		var result = {
+			uri: track.location.substr(1), // mpd expects absolute path without first '/'
+			service: 'mpd',
+			name: track.title,
+			artist: track.artist,
+			album: track.album,
+			type: 'track',
+			tracknumber: track.tracknumber,
+			albumart: '',
+			duration: '',
+			samplerate: '',
+			bitdepth: '',
+			trackType: track.location.split('.').pop()
+		};
+
+		return [result];
+	});
 };
