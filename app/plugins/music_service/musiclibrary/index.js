@@ -8,8 +8,7 @@ var iterateArrayAsync = require('./lib/utils').iterateArrayAsync;
 module.exports = MusicLibrary;
 
 
-// var ROOT = '/mnt';
-var ROOT = '/home/chertkov/Downloads/mnt/USB';
+var ROOT = '/mnt';
 
 
 var config = {
@@ -38,9 +37,10 @@ function MusicLibrary(commandRouter) {
 
 	// initialize database
 	this._sequelize = new Sequelize({
-		logging: false,
+		// logging: false,
 		dialect: 'sqlite',
 		storage: __dirname + '/library.db'
+		// storage: 'app/db/library.db' // this is fails with "SQLITE_ERROR: no such column: albumartist" o_O
 	});
 
 	this._model = {};
@@ -56,7 +56,8 @@ function MusicLibrary(commandRouter) {
 		self._fileScanner = new FileScanner({
 			cbFileFound: _processFile,
 			cbError: _processError,
-			cbOtherFound: function() {/* noop */}
+			cbOtherFound: function() {/* noop */
+			}
 		});
 
 		// TODO: don't scan all library on start
@@ -195,20 +196,56 @@ function MusicLibrary(commandRouter) {
 
 
 /**
- * @return {Promise<AudioMetadata[]>}
- * TODO: searchAll
+ * @typedef {object} SearchResult
+ * @property {string} service
+ * @property {'song'|'folder'} type
+ * @property {string} [title]
+ * @property {string} [artist]
+ * @property {string} [album]
+ * @property {string} uri
+ * @property {string} albumart
  */
-MusicLibrary.prototype.searchAll = function(token) {
+
+
+/**
+ * @typedef {object} SearchQuery
+ * @property {string} value
+ */
+
+
+/**
+ * @param {SearchQuery} query
+ * @return {Promise<SearchResult[]>}
+ */
+MusicLibrary.prototype.search = function(query) {
+	console.log('MusicLibrary.search', query);
+	var safeValue = query.value.replace(/"/g, '\\"');
+
+	var PLUGIN_PROTOCOL = 'musiclibrary';
+	var PLUGIN_NAME = 'musiclibrary';
+
 	return this._model.AudioMetadata.findAll({
 		where: {
 			[Sequelize.Op.or]: {
-				title: {[Sequelize.Op.substring]: token},
-				album: {[Sequelize.Op.substring]: token},
-				artist: {[Sequelize.Op.substring]: token}
+				title: {[Sequelize.Op.substring]: safeValue},
+				album: {[Sequelize.Op.substring]: safeValue},
+				artist: {[Sequelize.Op.substring]: safeValue}
 			}
 		},
 		limit: 10
+	}).then(function (records) {
+		return records.map(function(record){
+			return {
+				service: PLUGIN_NAME,
+				type: 'song',
+				title: record.title || '',
+				artist: record.artist || '',
+				album: record.album || '',
+				uri: PLUGIN_PROTOCOL + '://' + record.location
+			};
+		});
 	});
+
 };
 
 

@@ -1,5 +1,5 @@
 {
-  "name": "filesystem_scanner",
+  "name": "musiclibrary",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -19,5 +19,8 @@
     "sequelize": "^5.1.0",
     "sqlite3": "^4.0.6",
     "underscore": "^1.8.3"
+  },
+  "volumio_info": {
+    "plugin_type": "music_service"
   }
 }
