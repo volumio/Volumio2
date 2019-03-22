@@ -10,6 +10,7 @@ var backgroundPath = '/data/backgrounds';
 var translationLanguage = '';
 var totalWords = 0;
 var totalTranslated = 0;
+var pluginsTranslationPath = [];
 
 // Define the volumioAppearance class
 module.exports = volumioAppearance;
@@ -437,6 +438,9 @@ volumioAppearance.prototype.getConfigParam = function (key) {
 
 volumioAppearance.prototype.showTranslation = function (data){
   var self = this;
+  pluginsTranslationPath = [];
+  self.searchPluginTranslations('/myvolumio/plugins');
+  self.searchPluginTranslations('/data/plugins');
   var fileName = '';
   totalWords = 0;
   totalTranslated = 0;
@@ -450,8 +454,8 @@ volumioAppearance.prototype.showTranslation = function (data){
       for(var category in translations)
       {
         var labelName = self.labelFormatting(category);
-        nsections ++
-        var sectCon = 'sections['+ nsections +'].content'
+        nsections ++;
+        var sectCon = 'sections['+ nsections +'].content';
         configuration.sections.splice(nsections,0,{
           id: 'translation_selector' + nsections,
           element: 'section',
@@ -474,30 +478,31 @@ volumioAppearance.prototype.showTranslation = function (data){
         });
         for(var item in translations[category])
         {
-          totalWords ++;
-          var translate = self.readTranslation(category + '.' + item, 'strings');
-          configuration.sections[nsections].saveButton.data.push(fileName + '-' + category + '-' + item);
-          self.configManager.pushUIConfigParam(configuration, sectCon, {
-            id: fileName + '-' + category + '-' + item,
-            element: 'input',
-            type: 'text',
-            label:translations[category][item],
-            attributes: [
-              {placeholder: translations[category][item]},
-              {maxlength: 200}
-            ],
-            value: translate
-          });
+          if(translations[category][item] !== ""){
+            totalWords ++;
+            var translate = self.readTranslation(category + '.' + item, 'strings',"");
+            configuration.sections[nsections].saveButton.data.push(fileName + '-' + category + '-' + item);
+            self.configManager.pushUIConfigParam(configuration, sectCon, {
+              id: fileName + '-' + category + '-' + item,
+              element: 'input',
+              type: 'text',
+              label:translations[category][item],
+              attributes: [
+                {placeholder: translations[category][item]},
+                {maxlength: 200}
+              ],
+              value: translate
+            });
+          }
         }
       }
-//---------------------------------
       translations = fs.readJsonSync(('/volumio/http/www/app/i18n/locale-en.json'),  'utf8', {throws: false});
       fileName = 'locale-'+ translationLanguage;
       for(var category in translations)
       {
         var labelName = self.labelFormatting(category);
-        nsections ++
-        var sectCon = 'sections['+ nsections +'].content'
+        nsections ++;
+        var sectCon = 'sections['+ nsections +'].content';
         configuration.sections.splice(nsections,0,{
           id: 'translation_selector' + nsections,
           element: 'section',
@@ -520,22 +525,74 @@ volumioAppearance.prototype.showTranslation = function (data){
         });
         for(var item in translations[category])
         {
-          totalWords ++;
-          var translate = self.readTranslation(category + '.' + item, 'locale');
-          configuration.sections[nsections].saveButton.data.push(fileName + '-' + category + '-' + item);
-          self.configManager.pushUIConfigParam(configuration, sectCon, {
-            id: fileName + '-' + category + '-' + item,
-            element: 'input',
-            type: 'text',
-            label:translations[category][item],
-            attributes: [
-              {placeholder: translations[category][item]}
-            ],
-            value: translate
-          });
+          if(translations[category][item] !== ""){
+            totalWords ++;
+            var translate = self.readTranslation(category + '.' + item, 'locale',"");
+            configuration.sections[nsections].saveButton.data.push(fileName + '-' + category + '-' + item);
+            self.configManager.pushUIConfigParam(configuration, sectCon, {
+              id: fileName + '-' + category + '-' + item,
+              element: 'input',
+              type: 'text',
+              label:translations[category][item],
+              attributes: [
+                {placeholder: translations[category][item]}
+              ],
+              value: translate
+            });
+          }
         }
       }
-//-------------------------------------------
+
+      if(pluginsTranslationPath.length > 0){
+        pluginsTranslationPath.forEach(path =>{
+          translations = fs.readJsonSync((path+'/strings_en.json'),  'utf8', {throws: false});
+          fileName = path;
+          for(var category in translations)
+          {
+            var labelName = self.labelFormatting(category);
+            nsections ++;
+            var sectCon = 'sections['+ nsections +'].content';
+            configuration.sections.splice(nsections,0,{
+              id: 'translation_selector' + nsections,
+              element: 'section',
+              label: labelName,
+              icon: 'fa-language',
+              onSave: {type:'controller', endpoint:'miscellanea/appearance', method:'setTranslation'},
+              saveButton: {
+                label: self.commandRouter.getI18nString('COMMON.SAVE'),
+                data: [
+                ]
+              },
+              value:  {
+                value: '0',
+                label: 'Unknown'
+              },
+              content: [
+                {
+                }
+              ]
+            });
+            for(var item in translations[category])
+            {
+              if(translations[category][item] !== ""){
+                totalWords ++;
+                var translate = self.readTranslation(category + '.' + item, 'plugin', path);
+                configuration.sections[nsections].saveButton.data.push(fileName + '-' + category + '-' + item);
+                self.configManager.pushUIConfigParam(configuration, sectCon, {
+                  id: fileName + '-' + category + '-' + item,
+                  element: 'input',
+                  type: 'text',
+                  label:translations[category][item],
+                  attributes: [
+                    {placeholder: translations[category][item]}
+                  ],
+                  value: translate
+                });
+              }
+            }
+          }
+        });
+      }
 
       self.logger.info('Total Words =', totalWords);
       self.logger.info('Total Words Translated =', totalTranslated);
@@ -555,21 +612,31 @@ volumioAppearance.prototype.setTranslation = function (data){
   var self = this;
   var language = translationLanguage;
   var selectedLanguage;
+  var pluginPath;
+  var pluginName;
   if(Object.keys(data)[0].includes('strings_')){
     var file = 'strings';
   } else if(Object.keys(data)[0].includes('locale-')){
     var file = 'locale';
+  } else {
+    var file = 'plugin';
+    pluginPath = Object.keys(data)[0];
+    var pluginPathSplit = pluginPath.split('i18n');
+    for(var path in pluginsTranslationPath){
+      if(pluginsTranslationPath[path].includes(pluginPathSplit[0])){
+        pluginPath = pluginsTranslationPath[path];
+      }
+    }
   }
   try {
     if(file === 'strings'){
-      try{
+      try {
         selectedLanguage = fs.readJsonSync(__dirname + '/../../../i18n/strings_' + language + '.json');
       }
       catch(err){
         selectedLanguage = {};
       }
-      for(var translationID in data)
-      {
+      for(var translationID in data){
         if(data[translationID] !== ''){
           var idSplitted = translationID.split('-');
           if(selectedLanguage[idSplitted[1]] === undefined){
@@ -579,28 +646,50 @@ volumioAppearance.prototype.setTranslation = function (data){
         }
       }
     } else if (file === 'locale'){
-        try{
+        try {
           selectedLanguage = fs.readJsonSync('volumio/http/www/app/i18n/locale-' + language + '.json');
         }
         catch(err){
           selectedLanguage = {};
         }
-        for(var translationID in data)
-        {
+        for(var translationID in data){
           if(data[translationID] !== ''){
             var idSplitted = translationID.split('-');
             if(selectedLanguage[idSplitted[2]] === undefined){
               selectedLanguage[idSplitted[2]] = {};
-            }
-            selectedLanguage[idSplitted[2]][idSplitted[3]] = data[translationID];
           }
+          selectedLanguage[idSplitted[2]][idSplitted[3]] = data[translationID];
         }
       }
+    }else if (file === 'plugin'){
+      try {
+        selectedLanguage = fs.readJsonSync(pluginPath+'/strings_' + language + '.json');
+      }
+      catch(err){
+        selectedLanguage = {};
+      }
+      for(var translationID in data){
+        if(data[translationID] !== ''){
+          var idSplitted = translationID.split('-');
+          pluginName = idSplitted[0].replace('/',"");
+          while(pluginName.indexOf("/") > -1){
+            pluginName = pluginName.replace('/',"-");
+          }
+          if(selectedLanguage[idSplitted[1]] === undefined){
+            selectedLanguage[idSplitted[1]] = {};
+          }
+          selectedLanguage[idSplitted[1]][idSplitted[2]] = data[translationID];
+        }
+      }
+    }
     if(file === "strings"){
         fs.outputJsonSync('/data/strings_' + language + '.json', selectedLanguage, {spaces: 2});
         self.logger.info('Translation file saved');
     } else if (file === "locale"){
         fs.outputJsonSync('/data/locale-' + language + '.json', selectedLanguage, {spaces: 2});
+        self.logger.info('Translation file saved');
+    } else if (file === "plugin"){
+        fs.outputJsonSync('/data/'+pluginName+'-strings_' + language + '.json', selectedLanguage, {spaces: 2});
         self.logger.info('Translation file saved');
     }
 	} catch(e) {
@@ -609,17 +698,17 @@ volumioAppearance.prototype.setTranslation = function (data){
 	}
 }
 
-volumioAppearance.prototype.readTranslation = function (key, location){
+volumioAppearance.prototype.readTranslation = function (key, location, pluginPath){
   var self = this;
   var splitted = key.split('.');
-  try
-  {
+  try {
     if(location === 'strings'){
-        var i18nStrings = fs.readJsonSync(__dirname + '/../../../i18n/strings_' + translationLanguage + '.json');
+      var i18nStrings = fs.readJsonSync(__dirname + '/../../../i18n/strings_' + translationLanguage + '.json');
     } else if(location === 'locale'){
-        var i18nStrings = fs.readJsonSync('/volumio/http/www/app/i18n/locale-' + translationLanguage + '.json');
+      var i18nStrings = fs.readJsonSync('/volumio/http/www/app/i18n/locale-' + translationLanguage + '.json');
+    } else if(location === 'plugin'){
+      var i18nStrings = fs.readJsonSync(pluginPath+'/strings_' + translationLanguage + '.json');
     }
-
     if (i18nStrings) {
       if(splitted.length == 1){
         if(i18nStrings[key] !== undefined)
@@ -627,9 +716,9 @@ volumioAppearance.prototype.readTranslation = function (key, location){
         else return ('');
       } else {
         if(i18nStrings[splitted[0]] !== undefined && i18nStrings[splitted[0]][splitted[1]] !== undefined){
-            totalTranslated ++;
-            return i18nStrings[splitted[0]][splitted[1]];
-          }
+          totalTranslated ++;
+          return i18nStrings[splitted[0]][splitted[1]];
+        }
         else return ('');
       }
     } else {
@@ -644,22 +733,36 @@ volumioAppearance.prototype.readTranslation = function (key, location){
 }
 
 volumioAppearance.prototype.labelFormatting = function (labelName){
-    var label = '';
-    var labelName = labelName.toLowerCase();
-        if(labelName.indexOf('_') > -1)
-        {
-          var labelsplit = labelName.split('_');
-          for(var i = 0; i < labelsplit.length; i++)
-          {
-            labelsplit[i] = labelsplit[i].charAt(0).toUpperCase() + labelsplit[i].slice(1);
-            if(i < labelsplit.length-1){
-                label = label+labelsplit[i]+' ';
-            } else {
-                label = label+labelsplit[i];
-            }
-          }
-        } else {
-            label = labelName.charAt(0).toUpperCase() + labelName.slice(1);
+  var label = '';
+  var labelName = labelName.toLowerCase();
+  if(labelName.indexOf('_') > -1){
+    var labelsplit = labelName.split('_');
+    for(var i = 0; i < labelsplit.length; i++){
+      labelsplit[i] = labelsplit[i].charAt(0).toUpperCase() + labelsplit[i].slice(1);
+      if(i < labelsplit.length-1){
+        label = label+labelsplit[i]+' ';
+      } else {
+        label = label+labelsplit[i];
+      }
+    }
+  } else {
+    label = labelName.charAt(0).toUpperCase() + labelName.slice(1);
+  }
+  return label;
+}
+
+volumioAppearance.prototype.searchPluginTranslations = function (path){
+  var self = this;
+  try {
+    fs.readdirSync(path).forEach(file => {
+      if(file.indexOf('.') === -1){
+        if(file.indexOf('i18n')>-1){
+          pluginsTranslationPath.push(path+'/'+file);
         }
-    return label;
+        else self.searchPluginTranslations(path+'/'+file);
+      }
+    });
+  }catch (e){
+    return false;
+  }
 }
