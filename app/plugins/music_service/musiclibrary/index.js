@@ -4,9 +4,7 @@ var libQ = require('kew');
 var Sequelize = require('sequelize');
 var FileScanner = require('./lib/fileScanner');
 var metadata = require('./lib/metadata');
-var debounceTimeAmount = require('./lib/utils').debounceTimeAmount;
-var parseQueryParams = require('./lib/utils').parseQueryParams;
-var iterateArrayAsync = require('./lib/utils').iterateArrayAsync;
+var utils = require('./lib/utils');
 
 module.exports = MusicLibrary;
 
@@ -129,7 +127,6 @@ MusicLibrary.prototype.removeFolder = function(location) {
 };
 
 
-
 /**
  * Add file to library
  * Debounce is used during scanning process to reduce write operations
@@ -140,12 +137,12 @@ MusicLibrary.prototype.removeFolder = function(location) {
 MusicLibrary.prototype.addFile = function(location) {
 	var self = this;
 
-	var saveDebounced = debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
+	var saveDebounced = utils.debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
 
 
 	return metadata.parseFile(location)
 		.then(function(metadataArr) {
-			return iterateArrayAsync(metadataArr, updateMetadata);
+			return utils.iterateArrayAsync(metadataArr, updateMetadata);
 		})
 		.fail(function(err) {
 			console.error(err);
@@ -322,29 +319,19 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 	var info = MusicLibrary._parseTrackUri(uri);
 
 	return libQ.resolve().then(function() {
-		return self.model.AudioMetadata.findAll({
-			where: {
-				// TODO: that is not coreect condition
-				location: {[Sequelize.Op.endsWith]: info.location + path.sep}
-			},
-			limit: 10
-		});
-	}).then(function(records) {
-		return records.map(MusicLibrary.record2SearchResult);
-	}).then(function(records) {
-		return [{
-			availableListViews: [
-				'list', 'grid'
-			],
-			items: records
-		}];
-	}).then(function(data) {
+		return self.lsFolder(info.location);
+	}).then(function(items) {
 		return {
 			navigation: {
-				lists: data
-			},
-			prev: {
-				uri: uri == PLUGIN_PROTOCOL + '://' ? uri : uri.substring(0, uri.lastIndexOf(path.sep))
+				lists: [{
+					availableListViews: [
+						'list', 'grid'
+					],
+					items: items
+				}],
+				prev: {
+					uri: uri == PLUGIN_PROTOCOL + '://' ? '' : uri.substring(0, uri.lastIndexOf(path.sep))
+				}
 			}
 		};
 	});
@@ -361,8 +348,38 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 
 
 /**
+ * @param {string} location
+ *
+ * @return {Promise<AudioMetadata>}
+ */
+MusicLibrary.prototype.lsFolder = function(location) {
+	var self = this;
+
+	return utils.readdir(location).then(function(folderEntries) {
+		return utils.iterateArrayAsync(folderEntries, function(stats) {
+			var fullname = path.join(location, stats.name);
+			if (stats.isFile() && metadata.isMediaFile(fullname)) {
+				return self.model.AudioMetadata.findOne({
+					where: {
+						location: fullname
+					}
+				}).then(function(record) {
+					return MusicLibrary.record2SearchResult(record);
+				});
+			} else if (stats.isDirectory()) {
+				return MusicLibrary.folder2SearchResult(fullname);
+			} else {
+				// ignore all other types
+			}
+
+		});
+	});
+};
+
+
+/**
  * Get track uri
- * @param {AudioMetadata} track
+ * @param {{location:string, trackOffset?:number}} track
  * @return {string}
  * @private
  */
@@ -380,7 +397,7 @@ MusicLibrary._parseTrackUri = function(uri) {
 	var parts = uri.split('?');
 
 	var location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT);
-	var params = parseQueryParams(parts[1] || '');
+	var params = utils.parseQueryParams(parts[1] || '');
 	return {
 		location: location,
 		trackOffset: params.trackoffset
@@ -405,3 +422,60 @@ MusicLibrary.record2SearchResult = function(record) {
 		uri: MusicLibrary._getTrackUri(record)
 	};
 };
+
+
+/**
+ * @param {string} location
+ * @return {SearchResultItem}
+ * @private
+ */
+MusicLibrary.folder2SearchResult = function(location) {
+
+	// '/mnt/USB/folder1/folder2/..' to 'USB'
+	var rootSubfolder = location.replace(ROOT + path.sep, '');
+	rootSubfolder = rootSubfolder.split(path.sep, 2)[0];
+
+	var dirtype, diricon;
+	switch (rootSubfolder) {
+		case 'USB':
+			dirtype = 'remdisk';
+			diricon = 'fa fa-usb';
+			break;
+		case 'INTERNAL':
+			dirtype = 'internal-folder';
+			diricon = 'fa fa-folder-open-o';
+			break;
+		default:
+			dirtype = 'folder';
+			diricon = 'fa fa-folder-open-o';
+	}
+
+	return {
+		service: PLUGIN_NAME,
+		type: dirtype,
+		title: path.basename(location),
+		albumart: '',	// TODO: album art
+		icon: diricon,
+		uri: MusicLibrary._getTrackUri({location: location})
+	};
+};
+
+//
+// if (uri === 'music-library') {
+// 	switch(path) {
+// 		case 'INTERNAL':
+// 			var albumart = self.getAlbumArt('', '','microchip');
+// 			break;
+// 		case 'NAS':
+// 			var albumart = self.getAlbumArt('', '','server');
+// 			break;
+// 		case 'USB':
+// 			var albumart = self.getAlbumArt('', '','usb');
+// 			break;
+// 		default:
+// 			var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+// 	}
+// } else {
+// 	var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+// }
+

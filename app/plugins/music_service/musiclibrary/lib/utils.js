@@ -65,9 +65,12 @@ function readdir(location, options) {
  *     await iterator(array[i], i);
  * }
  * ```
- * @param {Array<*>} array
- * @param {function(*, number?, Array<*>?):Promise<*>} iterator
- * @return {Promise<*>}
+ * @template {T} array element type
+ * @template {R} array element type
+ *
+ * @param {Array<T>} array
+ * @param {function(T, number?, Array<T>?):Promise<R>} iterator
+ * @return {Promise<R[]>}
  */
 function iterateArrayAsync(array, iterator) {
 	var defer = libQ.defer();
@@ -154,7 +157,7 @@ function debounceTimeAmount(fn, debounceInterval, debounceSize){
 
 	/**
 	 * @param {*} data
-	 * @return {Promise<any>}
+	 * @return {Promise<*>}
 	 */
 	return function (data) {
 		cache.push(data);

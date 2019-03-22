@@ -17,7 +17,7 @@
 /**
  * @typedef {object} SearchResultItem
  * @property {string} service
- * @property {'song'|'folder'} type
+ * @property {'song'|'folder'|'internal-folder'|'remdisk'} type
  * @property {string} [title]
  * @property {string} [artist]
  * @property {string} [album]

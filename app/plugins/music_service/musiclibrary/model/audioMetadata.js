@@ -1,5 +1,6 @@
 /**
  * @typedef {object} AudioMetadata
+ * @extends {AudioMetadataPk}
  * @extends {Model}
  * @property {string} album
  * @property {string} albumartist
@@ -16,6 +17,7 @@
 
  * @property {any} [extra]
  * @property {boolean} [favorite]
+ *
  * @property {string} location
  * @property {number} trackOffset
  */
