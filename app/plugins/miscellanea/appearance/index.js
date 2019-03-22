@@ -671,10 +671,8 @@ volumioAppearance.prototype.setTranslation = function (data){
       for(var translationID in data){
         if(data[translationID] !== ''){
           var idSplitted = translationID.split('-');
-          pluginName = idSplitted[0].replace('/',"");
-          while(pluginName.indexOf("/") > -1){
-            pluginName = pluginName.replace('/',"-");
-          }
+          pluginName = idSplitted[0].replace('/','');
+          pluginName = pluginName.replace(/\//g, '-');
           if(selectedLanguage[idSplitted[1]] === undefined){
             selectedLanguage[idSplitted[1]] = {};
           }
