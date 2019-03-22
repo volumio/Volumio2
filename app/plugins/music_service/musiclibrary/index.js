@@ -31,6 +31,14 @@ function MusicLibrary(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 
+	/**
+	 * @type {Date}
+	 */
+	this.scanStartedAt = null;
+	/**
+	 * @type {string}
+	 */
+	this.scanPath = null;
 
 	// initialize database
 	this.sequelize = new Sequelize({
@@ -52,6 +60,8 @@ function MusicLibrary(context) {
 
 		// initialize file scanning service
 		self.fileScanner = new FileScanner({
+			cbStart: onScanStarted,
+			cbStop: onScanFinished,
 			cbFileFound: processFile,
 			cbError: processError,
 			cbOtherFound: function() {/* noop */
@@ -59,6 +69,7 @@ function MusicLibrary(context) {
 		});
 
 		// TODO: don't scan all library on start
+		self.scanPath = ROOT;
 		self.fileScanner.addTarget(ROOT);
 
 		// The recursive option is only supported on macOS and Windows. =(
@@ -108,6 +119,38 @@ function MusicLibrary(context) {
 		return self.addFile(location);
 	}
 
+	/**
+	 *
+	 */
+	function onScanStarted() {
+		self.scanStartedAt = new Date();
+	}
+
+	/**
+	 *
+	 */
+	function onScanFinished() {
+		// remove all records which are not found during scan
+		console.log('MusicLibrary: remove all unaffected items');
+
+		// wait for debounceTime, so we make sure all records are saved/updated
+		setTimeout(function() {
+			return self.model.AudioMetadata.destroy({
+				where: {
+					[Sequelize.Op.and]: {
+						// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
+						// http://docs.sequelizejs.com/manual/querying.html#operators
+						location: {[Sequelize.Op.endsWith]: self.scanPath + path.sep},
+						updatedAt: {[Sequelize.Op.lt]: self.scanStartedAt}
+					}
+				}
+			}).then(function(numDeleted) {
+				console.log('MusicLibrary: removed all unaffected items:', numDeleted);
+			});
+		}, config.debounceTime * 2); // we multiply by 2 to make sure cache is processed
+	}
+
+
 } // -
 
 
@@ -138,6 +181,7 @@ MusicLibrary.prototype.addFile = function(location) {
 	var self = this;
 
 	var saveDebounced = utils.debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
+	var updateDebounced = utils.debounceTimeAmount(updateRecords, config.debounceTime, config.debounceSize);
 
 
 	return metadata.parseFile(location)
@@ -168,6 +212,9 @@ MusicLibrary.prototype.addFile = function(location) {
 				// all 'write' operations should be debounced to reduce write operations count
 				return saveDebounced(metadata);
 				// return AudioMetadata.create(recordData);
+			} else {
+				// update 'updatedAt' field
+				return updateDebounced(record.id);
 			}
 		});
 	}
@@ -179,6 +226,27 @@ MusicLibrary.prototype.addFile = function(location) {
 	 */
 	function saveRecords(records) {
 		return self.model.AudioMetadata.bulkCreate(records);
+	}
+
+	/**
+	 * Update 'updatedAt' field value.
+	 * That's need to make sure file is stil exists and woudn't be removed by when scan is finished.
+	 * @see {@link onScanFinished}
+	 *
+	 * @param {Array<number>} ids
+	 * @return {Promise<*>}
+	 * @private
+	 */
+	function updateRecords(ids) {
+		// return self.model.AudioMetadata.update({updatedAt: new Date() }, {
+		// 	where: {
+		// 		id: {[Sequelize.Op.in]: ids}
+		// 	}
+		// });
+
+		return self.sequelize.query('UPDATE AudioMetadata SET updatedAt = ? WHERE AudioMetadata.id in (' + ids.join(',') + ')', {
+			replacements: [new Date()]
+		});
 	}
 
 };
@@ -334,6 +402,9 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 				}
 			}
 		};
+	}).fail(function(e) {
+		console.error(e);
+		throw e;
 	});
 };
 
@@ -358,10 +429,13 @@ MusicLibrary.prototype.lsFolder = function(location) {
 			if (stats.isFile() && metadata.isMediaFile(fullname)) {
 
 				return self.getTrack(fullname).then(function(record) {
-					return MusicLibrary.record2SearchResult(record);
+					if (record) {
+						return MusicLibrary.record2SearchResult(record);
+					}
+					// else - ignore it
 				});
 
-			// folder
+				// folder
 			} else if (stats.isDirectory()) {
 
 				if (isRoot) {
@@ -385,13 +459,28 @@ MusicLibrary.prototype.lsFolder = function(location) {
 
 
 /**
+ * @param {string} [uri]
+ * @implement
+ */
+MusicLibrary.prototype.updateDb = function(uri) {
+	uri = uri || (PLUGIN_PROTOCOL + '://');
+	var info = MusicLibrary._parseTrackUri(uri);
+	console.log('updateDb', info.location);
+
+	this.scanPath = info.location;
+	this.fileScanner.addTarget(info.location);
+};
+
+
+/**
  * Get track uri
  * @param {{location:string, trackOffset?:number}} track
  * @return {string}
  * @private
+ * @static
  */
 MusicLibrary._getTrackUri = function(track) {
-	var params = track.trackOffset !== null ? 'trackoffset=' + track.trackOffset : null;
+	var params = (track.trackOffset !== null && track.trackOffset !== undefined) ? 'trackoffset=' + track.trackOffset : null;
 	return track.location.replace(ROOT, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
 };
 

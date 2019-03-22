@@ -1,7 +1,7 @@
 /**
  * @typedef {object} AudioMetadata
- * @extends {AudioMetadataPk}
  * @extends {Model}
+ * @property {number} [id]
  * @property {string} album
  * @property {string} albumartist
  * @property {string} artist
@@ -20,6 +20,8 @@
  *
  * @property {string} location
  * @property {number} trackOffset
+ *
+ * @property {Date} updatedAt
  */
 
 /**
@@ -68,7 +70,7 @@ module.exports = function(sequelize, DataTypes) {
 		 *
 		 * TODO: use full-text search: http://www.sqlitetutorial.net/sqlite-full-text-search/
 		 */
-		// search:  {type: DataTypes.CITEXT, unique: true},
+		// search:  {type: DataTypes.CITEXT},
 
 		/**
 		 * file location
@@ -83,10 +85,18 @@ module.exports = function(sequelize, DataTypes) {
 
 
 		// By default, Sequelize will add the attributes createdAt and updatedAt to your model so you will be able to know when the database entry went into the db and when it was updated last.
+	}, {
+		indexes: [
+			// By default index name will be [table]_[fields]
+			// Creates a multi column partial index
+			{
+				name: 'location_idx',
+				fields: ['location']
+			}
+		]
 	});
 };
 
-// TODO: create index location_idx on  AudioMetadata (location);
 
 /*
 {

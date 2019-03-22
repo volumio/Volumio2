@@ -967,6 +967,8 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('updateDb', function (data) {
 				self.commandRouter.executeOnPlugin('music_service', 'mpd', 'updateDb', data);
+				// TODO: 'musiclibrary' added
+				self.commandRouter.executeOnPlugin('music_service', 'musiclibrary', 'updateDb', data);
 			});
 
 
