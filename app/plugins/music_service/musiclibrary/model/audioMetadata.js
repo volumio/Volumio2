@@ -86,6 +86,8 @@ module.exports = function(sequelize, DataTypes) {
 	});
 };
 
+// TODO: create index location_idx on  AudioMetadata (location);
+
 /*
 {
   "format": {

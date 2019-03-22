@@ -282,7 +282,7 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 
 /**
  * @return {Promise<TrackInfo>}
- * @implement
+ * @implement playMusic
  */
 MusicLibrary.prototype.explodeUri = function(uri) {
 	var trackInfo = MusicLibrary._parseTrackUri(uri);
@@ -335,42 +335,49 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 			}
 		};
 	});
-
-	// {
-	// 	type: dirtype,
-	// 		title: name,
-	// 	service:'mpd',
-	// 	albumart: albumart,
-	// 	icon: 'fa fa-music',
-	// 	uri: s0 + path
-	// }
 };
 
 
 /**
  * @param {string} location
- *
  * @return {Promise<AudioMetadata>}
+ * @private
  */
 MusicLibrary.prototype.lsFolder = function(location) {
 	var self = this;
 
+	// for root folders - we need to see if there any files inside
+	// if no files - don't show it
+	var isRoot = location == ROOT;
+
 	return utils.readdir(location).then(function(folderEntries) {
 		return utils.iterateArrayAsync(folderEntries, function(stats) {
 			var fullname = path.join(location, stats.name);
+
+			// file
 			if (stats.isFile() && metadata.isMediaFile(fullname)) {
-				return self.model.AudioMetadata.findOne({
-					where: {
-						location: fullname
-					}
-				}).then(function(record) {
+
+				return self.getTrack(fullname).then(function(record) {
 					return MusicLibrary.record2SearchResult(record);
 				});
+
+			// folder
 			} else if (stats.isDirectory()) {
-				return MusicLibrary.folder2SearchResult(fullname);
-			} else {
-				// ignore all other types
+
+				if (isRoot) {
+					return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
+						if (folderEntries.length > 0) {
+							return MusicLibrary.folder2SearchResult(fullname);
+						} else {
+							// return nothing = don't show it
+						}
+					});
+				} else {
+					return MusicLibrary.folder2SearchResult(fullname);
+				}
+
 			}
+			// ignore all other types
 
 		});
 	});
