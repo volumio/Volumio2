@@ -1,3 +1,11 @@
+/**
+ * @typedef {object} BrowseResult
+ * @property {object} navigation
+ * @property {SearchResult[]} navigation.lists
+ * @property {object} prev
+ * @property {string} prev.uri
+ */
+
 
 /**
  * @typedef {object} SearchResult

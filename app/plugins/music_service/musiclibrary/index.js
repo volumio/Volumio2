@@ -212,28 +212,18 @@ MusicLibrary.prototype.search = function(query) {
 	console.time('MusicLibrary.search');
 	var safeValue = query.value.replace(/"/g, '\\"');
 
-	return this._model.AudioMetadata.findAll({
-		where: {
-			[Sequelize.Op.or]: {
-				title: {[Sequelize.Op.substring]: safeValue},
-				album: {[Sequelize.Op.substring]: safeValue},
-				artist: {[Sequelize.Op.substring]: safeValue}
+	return libQ.resolve().then(function() {
+		return self._model.AudioMetadata.findAll({
+			where: {
+				[Sequelize.Op.or]: {
+					title: {[Sequelize.Op.substring]: safeValue},
+					album: {[Sequelize.Op.substring]: safeValue},
+					artist: {[Sequelize.Op.substring]: safeValue}
+				}
 			}
-		},
-		limit: 10
-	}).then(function(records) {
-		return records.map(function(record) {
-			return {
-				// service: 'music-library',
-				service: PLUGIN_NAME,
-				type: 'song',
-				title: record.title || '',
-				artist: record.artist || '',
-				album: record.album || '',
-				albumart: '',
-				uri: self._getTrackUri(record)
-			};
 		});
+	}).then(function(records) {
+		return records.map(MusicLibrary.record2SearchResult);
 	}).then(function(tracks) {
 		console.log('MusicLibrary.search: found %s track(s)', tracks.length);
 
@@ -246,11 +236,15 @@ MusicLibrary.prototype.search = function(query) {
 			],
 			'items': tracks
 		}];
+
 	}).then(function(searchResult) {
 		console.timeEnd('MusicLibrary.search');
 		return searchResult;
+	}).fail(function(e) {
+		console.error(e);
+		throw e;
+		// TODO: errors in promise are not printed in console =(
 	});
-	// TODO: errors in promise are not printed in console =(
 };
 
 
@@ -287,34 +281,6 @@ MusicLibrary.prototype.isScanning = function() {
 
 
 /**
- * @param {AudioMetadata} track
- * @return {string}
- * @private
- */
-MusicLibrary.prototype._getTrackUri = function(track) {
-	var params = track.trackOffset !== null ? 'trackoffset=' + track.trackOffset : null;
-	return track.location.replace(ROOT + path.sep, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
-};
-
-/**
- * @param {string} uri
- * @return {{location:string, trackOffset:number}} - primary key for AudioMetadata
- * @private
- */
-MusicLibrary.prototype._parseTrackUri = function(uri) {
-	var parts = uri.split('?');
-
-	var location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT + path.sep);
-	var params = parseQueryParams(parts[1] || '');
-	console.log('_parseTrackUri', uri, location);
-	return {
-		location: location,
-		trackOffset: params.trackoffset
-	};
-};
-
-
-/**
  * Load track info from database
  * @param {string} location
  * @param {number} [trackOffset]
@@ -336,7 +302,7 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
  * @implement
  */
 MusicLibrary.prototype.explodeUri = function(uri) {
-	var trackInfo = this._parseTrackUri(uri);
+	var trackInfo = MusicLibrary._parseTrackUri(uri);
 	return this.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
 
 		var result = {
@@ -356,4 +322,101 @@ MusicLibrary.prototype.explodeUri = function(uri) {
 
 		return [result];
 	});
+};
+
+
+/**
+ *
+ * @param {string} uri
+ * @return {Promise<BrowseResult>}
+ * @implement
+ */
+MusicLibrary.prototype.handleBrowseUri = function(uri) {
+	var self = this;
+	var info = MusicLibrary._parseTrackUri(uri);
+
+	return libQ.resolve().then(function() {
+		return self._model.AudioMetadata.findAll({
+			where: {
+				// TODO: that is not coreect condition
+				location: {[Sequelize.Op.endsWith]: info.location + path.sep}
+			},
+			limit: 10
+		});
+	}).then(function(records) {
+		return records.map(MusicLibrary.record2SearchResult);
+	}).then(function(records) {
+		return [{
+			availableListViews: [
+				'list', 'grid'
+			],
+			items: records
+		}];
+	}).then(function(data) {
+		return {
+			navigation: {
+				lists: data
+			},
+			prev: {
+				uri: uri == PLUGIN_PROTOCOL+'://' ? uri : uri.substring(0, uri.lastIndexOf(path.sep))
+			}
+		};
+	});
+
+	// {
+	// 	type: dirtype,
+	// 		title: name,
+	// 	service:'mpd',
+	// 	albumart: albumart,
+	// 	icon: 'fa fa-music',
+	// 	uri: s0 + path
+	// }
+};
+
+
+/**
+ * Get track uri
+ * @param {AudioMetadata} track
+ * @return {string}
+ * @private
+ */
+MusicLibrary._getTrackUri = function(track) {
+	var params = track.trackOffset !== null ? 'trackoffset=' + track.trackOffset : null;
+	return track.location.replace(ROOT, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
+};
+
+/**
+ * @param {string} uri
+ * @return {{location:string, trackOffset:number}} - primary key for AudioMetadata
+ * @private
+ */
+MusicLibrary._parseTrackUri = function(uri) {
+	var parts = uri.split('?');
+
+	var location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT);
+	var params = parseQueryParams(parts[1] || '');
+	console.log('_parseTrackUri', uri, location);
+	return {
+		location: location,
+		trackOffset: params.trackoffset
+	};
+};
+
+/**
+ * @param {AudioMetadata} record
+ * @return {SearchResultItem}
+ * @private
+ */
+MusicLibrary.record2SearchResult = function(record) {
+	return {
+		// service: 'music-library',
+		service: PLUGIN_NAME,
+		type: 'song',
+		title: record.title || '',
+		artist: record.artist || '',
+		album: record.album || '',
+		albumart: '',	// TODO: album art
+		icon: 'fa fa-music',
+		uri: MusicLibrary._getTrackUri(record)
+	};
 };

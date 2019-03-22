@@ -1,5 +1,6 @@
 /**
  * @typedef {object} AudioMetadata
+ * @extends {Model}
  * @property {string} album
  * @property {string} albumartist
  * @property {string} artist
