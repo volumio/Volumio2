@@ -7,7 +7,8 @@ var libQ = require('kew');
 module.exports = {
 	readdir: readdir,
 	iterateArrayAsync: iterateArrayAsync,
-	parseQueryParams: parseQueryParams
+	parseQueryParams: parseQueryParams,
+	debounceTimeAmount: debounceTimeAmount
 };
 
 /**
@@ -97,6 +98,79 @@ function iterateArrayAsync(array, iterator) {
 	__iteration();
 
 	return defer.promise;
+}
+
+
+/**
+ * Debounce function call using timeout and number of executions (whatever run first).
+ * @param {function} fn
+ * @param {number} debounceInterval
+ * @param {number} debounceSize
+ * @return {function}
+ *
+ *
+ * @example
+ *	```js
+ *    var debounced = debounceTimeAmount(myFn, 1000, 3);
+ *    await debounced(1);
+ *    await debounced(2);
+ *    await debounced(3); // here myFn will be called with arguments [1, 2, 3]
+ *  ```
+ *
+ * @example
+ *	```js
+ *    var debounced = debounceTimeAmount(myFn, 1000, 3);
+ *    await debounced(1);
+ *    await debounced(2);
+ *    // wait for more than 1 second
+ *    // myFn will be called with arguments [1, 2] in a separate call stack
+ *  ```
+ */
+function debounceTimeAmount(fn, debounceInterval, debounceSize){
+
+	/**
+	 * Cache and debounce is used during scanning process to reduce write operations
+	 * @type {AudioMetadata[]}
+	 * @private
+	 */
+	var cache = [];
+
+	/**
+	 * @private
+	 */
+	var debounceTimer = null;
+
+
+	/**
+	 * @return {Promise<*>}
+	 */
+	function runFn(){
+		var cacheLink = cache;
+		cache = [];
+		// clear cache before calling 'fn'
+		return fn(cacheLink);
+	}
+
+
+	/**
+	 * @param {*} data
+	 * @return {Promise<any>}
+	 */
+	return function (data) {
+		cache.push(data);
+
+		// check debounce conditions
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+		}
+
+		if (cache.length >= debounceSize) {
+			return runFn();
+		} else {
+			// TODO: technically, we can run in two concurrent write operations here
+			debounceTimer = setTimeout(runFn, debounceInterval);
+		}
+	}
 }
 
 

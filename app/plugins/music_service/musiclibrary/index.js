@@ -4,12 +4,13 @@ var libQ = require('kew');
 var Sequelize = require('sequelize');
 var FileScanner = require('./lib/fileScanner');
 var metadata = require('./lib/metadata');
+var debounceTimeAmount = require('./lib/utils').debounceTimeAmount;
 var parseQueryParams = require('./lib/utils').parseQueryParams;
 var iterateArrayAsync = require('./lib/utils').iterateArrayAsync;
 
 module.exports = MusicLibrary;
 
-
+// TODO: move to config?
 var ROOT = '/mnt';
 
 var PLUGIN_PROTOCOL = 'musiclibrary';
@@ -33,45 +34,38 @@ function MusicLibrary(context) {
 	this.logger = this.context.logger;
 
 
-	/**
-	 * @type {AudioMetadata[]}
-	 */
-	var _insertCache = [];
-
-	var _debounceTimer = null;
-
-
 	// initialize database
-	this._sequelize = new Sequelize({
+	this.sequelize = new Sequelize({
 		// logging: false,
 		dialect: 'sqlite',
 		storage: __dirname + '/library.db'
 		// storage: 'app/db/library.db' // this is fails with "SQLITE_ERROR: no such column: albumartist" o_O
 	});
 
-	this._model = {};
+	this.model = {};
 
 	/**
 	 * @type {AudioMetadata}
 	 */
-	this._model.AudioMetadata = this._sequelize.import(__dirname + '/model/audioMetadata');
+	this.model.AudioMetadata = this.sequelize.import(__dirname + '/model/audioMetadata');
+	// load more models here
 
-	this._sequelize.sync().then(function() {
+	this.sequelize.sync().then(function() {
 
 		// initialize file scanning service
-		self._fileScanner = new FileScanner({
-			cbFileFound: _processFile,
-			cbError: _processError,
+		self.fileScanner = new FileScanner({
+			cbFileFound: processFile,
+			cbError: processError,
 			cbOtherFound: function() {/* noop */
 			}
 		});
 
 		// TODO: don't scan all library on start
-		self._fileScanner.addTarget(ROOT);
+		self.fileScanner.addTarget(ROOT);
 
 		// The recursive option is only supported on macOS and Windows. =(
 		// https://nodejs.org/api/fs.html#fs_caveats
-		self._fileWatcher = fs.watch(ROOT, {recursive: true}, _onFsChanges);
+		self.fileWatcher = fs.watch(ROOT, {recursive: true}, onFsChanges);
 	});
 
 
@@ -79,9 +73,9 @@ function MusicLibrary(context) {
 	 * @param {'rename'|'change'} eventType
 	 * @param {string} filename
 	 */
-	function _onFsChanges(eventType, filename) {
-		// console.log('MusicLibrary._onFsChanges', eventType, filename);
-		self._fileScanner.addTarget(path.join(ROOT, filename));
+	function onFsChanges(eventType, filename) {
+		// console.log('MusicLibrary.onFsChanges', eventType, filename);
+		self.fileScanner.addTarget(path.join(ROOT, filename));
 	}
 
 	/**
@@ -89,7 +83,7 @@ function MusicLibrary(context) {
 	 * @param {string} location
 	 * @more NodeJS errors: https://nodejs.org/api/os.html#os_error_constants
 	 */
-	function _processError(err, location) {
+	function processError(err, location) {
 		if (err.code == 'EACCES' || err.code == 'ENOSYS' || err.code == 'EIO') {
 			// console.log('MusicLibrary: error %s at %s', err.code, err.path);
 			return;
@@ -98,7 +92,7 @@ function MusicLibrary(context) {
 		if (err.code == 'ENOENT') {
 			console.log('MusicLibrary: remove files from library:', location);
 			// remove content from the library
-			return removeFolder(location);
+			return self.removeFolder(location);
 		} else {
 			console.warn(err);
 		}
@@ -108,40 +102,56 @@ function MusicLibrary(context) {
 	/**
 	 * @param {string} location
 	 */
-	function _processFile(location) {
-		// console.log('MusicLibrary._processFile: File was found:', location);
+	function processFile(location) {
+		// console.log('MusicLibrary.processFile: File was found:', location);
 		if (!metadata.isMediaFile(location)) {
 			return;
 		}
-
-		// parse metadata
-		return metadata.parseFile(location)
-			.then(function(metadataArr) {
-				return iterateArrayAsync(metadataArr, updateMetadata);
-			})
-			.fail(function(err) {
-				console.error(err);
-			});
+		return self.addFile(location);
 	}
 
+} // -
 
-	/**
-	 * @param {string} location
-	 * @return {Promise<*>}
-	 */
-	function removeFolder(location) {
-		var AudioMetadata = self._model.AudioMetadata;
-		return AudioMetadata.destroy({
-			where: {
-				// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
-				// http://docs.sequelizejs.com/manual/querying.html#operators
-				location: {[Sequelize.Op.endsWith]: location + path.sep}
-			}
+
+/**
+ * @param {string} location
+ * @return {Promise<*>}
+ * @private
+ */
+MusicLibrary.prototype.removeFolder = function(location) {
+	return this.model.AudioMetadata.destroy({
+		where: {
+			// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
+			// http://docs.sequelizejs.com/manual/querying.html#operators
+			location: {[Sequelize.Op.endsWith]: location + path.sep}
+		}
+	});
+};
+
+
+
+/**
+ * Add file to library
+ * Debounce is used during scanning process to reduce write operations
+ * @param {string} location
+ * @return {Promise<*>}
+ * @private
+ */
+MusicLibrary.prototype.addFile = function(location) {
+	var self = this;
+
+	var saveDebounced = debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
+
+
+	return metadata.parseFile(location)
+		.then(function(metadataArr) {
+			return iterateArrayAsync(metadataArr, updateMetadata);
+		})
+		.fail(function(err) {
+			console.error(err);
 		});
-	}
 
 
-	// save record
 	/**
 	 * @param {AudioMetadata} metadata
 	 * @return {Promise<any>}
@@ -150,9 +160,8 @@ function MusicLibrary(context) {
 	function updateMetadata(metadata) {
 		console.log('MusicLibrary: track found: %s - %s', metadata.album, metadata.title);
 
-		var AudioMetadata = self._model.AudioMetadata;
 		metadata.trackOffset = (typeof metadata.trackOffset == 'undefined') ? null : metadata.trackOffset;
-		return AudioMetadata.findOne({
+		return self.model.AudioMetadata.findOne({
 			where: {
 				location: metadata.location,
 				trackOffset: metadata.trackOffset
@@ -160,45 +169,22 @@ function MusicLibrary(context) {
 		}).then(function(record) {
 			if (!record) {
 				// all 'write' operations should be debounced to reduce write operations count
-				return _saveDebounced(metadata);
+				return saveDebounced(metadata);
 				// return AudioMetadata.create(recordData);
 			}
 		});
 	}
 
-
 	/**
-	 * @param {AudioMetadata} audioMetadata
-	 * @return {Promise<any>}
-	 */
-	function _saveDebounced(audioMetadata) {
-		_insertCache.push(audioMetadata);
-
-		// check debounce conditions
-		if (_debounceTimer) {
-			clearTimeout(_debounceTimer);
-		}
-
-		if (_insertCache.length >= config.debounceSize) {
-			return __flushUpdateCache();
-		} else {
-			// TODO: technically, we can run in two concurrent write operations here
-			_debounceTimer = setTimeout(__flushUpdateCache, config.debounceTime);
-		}
-	}
-
-	/**
+	 * @param {Array<AudioMetadata>} records
 	 * @return {Promise<*>}
 	 * @private
 	 */
-	function __flushUpdateCache() {
-		var cache = _insertCache;
-		_insertCache = [];
-		return self._model.AudioMetadata.bulkCreate(cache);
+	function saveRecords(records) {
+		return self.model.AudioMetadata.bulkCreate(records);
 	}
 
-
-} // -
+};
 
 
 /**
@@ -213,7 +199,7 @@ MusicLibrary.prototype.search = function(query) {
 	var safeValue = query.value.replace(/"/g, '\\"');
 
 	return libQ.resolve().then(function() {
-		return self._model.AudioMetadata.findAll({
+		return self.model.AudioMetadata.findAll({
 			where: {
 				[Sequelize.Op.or]: {
 					title: {[Sequelize.Op.substring]: safeValue},
@@ -276,7 +262,7 @@ MusicLibrary.prototype.searchAlbum = function(query) {
  * @return {boolean}
  */
 MusicLibrary.prototype.isScanning = function() {
-	return this._fileScanner.isScanning;
+	return this.fileScanner.isScanning;
 };
 
 
@@ -288,7 +274,7 @@ MusicLibrary.prototype.isScanning = function() {
  */
 MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 	trackOffset = typeof trackOffset == 'undefined' ? null : trackOffset;
-	return this._model.AudioMetadata.findOne({
+	return this.model.AudioMetadata.findOne({
 		where: {
 			location: location,
 			trackOffset: trackOffset
@@ -336,7 +322,7 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 	var info = MusicLibrary._parseTrackUri(uri);
 
 	return libQ.resolve().then(function() {
-		return self._model.AudioMetadata.findAll({
+		return self.model.AudioMetadata.findAll({
 			where: {
 				// TODO: that is not coreect condition
 				location: {[Sequelize.Op.endsWith]: info.location + path.sep}
@@ -358,7 +344,7 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 				lists: data
 			},
 			prev: {
-				uri: uri == PLUGIN_PROTOCOL+'://' ? uri : uri.substring(0, uri.lastIndexOf(path.sep))
+				uri: uri == PLUGIN_PROTOCOL + '://' ? uri : uri.substring(0, uri.lastIndexOf(path.sep))
 			}
 		};
 	});
@@ -395,7 +381,6 @@ MusicLibrary._parseTrackUri = function(uri) {
 
 	var location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT);
 	var params = parseQueryParams(parts[1] || '');
-	console.log('_parseTrackUri', uri, location);
 	return {
 		location: location,
 		trackOffset: params.trackoffset
