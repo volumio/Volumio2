@@ -1,5 +1,5 @@
 {
-  "name": "musiclibrary",
+  "name": "music_library",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -21,6 +21,7 @@
     "underscore": "^1.8.3"
   },
   "volumio_info": {
-    "plugin_type": "music_service"
+    "plugin_type": "music_service",
+    "boot_priority":1
   }
 }

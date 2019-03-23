@@ -43,10 +43,16 @@ module.exports = function(sequelize, DataTypes) {
 		genre: DataTypes.TEXT,			// comma-separated genres
 		rating: DataTypes.TEXT,  		// Object holding rating score [0..1] (0.0 worst rating, 1.0 best rating) and source (e.g. user e-mail)
 		title: DataTypes.TEXT,
+        fileType: DataTypes.TEXT,
 		year: DataTypes.INTEGER,
-
+        samplerate: DataTypes.INTEGER,
 		disk: DataTypes.INTEGER,  // Disk or media number
 		tracknumber: DataTypes.INTEGER, // Track number on the media
+
+        /**
+         * file format informtions
+         */
+        format: DataTypes.JSON,
 
 
 		/**

@@ -1,4 +1,4 @@
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 var libQ = require('kew');
 var Sequelize = require('sequelize');
@@ -11,8 +11,8 @@ module.exports = MusicLibrary;
 // TODO: move to config?
 var ROOT = '/mnt';
 
-var PLUGIN_PROTOCOL = 'musiclibrary';
-var PLUGIN_NAME = 'musiclibrary';
+var PLUGIN_PROTOCOL = 'music_library';
+var PLUGIN_NAME = 'music_library';
 
 
 var config = {
@@ -41,12 +41,17 @@ function MusicLibrary(context) {
 	this.scanPath = null;
 
 	// initialize database
-	this.sequelize = new Sequelize({
-		// logging: false,
-		dialect: 'sqlite',
-		storage: __dirname + '/library.db'
-		// storage: 'app/db/library.db' // this is fails with "SQLITE_ERROR: no such column: albumartist" o_O
-	});
+	try {
+        fs.ensureDirSync('/data/musiclibrary/');
+	} catch(e) {
+        self.logger.error('Could not create Music Library database directory');
+	}
+    this.sequelize = new Sequelize({
+        // logging: false,
+        dialect: 'sqlite',
+        storage: '/data/musiclibrary/library.db'
+        // storage: 'app/db/library.db' // this is fails with "SQLITE_ERROR: no such column: albumartist" o_O
+    });
 
 	this.model = {};
 
@@ -70,7 +75,7 @@ function MusicLibrary(context) {
 
 		// TODO: don't scan all library on start
 		self.scanPath = ROOT;
-		self.fileScanner.addTarget(ROOT);
+		//self.fileScanner.addTarget(ROOT);
 
 		// The recursive option is only supported on macOS and Windows. =(
 		// https://nodejs.org/api/fs.html#fs_caveats
@@ -353,6 +358,7 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
  * @implement playMusic
  */
 MusicLibrary.prototype.explodeUri = function(uri) {
+	var self = this;
 	var trackInfo = MusicLibrary._parseTrackUri(uri);
 	return this.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
 
@@ -364,10 +370,10 @@ MusicLibrary.prototype.explodeUri = function(uri) {
 			album: track.album,
 			type: 'track',
 			tracknumber: track.tracknumber,
-			albumart: '',
-			duration: '',
-			samplerate: '',
-			bitdepth: '',
+			albumart: self.getAlbumArt({artist: track.artist, album: track.album},self.getParentFolder('/mnt/' + track.location.substr(1)),'fa-music'),
+			duration: track.format.duration,
+			samplerate: track.samplerate,
+			bitdepth: track.format.bitdepth,
 			trackType: track.location.split('.').pop()
 		};
 
@@ -420,6 +426,10 @@ MusicLibrary.prototype.lsFolder = function(location) {
 	// for root folders - we need to see if there any files inside
 	// if no files - don't show it
 	var isRoot = location == ROOT;
+
+	if (location === 'musiclibrary://') {
+		location = '/mnt/';
+	}
 
 	return utils.readdir(location).then(function(folderEntries) {
 		return utils.iterateArrayAsync(folderEntries, function(stats) {
@@ -554,6 +564,32 @@ MusicLibrary.folder2SearchResult = function(location) {
 		icon: diricon,
 		uri: MusicLibrary._getTrackUri({location: location})
 	};
+};
+
+MusicLibrary.prototype.getAlbumArt = function (data, path,icon) {
+
+    if(this.albumArtPlugin==undefined)
+    {
+        //initialization, skipped from second call
+        this.albumArtPlugin=  this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
+    }
+
+    if(this.albumArtPlugin)
+        return this.albumArtPlugin.getAlbumArt(data,path,icon);
+    else
+    {
+        return "/albumart";
+    }
+};
+
+MusicLibrary.prototype.getParentFolder = function (file) {
+    var index=file.lastIndexOf('/');
+
+    if(index>-1)
+    {
+        return file.substring(0,index);
+    }
+    else return '';
 };
 
 //

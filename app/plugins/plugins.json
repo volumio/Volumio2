@@ -59,7 +59,17 @@
 		"type": "string",
 		"value": "STARTED"
 	  }
-	}
+	},
+    "music_library": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    }
   },
   "audio_interface": {
     "outputs": {

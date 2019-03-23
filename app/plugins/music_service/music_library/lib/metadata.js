@@ -153,24 +153,32 @@ function _parseCue(filename) {
 function mm2custom(location, metadata) {
 	// TODO: process media picture
 	delete metadata.common.picture;
+	console.log(JSON.stringify(metadata))
 
 	return {
-		album: metadata.common.album,
-		albumartist: metadata.common.albumartist,
-		artist: metadata.common.artist,
-		artists: (metadata.common.artists || []).join(',') || null,
-		composer: (metadata.common.composer || []).join(',') || null,
-		date: metadata.common.date,
-		genre: (metadata.common.genre || []).join(',') || null,
-		rating: ((metadata.common.rating || [])[0] || {}).rating,	// get first rating value
-		title: metadata.common.title,
-		year: parseInt(metadata.common.year) || null,
-
-		disk: parseInt(metadata.common.disk.no) || null,
-		tracknumber: parseInt(metadata.common.track.no) || null,
-
+        album: metadata.common.album,
+        albumartist: metadata.common.albumartist,
+        artist: metadata.common.artist,
+        artists: (metadata.common.artists || []).join(',') || null,
+        composer: (metadata.common.composer || []).join(',') || null,
+        date: metadata.common.date,
+        genre: (metadata.common.genre || []).join(',') || null,
+        rating: ((metadata.common.rating || [])[0] || {}).rating,	// get first rating value
+        title: metadata.common.title,
+        fileType: location.split('.').pop(),
+        year: parseInt(metadata.common.year) || null,
+        samplerate: parseSampleRate(parseInt(metadata.format.sampleRate) || 44100),
+        disk: parseInt(metadata.common.disk.no) || null,
+        tracknumber: parseInt(metadata.common.track.no) || null,
+        format: {
+            duration: parseInt(metadata.format.duration) || null,
+            bitdepth: (parseInt(metadata.format.bitsPerSample) || 16) + ' bit',
+            bitrate: parseInt(metadata.format.bitrate) || null,
+			channels: parseInt(metadata.format.numberOfChannels) || null,
+			encoding: metadata.format.dataformat,
+			lossless: metadata.format.lossless
+        },
 		extra: metadata.common,
-
 		location: location,
 		trackOffset: null
 	};
@@ -209,6 +217,16 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		location: location,
 		trackOffset: _getOffset(trackData.indexes)
 	};
+}
+
+/**
+ * Convert samplerate string into string to show to user
+ * @param {string} bitrate
+ */
+function parseSampleRate(sampleRate) {
+   //todo proper parse dsd data
+
+	return sampleRate/1000 + ' kHz'
 }
 
 /**

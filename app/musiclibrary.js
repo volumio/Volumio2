@@ -110,7 +110,7 @@ function CoreMusicLibrary (commandRouter) {
             {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
             {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'},
 
-			{albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library JS', uri: 'musiclibrary://',plugin_type:'music_service',plugin_name:'musiclibrary'}
+			{albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library JS', uri: 'musiclibrary://',plugin_type:'music_service',plugin_name:'music_library'}
 		];
     }
 
