@@ -446,7 +446,9 @@ CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
 
 	this.stateMachine.clearQueue();
 
-    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
+    if (arrayItems.uri != undefined &&
+		arrayItems.uri.indexOf('playlists/') >= 0 &&
+		arrayItems.uri.indexOf('://') == -1) {
         return this.playPlaylist(arrayItems.title)
     } else  {
         return this.stateMachine.addQueueItems(arrayItems);
