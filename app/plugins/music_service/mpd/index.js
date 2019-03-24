@@ -37,17 +37,13 @@ function ControllerMpd(context) {
     this.config = new (require('v-conf'))();
     this.registeredCallbacks = [];
 
-    this.useNative=this.config.get("useNative",true);
-    // TODO: Line below is for debugging purposes. Remove when implementation is final
-    //this.useNative=false;
-
     this.setupImplementation();
 }
 
 ControllerMpd.prototype.setupImplementation = function () {
 	var impl;
 
-	if(this.useNative) {
+	if(process.env.MPD_USE_NATIVE_DATABASE) {
          impl =new(require('./nativeImplementation.js'))();
 	} else {
         impl=new(require('./dbImplementation.js'))();
