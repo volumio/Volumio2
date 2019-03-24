@@ -49,6 +49,8 @@
   {"name":"Sparky","data":[
 	{"id":"piano-dac","name":"Allo Piano","overlay":"","alsanum":"1","mixer":"Digital","modules":["snd-soc-allo-piano-dac"],"script":"","needsreboot":"yes"},
 	{"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"","alsanum":"1","mixer":"Digital","modules":["snd-soc-allo-piano-dac-plus"],"script":"","needsreboot":"yes"}
+	{"id":"es9038q2m-dac","name":"Volumio ESS 9038QM","overlay":"es90x8q2m-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"}
+	{"id":"es9038pro-dac","name":"Volumio ESS 9038Pro","overlay":"es90x8pro-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"}
   ]},
   {"name":"Tinkerboard","data":[
     {"id":"hifiberry-amp","name":"HiFiBerry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
