@@ -75,7 +75,7 @@ function MusicLibrary(context) {
 
 		// TODO: don't scan all library on start
 		self.scanPath = ROOT;
-		//self.fileScanner.addTarget(ROOT);
+		self.fileScanner.addTarget(ROOT);
 
 		// The recursive option is only supported on macOS and Windows. =(
 		// https://nodejs.org/api/fs.html#fs_caveats
