@@ -45,15 +45,21 @@ ControllerMpd.prototype.setupImplementation = function() {
 
 	if (process.env.MPD_USE_NATIVE_DATABASE) {
 		console.log('MPD: use native implementation');
-		impl = new (require('./nativeImplementation.js'))();
+		impl = new (require('./nativeImplementation.js'))(this.context);
+
+
+		ControllerMpd.prototype.search = impl.search.bind(this);
+		ControllerMpd.prototype.handleBrowseUri = impl.handleBrowseUri.bind(this);
+		ControllerMpd.prototype.explodeUri = impl.explodeUri.bind(this);
 	} else {
 		console.log('MPD: use js implementation');
-		impl = new (require('./dbImplementation.js'))();
-	}
+		impl = new (require('./dbImplementation.js'))(this.context);
 
-	ControllerMpd.prototype.search = impl.search.bind(this);
-	ControllerMpd.prototype.handleBrowseUri = impl.handleBrowseUri.bind(this);
-	ControllerMpd.prototype.explodeUri = impl.explodeUri.bind(this);
+		// TODO: handle different context: 'this' vs 'impl'
+		ControllerMpd.prototype.search = impl.search.bind(impl);
+		ControllerMpd.prototype.handleBrowseUri = impl.handleBrowseUri.bind(impl);
+		ControllerMpd.prototype.explodeUri = impl.explodeUri.bind(impl);
+	}
 };
 
 

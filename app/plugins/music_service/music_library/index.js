@@ -11,7 +11,9 @@ module.exports = MusicLibrary;
 // TODO: move to config?
 var ROOT = '/mnt';
 
-var PLUGIN_PROTOCOL = 'music_library';
+
+// TODO: move all 'uri' stuff out in other module
+var PLUGIN_PROTOCOL = 'music-library';
 var PLUGIN_NAME = 'music_library';
 
 
@@ -42,16 +44,15 @@ function MusicLibrary(context) {
 
 	// initialize database
 	try {
-        fs.ensureDirSync('/data/musiclibrary/');
-	} catch(e) {
-        self.logger.error('Could not create Music Library database directory');
+		fs.ensureDirSync('/data/musiclibrary/');
+	} catch (e) {
+		self.logger.error('Could not create Music Library database directory');
 	}
-    this.sequelize = new Sequelize({
-        // logging: false,
-        dialect: 'sqlite',
-        storage: '/data/musiclibrary/library.db'
-        // storage: 'app/db/library.db' // this is fails with "SQLITE_ERROR: no such column: albumartist" o_O
-    });
+	this.sequelize = new Sequelize({
+		// logging: false,
+		dialect: 'sqlite',
+		storage: '/data/musiclibrary/library.db'
+	});
 
 	this.model = {};
 
@@ -359,7 +360,7 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
  */
 MusicLibrary.prototype.explodeUri = function(uri) {
 	var self = this;
-	var trackInfo = MusicLibrary._parseTrackUri(uri);
+	var trackInfo = MusicLibrary.parseUri(uri);
 	return this.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
 
 		var result = {
@@ -370,7 +371,10 @@ MusicLibrary.prototype.explodeUri = function(uri) {
 			album: track.album,
 			type: 'track',
 			tracknumber: track.tracknumber,
-			albumart: self.getAlbumArt({artist: track.artist, album: track.album},self.getParentFolder('/mnt/' + track.location.substr(1)),'fa-music'),
+			albumart: self.getAlbumArt({
+				artist: track.artist,
+				album: track.album
+			}, self.getParentFolder('/mnt/' + track.location.substr(1)), 'fa-music'),
 			duration: track.format.duration,
 			samplerate: track.samplerate,
 			bitdepth: track.format.bitdepth,
@@ -390,11 +394,12 @@ MusicLibrary.prototype.explodeUri = function(uri) {
  */
 MusicLibrary.prototype.handleBrowseUri = function(uri) {
 	var self = this;
-	var info = MusicLibrary._parseTrackUri(uri);
+	var info = MusicLibrary.parseUri(uri);
 
 	return libQ.resolve().then(function() {
 		return self.lsFolder(info.location);
 	}).then(function(items) {
+		var isRoot = info.location == ROOT;
 		return {
 			navigation: {
 				lists: [{
@@ -404,7 +409,7 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 					items: items
 				}],
 				prev: {
-					uri: uri == PLUGIN_PROTOCOL + '://' ? '' : uri.substring(0, uri.lastIndexOf(path.sep))
+					uri: isRoot ? '' : uri.substring(0, uri.lastIndexOf(path.sep))
 				}
 			}
 		};
@@ -427,16 +432,12 @@ MusicLibrary.prototype.lsFolder = function(location) {
 	// if no files - don't show it
 	var isRoot = location == ROOT;
 
-	if (location === 'musiclibrary://') {
-		location = '/mnt/';
-	}
-
 	return utils.readdir(location).then(function(folderEntries) {
 		return utils.iterateArrayAsync(folderEntries, function(stats) {
 			var fullname = path.join(location, stats.name);
 
-			// file
 			if (stats.isFile() && metadata.isMediaFile(fullname)) {
+				// file
 
 				return self.getTrack(fullname).then(function(record) {
 					if (record) {
@@ -445,8 +446,8 @@ MusicLibrary.prototype.lsFolder = function(location) {
 					// else - ignore it
 				});
 
-				// folder
 			} else if (stats.isDirectory()) {
+				// folder
 
 				if (isRoot) {
 					return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
@@ -454,16 +455,23 @@ MusicLibrary.prototype.lsFolder = function(location) {
 							return MusicLibrary.folder2SearchResult(fullname);
 						} else {
 							// return nothing = don't show it
+							console.log('MusicLibrary.lsFolder empty folder', fullname);
 						}
 					});
 				} else {
 					return MusicLibrary.folder2SearchResult(fullname);
 				}
 
+			} else {
+				console.log('MusicLibrary.lsFolder unknown entry type', fullname);
 			}
 			// ignore all other types
 
 		});
+	}).fail(function(e) {
+		// TODO: caller doesn't log the error
+		console.error(e);
+		throw e;
 	});
 };
 
@@ -474,7 +482,7 @@ MusicLibrary.prototype.lsFolder = function(location) {
  */
 MusicLibrary.prototype.updateDb = function(uri) {
 	uri = uri || (PLUGIN_PROTOCOL + '://');
-	var info = MusicLibrary._parseTrackUri(uri);
+	var info = MusicLibrary.parseUri(uri);
 	console.log('updateDb', info.location);
 
 	this.scanPath = info.location;
@@ -489,20 +497,30 @@ MusicLibrary.prototype.updateDb = function(uri) {
  * @private
  * @static
  */
-MusicLibrary._getTrackUri = function(track) {
+MusicLibrary.getUri = function(track) {
 	var params = (track.trackOffset !== null && track.trackOffset !== undefined) ? 'trackoffset=' + track.trackOffset : null;
 	return track.location.replace(ROOT, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
 };
 
 /**
+ * Parse URI
+ *
+ * Note: the following uri are valid:
+ *  1. 'root' url: 'music-library'
+ *  2. non-'root' url: 'music-library://USB/some/folder'
  * @param {string} uri
  * @return {{location:string, trackOffset:number}} - primary key for AudioMetadata
  * @private
  */
-MusicLibrary._parseTrackUri = function(uri) {
+MusicLibrary.parseUri = function(uri) {
 	var parts = uri.split('?');
 
-	var location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT);
+	var location;
+	if (parts[0] == PLUGIN_PROTOCOL || parts[0] == PLUGIN_PROTOCOL + '://') {
+		location = ROOT;
+	} else {
+		location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT);
+	}
 	var params = utils.parseQueryParams(parts[1] || '');
 	return {
 		location: location,
@@ -525,7 +543,7 @@ MusicLibrary.record2SearchResult = function(record) {
 		album: record.album || '',
 		albumart: '',	// TODO: album art
 		icon: 'fa fa-music',
-		uri: MusicLibrary._getTrackUri(record)
+		uri: MusicLibrary.getUri(record)
 	};
 };
 
@@ -562,34 +580,30 @@ MusicLibrary.folder2SearchResult = function(location) {
 		title: path.basename(location),
 		albumart: '',	// TODO: album art
 		icon: diricon,
-		uri: MusicLibrary._getTrackUri({location: location})
+		uri: MusicLibrary.getUri({location: location})
 	};
 };
 
-MusicLibrary.prototype.getAlbumArt = function (data, path,icon) {
+MusicLibrary.prototype.getAlbumArt = function(data, path, icon) {
 
-    if(this.albumArtPlugin==undefined)
-    {
-        //initialization, skipped from second call
-        this.albumArtPlugin=  this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
-    }
+	if (this.albumArtPlugin == undefined) {
+		//initialization, skipped from second call
+		this.albumArtPlugin = this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
+	}
 
-    if(this.albumArtPlugin)
-        return this.albumArtPlugin.getAlbumArt(data,path,icon);
-    else
-    {
-        return "/albumart";
-    }
+	if (this.albumArtPlugin)
+		return this.albumArtPlugin.getAlbumArt(data, path, icon);
+	else {
+		return '/albumart';
+	}
 };
 
-MusicLibrary.prototype.getParentFolder = function (file) {
-    var index=file.lastIndexOf('/');
+MusicLibrary.prototype.getParentFolder = function(file) {
+	var index = file.lastIndexOf('/');
 
-    if(index>-1)
-    {
-        return file.substring(0,index);
-    }
-    else return '';
+	if (index > -1) {
+		return file.substring(0, index);
+	} else return '';
 };
 
 //
