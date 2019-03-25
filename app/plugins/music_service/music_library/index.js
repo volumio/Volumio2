@@ -244,12 +244,6 @@ MusicLibrary.prototype.addFile = function(location) {
 	 * @private
 	 */
 	function updateRecords(ids) {
-		// return self.model.AudioMetadata.update({updatedAt: new Date() }, {
-		// 	where: {
-		// 		id: {[Sequelize.Op.in]: ids}
-		// 	}
-		// });
-
 		return self.sequelize.query('UPDATE AudioMetadata SET updatedAt = ? WHERE AudioMetadata.id in (' + ids.join(',') + ')', {
 			replacements: [new Date()]
 		});
@@ -413,11 +407,20 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 				}
 			}
 		};
-	}).fail(function(e) {
-		console.error(e);
-		throw e;
 	});
 };
+
+
+/**
+ * @return {Promise<Artist>}
+ */
+MusicLibrary.prototype.getArtists = function() {
+	var self = this;
+	return libQ.resolve().then(function() {
+		return self.sequelize.query('SELECT DISTINCT artist FROM AudioMetadata', { type: Sequelize.QueryTypes.SELECT});
+	});
+};
+
 
 
 /**
@@ -509,20 +512,18 @@ MusicLibrary.getUri = function(track) {
  *  1. 'root' url: 'music-library'
  *  2. non-'root' url: 'music-library://USB/some/folder'
  * @param {string} uri
- * @return {{location:string, trackOffset:number}} - primary key for AudioMetadata
- * @private
+ * @return {{protocol:string, location:string, trackOffset:number}} - primary key for AudioMetadata
  */
 MusicLibrary.parseUri = function(uri) {
-	var parts = uri.split('?');
+	var protocolParts = uri.split('://', 2);
+	var protocol = protocolParts[0];
 
-	var location;
-	if (parts[0] == PLUGIN_PROTOCOL || parts[0] == PLUGIN_PROTOCOL + '://') {
-		location = ROOT;
-	} else {
-		location = parts[0].replace(PLUGIN_PROTOCOL + '://', ROOT);
-	}
-	var params = utils.parseQueryParams(parts[1] || '');
+	var queryParts = (protocolParts[1] || '').split('?', 2);
+	var location = protocol == PLUGIN_PROTOCOL ? path.join(ROOT, queryParts[0] || '') : queryParts[0] || '';
+
+	var params = utils.parseQueryParams(queryParts[1] || '');
 	return {
+		protocol: protocol,
 		location: location,
 		trackOffset: params.trackoffset
 	};
