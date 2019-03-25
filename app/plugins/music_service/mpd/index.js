@@ -40,19 +40,21 @@ function ControllerMpd(context) {
     this.setupImplementation();
 }
 
-ControllerMpd.prototype.setupImplementation = function () {
+ControllerMpd.prototype.setupImplementation = function() {
 	var impl;
 
-	if(process.env.MPD_USE_NATIVE_DATABASE) {
-         impl =new(require('./nativeImplementation.js'))();
+	if (process.env.MPD_USE_NATIVE_DATABASE) {
+		console.log('MPD: use native implementation');
+		impl = new (require('./nativeImplementation.js'))();
 	} else {
-        impl=new(require('./dbImplementation.js'))();
+		console.log('MPD: use js implementation');
+		impl = new (require('./dbImplementation.js'))();
 	}
 
 	ControllerMpd.prototype.search = impl.search.bind(this);
 	ControllerMpd.prototype.handleBrowseUri = impl.handleBrowseUri.bind(this);
 	ControllerMpd.prototype.explodeUri = impl.explodeUri.bind(this);
-}
+};
 
 
 // Public Methods ---------------------------------------------------------------------------------------
