@@ -46,9 +46,9 @@ DBImplementation.prototype.search = function(query) {
 
 	self.logger.info('DBImplementation.search', query);
 	console.time('DBImplementation.search');
-	var safeValue = query.value.replace(/"/g, '\\"');
+	var searchValue = query.value;
 
-	return this.library.searchAll(safeValue).then(function(records) {
+	return this.library.searchAll(searchValue).then(function(records) {
 		return records.map(DBImplementation.record2SearchResult);
 	}).then(function(tracks) {
 		console.log('DBImplementation.search: found %s track(s)', tracks.length);
@@ -71,6 +71,15 @@ DBImplementation.prototype.search = function(query) {
 		console.error(e);
 		throw e;
 	});
+};
+
+
+/**
+ * @param {string} searchValue
+ * @return {Promise<Album[]>}
+ */
+DBImplementation.prototype.searchAlbums = function(searchValue) {
+
 };
 
 
@@ -147,7 +156,7 @@ DBImplementation.prototype.explodeUri = function(uri) {
 			duration: track.format.duration,
 			samplerate: track.samplerate,
 			bitdepth: track.format.bitdepth,
-			trackType: track.location.split('.').pop()
+			trackType: path.extname(track.location)
 		};
 
 		return [result];
@@ -208,7 +217,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 		// list all artists
 		promise = this.library.getArtists().then(function(artistArr) {
 			return artistArr.map(function(artist) {
-				return DBImplementation.artist2SearchResult(artist.artist);
+				return DBImplementation.artist2SearchResult(artist);
 			});
 		});
 	} else {
@@ -252,7 +261,7 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 		// list all albums
 		promise = this.library.getAlbums().then(function(albumArr) {
 			return albumArr.map(function(album) {
-				return DBImplementation.album2SearchResult(album.album);
+				return DBImplementation.album2SearchResult(album);
 			});
 		});
 	} else {

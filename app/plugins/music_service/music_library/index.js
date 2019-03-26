@@ -298,12 +298,16 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 
 
 /**
- * @return {Promise<Array<{artist:string}>>}
+ * @return {Promise<Array<string>>}
  */
 MusicLibrary.prototype.getArtists = function() {
 	var self = this;
 	return libQ.resolve().then(function() {
 		return self.sequelize.query('SELECT DISTINCT artist FROM AudioMetadata', {type: Sequelize.QueryTypes.SELECT});
+	}).then(function(records) {
+		return records.map(function(record) {
+			return record.artist;
+		});
 	});
 };
 
@@ -323,12 +327,16 @@ MusicLibrary.prototype.getByArtist = function(artistName) {
 };
 
 /**
- * @return {Promise<Array<{album:string}>>}
+ * @return {Promise<Array<string>>}
  */
 MusicLibrary.prototype.getAlbums = function() {
 	var self = this;
 	return libQ.resolve().then(function() {
 		return self.sequelize.query('SELECT DISTINCT album FROM AudioMetadata', {type: Sequelize.QueryTypes.SELECT});
+	}).then(function(records) {
+		return records.map(function(record) {
+			return record.album;
+		});
 	});
 };
 
