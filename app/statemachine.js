@@ -440,7 +440,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 	{
 		this.playbackStart=Date.now();
 
-
+		var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 		var remainingTime=this.currentSongDuration-this.currentSeek;
 		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
 		{
@@ -458,6 +458,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 				var plugin = this.commandRouter.pluginManager.getPlugin('music_service', trackBlock.service);
 				if(plugin && typeof(plugin.prefetch) === typeof(Function))
 				{
+					mpdPlugin.ignoreUpdate(true);
 					this.prefetchDone=true;
 					plugin.prefetch(nextTrackBlock);
 				}
@@ -481,6 +482,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             }
 
 			this.nextRandomIndex=undefined;
+			mpdPlugin.ignoreUpdate(false);
 
             this.askedForPrefetch=false;
 			this.pushState.bind(this);
