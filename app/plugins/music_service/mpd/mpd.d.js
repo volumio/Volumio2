@@ -29,6 +29,8 @@
 /**
  * @typedef {object} SearchQuery
  * @property {string} value
+ * @property {'any'} [type]
+ * @property {string} [uri]
  */
 
 

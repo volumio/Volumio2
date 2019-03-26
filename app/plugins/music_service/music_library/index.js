@@ -298,15 +298,46 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 
 
 /**
+ * @param {string} searchStr
+ * @return {Promise<AudioMetadata[]>}
+ */
+MusicLibrary.prototype.searchTracks = function(searchStr) {
+	var self = this;
+
+	return libQ.resolve().then(function() {
+		return self.model.AudioMetadata.findAll({
+			where: {
+				[Sequelize.Op.or]: {
+					title: {[Sequelize.Op.substring]: searchStr}
+				}
+			}
+		});
+	});
+};
+
+
+
+
+/**
+ * @param {string} [searchString]
  * @return {Promise<Array<string>>}
  */
-MusicLibrary.prototype.getArtists = function() {
+MusicLibrary.prototype.searchArtists = function(searchString) {
 	var self = this;
 	return libQ.resolve().then(function() {
-		return self.sequelize.query('SELECT DISTINCT artist FROM AudioMetadata', {type: Sequelize.QueryTypes.SELECT});
-	}).then(function(records) {
-		return records.map(function(record) {
-			return record.artist;
+		// 'distinct'
+		return self.model.AudioMetadata.findAll({
+			attributes: [
+				[Sequelize.fn('DISTINCT', Sequelize.col('artist')), 'artist']
+			],
+			where: searchString ? {
+				artist: {[Sequelize.Op.substring]: searchString}
+			} : {},
+			raw: true
+		}).then(function(records) {
+			return records.map(function(record) {
+				return record.artist;
+			});
 		});
 	});
 };
@@ -327,15 +358,25 @@ MusicLibrary.prototype.getByArtist = function(artistName) {
 };
 
 /**
+ * @param {string} [searchString]
  * @return {Promise<Array<string>>}
  */
-MusicLibrary.prototype.getAlbums = function() {
+MusicLibrary.prototype.searchAlbums = function(searchString) {
 	var self = this;
 	return libQ.resolve().then(function() {
-		return self.sequelize.query('SELECT DISTINCT album FROM AudioMetadata', {type: Sequelize.QueryTypes.SELECT});
-	}).then(function(records) {
-		return records.map(function(record) {
-			return record.album;
+		// 'distinct'
+		return self.model.AudioMetadata.findAll({
+			attributes: [
+				[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album']
+			],
+			where: searchString ? {
+				album: {[Sequelize.Op.substring]: searchString}
+			} : {},
+			raw: true
+		}).then(function(records) {
+			return records.map(function(record) {
+				return record.album;
+			});
 		});
 	});
 };
