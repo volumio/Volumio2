@@ -262,7 +262,8 @@ MusicLibrary.prototype.searchAll = function(searchStr) {
 					album: {[Sequelize.Op.substring]: searchStr},
 					artist: {[Sequelize.Op.substring]: searchStr}
 				}
-			}
+			},
+			raw: true
 		});
 	});
 };
@@ -291,7 +292,8 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 			where: {
 				location: location,
 				trackOffset: trackOffset
-			}
+			},
+			raw: true
 		});
 	});
 };
@@ -310,7 +312,8 @@ MusicLibrary.prototype.searchTracks = function(searchStr) {
 				[Sequelize.Op.or]: {
 					title: {[Sequelize.Op.substring]: searchStr}
 				}
-			}
+			},
+			raw: true
 		});
 	});
 };
@@ -352,7 +355,8 @@ MusicLibrary.prototype.getByArtist = function(artistName) {
 		return self.model.AudioMetadata.findAll({
 			where: {
 				artist: {[Sequelize.Op.eq]: artistName}
-			}
+			},
+			raw: true
 		});
 	});
 };
@@ -391,7 +395,8 @@ MusicLibrary.prototype.getByAlbum = function(albumName) {
 		return self.model.AudioMetadata.findAll({
 			where: {
 				album: {[Sequelize.Op.eq]: albumName}
-			}
+			},
+			raw: true
 		});
 	});
 };
