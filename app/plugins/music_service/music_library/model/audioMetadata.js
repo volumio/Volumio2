@@ -11,11 +11,20 @@
  * @property {string} genre		- comma-separated artists
  * @property {string} rating
  * @property {string} title
+ * @property {string} fileType
+ * @property {number} samplerate
  * @property {number} year
  * @property {number} disk
  * @property {number} tracknumber
-
- * @property {any} [extra]
+ * @property {object} format
+ * @property {number} format.duration
+ * @property {number} format.bitdepth
+ * @property {number} format.bitrate
+ * @property {number} format.channels
+ * @property {string} format.encoding
+ * @property {string} format.lossless
+ *
+ * @property {*} [extra]
  * @property {boolean} [favorite]
  *
  * @property {string} location

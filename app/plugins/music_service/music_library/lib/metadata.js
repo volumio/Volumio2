@@ -71,7 +71,9 @@ function parseFile(filename) {
 	return libQ.resolve().then(function() {
 		var ext = path.extname(filename);
 		if (METADATA_EXTRACTOR_CONFIG['music-metadata'].indexOf(ext) >= 0) {
-			return _parseCommon(filename).then(function(d){ return [d]; })
+			return _parseCommon(filename).then(function(d) {
+				return [d];
+			});
 		} else if (METADATA_EXTRACTOR_CONFIG['cue-parser'].indexOf(ext) >= 0) {
 			return _parseCue(filename);
 		} else {
@@ -120,7 +122,7 @@ function _parseCue(filename) {
 				return;
 			}
 			return _parseCommon(location);
-		}).then(function(commonMetadata){
+		}).then(function(commonMetadata) {
 
 			// iterate through each track in file
 			// return iterateArrayAsync(fileData.tracks || [], function(_t, j) {
@@ -164,7 +166,7 @@ function mm2custom(location, metadata) {
         date: metadata.common.date,
         genre: (metadata.common.genre || []).join(',') || null,
         rating: ((metadata.common.rating || [])[0] || {}).rating,	// get first rating value
-        title: metadata.common.title,
+        title: metadata.common.title || path.basename(location),
         fileType: location.split('.').pop(),
         year: parseInt(metadata.common.year) || null,
         samplerate: parseSampleRate(parseInt(metadata.format.sampleRate) || 44100),
@@ -193,7 +195,14 @@ function mm2custom(location, metadata) {
  * @return {AudioMetadata}
  */
 function cue2custom(location, cuesheet, fileIndex, trackIndex) {
-	var trackData = _.defaults({}, cuesheet.files[fileIndex].tracks[trackIndex], cuesheet.files[fileIndex], cuesheet, {rem: []});
+	var trackData = _.defaults({},
+		cuesheet.files[fileIndex].tracks[trackIndex],
+		cuesheet.files[fileIndex],
+		cuesheet,
+		{
+			rem: [],
+			title: path.basename(location)
+		});
 	delete trackData.files;
 	delete trackData.tracks;
 
@@ -224,9 +233,9 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
  * @param {string} bitrate
  */
 function parseSampleRate(sampleRate) {
-   //todo proper parse dsd data
+	//todo proper parse dsd data
 
-	return sampleRate/1000 + ' kHz'
+	return sampleRate / 1000 + ' kHz';
 }
 
 /**
