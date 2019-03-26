@@ -153,7 +153,7 @@ function _parseCue(filename) {
 function mm2custom(location, metadata) {
 	// TODO: process media picture
 	delete metadata.common.picture;
-	console.log(JSON.stringify(metadata))
+	// console.log(JSON.stringify(metadata));
 
 	return {
         album: metadata.common.album,
@@ -205,17 +205,17 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		artists: trackData.performer,
 		composer: trackData.songWriter,
 		// date: undefined,
-		genre: _getRemData(trackData.rem, 'GENRE'),
+		genre: getRemData(trackData.rem, 'GENRE'),
 		// rating: undefined,
 		title: trackData.title,
-		year: parseInt(_getRemData(trackData.rem, 'DATE')) || null,
+		year: parseInt(getRemData(trackData.rem, 'DATE')) || null,
 		// disk: undefined,
 		tracknumber: parseInt(trackData.number) || null,
 
 		extra: trackData,
 
 		location: location,
-		trackOffset: _getOffset(trackData.indexes)
+		trackOffset: getTrackOffset(trackData.indexes)
 	};
 }
 
@@ -242,7 +242,7 @@ function parseSampleRate(sampleRate) {
  * @param {string} name
  * @return {string}
  */
-function _getRemData(rem, name) {
+function getRemData(rem, name) {
 	rem = rem || [];
 	for (var i = 0; i < rem.length; i++) {
 		if (rem[i].substring(0, name.length + 1) == name + ' ') {
@@ -269,7 +269,7 @@ function _getRemData(rem, name) {
  * @param {ICueIndex[]} indexes
  * @return {number} number of seconds
  */
-function _getOffset(indexes) {
+function getTrackOffset(indexes) {
 	/**
 	 * @type {ICueIndex}
 	 */
