@@ -293,7 +293,8 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 		});
 	} else {
 		// list artist tracks
-		promise = self.library.getByArtist(artistName).then(function(trackArr) {
+		var orderBy = ['tracknumber'];
+		promise = self.library.getByArtist(artistName, orderBy).then(function(trackArr) {
 			return trackArr.map(function(track) {
 				return DBImplementation.track2SearchResult(track);
 			});
@@ -337,7 +338,8 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 		});
 	} else {
 		// list album tracks
-		promise = self.library.getByAlbum(albumName).then(function(trackArr) {
+		var orderBy = ['tracknumber'];
+		promise = self.library.getByAlbum(albumName, orderBy).then(function(trackArr) {
 			return trackArr.map(function(track) {
 				return DBImplementation.track2SearchResult(track);
 			});
@@ -385,7 +387,8 @@ DBImplementation.prototype.handleGenresUri = function(uri) {
 		});
 	} else {
 		// list tracks by genre
-		promise = self.library.getByGenre(genreName).then(function(trackArr) {
+		var orderBy = ['tracknumber'];
+		promise = self.library.getByGenre(genreName, orderBy).then(function(trackArr) {
 			return trackArr.map(function(track) {
 				return DBImplementation.track2SearchResult(track);
 			});

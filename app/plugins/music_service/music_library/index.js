@@ -47,7 +47,7 @@ function MusicLibrary(context) {
 		var stat = fs.statSync(LIBRARY_DB);
 		fs.copySync(LIBRARY_DB, LIBRARY_DB_TEMP);
 		self.logger.info('MusicLibrary: Database backup loaded');
-	}catch(e){
+	} catch (e) {
 		self.logger.info('MusicLibrary: No database backup');
 	}
 
@@ -171,9 +171,9 @@ function MusicLibrary(context) {
  */
 MusicLibrary.prototype.backupDatabase = function() {
 	var self = this;
-	return libQ.nfcall(fs.ensureDir, path.dirname(LIBRARY_DB)).then(function(){
+	return libQ.nfcall(fs.ensureDir, path.dirname(LIBRARY_DB)).then(function() {
 		return libQ.nfcall(fs.copy, LIBRARY_DB_TEMP, LIBRARY_DB);
-	}).then(function(){
+	}).then(function() {
 		self.logger.info('MusicLibrary: Database backup done', LIBRARY_DB);
 	}).fail(function(err) {
 		self.logger.error('MusicLibrary: Database backup failed', err);
@@ -189,7 +189,6 @@ MusicLibrary.prototype.backupDatabase = function() {
 MusicLibrary.prototype.update = function(location) {
 	this.fileScanner.addTarget(location);
 };
-
 
 
 /**
@@ -338,10 +337,12 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 
 /**
  * @param {string} searchStr
+ * @param {string[]} [orderBy] any property of {@link AudioMetadata}
  * @return {Promise<AudioMetadata[]>}
  */
-MusicLibrary.prototype.searchTracks = function(searchStr) {
+MusicLibrary.prototype.searchTracks = function(searchStr, orderBy) {
 	var self = this;
+	orderBy = orderBy || ['tracknumber'];
 
 	return libQ.resolve().then(function() {
 		return self.model.AudioMetadata.findAll({
@@ -350,6 +351,7 @@ MusicLibrary.prototype.searchTracks = function(searchStr) {
 					title: {[Sequelize.Op.substring]: searchStr}
 				}
 			},
+			order: orderBy,
 			raw: true
 		});
 	});
@@ -371,6 +373,7 @@ MusicLibrary.prototype.searchArtists = function(searchString) {
 			where: searchString ? {
 				artist: {[Sequelize.Op.substring]: searchString}
 			} : {},
+			order: ['artist'],
 			raw: true
 		}).then(function(records) {
 			return records.map(function(record) {
@@ -382,15 +385,18 @@ MusicLibrary.prototype.searchArtists = function(searchString) {
 
 /**
  * @param {string} artistName
+ * @param {string[]} [orderBy] any property of {@link AudioMetadata}
  * @return {Promise<Array<AudioMetadata>>}
  */
-MusicLibrary.prototype.getByArtist = function(artistName) {
+MusicLibrary.prototype.getByArtist = function(artistName, orderBy) {
 	var self = this;
+	orderBy = orderBy || ['tracknumber'];
 	return libQ.resolve().then(function() {
 		return self.model.AudioMetadata.findAll({
 			where: {
 				artist: {[Sequelize.Op.eq]: artistName}
 			},
+			order: orderBy,
 			raw: true
 		});
 	});
@@ -411,6 +417,7 @@ MusicLibrary.prototype.searchAlbums = function(searchString) {
 			where: searchString ? {
 				album: {[Sequelize.Op.substring]: searchString}
 			} : {},
+			order: ['album'],
 			raw: true
 		}).then(function(records) {
 			return records.map(function(record) {
@@ -422,20 +429,22 @@ MusicLibrary.prototype.searchAlbums = function(searchString) {
 
 /**
  * @param {string} albumName
+ * @param {string[]} [orderBy] any property of {@link AudioMetadata}
  * @return {Promise<Array<AudioMetadata>>}
  */
-MusicLibrary.prototype.getByAlbum = function(albumName) {
+MusicLibrary.prototype.getByAlbum = function(albumName, orderBy) {
 	var self = this;
+	orderBy = orderBy || ['tracknumber'];
 	return libQ.resolve().then(function() {
 		return self.model.AudioMetadata.findAll({
 			where: {
 				album: {[Sequelize.Op.eq]: albumName}
 			},
+			order: orderBy,
 			raw: true
 		});
 	});
 };
-
 
 
 /**
@@ -453,6 +462,7 @@ MusicLibrary.prototype.searchGenres = function(searchString) {
 			where: searchString ? {
 				genre: {[Sequelize.Op.substring]: searchString}
 			} : {},
+			order: ['genre'],
 			raw: true
 		}).then(function(records) {
 			return records.map(function(record) {
@@ -464,20 +474,22 @@ MusicLibrary.prototype.searchGenres = function(searchString) {
 
 /**
  * @param {string} genreName
+ * @param {string[]} [orderBy] any property of {@link AudioMetadata}
  * @return {Promise<Array<AudioMetadata>>}
  */
-MusicLibrary.prototype.getByGenre = function(genreName) {
+MusicLibrary.prototype.getByGenre = function(genreName, orderBy) {
 	var self = this;
+	orderBy = orderBy || ['tracknumber'];
 	return libQ.resolve().then(function() {
 		return self.model.AudioMetadata.findAll({
 			where: {
 				genre: {[Sequelize.Op.eq]: genreName}
 			},
+			order: orderBy,
 			raw: true
 		});
 	});
 };
-
 
 
 /**
