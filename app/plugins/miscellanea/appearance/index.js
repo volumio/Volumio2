@@ -4,7 +4,8 @@ var fs=require('fs-extra');
 var config= new (require('v-conf'))();
 var libQ = require('kew');
 var path = require('path');
-var Jimp = require("jimp");
+var Jimp = require('jimp');
+var unirest = require('unirest');
 
 var backgroundPath = '/data/backgrounds';
 var translationLanguage = '';
@@ -669,10 +670,10 @@ volumioAppearance.prototype.setTranslation = function (data){
         selectedLanguage = {};
       }
       for(var translationID in data){
+        var idSplitted = translationID.split('-');
+        pluginName = idSplitted[0].replace('/','');
+        pluginName = pluginName.replace(/\//g, '-');
         if(data[translationID] !== ''){
-          var idSplitted = translationID.split('-');
-          pluginName = idSplitted[0].replace('/','');
-          pluginName = pluginName.replace(/\//g, '-');
           if(selectedLanguage[idSplitted[1]] === undefined){
             selectedLanguage[idSplitted[1]] = {};
           }
@@ -680,18 +681,38 @@ volumioAppearance.prototype.setTranslation = function (data){
         }
       }
     }
-    if(file === "strings"){
-        fs.outputJsonSync('/data/strings_' + language + '.json', selectedLanguage, {spaces: 2});
+    if(file === 'strings'){
+      fs.outputJsonSync('/data/strings_' + language + '.json', selectedLanguage, {spaces: 2});
+      unirest.post('http://192.168.1.204:8000/uploadTranslation')
+      .headers({'Content-Type': 'multipart/form-data'})
+      .attach('file', '/data/strings_' + language + '.json')
+      .end(function (response) {
+        self.logger.info(response.body);
+      });
+      self.logger.info('Translation file saved');
+    } else if (file === 'locale'){
+      fs.outputJsonSync('/data/locale-' + language + '.json', selectedLanguage, {spaces: 2});
+      unirest.post('http://192.168.1.204:8000/uploadTranslation')
+      .headers({'Content-Type': 'multipart/form-data'})
+      .attach('file', '/data/locale-' + language + '.json') 
+      .end(function (response) {
+        self.logger.info(response.body);
+      });
+        
         self.logger.info('Translation file saved');
-    } else if (file === "locale"){
-        fs.outputJsonSync('/data/locale-' + language + '.json', selectedLanguage, {spaces: 2});
-        self.logger.info('Translation file saved');
-    } else if (file === "plugin"){
-        fs.outputJsonSync('/data/'+pluginName+'-strings_' + language + '.json', selectedLanguage, {spaces: 2});
+    } else if (file === 'plugin'){
+      fs.outputJsonSync('/data/'+pluginName+'-strings_' + language + '.json', selectedLanguage, {spaces: 2});
+      unirest.post('http://192.168.1.204:8000/uploadTranslation')
+      .headers({'Content-Type': 'multipart/form-data'})
+      .attach('file', '/data/'+pluginName+'-strings_' + language + '.json') 
+      .end(function (response) {
+        self.logger.info(response.body);
+      });
+        
         self.logger.info('Translation file saved');
     }
 	} catch(e) {
-        self.logger.info("Error in saving the translation file");
+        self.logger.info('Error in saving the translation file');
         self.logger.error(e);
 	}
 }
@@ -763,4 +784,22 @@ volumioAppearance.prototype.searchPluginTranslations = function (path){
   }catch (e){
     return false;
   }
+}
+
+volumioAppearance.prototype.getTranslation = function (fileType,fileName)
+{
+  unirest.get('http://192.168.1.204:8000/getTranslation')
+    .query({fileType: fileType,
+            fileName: fileName
+          })
+    .end(function (res){
+      if(res.body !== undefined){
+        var response = res.body;
+        return (response);
+      }
+      else{
+        self.logger.info('Translation file not found');
+        return ('');
+      }
+    });
 }
