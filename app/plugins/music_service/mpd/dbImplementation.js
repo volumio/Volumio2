@@ -1,5 +1,6 @@
 var libQ = require('kew');
 var path = require('path');
+var url = require('url');
 
 // TODO: I think we can keep this module inside 'mpd' folder
 var MusicLibrary = require('../music_library/index');
@@ -90,28 +91,29 @@ DBImplementation.prototype.search = function(query) {
 DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 	var self = this;
 	return libQ.resolve().then(function() {
-		var uriInfo = DBImplementation.parseUri(uri);
-		console.log('DBImplementation.handleBrowseUri', uri, uriInfo);
-
-
-		var promise;
-		switch (uriInfo.protocol) {
-			case 'music-library':
-				promise = self.listFolders(uri);
-				break;
-
-			case 'artists':
-				promise = self.getArtists(uri);
-				break;
-
-			case 'albums':
-				promise = self.getAlbums(uri);
-				break;
-
-			default:
-				promise = libQ.reject('Unknown protocol: ' + uriInfo.protocol);
+		// fix: uri should always ends with '://'
+		if (uri.indexOf('://') < 0) {
+			uri += '://';
 		}
 
+		var protocolParts = uri.split('://', 2);
+		var protocol = protocolParts[0];
+		self.logger.info('DBImplementation.handleBrowseUri', uri, protocol);
+
+		var promise;
+		switch (protocol) {
+			case 'music-library':
+				promise = self.handleLibraryUri(uri);
+				break;
+			case 'artists':
+				promise = self.handleArtistsUri(uri);
+				break;
+			case 'albums':
+				promise = self.handleAlbumsUri(uri);
+				break;
+			default:
+				promise = libQ.reject('Unknown protocol: ' + protocol);
+		}
 		return promise;
 	}).fail(function(e) {
 		// TODO: caller doesn't log the error
@@ -161,7 +163,7 @@ DBImplementation.prototype.explodeUri = function(uri) {
  * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
-DBImplementation.prototype.listFolders = function(uri) {
+DBImplementation.prototype.handleLibraryUri = function(uri) {
 	var self = this;
 	var uriInfo = DBImplementation.parseUri(uri);
 
@@ -196,7 +198,7 @@ DBImplementation.prototype.listFolders = function(uri) {
  * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
-DBImplementation.prototype.getArtists = function(uri) {
+DBImplementation.prototype.handleArtistsUri = function(uri) {
 	var self = this;
 	var protocolParts = uri.split('://', 2);
 	var artistName = decodeURI(protocolParts[1]);
@@ -236,19 +238,33 @@ DBImplementation.prototype.getArtists = function(uri) {
 	});
 };
 
-
 /**
  * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
-DBImplementation.prototype.getAlbums = function(uri) {
+DBImplementation.prototype.handleAlbumsUri = function(uri) {
 	var self = this;
-	var uriInfo = DBImplementation.parseUri(uri);
+	var protocolParts = uri.split('://', 2);
+	var albumName = decodeURI(protocolParts[1]);
 
-	return this.library.getAlbums().then(function(artistArr) {
-		var items = artistArr.map(function(album) {
-			return DBImplementation.album2SearchResult(album.album);
+	var promise;
+	if (!albumName) {
+		// list all albums
+		promise = this.library.getAlbums().then(function(albumArr) {
+			return albumArr.map(function(album) {
+				return DBImplementation.album2SearchResult(album.album);
+			});
 		});
+	} else {
+		// list album tracks
+		promise = this.library.getByAlbum(albumName).then(function(trackArr) {
+			return trackArr.map(function(track) {
+				return DBImplementation.record2SearchResult(track);
+			});
+		});
+	}
+
+	return promise.then(function(items) {
 		return {
 			navigation: {
 				lists: [{
@@ -258,13 +274,14 @@ DBImplementation.prototype.getAlbums = function(uri) {
 					items: items
 				}],
 				prev: {
-					uri: ''
+					uri: albumName ? 'albums://' : ''
 				}
 			}
 		};
 
 	});
 };
+
 
 
 /**

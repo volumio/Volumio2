@@ -322,7 +322,6 @@ MusicLibrary.prototype.getByArtist = function(artistName) {
 	});
 };
 
-
 /**
  * @return {Promise<Array<{album:string}>>}
  */
@@ -330,6 +329,21 @@ MusicLibrary.prototype.getAlbums = function() {
 	var self = this;
 	return libQ.resolve().then(function() {
 		return self.sequelize.query('SELECT DISTINCT album FROM AudioMetadata', {type: Sequelize.QueryTypes.SELECT});
+	});
+};
+
+/**
+ * @param {string} albumName
+ * @return {Promise<Array<AudioMetadata>>}
+ */
+MusicLibrary.prototype.getByAlbum = function(albumName) {
+	var self = this;
+	return libQ.resolve().then(function() {
+		return self.model.AudioMetadata.findAll({
+			where: {
+				album: {[Sequelize.Op.eq]: albumName}
+			}
+		});
 	});
 };
 
