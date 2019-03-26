@@ -11,6 +11,11 @@ module.exports = MusicLibrary;
 // TODO: move to config?
 var ROOT = '/mnt';
 
+// On startup, the database are copied to LIBRARY_DB_TEMP and be accessed\written from there.
+// After each scanning routine has terminated, it's copied back to LIBRARY_DB.
+// This is to minimize sd card writes.
+var LIBRARY_DB = '/data/musiclibrary/library.db';
+var LIBRARY_DB_TEMP = '/tmp/library.db';
 
 var config = {
 	debounceTime: 1000,
@@ -39,14 +44,18 @@ function MusicLibrary(context) {
 
 	// initialize database
 	try {
-		fs.ensureDirSync('/data/musiclibrary/');
-	} catch (e) {
-		self.logger.error('Could not create Music Library database directory');
+		var stat = fs.statSync(LIBRARY_DB);
+		fs.copySync(LIBRARY_DB, LIBRARY_DB_TEMP);
+		self.logger.info('MusicLibrary: Database backup loaded');
+	}catch(e){
+		self.logger.info('MusicLibrary: No database backup');
 	}
+
+
 	this.sequelize = new Sequelize({
 		// logging: false,
 		dialect: 'sqlite',
-		storage: '/data/musiclibrary/library.db'
+		storage: LIBRARY_DB_TEMP
 	});
 
 	this.model = {};
@@ -135,7 +144,7 @@ function MusicLibrary(context) {
 		self.logger.info('MusicLibrary: remove all unaffected items');
 
 		// wait for debounceTime, so we make sure all records are saved/updated
-		setTimeout(function() {
+		return libQ.delay(config.debounceTime * 2).then(function() { // we multiply by 2 to make sure cache is processed
 			return self.model.AudioMetadata.destroy({
 				where: {
 					[Sequelize.Op.and]: {
@@ -145,14 +154,31 @@ function MusicLibrary(context) {
 						updatedAt: {[Sequelize.Op.lt]: self.scanStartedAt}
 					}
 				}
-			}).then(function(numDeleted) {
-				self.logger.info('MusicLibrary: removed all unaffected items:', numDeleted);
 			});
-		}, config.debounceTime * 2); // we multiply by 2 to make sure cache is processed
+		}).then(function(numDeleted) {
+			self.logger.info('MusicLibrary: removed all unaffected items:', numDeleted);
+			return self.backupDatabase();
+		});
 	}
 
 
 } // -
+
+
+/**
+ * @return {Promise<*>}
+ * @private
+ */
+MusicLibrary.prototype.backupDatabase = function() {
+	var self = this;
+	return libQ.nfcall(fs.ensureDir, path.dirname(LIBRARY_DB)).then(function(){
+		return libQ.nfcall(fs.copy, LIBRARY_DB_TEMP, LIBRARY_DB);
+	}).then(function(){
+		self.logger.info('MusicLibrary: Database backup done', LIBRARY_DB);
+	}).fail(function(err) {
+		self.logger.error('MusicLibrary: Database backup failed', err);
+	});
+};
 
 
 /**
@@ -317,8 +343,6 @@ MusicLibrary.prototype.searchTracks = function(searchStr) {
 		});
 	});
 };
-
-
 
 
 /**
