@@ -182,6 +182,17 @@ MusicLibrary.prototype.backupDatabase = function() {
 
 
 /**
+ * Rescan location and update missing files.
+ * Note: it doesn't update metadata for existed files
+ * @param {string} [location]
+ */
+MusicLibrary.prototype.update = function(location) {
+	this.fileScanner.addTarget(location);
+};
+
+
+
+/**
  * @param {string} location
  * @return {Promise<*>}
  * @private
@@ -272,27 +283,27 @@ MusicLibrary.prototype.addFile = function(location) {
 
 };
 
-
-/**
- * @param {string} searchStr
- * @return {Promise<AudioMetadata[]>}
- */
-MusicLibrary.prototype.searchAll = function(searchStr) {
-	var self = this;
-
-	return libQ.resolve().then(function() {
-		return self.model.AudioMetadata.findAll({
-			where: {
-				[Sequelize.Op.or]: {
-					title: {[Sequelize.Op.substring]: searchStr},
-					album: {[Sequelize.Op.substring]: searchStr},
-					artist: {[Sequelize.Op.substring]: searchStr}
-				}
-			},
-			raw: true
-		});
-	});
-};
+//
+// /**
+//  * @param {string} searchStr
+//  * @return {Promise<AudioMetadata[]>}
+//  */
+// MusicLibrary.prototype.searchAll = function(searchStr) {
+// 	var self = this;
+//
+// 	return libQ.resolve().then(function() {
+// 		return self.model.AudioMetadata.findAll({
+// 			where: {
+// 				[Sequelize.Op.or]: {
+// 					title: {[Sequelize.Op.substring]: searchStr},
+// 					album: {[Sequelize.Op.substring]: searchStr},
+// 					artist: {[Sequelize.Op.substring]: searchStr}
+// 				}
+// 			},
+// 			raw: true
+// 		});
+// 	});
+// };
 
 
 /**
@@ -426,6 +437,49 @@ MusicLibrary.prototype.getByAlbum = function(albumName) {
 };
 
 
+
+/**
+ * @param {string} [searchString]
+ * @return {Promise<Array<string>>}
+ */
+MusicLibrary.prototype.searchGenres = function(searchString) {
+	var self = this;
+	return libQ.resolve().then(function() {
+		// 'distinct'
+		return self.model.AudioMetadata.findAll({
+			attributes: [
+				[Sequelize.fn('DISTINCT', Sequelize.col('genre')), 'genre']
+			],
+			where: searchString ? {
+				genre: {[Sequelize.Op.substring]: searchString}
+			} : {},
+			raw: true
+		}).then(function(records) {
+			return records.map(function(record) {
+				return record.genre;
+			});
+		});
+	});
+};
+
+/**
+ * @param {string} genreName
+ * @return {Promise<Array<AudioMetadata>>}
+ */
+MusicLibrary.prototype.getByGenre = function(genreName) {
+	var self = this;
+	return libQ.resolve().then(function() {
+		return self.model.AudioMetadata.findAll({
+			where: {
+				genre: {[Sequelize.Op.eq]: genreName}
+			},
+			raw: true
+		});
+	});
+};
+
+
+
 /**
  * Get folder content
  * returns:
@@ -481,12 +535,4 @@ MusicLibrary.prototype.lsFolder = function(location) {
 	});
 };
 
-
-/**
- * @param {string} [location]
- * @implement
- */
-MusicLibrary.prototype.update = function(location) {
-	this.fileScanner.addTarget(location);
-};
 

@@ -31,6 +31,8 @@
  * @property {string} value
  * @property {'any'} [type]
  * @property {string} [uri]
+ *
+ * TODO: @property {string} [sortBy]
  */
 
 

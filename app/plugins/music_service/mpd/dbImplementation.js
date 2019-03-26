@@ -21,6 +21,7 @@ var PLUGIN_NAME = 'music_library';
 var PROTOCOL_LIBRARY = 'music-library';
 var PROTOCOL_ARTISTS = 'artists';
 var PROTOCOL_ALBUMS = 'albums';
+var PROTOCOL_GENRES = 'genres';
 
 /**
  * @class
@@ -187,6 +188,9 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 			case PROTOCOL_ALBUMS:
 				promise = self.handleAlbumsUri(uri);
 				break;
+			case PROTOCOL_GENRES:
+				promise = self.handleGenresUri(uri);
+				break;
 			default:
 				promise = libQ.reject('Unknown protocol: ' + protocol);
 		}
@@ -277,7 +281,7 @@ DBImplementation.prototype.handleLibraryUri = function(uri) {
 DBImplementation.prototype.handleArtistsUri = function(uri) {
 	var self = this;
 	var protocolParts = uri.split('://', 2);
-	var artistName = decodeURI(protocolParts[1]);
+	var artistName = decodeURIComponent(protocolParts[1]);
 
 	var promise;
 	if (!artistName) {
@@ -321,7 +325,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 DBImplementation.prototype.handleAlbumsUri = function(uri) {
 	var self = this;
 	var protocolParts = uri.split('://', 2);
-	var albumName = decodeURI(protocolParts[1]);
+	var albumName = decodeURIComponent(protocolParts[1]);
 
 	var promise;
 	if (!albumName) {
@@ -351,6 +355,54 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 				}],
 				prev: {
 					uri: albumName ? PROTOCOL_ALBUMS + '://' : ''
+				}
+			}
+		};
+
+	});
+};
+
+/**
+ * @param {string} uri
+ * @return {Promise<BrowseResult>}
+ *
+ * @example uri:
+ *   genres://Genre/Artist/
+ */
+DBImplementation.prototype.handleGenresUri = function(uri) {
+	var self = this;
+	var protocolParts = uri.split('://', 2);
+	var genreComponents = decodeURIComponent(protocolParts[1]).split('/');
+	var genreName = genreComponents[0];
+
+	var promise;
+	if (!genreName) {
+		// list all albums
+		promise = self.library.searchGenres().then(function(genresArr) {
+			return genresArr.map(function(genre) {
+				return DBImplementation.genre2SearchResult(genre);
+			});
+		});
+	} else {
+		// list tracks by genre
+		promise = self.library.getByGenre(genreName).then(function(trackArr) {
+			return trackArr.map(function(track) {
+				return DBImplementation.track2SearchResult(track);
+			});
+		});
+	}
+
+	return promise.then(function(items) {
+		return {
+			navigation: {
+				lists: [{
+					availableListViews: [
+						'list'
+					],
+					items: items
+				}],
+				prev: {
+					uri: genreName ? PROTOCOL_GENRES + '://' : ''
 				}
 			}
 		};
@@ -461,7 +513,7 @@ DBImplementation.artist2SearchResult = function(artistName) {
 		title: artistName,
 		albumart: '',	// TODO: album art for an artist
 		// albumart: self.getAlbumArt({artist: artist},undefined,'users')
-		uri: 'artists://' + encodeURI(artistName)
+		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName)
 	};
 };
 
@@ -478,28 +530,28 @@ DBImplementation.album2SearchResult = function(albumName) {
 		title: albumName,
 		albumart: '',	// TODO: album art for an album
 		// albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
-		uri: 'albums://' + encodeURI(albumName)
+		uri: PROTOCOL_ALBUMS + '://' + encodeURIComponent(albumName)
 	};
 };
 
-//
-// if (uri === 'music-library') {
-// 	switch(path) {
-// 		case 'INTERNAL':
-// 			var albumart = self.getAlbumArt('', '','microchip');
-// 			break;
-// 		case 'NAS':
-// 			var albumart = self.getAlbumArt('', '','server');
-// 			break;
-// 		case 'USB':
-// 			var albumart = self.getAlbumArt('', '','usb');
-// 			break;
-// 		default:
-// 			var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
-// 	}
-// } else {
-// 	var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
-// }
+
+/**
+ * @param {string} genreName
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.genre2SearchResult = function(genreName) {
+
+	return {
+		service: PLUGIN_NAME,
+		type: 'folder',
+		title: genreName,
+		albumart: '',	// TODO: album art for genre
+		// albumart: self.getAlbumArt({},undefined,'fa-tags');
+		uri: PROTOCOL_GENRES + '://' + encodeURIComponent(genreName)
+	};
+};
 
 
 /**
@@ -533,12 +585,30 @@ DBImplementation.folder2SearchResult = function(location) {
 		service: PLUGIN_NAME,
 		type: dirtype,
 		title: path.basename(location),
-		albumart: '',	// TODO: album art
+		albumart: '',	// TODO: album art for a folder
 		icon: diricon,
 		uri: DBImplementation.getUri({location: location})
 	};
 };
 
+//
+// if (uri === 'music-library') {
+// 	switch(path) {
+// 		case 'INTERNAL':
+// 			var albumart = self.getAlbumArt('', '','microchip');
+// 			break;
+// 		case 'NAS':
+// 			var albumart = self.getAlbumArt('', '','server');
+// 			break;
+// 		case 'USB':
+// 			var albumart = self.getAlbumArt('', '','usb');
+// 			break;
+// 		default:
+// 			var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+// 	}
+// } else {
+// 	var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+// }
 
 
 
