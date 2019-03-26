@@ -372,26 +372,3 @@ MusicLibrary.prototype.update = function(location) {
 	this.fileScanner.addTarget(location);
 };
 
-
-MusicLibrary.prototype.getAlbumArt = function(data, path, icon) {
-
-	if (this.albumArtPlugin == undefined) {
-		//initialization, skipped from second call
-		this.albumArtPlugin = this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
-	}
-
-	if (this.albumArtPlugin)
-		return this.albumArtPlugin.getAlbumArt(data, path, icon);
-	else {
-		return '/albumart';
-	}
-};
-
-MusicLibrary.prototype.getParentFolder = function(file) {
-	var index = file.lastIndexOf('/');
-
-	if (index > -1) {
-		return file.substring(0, index);
-	} else return '';
-};
-

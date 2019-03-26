@@ -30,6 +30,8 @@ function DBImplementation(context) {
 	this.logger = this.context.logger;
 
 
+	//initialization, skipped from second call
+	this.albumArtPlugin = this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
 	this.library = new MusicLibrary(context);
 }
 
@@ -136,7 +138,7 @@ DBImplementation.prototype.explodeUri = function(uri) {
 			albumart: self.getAlbumArt({
 				artist: track.artist,
 				album: track.album
-			}, self.getParentFolder('/mnt/' + track.location.substr(1)), 'fa-music'),
+			}, path.dirname(track.location), 'fa-music'),
 			duration: track.format.duration,
 			samplerate: track.samplerate,
 			bitdepth: track.format.bitdepth,
@@ -218,6 +220,23 @@ DBImplementation.prototype.updateDb = function(uri) {
 
 
 /**
+ * @param {{artist: string, album?:string, size?:string}} data
+ * @param {string} path  path to album art folder to scan
+ * @param {string} icon  icon to show
+ * @return {string}
+ * @private
+ */
+DBImplementation.prototype.getAlbumArt = function(data, path, icon) {
+	if (this.albumArtPlugin)
+		return this.albumArtPlugin.getAlbumArt(data, path, icon);
+	else {
+		return '/albumart';
+	}
+};
+
+
+
+/**
  * Get track uri
  * @param {{location:string, trackOffset?:number}} track
  * @return {string}
@@ -262,8 +281,8 @@ DBImplementation.parseUri = function(uri) {
  */
 DBImplementation.record2SearchResult = function(record) {
 	return {
-		// service: 'music-library',
-		service: PLUGIN_NAME,
+		service: 'mpd',
+		// service: PLUGIN_NAME,
 		type: 'song',
 		title: record.title || '',
 		artist: record.artist || '',
@@ -330,3 +349,7 @@ DBImplementation.folder2SearchResult = function(location) {
 		uri: DBImplementation.getUri({location: location})
 	};
 };
+
+
+
+

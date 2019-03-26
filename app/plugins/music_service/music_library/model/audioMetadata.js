@@ -80,6 +80,7 @@ module.exports = function(sequelize, DataTypes) {
 
 		/**
 		 * file location
+		 * @type {string}
 		 */
 		location: {type: DataTypes.TEXT},
 
