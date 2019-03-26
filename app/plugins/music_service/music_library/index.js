@@ -12,11 +12,6 @@ module.exports = MusicLibrary;
 var ROOT = '/mnt';
 
 
-// TODO: move all 'uri' stuff out in other module
-var PLUGIN_PROTOCOL = 'music-library';
-var PLUGIN_NAME = 'music_library';
-
-
 var config = {
 	debounceTime: 1000,
 	debounceSize: 20
@@ -74,7 +69,7 @@ function MusicLibrary(context) {
 			}
 		});
 
-		// TODO: don't scan all library on start
+		//
 		self.scanPath = ROOT;
 		self.fileScanner.addTarget(ROOT);
 
@@ -105,11 +100,11 @@ function MusicLibrary(context) {
 		}
 
 		if (err.code == 'ENOENT') {
-			console.log('MusicLibrary: remove files from library:', location);
+			self.logger.info('MusicLibrary: remove files from library:', location);
 			// remove content from the library
 			return self.removeFolder(location);
 		} else {
-			console.warn(err);
+			self.logger.warn(err);
 		}
 	}
 
@@ -137,7 +132,7 @@ function MusicLibrary(context) {
 	 */
 	function onScanFinished() {
 		// remove all records which are not found during scan
-		console.log('MusicLibrary: remove all unaffected items');
+		self.logger.info('MusicLibrary: remove all unaffected items');
 
 		// wait for debounceTime, so we make sure all records are saved/updated
 		setTimeout(function() {
@@ -151,7 +146,7 @@ function MusicLibrary(context) {
 					}
 				}
 			}).then(function(numDeleted) {
-				console.log('MusicLibrary: removed all unaffected items:', numDeleted);
+				self.logger.info('MusicLibrary: removed all unaffected items:', numDeleted);
 			});
 		}, config.debounceTime * 2); // we multiply by 2 to make sure cache is processed
 	}
@@ -195,7 +190,7 @@ MusicLibrary.prototype.addFile = function(location) {
 			return utils.iterateArrayAsync(metadataArr, updateMetadata);
 		})
 		.fail(function(err) {
-			console.error(err);
+			self.logger.error(err);
 		});
 
 
@@ -205,7 +200,7 @@ MusicLibrary.prototype.addFile = function(location) {
 	 * @private
 	 */
 	function updateMetadata(metadata) {
-		console.log('MusicLibrary: track found: %s - %s', metadata.album, metadata.title);
+		self.logger.info('MusicLibrary: track found: %s - %s', metadata.album, metadata.title);
 
 		metadata.trackOffset = (typeof metadata.trackOffset == 'undefined') ? null : metadata.trackOffset;
 		return self.model.AudioMetadata.findOne({
@@ -236,7 +231,7 @@ MusicLibrary.prototype.addFile = function(location) {
 
 	/**
 	 * Update 'updatedAt' field value.
-	 * That's need to make sure file is stil exists and woudn't be removed by when scan is finished.
+	 * That's need to make sure file is stil exists and wouldn't be removed by when scan is finished.
 	 * @see {@link onScanFinished}
 	 *
 	 * @param {Array<number>} ids
@@ -253,73 +248,23 @@ MusicLibrary.prototype.addFile = function(location) {
 
 
 /**
- * @param {SearchQuery} query
- * @return {Promise<SearchResult[]>}
+ * @param {string} searchStr
+ * @return {Promise<AudioMetadata[]>}
  */
-MusicLibrary.prototype.search = function(query) {
+MusicLibrary.prototype.searchAll = function(searchStr) {
 	var self = this;
-
-	console.log('MusicLibrary.search', query);
-	console.time('MusicLibrary.search');
-	var safeValue = query.value.replace(/"/g, '\\"');
 
 	return libQ.resolve().then(function() {
 		return self.model.AudioMetadata.findAll({
 			where: {
 				[Sequelize.Op.or]: {
-					title: {[Sequelize.Op.substring]: safeValue},
-					album: {[Sequelize.Op.substring]: safeValue},
-					artist: {[Sequelize.Op.substring]: safeValue}
+					title: {[Sequelize.Op.substring]: searchStr},
+					album: {[Sequelize.Op.substring]: searchStr},
+					artist: {[Sequelize.Op.substring]: searchStr}
 				}
 			}
 		});
-	}).then(function(records) {
-		return records.map(MusicLibrary.record2SearchResult);
-	}).then(function(tracks) {
-		console.log('MusicLibrary.search: found %s track(s)', tracks.length);
-
-		var trackdesc = self.commandRouter.getI18nString(tracks.length > 1 ? 'COMMON.TRACKS' : 'COMMON.TRACK');
-		var title = self.commandRouter.getI18nString('COMMON.FOUND');
-		return [{
-			'title': title + ' ' + tracks.length + ' ' + trackdesc + ' \'' + query.value + '\'',
-			'availableListViews': [
-				'list'
-			],
-			'items': tracks
-		}];
-
-	}).then(function(searchResult) {
-		console.timeEnd('MusicLibrary.search');
-		return searchResult;
-	}).fail(function(e) {
-		console.error(e);
-		throw e;
-		// TODO: errors in promise are not printed in console =(
 	});
-};
-
-
-/**
- * @param {SearchQuery} query
- */
-MusicLibrary.prototype.searchSong = function(query) {
-	// TODO: search songs
-};
-
-
-/**
- * @param {SearchQuery} query
- */
-MusicLibrary.prototype.searchArtist = function(query) {
-	// TODO: search artists
-};
-
-
-/**
- * @param {SearchQuery} query
- */
-MusicLibrary.prototype.searchAlbum = function(query) {
-	// TODO: search albums
 };
 
 
@@ -338,75 +283,16 @@ MusicLibrary.prototype.isScanning = function() {
  * @return {Promise<AudioMetadata>}
  */
 MusicLibrary.prototype.getTrack = function(location, trackOffset) {
+	var self = this;
 	trackOffset = typeof trackOffset == 'undefined' ? null : trackOffset;
-	return this.model.AudioMetadata.findOne({
-		where: {
-			location: location,
-			trackOffset: trackOffset
-		}
-	});
-};
-
-
-/**
- * @return {Promise<TrackInfo>}
- * @implement playMusic
- */
-MusicLibrary.prototype.explodeUri = function(uri) {
-	var self = this;
-	var trackInfo = MusicLibrary.parseUri(uri);
-	return this.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
-
-		var result = {
-			uri: track.location.substr(1), // mpd expects absolute path without first '/'
-			service: 'mpd',
-			name: track.title,
-			artist: track.artist,
-			album: track.album,
-			type: 'track',
-			tracknumber: track.tracknumber,
-			albumart: self.getAlbumArt({
-				artist: track.artist,
-				album: track.album
-			}, self.getParentFolder('/mnt/' + track.location.substr(1)), 'fa-music'),
-			duration: track.format.duration,
-			samplerate: track.samplerate,
-			bitdepth: track.format.bitdepth,
-			trackType: track.location.split('.').pop()
-		};
-
-		return [result];
-	});
-};
-
-
-/**
- *
- * @param {string} uri
- * @return {Promise<BrowseResult>}
- * @implement
- */
-MusicLibrary.prototype.handleBrowseUri = function(uri) {
-	var self = this;
-	var info = MusicLibrary.parseUri(uri);
 
 	return libQ.resolve().then(function() {
-		return self.lsFolder(info.location);
-	}).then(function(items) {
-		var isRoot = info.location == ROOT;
-		return {
-			navigation: {
-				lists: [{
-					availableListViews: [
-						'list', 'grid'
-					],
-					items: items
-				}],
-				prev: {
-					uri: isRoot ? '' : uri.substring(0, uri.lastIndexOf(path.sep))
-				}
+		return self.model.AudioMetadata.findOne({
+			where: {
+				location: location,
+				trackOffset: trackOffset
 			}
-		};
+		});
 	});
 };
 
@@ -417,16 +303,19 @@ MusicLibrary.prototype.handleBrowseUri = function(uri) {
 MusicLibrary.prototype.getArtists = function() {
 	var self = this;
 	return libQ.resolve().then(function() {
-		return self.sequelize.query('SELECT DISTINCT artist FROM AudioMetadata', { type: Sequelize.QueryTypes.SELECT});
+		return self.sequelize.query('SELECT DISTINCT artist FROM AudioMetadata', {type: Sequelize.QueryTypes.SELECT});
 	});
 };
 
 
-
 /**
+ * Get folder content
+ * returns:
+ *  - for file entry: {type: 'file', data:AudioMetadata}
+ *  - for folder entry: {type: 'folder', data:string} where 'data'data is an absolute folder path
+ *
  * @param {string} location
- * @return {Promise<AudioMetadata>}
- * @private
+ * @return {Promise<Array<{type: 'file'|'folder', data:AudioMetadata|string}>>}
  */
 MusicLibrary.prototype.lsFolder = function(location) {
 	var self = this;
@@ -444,7 +333,7 @@ MusicLibrary.prototype.lsFolder = function(location) {
 
 				return self.getTrack(fullname).then(function(record) {
 					if (record) {
-						return MusicLibrary.record2SearchResult(record);
+						return {type: 'file', data: record};
 					}
 					// else - ignore it
 				});
@@ -455,135 +344,34 @@ MusicLibrary.prototype.lsFolder = function(location) {
 				if (isRoot) {
 					return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
 						if (folderEntries.length > 0) {
-							return MusicLibrary.folder2SearchResult(fullname);
+							return {type: 'folder', data: fullname};
 						} else {
 							// return nothing = don't show it
-							console.log('MusicLibrary.lsFolder empty folder', fullname);
+							self.logger.info('MusicLibrary.lsFolder empty folder', fullname);
 						}
 					});
 				} else {
-					return MusicLibrary.folder2SearchResult(fullname);
+					return {type: 'folder', data: fullname};
 				}
 
 			} else {
-				console.log('MusicLibrary.lsFolder unknown entry type', fullname);
+				self.logger.info('MusicLibrary.lsFolder unknown entry type', fullname);
 			}
 			// ignore all other types
 
 		});
-	}).fail(function(e) {
-		// TODO: caller doesn't log the error
-		console.error(e);
-		throw e;
 	});
 };
 
 
 /**
- * @param {string} [uri]
+ * @param {string} [location]
  * @implement
  */
-MusicLibrary.prototype.updateDb = function(uri) {
-	uri = uri || (PLUGIN_PROTOCOL + '://');
-	var info = MusicLibrary.parseUri(uri);
-	console.log('updateDb', info.location);
-
-	this.scanPath = info.location;
-	this.fileScanner.addTarget(info.location);
+MusicLibrary.prototype.update = function(location) {
+	this.fileScanner.addTarget(location);
 };
 
-
-/**
- * Get track uri
- * @param {{location:string, trackOffset?:number}} track
- * @return {string}
- * @private
- * @static
- */
-MusicLibrary.getUri = function(track) {
-	var params = (track.trackOffset !== null && track.trackOffset !== undefined) ? 'trackoffset=' + track.trackOffset : null;
-	return track.location.replace(ROOT, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
-};
-
-/**
- * Parse URI
- *
- * Note: the following uri are valid:
- *  1. 'root' url: 'music-library'
- *  2. non-'root' url: 'music-library://USB/some/folder'
- * @param {string} uri
- * @return {{protocol:string, location:string, trackOffset:number}} - primary key for AudioMetadata
- */
-MusicLibrary.parseUri = function(uri) {
-	var protocolParts = uri.split('://', 2);
-	var protocol = protocolParts[0];
-
-	var queryParts = (protocolParts[1] || '').split('?', 2);
-	var location = protocol == PLUGIN_PROTOCOL ? path.join(ROOT, queryParts[0] || '') : queryParts[0] || '';
-
-	var params = utils.parseQueryParams(queryParts[1] || '');
-	return {
-		protocol: protocol,
-		location: location,
-		trackOffset: params.trackoffset
-	};
-};
-
-/**
- * @param {AudioMetadata} record
- * @return {SearchResultItem}
- * @private
- */
-MusicLibrary.record2SearchResult = function(record) {
-	return {
-		// service: 'music-library',
-		service: PLUGIN_NAME,
-		type: 'song',
-		title: record.title || '',
-		artist: record.artist || '',
-		album: record.album || '',
-		albumart: '',	// TODO: album art
-		icon: 'fa fa-music',
-		uri: MusicLibrary.getUri(record)
-	};
-};
-
-
-/**
- * @param {string} location
- * @return {SearchResultItem}
- * @private
- */
-MusicLibrary.folder2SearchResult = function(location) {
-
-	// '/mnt/USB/folder1/folder2/..' to 'USB'
-	var rootSubfolder = location.replace(ROOT + path.sep, '');
-	rootSubfolder = rootSubfolder.split(path.sep, 2)[0];
-
-	var dirtype, diricon;
-	switch (rootSubfolder) {
-		case 'USB':
-			dirtype = 'remdisk';
-			diricon = 'fa fa-usb';
-			break;
-		case 'INTERNAL':
-			dirtype = 'internal-folder';
-			diricon = 'fa fa-folder-open-o';
-			break;
-		default:
-			dirtype = 'folder';
-			diricon = 'fa fa-folder-open-o';
-	}
-
-	return {
-		service: PLUGIN_NAME,
-		type: dirtype,
-		title: path.basename(location),
-		albumart: '',	// TODO: album art
-		icon: diricon,
-		uri: MusicLibrary.getUri({location: location})
-	};
-};
 
 MusicLibrary.prototype.getAlbumArt = function(data, path, icon) {
 
@@ -606,23 +394,4 @@ MusicLibrary.prototype.getParentFolder = function(file) {
 		return file.substring(0, index);
 	} else return '';
 };
-
-//
-// if (uri === 'music-library') {
-// 	switch(path) {
-// 		case 'INTERNAL':
-// 			var albumart = self.getAlbumArt('', '','microchip');
-// 			break;
-// 		case 'NAS':
-// 			var albumart = self.getAlbumArt('', '','server');
-// 			break;
-// 		case 'USB':
-// 			var albumart = self.getAlbumArt('', '','usb');
-// 			break;
-// 		default:
-// 			var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
-// 	}
-// } else {
-// 	var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
-// }
 

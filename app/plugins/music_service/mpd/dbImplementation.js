@@ -1,74 +1,190 @@
-
-var libQ= require('kew');
+var libQ = require('kew');
+var path = require('path');
 
 // TODO: I think we can keep this module inside 'mpd' folder
 var MusicLibrary = require('../music_library/index');
+var utils = require('../music_library/lib/utils');
 
 module.exports = DBImplementation;
 
 
-
 /////////////////////////////
 
+// TODO: move to config?
+var ROOT = '/mnt';
 
+
+// TODO: move all 'uri' stuff out in other module
+var PLUGIN_PROTOCOL = 'music-library';
+var PLUGIN_NAME = 'music_library';
+
+
+/**
+ * @class
+ */
 function DBImplementation(context) {
+
+	// Save a reference to the parent commandRouter
+	this.context = context;
+	this.commandRouter = this.context.coreCommand;
+	this.logger = this.context.logger;
+
+
 	this.library = new MusicLibrary(context);
 }
 
+
+/**
+ * @param {SearchQuery} query
+ * @return {Promise<SearchResult[]>}
+ * @implement plugin api
+ */
 DBImplementation.prototype.search = function(query) {
-	return this.library.search(query);
+	var self = this;
+
+	self.logger.info('DBImplementation.search', query);
+	console.time('DBImplementation.search');
+	var safeValue = query.value.replace(/"/g, '\\"');
+
+	return this.library.searchAll(safeValue).then(function(records) {
+		return records.map(DBImplementation.record2SearchResult);
+	}).then(function(tracks) {
+		console.log('DBImplementation.search: found %s track(s)', tracks.length);
+
+		var trackdesc = self.commandRouter.getI18nString(tracks.length > 1 ? 'COMMON.TRACKS' : 'COMMON.TRACK');
+		var title = self.commandRouter.getI18nString('COMMON.FOUND');
+		return [{
+			'title': title + ' ' + tracks.length + ' ' + trackdesc + ' \'' + query.value + '\'',
+			'availableListViews': [
+				'list'
+			],
+			'items': tracks
+		}];
+
+	}).then(function(searchResult) {
+		console.timeEnd('DBImplementation.search');
+		return searchResult;
+	}).fail(function(e) {
+		// TODO: caller doesn't log the error
+		console.error(e);
+		throw e;
+	});
 };
 
-DBImplementation.prototype.handleBrowseUri = function(uri, previousUri){
-	var uriInfo = MusicLibrary.parseUri(uri);
-	console.log('DBImplementation.handleBrowseUri', uri, uriInfo);
 
-	/**
-	 * Shall handle uris:
-	 * albums://
-	 * aritsts://
-	 * playlists://
-	 * genres://
-	 * mounts://<MOUNT_NAME>
-	 */
+/**
+ *
+ * Shall handle uris:
+ * albums://
+ * aritsts://
+ * playlists://
+ * genres://
+ * mounts://<MOUNT_NAME>
+ *
+ * @param {string} uri
+ * @param {string} [previousUri]
+ * @return {!Promise<BrowseResult>}
+ * @implement plugin api
+ */
+DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
+	var self = this;
+	return libQ.resolve().then(function() {
+		var uriInfo = DBImplementation.parseUri(uri);
+		console.log('DBImplementation.handleBrowseUri', uri, uriInfo);
 
-	var promise;
-	switch (uriInfo.protocol) {
-		case 'music-library':
-			promise = this.listFolders(uri);
-			break;
 
-		case 'artists':
-			promise = this.getArtists();
-			break;
 
-		default:
-			promise = libQ.reject('Unknown protocol: ' + uriInfo.protocol);
-	}
+		var promise;
+		switch (uriInfo.protocol) {
+			case 'music-library':
+				promise = self.listFolders(uriInfo.location);
+				break;
 
-	return promise.fail(function(e) {
+			case 'artists':
+				promise = self.getArtists();
+				break;
+
+			default:
+				promise = libQ.reject('Unknown protocol: ' + uriInfo.protocol);
+		}
+
+		return promise;
+	}).fail(function(e) {
+		// TODO: caller doesn't log the error
 		console.error(e);
 		throw e;
 	});
 };
 
 /**
- * @param {string} uri
  * @return {Promise<TrackInfo>}
+ * @implement plugin api
  */
 DBImplementation.prototype.explodeUri = function(uri) {
-	return this.library.explodeUri(uri);
+	var self = this;
+	var trackInfo = DBImplementation.parseUri(uri);
+	return this.library.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
+
+		var result = {
+			uri: track.location.substr(1), // mpd expects absolute path without first '/'
+			service: 'mpd',
+			name: track.title,
+			artist: track.artist,
+			album: track.album,
+			type: 'track',
+			tracknumber: track.tracknumber,
+			albumart: self.getAlbumArt({
+				artist: track.artist,
+				album: track.album
+			}, self.getParentFolder('/mnt/' + track.location.substr(1)), 'fa-music'),
+			duration: track.format.duration,
+			samplerate: track.samplerate,
+			bitdepth: track.format.bitdepth,
+			trackType: track.location.split('.').pop()
+		};
+
+		return [result];
+	}).fail(function(e) {
+		// TODO: caller doesn't log the error
+		console.error(e);
+		throw e;
+	});
 };
 
 
 /**
- * @param {string} uri
+ *
+ * @param {string} location
  * @return {Promise<BrowseResult>}
  */
-DBImplementation.prototype.listFolders = function(uri) {
-	return this.library.handleBrowseUri(uri);
-};
+DBImplementation.prototype.listFolders = function(location) {
+	var self = this;
 
+	return this.library.lsFolder(location).then(function(folderEntries) {
+		var items = folderEntries.map(function(entry) {
+			if (entry.type == 'file') {
+				return DBImplementation.record2SearchResult(entry.data);
+			} else if (entry.type == 'folder') {
+				return DBImplementation.folder2SearchResult(entry.data);
+			}
+		});
+
+		var isRoot = location == ROOT;
+		return {
+			navigation: {
+				lists: [{
+					availableListViews: [
+						'list', 'grid'
+					],
+					items: items
+				}],
+				prev: {
+					uri: isRoot ? '' : location.substring(0, location.lastIndexOf(path.sep))
+				}
+			}
+		};
+	});
+};
 
 
 /**
@@ -76,8 +192,141 @@ DBImplementation.prototype.listFolders = function(uri) {
  */
 DBImplementation.prototype.getArtists = function() {
 	// TODO: incomplete: wrong data format
-	return this.library.getArtists().then(function(data){
+	return this.library.getArtists().then(function(data) {
 		console.log('DBImplementation TODO: getArtists', data);
-		return data
+		return data;
+	}).fail(function(e) {
+		// TODO: caller doesn't log the error
+		console.error(e);
+		throw e;
 	});
+};
+
+
+/**
+ * @param {string} [uri]
+ * @return {void}
+ * @implement
+ */
+DBImplementation.prototype.updateDb = function(uri) {
+	uri = uri || (PLUGIN_PROTOCOL + '://');
+	var info = DBImplementation.parseUri(uri);
+	this.logger.info('DBImplementation.updateDb', info.location);
+
+	this.library.update(info.location);
+};
+
+
+/**
+ * Get track uri
+ * @param {{location:string, trackOffset?:number}} track
+ * @return {string}
+ * @private
+ * @static
+ */
+DBImplementation.getUri = function(track) {
+	var params = (track.trackOffset !== null && track.trackOffset !== undefined) ? 'trackoffset=' + track.trackOffset : null;
+	return track.location.replace(ROOT, PLUGIN_PROTOCOL + '://') + (params ? '?' + params : '');
+};
+
+/**
+ * Parse URI
+ *
+ * Note: the following uri are valid:
+ *  1. 'root' url: 'music-library'
+ *  2. non-'root' url: 'music-library://USB/some/folder'
+ * @param {string} uri
+ * @return {{protocol:string, location:string, trackOffset:number}} - primary key for AudioMetadata
+ * @static
+ */
+DBImplementation.parseUri = function(uri) {
+	var protocolParts = uri.split('://', 2);
+	var protocol = protocolParts[0];
+
+	var queryParts = (protocolParts[1] || '').split('?', 2);
+	var location = protocol == PLUGIN_PROTOCOL ? path.join(ROOT, queryParts[0] || '') : queryParts[0] || '';
+
+	var params = utils.parseQueryParams(queryParts[1] || '');
+	return {
+		protocol: protocol,
+		location: location,
+		trackOffset: params.trackoffset
+	};
+};
+
+/**
+ * @param {AudioMetadata} record
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.record2SearchResult = function(record) {
+	return {
+		// service: 'music-library',
+		service: PLUGIN_NAME,
+		type: 'song',
+		title: record.title || '',
+		artist: record.artist || '',
+		album: record.album || '',
+		albumart: '',	// TODO: album art for a folder
+		icon: 'fa fa-music',
+		uri: DBImplementation.getUri(record)
+	};
+};
+
+//
+// if (uri === 'music-library') {
+// 	switch(path) {
+// 		case 'INTERNAL':
+// 			var albumart = self.getAlbumArt('', '','microchip');
+// 			break;
+// 		case 'NAS':
+// 			var albumart = self.getAlbumArt('', '','server');
+// 			break;
+// 		case 'USB':
+// 			var albumart = self.getAlbumArt('', '','usb');
+// 			break;
+// 		default:
+// 			var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+// 	}
+// } else {
+// 	var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+// }
+
+
+/**
+ * @param {string} location
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.folder2SearchResult = function(location) {
+
+	// '/mnt/USB/folder1/folder2/..' to 'USB'
+	var rootSubfolder = location.replace(ROOT + path.sep, '');
+	rootSubfolder = rootSubfolder.split(path.sep, 2)[0];
+
+	var dirtype, diricon;
+	switch (rootSubfolder) {
+		case 'USB':
+			dirtype = 'remdisk';
+			diricon = 'fa fa-usb';
+			break;
+		case 'INTERNAL':
+			dirtype = 'internal-folder';
+			diricon = 'fa fa-folder-open-o';
+			break;
+		default:
+			dirtype = 'folder';
+			diricon = 'fa fa-folder-open-o';
+	}
+
+	return {
+		service: PLUGIN_NAME,
+		type: dirtype,
+		title: path.basename(location),
+		albumart: '',	// TODO: album art
+		icon: diricon,
+		uri: DBImplementation.getUri({location: location})
+	};
 };

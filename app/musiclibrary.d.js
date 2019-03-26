@@ -35,8 +35,10 @@
 
 /**
  * @typedef {object} TrackInfo
+ * @description Track info used by mpd to start playing sound
+ *
  * @property {string} uri
- * @property {string} service
+ * @property {'mpd'} service
  * @property {string} name	 	- track title
  * @property {string} artist	- track artist
  * @property {string} album	 	- track album
