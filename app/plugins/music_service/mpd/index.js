@@ -59,6 +59,9 @@ ControllerMpd.prototype.setupImplementation = function() {
 		ControllerMpd.prototype.search = impl.search.bind(impl);
 		ControllerMpd.prototype.handleBrowseUri = impl.handleBrowseUri.bind(impl);
 		ControllerMpd.prototype.explodeUri = impl.explodeUri.bind(impl);
+
+		// override
+		ControllerMpd.prototype.updateDb = impl.updateDb.bind(impl);
 	}
 };
 

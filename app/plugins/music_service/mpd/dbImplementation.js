@@ -95,7 +95,6 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 		console.log('DBImplementation.handleBrowseUri', uri, uriInfo);
 
 
-
 		var promise;
 		switch (uriInfo.protocol) {
 			case 'music-library':
@@ -181,7 +180,7 @@ DBImplementation.prototype.listFolders = function(location) {
 					items: items
 				}],
 				prev: {
-					uri: isRoot ? '' : location.substring(0, location.lastIndexOf(path.sep))
+					uri: isRoot ? '' : DBImplementation.getUri({location: location.substring(0, location.lastIndexOf(path.sep))})
 				}
 			}
 		};
@@ -243,7 +242,6 @@ DBImplementation.prototype.getAlbumArt = function(data, path, icon) {
 		return '/albumart';
 	}
 };
-
 
 
 /**
@@ -316,7 +314,7 @@ DBImplementation.artist2SearchResult = function(artistName) {
 		type: 'folder',
 		title: artistName,
 		albumart: '',	// TODO: album art for an artist
-		uri: 'artists://'+encodeURI(artistName)
+		uri: 'artists://' + encodeURI(artistName)
 	};
 };
 
