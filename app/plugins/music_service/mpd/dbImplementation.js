@@ -101,7 +101,11 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 				break;
 
 			case 'artists':
-				promise = self.getArtists();
+				promise = self.getArtists(uri);
+				break;
+
+			case 'albums':
+				promise = self.getAlbums(uri);
 				break;
 
 			default:
@@ -189,12 +193,61 @@ DBImplementation.prototype.listFolders = function(uri) {
 
 
 /**
+ * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
-DBImplementation.prototype.getArtists = function() {
-	return this.library.getArtists().then(function(artistArr) {
-		var items = artistArr.map(function(artist) {
-			return DBImplementation.artist2SearchResult(artist.artist);
+DBImplementation.prototype.getArtists = function(uri) {
+	var self = this;
+	var protocolParts = uri.split('://', 2);
+	var artistName = decodeURI(protocolParts[1]);
+
+	var promise;
+	if (!artistName) {
+		// list all artists
+		promise = this.library.getArtists().then(function(artistArr) {
+			return artistArr.map(function(artist) {
+				return DBImplementation.artist2SearchResult(artist.artist);
+			});
+		});
+	} else {
+		// list artist tracks
+		promise = this.library.getByArtist(artistName).then(function(trackArr) {
+			return trackArr.map(function(track) {
+				return DBImplementation.record2SearchResult(track);
+			});
+		});
+	}
+
+	return promise.then(function(items) {
+		return {
+			navigation: {
+				lists: [{
+					availableListViews: [
+						'list', 'grid'
+					],
+					items: items
+				}],
+				prev: {
+					uri: artistName ? 'artists://' : ''
+				}
+			}
+		};
+
+	});
+};
+
+
+/**
+ * @param {string} uri
+ * @return {Promise<BrowseResult>}
+ */
+DBImplementation.prototype.getAlbums = function(uri) {
+	var self = this;
+	var uriInfo = DBImplementation.parseUri(uri);
+
+	return this.library.getAlbums().then(function(artistArr) {
+		var items = artistArr.map(function(album) {
+			return DBImplementation.album2SearchResult(album.album);
 		});
 		return {
 			navigation: {
@@ -257,7 +310,7 @@ DBImplementation.getUri = function(track) {
 };
 
 /**
- * Parse URI
+ * Parse track uri
  *
  * Note: the following uri are valid:
  *  1. 'root' url: 'music-library'
@@ -315,6 +368,22 @@ DBImplementation.artist2SearchResult = function(artistName) {
 		title: artistName,
 		albumart: '',	// TODO: album art for an artist
 		uri: 'artists://' + encodeURI(artistName)
+	};
+};
+
+/**
+ * @param {string} albumName
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.album2SearchResult = function(albumName) {
+	return {
+		service: PLUGIN_NAME,
+		type: 'folder',
+		title: albumName,
+		albumart: '',	// TODO: album art for an album
+		uri: 'albums://' + encodeURI(albumName)
 	};
 };
 
