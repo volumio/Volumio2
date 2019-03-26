@@ -14,7 +14,6 @@ module.exports = DBImplementation;
 var ROOT = '/mnt';
 
 
-// TODO: move all 'uri' stuff out in other module
 var PLUGIN_PROTOCOL = 'music-library';
 var PLUGIN_NAME = 'music_library';
 
@@ -30,7 +29,7 @@ function DBImplementation(context) {
 	this.logger = this.context.logger;
 
 
-	//initialization, skipped from second call
+	//initialization
 	this.albumArtPlugin = this.commandRouter.pluginManager.getPlugin('miscellanea', 'albumart');
 	this.library = new MusicLibrary(context);
 }
@@ -98,7 +97,7 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 		var promise;
 		switch (uriInfo.protocol) {
 			case 'music-library':
-				promise = self.listFolders(uriInfo.location);
+				promise = self.listFolders(uri);
 				break;
 
 			case 'artists':
@@ -118,6 +117,7 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 };
 
 /**
+ * @param {string} uri
  * @return {Promise<TrackInfo>}
  * @implement plugin api
  */
@@ -154,14 +154,14 @@ DBImplementation.prototype.explodeUri = function(uri) {
 
 
 /**
- *
- * @param {string} location
+ * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
-DBImplementation.prototype.listFolders = function(location) {
+DBImplementation.prototype.listFolders = function(uri) {
 	var self = this;
+	var uriInfo = DBImplementation.parseUri(uri);
 
-	return this.library.lsFolder(location).then(function(folderEntries) {
+	return this.library.lsFolder(uriInfo.location).then(function(folderEntries) {
 		var items = folderEntries.map(function(entry) {
 			if (entry.type == 'file') {
 				return DBImplementation.record2SearchResult(entry.data);
@@ -170,7 +170,7 @@ DBImplementation.prototype.listFolders = function(location) {
 			}
 		});
 
-		var isRoot = location == ROOT;
+		var isRoot = uriInfo.location == ROOT;
 		return {
 			navigation: {
 				lists: [{
@@ -180,7 +180,7 @@ DBImplementation.prototype.listFolders = function(location) {
 					items: items
 				}],
 				prev: {
-					uri: isRoot ? '' : DBImplementation.getUri({location: location.substring(0, location.lastIndexOf(path.sep))})
+					uri: isRoot ? '' : DBImplementation.getUri({location: path.dirname(uriInfo.location)})
 				}
 			}
 		};
