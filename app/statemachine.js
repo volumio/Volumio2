@@ -442,7 +442,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 		var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
 		var remainingTime=this.currentSongDuration-this.currentSeek;
-		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
+		if(remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
 
@@ -465,7 +465,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 			}
 		}
 
-		if(remainingTime>=0 && remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
+		if(remainingTime<=500 && this.prefetchDone==true && this.simulateStopStartDone==false)
 		{
 
 			this.simulateStopStartDone=true;
@@ -728,8 +728,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
                     {
                         if (stateService.duration !== undefined) {
                             trackBlock.duration = stateService.duration;
-                            // fix playlist stops issue
-                            this.currentSongDuration=trackBlock.duration*1000;
                         }
 
                         if (stateService.samplerate !== undefined && trackBlock.samplerate === undefined) {
