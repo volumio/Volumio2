@@ -193,14 +193,24 @@ DBImplementation.prototype.listFolders = function(location) {
  * @return {Promise<BrowseResult>}
  */
 DBImplementation.prototype.getArtists = function() {
-	// TODO: incomplete: wrong data format
-	return this.library.getArtists().then(function(data) {
-		console.log('DBImplementation TODO: getArtists', data);
-		return data;
-	}).fail(function(e) {
-		// TODO: caller doesn't log the error
-		console.error(e);
-		throw e;
+	return this.library.getArtists().then(function(artistArr) {
+		var items = artistArr.map(function(artist) {
+			return DBImplementation.artist2SearchResult(artist.artist);
+		});
+		return {
+			navigation: {
+				lists: [{
+					availableListViews: [
+						'list', 'grid'
+					],
+					items: items
+				}],
+				prev: {
+					uri: ''
+				}
+			}
+		};
+
 	});
 };
 
@@ -281,7 +291,7 @@ DBImplementation.parseUri = function(uri) {
  */
 DBImplementation.record2SearchResult = function(record) {
 	return {
-		service: 'mpd',
+		service: 'mpd',	// TODO: 'music_library' are not routed to this plugin
 		// service: PLUGIN_NAME,
 		type: 'song',
 		title: record.title || '',
@@ -290,6 +300,23 @@ DBImplementation.record2SearchResult = function(record) {
 		albumart: '',	// TODO: album art for a folder
 		icon: 'fa fa-music',
 		uri: DBImplementation.getUri(record)
+	};
+};
+
+
+/**
+ * @param {string} artistName
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.artist2SearchResult = function(artistName) {
+	return {
+		service: PLUGIN_NAME,
+		type: 'folder',
+		title: artistName,
+		albumart: '',	// TODO: album art for an artist
+		uri: 'artists://'+encodeURI(artistName)
 	};
 };
 

@@ -298,7 +298,7 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 
 
 /**
- * @return {Promise<Artist>}
+ * @return {Promise<Array<{artist:string}>>}
  */
 MusicLibrary.prototype.getArtists = function() {
 	var self = this;
