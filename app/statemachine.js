@@ -440,6 +440,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 	{
 		this.playbackStart=Date.now();
 
+
 		var remainingTime=this.currentSongDuration-this.currentSeek;
 		if (remainingTime < 0)
 		{
@@ -486,7 +487,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
             }
 
 			this.nextRandomIndex=undefined;
-	
+
             this.askedForPrefetch=false;
 			this.pushState.bind(this);
 
