@@ -602,7 +602,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 	// on slow devices, nodejs might update mpd before the setTimeout scheduled. Doing a direct call to force update.
 	if (this.askedForPrefetch)
 	{
-		this.commandRouter.pushDebugConsoleMessage('Prefetch 500ms setTimeout missed >> direclty calling increasePlaybackTimer');
+		this.commandRouter.pushDebugConsoleMessage('ERROR Prefetch 500ms setTimeout missed >> directly calling increasePlaybackTimer');
 		this.increasePlaybackTimer.bind(this);
 	}
   
