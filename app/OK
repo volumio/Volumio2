@@ -1,0 +1,55 @@
+info CoreCommandRouter::volumioGetState
+info CoreStateMachine::getState
+info CorePlayQueue::getTrack 4
+info CoreCommandRouter::volumioGetQueue
+info CoreStateMachine::getQueue
+info CorePlayQueue::getQueue
+info CorePlayQueue::getTrack 4
+info CorePlayQueue::getTrack 107
+info Prefetching next song
+info DOING PREFETCH IN MPD
+info ControllerMpd::sendMpdCommand add "NAS/Music-flac/Music Pop Rock Library/The Corrs/Unplugged/06 Forgiven Not Forgotten.flac"
+info sending command...
+info 
+---------------------------- MPD announces system playlist update
+info Ignoring MPD Status Update
+info parsing response...
+info ControllerMpd::sendMpdCommand consume 1
+info sending command...
+info ------------------------------ 171ms
+info parsing response...
+info 
+---------------------------- MPD announces system playlist update
+info Ignoring MPD Status Update
+info 
+---------------------------- MPD announces state update: player
+info ControllerMpd::getState
+info ControllerMpd::sendMpdCommand status
+info sending command...
+info ------------------------------ 100ms
+info parsing response...
+info ControllerMpd::parseState
+info
+info sending command...
+info parsing response...
+info
+info ControllerMpd::pushState
+info CoreCommandRouter::servicePushState
+info CoreStateMachine::syncState
+info CorePlayQueue::getTrack 4
+info STATE SERVICE {"status":"play","position":0,"seek":23,"duration":322,"samplerate":"44.1 kHz","bitdepth":"16 bit","channels":2,"random":false,"updatedb":false,"repeat":false,"isStreaming":false,"title":"Forgiven Not Forgotten","artist":"The Corrs","album":"Unplugged","uri":"NAS/Music-flac/Music Pop Rock Library/The Corrs/Unplugged/06 Forgiven Not Forgotten.flac","trackType":"flac"}
+info CURRENT POSITION 4
+info CoreStateMachine::syncState   stateService play
+info CoreStateMachine::syncState   currentStatus play
+info from payload
+info CoreStateMachine::pushState
+info CoreStateMachine::getState
+info CorePlayQueue::getTrack 4
+info CoreCommandRouter::volumioPushState
+info
+info CoreStateMachine::pushState
+info CoreStateMachine::getState
+info CorePlayQueue::getTrack 4
+info CoreCommandRouter::volumioPushState
+info
+info ------------------------------ 1762ms

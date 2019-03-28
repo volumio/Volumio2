@@ -601,10 +601,12 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
     this.volatileService = undefined;
 
 	// on slow devices, nodejs might update mpd before the setTimeout scheduled. Doing a direct call to force update.
-	// sometimes the mpd update gets here BEFORE the 500ms marker. Forcing the 500ms increasePlaybackTimer by setting currentSeek to the currentSongDuration
+	//  Forcing the 500ms increasePlaybackTimer by setting currentSeek to the currentSongDuration. Adding logging to debug the issue.
 	if (this.askedForPrefetch)
 	{
 		this.commandRouter.pushDebugConsoleMessage('ERROR Prefetch 500ms setTimeout missed >> directly calling increasePlaybackTimer');
+		this.commandRouter.pushDebugConsoleMessage("ERROR this.runPlaybackTimer:" + this.runPlaybackTimer + " this.currentSongDuration:" + this.currentSongDuration + " - this.currentSeek:" + this.currentSeek + " - this.prefetchDone:"+this.prefetchDone+ " - this.simulateStopStartDone:"+this.simulateStopStartDone);
+
 		this.currentSeek = this.currentSongDuration;
 		this.increasePlaybackTimer.bind(this);
 	}
