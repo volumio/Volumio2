@@ -608,7 +608,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 		this.commandRouter.pushDebugConsoleMessage("ERROR this.runPlaybackTimer:" + this.runPlaybackTimer + " this.currentSongDuration:" + this.currentSongDuration + " - this.currentSeek:" + this.currentSeek + " - this.prefetchDone:"+this.prefetchDone+ " - this.simulateStopStartDone:"+this.simulateStopStartDone);
 
 		this.currentSeek = this.currentSongDuration;
-		this.increasePlaybackTimer.bind(this);
+		this.increasePlaybackTimer();
 	}
   
     var trackBlock = this.getTrack(this.currentPosition);
