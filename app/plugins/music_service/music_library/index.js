@@ -510,38 +510,42 @@ MusicLibrary.prototype.lsFolder = function(location) {
 
 	return utils.readdir(location).then(function(folderEntries) {
 		return utils.iterateArrayAsync(folderEntries, function(stats) {
-			var fullname = path.join(location, stats.name);
+			if(stats.name.startsWith(".")==false)
+			{
+				var fullname = path.join(location, stats.name);
 
-			if (stats.isFile() && metadata.isMediaFile(fullname)) {
-				// file
+				if (stats.isFile() && metadata.isMediaFile(fullname)) {
+					// file
 
-				return self.getTrack(fullname).then(function(record) {
-					if (record) {
-						return {type: 'file', data: record};
-					}
-					// else - ignore it
-				});
-
-			} else if (stats.isDirectory()) {
-				// folder
-
-				if (isRoot) {
-					return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
-						if (folderEntries.length > 0) {
-							return {type: 'folder', data: fullname};
-						} else {
-							// return nothing = don't show it
-							self.logger.info('MusicLibrary.lsFolder empty folder', fullname);
+					return self.getTrack(fullname).then(function(record) {
+						if (record) {
+							return {type: 'file', data: record};
 						}
+						// else - ignore it
 					});
-				} else {
-					return {type: 'folder', data: fullname};
-				}
 
-			} else {
-				self.logger.info('MusicLibrary.lsFolder unknown entry type', fullname);
+				} else if (stats.isDirectory()) {
+					// folder
+
+					if (isRoot) {
+						return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
+							if (folderEntries.length > 0) {
+								return {type: 'folder', data: fullname};
+							} else {
+								// return nothing = don't show it
+								self.logger.info('MusicLibrary.lsFolder empty folder', fullname);
+							}
+						});
+					} else {
+						return {type: 'folder', data: fullname};
+					}
+
+				} else {
+					self.logger.info('MusicLibrary.lsFolder unknown entry type', fullname);
+				}
+				// ignore all other types
 			}
-			// ignore all other types
+
 
 		});
 	});
