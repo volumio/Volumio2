@@ -43,7 +43,7 @@ function ControllerMpd(context) {
 ControllerMpd.prototype.setupImplementation = function() {
 	var impl;
 
-	if (process.env.MPD_USE_NATIVE_DATABASE) {
+	if (process.env.MPD_USE_NATIVE_DATABASE == 'true') {
 		console.log('MPD: use native implementation');
 		impl = new (require('./nativeImplementation.js'))(this.context);
 
