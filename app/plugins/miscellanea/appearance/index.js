@@ -145,13 +145,13 @@ volumioAppearance.prototype.getUIConfig = function () {
             }
 
 
-            self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', {
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', {
               value: language_code,
               label: language
           });
           for (var n = 0; n < allLanguagesdata.languages.length; n++){
 
-              self.configManager.pushUIConfigParam(uiconf, 'sections[1].content[0].options', {
+              self.configManager.pushUIConfigParam(uiconf, 'sections[2].content[0].options', {
                   value: allLanguagesdata.languages[n].code,
                   label: allLanguagesdata.languages[n].nativeName
               });
@@ -431,11 +431,17 @@ volumioAppearance.prototype.getAvailableLanguages = function() {
     return defer.promise;
 }
 
-
 volumioAppearance.prototype.getConfigParam = function (key) {
     var self = this;
     return config.get(key);
 };
+
+volumioAppearance.prototype.getAllLanguages = function (){
+  var defer = libQ.defer();
+  var allLanguagesData = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/allLanguages.json'),  'utf8', {throws: false});
+  defer.resolve(allLanguagesData);
+  return defer.promise;
+}
 
 volumioAppearance.prototype.showTranslation = function (data){
   var self = this;
@@ -636,12 +642,15 @@ volumioAppearance.prototype.showTranslation = function (data){
               self.logger.info('Total Words Translated =', totalTranslated);
               self.logger.info('Percentage translated =', (Math.trunc((totalTranslated/totalWords)*100))+'%');
               self.commandRouter.broadcastMessage('pushUiConfig', configuration);
+              defer.resolve(Math.trunc((totalTranslated/totalWords)*100)+'%');
+              
             });
           } else {
             self.logger.info('Total Words =', totalWords);
             self.logger.info('Total Words Translated =', totalTranslated);
             self.logger.info('Percentage translated =', (Math.trunc((totalTranslated/totalWords)*100))+'%');
             self.commandRouter.broadcastMessage('pushUiConfig', configuration);
+            defer.resolve(Math.trunc((totalTranslated/totalWords)*100)+'%');
           }
         })
       })
@@ -649,10 +658,12 @@ volumioAppearance.prototype.showTranslation = function (data){
     .fail(function(e)
     {
       self.logger.info(e);
+      defer.resolve(e);
     })
   } else {
     self.logger.info('Error in receiving data');
   }
+  return(defer.promise);
 }
 
 volumioAppearance.prototype.setTranslation = function (data){

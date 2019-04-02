@@ -1814,7 +1814,29 @@ function InterfaceWebUI(context) {
                 self.printToastMessage('error', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'),  self.commandRouter.getI18nString('SYSTEM.ERROR_DELETING_FOLDER'));
 				self.logger.error(error);
             });
-        });
+		});
+		
+		connWebSocket.on('getAllLanguages', function () {
+			var selfConnWebSocket = this;
+			var allLanguages = self.commandRouter.executeOnPlugin('miscellanea','appearance', 'getAllLanguages');
+			allLanguages.then(function(data){
+				selfConnWebSocket.emit('pushAllLanguages', data);
+			})
+			.fail(function (error){
+				self.logger.error(error);
+			});
+		});
+
+		connWebSocket.on('showTranslations', function (data){
+			var selfConnWebSocket = this;
+			var percent = self.commandRouter.executeOnPlugin('miscellanea','appearance', 'showTranslation', data);
+			percent.then(function (value){
+				selfConnWebSocket.emit('pushPercentage', value);
+			})
+			.fail(function (error){
+				self.logger.error(error);
+			})
+		})
 
 	});
 };
