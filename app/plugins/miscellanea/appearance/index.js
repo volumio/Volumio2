@@ -747,6 +747,7 @@ volumioAppearance.prototype.setTranslation = function (data){
         if(response.body){
           self.logger.info(response.body);
           self.logger.info('Translation file saved');
+          self.showPercentage();
         }else {
           self.logger.error('Error in saving the translation file: server body unavailable');
         }
@@ -760,6 +761,7 @@ volumioAppearance.prototype.setTranslation = function (data){
         if(response.body){
           self.logger.info(response.body);
           self.logger.info('Translation file saved');
+          self.showPercentage();
         }else {
           self.logger.error('Error in saving the translation file: server body unavailable');
         }
@@ -773,11 +775,13 @@ volumioAppearance.prototype.setTranslation = function (data){
         if(response.body){
           self.logger.info('Translation file saved');
           self.logger.info(response.body);
+          self.showPercentage();
         } else {
           self.logger.error('Error in saving the translation file: server body unavailable');
         }
       });
     }
+
 	} catch(e) {
       self.logger.info('Error in saving the translation file');
       self.logger.error(e);
@@ -874,4 +878,45 @@ volumioAppearance.prototype.getTranslation = function (fileType,fileName)
       }
     });
     return defer.promise;
+}
+
+volumioAppearance.prototype.showPercentage = function (){
+  let self = this;
+  totalWords = 0;
+  totalTranslated = 0 ;
+  var stringsDefault = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
+  self.getTranslation('strings','strings_'+ translationLanguage + '.json')
+  .then((stringsCustom)=>{
+    for(var category in stringsDefault){
+      for(var item in stringsDefault[category]){
+        if(stringsDefault[category][item] !== ''){
+          totalWords ++;
+          if(stringsCustom !== ''){
+            if(stringsCustom[category] !== undefined && stringsCustom[category][item] !== undefined){
+              totalTranslated ++;
+            } else {
+            }
+          }
+        }
+      }
+    }
+    var localeDefault = fs.readJsonSync(('/volumio/http/www/app/i18n/locale-en.json'),  'utf8', {throws: false});
+    self.getTranslation('locale','locale-'+ translationLanguage + '.json')
+    .then((localeCustom)=>{
+      for(var category in localeDefault){
+        for(var item in localeDefault[category]){
+          if(localeDefault[category][item] !== ''){
+            totalWords ++;
+            if(localeCustom !== ''){
+              if(localeCustom[category] !== undefined && localeCustom[category][item] !== undefined){
+                totalTranslated ++;
+              }else {
+              }
+            }
+          }
+        }
+      }
+      self.commandRouter.broadcastMessage('pushPercentage', Math.trunc((totalTranslated/totalWords)*100)+'%');
+    });
+  });
 }

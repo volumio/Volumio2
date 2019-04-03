@@ -328,7 +328,7 @@
     "NO_CONFIGURATION_AVAILABLE":"No configuration available",
     "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer",
     "CONFIRM_PLUGIN_INSTALL":"Install Plugin",
-    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instability. Are you sure you want to install this plugin",
     "INSTALL":"Install"
   },
   "WIZARD":{

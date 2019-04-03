@@ -34,36 +34,6 @@
       ]
     },
     {"coreSection":"custom-translation"},
-    {
-      "id": "translation_language_selector",
-      "element": "section",
-      "label": "Custom Translation",
-      "icon": "fa-language",
-      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"showTranslation"},
-      "saveButton": {
-        "label": "TRANSLATE.COMMON.SAVE",
-        "data": [
-          "translation_language"
-        ]
-      },
-      "value":  {
-        "value": "0",
-        "label": "Unknown"
-      },
-      "content": [
-        {
-          "id": "translation_language",
-          "element": "select",
-          "label": "TRANSLATE.APPEARANCE.UI_CONFIG_SELECT_LANGUAGE",
-          "value":  {
-            "value":0,
-            "label": "0"
-          },
-          "options": [
-          ]
-        }
-      ]
-    },
     {"coreSection": "ui-settings"}
   ]
 }
