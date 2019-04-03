@@ -401,7 +401,10 @@ DBImplementation.prototype.explodeUri = function(uri) {
 				promise = self.explodeLibraryUri(uri);
 				break;
 			case PROTOCOL_ARTISTS:
-				promise = self.explodeAlbumUri(uri);
+				promise = self.explodeArtistsUri(uri);
+				break;
+			case PROTOCOL_ALBUMS:
+				promise = self.explodeAlbumsUri(uri);
 				break;
 
 			default:
@@ -430,26 +433,7 @@ DBImplementation.prototype.explodeLibraryUri = function(uri) {
 
 	var trackInfo = DBImplementation.parseUri(uri);
 	return this.library.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
-
-		var result = {
-			uri: track.location.substr(1), // mpd expects absolute path without first '/'
-			service: 'mpd',
-			name: track.title,
-			artist: track.artist,
-			album: track.album,
-			type: 'track',
-			tracknumber: track.tracknumber,
-			albumart: self.getAlbumArt({
-				artist: track.artist,
-				album: track.album
-			}, path.dirname(track.location), 'fa-music'),
-			duration: track.format.duration,
-			samplerate: track.samplerate,
-			bitdepth: track.format.bitdepth,
-			trackType: path.extname(track.location)
-		};
-
-		return [result];
+		return [ self.track2mpd(track) ];
 	});
 };
 
@@ -458,7 +442,7 @@ DBImplementation.prototype.explodeLibraryUri = function(uri) {
  * @param {string} uri
  * @return {Promise<TrackInfo>}
  */
-DBImplementation.prototype.explodeAlbumUri = function(uri) {
+DBImplementation.prototype.explodeArtistsUri = function(uri) {
 	var self = this;
 
 	var protocolParts = uri.split('://', 2);
@@ -467,7 +451,29 @@ DBImplementation.prototype.explodeAlbumUri = function(uri) {
 		where: {
 			artist: {[Sequelize.Op.eq]: artistName}
 		},
-		order: [],
+		order: ['disk', 'tracknumber', 'title'],
+		raw: true
+	}).then(function(tracks) {
+		return tracks.map(self.track2mpd.bind(self));
+	});
+
+};
+
+
+/**
+ * @param {string} uri
+ * @return {Promise<TrackInfo>}
+ */
+DBImplementation.prototype.explodeAlbumsUri = function(uri) {
+	var self = this;
+
+	var protocolParts = uri.split('://', 2);
+	var albumName = decodeURIComponent(protocolParts[1]);
+	return this.library.query({
+		where: {
+			album: {[Sequelize.Op.eq]: albumName}
+		},
+		order: ['disk', 'tracknumber', 'title'],
 		raw: true
 	}).then(function(tracks) {
 		return tracks.map(self.track2mpd.bind(self));
@@ -623,7 +629,8 @@ DBImplementation.artist2SearchResult = function(artistName) {
  */
 DBImplementation.album2SearchResult = function(albumName) {
 	return {
-		service: PLUGIN_NAME,
+		service: 'mpd',
+		// service: PLUGIN_NAME,
 		type: 'folder',
 		title: albumName,
 		albumart: '',	// TODO: album art for an album

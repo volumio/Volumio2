@@ -14,8 +14,8 @@
  * @property {string} fileType
  * @property {number} samplerate
  * @property {number} year
- * @property {number} disk
- * @property {number} tracknumber
+ * @property {number} disk		- disc number
+ * @property {number} tracknumber - track number
  * @property {object} format
  * @property {number} format.duration
  * @property {number} format.bitdepth
