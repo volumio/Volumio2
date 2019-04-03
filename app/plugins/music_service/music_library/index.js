@@ -5,11 +5,13 @@ var Sequelize = require('sequelize');
 var FileScanner = require('./lib/fileScanner');
 var metadata = require('./lib/metadata');
 var utils = require('./lib/utils');
+var chokidar = require('chokidar');
 
 module.exports = MusicLibrary;
 
 // TODO: move to config?
 var ROOT = '/mnt';
+var WATCH_EXCLUDE = ['/mnt/NAS'];
 
 // On startup, the database are copied to LIBRARY_DB_TEMP and be accessed\written from there.
 // After each scanning routine has terminated, it's copied back to LIBRARY_DB.
@@ -86,14 +88,17 @@ function MusicLibrary(context) {
 		// self.scanPath = ROOT;
 		// self.fileScanner.addTarget(ROOT);
 
-		// The recursive option is only supported on macOS and Windows. =(
-		// https://nodejs.org/api/fs.html#fs_caveats
-		self.fileWatcher = fs.watch(ROOT, {recursive: true}, onFsChanges);
+		// https://github.com/paulmillr/chokidar#api
+		self.fileWatcher = chokidar.watch(ROOT, {ignored: WATCH_EXCLUDE, persistent: true});
+		self.fileWatcher
+			.on('add', onFsChanges.bind(self, 'add'))
+			// .on('change', onFsChanges.bind(self, 'change') )
+			.on('unlink', onFsChanges.bind(self, 'unlink'));
 	});
 
 
 	/**
-	 * @param {'rename'|'change'} eventType
+	 * @param {'add'|'change'|'unlink'} eventType
 	 * @param {string} filename
 	 */
 	function onFsChanges(eventType, filename) {
