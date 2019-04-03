@@ -78,9 +78,9 @@ function MusicLibrary(context) {
 			}
 		});
 
-		//
-		self.scanPath = ROOT;
-		self.fileScanner.addTarget(ROOT);
+		// Uncomment the following 2 lines to enable update on start
+		// self.scanPath = ROOT;
+		// self.fileScanner.addTarget(ROOT);
 
 		// The recursive option is only supported on macOS and Windows. =(
 		// https://nodejs.org/api/fs.html#fs_caveats
