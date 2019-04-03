@@ -499,6 +499,19 @@ MusicLibrary.prototype.getByGenre = function(genreName, orderBy) {
 
 
 /**
+ * Run arbitrary query
+ * @param {object} sequelizeQueryOptions
+ * @return {Promise<Array<AudioMetadata>>}
+ */
+MusicLibrary.prototype.query = function(sequelizeQueryOptions) {
+	var self = this;
+	return libQ.resolve().then(function() {
+		return self.model.AudioMetadata.findAll(sequelizeQueryOptions);
+	});
+};
+
+
+/**
  * Get folder content
  * returns:
  *  - for file entry: {type: 'file', data:AudioMetadata}

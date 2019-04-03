@@ -1,6 +1,7 @@
 var libQ = require('kew');
 var path = require('path');
 var url = require('url');
+var Sequelize = require('sequelize');
 
 // TODO: I think we can keep this module inside 'mpd' folder
 var MusicLibrary = require('../music_library/index');
@@ -202,41 +203,6 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 	});
 };
 
-/**
- * @param {string} uri
- * @return {Promise<TrackInfo>}
- * @implement plugin api
- */
-DBImplementation.prototype.explodeUri = function(uri) {
-	var self = this;
-	var trackInfo = DBImplementation.parseUri(uri);
-	return this.library.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
-
-		var result = {
-			uri: track.location.substr(1), // mpd expects absolute path without first '/'
-			service: 'mpd',
-			name: track.title,
-			artist: track.artist,
-			album: track.album,
-			type: 'track',
-			tracknumber: track.tracknumber,
-			albumart: self.getAlbumArt({
-				artist: track.artist,
-				album: track.album
-			}, path.dirname(track.location), 'fa-music'),
-			duration: track.format.duration,
-			samplerate: track.samplerate,
-			bitdepth: track.format.bitdepth,
-			trackType: path.extname(track.location)
-		};
-
-		return [result];
-	}).fail(function(e) {
-		// TODO: caller doesn't log the error
-		console.error(e);
-		throw e;
-	});
-};
 
 
 /**
@@ -414,6 +380,103 @@ DBImplementation.prototype.handleGenresUri = function(uri) {
 };
 
 
+
+
+/**
+ * @param {string} uri
+ * @return {Promise<TrackInfo>}
+ * @implement plugin api
+ */
+DBImplementation.prototype.explodeUri = function(uri) {
+	var self = this;
+	return libQ.resolve().then(function() {
+
+		var protocolParts = uri.split('://', 2);
+		var protocol = protocolParts[0];
+		self.logger.info('DBImplementation.explodeUri', uri, protocol);
+
+		var promise;
+		switch (protocol) {
+			case PROTOCOL_LIBRARY:
+				promise = self.explodeLibraryUri(uri);
+				break;
+			case PROTOCOL_ARTISTS:
+				promise = self.explodeAlbumUri(uri);
+				break;
+
+			default:
+				promise = libQ.reject('Unknown protocol: ' + protocol);
+		}
+
+		return promise;
+	}).fail(function(e) {
+		// TODO: caller doesn't log the error
+		console.error(e);
+		throw e;
+	});
+};
+
+
+/**
+ * @param {string} uri
+ * @return {Promise<TrackInfo>}
+ */
+DBImplementation.prototype.explodeLibraryUri = function(uri) {
+	var self = this;
+
+	var protocolParts = uri.split('://', 2);
+	var protocol = protocolParts[0];
+	self.logger.info('DBImplementation.explodeLibraryUri', uri, protocol);
+
+	var trackInfo = DBImplementation.parseUri(uri);
+	return this.library.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
+
+		var result = {
+			uri: track.location.substr(1), // mpd expects absolute path without first '/'
+			service: 'mpd',
+			name: track.title,
+			artist: track.artist,
+			album: track.album,
+			type: 'track',
+			tracknumber: track.tracknumber,
+			albumart: self.getAlbumArt({
+				artist: track.artist,
+				album: track.album
+			}, path.dirname(track.location), 'fa-music'),
+			duration: track.format.duration,
+			samplerate: track.samplerate,
+			bitdepth: track.format.bitdepth,
+			trackType: path.extname(track.location)
+		};
+
+		return [result];
+	});
+};
+
+
+/**
+ * @param {string} uri
+ * @return {Promise<TrackInfo>}
+ */
+DBImplementation.prototype.explodeAlbumUri = function(uri) {
+	var self = this;
+
+	var protocolParts = uri.split('://', 2);
+	var artistName = decodeURIComponent(protocolParts[1]);
+	return this.library.query({
+		where: {
+			artist: {[Sequelize.Op.eq]: artistName}
+		},
+		order: [],
+		raw: true
+	}).then(function(tracks) {
+		return tracks.map(self.track2mpd.bind(self));
+	});
+
+};
+
+
+
 /**
  * @param {string} [uri]
  * @return {void}
@@ -503,6 +566,37 @@ DBImplementation.track2SearchResult = function(record) {
 };
 
 
+
+/**
+ * Technically, plays track
+ * @param {AudioMetadata} record
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.prototype.track2mpd = function(record) {
+	var self = this;
+	return {
+		uri: record.location.substr(1), // mpd expects absolute path without first '/'
+		service: 'mpd',
+		name: record.title,
+		artist: record.artist,
+		album: record.album,
+		type: 'track',
+		tracknumber: record.tracknumber,
+		albumart: self.getAlbumArt({
+			artist: record.artist,
+			album: record.album
+		}, path.dirname(record.location), 'fa-music'),
+		duration: record.format.duration,
+		samplerate: record.samplerate,
+		bitdepth: record.format.bitdepth,
+		trackType: path.extname(record.location)
+	};
+};
+
+
+
 /**
  * @param {string} artistName
  * @return {SearchResultItem}
@@ -511,7 +605,8 @@ DBImplementation.track2SearchResult = function(record) {
  */
 DBImplementation.artist2SearchResult = function(artistName) {
 	return {
-		service: PLUGIN_NAME,
+		service: 'mpd',
+		// service: PLUGIN_NAME,
 		type: 'folder',
 		title: artistName,
 		albumart: '',	// TODO: album art for an artist
