@@ -372,7 +372,9 @@ MusicLibrary.prototype.searchArtists = function(searchString) {
 			],
 			where: searchString ? {
 				artist: {[Sequelize.Op.substring]: searchString}
-			} : {},
+			} : {
+				artist: {[Sequelize.Op.not]: null}
+			},
 			order: ['artist'],
 			raw: true
 		}).then(function(records) {
@@ -416,7 +418,9 @@ MusicLibrary.prototype.searchAlbums = function(searchString) {
 			],
 			where: searchString ? {
 				album: {[Sequelize.Op.substring]: searchString}
-			} : {},
+			} : {
+				album: {[Sequelize.Op.not]: null}
+			},
 			order: ['album'],
 			raw: true
 		}).then(function(records) {
@@ -461,7 +465,9 @@ MusicLibrary.prototype.searchGenres = function(searchString) {
 			],
 			where: searchString ? {
 				genre: {[Sequelize.Op.substring]: searchString}
-			} : {},
+			} : {
+				genre: {[Sequelize.Op.not]: null}
+			},
 			order: ['genre'],
 			raw: true
 		}).then(function(records) {
