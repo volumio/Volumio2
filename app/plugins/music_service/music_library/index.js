@@ -405,28 +405,22 @@ MusicLibrary.prototype.getByArtist = function(artistName, orderBy) {
 };
 
 /**
- * @param {string} [searchString]
+ * @param {object} [sequelizeQueryOptions]
  * @return {Promise<Array<string>>}
  */
-MusicLibrary.prototype.searchAlbums = function(searchString) {
+MusicLibrary.prototype.searchAlbums = function(sequelizeQueryOptions) {
 	var self = this;
-	return libQ.resolve().then(function() {
-		// 'distinct'
-		return self.model.AudioMetadata.findAll({
-			attributes: [
-				[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album']
-			],
-			where: searchString ? {
-				album: {[Sequelize.Op.substring]: searchString}
-			} : {
-				album: {[Sequelize.Op.not]: null}
-			},
-			order: ['album'],
-			raw: true
-		}).then(function(records) {
-			return records.map(function(record) {
-				return record.album;
-			});
+
+	sequelizeQueryOptions = sequelizeQueryOptions || {};
+	sequelizeQueryOptions.attributes = sequelizeQueryOptions.attributes || [];
+	sequelizeQueryOptions.attributes.push(
+		[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album']
+	);
+
+	//
+	return this.query(sequelizeQueryOptions).then(function(records) {
+		return records.map(function(record) {
+			return record.album;
 		});
 	});
 };

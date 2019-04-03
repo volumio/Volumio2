@@ -63,6 +63,7 @@ DBImplementation.prototype.search = function(query) {
 
 	var titleCommon = self.commandRouter.getI18nString('COMMON.FOUND');
 	var promiseResultArr = [];
+
 	if (isSearchArtists) {
 		promiseResultArr.push(this.searchArtists(searchValue).then(function(items) {
 			var artistdesc = self.commandRouter.getI18nString(items.length > 1 ? 'COMMON.ARTISTS' : 'COMMON.ARTIST');
@@ -107,7 +108,7 @@ DBImplementation.prototype.search = function(query) {
 			return data.items.length > 0;
 		});
 	}).fail(function(e) {
-		// TODO: caller doesn't log the error
+		// TODO: caller doesn't log an error
 		console.error(e);
 		throw e;
 	});
@@ -131,7 +132,12 @@ DBImplementation.prototype.searchArtists = function(searchValue) {
  * @return {Promise<SearchResultItem[]>}
  */
 DBImplementation.prototype.searchAlbums = function(searchValue) {
-	return this.library.searchAlbums(searchValue).then(function(albumsArr) {
+	return this.library.searchAlbums({
+		where: {
+			album: {[Sequelize.Op.substring]: searchValue}
+		},
+		order: ['album']
+	}).then(function(albumsArr) {
 		return albumsArr.map(function(album) {
 			return DBImplementation.album2SearchResult(album);
 		});
@@ -204,14 +210,13 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 };
 
 
-
 /**
  * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
 DBImplementation.prototype.handleLibraryUri = function(uri) {
 	var self = this;
-	var uriInfo = DBImplementation.parseUri(uri);
+	var uriInfo = DBImplementation.parseTrackUri(uri);
 
 	return self.library.lsFolder(uriInfo.location).then(function(folderEntries) {
 		var items = folderEntries.map(function(entry) {
@@ -232,7 +237,7 @@ DBImplementation.prototype.handleLibraryUri = function(uri) {
 					items: items
 				}],
 				prev: {
-					uri: isRoot ? '' : DBImplementation.getUri({location: path.dirname(uriInfo.location)})
+					uri: isRoot ? '' : DBImplementation.getTrackUri({location: path.dirname(uriInfo.location)})
 				}
 			}
 		};
@@ -241,26 +246,53 @@ DBImplementation.prototype.handleLibraryUri = function(uri) {
 
 
 /**
- * @param {string} uri
+ * @param {string} uri - //artistName/albumName
  * @return {Promise<BrowseResult>}
  */
 DBImplementation.prototype.handleArtistsUri = function(uri) {
 	var self = this;
-	var protocolParts = uri.split('://', 2);
-	var artistName = decodeURIComponent(protocolParts[1]);
-
+	var uriInfo = DBImplementation.parseUri(uri);
+	console.log('DBImplementation.handleArtistsUri', uriInfo);
 	var promise;
-	if (!artistName) {
+	if (uriInfo.parts.length === 0) {
+
 		// list all artists
 		promise = self.library.searchArtists().then(function(artistArr) {
 			return artistArr.map(function(artist) {
 				return DBImplementation.artist2SearchResult(artist);
 			});
 		});
-	} else {
-		// list artist tracks
-		var orderBy = ['tracknumber'];
-		promise = self.library.getByArtist(artistName, orderBy).then(function(trackArr) {
+
+	}
+	if (uriInfo.parts.length === 1) {
+		var artistName = uriInfo.parts[0];
+
+		// list albums, which are belong to the artist
+		promise = self.library.searchAlbums({
+			where: {
+				artist: {[Sequelize.Op.eq]: artistName},
+			},
+			order: ['disk', 'tracknumber', 'title'],
+		}).then(function(albumArr) {
+			return albumArr.map(function(album) {
+				return DBImplementation.artistAlbum2SearchResult(artistName, album);
+			});
+		});
+
+	}
+	if (uriInfo.parts.length === 2) {
+		var artistName = uriInfo.parts[0];
+		var albumName = uriInfo.parts[1];
+
+		// list tracks, which are belong to the artist/album
+		promise = self.library.query({
+			where: {
+				artist: {[Sequelize.Op.eq]: artistName},
+				album: {[Sequelize.Op.eq]: albumName}
+			},
+			order: ['disk', 'tracknumber', 'title'],
+			raw: true
+		}).then(function(trackArr) {
 			return trackArr.map(function(track) {
 				return DBImplementation.track2SearchResult(track);
 			});
@@ -277,7 +309,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 					items: items
 				}],
 				prev: {
-					uri: artistName ? PROTOCOL_ARTISTS + '://' : ''
+					uri: DBImplementation.getParentUri(uriInfo)
 				}
 			}
 		};
@@ -380,8 +412,6 @@ DBImplementation.prototype.handleGenresUri = function(uri) {
 };
 
 
-
-
 /**
  * @param {string} uri
  * @return {Promise<TrackInfo>}
@@ -431,9 +461,9 @@ DBImplementation.prototype.explodeLibraryUri = function(uri) {
 	var protocol = protocolParts[0];
 	self.logger.info('DBImplementation.explodeLibraryUri', uri, protocol);
 
-	var trackInfo = DBImplementation.parseUri(uri);
+	var trackInfo = DBImplementation.parseTrackUri(uri);
 	return this.library.getTrack(trackInfo.location, trackInfo.trackOffset).then(function(track) {
-		return [ self.track2mpd(track) ];
+		return [self.track2mpd(track)];
 	});
 };
 
@@ -482,7 +512,6 @@ DBImplementation.prototype.explodeAlbumsUri = function(uri) {
 };
 
 
-
 /**
  * @param {string} [uri]
  * @return {void}
@@ -490,7 +519,7 @@ DBImplementation.prototype.explodeAlbumsUri = function(uri) {
  */
 DBImplementation.prototype.updateDb = function(uri) {
 	uri = uri || (PROTOCOL_LIBRARY + '://');
-	var info = DBImplementation.parseUri(uri);
+	var info = DBImplementation.parseTrackUri(uri);
 	this.logger.info('DBImplementation.updateDb', info.location);
 
 	this.library.update(info.location);
@@ -520,7 +549,7 @@ DBImplementation.prototype.getAlbumArt = function(data, path, icon) {
  * @private
  * @static
  */
-DBImplementation.getUri = function(track) {
+DBImplementation.getTrackUri = function(track) {
 	var params = (track.trackOffset !== null && track.trackOffset !== undefined) ? 'trackoffset=' + track.trackOffset : null;
 	return track.location.replace(ROOT, PROTOCOL_LIBRARY + '://') + (params ? '?' + params : '');
 };
@@ -535,7 +564,7 @@ DBImplementation.getUri = function(track) {
  * @return {{protocol:string, location:string, trackOffset:number}} - primary key for AudioMetadata
  * @static
  */
-DBImplementation.parseUri = function(uri) {
+DBImplementation.parseTrackUri = function(uri) {
 	var protocolParts = uri.split('://', 2);
 	var protocol = protocolParts[0];
 
@@ -547,6 +576,38 @@ DBImplementation.parseUri = function(uri) {
 		protocol: protocol,
 		location: location,
 		trackOffset: params.trackoffset
+	};
+};
+
+
+/**
+ * @param {{protocol:string, parts:Array<string>}} uriInfo
+ * @return {string}
+ * @static
+ */
+DBImplementation.getParentUri = function(uriInfo) {
+	var allButLast = uriInfo.parts.slice(0, uriInfo.parts.length - 1);
+	return PROTOCOL_ARTISTS + '://' + allButLast.join('/');
+};
+
+/**
+ * Parse artist uri
+ * @param {string} uri
+ * @return {{protocol:string, parts:Array<string>}}
+ * @static
+ */
+DBImplementation.parseUri = function(uri) {
+	var protocolParts = uri.split('://', 2);
+	var protocol = protocolParts[0];
+	var parts = ((protocolParts[1] || '').split('/') || []).map(function(part) {
+		return part ? decodeURIComponent(part) : undefined;
+	}).filter(function(part) {
+		return !!part;
+	});
+
+	return {
+		protocol: protocol,
+		parts: parts
 	};
 };
 
@@ -567,10 +628,9 @@ DBImplementation.track2SearchResult = function(record) {
 		albumart: '',	// TODO: album art for a folder
 		// albumart : self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
 		icon: 'fa fa-music',
-		uri: DBImplementation.getUri(record)
+		uri: DBImplementation.getTrackUri(record)
 	};
 };
-
 
 
 /**
@@ -600,7 +660,6 @@ DBImplementation.prototype.track2mpd = function(record) {
 		trackType: path.extname(record.location)
 	};
 };
-
 
 
 /**
@@ -636,6 +695,25 @@ DBImplementation.album2SearchResult = function(albumName) {
 		albumart: '',	// TODO: album art for an album
 		// albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
 		uri: PROTOCOL_ALBUMS + '://' + encodeURIComponent(albumName)
+	};
+};
+
+/**
+ * @param {string} artistName
+ * @param {string} albumName
+ * @return {SearchResultItem}
+ * @private
+ * @static
+ */
+DBImplementation.artistAlbum2SearchResult = function(artistName, albumName) {
+	return {
+		service: 'mpd',
+		// service: PLUGIN_NAME,
+		type: 'folder',
+		title: albumName,
+		albumart: '',	// TODO: album art for an album
+		// albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
+		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName)
 	};
 };
 
@@ -692,7 +770,7 @@ DBImplementation.folder2SearchResult = function(location) {
 		title: path.basename(location),
 		albumart: '',	// TODO: album art for a folder
 		icon: diricon,
-		uri: DBImplementation.getUri({location: location})
+		uri: DBImplementation.getTrackUri({location: location})
 	};
 };
 
