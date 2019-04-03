@@ -199,10 +199,12 @@ DBImplementation.prototype.searchTracks = function(searchValue) {
  */
 DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 	var self = this;
+
+	var uriInfo;
 	return libQ.resolve().then(function() {
 
-		var uriInfo = DBImplementation.parseUri(uri);
-		self.logger.info('DBImplementation.handleBrowseUri', uriInfo);
+		uriInfo = DBImplementation.parseUri(uri);
+		self.logger.info('DBImplementation.handleBrowseUri', uriInfo, previousUri);
 
 		var promise;
 		switch (uriInfo.protocol) {
@@ -222,6 +224,9 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 				promise = libQ.reject('Unknown protocol: ' + uriInfo.protocol);
 		}
 		return promise;
+	}).then(function(response) {
+		response.navigation.prev.uri = previousUri || response.navigation.prev.uri || DBImplementation.getParentUri(uriInfo);
+		return response;
 	}).fail(function(e) {
 		// TODO: caller doesn't log the error
 		console.error(e);
@@ -283,10 +288,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 		promise = self.listAlbumSongs(uriInfo.parts[0], uriInfo.parts[1]);
 	}
 
-	return promise.then(function(response) {
-		response.navigation.prev.uri = DBImplementation.getParentUri(uriInfo);
-		return response;
-	});
+	return promise;
 };
 
 
@@ -425,9 +427,6 @@ DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 };
 
 
-
-
-
 /**
  * @param {string} uri
  * @return {Promise<BrowseResult>}
@@ -438,17 +437,17 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 	var uriInfo = DBImplementation.parseUri(uri);
 
 	var promise;
-	if (uriInfo.parts.length === 0) {
+	if (uriInfo.parts.length < 2) {
 		// list all artists
 		promise = self.listAlbums();
 	} else if (uriInfo.parts.length >= 2) {
-		promise = self.listAlbumSongs(uriInfo.parts[0], uriInfo.parts[1]);
+		promise = self.listAlbumSongs(uriInfo.parts[0], uriInfo.parts[1]).then(function(response) {
+			response.navigation.prev.uri = uriInfo.protocol + '://';
+			return response;
+		});
 	}
 
-	return promise.then(function(response) {
-		response.navigation.prev.uri = DBImplementation.getParentUri(uriInfo);
-		return response;
-	});
+	return promise;
 };
 
 
@@ -482,8 +481,6 @@ DBImplementation.prototype.listAlbums = function() {
 };
 
 
-
-
 /**
  * @param {string} uri
  * @return {Promise<BrowseResult>}
@@ -504,14 +501,15 @@ DBImplementation.prototype.handleGenresUri = function(uri) {
 	} else if (uriInfo.parts.length == 2) {
 		promise = self.listArtist(uriInfo.parts[1], PROTOCOL_GENRES, uriInfo.parts[0]);
 	} else if (uriInfo.parts.length >= 3) {
-		promise = self.listAlbumSongs(uriInfo.parts[1], uriInfo.parts[2]);
+		promise = self.listAlbumSongs(uriInfo.parts[1], uriInfo.parts[2]).then(function(response) {
+			if (uriInfo.query.skipartist) {
+				response.navigation.prev.uri = uriInfo.protocol + '://' + encodeURIComponent(uriInfo.parts[0]);
+			}
+			return response;
+		});
 	}
 
-	return promise.then(function(response) {
-		response.navigation.prev.uri = DBImplementation.getParentUri(uriInfo);
-		return response;
-	});
-
+	return promise;
 };
 
 
@@ -578,6 +576,11 @@ DBImplementation.prototype.listGenre = function(genreName) {
 			return albumArr.map(function(album) {
 				return self.album2SearchResult(album, PROTOCOL_GENRES, genreName);
 			});
+		}).then(function(items) {
+			for (var i = 0; i < items.length; i++) {
+				items[i].uri += '?skipartist';
+			}
+			return items;
 		}),
 
 		// tracks
@@ -754,7 +757,7 @@ DBImplementation.prototype.explodeGenresUri = function(uri) {
 	var uriInfo = DBImplementation.parseUri(uri);
 
 	var promise;
-	switch(uriInfo.parts.length) {
+	switch (uriInfo.parts.length) {
 		case 1:
 			// play all genre songs
 			promise = this.library.query({
@@ -1116,7 +1119,7 @@ DBImplementation.getParentUri = function(uriInfo) {
 /**
  * Parse artist uri
  * @param {string} uri
- * @return {{protocol:string, parts:Array<string>}}
+ * @return {{protocol:string, parts:Array<string>, query: object}}
  * @static
  */
 DBImplementation.parseUri = function(uri) {
@@ -1128,14 +1131,32 @@ DBImplementation.parseUri = function(uri) {
 
 	var protocolParts = uri.split('://', 2);
 	var protocol = protocolParts[0];
-	var parts = ((protocolParts[1] || '').split('/') || []).map(function(part) {
+	var queryPart = (protocolParts[1] || '').split('?');
+
+	var parts = ((queryPart[0] || '').split('/') || []).map(function(part) {
 		return part ? decodeURIComponent(part) : undefined;
 	}).filter(function(part) {
 		return !!part;
 	});
 
+
+	var query = ((queryPart[1] || '').split('&') || []).map(function(part) {
+		var values = part.split('=', 2);
+		return {
+			key: values[0] ? decodeURIComponent(values[0]) : null,
+			value: values[0] ? decodeURIComponent(values[1]) : null
+		};
+	}).reduce(function(result, item) {
+		if(item.key) {
+			result[item.key] = item.value;
+		}
+		return result;
+	}, {});
+
+
 	return {
 		protocol: protocol,
-		parts: parts
+		parts: parts,
+		query: query
 	};
 };
