@@ -336,58 +336,26 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 
 
 /**
- * @param {string} searchStr
- * @param {string[]} [orderBy] any property of {@link AudioMetadata}
- * @return {Promise<AudioMetadata[]>}
- */
-MusicLibrary.prototype.searchTracks = function(searchStr, orderBy) {
-	var self = this;
-	orderBy = orderBy || ['tracknumber'];
-
-	return libQ.resolve().then(function() {
-		return self.model.AudioMetadata.findAll({
-			where: {
-				[Sequelize.Op.or]: {
-					title: {[Sequelize.Op.substring]: searchStr}
-				}
-			},
-			order: orderBy,
-			raw: true
-		});
-	});
-};
-
-
-/**
- * @param {string} [searchString]
+ * @param {FindOptions} [sequelizeQueryOptions]
  * @return {Promise<Array<string>>}
  */
-MusicLibrary.prototype.searchArtists = function(searchString) {
-	var self = this;
-	return libQ.resolve().then(function() {
-		// 'distinct'
-		return self.model.AudioMetadata.findAll({
-			attributes: [
-				[Sequelize.fn('DISTINCT', Sequelize.col('artist')), 'artist']
-			],
-			where: searchString ? {
-				artist: {[Sequelize.Op.substring]: searchString}
-			} : {
-				artist: {[Sequelize.Op.not]: null}
-			},
-			order: ['artist'],
-			raw: true
-		}).then(function(records) {
-			return records.map(function(record) {
-				return record.artist;
-			});
+MusicLibrary.prototype.searchArtists = function(sequelizeQueryOptions) {
+	sequelizeQueryOptions = sequelizeQueryOptions || {};
+	sequelizeQueryOptions.attributes = sequelizeQueryOptions.attributes || [];
+	sequelizeQueryOptions.attributes.push(
+		[Sequelize.fn('DISTINCT', Sequelize.col('artist')), 'artist'],
+	);
+
+	return this.query(sequelizeQueryOptions).then(function(records) {
+		return records.map(function(record) {
+			return record.artist;
 		});
 	});
 };
 
 
 /**
- * @param {object} [sequelizeQueryOptions]
+ * @param {FindOptions} [sequelizeQueryOptions]
  * @return {Promise<Array<Album>>}
  */
 MusicLibrary.prototype.searchAlbums = function(sequelizeQueryOptions) {
@@ -459,7 +427,7 @@ MusicLibrary.prototype.getByGenre = function(genreName, orderBy) {
 
 /**
  * Run arbitrary query
- * @param {object} sequelizeQueryOptions
+ * @param {FindOptions} sequelizeQueryOptions
  * @return {Promise<Array<AudioMetadata>>}
  */
 MusicLibrary.prototype.query = function(sequelizeQueryOptions) {

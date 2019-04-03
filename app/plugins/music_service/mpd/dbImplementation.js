@@ -121,7 +121,15 @@ DBImplementation.prototype.search = function(query) {
  */
 DBImplementation.prototype.searchArtists = function(searchValue) {
 	var self = this;
-	return this.library.searchArtists(searchValue).then(function(artistsArr) {
+	return this.library.searchArtists({
+		where: searchValue ? {
+			artist: {[Sequelize.Op.substring]: searchValue}
+		} : {
+			artist: {[Sequelize.Op.not]: null}
+		},
+		order: ['artist'],
+		raw: true
+	}).then(function(artistsArr) {
 		return artistsArr.map(function(artist) {
 			return self.artist2SearchResult(artist);
 		});
@@ -135,8 +143,10 @@ DBImplementation.prototype.searchArtists = function(searchValue) {
 DBImplementation.prototype.searchAlbums = function(searchValue) {
 	var self = this;
 	return this.library.searchAlbums({
-		where: {
+		where: searchValue ? {
 			album: {[Sequelize.Op.substring]: searchValue}
+		} : {
+			album: {[Sequelize.Op.not]: null}
 		},
 		order: ['album']
 	}).then(function(albumsArr) {
@@ -153,7 +163,19 @@ DBImplementation.prototype.searchAlbums = function(searchValue) {
  */
 DBImplementation.prototype.searchTracks = function(searchValue) {
 	var self = this;
-	return this.library.searchTracks(searchValue).then(function(trackArr) {
+	if(!searchValue){
+		return libQ.reject(new Error('DBImplementation.searchTracks: search value is empty'));
+	}
+
+	return this.library.query({
+		where: {
+			[Sequelize.Op.or]: {
+				title: {[Sequelize.Op.substring]: searchValue}
+			}
+		},
+		order: ['tracknumber'],
+		raw: true
+	}).then(function(trackArr) {
 		return trackArr.map(function(track) {
 			return self.track2SearchResult(track);
 		});
@@ -256,11 +278,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 	if (uriInfo.parts.length === 0) {
 
 		// list all artists
-		promise = self.library.searchArtists().then(function(artistArr) {
-			return artistArr.map(function(artist) {
-				return self.artist2SearchResult(artist);
-			});
-		});
+		promise = self.searchArtists();
 
 	}
 	if (uriInfo.parts.length === 1) {
@@ -797,7 +815,6 @@ DBImplementation.prototype.albumInfo = function(artistName, albumName) {
 };
 
 
-
 /**
  * Get track uri
  * @param {{location:string, trackOffset?:number}} track
@@ -836,14 +853,15 @@ DBImplementation.parseTrackUri = function(uri) {
 };
 
 
-
-
 /**
  * @param {{protocol:string, parts:Array<string>}} uriInfo
  * @return {string}
  * @static
  */
 DBImplementation.getParentUri = function(uriInfo) {
+	if (uriInfo.parts.length == 0) {
+		return '';
+	}
 	var allButLast = uriInfo.parts.slice(0, uriInfo.parts.length - 1);
 	return PROTOCOL_ARTISTS + '://' + allButLast.join('/');
 };
