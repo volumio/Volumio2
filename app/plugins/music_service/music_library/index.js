@@ -281,9 +281,17 @@ MusicLibrary.prototype.addFile = function(location) {
 		}).then(function(record) {
 			// all 'write' operations should be debounced to reduce write operations count
 			if (!record) {
-				// all 'write' operations should be debounced to reduce write operations count
-				return self.saveDebounced(metadata);
-				// return AudioMetadata.create(recordData);
+
+				// check the record in cache
+				var cachedRecord = self.saveDebounced._cache.find(function(item){
+					return item.location === metadata.location && item.trackOffset === metadata.trackOffset;
+				});
+
+				if(!cachedRecord) {
+					return self.saveDebounced(metadata);
+					// return AudioMetadata.create(recordData);
+				}
+
 			} else {
 				// update 'updatedAt' field
 				return self.updateDebounced(record.id);

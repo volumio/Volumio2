@@ -131,49 +131,45 @@ function iterateArrayAsync(array, iterator) {
  */
 function debounceTimeAmount(fn, debounceInterval, debounceSize){
 
-	/**
-	 * Cache and debounce is used during scanning process to reduce write operations
-	 * @type {AudioMetadata[]}
-	 * @private
-	 */
-	var cache = [];
+	resultFn._cache = [];
 
 	/**
 	 * @private
 	 */
 	var debounceTimer = null;
 
-
 	/**
 	 * @return {Promise<*>}
 	 */
 	function runFn(){
-		var cacheLink = cache;
-		cache = [];
+		// unlink cache before calling anything
+		var cacheLink = resultFn._cache;
+		resultFn._cache = [];
 		// clear cache before calling 'fn'
 		return fn(cacheLink);
 	}
-
 
 	/**
 	 * @param {*} data
 	 * @return {Promise<*>}
 	 */
-	return function (data) {
-		cache.push(data);
+	function resultFn (data) {
+		resultFn._cache.push(data);
 
 		// check debounce conditions
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
 		}
 
-		if (cache.length >= debounceSize) {
+		if (resultFn._cache.length >= debounceSize) {
 			return runFn();
 		} else {
 			// TODO: technically, we can run in two concurrent write operations here
 			debounceTimer = setTimeout(runFn, debounceInterval);
 		}
 	}
+
+	return resultFn;
 }
 
 
