@@ -10,7 +10,8 @@
 
 /**
  * @typedef {object} SearchResult
- * @property {string} title
+ * @property {string} [title]
+ * @property {string} [icon]
  * @property {Array<'list'|'grid'>} availableListViews
  * @property {Array<SearchResultItem>} items
  */

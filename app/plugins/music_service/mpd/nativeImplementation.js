@@ -273,7 +273,7 @@ NativeImplementation.prototype.handleBrowseUri = function (curUri, previous) {
     else if (curUri.startsWith('artists://')) {
 
         if (curUri == 'artists://') {
-            response = self.listArtists(curUri);
+            response = self.searchArtists(curUri);
         }
         else
         {

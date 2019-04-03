@@ -116,7 +116,7 @@ DBImplementation.prototype.search = function(query) {
 
 
 /**
- * @param {string} searchValue
+ * @param {string} [searchValue]
  * @return {Promise<SearchResultItem[]>}
  */
 DBImplementation.prototype.searchArtists = function(searchValue) {
@@ -137,7 +137,7 @@ DBImplementation.prototype.searchArtists = function(searchValue) {
 };
 
 /**
- * @param {string} searchValue
+ * @param {string} [searchValue]
  * @return {Promise<SearchResultItem[]>}
  */
 DBImplementation.prototype.searchAlbums = function(searchValue) {
@@ -163,7 +163,7 @@ DBImplementation.prototype.searchAlbums = function(searchValue) {
  */
 DBImplementation.prototype.searchTracks = function(searchValue) {
 	var self = this;
-	if(!searchValue){
+	if (!searchValue) {
 		return libQ.reject(new Error('DBImplementation.searchTracks: search value is empty'));
 	}
 
@@ -273,21 +273,64 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 	var self = this;
 	var uriInfo = DBImplementation.parseUri(uri);
 
-	var info = null;
 	var promise;
 	if (uriInfo.parts.length === 0) {
-
 		// list all artists
-		promise = self.searchArtists();
-
+		promise = self.listArtists();
+	} else if (uriInfo.parts.length === 1) {
+		promise = self.listArtist(uriInfo.parts[0]);
+	} else if (uriInfo.parts.length === 2) {
+		promise = self.listAlbumSongs(uriInfo.parts[0], uriInfo.parts[1]);
 	}
-	if (uriInfo.parts.length === 1) {
-		var artistName = uriInfo.parts[0];
 
-		info = self.artistInfo(artistName);
+	return promise.then(function(response) {
+		response.navigation.prev.uri = DBImplementation.getParentUri(uriInfo);
+		return response;
+	});
+};
 
-		// list albums, which are belong to the artist
-		promise = self.library.searchAlbums({
+
+/**
+ * @return {Promise<BrowseResult>}
+ * @private
+ */
+DBImplementation.prototype.listArtists = function() {
+	var self = this;
+
+	return self.searchArtists().then(function(items) {
+		return {
+			navigation: {
+				'lists': [{
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list',
+						'grid'
+					],
+					'items': items
+				}],
+				prev: {
+					'uri': ''
+				}
+			}
+		};
+	});
+};
+
+
+/**
+ * @param {string} artistName
+ * @return {Promise<BrowseResult>}
+ * @private
+ */
+DBImplementation.prototype.listArtist = function(artistName) {
+	var self = this;
+
+	// list albums, which are belong to the artist
+	return libQ.all([
+
+
+		// albums
+		self.library.searchAlbums({
 			where: {
 				artist: {[Sequelize.Op.eq]: artistName},
 			},
@@ -296,46 +339,86 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 			return albumArr.map(function(album) {
 				return self.album2SearchResult(album, PROTOCOL_ARTISTS);
 			});
-		});
+		}),
 
-	}
-	if (uriInfo.parts.length === 2) {
-		var artistName = uriInfo.parts[0];
-		var albumName = uriInfo.parts[1];
 
-		info = self.albumInfo(artistName, albumName);
-
-		// list tracks, which are belong to the artist/album
-		promise = self.library.query({
+		// tracks
+		self.library.query({
 			where: {
 				artist: {[Sequelize.Op.eq]: artistName},
-				album: {[Sequelize.Op.eq]: albumName}
 			},
 			order: ['disk', 'tracknumber', 'title'],
-			raw: true
 		}).then(function(trackArr) {
 			return trackArr.map(function(track) {
 				return self.track2SearchResult(track);
 			});
-		});
-	}
+		})
 
-	return promise.then(function(items) {
+	]).then(function(lists) {
 		return {
 			navigation: {
-				lists: [{
-					availableListViews: [
-						'list', 'grid'
+				'lists': [{
+					'title': self.commandRouter.getI18nString('COMMON.ALBUMS') + ' (' + decodeURIComponent(artistName) + ')',
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list',
+						'grid'
 					],
-					items: items
+					'items': lists[0]
+				}, {
+					'title': self.commandRouter.getI18nString('COMMON.TRACKS') + ' (' + decodeURIComponent(artistName) + ')',
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list'
+					],
+					'items': lists[1]
 				}],
 				prev: {
-					uri: DBImplementation.getParentUri(uriInfo)
+					'uri': ''
 				},
-				info: info
+				info: self.artistInfo(artistName)
 			}
 		};
+	});
+};
 
+/**
+ * @param {string} artistName
+ * @param {string} albumName
+ * @return {Promise<BrowseResult>}
+ * @private
+ */
+DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
+	var self = this;
+
+	// tracks
+	return self.library.query({
+		where: {
+			artist: {[Sequelize.Op.eq]: artistName},
+			album: {[Sequelize.Op.eq]: albumName},
+		},
+		order: ['disk', 'tracknumber', 'title'],
+	}).then(function(trackArr) {
+		return trackArr.map(function(track) {
+			return self.track2SearchResult(track);
+		});
+	}).then(function(items) {
+		return {
+			navigation: {
+				'lists': [{
+					// 'title': self.commandRouter.getI18nString('COMMON.TRACKS') + ' (' + decodeURIComponent(artistName) + ')',
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list'
+					],
+					'items': items
+				}],
+				prev: {
+					'uri': ''
+				},
+				info: self.albumInfo(artistName, albumName)
+			}
+		};
 	});
 };
 
@@ -544,11 +627,10 @@ DBImplementation.prototype.explodeArtistsUri = function(uri) {
 DBImplementation.prototype.explodeAlbumsUri = function(uri) {
 	var self = this;
 
-	var protocolParts = uri.split('://', 2);
-	var albumName = decodeURIComponent(protocolParts[1]);
+	var uriInfo = DBImplementation.parseUri(uri);
 	return this.library.query({
 		where: {
-			album: {[Sequelize.Op.eq]: albumName}
+			album: {[Sequelize.Op.eq]: uriInfo.parts[1]}
 		},
 		order: ['disk', 'tracknumber', 'title'],
 		raw: true
