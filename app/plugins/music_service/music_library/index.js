@@ -66,6 +66,10 @@ function MusicLibrary(context) {
 	this.model.AudioMetadata = this.sequelize.import(__dirname + '/model/audioMetadata');
 	// load more models here
 
+
+	this.saveDebounced = utils.debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
+	this.updateDebounced = utils.debounceTimeAmount(updateRecords, config.debounceTime, config.debounceSize);
+
 	this.sequelize.sync().then(function() {
 
 		// initialize file scanning service
@@ -93,8 +97,12 @@ function MusicLibrary(context) {
 	 * @param {string} filename
 	 */
 	function onFsChanges(eventType, filename) {
-		// console.log('MusicLibrary.onFsChanges', eventType, filename);
-		self.fileScanner.addTarget(path.join(ROOT, filename));
+		console.log('MusicLibrary.onFsChanges', eventType, filename);
+		var scanFolder = path.dirname(filename);
+		if (self.scanPath != scanFolder) {
+			self.scanPath = scanFolder;
+			self.fileScanner.addTarget(scanFolder);
+		}
 	}
 
 	/**
@@ -141,7 +149,9 @@ function MusicLibrary(context) {
 	 */
 	function onScanFinished() {
 		// remove all records which are not found during scan
-		self.logger.info('MusicLibrary: remove all unaffected items');
+		var scanPath = self.scanPath;
+		self.scanPath = null;
+		self.logger.info('MusicLibrary: remove all unaffected items at ' + scanPath);
 
 		// wait for debounceTime, so we make sure all records are saved/updated
 		return libQ.delay(config.debounceTime * 2).then(function() { // we multiply by 2 to make sure cache is processed
@@ -150,7 +160,7 @@ function MusicLibrary(context) {
 					[Sequelize.Op.and]: {
 						// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
 						// http://docs.sequelizejs.com/manual/querying.html#operators
-						location: {[Sequelize.Op.endsWith]: self.scanPath + path.sep},
+						location: {[Sequelize.Op.endsWith]: scanPath + path.sep},
 						updatedAt: {[Sequelize.Op.lt]: self.scanStartedAt}
 					}
 				}
@@ -158,6 +168,33 @@ function MusicLibrary(context) {
 		}).then(function(numDeleted) {
 			self.logger.info('MusicLibrary: removed all unaffected items:', numDeleted);
 			return self.backupDatabase();
+		});
+	}
+
+
+	/**
+	 * @param {Array<AudioMetadata>} records
+	 * @return {Promise<*>}
+	 * @private
+	 */
+	function saveRecords(records) {
+		// remove duplicates
+		// var filteredRecords = underscore.uniq(records, false, underscore.iteratee(function(r) { return r.location+':'+r.trackOffset }));
+		return self.model.AudioMetadata.bulkCreate(records);
+	}
+
+	/**
+	 * Update 'updatedAt' field value.
+	 * That's need to make sure file is still exists and wouldn't be removed by when scan is finished.
+	 * @see {@link onScanFinished}
+	 *
+	 * @param {Array<number>} ids
+	 * @return {Promise<*>}
+	 * @private
+	 */
+	function updateRecords(ids) {
+		return self.sequelize.query('UPDATE AudioMetadata SET updatedAt = ? WHERE AudioMetadata.id in (' + ids.join(',') + ')', {
+			replacements: [new Date()]
 		});
 	}
 
@@ -187,6 +224,7 @@ MusicLibrary.prototype.backupDatabase = function() {
  * @param {string} [location]
  */
 MusicLibrary.prototype.update = function(location) {
+	this.scanPath = location;
 	this.fileScanner.addTarget(location);
 };
 
@@ -217,10 +255,6 @@ MusicLibrary.prototype.removeFolder = function(location) {
 MusicLibrary.prototype.addFile = function(location) {
 	var self = this;
 
-	var saveDebounced = utils.debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
-	var updateDebounced = utils.debounceTimeAmount(updateRecords, config.debounceTime, config.debounceSize);
-
-
 	return metadata.parseFile(location)
 		.then(function(metadataArr) {
 			return utils.iterateArrayAsync(metadataArr, updateMetadata);
@@ -245,38 +279,15 @@ MusicLibrary.prototype.addFile = function(location) {
 				trackOffset: metadata.trackOffset
 			}
 		}).then(function(record) {
+			// all 'write' operations should be debounced to reduce write operations count
 			if (!record) {
 				// all 'write' operations should be debounced to reduce write operations count
-				return saveDebounced(metadata);
+				return self.saveDebounced(metadata);
 				// return AudioMetadata.create(recordData);
 			} else {
 				// update 'updatedAt' field
-				return updateDebounced(record.id);
+				return self.updateDebounced(record.id);
 			}
-		});
-	}
-
-	/**
-	 * @param {Array<AudioMetadata>} records
-	 * @return {Promise<*>}
-	 * @private
-	 */
-	function saveRecords(records) {
-		return self.model.AudioMetadata.bulkCreate(records);
-	}
-
-	/**
-	 * Update 'updatedAt' field value.
-	 * That's need to make sure file is stil exists and wouldn't be removed by when scan is finished.
-	 * @see {@link onScanFinished}
-	 *
-	 * @param {Array<number>} ids
-	 * @return {Promise<*>}
-	 * @private
-	 */
-	function updateRecords(ids) {
-		return self.sequelize.query('UPDATE AudioMetadata SET updatedAt = ? WHERE AudioMetadata.id in (' + ids.join(',') + ')', {
-			replacements: [new Date()]
 		});
 	}
 
