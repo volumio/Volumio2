@@ -405,24 +405,6 @@ MusicLibrary.prototype.searchGenres = function(searchString) {
 	});
 };
 
-/**
- * @param {string} genreName
- * @param {string[]} [orderBy] any property of {@link AudioMetadata}
- * @return {Promise<Array<AudioMetadata>>}
- */
-MusicLibrary.prototype.getByGenre = function(genreName, orderBy) {
-	var self = this;
-	orderBy = orderBy || ['tracknumber'];
-	return libQ.resolve().then(function() {
-		return self.model.AudioMetadata.findAll({
-			where: {
-				genre: {[Sequelize.Op.eq]: genreName}
-			},
-			order: orderBy,
-			raw: true
-		});
-	});
-};
 
 
 /**

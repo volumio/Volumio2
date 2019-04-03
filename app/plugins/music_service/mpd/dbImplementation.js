@@ -278,7 +278,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 		// list all artists
 		promise = self.listArtists();
 	} else if (uriInfo.parts.length === 1) {
-		promise = self.listArtist(uriInfo.parts[0]);
+		promise = self.listArtist(uriInfo.parts[0], PROTOCOL_ARTISTS);
 	} else if (uriInfo.parts.length === 2) {
 		promise = self.listAlbumSongs(uriInfo.parts[0], uriInfo.parts[1]);
 	}
@@ -319,10 +319,12 @@ DBImplementation.prototype.listArtists = function() {
 
 /**
  * @param {string} artistName
+ * @param {string} [protocol]
+ * @param {string} [path]
  * @return {Promise<BrowseResult>}
  * @private
  */
-DBImplementation.prototype.listArtist = function(artistName) {
+DBImplementation.prototype.listArtist = function(artistName, protocol, path) {
 	var self = this;
 
 	// list albums, which are belong to the artist
@@ -337,7 +339,7 @@ DBImplementation.prototype.listArtist = function(artistName) {
 			order: ['disk', 'tracknumber', 'title'],
 		}).then(function(albumArr) {
 			return albumArr.map(function(album) {
-				return self.album2SearchResult(album, PROTOCOL_ARTISTS);
+				return self.album2SearchResult(album, protocol, path);
 			});
 		}),
 
@@ -422,43 +424,46 @@ DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 	});
 };
 
+
+
+
+
 /**
  * @param {string} uri
  * @return {Promise<BrowseResult>}
  */
 DBImplementation.prototype.handleAlbumsUri = function(uri) {
+
 	var self = this;
 	var uriInfo = DBImplementation.parseUri(uri);
-	var artistName = uriInfo.parts[0];
-	var albumName = uriInfo.parts[1];
 
-	var info = null;
 	var promise;
-	if (!albumName) {
-		// list all albums
-		promise = self.library.searchAlbums().then(function(albumArr) {
-			return albumArr.map(function(album) {
-				return self.album2SearchResult(album);
-			});
-		});
-	} else {
-		info = self.albumInfo(artistName, albumName);
-		// list album tracks
-		promise = self.library.query({
-			where: {
-				artist: {[Sequelize.Op.eq]: artistName},
-				album: {[Sequelize.Op.eq]: albumName}
-			},
-			order: ['tracknumber'],
-			raw: true
-		}).then(function(trackArr) {
-			return trackArr.map(function(track) {
-				return self.track2SearchResult(track);
-			});
-		});
+	if (uriInfo.parts.length === 0) {
+		// list all artists
+		promise = self.listAlbums();
+	} else if (uriInfo.parts.length >= 2) {
+		promise = self.listAlbumSongs(uriInfo.parts[0], uriInfo.parts[1]);
 	}
 
-	return promise.then(function(items) {
+	return promise.then(function(response) {
+		response.navigation.prev.uri = DBImplementation.getParentUri(uriInfo);
+		return response;
+	});
+};
+
+
+/**
+ * @return {Promise<BrowseResult>}
+ * @private
+ */
+DBImplementation.prototype.listAlbums = function() {
+	var self = this;
+
+	return self.library.searchAlbums().then(function(albumArr) {
+		return albumArr.map(function(album) {
+			return self.album2SearchResult(album);
+		});
+	}).then(function(items) {
 		return {
 			navigation: {
 				lists: [{
@@ -468,61 +473,157 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 					items: items
 				}],
 				prev: {
-					uri: albumName ? PROTOCOL_ALBUMS + '://' : ''
+					uri: ''
 				},
-				info: info
+				// info: info
 			}
 		};
-
 	});
 };
+
+
+
 
 /**
  * @param {string} uri
  * @return {Promise<BrowseResult>}
  *
  * @example uri:
- *   genres://Genre/Artist/
+ *   genres://Genre/Artist/Album
  */
 DBImplementation.prototype.handleGenresUri = function(uri) {
 	var self = this;
-	var protocolParts = uri.split('://', 2);
-	var genreComponents = decodeURIComponent(protocolParts[1]).split('/');
-	var genreName = genreComponents[0];
+	var uriInfo = DBImplementation.parseUri(uri);
 
 	var promise;
-	if (!genreName) {
-		// list all albums
-		promise = self.library.searchGenres().then(function(genresArr) {
-			return genresArr.map(function(genre) {
-				return self.genre2SearchResult(genre);
-			});
-		});
-	} else {
-		// list tracks by genre
-		var orderBy = ['tracknumber'];
-		promise = self.library.getByGenre(genreName, orderBy).then(function(trackArr) {
-			return trackArr.map(function(track) {
-				return self.track2SearchResult(track);
-			});
-		});
+	if (uriInfo.parts.length === 0) {
+		// list all genres
+		promise = self.listGenres();
+	} else if (uriInfo.parts.length == 1) {
+		promise = self.listGenre(uriInfo.parts[0]);
+	} else if (uriInfo.parts.length == 2) {
+		promise = self.listArtist(uriInfo.parts[1], PROTOCOL_GENRES, uriInfo.parts[0]);
+	} else if (uriInfo.parts.length >= 3) {
+		promise = self.listAlbumSongs(uriInfo.parts[1], uriInfo.parts[2]);
 	}
 
-	return promise.then(function(items) {
+	return promise.then(function(response) {
+		response.navigation.prev.uri = DBImplementation.getParentUri(uriInfo);
+		return response;
+	});
+
+};
+
+
+/**
+ * @return {Promise<BrowseResult>}
+ * @private
+ */
+DBImplementation.prototype.listGenres = function() {
+	var self = this;
+
+	return self.library.searchGenres().then(function(genresArr) {
+		return genresArr.map(function(genre) {
+			return self.genre2SearchResult(genre);
+		});
+	}).then(function(items) {
 		return {
 			navigation: {
 				lists: [{
 					availableListViews: [
-						'list'
+						'list', 'grid'
 					],
 					items: items
 				}],
 				prev: {
-					uri: genreName ? PROTOCOL_GENRES + '://' : ''
+					uri: ''
+				},
+				// info: info
+			}
+		};
+	});
+};
+
+/**
+ * @param {string} genreName
+ * @return {Promise<BrowseResult>}
+ * @private
+ */
+DBImplementation.prototype.listGenre = function(genreName) {
+	var self = this;
+
+	return libQ.all([
+
+		// artists
+		self.library.searchArtists({
+			where: {
+				genre: {[Sequelize.Op.eq]: genreName},
+				artist: {[Sequelize.Op.ne]: null}
+			},
+			order: ['artist'],
+		}).then(function(artistArr) {
+			return artistArr.map(function(artist) {
+				return self.artist2SearchResult(artist, PROTOCOL_GENRES, genreName);
+			});
+		}),
+
+		// albums
+		self.library.searchAlbums({
+			where: {
+				genre: {[Sequelize.Op.eq]: genreName},
+				album: {[Sequelize.Op.ne]: null}
+			},
+			order: ['album'],
+		}).then(function(albumArr) {
+			return albumArr.map(function(album) {
+				return self.album2SearchResult(album, PROTOCOL_GENRES, genreName);
+			});
+		}),
+
+		// tracks
+		self.library.query({
+			where: {
+				genre: {[Sequelize.Op.eq]: genreName}
+			},
+			order: ['disk', 'tracknumber', 'title'],
+			raw: true
+		}).then(function(trackArr) {
+			return trackArr.map(function(track) {
+				return self.track2SearchResult(track);
+			});
+		}),
+	]).then(function(lists) {
+		return {
+			navigation: {
+				'lists': [{
+					'title': self.commandRouter.getI18nString('COMMON.ARTISTS') + ' ' + self.commandRouter.getI18nString('COMMON.WITH') + ' \'' + genreName + '\' ' + self.commandRouter.getI18nString('COMMON.GENRE') + ' ' + self.commandRouter.getI18nString('COMMON.TRACKS'),
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list',
+						'grid'
+					],
+					'items': lists[0]
+				}, {
+					'title': self.commandRouter.getI18nString('COMMON.ALBUMS') + ' ' + self.commandRouter.getI18nString('COMMON.WITH') + ' \'' + genreName + '\' ' + self.commandRouter.getI18nString('COMMON.GENRE') + ' ' + self.commandRouter.getI18nString('COMMON.TRACKS'),
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list',
+						'grid'
+					],
+					'items': lists[1]
+				}, {
+					'title': self.commandRouter.getI18nString('COMMON.TRACKS') + ' - \'' + genreName + '\' ' + self.commandRouter.getI18nString('COMMON.GENRE'),
+					'icon': 'fa icon',
+					'availableListViews': [
+						'list'
+					],
+					'items': lists[2]
+				}],
+				prev: {
+					'uri': ''
 				}
 			}
 		};
-
 	});
 };
 
@@ -550,6 +651,9 @@ DBImplementation.prototype.explodeUri = function(uri) {
 				break;
 			case PROTOCOL_ALBUMS:
 				promise = self.explodeAlbumsUri(uri);
+				break;
+			case PROTOCOL_GENRES:
+				promise = self.explodeGenresUri(uri);
 				break;
 
 			default:
@@ -635,6 +739,58 @@ DBImplementation.prototype.explodeAlbumsUri = function(uri) {
 		order: ['disk', 'tracknumber', 'title'],
 		raw: true
 	}).then(function(tracks) {
+		return tracks.map(self.track2mpd.bind(self));
+	});
+
+};
+
+/**
+ * @param {string} uri
+ * @return {Promise<TrackInfo>}
+ */
+DBImplementation.prototype.explodeGenresUri = function(uri) {
+	var self = this;
+
+	var uriInfo = DBImplementation.parseUri(uri);
+
+	var promise;
+	switch(uriInfo.parts.length) {
+		case 1:
+			// play all genre songs
+			promise = this.library.query({
+				where: {
+					genre: {[Sequelize.Op.eq]: uriInfo.parts[0]}
+				},
+				order: ['disk', 'tracknumber', 'title'],
+				raw: true
+			});
+			break;
+		case 2:
+			// play all artist songs
+			promise = this.library.query({
+				where: {
+					// genre: {[Sequelize.Op.eq]: uriInfo.parts[0]}, // ignore genre in this case
+					artist: {[Sequelize.Op.eq]: uriInfo.parts[1]}
+				},
+				order: ['disk', 'tracknumber', 'title'],
+				raw: true
+			});
+			break;
+		case 3:
+		default:
+			// play all artist/album songs
+			promise = this.library.query({
+				where: {
+					artist: {[Sequelize.Op.eq]: uriInfo.parts[1]},
+					album: {[Sequelize.Op.eq]: uriInfo.parts[2]}
+				},
+				order: ['disk', 'tracknumber', 'title'],
+				raw: true
+			});
+	}
+
+
+	return promise.then(function(tracks) {
 		return tracks.map(self.track2mpd.bind(self));
 	});
 
@@ -737,53 +893,62 @@ DBImplementation.prototype.track2mpd = function(record) {
 
 /**
  * @param {string} artistName
+ * @param {string} [protocol]
+ * @param {string} [pathPrefix]
  * @return {SearchResultItem}
  * @private
  */
-DBImplementation.prototype.artist2SearchResult = function(artistName) {
+DBImplementation.prototype.artist2SearchResult = function(artistName, protocol, pathPrefix) {
 	var self = this;
+	var prefix = pathPrefix ? encodeURIComponent(pathPrefix) + '/' : '';
 	return {
 		service: 'mpd',
 		// service: PLUGIN_NAME,
 		type: 'folder',
 		title: artistName,
 		albumart: self.getAlbumArt({artist: artistName}, undefined, 'users'),
-		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName)
+		uri: (protocol || PROTOCOL_ARTISTS) + '://' + prefix + encodeURIComponent(artistName)
 	};
 };
 
 /**
  * @param {Album} album
  * @param {string} [protocol]
+ * @param {string} [pathPrefix]
  * @return {SearchResultItem}
  * @private
  */
-DBImplementation.prototype.album2SearchResult = function(album, protocol) {
+DBImplementation.prototype.album2SearchResult = function(album, protocol, pathPrefix) {
 	var self = this;
+	var prefix = pathPrefix ? encodeURIComponent(pathPrefix) + '/' : '';
 	return {
 		service: 'mpd',
 		// service: PLUGIN_NAME,
 		type: 'folder',
 		title: album.album,
 		albumart: self.getAlbumArt({artist: album.artist, album: album.album}, undefined, 'fa-tags'),
-		uri: (protocol || PROTOCOL_ALBUMS) + '://' + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
+		uri: (protocol || PROTOCOL_ALBUMS) + '://' + prefix + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
 	};
 };
 
 
 /**
  * @param {string} genreName
+ * @param {string} [protocol]
+ * @param {string} [pathPrefix]
  * @return {SearchResultItem}
  * @private
  */
-DBImplementation.prototype.genre2SearchResult = function(genreName) {
+DBImplementation.prototype.genre2SearchResult = function(genreName, protocol, pathPrefix) {
 	var self = this;
+	var prefix = pathPrefix ? encodeURIComponent(pathPrefix) + '/' : '';
 	return {
-		service: PLUGIN_NAME,
+		// service: PLUGIN_NAME,
+		service: 'mpd',
 		type: 'folder',
 		title: genreName,
 		albumart: self.getAlbumArt({}, undefined, 'fa-tags'),
-		uri: PROTOCOL_GENRES + '://' + encodeURIComponent(genreName)
+		uri: (protocol || PROTOCOL_GENRES) + '://' + prefix + encodeURIComponent(genreName)
 	};
 };
 
@@ -945,7 +1110,7 @@ DBImplementation.getParentUri = function(uriInfo) {
 		return '';
 	}
 	var allButLast = uriInfo.parts.slice(0, uriInfo.parts.length - 1);
-	return PROTOCOL_ARTISTS + '://' + allButLast.join('/');
+	return uriInfo.protocol + '://' + allButLast.join('/');
 };
 
 /**
