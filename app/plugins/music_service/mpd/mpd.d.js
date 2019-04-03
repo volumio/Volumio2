@@ -18,12 +18,25 @@
 /**
  * @typedef {object} SearchResultItem
  * @property {string} service
- * @property {'song'|'folder'|'internal-folder'|'remdisk'} type
+ * @property {'song'|'folder'|'internal-folder'|'remdisk'|'track'} type
  * @property {string} title
  * @property {string} [artist]
  * @property {string} [album]
  * @property {string} uri
  * @property {string} albumart
+ */
+
+
+/**
+ * @typedef {object} MPDTrack
+ * @extends {SearchResultItem}
+ *
+ * @property {'mpd'} service
+ * @property {'track'} type
+ * @property {string} [trackType]
+ * @property {string} [bitdepth]
+ * @property {string} [samplerate]
+ * @property {string} [duration]
  */
 
 
