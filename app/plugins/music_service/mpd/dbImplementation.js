@@ -49,8 +49,8 @@ function DBImplementation(context) {
 DBImplementation.prototype.search = function(query) {
 	var self = this;
 
-	var protocolParts = (query.uri || '').split('://', 2);
-	var protocol = protocolParts[0];
+	var uriInfo = DBImplementation.parseUri(query.uri);
+	var protocol = uriInfo.protocol;
 
 	self.logger.info('DBImplementation.search', query, protocol);
 	console.time('DBImplementation.search');
@@ -175,17 +175,12 @@ DBImplementation.prototype.searchTracks = function(searchValue) {
 DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 	var self = this;
 	return libQ.resolve().then(function() {
-		// fix: uri should always ends with '://'
-		if (uri.indexOf('://') < 0) {
-			uri += '://';
-		}
 
-		var protocolParts = uri.split('://', 2);
-		var protocol = protocolParts[0];
-		self.logger.info('DBImplementation.handleBrowseUri', uri, protocol);
+		var uriInfo = DBImplementation.parseUri(uri);
+		self.logger.info('DBImplementation.handleBrowseUri', uriInfo);
 
 		var promise;
-		switch (protocol) {
+		switch (uriInfo.protocol) {
 			case PROTOCOL_LIBRARY:
 				promise = self.handleLibraryUri(uri);
 				break;
@@ -199,7 +194,7 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 				promise = self.handleGenresUri(uri);
 				break;
 			default:
-				promise = libQ.reject('Unknown protocol: ' + protocol);
+				promise = libQ.reject('Unknown protocol: ' + uriInfo.protocol);
 		}
 		return promise;
 	}).fail(function(e) {
@@ -252,7 +247,8 @@ DBImplementation.prototype.handleLibraryUri = function(uri) {
 DBImplementation.prototype.handleArtistsUri = function(uri) {
 	var self = this;
 	var uriInfo = DBImplementation.parseUri(uri);
-	console.log('DBImplementation.handleArtistsUri', uriInfo);
+
+	var info = null;
 	var promise;
 	if (uriInfo.parts.length === 0) {
 
@@ -267,6 +263,8 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 	if (uriInfo.parts.length === 1) {
 		var artistName = uriInfo.parts[0];
 
+		info = DBImplementation.artistInfo(artistName);
+
 		// list albums, which are belong to the artist
 		promise = self.library.searchAlbums({
 			where: {
@@ -275,7 +273,7 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 			order: ['disk', 'tracknumber', 'title'],
 		}).then(function(albumArr) {
 			return albumArr.map(function(album) {
-				return DBImplementation.artistAlbum2SearchResult(artistName, album);
+				return DBImplementation.album2SearchResult(album, PROTOCOL_ARTISTS);
 			});
 		});
 
@@ -283,6 +281,8 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 	if (uriInfo.parts.length === 2) {
 		var artistName = uriInfo.parts[0];
 		var albumName = uriInfo.parts[1];
+
+		info = DBImplementation.albumInfo(artistName, albumName);
 
 		// list tracks, which are belong to the artist/album
 		promise = self.library.query({
@@ -310,7 +310,8 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
 				}],
 				prev: {
 					uri: DBImplementation.getParentUri(uriInfo)
-				}
+				},
+				info: info
 			}
 		};
 
@@ -323,9 +324,11 @@ DBImplementation.prototype.handleArtistsUri = function(uri) {
  */
 DBImplementation.prototype.handleAlbumsUri = function(uri) {
 	var self = this;
-	var protocolParts = uri.split('://', 2);
-	var albumName = decodeURIComponent(protocolParts[1]);
+	var uriInfo = DBImplementation.parseUri(uri);
+	var artistName = uriInfo.parts[0];
+	var albumName = uriInfo.parts[1];
 
+	var info = null;
 	var promise;
 	if (!albumName) {
 		// list all albums
@@ -335,9 +338,16 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 			});
 		});
 	} else {
+		info = DBImplementation.albumInfo(artistName, albumName);
 		// list album tracks
-		var orderBy = ['tracknumber'];
-		promise = self.library.getByAlbum(albumName, orderBy).then(function(trackArr) {
+		promise = self.library.query({
+			where: {
+				artist: {[Sequelize.Op.eq]: artistName},
+				album: {[Sequelize.Op.eq]: albumName}
+			},
+			order: ['tracknumber'],
+			raw: true
+		}).then(function(trackArr) {
 			return trackArr.map(function(track) {
 				return DBImplementation.track2SearchResult(track);
 			});
@@ -355,7 +365,8 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 				}],
 				prev: {
 					uri: albumName ? PROTOCOL_ALBUMS + '://' : ''
-				}
+				},
+				info: info
 			}
 		};
 
@@ -475,15 +486,30 @@ DBImplementation.prototype.explodeLibraryUri = function(uri) {
 DBImplementation.prototype.explodeArtistsUri = function(uri) {
 	var self = this;
 
-	var protocolParts = uri.split('://', 2);
-	var artistName = decodeURIComponent(protocolParts[1]);
-	return this.library.query({
-		where: {
-			artist: {[Sequelize.Op.eq]: artistName}
-		},
-		order: ['disk', 'tracknumber', 'title'],
-		raw: true
-	}).then(function(tracks) {
+	var uriInfo = DBImplementation.parseUri(uri);
+
+	var promise;
+	if(uriInfo.parts.length >= 2){
+		promise = this.library.query({
+			where: {
+				artist: {[Sequelize.Op.eq]: uriInfo.parts[0]},
+				album: {[Sequelize.Op.eq]: uriInfo.parts[1]}
+			},
+			order: ['disk', 'tracknumber', 'title'],
+			raw: true
+		});
+	} else if(uriInfo.parts.length == 1) {
+		promise = this.library.query({
+			where: {
+				artist: {[Sequelize.Op.eq]: uriInfo.parts[0]},
+			},
+			order: ['disk', 'tracknumber', 'title'],
+			raw: true
+		});
+	} else {
+		return libQ.reject('DBImplementation.explodeArtistsUri: empty uri');
+	}
+	return promise.then(function(tracks) {
 		return tracks.map(self.track2mpd.bind(self));
 	});
 
@@ -597,6 +623,12 @@ DBImplementation.getParentUri = function(uriInfo) {
  * @static
  */
 DBImplementation.parseUri = function(uri) {
+
+	// fix: uri should always ends with '://'
+	if (uri.indexOf('://') < 0) {
+		uri += '://';
+	}
+
 	var protocolParts = uri.split('://', 2);
 	var protocol = protocolParts[0];
 	var parts = ((protocolParts[1] || '').split('/') || []).map(function(part) {
@@ -681,39 +713,21 @@ DBImplementation.artist2SearchResult = function(artistName) {
 };
 
 /**
- * @param {string} albumName
+ * @param {Album} album
+ * @param {string} [protocol]
  * @return {SearchResultItem}
  * @private
  * @static
  */
-DBImplementation.album2SearchResult = function(albumName) {
+DBImplementation.album2SearchResult = function(album, protocol) {
 	return {
 		service: 'mpd',
 		// service: PLUGIN_NAME,
 		type: 'folder',
-		title: albumName,
+		title: album.album,
 		albumart: '',	// TODO: album art for an album
 		// albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
-		uri: PROTOCOL_ALBUMS + '://' + encodeURIComponent(albumName)
-	};
-};
-
-/**
- * @param {string} artistName
- * @param {string} albumName
- * @return {SearchResultItem}
- * @private
- * @static
- */
-DBImplementation.artistAlbum2SearchResult = function(artistName, albumName) {
-	return {
-		service: 'mpd',
-		// service: PLUGIN_NAME,
-		type: 'folder',
-		title: albumName,
-		albumart: '',	// TODO: album art for an album
-		// albumart: self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/' + path),'fa-tags')
-		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName)
+		uri: (protocol || PROTOCOL_ALBUMS) + '://' + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
 	};
 };
 
@@ -795,3 +809,42 @@ DBImplementation.folder2SearchResult = function(location) {
 
 
 
+
+/**
+ * @param {string} artistName
+ * @return {BrowseResultInfo}
+ * @private
+ * @static
+ */
+DBImplementation.artistInfo = function(artistName) {
+
+	return {
+		service: 'mpd',
+		type: 'artist',
+		title: artistName,
+		albumart: '',	// TODO: album art
+		// albumart: self.getAlbumArt({},undefined,'fa-tags');
+		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName)
+	};
+};
+
+
+
+/**
+ * @param {string} artistName
+ * @param {string} albumName
+ * @return {BrowseResultInfo}
+ * @private
+ * @static
+ */
+DBImplementation.albumInfo = function(artistName, albumName) {
+
+	return {
+		service: 'mpd',
+		type: 'album',
+		title: albumName,
+		albumart: '',	// TODO: album art
+		// albumart: self.getAlbumArt({},undefined,'fa-tags');
+		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName)
+	};
+};

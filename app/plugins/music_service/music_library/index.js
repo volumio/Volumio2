@@ -385,28 +385,10 @@ MusicLibrary.prototype.searchArtists = function(searchString) {
 	});
 };
 
-/**
- * @param {string} artistName
- * @param {string[]} [orderBy] any property of {@link AudioMetadata}
- * @return {Promise<Array<AudioMetadata>>}
- */
-MusicLibrary.prototype.getByArtist = function(artistName, orderBy) {
-	var self = this;
-	orderBy = orderBy || ['tracknumber'];
-	return libQ.resolve().then(function() {
-		return self.model.AudioMetadata.findAll({
-			where: {
-				artist: {[Sequelize.Op.eq]: artistName}
-			},
-			order: orderBy,
-			raw: true
-		});
-	});
-};
 
 /**
  * @param {object} [sequelizeQueryOptions]
- * @return {Promise<Array<string>>}
+ * @return {Promise<Array<Album>>}
  */
 MusicLibrary.prototype.searchAlbums = function(sequelizeQueryOptions) {
 	var self = this;
@@ -414,32 +396,15 @@ MusicLibrary.prototype.searchAlbums = function(sequelizeQueryOptions) {
 	sequelizeQueryOptions = sequelizeQueryOptions || {};
 	sequelizeQueryOptions.attributes = sequelizeQueryOptions.attributes || [];
 	sequelizeQueryOptions.attributes.push(
-		[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album']
+		// It's not clear, but 'DISTINCT' works for 'artist' as well
+		[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album'],
+		'artist'
 	);
 
 	//
 	return this.query(sequelizeQueryOptions).then(function(records) {
 		return records.map(function(record) {
-			return record.album;
-		});
-	});
-};
-
-/**
- * @param {string} albumName
- * @param {string[]} [orderBy] any property of {@link AudioMetadata}
- * @return {Promise<Array<AudioMetadata>>}
- */
-MusicLibrary.prototype.getByAlbum = function(albumName, orderBy) {
-	var self = this;
-	orderBy = orderBy || ['tracknumber'];
-	return libQ.resolve().then(function() {
-		return self.model.AudioMetadata.findAll({
-			where: {
-				album: {[Sequelize.Op.eq]: albumName}
-			},
-			order: orderBy,
-			raw: true
+			return {artist: record.artist, album: record.album};
 		});
 	});
 };
@@ -523,8 +488,7 @@ MusicLibrary.prototype.lsFolder = function(location) {
 
 	return utils.readdir(location).then(function(folderEntries) {
 		return utils.iterateArrayAsync(folderEntries, function(stats) {
-			if(stats.name.startsWith(".")==false)
-			{
+			if (stats.name.startsWith('.') == false) {
 				var fullname = path.join(location, stats.name);
 
 				if (stats.isFile() && metadata.isMediaFile(fullname)) {

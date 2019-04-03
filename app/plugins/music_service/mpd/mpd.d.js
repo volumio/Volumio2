@@ -4,6 +4,7 @@
  * @property {SearchResult[]} navigation.lists
  * @property {object} prev
  * @property {string} prev.uri
+ * @property {BrowseResultInfo} [info]
  */
 
 
@@ -18,9 +19,20 @@
  * @typedef {object} SearchResultItem
  * @property {string} service
  * @property {'song'|'folder'|'internal-folder'|'remdisk'} type
- * @property {string} [title]
+ * @property {string} title
  * @property {string} [artist]
  * @property {string} [album]
+ * @property {string} uri
+ * @property {string} albumart
+ */
+
+
+
+/**
+ * @typedef {object} BrowseResultInfo
+ * @property {string} service
+ * @property {'artist'|'album'} type
+ * @property {string} title
  * @property {string} uri
  * @property {string} albumart
  */
