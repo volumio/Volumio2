@@ -1,0 +1,7 @@
+{  "page": {
+    "label": "TRANSLATE.TRANSLATION.TRANSLATION_MANAGER"
+  },
+  "sections": [
+    {"coreSection":"custom-translation"}
+  ]
+}

@@ -33,7 +33,20 @@
         }
       ]
     },
-    {"coreSection":"custom-translation"},
-    {"coreSection": "ui-settings"}
+    {"coreSection": "ui-settings"},
+    {
+      "id":"section_translation_manager",
+      "type": "section",
+      "label": "TRANSLATE.TRANSLATION.TRANSLATION_MANAGER",
+      "icon": "fa-language",
+      "content": [
+        {
+          "id":"goto_translation_manager",
+          "element": "button",
+          "label": "TRANSLATE.TRANSLATION.LABEL",
+          "onClick": {"type":"gotoPlugin", "pluginCategory":"miscellanea", "pluginName":"translation_manager"}
+        }
+      ]
+    }
   ]
 }

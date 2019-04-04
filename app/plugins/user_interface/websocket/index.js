@@ -1818,7 +1818,7 @@ function InterfaceWebUI(context) {
 		
 		connWebSocket.on('getAllLanguages', function () {
 			var selfConnWebSocket = this;
-			var allLanguages = self.commandRouter.executeOnPlugin('miscellanea','appearance', 'getAllLanguages');
+			var allLanguages = self.commandRouter.executeOnPlugin('miscellanea','translation_manager', 'getAllLanguages');
 			allLanguages.then(function(data){
 				selfConnWebSocket.emit('pushAllLanguages', data);
 			})
@@ -1829,7 +1829,7 @@ function InterfaceWebUI(context) {
 
 		connWebSocket.on('showTranslations', function (data){
 			var selfConnWebSocket = this;
-			var percent = self.commandRouter.executeOnPlugin('miscellanea','appearance', 'showTranslation', data);
+			var percent = self.commandRouter.executeOnPlugin('miscellanea','translation_manager', 'showTranslation', data);
 			percent.then(function (value){
 				selfConnWebSocket.emit('pushPercentage', value);
 			})

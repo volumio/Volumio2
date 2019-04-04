@@ -350,5 +350,9 @@
     "UPDATE":"Aggiornamento",
     "CHECKING_FOR_UPDATES":"Controllando gli Aggiornamenti",
     "CHECKING_FOR_UPDATES_WAIT":"Attendere"
+  },
+  "TRANSLATION" : {
+    "TRANSLATION_MANAGER": "Editor traduzioni",
+    "LABEL": "Traduzione personalizzata"
   }
 }

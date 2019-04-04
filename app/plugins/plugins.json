@@ -139,6 +139,16 @@
         "type": "string",
         "value": "STARTED"
       }
+    },
+    "translation_manager": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
     }
   },
   "user_interface": {
