@@ -505,6 +505,10 @@ volumioAppearance.prototype.showTranslation = function (data){
                 element: 'input',
                 type: 'text',
                 label:translations[category][item],
+                style: {
+                  'width':'100%',
+                  'text-align': 'left'
+                },
                 attributes: [
                   {placeholder: translations[category][item]},
                   {maxlength: 200}
@@ -564,6 +568,10 @@ volumioAppearance.prototype.showTranslation = function (data){
                   element: 'input',
                   type: 'text',
                   label:translations[category][item],
+                  style: {
+                    'width':'100%',
+                    'text-align': 'left'
+                  },
                   attributes: [
                     {placeholder: translations[category][item]}
                   ],
@@ -625,6 +633,10 @@ volumioAppearance.prototype.showTranslation = function (data){
                         element: 'input',
                         type: 'text',
                         label:translations[category][item],
+                        style: {
+                          'width':'100%',
+                          'text-align': 'left'
+                        },
                         attributes: [
                           {placeholder: translations[category][item]}
                         ],
