@@ -15,7 +15,6 @@ function inputs(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
-
 }
 
 
@@ -34,8 +33,6 @@ inputs.prototype.onStart = function() {
     var self = this;
 	var defer=libQ.defer();
 
-
-	// Once the Plugin has successfull started resolve the promise
 	defer.resolve();
 
     return defer.promise;
@@ -45,15 +42,9 @@ inputs.prototype.onStop = function() {
     var self = this;
     var defer=libQ.defer();
 
-    // Once the Plugin has successfull stopped resolve the promise
     defer.resolve();
 
     return libQ.resolve();
-};
-
-inputs.prototype.onRestart = function() {
-    var self = this;
-    // Optional, use if you need it
 };
 
 
@@ -98,23 +89,14 @@ inputs.prototype.setConf = function(varName, varValue) {
 	//Perform your installation tasks here
 };
 
-
-
-// Playback Controls ---------------------------------------------------------------------------------------
-// If your plugin is not a music_sevice don't use this part and delete it
-
-
 inputs.prototype.addToBrowseSources = function () {
 
-	// Use this function to add your music service plugin to music sources
-    //var data = {name: 'Spotify', uri: 'spotify',plugin_type:'music_service',plugin_name:'spop'};
-    this.commandRouter.volumioAddToBrowseSources(data);
+	this.commandRouter.volumioAddToBrowseSources(data);
 };
 
 inputs.prototype.handleBrowseUri = function (curUri) {
     var self = this;
 
-    //self.commandRouter.logger.info(curUri);
     var response;
 
 
