@@ -124,10 +124,6 @@ translationManager.prototype.getUIConfig = function () {
         __dirname + '/UIConfig.json')
         .then(function(uiconf)
         {
-            // var languagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/appearance/languages.json'),  'utf8', {throws: false});
-            // var language = self.commandRouter.executeOnPlugin('miscellanea', 'appearance', 'getConfigParam', 'language');
-            // var allLanguagesdata = fs.readJsonSync(('/volumio/app/plugins/miscellanea/translation_manager/allLanguages.json'),  'utf8', {throws: false});
-
             defer.resolve(uiconf);
         })
         .fail(function()
@@ -476,10 +472,10 @@ translationManager.prototype.setTranslation = function (data){
       }
     }
     if(file === 'strings'){
-      fs.outputJsonSync('/data/strings_' + language + '.json', selectedLanguage, {spaces: 2});
+      fs.outputJsonSync('/data/custom_translation/strings_' + language + '.json', selectedLanguage, {spaces: 2});
       unirest.post('http://192.168.1.204:8000/uploadTranslation')
       .headers({'Content-Type': 'multipart/form-data'})
-      .attach('file', '/data/strings_' + language + '.json')
+      .attach('file', '/data/custom_translation/strings_' + language + '.json')
       .end(function (response) {
         if(response.body){
           self.logger.info(response.body);
@@ -490,10 +486,10 @@ translationManager.prototype.setTranslation = function (data){
         }
       });
     } else if (file === 'locale'){
-      fs.outputJsonSync('/data/locale-' + language + '.json', selectedLanguage, {spaces: 2});
+      fs.outputJsonSync('/data/custom_translation/locale-' + language + '.json', selectedLanguage, {spaces: 2});
       unirest.post('http://192.168.1.204:8000/uploadTranslation')
       .headers({'Content-Type': 'multipart/form-data'})
-      .attach('file', '/data/locale-' + language + '.json') 
+      .attach('file', '/data/custom_translation/locale-' + language + '.json') 
       .end(function (response) {
         if(response.body){
           self.logger.info(response.body);
@@ -504,10 +500,10 @@ translationManager.prototype.setTranslation = function (data){
         }
       });
     } else if (file === 'plugin'){
-      fs.outputJsonSync('/data/'+pluginName+'-strings_' + language + '.json', selectedLanguage, {spaces: 2});
+      fs.outputJsonSync('/data/custom_translation/'+pluginName+'-strings_' + language + '.json', selectedLanguage, {spaces: 2});
       unirest.post('http://192.168.1.204:8000/uploadTranslation')
       .headers({'Content-Type': 'multipart/form-data'})
-      .attach('file', '/data/'+pluginName+'-strings_' + language + '.json') 
+      .attach('file', '/data/custom_translation/'+pluginName+'-strings_' + language + '.json') 
       .end(function (response) {
         if(response.body){
           self.logger.info('Translation file saved');
@@ -600,60 +596,66 @@ translationManager.prototype.getTranslation = function (fileType,fileName)
 {
   var self = this;
   var defer = libQ.defer();
-  unirest.get('http://192.168.1.204:8000/getTranslation')
-    .query({fileType: fileType,
-            fileName: fileName
-          })
-    .end(function (res){
-      if(res.body !== undefined){
-        var response = res.body;
-        defer.resolve(response);
-      }
-      else{
-        self.logger.info(fileType, 'Translation file not found');
-        defer.resolve('');
-      }
-    });
-    return defer.promise;
+  try {
+    var response = fs.readJsonSync(('/data/custom_translation/'+fileName),  'utf8', {throws: false});
+    defer.resolve(response);
+  } catch (e){
+    self.logger.info(fileType, 'Translation file not found');
+    defer.resolve('');
+  }
+  return defer.promise;
 }
 
 translationManager.prototype.showPercentage = function (){
   let self = this;
   totalWords = 0;
   totalTranslated = 0 ;
-  var stringsDefault = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
-  self.getTranslation('strings','strings_'+ translationLanguage + '.json')
-  .then((stringsCustom)=>{
-    for(var category in stringsDefault){
-      for(var item in stringsDefault[category]){
-        if(stringsDefault[category][item] !== ''){
-          totalWords ++;
-          if(stringsCustom !== ''){
-            if(stringsCustom[category] !== undefined && stringsCustom[category][item] !== undefined){
-              totalTranslated ++;
-            } else {
-            }
-          }
-        }
-      }
-    }
-    var localeDefault = fs.readJsonSync(('/volumio/http/www/app/i18n/locale-en.json'),  'utf8', {throws: false});
-    self.getTranslation('locale','locale-'+ translationLanguage + '.json')
-    .then((localeCustom)=>{
-      for(var category in localeDefault){
-        for(var item in localeDefault[category]){
-          if(localeDefault[category][item] !== ''){
+  var i18nStrings;
+  try{
+    var stringsDefault = fs.readJsonSync(('/volumio/app/i18n/strings_en.json'),  'utf8', {throws: false});
+    i18nStrings = fs.readJsonSync(__dirname + '/../../../i18n/strings_' + translationLanguage + '.json');
+    self.getTranslation('strings','strings_'+ translationLanguage + '.json')
+    .then((stringsCustom)=>{
+      for(var category in stringsDefault){
+        for(var item in stringsDefault[category]){
+          if(stringsDefault[category][item] !== ''){
             totalWords ++;
-            if(localeCustom !== ''){
-              if(localeCustom[category] !== undefined && localeCustom[category][item] !== undefined){
+            if(stringsCustom !== ''){
+              if(stringsCustom[category] !== undefined && stringsCustom[category][item] !== undefined){
                 totalTranslated ++;
-              }else {
+              } 
+            }  else {
+              if(i18nStrings[category] !== undefined && i18nStrings[category][item] !== undefined){
+                totalTranslated ++;
               }
             }
           }
         }
       }
-      self.commandRouter.broadcastMessage('pushPercentage', Math.trunc((totalTranslated/totalWords)*100)+'%');
+      var localeDefault = fs.readJsonSync(('/volumio/http/www/app/i18n/locale-en.json'),  'utf8', {throws: false});
+      i18nStrings = fs.readJsonSync('/volumio/http/www/app/i18n/locale-' + translationLanguage + '.json');
+      self.getTranslation('locale','locale-'+ translationLanguage + '.json')
+      .then((localeCustom)=>{
+        for(var category in localeDefault){
+          for(var item in localeDefault[category]){
+            if(localeDefault[category][item] !== ''){
+              totalWords ++;
+              if(localeCustom !== ''){
+                if(localeCustom[category] !== undefined && localeCustom[category][item] !== undefined){
+                  totalTranslated ++;
+                }
+              } else { 
+                if(i18nStrings[category] !== undefined && i18nStrings[category][item] !== undefined){
+                  totalTranslated ++;
+                }
+              }
+            }
+          }
+        }
+        self.commandRouter.broadcastMessage('pushPercentage', Math.trunc((totalTranslated/totalWords)*100)+'%');
+      });
     });
-  });
+  } catch (e){
+      self.logger.error('Failed to send percentage translated');
+  }
 }
