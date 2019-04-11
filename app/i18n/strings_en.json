@@ -355,6 +355,9 @@
   },
   "TRANSLATION" : {
     "TRANSLATION_MANAGER": "Translation Manager",
-    "LABEL": "Custom Translation"
+    "LABEL": "Custom Translation",
+    "ERROR": "Error",
+    "SERVER_ERROR": "Lost connection to the server",
+    "SUCCESS": "Success"
   }
 }

@@ -659,3 +659,66 @@ translationManager.prototype.showPercentage = function (){
       self.logger.error('Failed to send percentage translated');
   }
 }
+
+translationManager.prototype.contribute = function (){
+  let self = this;
+  unirest.post('http://192.168.1.204:8000/contribute')
+      .headers({'Content-Type': 'application/json'})
+      .send({language : translationLanguage})
+      .end(function (response) {
+        if(response !== undefined){
+          if(response.body.value === true){
+            self.logger.info(response.body.message);
+            var res = {
+              title: self.commandRouter.getI18nString('TRANSLATION.SUCCESS'),
+              message: response.body.message,
+              size: 'md',
+              buttons: [
+                {
+                    name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                    class: 'btn btn-info ng-scope',
+                    emit:'closeModals',
+                    payload:''
+                }
+              ]
+            }
+            self.commandRouter.broadcastMessage('openModal', res);
+            self.commandRouter.broadcastMessage('contributeResponse', '');
+          } else {
+            self.logger.error(response.body.message);
+            var res = {
+              title: self.commandRouter.getI18nString('TRANSLATION.ERROR'),
+              message: response.body.message,
+              size: 'md',
+              buttons: [
+                {
+                    name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                    class: 'btn btn-info ng-scope',
+                    emit:'closeModals',
+                    payload:''
+                }
+              ]
+            }
+            self.commandRouter.broadcastMessage('openModal', res);
+            self.commandRouter.broadcastMessage('contributeResponse', '');
+          }
+        } else {
+          var res = {
+            title: self.commandRouter.getI18nString('TRANSLATION.ERROR'),
+            message: self.commandRouter.getI18nString('TRANSLATION.SERVER_ERROR'),
+            size: 'md',
+            buttons: [
+              {
+                  name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                  class: 'btn btn-info ng-scope',
+                  emit:'closeModals',
+                  payload:''
+              }
+            ]
+          }
+          self.commandRouter.broadcastMessage('openModal', res);
+          self.commandRouter.broadcastMessage('contributeResponse', '');
+        }
+      });
+}
+

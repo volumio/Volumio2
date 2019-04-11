@@ -1838,6 +1838,11 @@ function InterfaceWebUI(context) {
 			})
 		})
 
+		connWebSocket.on('contribute', function (){
+			var selfConnWebSocket = this;
+			self.commandRouter.executeOnPlugin('miscellanea','translation_manager', 'contribute');
+		})
+
 	});
 };
 
