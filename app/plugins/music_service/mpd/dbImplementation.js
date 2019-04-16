@@ -859,8 +859,8 @@ DBImplementation.prototype.track2SearchResult = function(record) {
 		albumart: self.getAlbumArt({
 			artist: record.artist,
 			album: record.album
-		}, path.dirname(record.location), 'fa-tags'),
-		icon: 'fa fa-music',
+		}, path.relative(ROOT, path.dirname(record.location)), 'fa-tags'),
+		// icon: 'fa fa-music', // icon hides album art
 		uri: DBImplementation.getTrackUri(record)
 	};
 };
