@@ -395,6 +395,11 @@ DBImplementation.prototype.listArtist = function(artistName, protocol, path) {
 DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 	var self = this;
 
+	/**
+	 * @type {AudioMetadata}
+	 */
+	var firstFoundTrack;
+
 	// tracks
 	return self.library.query({
 		where: {
@@ -403,6 +408,7 @@ DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 		},
 		order: ['disk', 'tracknumber', 'title'],
 	}).then(function(trackArr) {
+		firstFoundTrack = trackArr[0];
 		return trackArr.map(function(track) {
 			return self.track2SearchResult(track);
 		});
@@ -420,7 +426,7 @@ DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 				prev: {
 					'uri': ''
 				},
-				info: self.albumInfo(artistName, albumName)
+				info: self.albumInfo(artistName, albumName, firstFoundTrack.location)
 			}
 		};
 	});
@@ -930,7 +936,7 @@ DBImplementation.prototype.album2SearchResult = function(album, protocol, pathPr
 		type: 'folder',
 		artist: album.artist,
 		title: album.album,
-		albumart: self.getAlbumArt({artist: album.artist, album: album.album}, undefined, 'fa-tags'),
+		albumart: self.getAlbumArt({artist: album.artist, album: album.album}, path.dirname(album.trackLocation), 'fa-tags'),
 		uri: (protocol || PROTOCOL_ALBUMS) + '://' + prefix + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
 	};
 };
@@ -1051,16 +1057,17 @@ DBImplementation.prototype.artistInfo = function(artistName) {
 /**
  * @param {string} artistName
  * @param {string} albumName
+ * @param {string} trackLocation - any track of the album
  * @return {BrowseResultInfo}
  * @private
  */
-DBImplementation.prototype.albumInfo = function(artistName, albumName) {
+DBImplementation.prototype.albumInfo = function(artistName, albumName, trackLocation) {
 	var self = this;
 	return {
 		service: 'mpd',
 		type: 'album',
 		title: albumName,
-		albumart: self.getAlbumArt({artist: artistName, album: albumName}, undefined, 'fa-tags'),
+		albumart: self.getAlbumArt({artist: artistName, album: albumName}, path.dirname(trackLocation), 'fa-tags'),
 		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName)
 	};
 };

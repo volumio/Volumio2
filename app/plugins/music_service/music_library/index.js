@@ -401,13 +401,14 @@ MusicLibrary.prototype.searchAlbums = function(sequelizeQueryOptions) {
 	sequelizeQueryOptions.attributes.push(
 		// It's not clear, but 'DISTINCT' works for 'artist' as well
 		[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album'],
-		'artist'
+		'artist',
+		[Sequelize.literal('(SELECT location FROM AudioMetadata AS innerData WHERE innerData.artist = artist AND innerData.album = album LIMIT 1)'), 'trackLocation']
 	);
 
 	//
 	return this.query(sequelizeQueryOptions).then(function(records) {
 		return records.map(function(record) {
-			return {artist: record.artist, album: record.album};
+			return {artist: record.artist, album: record.album, trackLocation: record.dataValues.trackLocation};
 		});
 	});
 };
@@ -445,7 +446,7 @@ MusicLibrary.prototype.searchGenres = function(searchString) {
 /**
  * Run arbitrary query
  * @param {FindOptions} sequelizeQueryOptions
- * @return {Promise<Array<AudioMetadata>>}
+ * @return {Promise<Array<AudioMetadata|*>>}
  */
 MusicLibrary.prototype.query = function(sequelizeQueryOptions) {
 	var self = this;

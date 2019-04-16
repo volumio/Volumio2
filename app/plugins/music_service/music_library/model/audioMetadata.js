@@ -31,6 +31,7 @@
  * @property {number} trackOffset
  *
  * @property {Date} updatedAt
+ * @property {*} dataValues
  */
 
 /**
