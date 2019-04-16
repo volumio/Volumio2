@@ -1066,7 +1066,9 @@ DBImplementation.prototype.albumInfo = function(artistName, albumName, trackLoca
 	return {
 		service: 'mpd',
 		type: 'album',
-		title: albumName,
+		// title: albumName, // ui shows title instead of artist+album when it's present
+		artist: artistName,
+		album: albumName,
 		albumart: self.getAlbumArt({artist: artistName, album: albumName}, path.dirname(trackLocation), 'fa-tags'),
 		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName)
 	};
