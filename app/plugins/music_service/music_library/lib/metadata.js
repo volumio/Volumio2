@@ -164,7 +164,7 @@ function mm2custom(location, metadata) {
         artists: (metadata.common.artists || []).join(',') || null,
         composer: (metadata.common.composer || []).join(',') || null,
         date: metadata.common.date,
-        genre: (metadata.common.genre || []).join(',') || null,
+        genre: charOnly((metadata.common.genre || [])[0] || null), // use first genre only
         rating: ((metadata.common.rating || [])[0] || {}).rating,	// get first rating value
         title: metadata.common.title || path.basename(location),
         fileType: location.split('.').pop(),
@@ -215,7 +215,7 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		artists: trackData.performer,
 		composer: trackData.songWriter,
 		// date: undefined,
-		genre: getRemData(trackData.rem, 'GENRE'),
+		genre: charOnly(getRemData(trackData.rem, 'GENRE')),
 		// rating: undefined,
 		title: trackData.title,
 		year: parseInt(getRemData(trackData.rem, 'DATE')) || null,
@@ -227,6 +227,15 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		location: location,
 		trackOffset: getTrackOffset(trackData.indexes)
 	};
+}
+
+/**
+ * trim invalid characters
+ * @param {string} dataStr
+ * @return {string}
+ */
+function charOnly(dataStr){
+	return dataStr ? dataStr.replace(/[^\w-, ]/g, '').trim() : dataStr;
 }
 
 /**
