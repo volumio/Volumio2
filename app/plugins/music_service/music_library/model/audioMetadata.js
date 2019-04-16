@@ -13,6 +13,7 @@
  * @property {string} title
  * @property {string} fileType
  * @property {number} samplerate
+ * @property {number} duration
  * @property {number} year
  * @property {number} disk		- disc number
  * @property {number} tracknumber - track number
@@ -56,6 +57,7 @@ module.exports = function(sequelize, DataTypes) {
         fileType: DataTypes.TEXT,
 		year: DataTypes.INTEGER,
         samplerate: DataTypes.INTEGER,
+		duration: DataTypes.INTEGER,
 		disk: DataTypes.INTEGER,  // Disk or media number
 		tracknumber: DataTypes.INTEGER, // Track number on the media
 

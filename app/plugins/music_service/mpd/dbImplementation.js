@@ -204,7 +204,7 @@ DBImplementation.prototype.handleBrowseUri = function(uri, previousUri) {
 	return libQ.resolve().then(function() {
 
 		uriInfo = DBImplementation.parseUri(uri);
-		self.logger.info('DBImplementation.handleBrowseUri', uriInfo, previousUri);
+		self.logger.info('DBImplementation.handleBrowseUri', uri, uriInfo, previousUri);
 
 		var promise;
 		switch (uriInfo.protocol) {
@@ -395,20 +395,25 @@ DBImplementation.prototype.listArtist = function(artistName, protocol, path) {
 DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 	var self = this;
 
-	/**
-	 * @type {AudioMetadata}
-	 */
-	var firstFoundTrack;
 
-	// tracks
-	return self.library.searchTracks({
-		where: {
-			artist: {[Sequelize.Op.eq]: artistName},
-			album: {[Sequelize.Op.eq]: albumName},
-		},
-		order: ['disk', 'tracknumber', 'title'],
+	/**
+	 * @type {Album}
+	 */
+	var album;
+
+	// get album
+	return self.library.getAlbum(artistName, albumName).then(function(_album) {
+		album = _album;
+
+		// tracks
+		return self.library.searchTracks({
+			where: {
+				artist: {[Sequelize.Op.eq]: artistName},
+				album: {[Sequelize.Op.eq]: albumName},
+			},
+			order: ['disk', 'tracknumber', 'title'],
+		});
 	}).then(function(trackArr) {
-		firstFoundTrack = trackArr[0];
 		return trackArr.map(function(track) {
 			return self.track2SearchResult(track);
 		});
@@ -426,7 +431,7 @@ DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 				prev: {
 					'uri': ''
 				},
-				info: self.albumInfo(artistName, albumName, firstFoundTrack.location)
+				info: self.albumInfo(album)
 			}
 		};
 	});
@@ -464,11 +469,7 @@ DBImplementation.prototype.handleAlbumsUri = function(uri) {
 DBImplementation.prototype.listAlbums = function() {
 	var self = this;
 
-	return self.library.searchAlbums().then(function(albumArr) {
-		return albumArr.map(function(album) {
-			return self.album2SearchResult(album);
-		});
-	}).then(function(items) {
+	return self.searchAlbums().then(function(items) {
 		return {
 			navigation: {
 				lists: [{
@@ -936,7 +937,12 @@ DBImplementation.prototype.album2SearchResult = function(album, protocol, pathPr
 		type: 'folder',
 		artist: album.artist,
 		title: album.album,
-		albumart: self.getAlbumArt({artist: album.artist, album: album.album}, path.dirname(album.trackLocation), 'fa-tags'),
+		year: album.year,
+		duration: utils.formatTime(album.duration),
+		albumart: self.getAlbumArt({
+			artist: album.artist,
+			album: album.album
+		}, path.dirname(album.trackLocation), 'fa-tags'),
 		uri: (protocol || PROTOCOL_ALBUMS) + '://' + prefix + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
 	};
 };
@@ -1055,22 +1061,25 @@ DBImplementation.prototype.artistInfo = function(artistName) {
 
 
 /**
- * @param {string} artistName
- * @param {string} albumName
- * @param {string} trackLocation - any track of the album
+ * @param {Album} album
  * @return {BrowseResultInfo}
  * @private
  */
-DBImplementation.prototype.albumInfo = function(artistName, albumName, trackLocation) {
+DBImplementation.prototype.albumInfo = function(album) {
 	var self = this;
 	return {
 		service: 'mpd',
 		type: 'album',
 		// title: albumName, // ui shows title instead of artist+album when it's present
-		artist: artistName,
-		album: albumName,
-		albumart: self.getAlbumArt({artist: artistName, album: albumName}, path.dirname(trackLocation), 'fa-tags'),
-		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName)
+		artist: album.artist,
+		album: album.album,
+		duration: utils.formatTime(album.duration),
+		year: album.year,
+		albumart: self.getAlbumArt({
+			artist: album.artist,
+			album: album.album
+		}, path.dirname(album.trackLocation), 'fa-tags'),
+		uri: PROTOCOL_ARTISTS + '://' + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
 	};
 };
 
@@ -1144,9 +1153,10 @@ DBImplementation.parseUri = function(uri) {
 	var queryPart = (protocolParts[1] || '').split('?');
 
 	var parts = ((queryPart[0] || '').split('/') || []).map(function(part) {
+		if (part == 'null') return null;
 		return part ? decodeURIComponent(part) : undefined;
 	}).filter(function(part) {
-		return !!part;
+		return part !== undefined;
 	});
 
 
@@ -1157,7 +1167,7 @@ DBImplementation.parseUri = function(uri) {
 			value: values[0] ? decodeURIComponent(values[1]) : null
 		};
 	}).reduce(function(result, item) {
-		if(item.key) {
+		if (item.key) {
 			result[item.key] = item.value;
 		}
 		return result;

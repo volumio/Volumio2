@@ -13,11 +13,14 @@ module.exports = MusicLibrary;
 var ROOT = '/mnt';
 var WATCH_EXCLUDE = ['/mnt/NAS'];
 
+// increase version when you change schema
+var LIBRARY_VERSION = '1.1';
+
 // On startup, the database are copied to LIBRARY_DB_TEMP and be accessed\written from there.
 // After each scanning routine has terminated, it's copied back to LIBRARY_DB.
 // This is to minimize sd card writes.
-var LIBRARY_DB = '/data/musiclibrary/library.db';
-var LIBRARY_DB_TEMP = '/tmp/library.db';
+var LIBRARY_DB = '/data/musiclibrary/library-' + LIBRARY_VERSION + '.db';
+var LIBRARY_DB_TEMP = '/tmp/library-' + LIBRARY_VERSION + '.db';
 
 var config = {
 	debounceTime: 1000,
@@ -72,10 +75,10 @@ function MusicLibrary(context) {
 	this.saveDebounced = utils.debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
 	this.updateDebounced = utils.debounceTimeAmount(updateRecords, config.debounceTime, config.debounceSize);
 
-	this.sequelize.sync()
-		.catch(function(e){
+	this.sequelize.sync(/*{alter: true}*/)
+		.catch(function(e) {
 			// self.logger.warn('MusicLibrary: ', e);
-			if(e.parent && e.parent.code == 'SQLITE_CORRUPT'){
+			if (e.parent && e.parent.code == 'SQLITE_CORRUPT') {
 				self.logger.warn(`MusicLibrary: [${e.parent.code}] Database is corrupted and will be dropped`);
 				fs.truncateSync(LIBRARY_DB_TEMP);
 				return self.sequelize.sync();
@@ -84,28 +87,28 @@ function MusicLibrary(context) {
 			}
 		})
 		.then(function(e) {
-		// SQLITE_CORRUPT
-		// initialize file scanning service
-		self.fileScanner = new FileScanner({
-			cbStart: onScanStarted,
-			cbStop: onScanFinished,
-			cbFileFound: processFile,
-			cbError: processError,
-			cbOtherFound: function() {/* noop */
-			}
+			// SQLITE_CORRUPT
+			// initialize file scanning service
+			self.fileScanner = new FileScanner({
+				cbStart: onScanStarted,
+				cbStop: onScanFinished,
+				cbFileFound: processFile,
+				cbError: processError,
+				cbOtherFound: function() {/* noop */
+				}
+			});
+
+			// Uncomment the following 2 lines to enable update on start
+			// self.scanPath = ROOT;
+			// self.fileScanner.addTarget(ROOT);
+
+			// https://github.com/paulmillr/chokidar#api
+			self.fileWatcher = chokidar.watch(ROOT, {ignored: WATCH_EXCLUDE, persistent: true});
+			self.fileWatcher
+				.on('add', onFsChanges.bind(self, 'add'))
+				// .on('change', onFsChanges.bind(self, 'change') )
+				.on('unlink', onFsChanges.bind(self, 'unlink'));
 		});
-
-		// Uncomment the following 2 lines to enable update on start
-		// self.scanPath = ROOT;
-		// self.fileScanner.addTarget(ROOT);
-
-		// https://github.com/paulmillr/chokidar#api
-		self.fileWatcher = chokidar.watch(ROOT, {ignored: WATCH_EXCLUDE, persistent: true});
-		self.fileWatcher
-			.on('add', onFsChanges.bind(self, 'add'))
-			// .on('change', onFsChanges.bind(self, 'change') )
-			.on('unlink', onFsChanges.bind(self, 'unlink'));
-	});
 
 
 	/**
@@ -299,11 +302,11 @@ MusicLibrary.prototype.addFile = function(location) {
 			if (!record) {
 
 				// check the record in cache
-				var cachedRecord = self.saveDebounced._cache.find(function(item){
+				var cachedRecord = self.saveDebounced._cache.find(function(item) {
 					return item.location === metadata.location && item.trackOffset === metadata.trackOffset;
 				});
 
-				if(!cachedRecord) {
+				if (!cachedRecord) {
 					return self.saveDebounced(metadata);
 					// return AudioMetadata.create(recordData);
 				}
@@ -370,6 +373,25 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 };
 
 /**
+ * Load track info from database
+ * @param {string} artistName
+ * @param {string} albumName
+ * @return {Promise<Album>}
+ */
+MusicLibrary.prototype.getAlbum = function(artistName, albumName) {
+	var self = this;
+	return self.searchAlbums({
+		where: {
+			artist: {[Sequelize.Op.eq]: artistName},
+			album: {[Sequelize.Op.eq]: albumName},
+		},
+		limit: 1
+	}).then(function(albums) {
+		return albums[0];
+	});
+};
+
+/**
  * @param {FindOptions} [sequelizeQueryOptions]
  * @return {Promise<Array<Album>>}
  */
@@ -379,7 +401,7 @@ MusicLibrary.prototype.searchTracks = function(sequelizeQueryOptions) {
 	return this.query(sequelizeQueryOptions).then(function(records) {
 		// filter duplicates
 		return records.filter(function(record, index, arr) {
-			return index === arr.findIndex(function(r){
+			return index === arr.findIndex(function(r) {
 				// filter duplicates by the following fields:
 				return r.album === record.album && r.artist === record.artist && r.title === record.title;
 			});
@@ -419,13 +441,24 @@ MusicLibrary.prototype.searchAlbums = function(sequelizeQueryOptions) {
 		// It's not clear, but 'DISTINCT' works for 'artist' as well
 		[Sequelize.fn('DISTINCT', Sequelize.col('album')), 'album'],
 		'artist',
-		[Sequelize.literal('(SELECT location FROM AudioMetadata AS innerData WHERE innerData.artist = artist AND innerData.album = album LIMIT 1)'), 'trackLocation']
+		[Sequelize.literal('(SELECT location FROM AudioMetadata AS innerData WHERE innerData.artist = artist AND innerData.album = album LIMIT 1)'), 'trackLocation'],
+		[Sequelize.literal('(SELECT year FROM AudioMetadata AS innerData WHERE innerData.artist = artist AND innerData.album = album LIMIT 1)'), 'year'],
+		// SQLITE specific:
+		// When we use aggregated function we have to specify 'AudioMetadata' explicitly
+		// Otherwise we have NOT specify
+		[Sequelize.literal('(SELECT sum(duration) FROM AudioMetadata AS innerData WHERE innerData.artist = AudioMetadata.artist AND innerData.album = AudioMetadata.album)'), 'duration'],
 	);
 
 	//
 	return this.query(sequelizeQueryOptions).then(function(records) {
 		return records.map(function(record) {
-			return {artist: record.artist, album: record.album, trackLocation: record.dataValues.trackLocation};
+			return {
+				artist: record.artist,
+				album: record.album,
+				trackLocation: record.dataValues.trackLocation,
+				year: record.dataValues.year,
+				duration: record.dataValues.duration
+			};
 		});
 	});
 };
@@ -457,7 +490,6 @@ MusicLibrary.prototype.searchGenres = function(searchString) {
 		});
 	});
 };
-
 
 
 /**

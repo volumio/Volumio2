@@ -5,6 +5,7 @@ var libQ = require('kew');
 
 
 module.exports = {
+	formatTime: formatTime,
 	readdir: readdir,
 	iterateArrayAsync: iterateArrayAsync,
 	parseQueryParams: parseQueryParams,
@@ -51,7 +52,7 @@ function readdir(location, options) {
 				// 'Stats' are a little bit different from 'Dirent'
 				stats.name = folderEntry;
 				return stats;
-			}).fail(function(err){
+			}).fail(function(err) {
 				// skip errors
 				console.log(err);
 			});
@@ -116,7 +117,7 @@ function iterateArrayAsync(array, iterator) {
  *
  *
  * @example
- *	```js
+ *    ```js
  *    var debounced = debounceTimeAmount(myFn, 1000, 3);
  *    await debounced(1);
  *    await debounced(2);
@@ -124,7 +125,7 @@ function iterateArrayAsync(array, iterator) {
  *  ```
  *
  * @example
- *	```js
+ *    ```js
  *    var debounced = debounceTimeAmount(myFn, 1000, 3);
  *    await debounced(1);
  *    await debounced(2);
@@ -132,7 +133,7 @@ function iterateArrayAsync(array, iterator) {
  *    // myFn will be called with arguments [1, 2] in a separate call stack
  *  ```
  */
-function debounceTimeAmount(fn, debounceInterval, debounceSize){
+function debounceTimeAmount(fn, debounceInterval, debounceSize) {
 
 	resultFn._cache = [];
 
@@ -144,7 +145,7 @@ function debounceTimeAmount(fn, debounceInterval, debounceSize){
 	/**
 	 * @return {Promise<*>}
 	 */
-	function runFn(){
+	function runFn() {
 		// unlink cache before calling anything
 		var cacheLink = resultFn._cache;
 		resultFn._cache = [];
@@ -156,7 +157,7 @@ function debounceTimeAmount(fn, debounceInterval, debounceSize){
 	 * @param {*} data
 	 * @return {Promise<*>}
 	 */
-	function resultFn (data) {
+	function resultFn(data) {
 		resultFn._cache.push(data);
 
 		// check debounce conditions
@@ -196,3 +197,33 @@ function parseQueryParams(query, groupSeparator, valueSeparator) {
 	}
 	return result;
 }
+
+
+/**
+ * minutes
+ * @param {number} seconds
+ * @return {string} time in format: '1d 2:03:40'
+ */
+function formatTime(seconds) {
+	var day = Math.floor(seconds / (24 * 3600));
+	var hour = Math.floor(seconds % (24 * 3600) / 3600);
+	var min = Math.floor(seconds % 3600 / 60);
+	var sec = Math.floor(seconds % 60);
+
+	if (day > 0) {
+		return `${day}d ${zeropad(hour)}:${zeropad(min)}:${zeropad(sec)}`;
+	} else if (hour > 0) {
+		return `${hour}:${zeropad(min)}:${zeropad(sec)}`;
+	} else {
+		return `${min}:${zeropad(sec)}`;
+	}
+}
+/**
+ * @param {number} num
+ * @return {string}
+ */
+function zeropad(num) {
+	return num < 10 ? '0' + num : ('' + num);
+}
+
+

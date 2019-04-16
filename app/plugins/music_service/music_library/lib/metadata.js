@@ -153,7 +153,7 @@ function _parseCue(filename) {
  * @return {AudioMetadata}
  */
 function mm2custom(location, metadata) {
-	// TODO: process media picture
+	// remove media picture, so it wouldn't be saved in database
 	delete metadata.common.picture;
 	// console.log(JSON.stringify(metadata));
 
@@ -170,6 +170,7 @@ function mm2custom(location, metadata) {
         fileType: location.split('.').pop(),
         year: parseInt(metadata.common.year) || null,
         samplerate: parseSampleRate(parseInt(metadata.format.sampleRate) || 44100),
+		duration: parseInt(metadata.format.duration) || null,
         disk: parseInt(metadata.common.disk.no) || null,
         tracknumber: parseInt(metadata.common.track.no) || null,
         format: {
