@@ -375,6 +375,7 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 		})
 		.then(function (response) {
 			self.commandRouter.pushConsoleMessage('parsing response...');
+			// console.log('ControllerMpd::sendMpdCommand: parsing response: [%s]', response);
 			var respobject = libMpd.parseKeyValueMessage.call(libMpd, response);
 			// If there's an error show an alert on UI
 			if ('error' in respobject) {
@@ -384,6 +385,10 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 
 			}
 			return libQ.resolve(respobject);
+		}).fail(function(err){
+			console.error('ControllerMpd::sendMpdCommand error', err);
+			//self.commandRouter.broadcastToastMessage('error', 'Error', err.message);
+			throw err;
 		});
 };
 

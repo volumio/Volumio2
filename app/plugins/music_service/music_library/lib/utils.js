@@ -37,7 +37,7 @@ module.exports = {
  * Get folder entry (not just a names, but 'Dirent' object)
  * @param {string} location
  * @param {object} [options]
- * @return {Promise<Dirent[]>}
+ * @return {Promise<Array<Dirent|Error>>}
  */
 function readdir(location, options) {
 	// TODO: we can use 'withFileTypes' flag with node >=10.10 to simplify this method
@@ -51,6 +51,9 @@ function readdir(location, options) {
 				// 'Stats' are a little bit different from 'Dirent'
 				stats.name = folderEntry;
 				return stats;
+			}).fail(function(err){
+				// skip errors
+				console.log(err);
 			});
 		});
 	});
