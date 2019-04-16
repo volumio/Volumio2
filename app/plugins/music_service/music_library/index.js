@@ -549,7 +549,19 @@ MusicLibrary.prototype.lsFolder = function(location) {
 							}
 						});
 					} else {
-						return {type: 'folder', data: fullname};
+						// check any music file inside it
+						return self.model.AudioMetadata.findOne({
+							where: {
+								// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
+								// http://docs.sequelizejs.com/manual/querying.html#operators
+								location: {[Sequelize.Op.endsWith]: fullname + path.sep},
+							},
+							raw: true
+						}).then(function(record) {
+							if (record) {
+								return {type: 'folder', data: fullname};
+							}
+						});
 					}
 
 				} else {
