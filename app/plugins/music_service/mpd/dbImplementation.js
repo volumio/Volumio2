@@ -928,6 +928,7 @@ DBImplementation.prototype.album2SearchResult = function(album, protocol, pathPr
 		service: 'mpd',
 		// service: PLUGIN_NAME,
 		type: 'folder',
+		artist: album.artist,
 		title: album.album,
 		albumart: self.getAlbumArt({artist: album.artist, album: album.album}, undefined, 'fa-tags'),
 		uri: (protocol || PROTOCOL_ALBUMS) + '://' + prefix + encodeURIComponent(album.artist) + '/' + encodeURIComponent(album.album)
