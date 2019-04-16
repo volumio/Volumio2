@@ -72,8 +72,19 @@ function MusicLibrary(context) {
 	this.saveDebounced = utils.debounceTimeAmount(saveRecords, config.debounceTime, config.debounceSize);
 	this.updateDebounced = utils.debounceTimeAmount(updateRecords, config.debounceTime, config.debounceSize);
 
-	this.sequelize.sync().then(function() {
-
+	this.sequelize.sync()
+		.catch(function(e){
+			// self.logger.warn('MusicLibrary: ', e);
+			if(e.parent && e.parent.code == 'SQLITE_CORRUPT'){
+				self.logger.warn(`MusicLibrary: [${e.parent.code}] Database is corrupted and will be dropped`);
+				fs.truncateSync(LIBRARY_DB_TEMP);
+				return self.sequelize.sync();
+			} else {
+				throw e;
+			}
+		})
+		.then(function(e) {
+		// SQLITE_CORRUPT
 		// initialize file scanning service
 		self.fileScanner = new FileScanner({
 			cbStart: onScanStarted,
