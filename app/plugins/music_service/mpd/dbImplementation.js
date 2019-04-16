@@ -167,7 +167,7 @@ DBImplementation.prototype.searchTracks = function(searchValue) {
 		return libQ.reject(new Error('DBImplementation.searchTracks: search value is empty'));
 	}
 
-	return this.library.query({
+	return this.library.searchTracks({
 		where: {
 			[Sequelize.Op.or]: {
 				title: {[Sequelize.Op.substring]: searchValue}
@@ -347,7 +347,7 @@ DBImplementation.prototype.listArtist = function(artistName, protocol, path) {
 
 
 		// tracks
-		self.library.query({
+		self.library.searchTracks({
 			where: {
 				artist: {[Sequelize.Op.eq]: artistName},
 			},
@@ -401,7 +401,7 @@ DBImplementation.prototype.listAlbumSongs = function(artistName, albumName) {
 	var firstFoundTrack;
 
 	// tracks
-	return self.library.query({
+	return self.library.searchTracks({
 		where: {
 			artist: {[Sequelize.Op.eq]: artistName},
 			album: {[Sequelize.Op.eq]: albumName},
@@ -590,7 +590,7 @@ DBImplementation.prototype.listGenre = function(genreName) {
 		}),
 
 		// tracks
-		self.library.query({
+		self.library.searchTracks({
 			where: {
 				genre: {[Sequelize.Op.eq]: genreName}
 			},
@@ -707,7 +707,7 @@ DBImplementation.prototype.explodeArtistsUri = function(uri) {
 
 	var promise;
 	if (uriInfo.parts.length >= 2) {
-		promise = this.library.query({
+		promise = this.library.searchTracks({
 			where: {
 				artist: {[Sequelize.Op.eq]: uriInfo.parts[0]},
 				album: {[Sequelize.Op.eq]: uriInfo.parts[1]}
@@ -716,7 +716,7 @@ DBImplementation.prototype.explodeArtistsUri = function(uri) {
 			raw: true
 		});
 	} else if (uriInfo.parts.length == 1) {
-		promise = this.library.query({
+		promise = this.library.searchTracks({
 			where: {
 				artist: {[Sequelize.Op.eq]: uriInfo.parts[0]},
 			},
@@ -741,7 +741,7 @@ DBImplementation.prototype.explodeAlbumsUri = function(uri) {
 	var self = this;
 
 	var uriInfo = DBImplementation.parseUri(uri);
-	return this.library.query({
+	return this.library.searchTracks({
 		where: {
 			album: {[Sequelize.Op.eq]: uriInfo.parts[1]}
 		},
@@ -766,7 +766,7 @@ DBImplementation.prototype.explodeGenresUri = function(uri) {
 	switch (uriInfo.parts.length) {
 		case 1:
 			// play all genre songs
-			promise = this.library.query({
+			promise = this.library.searchTracks({
 				where: {
 					genre: {[Sequelize.Op.eq]: uriInfo.parts[0]}
 				},
@@ -776,7 +776,7 @@ DBImplementation.prototype.explodeGenresUri = function(uri) {
 			break;
 		case 2:
 			// play all artist songs
-			promise = this.library.query({
+			promise = this.library.searchTracks({
 				where: {
 					// genre: {[Sequelize.Op.eq]: uriInfo.parts[0]}, // ignore genre in this case
 					artist: {[Sequelize.Op.eq]: uriInfo.parts[1]}
@@ -788,7 +788,7 @@ DBImplementation.prototype.explodeGenresUri = function(uri) {
 		case 3:
 		default:
 			// play all artist/album songs
-			promise = this.library.query({
+			promise = this.library.searchTracks({
 				where: {
 					artist: {[Sequelize.Op.eq]: uriInfo.parts[1]},
 					album: {[Sequelize.Op.eq]: uriInfo.parts[2]}

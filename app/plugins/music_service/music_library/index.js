@@ -369,6 +369,23 @@ MusicLibrary.prototype.getTrack = function(location, trackOffset) {
 	});
 };
 
+/**
+ * @param {FindOptions} [sequelizeQueryOptions]
+ * @return {Promise<Array<Album>>}
+ */
+MusicLibrary.prototype.searchTracks = function(sequelizeQueryOptions) {
+	var self = this;
+	//
+	return this.query(sequelizeQueryOptions).then(function(records) {
+		// filter duplicates
+		return records.filter(function(record, index, arr) {
+			return index === arr.findIndex(function(r){
+				// filter duplicates by the following fields:
+				return r.album === record.album && r.artist === record.artist && r.title === record.title;
+			});
+		});
+	});
+};
 
 /**
  * @param {FindOptions} [sequelizeQueryOptions]
