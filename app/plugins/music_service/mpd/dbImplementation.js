@@ -245,7 +245,9 @@ DBImplementation.prototype.handleLibraryUri = function(uri) {
 
 	return self.library.lsFolder(uriInfo.location).then(function(folderEntries) {
 		var items = folderEntries.map(function(entry) {
-			if (entry.type == 'file') {
+			if (entry.type == 'collection') {
+				return self.collection2SearchResult(entry.data);
+			} else if (entry.type == 'file') {
 				return self.track2SearchResult(entry.data);
 			} else if (entry.type == 'folder') {
 				return self.folder2SearchResult(entry.data);
@@ -881,6 +883,7 @@ DBImplementation.prototype.track2SearchResult = function(record) {
  */
 DBImplementation.prototype.track2mpd = function(record) {
 	var self = this;
+	record.format = record.format || {};
 	return {
 		service: 'mpd',
 		name: record.title,
@@ -896,6 +899,7 @@ DBImplementation.prototype.track2mpd = function(record) {
 		samplerate: record.samplerate,
 		bitdepth: record.format.bitdepth,
 		trackType: path.extname(record.location),
+		// position: record.trackOffset * 1000, // TODO: pass track offset as 'position', 'seek' or something else
 		uri: record.location.substr(1), // mpd expects absolute path without first '/'
 	};
 };
@@ -966,6 +970,19 @@ DBImplementation.prototype.genre2SearchResult = function(genreName, protocol, pa
 		albumart: self.getAlbumArt({}, undefined, 'fa-tags'),
 		uri: (protocol || PROTOCOL_GENRES) + '://' + prefix + encodeURIComponent(genreName)
 	};
+};
+
+
+/**
+ * @param {AudioMetadata} record
+ * @return {SearchResultItem}
+ * @private
+ */
+DBImplementation.prototype.collection2SearchResult = function(record) {
+	var sr = this.track2SearchResult(record);
+	sr.type = 'folder';
+	sr.icon = 'fa fa-list-ol'; // icon hides album art
+	return sr;
 };
 
 
@@ -1086,14 +1103,29 @@ DBImplementation.prototype.albumInfo = function(album) {
 
 /**
  * Get track uri
- * @param {{location:string, trackOffset?:number}} track
+ * @param {AudioMetadata} track
  * @return {string}
  * @private
  * @static
  */
 DBImplementation.getTrackUri = function(track) {
-	var params = (track.trackOffset !== null && track.trackOffset !== undefined) ? 'trackoffset=' + track.trackOffset : null;
-	return track.location.replace(ROOT, PROTOCOL_LIBRARY + '://') + (params ? '?' + params : '');
+	var params = {
+		trackoffset: track.trackOffset,
+		// collection: track.isMetafile || null,
+	};
+
+	var query = Object.keys(params).map(function(key) {
+		var val = params[key];
+		if (val !== null && val !== undefined) {
+			return encodeURIComponent(key) + '=' + encodeURIComponent(val);
+		} else {
+			return null;
+		}
+	}).filter(function(pString) {
+		return !!pString;
+	}).join('&');
+
+	return track.location.replace(ROOT, PROTOCOL_LIBRARY + '://') + (query ? '?' + query : '');
 };
 
 /**

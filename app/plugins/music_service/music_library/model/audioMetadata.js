@@ -30,6 +30,8 @@
  *
  * @property {string} location
  * @property {number} trackOffset
+ * @property {boolean} isMetafile
+ * @property {string} metafile
  *
  * @property {Date} updatedAt
  * @property {*} dataValues
@@ -100,17 +102,37 @@ module.exports = function(sequelize, DataTypes) {
 		 * track offset in seconds
 		 * It's used when single file contains multiple tracks
 		 */
-		trackOffset: {type: DataTypes.INTEGER, defaultValue: null}
+		trackOffset: {type: DataTypes.INTEGER, defaultValue: null},
+
+
+		/**
+		 * metafile supposed to have multiple tracks
+		 * Metafile example are: cue, m3u, etc
+		 */
+		isMetafile: {type: DataTypes.BOOLEAN, defaultValue: false},
+
+		/**
+		 * metafile location.
+		 * It's used for cue files
+		 * It's used when single file contains multiple tracks
+		 */
+		metafile: {type: DataTypes.TEXT, defaultValue: null}
 
 
 		// By default, Sequelize will add the attributes createdAt and updatedAt to your model so you will be able to know when the database entry went into the db and when it was updated last.
 	}, {
 		indexes: [
-			// By default index name will be [table]_[fields]
-			// Creates a multi column partial index
 			{
 				name: 'location_idx',
 				fields: ['location']
+			},
+			{
+				name: 'metafile_idx',
+				fields: ['metafile']
+			},
+			{
+				name: 'album_idx',
+				fields: ['album']
 			}
 		]
 	});

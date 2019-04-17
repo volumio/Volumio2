@@ -5,6 +5,7 @@ var libQ = require('kew');
 
 
 module.exports = {
+	xpath_get: xpath_get,
 	formatTime: formatTime,
 	readdir: readdir,
 	iterateArrayAsync: iterateArrayAsync,
@@ -227,3 +228,21 @@ function zeropad(num) {
 }
 
 
+
+
+/**
+ * extract object property value by point-divided selector like 'book.meta.author'
+ * @param {object} obj
+ * @param {string|Array<string>} path
+ * @param {string} [separator:'.']
+ * @return {*|null} value
+ */
+function xpath_get(obj, path, separator) {
+	separator = (typeof separator == 'undefined') ? '.' : separator;
+	let tokens = Array.isArray(path) ? path : path.split(separator);
+	let result = obj;
+	for( let i=0; result && (i<tokens.length); i++){
+		result = result[tokens[i]];
+	}
+	return result;
+}

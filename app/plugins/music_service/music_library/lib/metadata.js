@@ -4,7 +4,7 @@ var musicMetadata = require('music-metadata');
 var cueParser = require('cue-parser');
 var libQ = require('kew');
 var _ = require('underscore');
-var iterateArrayAsync = require('./utils').iterateArrayAsync;
+var utils = require('./utils');
 
 
 module.exports = {
@@ -112,8 +112,10 @@ function _parseCue(filename) {
 	 */
 	var tracks = [];
 
+	tracks.push(cue2customMetafile(filename, cuesheet));
+
 	// iterate through each file
-	return iterateArrayAsync(cuesheet.files || [], function(fileData, i) {
+	return utils.iterateArrayAsync(cuesheet.files || [], function(fileData, i) {
 		// check that file exists
 		var location = path.join(path.dirname(filename), fileData.name);
 		return libQ.nfcall(fs.stat, location).then(function(stats) {
@@ -125,9 +127,9 @@ function _parseCue(filename) {
 		}).then(function(commonMetadata) {
 
 			// iterate through each track in file
-			// return iterateArrayAsync(fileData.tracks || [], function(_t, j) {
+			// return utils.iterateArrayAsync(fileData.tracks || [], function(_t, j) {
 			(fileData.tracks || []).forEach(function(_t, j) {
-				var cueMetadata = cue2custom(location, cuesheet, i, j);
+				var cueMetadata = cue2custom(location, filename, cuesheet, i, j);
 
 				var mergedMetadata = _.defaults({}, cueMetadata, commonMetadata);
 				tracks.push(mergedMetadata);
@@ -187,18 +189,39 @@ function mm2custom(location, metadata) {
 	};
 }
 
+
+/**
+ * @param {string} location  			music file location
+ * @param {CueSheet} cuesheet
+ * @return {AudioMetadata}
+ */
+function cue2customMetafile(location, cuesheet) {
+	var trackData = cue2custom(location, undefined, cuesheet, -1, -1);
+	trackData = _.defaults({
+			trackOffset: null,
+			isMetafile: true,
+			metafile: null
+		},
+		trackData, {
+			fileType: path.extname(location)
+		});
+	return trackData;
+}
+
+
 /**
  * Convert metadata from 'cue-parser' format to 'AudioMetadata'
- * @param {string} location
+ * @param {string} location  			music file location
+ * @param {string} metafileLocation  	cue file location
  * @param {CueSheet} cuesheet
  * @param {number} fileIndex
  * @param {number} trackIndex
  * @return {AudioMetadata}
  */
-function cue2custom(location, cuesheet, fileIndex, trackIndex) {
+function cue2custom(location, metafileLocation, cuesheet, fileIndex, trackIndex) {
 	var trackData = _.defaults({},
-		cuesheet.files[fileIndex].tracks[trackIndex],
-		cuesheet.files[fileIndex],
+		utils.xpath_get(cuesheet, ['files', fileIndex, 'tracks', trackIndex]),
+		utils.xpath_get(cuesheet, ['files', fileIndex]),
 		cuesheet,
 		{
 			rem: [],
@@ -206,6 +229,8 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		});
 	delete trackData.files;
 	delete trackData.tracks;
+
+	// console.log('cue2custom', metafileLocation, fileIndex, trackIndex, trackData.indexes, getTrackOffset(trackData.indexes) );
 
 	// TODO: cue2common may be updated later
 	return {
@@ -218,6 +243,7 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		genre: charOnly(getRemData(trackData.rem, 'GENRE')),
 		// rating: undefined,
 		title: trackData.title,
+		fileType: path.extname(location),
 		year: parseInt(getRemData(trackData.rem, 'DATE')) || null,
 		// disk: undefined,
 		tracknumber: parseInt(trackData.number) || null,
@@ -225,7 +251,9 @@ function cue2custom(location, cuesheet, fileIndex, trackIndex) {
 		extra: trackData,
 
 		location: location,
-		trackOffset: getTrackOffset(trackData.indexes)
+		trackOffset: getTrackOffset(trackData.indexes),
+		metafile: metafileLocation,
+		isMetafile: false,
 	};
 }
 
@@ -240,7 +268,7 @@ function charOnly(dataStr){
 
 /**
  * Convert samplerate string into string to show to user
- * @param {string} bitrate
+ * @param {string} sampleRate
  */
 function parseSampleRate(sampleRate) {
 	//todo proper parse dsd data

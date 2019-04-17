@@ -509,69 +509,103 @@ MusicLibrary.prototype.query = function(sequelizeQueryOptions) {
  * Get folder content
  * returns:
  *  - for file entry: {type: 'file', data:AudioMetadata}
+ *  - for collection entry: {type: 'collection', data:AudioMetadata}
  *  - for folder entry: {type: 'folder', data:string} where 'data'data is an absolute folder path
  *
  * @param {string} location
- * @return {Promise<Array<{type: 'file'|'folder', data:AudioMetadata|string}>>}
+ * @return {Promise<Array<{type: 'file'|'folder'|'collection', data:AudioMetadata|string}>>}
  */
 MusicLibrary.prototype.lsFolder = function(location) {
 	var self = this;
+
 
 	// for root folders - we need to see if there any files inside
 	// if no files - don't show it
 	var isRoot = location == ROOT;
 
-	return utils.readdir(location).then(function(folderEntries) {
-		return utils.iterateArrayAsync(folderEntries, function(stats) {
-			if (stats.name.startsWith('.') == false) {
-				var fullname = path.join(location, stats.name);
 
-				if (stats.isFile() && metadata.isMediaFile(fullname)) {
-					// file
+	function _lsTrackResult(record){
+		if (record.isMetafile) {
+			return {type: 'collection', data: record};
+		} else {
+			return {type: 'file', data: record};
+		}
+	}
 
-					return self.getTrack(fullname).then(function(record) {
-						if (record) {
-							return {type: 'file', data: record};
+	function _lsFolderResult(fullname){
+
+		if (isRoot) {
+			return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
+				if (folderEntries.length > 0) {
+					return {type: 'folder', data: fullname};
+				} else {
+					// return nothing = don't show it
+					self.logger.info('MusicLibrary.lsFolder empty folder', fullname);
+				}
+			});
+		} else {
+			// check any music file inside it
+			return self.model.AudioMetadata.findOne({
+				where: {
+					// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
+					// http://docs.sequelizejs.com/manual/querying.html#operators
+					location: {[Sequelize.Op.endsWith]: fullname + path.sep},
+				},
+				raw: true
+			}).then(function(record) {
+				if (record) {
+					return {type: 'folder', data: fullname};
+				}
+			});
+		}
+	}
+
+
+	return self.getTrack(location).then(function(record) {
+		if (record) {
+			// This is a metatrack, get it's content
+			return self.model.AudioMetadata.findAll({
+				where: {
+					// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
+					// http://docs.sequelizejs.com/manual/querying.html#operators
+					metafile: {[Sequelize.Op.eq]: location},
+				},
+				raw: true
+			}).then(function(records) {
+				return records.map(function(record){
+					return _lsTrackResult(record);
+				})
+			});
+		} else {
+			// this is a folder
+			return utils.readdir(location).then(function(folderEntries) {
+				return utils.iterateArrayAsync(folderEntries, function(stats) {
+					if (!stats.name.startsWith('.')) {
+						var fullname = path.join(location, stats.name);
+
+						if (stats.isFile()) {
+							// file
+							if (metadata.isMediaFile(fullname)) {
+								return self.getTrack(fullname).then(function(record) {
+									if (record) {
+										return _lsTrackResult(record);
+									}
+									// else - ignore it
+								});
+							}
+
+						} else if (stats.isDirectory()) {
+							// folder
+							return _lsFolderResult(fullname);
+						} else {
+							self.logger.info('MusicLibrary.lsFolder unknown entry type', fullname);
 						}
-						// else - ignore it
-					});
-
-				} else if (stats.isDirectory()) {
-					// folder
-
-					if (isRoot) {
-						return libQ.nfcall(fs.readdir, fullname).then(function(folderEntries) {
-							if (folderEntries.length > 0) {
-								return {type: 'folder', data: fullname};
-							} else {
-								// return nothing = don't show it
-								self.logger.info('MusicLibrary.lsFolder empty folder', fullname);
-							}
-						});
-					} else {
-						// check any music file inside it
-						return self.model.AudioMetadata.findOne({
-							where: {
-								// It's not clear, but 'endsWith' produce "LIKE 'hat%'" condition
-								// http://docs.sequelizejs.com/manual/querying.html#operators
-								location: {[Sequelize.Op.endsWith]: fullname + path.sep},
-							},
-							raw: true
-						}).then(function(record) {
-							if (record) {
-								return {type: 'folder', data: fullname};
-							}
-						});
+						// ignore all other types
 					}
 
-				} else {
-					self.logger.info('MusicLibrary.lsFolder unknown entry type', fullname);
-				}
-				// ignore all other types
-			}
-
-
-		});
+				});
+			});
+		}
 	});
 };
 
