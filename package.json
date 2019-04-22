@@ -19,6 +19,7 @@
   "dependencies": {
     "body-parser": "^1.17.2",
     "cache-manager": "^2.4.0",
+    "chokidar": "^2.1.5",
     "compare-versions": "^3.0.1",
     "compression": "^1.6.2",
     "connect-busboy": "0.0.2",
@@ -45,7 +46,7 @@
     "moment": "^2.18.1",
     "mpd": "^1.3.0",
     "mqtt": "^2.18.8",
-    "music-metadata": "^2.6.0",
+    "music-metadata": "^3.6.0",
     "node-cache": "^4.1.1",
     "node-schedule": "^1.2.3",
     "node-ssdp": "^3.2.5",
