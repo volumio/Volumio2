@@ -1607,6 +1607,18 @@ function InterfaceWebUI(context) {
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
 
+        	connWebSocket.on('setDeviceActivationCode', function (data) {
+            	var selfConnWebSocket = this;
+
+                var codeCheck = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'checkDeviceCode', data);
+
+                if (codeCheck != undefined) {
+                    codeCheck.then(function (data) {
+                        selfConnWebSocket.emit('pushDeviceActivationCodeResult', data);
+                    });
+                }
+        	});
+
 			connWebSocket.on('checkPassword', function (data) {
 				var selfConnWebSocket = this;
 
