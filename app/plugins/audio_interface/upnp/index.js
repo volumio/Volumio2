@@ -261,7 +261,9 @@ UpnpInterface.prototype.prepareUpnpPlayback = function () {
     self.logger.info("Preparing playback through UPNP");
 
     //self.commandRouter.volumioStop();
-    this.commandRouter.stateMachine.unSetVolatile();
+    if (self.commandRouter.stateMachine.isVolatile) {
+        self.commandRouter.stateMachine.unSetVolatile();
+    }
     if(this.commandRouter.stateMachine.isConsume)
     {
         self.logger.info("Consume mode");
@@ -298,5 +300,11 @@ UpnpInterface.prototype.clearQueue = function () {
     var self = this;
 
     self.logger.info("Clearing queue after UPNP request");
-    this.commandRouter.stateMachine.clearQueue();
+    if (self.commandRouter.stateMachine.isVolatile) {
+        self.commandRouter.stateMachine.unSetVolatile();
+    }
+
+    setTimeout(()=>{
+        this.commandRouter.stateMachine.clearQueue();
+    }, 300)
 };

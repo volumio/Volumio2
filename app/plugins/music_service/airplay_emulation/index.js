@@ -22,7 +22,7 @@ function AirPlayInterface(context) {
     this.logger = this.commandRouter.logger;
     this.obj={
         status: 'play',
-        service:'airplay',
+        service:'airplay_emulation',
         title: '',
         artist: '',
         album: '',
@@ -169,7 +169,7 @@ function startShairportSync(self) {
 AirPlayInterface.prototype.stopShairportSync = function () {
     var self = this;
 
-    exec("sudo systemctl stop airplay", function (error, stdout, stderr) {
+    exec("/usr/bin/sudo /usr/bin/killall shairport-sync", {uid:1000, gid:1000}, function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
         }
@@ -222,12 +222,23 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
         self.obj.albumart="/albumart";
 
         if (!onDemand) {
-            self.context.coreCommand.volumioStop();
             self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
-            self.context.coreCommand.stateMachine.setVolatile({
-                service:"airplay",
+            var state = self.commandRouter.stateMachine.getState();
+            if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+                // if Initial startup do not kill shairport
+                self.commandRouter.stateMachine.unSetVolatile();
+            } else {
+                self.context.coreCommand.volumioStop();
+            }
+            setTimeout(()=>{
+                self.context.coreCommand.stateMachine.setVolatile({
+                service:'airplay_emulation',
                 callback: self.unsetVol.bind(self)
             });
+            self.pushAirplayMeta();
+            }, 1000)
+
+
         }
     })
 
@@ -310,7 +321,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 AirPlayInterface.prototype.pushAirplayMeta = function () {
     var self = this;
     self.seekTimerAction();
-    self.context.coreCommand.servicePushState(self.obj, 'airplay');
+    self.context.coreCommand.servicePushState(self.obj, 'airplay_emulation');
 }
 
 AirPlayInterface.prototype.getAlbumArt = function (data, path,icon) {
@@ -340,12 +351,25 @@ AirPlayInterface.prototype.airPlayStop = function () {
 
 AirPlayInterface.prototype.unsetVol = function () {
     var self = this;
-    console.log('STOPPING SHAIRPORT');
 
-    self.stopAirplay();
-    setTimeout(()=>{
-        return libQ.resolve()
-    },500)
+    if (!onDemand) {
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+            console.log('STOPPING SHAIRPORT');
+            self.stopAirplay();
+            setTimeout(()=>{
+                return libQ.resolve()
+            },500)
+        } else {
+            setTimeout(()=>{
+                return libQ.resolve()
+            },500)
+        }
+    } else {
+        setTimeout(()=>{
+            return libQ.resolve()
+        },500)
+    }
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
@@ -356,7 +380,24 @@ AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data)
 AirPlayInterface.prototype.stop = function () {
     var self = this;
     var defer = libQ.defer();
-    defer.resolve('');
+
+    if (!onDemand) {
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service === 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+            self.stopShairportSync();
+            setTimeout(()=> {
+                self.startShairportSync();
+            },5000)
+            setTimeout(()=> {
+                defer.resolve('');
+            },1000)
+        } else {
+            defer.resolve('');
+        }
+    } else {
+        defer.resolve('');
+    }
+
     return defer.promise
 };
 
@@ -364,14 +405,13 @@ AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
     var self = this;
 
     this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
-
     try {
         this.commandRouter.volumioStop().then(()=>{
 
             self.context.coreCommand.volumioStop();
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
         self.context.coreCommand.stateMachine.setVolatile({
-            service:"airplay",
+            service:'airplay_emulation',
             callback: self.unsetVol.bind(self)
         });
     });
@@ -380,7 +420,7 @@ AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
         self.context.coreCommand.volumioStop();
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
         self.context.coreCommand.stateMachine.setVolatile({
-            service:"airplay",
+            service:'airplay_emulation',
             callback: self.unsetVol.bind(self)
         });
     }
@@ -402,7 +442,13 @@ AirPlayInterface.prototype.stopAirplay = function () {
     if (onDemand) {
         self.stopShairportSync();
     } else {
-        self.startShairportSync();
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+            self.stopShairportSync();
+            setTimeout(() => {
+                self.startShairportSync();
+            },5000)
+        }
     }
 };
 
