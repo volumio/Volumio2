@@ -442,6 +442,12 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
+		if (remainingTime < 0)
+		{
+			this.commandRouter.pushConsoleMessage("ERROR increasePlaybackTimer remainingTime:" + remainingTime + " negative - askedForPrefetch:" + this.askedForPrefetch + " - simulateStopStartDone:" + this.simulateStopStartDone);
+			remainingTime = 0;
+		}
+
 		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
@@ -594,6 +600,20 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
   } else {
     this.volatileService = undefined;
 
+    // On slow devices, nodejs might update mpd before the scheduled setTimeout ends.
+    // To handle this, make a direct call to increasePlaybackTimer to force another mpd update.
+    // Sometimes the mpd update occurs more than 500ms before the end of the scheduled setTimeout.              
+    // Setting currentSeek = currentSongDuration ensures a setTimeout increase of no more than 500ms.
+	if (this.askedForPrefetch)
+	{
+		// Debug if the workaround is applicable
+		this.commandRouter.pushDebugConsoleMessage('ERROR Prefetch 500ms setTimeout missed >> directly calling increasePlaybackTimer');
+		this.commandRouter.pushDebugConsoleMessage("ERROR this.runPlaybackTimer:" + this.runPlaybackTimer + " this.currentSongDuration:" + this.currentSongDuration + " - this.currentSeek:" + this.currentSeek + " - this.prefetchDone:"+this.prefetchDone+ " - this.simulateStopStartDone:"+this.simulateStopStartDone);
+
+		this.currentSeek = this.currentSongDuration;
+		this.increasePlaybackTimer();
+	}
+  
     var trackBlock = this.getTrack(this.currentPosition);
 	}
 
