@@ -149,7 +149,7 @@
           "options": [
             {
               "value":1024,
-              "label": "128 KB"
+              "label": "1 MB"
             },
             {
               "value":2048,
