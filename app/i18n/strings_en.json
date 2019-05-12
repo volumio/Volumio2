@@ -61,6 +61,8 @@
     "SOFTWARE":"Software",
     "MPD_VOLUME":"MPD Clients Volume Control",
     "MPD_VOLUME_DOC":"Allow MPD Clients to change Volume, this will negatively impact Volume change speed",
+    "MIXER_SAVE":"Retain Mixer Settings",
+    "MIXER_SAVE_DOC":"Maintins mixer settings even if mixer is turned off or unplugged",
     "RESAMPLING_ALG":"Resampling algorithm quality",
     "RESAMPLING_ALG_DOC":"This setting allows to set the ideal Resampling algorithm quality. Higher quality requires greater computing power, therefore sound might stutter or pause on low power devices. If that's the case lower the quality until you get smooth playback.",
     "VERY_HIGH":"Very high",
