@@ -198,6 +198,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 			} else if (activemixer_type == 'Software'){
 				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE');
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[7].hidden', true);
                 self.config.set('mixersave', false);
 			} else if (activemixer_type == 'Hardware'){
 				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.HARDWARE');
