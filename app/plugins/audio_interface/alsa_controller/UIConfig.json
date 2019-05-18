@@ -136,7 +136,6 @@
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_NORMALIZATION",
           "value":false
         },
-
         {
           "id": "audio_buffer_size",
           "element": "select",
@@ -491,11 +490,10 @@
         {
           "id": "mixersave",
           "element": "switch",
-          "doc":"TRANSLATE.PLAYBACK_OPTIONS.MIXER_SAVE",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_SAVE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_SAVE",
-          "value":true
+          "value": false
         }
-
       ]
     },
 	{
