@@ -179,6 +179,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			var mixers = self.getMixerControls(value);
 			var activemixer = self.config.get('mixer');
+            var mixersave = self.config.get('mixersave')
 			var activemixer_type = self.config.get('mixer_type');
 
 
@@ -192,6 +193,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[4].hidden', true);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[5].hidden', true);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[6].hidden', true);
+                self.configManager.setUIConfigParam(uiconf, 'sections[3].content[7].hidden', true);
 			} else if (activemixer_type == 'Software'){
 				var activemixer_type_lang = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE');
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].hidden', true);
@@ -332,6 +334,10 @@ ControllerAlsa.prototype.getUIConfig = function () {
             self.configManager.setUIConfigParam(uiconf, 'sections[3].content[6].value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[3].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[6].options'), value));
 
+            value = self.config.get('mixersave', false);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[7].value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[3].content[7].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[7].options'), value));
+
 			value = self.config.get('resampling', false);
 			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[4].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[4].content[0].options'), value));
@@ -383,6 +389,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
                 uiconf.sections[3].content[4].hidden = true;
                 uiconf.sections[3].content[5].hidden = true;
                 uiconf.sections[3].content[6].hidden = true;
+                uiconf.sections[3].content[7].hidden = true;
                 uiconf.sections[4].hidden = true;
             }
 
@@ -678,7 +685,10 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
         self.setConfigParam({key: 'mpdvolume', value: data.mpdvolume});
         self.commandRouter.executeOnPlugin('music_service', 'mpd', 'saveResampleOptions', '');
     }
-
+    var mixersave = self.config.get('mixersave', false)
+    if (mixersave != data.mixersave){
+        self.setConfigParam({key: 'mixersave', value: data.mixersave});
+    }
 	if (data.mixer_type.value === 'Hardware') {
 	if (data.mixer.value == 'SoftMaster' || data.mixer.value == 'None'){
 		var value = self.config.get('outputdevice');
@@ -979,12 +989,21 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 
 ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var self = this;
+    var mixersave = self.config.get('mixersave', false)
+    var mixertype = self.config.get('mixertype', '')
+    var defaultmixer = self.config.get('mixer', '')
+    if(mixersave && defaultmixer != undefined && defaultmixer){ 
 
+        var mixers = [];
+        var match = '';
+        var currentcardname = defaultmixer       
+    } else {
 	var mixers = [];
 	var currentcardname = '';
 	var defaultmixer = '';
 	var match = '';
-	var mixertpye = '';
+        var mixertype = '';
+    }
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
     var outputdevice = self.config.get('outputdevice');
@@ -1095,6 +1114,12 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 		self.setConfigParam({key: 'mixer', value: defaultmixer});
 		this.updateVolumeSettings();
 	}
+    if (this.config.has('mixersave') == false){
+        this.config.addConfigValue('mixersave', 'string', this.mixersave);
+    } else {
+        self.setConfigParam({key: 'mixersave', value: mixersave});
+		this.updateVolumeSettings();
+    }
 	setTimeout(()=>{
         self.commandRouter.retrieveVolumeLevels();
 	}, 2500)
