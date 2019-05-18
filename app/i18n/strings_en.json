@@ -62,7 +62,7 @@
     "MPD_VOLUME":"MPD Clients Volume Control",
     "MPD_VOLUME_DOC":"Allow MPD Clients to change Volume, this will negatively impact Volume change speed",
     "MIXER_SAVE":"Retain Hardware Mixer Settings",
-    "MIXER_SAVE_DOC":"Maintins hardware mixer settings even if mixer is turned off or removed. This allows for variable bootup order between DAC and Volumio. If the Mixer Type changes from Hardware to unefined turn this on.",
+    "MIXER_SAVE_DOC":"Maintins hardware mixer settings even if mixer is turned off or removed. This allows for variable bootup order between DAC and Volumio. If the Mixer Type changes from Hardware to unedfined turn this on.",
     "RESAMPLING_ALG":"Resampling algorithm quality",
     "RESAMPLING_ALG_DOC":"This setting allows to set the ideal Resampling algorithm quality. Higher quality requires greater computing power, therefore sound might stutter or pause on low power devices. If that's the case lower the quality until you get smooth playback.",
     "VERY_HIGH":"Very high",
