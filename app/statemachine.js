@@ -86,8 +86,8 @@ CoreStateMachine.prototype.getState = function () {
             samplerate: this.volatileState.samplerate,
             bitdepth: this.volatileState.bitdepth,
             channels: this.volatileState.channels,
-            random: false,
-            repeat: false,
+            random: this.volatileState.random,
+            repeat: this.volatileState.repeat,
             repeatSingle:false,
             consume: false,
             volume: this.currentVolume,
@@ -1500,20 +1500,39 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 CoreStateMachine.prototype.setRandom = function (value) {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRandom '+value);
 
-	this.currentRandom=value;
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.random === "function") {
+            volatilePlugin.random(value);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No random method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.currentRandom=value;
 
-	this.pushState().fail(this.pushError.bind(this));
+        this.pushState().fail(this.pushError.bind(this));
+	}
 };
 
 CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRepeat '+value+ ' single '+repeatSingle);
 
-	this.currentRepeat=value;
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.repeat === "function") {
+            volatilePlugin.repeat(value);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No repeat method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.currentRepeat=value;
 
-	if(repeatSingle!=undefined)
-	    this.currentRepeatSingleSong=repeatSingle;
+        if (repeatSingle!=undefined) {
+            this.currentRepeatSingleSong=repeatSingle;
+		}
 
-	this.pushState().fail(this.pushError.bind(this));
+        this.pushState().fail(this.pushError.bind(this));
+	}
 };
 
 CoreStateMachine.prototype.setConsume = function (value) {
