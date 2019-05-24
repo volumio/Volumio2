@@ -1498,7 +1498,7 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 };
 
 CoreStateMachine.prototype.setRandom = function (value) {
-	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRandom '+value);
+	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRandom '+ value);
 
     if(this.isVolatile){
         var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
@@ -1515,12 +1515,12 @@ CoreStateMachine.prototype.setRandom = function (value) {
 };
 
 CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
-	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRepeat '+value+ ' single '+repeatSingle);
+	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRepeat '+ value + ' single '+ repeatSingle);
 
     if(this.isVolatile){
         var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
         if (typeof volatilePlugin.repeat === "function") {
-            volatilePlugin.repeat(value);
+            volatilePlugin.repeat(value,repeatSingle);
         } else {
             this.commandRouter.pushConsoleMessage('WARNING: No repeat method for plugin ' + this.volatileService);
         }
