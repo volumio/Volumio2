@@ -1540,8 +1540,17 @@ CoreCommandRouter.prototype.volumioFFWDRew = function (millisecs) {
     return this.stateMachine.ffwdRew(millisecs);
 };
 
+CoreCommandRouter.prototype.volumioSkipBackwards = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSkipBackwards');
 
+    return this.stateMachine.skipBackwards(data);
+};
 
+CoreCommandRouter.prototype.volumioSkipForward = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSkipForward');
+
+    return this.stateMachine.skipForward(data);
+};
 
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {

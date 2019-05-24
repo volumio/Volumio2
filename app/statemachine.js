@@ -73,6 +73,10 @@ CoreStateMachine.prototype.getState = function () {
             this.volatileState.albumart = '/albumart';
         }
 
+        if (this.volatileState.repeatMode === undefined) {
+            this.volatileState.repeatMode = 'all';
+        }
+
         return {
             status: this.volatileState.status,
             title: this.volatileState.title,
@@ -88,7 +92,8 @@ CoreStateMachine.prototype.getState = function () {
             channels: this.volatileState.channels,
             random: this.volatileState.random,
             repeat: this.volatileState.repeat,
-            repeatSingle:false,
+            repeatSingle:this.volatileState.repeatSingle,
+            enableSkip: this.volatileState.enableSkip,
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
@@ -1541,6 +1546,36 @@ CoreStateMachine.prototype.setConsume = function (value) {
 	this.currentConsume=value;
 
 	this.pushState().fail(this.pushError.bind(this));
+};
+
+CoreStateMachine.prototype.skipBackwards = function (data) {
+    this.commandRouter.pushConsoleMessage('CoreStateMachine::skipBackwards '+ data);
+
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.skipBackwards === "function") {
+            volatilePlugin.skipBackwards(data);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No skipBackwards method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.commandRouter.pushConsoleMessage('WARNING: skipBackwards method is only available for volatile plugins');
+    }
+};
+
+CoreStateMachine.prototype.skipForward = function (data) {
+    this.commandRouter.pushConsoleMessage('CoreStateMachine::skipForward '+ data);
+
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.skipForward === "function") {
+            volatilePlugin.skipForward(data);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No skipForward method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.commandRouter.pushConsoleMessage('WARNING: SkipForward method is only available for volatile plugins');
+    }
 };
 
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {

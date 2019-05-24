@@ -261,7 +261,15 @@ function InterfaceWebUI(context) {
                 return self.commandRouter.volumioRepeat(data.value,data.repeatSingle);
 			});
 
-			connWebSocket.on('serviceUpdateTracklist', function (sService) {
+        	connWebSocket.on('skipBackwards', function (data) {
+            	return self.commandRouter.volumioSkipBackwards(data);
+        	});
+
+        	connWebSocket.on('skipForward', function (data) {
+            	return self.commandRouter.volumioSkipForward(data);
+        	});
+
+        	connWebSocket.on('serviceUpdateTracklist', function (sService) {
 				return self.commandRouter.serviceUpdateTracklist(sService);
 			});
 
