@@ -2094,6 +2094,11 @@ CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
     return this.executeOnPlugin('system_controller', 'system', 'getAdvancedSettingsStatus', '');
 }
 
+CoreCommandRouter.prototype.getExperienceAdvancedSettings = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getExperienceAdvancedSettings', '');
+}
 
 // ============================  AUDIO OUTPUTS =================================
 

@@ -156,6 +156,10 @@ volumioWizard.prototype.getWizardSteps = function () {
                     stepsArray.push(step);
                 }
             }
+            if (step.name === 'advancedsettings' && (process.env.SHOW_ADVANCED_SETTINGS_MODE_SELECTOR === 'true')) {
+                step.show = true;
+                stepsArray.push(step);
+            }
         }
     }
     return  stepsArray

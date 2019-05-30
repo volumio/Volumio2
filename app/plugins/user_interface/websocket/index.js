@@ -1595,6 +1595,19 @@ function InterfaceWebUI(context) {
 				}
 			});
 
+        	connWebSocket.on('getExperienceAdvancedSettings', function () {
+            	var selfConnWebSocket = this;
+
+            	var experienceAdvancedSettings = self.commandRouter.getExperienceAdvancedSettings();
+            	selfConnWebSocket.emit('pushExperienceAdvancedSettings', experienceAdvancedSettings);
+        	});
+
+        	connWebSocket.on('setExperienceAdvancedSettings', function (data) {
+            	var selfConnWebSocket = this;
+
+                return self.commandRouter.executeOnPlugin('system_controller', 'system', 'setExperienceAdvancedSettings', data);
+        	});
+
 			connWebSocket.on('setOutputDevices', function (data) {
 				var selfConnWebSocket = this;
 				data.disallowPush = true;

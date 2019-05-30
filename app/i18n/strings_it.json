@@ -306,7 +306,11 @@
     "SUCCESSFULLY_DELETED_FOLDER":"Cartella eliminata correttamente",
     "ERROR_DELETING_FOLDER":"Errore nell'eliminazione della cartella",
     "SHOW_ADVANCED_SETTINGS":"Mostra impostazioni avanzate",
-    "SHOW_ADVANCED_SETTINGS_DOC":"Se abilitato, il sistema mostrerà le impostazioni avanzate. E' consigliato modificare queste impostazioni solo ad utenti esperti"
+    "SHOW_ADVANCED_SETTINGS_DOC":"Se abilitato, il sistema mostrerà le impostazioni avanzate. E' consigliato modificare queste impostazioni solo ad utenti esperti",
+    "FULL_SETTINGS_SET":"Impostazioni Avanzate Complete",
+    "FULL_SETTINGS_SET_EXTENDED":"Voglio il controllo avanzato",
+    "SIMPLE_SETTINGS_SET":"Impostazioni Semplificate",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"Voglio le opzioni semplificate"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

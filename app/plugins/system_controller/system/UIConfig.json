@@ -41,11 +41,24 @@
         },
         {
           "id":"advanced_settings",
-          "element": "switch",
+          "element": "select",
           "doc": "TRANSLATE.SYSTEM.SHOW_ADVANCED_SETTINGS_DOC",
           "label": "TRANSLATE.SYSTEM.SHOW_ADVANCED_SETTINGS",
-          "value": true,
-          "hidden":true
+          "hidden":true,
+          "value":  {
+            "value":true,
+            "label": "TRANSLATE.SYSTEM.FULL_SETTINGS_SET"
+          },
+          "options": [
+            {
+              "value":true,
+              "label": "TRANSLATE.SYSTEM.FULL_SETTINGS_SET"
+            },
+            {
+              "value":false,
+              "label": "TRANSLATE.SYSTEM.SIMPLE_SETTINGS_SET"
+            }
+          ]
         }
       ]
     },

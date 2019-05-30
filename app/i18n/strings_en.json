@@ -308,7 +308,11 @@
     "SUCCESSFULLY_DELETED_FOLDER":"Successfully deleted folder",
     "ERROR_DELETING_FOLDER":"Error in deleting folder",
     "SHOW_ADVANCED_SETTINGS":"Show Advanced Settings",
-    "SHOW_ADVANCED_SETTINGS_DOC":"When enabled, the system will show some advanced settings to allow advanced tweakings. Those settings should be operated by experts only"
+    "SHOW_ADVANCED_SETTINGS_DOC":"When enabled, the system will show some advanced settings to allow advanced tweakings. Those settings should be operated by experts only",
+    "FULL_SETTINGS_SET":"Full Settings Mode",
+    "FULL_SETTINGS_SET_EXTENDED":"I want the full set of options",
+    "SIMPLE_SETTINGS_SET":"Simplified Settings Mode",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"I want a simplified set of options"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",
