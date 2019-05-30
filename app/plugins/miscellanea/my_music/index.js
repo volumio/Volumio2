@@ -122,6 +122,10 @@ ControllerMyMusic.prototype.getUIConfig = function () {
                     self.logger.error('Could not retrieve disabled sources: ' + e);
                 }
 
+                if (process.env.HIDE_BROWSE_SOURCES_VISIBILITY_SELECTOR === 'true') {
+                    uiconf.sections[5].hidden = true;
+                }
+
                 if (sconf) {
                     var insertInto = 3;
                     for (var i in sconf.sections) {
