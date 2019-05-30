@@ -240,7 +240,7 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
         self.config.set('startupSound', data['startup_sound']);
     }
 
-    if (data['advanced_settings'].value != undefined) {
+    if (data['advanced_settings'] !== undefined && data['advanced_settings'].value !== undefined) {
         self.config.set('advanced_settings_mode', data['advanced_settings'].value);
         process.env.ADVANCED_SETTINGS_MODE = data['advanced_settings'].value;
     }
