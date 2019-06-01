@@ -27,7 +27,7 @@ RESTApiBrowse.prototype.browseListing=function(req,res)
     var defer;
 
     var ipAddress=this.commandRouter.sharedVars.get('ipAddress');
-    
+
     if(path=='/')
     {
         var content={"navigation":{

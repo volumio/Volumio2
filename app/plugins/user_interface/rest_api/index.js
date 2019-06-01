@@ -4,7 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
 var bodyParser = require('body-parser');
-
+var ifconfig = require('wireless-tools/ifconfig');
 
 module.exports = interfaceApi;
 
@@ -18,6 +18,8 @@ function interfaceApi(context) {
     var success = {'Message': "Succesfully restored resource"};
 
     self.logger = self.commandRouter.logger;
+
+    this.setIPAddress();
 
     api.route('/backup/playlists/:type')
         .get(function (req, res) {
@@ -510,3 +512,23 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
 
     return defer.promise
 };
+
+
+interfaceApi.prototype.setIPAddress=function()
+{
+    var self = this;
+
+    ifconfig.status('wlan0',(err, status) => {
+        if(err) {
+            ifconfig.status('eth0',(err, status) => {
+                if(err) {
+                    console.log("ERR!!!")
+                } else {
+                    self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
+                }
+            });
+        } else {
+            self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
+        }
+    });
+}
