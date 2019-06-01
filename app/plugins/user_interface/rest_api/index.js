@@ -522,7 +522,7 @@ interfaceApi.prototype.setIPAddress=function()
         if(err) {
             ifconfig.status('eth0',(err, status) => {
                 if(err) {
-                    console.log("ERR!!!")
+                    self.logger.error("Cannot retrieve current ipAddress!");
                 } else {
                     self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
                 }
