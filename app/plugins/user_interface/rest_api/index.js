@@ -4,7 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
 var bodyParser = require('body-parser');
-
+var ifconfig = require('wireless-tools/ifconfig');
 
 module.exports = interfaceApi;
 
@@ -18,6 +18,8 @@ function interfaceApi(context) {
     var success = {'Message': "Succesfully restored resource"};
 
     self.logger = self.commandRouter.logger;
+
+    this.setIPAddress();
 
     api.route('/backup/playlists/:type')
         .get(function (req, res) {
@@ -360,6 +362,38 @@ function interfaceApi(context) {
                 res.json({'success': false, 'error': error});
             })
         });
+
+    /*
+        Loading REST classes
+     */
+    this.browse=new (require(__dirname+'/browse.js'))(context);
+    this.playback=new (require(__dirname+'/playback.js'))(context);
+
+    // Adding methods
+
+    api.get('/v1/listing/browse', this.browse.browseListing.bind(this.browse));
+
+    api.get('/v1/playback/status', this.playback.playbackGetStatus.bind(this.playback));
+    api.post('/v1/playback/play', this.playback.playbackPlay.bind(this.playback));
+    api.post('/v1/playback/stop', this.playback.playbackStop.bind(this.playback));
+    api.post('/v1/playback/pause', this.playback.playbackPause.bind(this.playback));
+    api.post('/v1/playback/resume', this.playback.playbackResume.bind(this.playback));
+    api.post('/v1/playback/next', this.playback.playbackNext.bind(this.playback));
+    api.post('/v1/playback/previous', this.playback.playbackPrevious.bind(this.playback));
+    api.post('/v1/playback/seek', this.playback.playbackSeek.bind(this.playback));
+    api.put('/v1/playback/random', this.playback.playbackRandom.bind(this.playback));
+    api.get('/v1/playback/random', this.playback.playbackGetRandom.bind(this.playback));
+    api.put('/v1/playback/repeat', this.playback.playbackRepeat.bind(this.playback));
+    api.get('/v1/playback/repeat', this.playback.playbackGetRepeat.bind(this.playback));
+    api.put('/v1/playback/consume', this.playback.playbackConsume.bind(this.playback));
+    api.get('/v1/playback/consume', this.playback.playbackGetConsume.bind(this.playback));
+    api.put('/v1/playback/volume', this.playback.playbackVolume.bind(this.playback));
+    api.get('/v1/playback/volume', this.playback.playbackGetVolume.bind(this.playback));
+    api.put('/v1/playback/mute', this.playback.playbackMute.bind(this.playback));
+    api.get('/v1/playback/mute', this.playback.playbackGetMute.bind(this.playback));
+    api.post('/v1/playback/ffwdrew', this.playback.ffwdRew.bind(this.playback));
+    api.get('/v1/playback/queue', this.playback.playbackGetQueue.bind(this.playback));
+
 };
 
 interfaceApi.prototype.printConsoleMessage = function (message) {
@@ -478,3 +512,23 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
 
     return defer.promise
 };
+
+
+interfaceApi.prototype.setIPAddress=function()
+{
+    var self = this;
+
+    ifconfig.status('wlan0',(err, status) => {
+        if(err) {
+            ifconfig.status('eth0',(err, status) => {
+                if(err) {
+                    console.log("ERR!!!")
+                } else {
+                    self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
+                }
+            });
+        } else {
+            self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
+        }
+    });
+}
