@@ -269,7 +269,11 @@ UpnpInterface.prototype.prepareUpnpPlayback = function () {
         self.logger.info("Consume mode");
 
     }
-    self.commandRouter.volumioStop();
+    var state = self.commandRouter.volumioGetState();
+    if (state !== undefined && state.service !== 'mpd') {
+        self.commandRouter.volumioStop();
+    }
+
     this.commandRouter.stateMachine.setConsumeUpdateService('mpd', false, true);
 
 
