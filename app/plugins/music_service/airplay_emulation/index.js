@@ -3,6 +3,7 @@
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
+var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var libQ = require('kew');
 var ShairportReader = require('./shairport-sync-reader/shairport-sync-reader.js');
@@ -123,9 +124,14 @@ AirPlayInterface.prototype.startShairportSync = function () {
         outdev = 'plughw:'+outdev+',0';
     }
 
-
+    var buffer_size_line;
     var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
     var name = this.commandRouter.sharedVars.get('system.name');
+    var isPrimo = self.detectPrimo();
+    // With Primo we need to set a lower buffer size
+    if (isPrimo && outdev === 'plughw:0,0') {
+        buffer_size_line = 'buffer_size = 5536;';
+    }
 
 
     var fs = require('fs');
@@ -139,6 +145,11 @@ AirPlayInterface.prototype.startShairportSync = function () {
         var conf = data;
         conf = conf.replace("${name}", name);
         conf = conf.replace("${device}", outdev);
+        if (buffer_size_line && buffer_size_line.length) {
+            conf = conf.replace("${buffer_size_line}", buffer_size_line);
+        } else {
+            conf = conf.replace("${buffer_size_line}", "");
+        }
         conf = conf.replace("${mixer}", mixer);
         var onDemand_line = '';
         if (!onDemand){
@@ -465,5 +476,21 @@ AirPlayInterface.prototype.seekTimerAction = function() {
     } else {
         clearInterval(seekTimer);
         seekTimer = undefined;
+    }
+};
+
+AirPlayInterface.prototype.detectPrimo = function () {
+    var self = this;
+
+    try {
+        var primoAudioDevice = execSync('aplay -l | grep es90x8q2m-dac-dai-0').toString();
+        if (primoAudioDevice.length > 0) {
+            return true
+        } else {
+            return false
+        }
+    } catch(e) {
+        self.logger.info('Could not detect Primo: ' + e);
+        return false
     }
 };
