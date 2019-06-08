@@ -372,6 +372,7 @@ function interfaceApi(context) {
     // Adding methods
 
     api.get('/v1/listing/browse', this.browse.browseListing.bind(this.browse));
+    api.get('/v1/listing/collectionstats', this.browse.getCollectionStats.bind(this.browse));
 
     api.get('/v1/playback/status', this.playback.playbackGetStatus.bind(this.playback));
     api.post('/v1/playback/play', this.playback.playbackPlay.bind(this.playback));

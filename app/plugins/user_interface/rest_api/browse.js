@@ -348,3 +348,23 @@ RESTApiBrowse.prototype.listingSearch=function(req,res)
             });
         });
 };
+
+RESTApiBrowse.prototype.getCollectionStats=function(req,res) {
+    var returnedData = this.commandRouter.executeOnPlugin('music_service', 'mpd', 'getMyCollectionStats', '');
+
+    returnedData.then(function(stats) {
+        if (stats) {
+            res.send({
+                success:true,
+                value:stats
+            });
+        }
+        else {
+            res.send({
+                success:false,
+                reason:'We got an issue retrieving the Collection statistics'
+            });
+        }
+    })
+
+}
