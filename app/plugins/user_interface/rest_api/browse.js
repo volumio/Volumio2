@@ -36,27 +36,16 @@ RESTApiBrowse.prototype.browseListing=function(req,res)
             }]
         }};
 
+        var browseSourcesList=this.commandRouter.volumioGetBrowseSources()
+        for(var sourceIndex in browseSourcesList)
+        {
+            content.navigation.lists[0].items.push({
+                "title":browseSourcesList[sourceIndex].name,
+                "uri":browseSourcesList[sourceIndex].uri,
+                "type":"folder",
+                "albumart":browseSourcesList[sourceIndex].albumart});
+        }
 
-        content.navigation.lists[0].items.push({"title":"MusicLibrary",
-            "uri":"/music-library",
-            "type":"folder"});
-
-        content.navigation.lists[0].items.push({"title":"Artists",
-            "uri":"/artists",
-            "type":"folder"});
-        content.navigation.lists[0].items.push({"title":"Albums",
-            "uri":"/albums",
-            "type":"folder"});
-        content.navigation.lists[0].items.push({"title":"Genres",
-            "uri":"/genres",
-            "type":"folder"});
-        content.navigation.lists[0].items.push({"title":"Years",
-            "uri":"/years",
-            "type":"folder"});
-        content.navigation.lists[0].items.push({"title":"WebRadio",
-            "uri":"/radio",
-            "type":"folder"});
-        console.log(JSON.stringify(content));
         defer=libQ.resolve(content);
     }
     else
