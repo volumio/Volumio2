@@ -309,7 +309,11 @@
     "SUCCESSFULLY_DELETED_FOLDER":"Dossier effacé avec succès",
     "ERROR_DELETING_FOLDER":"Erreur d'effacement du dossier",
     "SHOW_ADVANCED_SETTINGS":"Montrer les réglages avancés",
-    "SHOW_ADVANCED_SETTINGS_DOC":"Si activé, donne accès à des réglages avancés. Pour les experts seulement"
+    "SHOW_ADVANCED_SETTINGS_DOC":"Si activé, donne accès à des réglages avancés. Pour les experts seulement",
+    "FULL_SETTINGS_SET":"Mode réglage expert",
+    "FULL_SETTINGS_SET_EXTENDED":"Accès à toutes les options de réglage",
+    "SIMPLE_SETTINGS_SET":"Mode réglage simplifié",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"Accès seulement aux réglages de base"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes Web Radios",
