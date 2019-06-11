@@ -799,21 +799,44 @@ ControllerWebradio.prototype.search = function (data) {
         "availableListViews": [
             "list"
         ],
-        "items": [
-
-        ]
+        "items": []
     };
 
     var search = data.value.toLowerCase();
-    //var uri='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+encodeURIComponent(query.value)+'&limit=20';
-    var uri = 'http://api.dirble.com/v2/search?token=8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2';
+    var dirbleSerch = self.searchWithDirble(search).then(function (value) {
+        return value;
+    });
+    var shoutcastSearch = self.searchWithShoutcast(search).then(function (value) {
+        return value;
+    });
 
-    unirest.post(uri)
+    libQ.all([dirbleSerch,shoutcastSearch]).then(function(result){
+        var i = 0;
+        for (i = 0; i < result.length; i++) {
+            if (Array.isArray(result[i])) {
+                Array.prototype.push.apply(list.items,result[i]);
+                list.items.concat(result[i]);
+            }
+        }
+        defer.resolve(list);
+    });
+    return defer.promise
+};
+
+ControllerWebradio.prototype.searchWithDirble = function (search) {
+    var self = this;
+    var defer = libQ.defer();
+
+    //var dirbleSearchUrl = 'http://api.dirble.com/v2/search?token=8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2';
+    var dirbleSearchUrl = 'http://127.0.0.1:9000';
+    var items = [];
+
+    unirest.post(dirbleSearchUrl)
         .headers({'Accept': 'application/json', 'Content-Type': 'application/json'})
         .send({'query':search})
         .timeout(1800)
         .end(function (response) {
-           // console.log(response.body);
+            //console.log(response.body);
             if (response.status === 200) {
                 for (var i in response.body) {
                     var station = response.body[i];
@@ -830,90 +853,98 @@ ControllerWebradio.prototype.search = function (data) {
                             album: '',
                             uri: safeuri
                         };
-                        if (station.image.url != undefined && station.image.url != null) {
+                        if (station.image != undefined && station.image.url != undefined && station.image.url != null) {
                             radio.albumart = station.image.url;
                         } else {
                             radio.icon = 'fa fa-microphone';
                         }
-                        list.items.push(radio);
+                        items.push(radio);
                     }
                 }
-                defer.resolve(list);
+                defer.resolve(items);
             } else {
                 defer.resolve();
             }
 
         });
+    return defer.promise;
+}
 
-    /*
-    memoryCache.wrap(uri, function (cacheCallback) {
+ControllerWebradio.prototype.searchWithShoutcast = function (search) {
+    var self = this;
+    var defer = libQ.defer();
+    var items = [];
+
+    var shoutCastSearchUrl='http://api.shoutcast.com/legacy/stationsearch?k=vKgHQrwysboWzMwH&search='+encodeURIComponent(search)+'&limit=20';
+    memoryCache.wrap(shoutCastSearchUrl, function (cacheCallback) {
         var promise=libQ.defer();
 
-        var request= unirest.get(uri);
+        var request= unirest.get(shoutCastSearchUrl);
 
-        request.timeout(1500);
+        request.timeout(1800);
         request.end(function(xml)
+        {
+            if(xml.error)
             {
-                if(xml.error)
-                {
-                    promise.resolve(xml);
-                }
-                else if(xml.ok)
-                {
-                    memoryCache.set(uri,xml);
-                    promise.resolve(xml);
-                }
-                else promise.reject(new Error());
-            });
+                promise.resolve(xml);
+            }
+            else if(xml.ok)
+            {
+                memoryCache.set(shoutCastSearchUrl,xml);
+                promise.resolve(xml);
+            }
+            else promise.reject(new Error());
+        });
 
 
         return promise;
     })
-    .then( function (xml) {
-        if(xml.ok)
-        {
-            var xmlDoc = libxmljs.parseXml(xml.body);
-
-            var children = xmlDoc.root().childNodes();
-            var base;
-
-            for(var i in children)
+        .then( function (xml) {
+            if(xml.ok)
             {
-                if(children[i].name()==='tunein')
+                var xmlDoc = libxmljs.parseXml(xml.body);
+
+                var children = xmlDoc.root().childNodes();
+                var base;
+
+                for(var i in children)
                 {
-                    base=(children[i].attr('base').value()).replace('.pls','.m3u');
+                    if(children[i].name()==='tunein')
+                    {
+                        base=(children[i].attr('base').value()).replace('.pls','.m3u');
+                    }
+                    else if(children[i].name()==='station')
+                    {
+                        var name=children[i].attr('name').value();
+                        var id=children[i].attr('id').value();
+
+                        var category = {
+                            service: 'webradio',
+                            type: 'webradio',
+                            title: name,
+                            artist: '',
+                            album: '',
+                            uri: 'http://yp.shoutcast.com' + base+'?id='+id
+                        };
+
+                        if (children[i].attr('logo') && children[i].attr('logo').value()) {
+                            category.albumart = children[i].attr('logo').value();
+                        } else {
+                            category.icon = 'fa fa-microphone';
+                        }
+                        items.push(category);
+                    }
                 }
-                else if(children[i].name()==='station')
-                {
-                    var name=children[i].attr('name').value();
-                    var id=children[i].attr('id').value();
-
-                    var category = {
-                        service: 'webradio',
-                        type: 'webradio',
-                        title: name,
-                        artist: '',
-                        album: '',
-                        icon: 'fa fa-microphone',
-                        uri: 'http://yp.shoutcast.com' + base+'?id='+id
-                    };
-
-                    list.items.push(category);
-                }
-
+                defer.resolve(items);
             }
-
-            defer.resolve(list);
-        }
-        else
-        {
-            self.commandRouter.logger.info('An error occurred while querying SHOUTCAST');
-            defer.resolve();
-        }
-    });
-    */
+            else
+            {
+                self.commandRouter.logger.info('An error occurred while querying SHOUTCAST');
+                defer.resolve([]);
+            }
+        });
     return defer.promise;
-};
+}
 
 
 ControllerWebradio.prototype.addMyWebRadio = function (data) {
