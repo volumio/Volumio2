@@ -44,6 +44,7 @@
 	"MIXER_TYPE_DOC":"Vyberte typ ovládača hlasitosti: None = žiadne nastavenie hlasitosti cez Volumio, Softwarový = softwarová zmena hlasitosti, zníženie kvality zvuku, Hardwarový = ovládanie hlasitosti bez zmeny kvality zvuku. Musí být podporované výstupným zariadením",
 	"ADVANCED_AUDIO_TWEAKS":"Pokročilé nastavenie zvuku",
 	"AUDIO_RESAMPLING":"Prevzorkovanie",
+  "AUDIO_RESAMPLING_DOC":"Toto nastavenie ovláda možnosti prevzorkovania zvuku. Len pre lokálne prehrávanie súborov (netýka sa služieb Shairport a tretích strán, ako je ROON).",
 	"AUDIO_RESAMPLING_SETTINGS_SAVED":"Nastavenie prevzorkovania uložené",
 	"TARGET_BITDEPTH":"Cíeľová bitová hĺbka",
 	"TARGET_SAMPLERATE":"Cieľová vzorkovacia frekvencia",
@@ -69,7 +70,10 @@
     "ISO_PLAYBACK":"Prehrávanie ISO",
     "ISO_PLAYBACK_DOC":"Používa experimentálnu MPD verziu, ktorá umožnuje prehrávať ISO subory, stratíte však možnosť prehrávania DSD Direct.",
     "EXTENDED_FILE_FORMAT_SUPPORT":"Podpora ďalších formátov súborov",
-    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Toto nastavenie umožní načítať rôzne formáty audio súborov, avšak môže spomaliť vytváranie hudobnej knižnice. Ak je voľba zakázaná, hlavné formáty budu spracované a vytváranie hudobnej knižnice bude oveľa rýchlejšie."
+    "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Toto nastavenie umožní načítať rôzne formáty audio súborov, avšak môže spomaliť vytváranie hudobnej knižnice. Ak je voľba zakázaná, hlavné formáty budu spracované a vytváranie hudobnej knižnice bude oveľa rýchlejšie.",
+    "USB_DAC_CONNECTED":"USB DAC pripojený",
+    "NO_OUTPUT_DEVICE":"Žiaden audiovýstup nieje k dispozícii",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Pripojte výstupné zvukové zariadenie."
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Nastavenie siete",
@@ -111,7 +115,9 @@
     "WIRELESS_NETWORK_CONNECTION_ERROR":"Pripojenie do siete zlyhalo ",
     "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED":"Skúste znova alebo pokračujte ďalším krokom",
     "WIRELESS_NETWORK_CONNECTION_DEFER":"Zariadenie sa pripojí k sieti",
-    "WIRELESS_NETWORK_CONNECTION_DEFER2":"keď bude prvotné nastavenie dokončené"
+    "WIRELESS_NETWORK_CONNECTION_DEFER2":"keď bude prvotné nastavenie dokončené",
+    "HOTSPOT_FALLBACK":"Záložný prístupový bod",
+    "HOTSPOT_FALLBACK_DOC":"Pokiaľ je povolené, spustí sa záložný prístupový bod ak dôjte k odpojeniu od bezdrôtovej siete. Pokiaľ je zakázané, bude sa zariadeneie aj naďalej pokúšať znovu pripojiť ku známej bezdrôtovej sieti"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Zvoľte meno, ktoré bude zobrazené v zozname sieťových diskov",
@@ -120,7 +126,8 @@
 	  "NETWORK_DRIVE":"Sieťový disk",
 	  "SHARE_NOT_CONFIGURED":"Toto pripojenie nie je nastavené",
 	  "SHARE_MOUNT_SUCCESS":"Sieťový disk úspešne pridaný",
-	  "MOUNT_SHARE_ERROR":"Chyba v pridávaní sieťového disku"
+	  "MOUNT_SHARE_ERROR":"Chyba v pridávaní sieťového disku",
+    "ERROR_PATH_UNDEFINED":"Zadajte názov zdieľanej zložky alebo jej cestu"
   },
   "PLAYLIST":{
     "ADDED_TITLE":"Pridaný",
@@ -177,7 +184,16 @@
 	"CONTINUE":"Pokračovať",
 	"SETTINGS_SAVED_SUCCESSFULLY":"Nastavenia úspešne uložené",
 	"SETTINGS_SAVE_ERROR":"Chyba pri ukladaní nastavení",
-	"ERROR":"Chyba"
+	"ERROR":"Chyba",
+  "UPDATING_MUSIC_DB_WAIT_MESSAGE":"Pre zlepšenie systému ukladá systém obrázky obálok do medzipamäte, avšak preto nejde zobraziť nanovo pridané obrázky. Nanovo pridané obrázky obálok budú k dispozícii po vyčistení tejto medzipamäte.",
+  "GOT_IT":"Beriem na vedomie",
+  "MEDIA_SERVERS":"Mediálne servery",
+  "ENABLED":"Povolené",
+  "DISABLED":"Zakázané",
+  "NO_RESULTS":"Žiadne výsledky",
+  "REMOVE_FAIL":"Nemožno odobrať",
+  "CONNECTED":"Pripojené",
+  "DISCONNECTED":"Odpojené"
   },
   "APPEARANCE":{
     "APPEARANCE":"Vzhľad",
@@ -211,7 +227,8 @@
     "ALBUMART_RESET_CACHE":"Vyčistiť úložisko obrázkov albumov",
     "ALBUMART_RESET_CACHE_DOC":"Systém ukladá obrázky albumov pre zvýšenie výkonu, ale toto zabraňuje zobrazovať novo pridané obrázky. Vyčistením úložiska obrázkov sa budú zobrazovať aj nové obrázky",
     "METADATA_IMAGE":"Zobrazovať vložené obrázky",
-    "METADATA_IMAGE_DOC":"Ak je povolené, systém sa pokúsi získať obrázok priamo z hudobných súborov. Toto zvyšuje čas načítavania obrázkov albumov."
+    "METADATA_IMAGE_DOC":"Ak je povolené, systém sa pokúsi získať obrázok priamo z hudobných súborov. Toto zvyšuje čas načítavania obrázkov albumov.",
+    "BROWSE_SOURCES_VISIBILITY":"Viditeľnosť zdrojov"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Moja hudba",
@@ -223,7 +240,8 @@
     "ALARM":"Budík",
     "SLEEP":"Spánok",
     "CREDITS":"Poďakovanie",
-    "SHUTDOWN":"Vypnúť"
+    "SHUTDOWN":"Vypnúť",
+    "HELP":"Pomoc"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Budík",
@@ -264,7 +282,33 @@
 	"UPDATE_ALREADY_LATEST_VERSION":"Vaša verzia systému je aktuálna",
 	"NO_UPDATE_AVAILABLE":"Žiadne aktualizácie nie sú k dispozícii",
     "CANNOT_REMOVE_MEDIA":"Médium sa nedá odobrať",
-    "MEDIA_REMOVED_SUCCESSFULLY":"Médium úspešne odpojené"
+    "MEDIA_REMOVED_SUCCESSFULLY":"Médium úspešne odpojené",
+    "INSTALL_TO_DISK":"Inštalácia na disk",
+    "INSTALLING_TO_DISK":"Inštalácia na disk",
+    "INSTALLING_TO_DISK_MESSAGE":"Inštalácia na disk, počkajte",
+    "INSTALLING_TO_DISK_ERROR_MESSAGE":"Inštalácia na disk zlyhala",
+    "INSTALLING_TO_DISK_ERROR_TARGET_SIZE":"Nie je možné inštalovať na tento disk: cieľový disk musí byť väčší ako zdrojový",
+    "INSTALL_TO_DISK_DESC":"Inštalácia na disk",
+    "INSTALL_TO_DISK_MESSAGE":"Potvrdiť inštaláciu Volumia na disk",
+    "INSTALL_TO_DISK_LABEL":"MENO",
+    "INSTALL_TO_DISK_SIZE":"VEĽKOSŤ",
+    "INSTALL_TO_DISK_MESSAGE_WARNING":". UPOZORNENIE: Pozorne vyberte správny cieľový disk, všetky jeho dáta budú zmazané!",
+    "INSTALLING_TO_DISK_SUCCESS_TITLE":"Systém úspešne nainštalovaný na disk",
+    "INSTALLING_TO_DISK_SUCCESS_MESSAGE":"Nanovo nainštalovaný systém vyžaduje reštart, odpojte všetky vymeniteľné média",
+    "CREDITS_OPEN_SOURCE_LICENSES":"Poďakovanie a Open Source licencia",
+    "VIDEO_OUT_OPTIONS": "Nastavenie videovýstupu",
+    "HDMI_UI_DOC":"Zobrazí uživateľské rozhranie cez HDMI videovýstup. UPOZORNENIE: dôjde k zníženiu výkonu systému",
+    "HDMI_UI":"Uživateľské rozhranie cez HDMI",
+    "STARTING_SOFTWARE_UPDATE":"Spustenie aktualizácie softvéru",
+    "CHECKING_SYSTEM_INTEGRITY":"Kontrola integrity systému",
+    "SYSTEM_INTEGRITY_CHECK_FAILED":"Kontrola integrity systémového softvéru zlyhala, boli zistené manuálne upravené. Za týchto okolností nie je možná aktualizácia systémového softvéru. Vykonajte Reset do továrenského nastavenia alebo Vymažte používateľské dáta a potom skúste znovu.",
+    "UPDATE_FAILED":"Aktualizácia zlyhala",
+    "DELETE_FOLDER":"Vymazať zložku",
+    "DELETING_FOLDER":"Vymazávanie zložky",
+    "SUCCESSFULLY_DELETED_FOLDER":"Úspešne vymazaná zložka",
+    "ERROR_DELETING_FOLDER":"Chyba pri odstraňovaní zložky",
+    "SHOW_ADVANCED_SETTINGS":"Zobraziť pokročilé nastavenia",
+    "SHOW_ADVANCED_SETTINGS_DOC":"Ak je táto možnosť povolená, systém zobrazí niektoré rozšírené nastavenia, ktoré umožnia pokročilé vylepšenia. Tieto nastavenia by mali prevádzkovať iba odborníci"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Moje webová rádiá",
@@ -280,11 +324,33 @@
     "UNINSTALL":"Odinštalovať",
     "UPDATING_PLUGIN":"Aktualizácia zásuvného modulu",
     "DOWNLOADING_FROM":"Sťahujem zásuvný modul z ",
-    "DOWNLOADING":"Sťahujem zásuvný modul"
+    "DOWNLOADING":"Sťahujem zásuvný modul",
+    "NO_CONFIGURATION_AVAILABLE":"Žiadne nastavenia k dispozícii",
+    "PLUGIN_START_ERROR":"Tento plugin sa nedá spustiť. Nainštalujte aktualizovanú verziu alebo kontaktujte vývojára",
+    "CONFIRM_PLUGIN_INSTALL":"Inštalovať Plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Upozornenie, komunitné pluginy sú vyvíjané vývojármi tretích strán a môžu mať za následok neočakávané správanie a systémovú nestabilitiu. Naozaj chcete nainštalovať tento plugin",
+    "INSTALL":"Inštalovať"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Gratulujem",
     "DEVICE_SUCCESSFULLY_CONFIGURED":"bol nakonfigurovaný a je pripravený na prehrávanie",
-    "PLEASE_DONATE":"Ak sa vám Volumio páči, prosím zvážte podporu pre projekt. Môžete podporiť ďalší rozvoj projektu!"
+    "PLEASE_DONATE":"Ak sa vám Volumio páči, prosím zvážte podporu pre projekt. Môžete podporiť ďalší rozvoj projektu!",
+    "RUN_FIRST_CONFIG_WIZARD":"Spustiť sprievodcu prvotného nastavenia."
+  },
+  "UPDATER":{
+    "PREPARING_UPDATE":"Príprava na aktualizáciu",
+    "CREATING_BACKUP":"Vytváranie zálohy",
+    "DOWNLOADING_UPDATE":"Sťahovanie novej aktualizácie",
+    "CLEANING":"Čistenie starých súborov",
+    "FINALIZING_UPDATE":"Dokončovanie aktualizácie",
+    "ERROR":"Chyba",
+    "ERROR_UPDATE_FAILED":"Chyba: aktualizácia zlyhala, prosím reštartujte systém a skúste to znova",
+    "ERROR_UPDATE_FILE_NOT_FOUND":"Aktualizačný súbor sa nepodarilo nájsť",
+    "SUCCESSFULLY_UPDATED_TO_VERSION":"Úspešne aktualizované na verziu",
+    "SYSTEM_RESTART_REQUIRED":"Prosím reštartujte Vaše zariadenie",
+    "SYSTEM_RESTART_IN":"Vaše zariadenie sa reštartuje za ",
+    "UPDATE":"Aktualizovať",
+    "CHECKING_FOR_UPDATES":"Kontrola aktualizácii",
+    "CHECKING_FOR_UPDATES_WAIT":"Počkajte prosím"
   }
 }
