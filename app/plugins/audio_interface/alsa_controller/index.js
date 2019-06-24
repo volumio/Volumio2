@@ -1475,7 +1475,7 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 ControllerAlsa.prototype.usbAudioAttach  = function () {
 	var self = this;
 
-    var usbHotplug = self.config.get('usb_hotplug', false);
+    var usbHotplug = self.config.get('usb_hotplug', true);
     if (usbHotplug && !ignoreUsbAudioAttach) {
         var cards = self.getAlsaCards();
         var usbCardName = self.getLabelForSelectedCard(cards, 5);
