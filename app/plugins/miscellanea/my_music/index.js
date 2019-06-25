@@ -58,8 +58,8 @@ ControllerMyMusic.prototype.getUIConfig = function () {
 
 	var defer=libQ.defer();
 
-    var streamingConf = self.getStreamingConf();
-    streamingConf.then(function(sconf) {
+    var additionalConf = self.getAdditionalPluginsConf();
+    additionalConf.then(function(aconf) {
         self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
             __dirname+'/../../../i18n/strings_en.json',
             __dirname + '/UIConfig.json')
@@ -126,10 +126,10 @@ ControllerMyMusic.prototype.getUIConfig = function () {
                     uiconf.sections[5].hidden = true;
                 }
 
-                if (sconf) {
+                if (aconf) {
                     var insertInto = 3;
-                    for (var i in sconf.sections) {
-                        var streamingSection = sconf.sections[i];
+                    for (var i in aconf.sections) {
+                        var streamingSection = aconf.sections[i];
                         uiconf.sections.splice(insertInto, 0, streamingSection);
                         insertInto++
                     }
@@ -147,28 +147,19 @@ ControllerMyMusic.prototype.getUIConfig = function () {
 	return defer.promise;
 };
 
-ControllerMyMusic.prototype.getStreamingConf = function () {
-    var self = this;
-    var  defer = libQ.defer();
+ControllerMyMusic.prototype.getAdditionalPluginsConf = function() {
+    let self = this;
+    let defer = libQ.defer();
 
-    var streamingPlugin = self.context.coreCommand.pluginManager.getPlugin('music_service', 'streaming_services');
-	if (streamingPlugin) {
-        var streamingConf = self.commandRouter.getUIConfigOnPlugin('music_service', 'streaming_services', '');
-        streamingConf.then(function(conf) {
-            defer.resolve(conf);
-        })
-            .fail(function()
-            {
-                defer.resolve(false);
-            })
-	} else {
+    let pluginsMyMysicConfig = self.context.coreCommand.pluginManager.getPluginsMyMusicConfig();
+    pluginsMyMysicConfig.then(function(conf) {
+        defer.resolve(conf);
+    }).fail(function() {
         defer.resolve(false);
-	}
+    });
 
     return defer.promise;
 };
-
-
 
 ControllerMyMusic.prototype.setUIConfig = function (data) {
 	var self = this;
