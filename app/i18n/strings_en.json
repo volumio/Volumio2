@@ -76,7 +76,7 @@
     "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit",
     "OUTPUT_DEVICE_NOT_AVAILABLE":"The selected output device is not available",
     "CONNECT_OUTPUT_DEVICE_1":"Please connect",
-    "CONNECT_OUTPUT_DEVICE_2":"to the unit"
+    "CONNECT_OUTPUT_DEVICE_2":"to the unit or select a different output device from playback options"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

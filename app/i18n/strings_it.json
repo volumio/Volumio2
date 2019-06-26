@@ -76,7 +76,7 @@
     "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità",
     "OUTPUT_DEVICE_NOT_AVAILABLE":"L'uscita audio selezionata non è disponibile",
     "CONNECT_OUTPUT_DEVICE_1":"Si prega di connettere",
-    "CONNECT_OUTPUT_DEVICE_2":"all'unità"
+    "CONNECT_OUTPUT_DEVICE_2":"all'unità o seleziona un altra uscita audio dalle impostazioni di riproduzione"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
