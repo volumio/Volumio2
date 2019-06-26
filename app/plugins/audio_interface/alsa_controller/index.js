@@ -1499,6 +1499,8 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
     var self = this;
 
     var cards = self.getAlsaCards();
+    var outdev = this.config.get('outputdevice');
+    var outdevName = this.config.get('outputdevicename');
     if (cards.length === 0) {
         var responseData = {
             title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_OUTPUT_DEVICE'),
@@ -1514,6 +1516,31 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
             ]
         }
         self.commandRouter.broadcastMessage("openModal", responseData);
+	} else {
+    	var found = false;
+    	for (var i in cards) {
+    		var currentCard = cards[i];
+    		if (currentCard.id === outdev && currentCard.name === outdevName) {
+    			found = true;
+			}
+		}
+		if (!found) {
+    		var message = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.CONNECT_OUTPUT_DEVICE_1') + ' ' + outdevName + ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.CONNECT_OUTPUT_DEVICE_2');
+            var responseData = {
+                title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.OUTPUT_DEVICE_NOT_AVAILABLE'),
+                message: message,
+                size: 'lg',
+                buttons: [
+                    {
+                        name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                        class: 'btn btn-info ng-scope',
+                        emit:'',
+                        payload:''
+                    }
+                ]
+            }
+            self.commandRouter.broadcastMessage("openModal", responseData);
+		}
 	}
 };
 
