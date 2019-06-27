@@ -369,21 +369,19 @@ RESTApiBrowse.prototype.getCollectionStats=function(req,res) {
 }
 
 RESTApiBrowse.prototype.getZones=function(req,res) {
-    var returnedData = this.commandRouter.executeOnPlugin('audio_interface', 'multiroom', 'getMultiroom');
 
-    returnedData.then(function(zones) {
-        if (zones) {
-            res.send({
-                success:true,
-                value:zones
-            });
-        }
-        else {
-            res.send({
-                success:false,
-                reason:'We got an issue retrieving the Collection statistics'
-            });
-        }
-    })
+    var zones = this.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'getDevices');
+    if (zones && zones.list) {
+        res.send({
+            success:true,
+            value: zones.list
+        });
+    }
+    else {
+        res.send({
+            success:false,
+            reason:'Error retrieving zones'
+        });
+    }
 
 }
