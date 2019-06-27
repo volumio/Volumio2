@@ -73,7 +73,10 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"This setting controls the ability to read a wide variety of Audio formats, however it might slow down the creation of music library database. If disabled, the system will still read most of music formats and Music Library scanning will be much faster.",
     "USB_DAC_CONNECTED":"USB DAC Connected",
     "NO_OUTPUT_DEVICE":"No Audio Output Available",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit"
+    "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"The selected output device is not available",
+    "CONNECT_OUTPUT_DEVICE_1":"Please connect",
+    "CONNECT_OUTPUT_DEVICE_2":"to the unit or select a different output device from playback options"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

@@ -73,7 +73,10 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Se abilitata, il sistema sarà in grado di supportare un maggior numero di formati, tuttavia la scansione della musica avverrà in maniera considerevolmente più lenta. Se disabilitata, il sistema sarà comunque in grado di leggere i formati di file più diffusi.",
     "USB_DAC_CONNECTED":"DAC USB Connesso",
     "NO_OUTPUT_DEVICE":"Nessuna uscita audio disponibile",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità"
+    "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"L'uscita audio selezionata non è disponibile",
+    "CONNECT_OUTPUT_DEVICE_1":"Si prega di connettere",
+    "CONNECT_OUTPUT_DEVICE_2":"all'unità o seleziona un altra uscita audio dalle impostazioni di riproduzione"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
