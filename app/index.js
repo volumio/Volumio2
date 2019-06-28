@@ -2100,6 +2100,17 @@ CoreCommandRouter.prototype.getExperienceAdvancedSettings = function () {
     return this.executeOnPlugin('system_controller', 'system', 'getExperienceAdvancedSettings', '');
 }
 
+CoreCommandRouter.prototype.broadcastUiSettings = function () {
+    var self=this;
+    var returnedData = self.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
+
+    if (returnedData != undefined) {
+        returnedData.then(function (data) {
+            self.broadcastMessage('pushUiSettings', data);
+        });
+    }
+}
+
 // ============================  AUDIO OUTPUTS =================================
 
 

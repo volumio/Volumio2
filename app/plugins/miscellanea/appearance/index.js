@@ -101,10 +101,15 @@ volumioAppearance.prototype.setSystemConf = function(pluginName,varName)
     //Perform your installation tasks here
 };
 
-volumioAppearance.prototype.getAdditionalConf = function()
+volumioAppearance.prototype.getAdditionalConf = function(type, controller, data, def)
 {
     var self = this;
-    //Perform your installation tasks here
+    var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+    if (setting == undefined) {
+        setting = def;
+    }
+    return setting
 };
 
 volumioAppearance.prototype.setAdditionalConf = function()
@@ -161,14 +166,15 @@ volumioAppearance.prototype.getUiSettings = function()
     var language = config.get('language_code');
     var theme = config.get('theme');
     var background_type = config.get('background_type');
+    var playbackMode = self.getAdditionalConf('music_service', 'mpd', 'playback_mode', 'continuous');
 
     if (background_type === 'background') {
         var background_title = config.get('background_title');
         var background_path = config.get('background_path');
-        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme}
+        var UiSettings = {"background":{"title":background_title, "path":background_path},"language":language, "theme":theme, "playMethod":playbackMode};
     } else {
         var background_color = config.get('background_color');
-        var UiSettings = {"color":background_color, "language":language, "theme":theme}
+        var UiSettings = {"color":background_color, "language":language, "theme":theme, "playMethod":playbackMode};
     }
 
     defer.resolve(UiSettings);

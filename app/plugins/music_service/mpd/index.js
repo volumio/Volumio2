@@ -791,6 +791,17 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 		self.config.set('persistent_queue', data['persistent_queue']);
 	}
 
+
+	var playbackMode = self.config.get('playback_mode', 'continuous');
+	var playbackModeNew = data['playback_mode'].value;
+
+	if (playbackMode !== playbackModeNew) {
+        self.config.set('playback_mode', data['playback_mode'].value);
+        setTimeout(()=>{
+        	self.commandRouter.broadcastUiSettings();
+		},300)
+	}
+
     if (isonew != iso) {
         self.config.set('iso', data['iso']);
         if (isonew) {
