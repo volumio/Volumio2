@@ -286,10 +286,32 @@ RESTApiPlayback.prototype.addPlay=function(req, res) {
         });
 };
 
+RESTApiPlayback.prototype.addToQueue=function(req, res) {
+    var self=this;
 
+    var data = req.body;
+    self.commandRouter.addQueueItems(data)
+        .then(function(){
+            res.json({'response': 'success'});
+        })
+        .fail(function (e) {
+            return res.json({'error': e});
+        });
+};
 
+RESTApiPlayback.prototype.replaceAndPlay=function(req, res) {
+    var self=this;
 
-
+    var data = req.body;
+    self.commandRouter.replaceAndPlay(data)
+        .then(function(e){
+            self.commandRouter.volumioPlay(e.firstItemIndex);
+            res.json({'response': 'success'});
+        })
+        .fail(function (e) {
+            return res.json({'error': e});
+        });
+};
 
 RESTApiPlayback.prototype.logStart = function (sCommand) {
     var self = this;

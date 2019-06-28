@@ -41,8 +41,9 @@ function interfaceApi(context) {
     api.get('/commands', this.playback.playbackCommands.bind(this.playback));
     api.get('/getState', this.playback.playbackGetState.bind(this.playback));
     api.get('/getQueue', this.playback.playbackGetQueue.bind(this.playback));
+    api.post('/addToQueue', this.playback.addToQueue.bind(this.playback));
     api.post('/addPlay', this.playback.addPlay.bind(this.playback));
-
+    api.post('/replaceAndPlay', this.playback.replaceAndPlay.bind(this.playback));
 
     // Plugin Endpoints
     api.get('/pluginEndpoint', this.pluginRestEndpoint.bind(this));
