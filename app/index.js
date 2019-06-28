@@ -442,32 +442,40 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	return this.stateMachine.addQueueItems(arrayItems);
 };
 CoreCommandRouter.prototype.replaceAndPlay = function (data) {
+	var defer = libQ.defer();
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
 
     if (data.uri != undefined) {
     	if (data.uri.indexOf('playlists/') >= 0) {
-            return this.playPlaylist(data.title)
+            this.playPlaylist(data.title);
+            defer.resolve();
 		} else {
             this.stateMachine.addQueueItems(data)
                 .then((e)=> {
                 	this.volumioPlay(e.firstItemIndex);
+            		defer.resolve();
         	});
 		}
     } else if (data.list && data.index) {
         this.stateMachine.addQueueItems(data.list)
             .then(()=>{
                 this.volumioPlay(data.index);
+        		defer.resolve();
             });
     } else if ((!(data.list && data.index) && data.item && data.item.uri)) {
         this.stateMachine.addQueueItems(data.item)
             .then((e)=>{
                 this.volumioPlay(e.firstItemIndex);
+        		defer.resolve();
             });
     } else {
     	self.logger.error('Could not Replace and Play Item');
+        defer.reject('Could not Replace and Play Item');
 	}
+
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
