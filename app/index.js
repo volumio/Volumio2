@@ -441,16 +441,33 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 
 	return this.stateMachine.addQueueItems(arrayItems);
 };
-CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
+CoreCommandRouter.prototype.replaceAndPlay = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
 
-    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
-        return this.playPlaylist(arrayItems.title)
-    } else  {
-        return this.stateMachine.addQueueItems(arrayItems);
-    }
+    if (data.uri != undefined) {
+    	if (data.uri.indexOf('playlists/') >= 0) {
+            return this.playPlaylist(data.title)
+		} else {
+            this.stateMachine.addQueueItems(data)
+                .then((e)=> {
+                	this.volumioPlay(e.firstItemIndex);
+        	});
+		}
+    } else if (data.list && data.index) {
+        this.stateMachine.addQueueItems(data.list)
+            .then(()=>{
+                this.volumioPlay(data.index);
+            });
+    } else if ((!(data.list && data.index) && data.item && data.item.uri)) {
+        this.stateMachine.addQueueItems(data.item)
+            .then((e)=>{
+                this.volumioPlay(e.firstItemIndex);
+            });
+    } else {
+    	self.logger.error('Could not Replace and Play Item');
+	}
 };
 
 CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {

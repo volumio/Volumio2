@@ -75,10 +75,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('replaceAndPlay', function (data) {
 
-				self.commandRouter.replaceAndPlay(data)
-				.then(function(e){
-					return self.commandRouter.volumioPlay(e.firstItemIndex);
-				});
+				return self.commandRouter.replaceAndPlay(data)
 			});
 
             connWebSocket.on('replaceAndPlayCue', function (data) {
@@ -106,26 +103,7 @@ function InterfaceWebUI(context) {
                     });
 
             });
-
-        	connWebSocket.on('replaceAndPlayList', function (data) {
-				var index = 0;
-				
-				if (data.list && data.index) {
-                    self.commandRouter.replaceAndPlay(data.list)
-                        .then(function(e){
-                            return self.commandRouter.volumioPlay(data.index);
-                        });
-				} else if (!(data.list && data.index) && data.item) {
-                    self.commandRouter.replaceAndPlay(data.item)
-                        .then(function(e){
-                            return self.commandRouter.volumioPlay(0);
-                        });
-				} else {
-					self.logger.error('Cannot replace and add Playlis, missing parameter')
-				}
-
-        	});
-
+		
 			connWebSocket.on('addPlay', function (data) {
 
                 self.commandRouter.addQueueItems(data)
