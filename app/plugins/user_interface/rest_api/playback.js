@@ -10,623 +10,276 @@ module.exports = RESTApiPlayback;
 function RESTApiPlayback(context) {
     var self = this;
 
-
     // Save a reference to the parent commandRouter
     self.context=context;
     self.logger=self.context.logger;
     self.commandRouter = self.context.coreCommand;
 }
 
-RESTApiPlayback.prototype.playbackPlay=function(req, res)
-{
+RESTApiPlayback.prototype.playbackCommands=function(req, res) {
     var self=this;
-    var input=req.body;
 
-    if(input.clear)
-    {
-        this.commandRouter.stateMachine.clearQueue();
-    }
-
-    var promise;
-
-    if(input.items)
-    {
-        var queue=[];
-
-        for(var i in input.items)
-        {
-            var newUri;
-            var service = 'mpd';
-            // When new services are added, we need this function updated for parsing proper service
-            if(input.items[i].startsWith('/music-library')) {
-                newUri=input.items[i].substring(15);
-            } else if(input.items[i].startsWith('spotify:')) {
-                newUri=input.items[i];
-                service = 'spop';
+    var response = {'Error': 'Failed to execute command'};
+    try {
+        if(req.query.cmd == "play"){
+            var timeStart = Date.now();
+            if (req.query.N == undefined) {
+                self.logStart('Client requests Volumio play')
+                    .then(self.commandRouter.volumioPlay.bind(self.commandRouter))
+                    .fail(self.pushError.bind(self))
+                    .done(function () {
+                        res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                    });
             } else {
-                newUri=input.items[i];
-            }
-
-            queue.push({
-                "service":service,
-                "uri":newUri
-            });
-        }
-
-        promise=this.commandRouter.stateMachine.addQueueItems(queue);
-    }
-    else promise=libQ.resolve();
-
-    promise.then(
-        function()
-        {
-           var index=0;
-           if(input.index && input.index<self.commandRouter.stateMachine.getQueue().length)
-           {
-               index=input.index;
-           }
-           return self.commandRouter.volumioPlay(index);
-        }
-    )
-        .then(function()
-        {
-            res.send({
-                "success":true
-            });
-        })
-        .fail(function(err)
-        {
-            res.send({
-                "success":false,
-                "reason":err
-            });
-        })
-
-
-
-};
-
-RESTApiPlayback.prototype.playbackStop=function(req, res)
-{
-    this.commandRouter.volumioStop();
-    res.send({
-        "success":true
-    });
-};
-
-RESTApiPlayback.prototype.playbackPause=function(req, res)
-{
-    this.commandRouter.volumioPause();
-    res.send({
-        "success":true
-    });
-};
-
-RESTApiPlayback.prototype.playbackResume=function(req, res)
-{
-    this.commandRouter.volumioPlay();
-    res.send({
-        "success":true
-    });
-};
-
-RESTApiPlayback.prototype.playbackNext=function(req, res)
-{
-    this.commandRouter.volumioNext();
-    res.send({
-        "success":true
-    });
-};
-
-RESTApiPlayback.prototype.playbackPrevious=function(req, res)
-{
-    this.commandRouter.volumioPrevious();
-    res.send({
-        "success":true
-    });
-};
-
-RESTApiPlayback.prototype.playbackSeek=function(req, res)
-{
-    var input=req.body;
-    var seek=0;
-
-    try
-    {
-        seek=parseInt(input.seek)/1000;
-
-        this.commandRouter.volumioSeek(seek);
-
-        //Cannot put a promise here, Volumio method doesn't return it
-        res.send({
-            "success":true
-        });
-    }
-    catch(e)
-    {
-        res.send({
-            "success":false,
-            "reason":e
-        });
-    }
-};
-
-RESTApiPlayback.prototype.playbackRandom=function(req, res)
-{
-    var input=req.body;
-
-    if(input.random!==undefined)
-    {
-        this.commandRouter.volumioRandom(input.random);
-        res.send({
-            "success":true
-        });
-    }
-    else if(input.toggle)
-    {
-        var state=this.commandRouter.stateMachine.getState();
-        var random=state.random;
-
-        this.commandRouter.volumioRandom(!random);
-        res.send({
-            "success":true
-        });
-    }
-    else res.send({
-        "success":false,
-        "reason":"No random value in request"
-    });
-};
-
-RESTApiPlayback.prototype.playbackGetRandom=function(req, res)
-{
-    var state=this.commandRouter.stateMachine.getState();
-    var random=state.random;
-
-    if(random==undefined)
-        random=false;
-
-    res.send({
-        "success":true,
-        "value":{
-            "random":random
-        }
-    });
-};
-
-RESTApiPlayback.prototype.playbackRepeat=function(req, res)
-{
-    var input=req.body;
-
-    if(input.repeat!==undefined)
-    {
-        this.commandRouter.volumioRepeat(input.repeat,input.repeatSingle);
-        res.send({
-            "success":true
-        });
-    }
-    if(input.cycle)
-    {
-        var state=this.commandRouter.stateMachine.getState();
-
-        var repeat=state.repeat;
-        var repeatSingle=state.repeatSingle;
-
-        if(repeat==undefined || repeat==null)
-            repeat=false;
-
-        if(repeatSingle==undefined || repeatSingle==null)
-            repeatSingle=false;
-
-        //off -> track -> list
-
-        if(repeat)
-        {
-            if(repeatSingle)
-            {
-
-                console.log("SETTING true,false");
-                this.commandRouter.volumioRepeat(true,false);
-            }
-            else
-            {
-
-                console.log("SETTING false,false");
-                this.commandRouter.volumioRepeat(false,false);
+                var N = parseInt(req.query.N);
+                self.logStart('Client requests Volumio play at index '+ N)
+                    .then(self.commandRouter.volumioPlay.bind(self.commandRouter,N))
+                    .done(function () {
+                        res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                    });
             }
         }
-        else
-        {
-            console.log("SETTING true,true");
-            this.commandRouter.volumioRepeat(true,true);
+        else if (req.query.cmd == "toggle"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio toggle')
+                .then(self.commandRouter.volumioToggle.bind(self.commandRouter))
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-
-        res.send({
-            "success":true
-        });
-    }
-    else res.send({
-        "success":false,
-        "reason":"No repeat value in request"
-    });
-};
-
-RESTApiPlayback.prototype.playbackGetRepeat=function(req, res)
-{
-    var state=this.commandRouter.stateMachine.getState();
-
-    var repeat=state.repeat;
-    var repeatSingle=state.repeatSingle;
-
-
-    if(repeat==undefined || repeat==null)
-        repeat=false;
-
-    if(repeatSingle==undefined || repeatSingle==null)
-        repeatSingle=false;
-
-    var repeatStr="off";
-
-    if(repeat)
-    {
-        if(repeatSingle)
-        {
-            repeatStr="track";
+        else if (req.query.cmd == "stop"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio stop')
+                .then(self.commandRouter.volumioStop.bind(self.commandRouter))
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-        else
-        {
-            repeatStr="list";
+        else if (req.query.cmd == "pause"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio pause')
+                .then(self.commandRouter.volumioPause.bind(self.commandRouter))
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-
-    }
-
-    res.send({
-        "success":true,
-        "value":repeatStr
-    });
-};
-
-RESTApiPlayback.prototype.playbackConsume=function(req, res)
-{
-    var input=req.body;
-
-    if(input.consume!==undefined)
-    {
-        this.commandRouter.volumioConsume(input.consume);
-        res.send({
-            "success":true
-        });
-    }
-    else res.send({
-        "success":false,
-        "reason":"No consume value in request"
-    });
-};
-
-RESTApiPlayback.prototype.playbackGetConsume=function(req, res)
-{
-    var state=this.commandRouter.stateMachine.getState();
-    var consume=state.consume;
-
-    if(consume==undefined)
-        consume=false;
-
-    res.send({
-        "success":true,
-        "value":{
-            "consume":consume
+        else if (req.query.cmd == "clearQueue"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio Clear Queue')
+                .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-    });
-};
-
-
-RESTApiPlayback.prototype.playbackGetStatus=function(req, res)
-{
-    var state=this.commandRouter.stateMachine.getState();
-
-    var random=state.random!==null?state.random:false;
-    var repeat=state.repeat!==null?state.repeat:false;
-    var repeatSingle=state.repeatSingle!==null?state.repeatSingle:false;
-    var consume=state.consume!==null?state.consume:false;
-
-    var repeatStatus="off";
-    if(repeat)
-    {
-        if(repeatSingle)
-        {
-            repeatStatus="track";
+        else if(req.query.cmd == "prev"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio previous')
+                .then(self.commandRouter.volumioPrevious.bind(self.commandRouter))
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-        else
-        {
-            repeatStatus="list";
+        else if(req.query.cmd == "next"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio next')
+                .then(self.commandRouter.volumioNext.bind(self.commandRouter))
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-    }
-
-    res.send({
-        "success":true,
-        "value":{
-            "status":state.status,
-            "index":state.position,
-            "title":state.title,
-            "artist":state.artist,
-            "album":state.album,
-            "albumart":state.albumart,
-            "trackType":state.trackType,
-            "seek":state.seek,
-            "duration":state.duration*1000,
-            "random":random,
-            "repeat":repeatStatus,
-            "consume":consume,
-            "volume":state.volume
-        }
-    });
-};
-
-RESTApiPlayback.prototype.playbackVolume=function(req, res)
-{
-    var input=req.body;
-
-    if(input.volume!==undefined)
-    {
-        if(_.isNumber(input.volume))
-        {
-            this.commandRouter.volumiosetvolume(input.volume);
-            var setVolume = this.setVolume(input.volume);
-            setVolume.then((volume)=>{
-                this.commandRouter.volumioupdatevolume(volume);
-            return res.send({
-                "success":true})
-        })
-            res.send({
-                "success":true
-            });
-        }
-        else
-        {
-            res.send({
-                "success":false,
-                "reason":"Volume is not an integer"
-            });
-        }
-
-    }
-    else if(input.delta!==undefined)
-    {
-        if(_.isNumber(input.delta))
-        {
-            volumeDeltaArray.push(input.delta);
-            var setVolume = this.setDeltaVolume(volumeDeltaArray[0]);
-            setVolume.then((volume)=>{
-                this.commandRouter.volumioupdatevolume(volume);
-                volumeDeltaArray.splice(0, 1);
-                return res.send({
-                "success":true})
-            })
-
-        }
-        else
-        {
-            res.send({
-                "success":false,
-                "reason":"Delta is not an integer"
-            });
-        }
-
-    }
-    else {
-        res.send({
-            "success":false,
-            "reason":"No volume value in request"
-        });
-    }
-};
-
-RESTApiPlayback.prototype.setDeltaVolume=function(deltaVolume)
-{
-    var defer = libQ.defer();
-    var volume=this.commandRouter.stateMachine.currentVolume;
-    volume+=deltaVolume;
-    var execVolume = this.commandRouter.volumeControl.alsavolume(volume);
-    execVolume.then(function(result){
-        defer.resolve(result);
-    })
-    return defer.promise
-};
-
-RESTApiPlayback.prototype.setVolume=function(volume)
-{
-    var defer = libQ.defer();
-    var execVolume = this.commandRouter.volumeControl.alsavolume(volume);
-    execVolume.then(function(result){
-        defer.resolve(result);
-    })
-    return defer.promise
-};
-
-RESTApiPlayback.prototype.playbackGetVolume=function(req, res)
-{
-    this.commandRouter.volumeControl.getVolume(function(vol)
-    {
-        res.send({
-            "success":true,
-            "value":{
-                "volume":vol
+        else if(req.query.cmd == "volume"){
+            var VolumeInteger = req.query.volume;
+            if (VolumeInteger == "plus") {
+                VolumeInteger = '+';
+            } else if (VolumeInteger == "minus"){
+                VolumeInteger = '-';
             }
-        });
-    });
-};
+            else if (VolumeInteger == "mute" || VolumeInteger == "unmute" || VolumeInteger == "toggle") {
 
-RESTApiPlayback.prototype.playbackMute=function(req, res)
-{
-    var self=this;
-    var input=req.body;
-    var promise;
+            } else {
+                VolumeInteger = parseInt(VolumeInteger);
+            }
 
-    if(input.mute!==undefined)
-    {
-        if(input.mute=='toggle')
-        {
-            muteToggleArray.push('toggle');
-            var setMute = this.setMuteToggle();
-            setMute.then((result)=>{
-                this.commandRouter.volumioupdatevolume(result);
-                muteToggleArray.splice(0, 1);
-                res.send({
-                "success":true,
-                "value":{
-                    "mute":result.mute
+            var timeStart = Date.now();
+            self.logStart('Client requests Volume ' + VolumeInteger)
+                .then(function () {
+                    return self.commandRouter.volumiosetvolume.call(self.commandRouter,
+                        VolumeInteger);
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else if(req.query.cmd == "playplaylist"){
+            var playlistName = req.query.name;
+            var timeStart = Date.now();
+            self.logStart('Client requests Volumio Play Playlist '+playlistName)
+                .then(function () {
+                    return self.commandRouter.playPlaylist.call(self.commandRouter,
+                        playlistName);
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else if(req.query.cmd=="seek"){
+            var position = req.query.position;
+            if(position == "plus") {
+                position = '+';
+            }
+            else if (position == "minus"){
+                position = '-';
+            }
+            else {
+                position = parseInt(position);
+            }
+
+            var timeStart = Date.now();
+            self.logStart('Client requests Position ' + position)
+                .then(function () {
+                    return self.commandRouter.volumioSeek(position);
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else if(req.query.cmd == "repeat"){
+            var value = req.query.value;
+            if(value == "true"){
+                value = true;
+            }
+            else if (value == "false"){
+                value = false;
+            }
+
+            var timeStart = Date.now();
+            self.logStart('Client requests Repeat ' + value)
+                .then(function () {
+                    if(value != undefined) {
+                        return self.commandRouter.volumioRepeat(value, false);
                     }
+                    else{
+                        return self.commandRouter.repeatToggle();
+                    }
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                 });
-            });
-
         }
-        else
-        {
-            if(input.mute=='true') {
-                var setMute = this.setMuteToggle('mute');
-                setMute.then((result)=> {
-                    this.commandRouter.volumioupdatevolume(result);
-                    res.send({
-                    "success":true,
-                    "value":{
-                        "mute":result.mute
-                        }
-                    });
-                });
-            } else  {
-                var setMute = this.setMuteToggle('unmute');
-                setMute.then((result)=>{
-                    this.commandRouter.volumioupdatevolume(result);
-                    res.send({
-                    "success":true,
-                    "value":{
-                        "mute":result.mute
-                        }
-                    });
-                });
+        else if(req.query.cmd == "random"){
+            var value = req.query.value;
+            if(value == "true"){
+                value = true;
             }
+            else if (value == "false"){
+                value = false;
+            }
+
+            var timeStart = Date.now();
+            self.logStart('Client requests Random ' + value)
+                .then(function () {
+                    if(value != undefined) {
+                        return self.commandRouter.volumioRandom(value);
+                    }
+                    else{
+                        return self.commandRouter.randomToggle();
+                    }
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-    }
-    else { res.send({
-            "success":false,
-            "reason":"No volume value in request"
-        });
-    }
-};
-
-RESTApiPlayback.prototype.setMuteToggle=function(value)
-{
-    var defer = libQ.defer();
-    if (value !== undefined) {
-        var state=this.commandRouter.stateMachine.getState();
-        var execMute = this.setVolume(value);
-        execMute.then((result)=>{
-            defer.resolve(result);
-        })
-    } else {
-        var state=this.commandRouter.stateMachine.getState();
-        console.log("MUTED: "+state.mute);
-
-        if(state.mute){
-            var execMute = this.setVolume('unmute');
-            execMute.then((result)=>{
-                defer.resolve(result);
-            })
-
-        } else {
-            var execMute = this.setVolume('mute');
-            execMute.then((result)=>{
-                defer.resolve(result);
-            })
+        else if(req.query.cmd == "startAirplay"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Start Airplay metadata parsing')
+                .then(function () {
+                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'startAirplayMeta', '');
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-    }
-
-    return defer.promise
-};
-
-RESTApiPlayback.prototype.playbackGetMute=function(req, res)
-{
-    var self=this;
-
-    var state=this.commandRouter.stateMachine.getState();
-
-    console.log("VOLUME: "+state.mute);
-
-    res.send({
-        "success":true,
-        "value":{
-            "mute":state.mute
+        else if(req.query.cmd == "stopAirplay"){
+            var timeStart = Date.now();
+            self.logStart('Client requests Start Airplay metadata parsing')
+                .then(function () {
+                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'airPlayStop', '');
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
         }
-    });
-
-
-};
-
-RESTApiPlayback.prototype.ffwdRew=function(req, res)
-{
-    var self=this;
-    var input=req.body;
-
-    if(input.value)
-    {
-        self.commandRouter.volumioFFWDRew(input.value).then(function()
-        {
-            res.send({
-                "success":true
-            });
-        })
-        .fail(function(err)
-        {
-            res.send({
-                "success":true,
-                "reason":err
-            });
-        });
-    }
-    else
-    {
-        res.send({
-            "success":false,
-            "reason":"Cannot seek"
-        });
+        else if(req.query.cmd == "usbAudioAttach"){
+            var timeStart = Date.now();
+            self.logStart('USB Audio Device Attached')
+                .then(function () {
+                    self.commandRouter.usbAudioAttach();
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else if(req.query.cmd == "usbAudioDetach"){
+            var timeStart = Date.now();
+            self.logStart('USB Audio Device Detached')
+                .then(function () {
+                    self.commandRouter.usbAudioDetach();
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else{
+            res.json({'Error': "command not recognized"});
+        }
+    } catch(e){
+        self.commandRouter.logger.info("Error executing command: " + e);
+        res.json(response);
     }
 };
 
-RESTApiPlayback.prototype.playbackGetQueue=function(req, res)
-{
+
+RESTApiPlayback.prototype.playbackGetQueue=function(req, res) {
     var self=this;
 
     var queue=this.commandRouter.volumioGetQueue();
-    var apiQueue=[];
+    res.json(queue)
+};
 
-    _.each(queue,function(element, index, list){
-        var uri;
+RESTApiPlayback.prototype.playbackGetState=function(req, res) {
+    var self=this;
+    var response = self.commandRouter.volumioGetState();
 
-        if(element.uri.startsWith('mnt'))
-        {
-            uri='/music-library'+element.uri.substring(3);
-        }
-        else
-        {
-            uri=element.uri;
-        }
+    if (response != undefined) {
+        res.json(response);
+    } else {
+        res.json(notFound);
+    }
+};
 
-        apiQueue.push({
-            name:element.name,
-            title:element.name,
-            filetitle:element.uri.substring(element.uri.lastIndexOf('/')+1),
-            path:uri,
-            artist:element.artist,
-            album:element.album
-        });
-    });
+RESTApiPlayback.prototype.logStart = function (sCommand) {
+    var self = this;
+    self.commandRouter.pushConsoleMessage('\n' + '---------------------------- ' + sCommand);
+    return libQ.resolve();
+};
 
-
-    res.send({
-        "success":true,
-        "value":apiQueue
-
-    });
-
-
+RESTApiPlayback.prototype.pushError = function (error) {
+    var self = this;
+    self.logger.error("API:pushError: " + error);
+    return libQ.resolve();
 };
