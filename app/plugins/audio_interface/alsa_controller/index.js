@@ -312,7 +312,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[6].options'), value));
 
-			value = self.config.get('volumestart');
+            value = self.getAdditionalConf('music_service', 'mpd', 'playback_mode', 'continuous');
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[7].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[7].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[7].options'), value));
+
+            value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), value));
 

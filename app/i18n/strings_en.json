@@ -76,7 +76,11 @@
     "NO_OUTPUT_DEVICE_MESSAGE":"Please connect an Audio Output Device to the Unit",
     "OUTPUT_DEVICE_NOT_AVAILABLE":"The selected output device is not available",
     "CONNECT_OUTPUT_DEVICE_1":"Please connect",
-    "CONNECT_OUTPUT_DEVICE_2":"to the unit or select a different output device from playback options"
+    "CONNECT_OUTPUT_DEVICE_2":"to the unit or select a different output device from playback options",
+    "PLAYBACK_MODE":"Playback Mode",
+    "PLAYBACK_MODE_DOC":"You can select the plabyack Behaviour: Continuous will replace your current queue with all the songs in an album or a playlist, single will only add to queue the song you selected to play",
+    "PLAYBACK_MODE_CONTINUOUS":"Continuous",
+    "PLAYBACK_MODE_SINGLE":"Single"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Network Settings",

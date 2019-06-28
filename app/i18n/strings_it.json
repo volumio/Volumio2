@@ -76,7 +76,11 @@
     "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità",
     "OUTPUT_DEVICE_NOT_AVAILABLE":"L'uscita audio selezionata non è disponibile",
     "CONNECT_OUTPUT_DEVICE_1":"Si prega di connettere",
-    "CONNECT_OUTPUT_DEVICE_2":"all'unità o seleziona un altra uscita audio dalle impostazioni di riproduzione"
+    "CONNECT_OUTPUT_DEVICE_2":"all'unità o seleziona un altra uscita audio dalle impostazioni di riproduzione",
+    "PLAYBACK_MODE":"Modalità di riproduzione",
+    "PLAYBACK_MODE_DOC":"Puoi selezionare la modalirà di riproduzione: La modalità continua rimpiazzerà la coda corrente con tutte le tracce presenti in un album o in una playlist, la modalità singola aggiungerà unicamente la canzone selezionata",
+    "PLAYBACK_MODE_CONTINUOUS":"Continua",
+    "PLAYBACK_MODE_SINGLE":"Singola"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
