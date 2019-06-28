@@ -145,7 +145,13 @@ interfaceApi.prototype.logStart = function (sCommand) {
 interfaceApi.prototype.pluginRestEndpoint = function (req, res) {
     var self = this;
 
-    var result = self.executeRestEndpoint(req.body);
+    if (req.query) {
+        var payload = req.query;
+    } else {
+        var payload = req.body;
+    }
+
+    var result = self.executeRestEndpoint(payload);
     result.then(function(response) {
         res.json({'success': true});
     })
