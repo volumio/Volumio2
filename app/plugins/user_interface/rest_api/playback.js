@@ -272,6 +272,25 @@ RESTApiPlayback.prototype.playbackGetState=function(req, res) {
     }
 };
 
+RESTApiPlayback.prototype.addPlay=function(req, res) {
+    var self=this;
+
+    var data = req.body;
+    self.commandRouter.addQueueItems(data)
+        .then(function(e){
+            self.commandRouter.volumioPlay(e.firstItemIndex);
+            res.json({'response': 'success'});
+        })
+        .fail(function (e) {
+            return res.json({'error': e});
+        });
+};
+
+
+
+
+
+
 RESTApiPlayback.prototype.logStart = function (sCommand) {
     var self = this;
     self.commandRouter.pushConsoleMessage('\n' + '---------------------------- ' + sCommand);
@@ -283,3 +302,5 @@ RESTApiPlayback.prototype.pushError = function (error) {
     self.logger.error("API:pushError: " + error);
     return libQ.resolve();
 };
+
+
