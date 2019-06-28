@@ -303,14 +303,7 @@ RESTApiPlayback.prototype.replaceAndPlay=function(req, res) {
     var self=this;
 
     var data = req.body;
-    self.commandRouter.replaceAndPlay(data)
-        .then(function(e){
-            self.commandRouter.volumioPlay(e.firstItemIndex);
-            res.json({'response': 'success'});
-        })
-        .fail(function (e) {
-            return res.json({'error': e});
-        });
+    return self.commandRouter.replaceAndPlay(data)
 };
 
 RESTApiPlayback.prototype.logStart = function (sCommand) {
