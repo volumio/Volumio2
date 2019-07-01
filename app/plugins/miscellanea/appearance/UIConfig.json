@@ -14,10 +14,6 @@
           "language"
         ]
       },
-      "value":  {
-        "value": "0",
-        "label": "Unknown"
-      },
       "content": [
         {
           "id": "language",
@@ -33,6 +29,29 @@
         }
       ]
     },
-    {"coreSection": "ui-settings"}
+    {"coreSection": "ui-settings"},
+    {
+      "id": "volumio3_ui_section",
+      "element": "section",
+      "label": "TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI",
+      "icon": "fa-language",
+      "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setVolumio3UI"},
+      "hidden":false,
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "volumio3_ui"
+        ]
+      },
+      "content": [
+        {
+          "id": "volumio3_ui",
+          "element": "switch",
+          "doc":"TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI_DOC",
+          "label": "TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI",
+          "value":false
+        }
+      ]
+    }
   ]
 }

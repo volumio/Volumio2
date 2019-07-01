@@ -17,6 +17,7 @@ var background = express();
 
 var plugindir = '/tmp/plugins';
 var backgrounddir = '/data/backgrounds';
+var volumio3UIFlagFile = '/data/volumio3ui';
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -44,7 +45,19 @@ dev.use(express.static(path.join(__dirname, 'dev')));
 dev.use('/', routes);
 
 app.use(compression())
-app.use(express.static(path.join(__dirname, 'www')));
+
+// Serving Volumio3 UI
+// Checking if we use Volumio3 UI
+if (fs.existsSync(volumio3UIFlagFile)) {
+    process.env.VOLUMIO_3_UI = 'true';
+}
+
+if (process.env.VOLUMIO_3_UI === 'true') {
+    app.use(express.static(path.join(__dirname, 'www3')));
+} else {
+    app.use(express.static(path.join(__dirname, 'www')));
+}
+
 app.use(busboy());
 app.use(allowCrossDomain);
 

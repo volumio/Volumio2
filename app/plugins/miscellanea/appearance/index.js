@@ -5,6 +5,7 @@ var config= new (require('v-conf'))();
 var libQ = require('kew');
 var path = require('path');
 var Jimp = require("jimp");
+var execSync = require('child_process').execSync;
 
 var backgroundPath = '/data/backgrounds';
 
@@ -142,13 +143,28 @@ volumioAppearance.prototype.getUIConfig = function () {
                     value: languagesdata.languages[n].code,
                     label: languagesdata.languages[n].name
                 });
+            };
+
+            try {
+                var sysVariant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString().replace('\n','');
+            } catch(e) {
+                self.logger.error(e)
             }
 
+            if (sysVariant === 'volumio') {
+                self.configManager.setUIConfigParam(uiconf, 'sections[2].hidden', false);
+            }
+
+            var showVolumio3UI = false;
+            if (process.env.VOLUMIO_3_UI === 'true') {
+                showVolumio3UI = true;
+            }
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', showVolumio3UI);
 
             defer.resolve(uiconf);
         })
-        .fail(function()
-        {
+        .fail(function(e)
+        {   self.logger.error('Error getting Configuration page: ' + e);
             defer.reject(new Error());
         })
 
@@ -429,4 +445,38 @@ volumioAppearance.prototype.getAvailableLanguages = function() {
 volumioAppearance.prototype.getConfigParam = function (key) {
     var self = this;
     return config.get(key);
+};
+
+volumioAppearance.prototype.setVolumio3UI = function (data) {
+    var self = this;
+
+    if (data &&  data.volumio3_ui === true) {
+        try {
+            execSync("/usr/bin/touch /data/volumio3ui");
+        } catch(e) {
+            self.logger.error(e)
+        }
+    } else {
+        try {
+            execSync("/bin/rm /data/volumio3ui");
+        } catch(e) {
+            self.logger.error(e)
+        }
+    }
+
+    var responseData = {
+        title: 'Restart the system',
+        message: 'In order for changes to take effect, restart the system and reload manually your browser once the system has restarted',
+        size: 'lg',
+        buttons: [
+            {
+                name: 'Restart System',
+                class: 'btn btn-info',
+                emit:'reboot',
+                payload:''
+            }
+        ]
+    }
+
+    self.commandRouter.broadcastMessage("openModal", responseData)
 };

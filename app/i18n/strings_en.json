@@ -235,7 +235,9 @@
     "ALBUMART_RESET_CACHE_DOC":"The system caches your albumart to improve performance, but this prevents newly added albumart from being shown. By resetting the cache you will be able to see newly added albumart.",
     "METADATA_IMAGE":"Show embedded albumart",
     "METADATA_IMAGE_DOC":"When enabled, if no albumart file can be found in the folder, the system will attempt to extract any albumart embedded in your music files. This will most likely increase albumart loading times",
-    "BROWSE_SOURCES_VISIBILITY":"Sources Visibility"
+    "BROWSE_SOURCES_VISIBILITY":"Sources Visibility",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Enable Volumio3 Experimental User Interface",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Volumio3 Experimental User Interface"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",
