@@ -148,9 +148,11 @@ interfaceApi.prototype.logStart = function (sCommand) {
 interfaceApi.prototype.pluginRestEndpoint = function (req, res) {
     var self = this;
 
-    if (req.query) {
+    if (req.method == "POST") {
         var payload = req.query;
-    } else {
+    }
+
+    if (req.method == "POST") {
         var payload = req.body;
     }
 
