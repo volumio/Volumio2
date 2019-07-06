@@ -9,6 +9,7 @@ var io=require('socket.io-client');
 var exec = require('child_process').exec;
 var libQ = require('kew');
 var ip = require('ip');
+var unirest = require('unirest');
 var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js');
 
 // Define the ControllerVolumioDiscovery class
@@ -310,7 +311,6 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 				}
                 foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
 				var toAdvertise=self.getDevices();
-				console.log(toAdvertise)
 				self.commandRouter.pushMultiroomDevices(toAdvertise);
 			});
 		});
@@ -566,3 +566,21 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 // 				callback(toAdvertise);
 // 			}
 // }
+
+ControllerVolumioDiscovery.prototype.setRemoteDeviceVolume = function (data) {
+    let self = this;
+	
+    self.logger.info('Setting Remote Device Volume: ' + data.host);
+
+    let url = data.host + "/api/v1/commands/?cmd=volume&volume=" + data.volume;
+
+    unirest.get(url)
+        .timeout(3000)
+        .end(function (response) {
+            if (response && response.status === 200) {
+                self.logger.info("Done setting volume on: ", data.host);
+            } else {
+                self.logger.error('Cannot set Remote Device Volume');
+            }
+        });
+};
