@@ -7,6 +7,7 @@ var pidof = require('pidof');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
 var libMpd = require('mpd');
+var TuneIn = require('node-tunein-radio');
 var variant = '';
 var selection = {};
 var retry = 0;
@@ -42,6 +43,13 @@ ControllerWebradio.prototype.onStart = function() {
     this.addToBrowseSources();
 
     this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+    var tuneinOptions = {
+        protocol: 'https',
+        cacheRequests: true,
+        cacheTTL: 1000 * 60 * 60,
+    };
+
+    self.tuneIn = new TuneIn(tuneinOptions);
     this.getSelectionInfo();
 
     return libQ.resolve();
@@ -803,14 +811,14 @@ ControllerWebradio.prototype.search = function (data) {
     };
 
     var search = data.value.toLowerCase();
-    var dirbleSerch = self.searchWithDirble(search).then(function (value) {
+    var tuneInSerch = self.searchWithTuneIn(search).then(function (value) {
         return value;
     });
     var shoutcastSearch = self.searchWithShoutcast(search).then(function (value) {
         return value;
     });
 
-    libQ.all([dirbleSerch,shoutcastSearch]).then(function(result){
+    libQ.all([tuneInSerch,shoutcastSearch]).then(function(result){
         var i = 0;
         for (i = 0; i < result.length; i++) {
             if (Array.isArray(result[i])) {
@@ -946,6 +954,31 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
     return defer.promise;
 }
 
+ControllerWebradio.prototype.searchWithTuneIn = function (search) {
+    var self = this;
+    var defer = libQ.defer();
+    var items = [];
+
+    var query = encodeURIComponent(search);
+    let tuneinSearch = self.tuneIn.search(query);
+    tuneinSearch.then(function(results) {
+        var body = results.body;
+        for (var i in body) {
+            let item = self.getTuneInNavigationItem(body[i], 'tunein_radio');
+            if (item) {
+                items.push(item);
+            }
+        }
+        defer.resolve(items);
+    })
+        .catch(function(err) {
+            self.logger.error('Error in TuneIn search: ' + err);
+            defer.resolve([]);
+        });
+
+    return defer.promise;
+}
+
 
 ControllerWebradio.prototype.addMyWebRadio = function (data) {
     this.logger.info(JSON.stringify(data));
@@ -1061,4 +1094,37 @@ ControllerWebradio.prototype.listSelection = function () {
         defer.resolve(object);
     }
     return defer.promise
+}
+
+ControllerWebradio.prototype.getTuneInNavigationItem = function(node, category) {
+    var self = this;
+
+    let servType = '';
+    let albumart = '';
+    let icon = '';
+    let uri = '';
+    console.log(node.type)
+    if (node.type == 'audio') {
+        servType = 'webradio';
+        albumart = node.image;
+        uri = node.URL;
+    } else if (node.type == 'link') {
+        return null;
+    } else {
+        self.logger.warn('[TuneIn] Unknown element type ' + node.type + ' ignored for ' + category + ':' + node);
+        return null;
+    }
+
+    var item = {
+        service: 'webradio',
+        type: servType,
+        title: node.text,
+        artist: '',
+        album: '',
+        albumart: albumart,
+        icon: icon,
+        uri: uri,
+    };
+
+    return item;
 }
