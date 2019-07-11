@@ -7,10 +7,13 @@ var pidof = require('pidof');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
 var libMpd = require('mpd');
+var TuneIn = require('node-tunein-radio');
+var url = require('url');
 var variant = '';
 var selection = {};
 var retry = 0;
 var selectionEndpoint = 'https://radio-directory.firebaseapp.com/';
+var tuneInNavTree;
 
 
 // Define the ControllerWebradio class
@@ -22,6 +25,7 @@ function ControllerWebradio(context) {
 	this.commandRouter = this.context.coreCommand;
 	this.logger = this.context.logger;
 	this.configManager = this.context.configManager;
+    self.resetHistory();
 }
 
 
@@ -42,7 +46,15 @@ ControllerWebradio.prototype.onStart = function() {
     this.addToBrowseSources();
 
     this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+    var tuneinOptions = {
+        protocol: 'https',
+        cacheRequests: true,
+        cacheTTL: 1000 * 60 * 60,
+    };
+
+    self.tuneIn = new TuneIn(tuneinOptions);
     this.getSelectionInfo();
+    this.initTuneIn();
 
     return libQ.resolve();
 };
@@ -50,13 +62,14 @@ ControllerWebradio.prototype.onStart = function() {
 ControllerWebradio.prototype.handleBrowseUri=function(curUri)
 {
     var self=this;
-    //console.log(curUri);
     var response;
 
     if (curUri.startsWith('radio')) {
-        if (curUri == 'radio')
+        if (curUri == 'radio') {
+            self.resetHistory();
+            self.historyAdd(curUri);
             response = self.listRoot(curUri);
-        else {
+        } else {
             if (curUri.startsWith('radio/myWebRadio')) {
                 response = self.listMyWebRadio(curUri);
             }
@@ -68,6 +81,9 @@ ControllerWebradio.prototype.handleBrowseUri=function(curUri)
             }
             if (curUri.startsWith('radio/favourites')) {
                 response = self.listRadioFavourites(curUri);
+            }
+            if (curUri.startsWith('radio/tunein') || curUri.startsWith('tunein')) {
+                response = self.handleTuneInUri(curUri);
             }
              if (curUri==='radio/top500') {
                     response = self.listTop500Radios(curUri);
@@ -122,7 +138,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: self.commandRouter.getI18nString('WEBRADIO.TOP_500_RADIOS') + ' (Shoutcast)',
+                            title: self.commandRouter.getI18nString('WEBRADIO.TOP_500_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-star',
@@ -131,7 +147,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: self.commandRouter.getI18nString('WEBRADIO.BY_GENRE_RADIOS') + ' (Shoutcast)',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BY_GENRE_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-tags',
@@ -140,12 +156,67 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: self.commandRouter.getI18nString('WEBRADIO.BY_COUNTRY_RADIOS') + ' (Dirble)',
+                            title: 'Local Radio',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-map-marker',
+                            uri: 'radio/tunein/local'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BY_COUNTRY_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-globe',
-                            uri: 'radio/byCountry'
-                        }
+                            uri: 'radio/tunein/location'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: 'Popular',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-thumbs-o-up',
+                            uri: 'radio/tunein/popular'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: 'Best',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-diamond',
+                            uri: 'radio/tunein/best'
+                        }/*,
+
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: 'By Language',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-map-signs',
+                            uri: 'radio/tunein/language'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: 'Music',
+                            artist: '',
+                            album: '',
+                            icon: 'fa fa-music',
+                            uri: 'radio/tunein/music'
+                        },
+                        {
+                            service: 'webradio',
+                            type: 'radio-category',
+                            title: 'Talk',
+                            artist: '',
+                            album: '',
+                            'icon': 'fa fa-comments-o',
+                            'uri': 'radio/tunein/talk'
+                        }*/
                     ]
                 }
             ],
@@ -505,17 +576,43 @@ ControllerWebradio.prototype.seek = function(position) {
     return self.mpdPlugin.seek(position);
 };
 
-ControllerWebradio.prototype.explodeUri = function(uri) {
+ControllerWebradio.prototype.explodeUri = function(data) {
     var self = this;
-    
     var defer=libQ.defer();
+    var uri = data.uri;
 
-    defer.resolve({
-        uri: uri,
-        service: 'webradio',
-        name: uri,
-        type: 'track'
-    });
+    if (uri.indexOf('http://opml') >= 0) {
+        var explodedUri = {
+            service: 'webradio',
+            type: 'track',
+        }
+
+        let parsedUrl = url.parse(uri, true);
+        let streamId = parsedUrl.query.id;
+
+        let streamUrl = self.tuneIn.tune_radio(streamId);
+        let streamDescribe = self.tuneIn.describe(streamId);
+
+        Promise.all([streamUrl, streamDescribe]).then(function(results) {
+            explodedUri.uri = results[0].body[0].url;
+            explodedUri.name = results[1].body[0].name;
+            explodedUri.albumart = results[1].body[0].logo;
+
+            defer.resolve(explodedUri);
+        })
+            .catch(function(err) {
+                self.logger.error(err);
+                defer.reject(new Error('Cannot retrieve details for stram ' + uri + ': ' + err));
+            });
+
+    } else {
+        data.name=data.title;
+        if (!data.albumart) {
+            data.albumart="/albumart";
+        }
+        defer.resolve(data);
+    }
+
 
     return defer.promise;
 };
@@ -803,14 +900,14 @@ ControllerWebradio.prototype.search = function (data) {
     };
 
     var search = data.value.toLowerCase();
-    var dirbleSerch = self.searchWithDirble(search).then(function (value) {
+    var tuneInSerch = self.searchWithTuneIn(search).then(function (value) {
         return value;
     });
     var shoutcastSearch = self.searchWithShoutcast(search).then(function (value) {
         return value;
     });
 
-    libQ.all([dirbleSerch,shoutcastSearch]).then(function(result){
+    libQ.all([tuneInSerch,shoutcastSearch]).then(function(result){
         var i = 0;
         for (i = 0; i < result.length; i++) {
             if (Array.isArray(result[i])) {
@@ -946,6 +1043,31 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
     return defer.promise;
 }
 
+ControllerWebradio.prototype.searchWithTuneIn = function (search) {
+    var self = this;
+    var defer = libQ.defer();
+    var items = [];
+
+    var query = encodeURIComponent(search);
+    let tuneinSearch = self.tuneIn.search(query);
+    tuneinSearch.then(function(results) {
+        var body = results.body;
+        for (var i in body) {
+            let item = self.getTuneInNavigationItem(body[i], 'tunein_radio');
+            if (item) {
+                items.push(item);
+            }
+        }
+        defer.resolve(items);
+    })
+        .catch(function(err) {
+            self.logger.error('Error in TuneIn search: ' + err);
+            defer.resolve([]);
+        });
+
+    return defer.promise;
+}
+
 
 ControllerWebradio.prototype.addMyWebRadio = function (data) {
     this.logger.info(JSON.stringify(data));
@@ -1061,4 +1183,336 @@ ControllerWebradio.prototype.listSelection = function () {
         defer.resolve(object);
     }
     return defer.promise
+}
+
+ControllerWebradio.prototype.getTuneInNavigationItem = function(node, category) {
+    var self = this;
+
+    let servType = '';
+    let albumart = '';
+    let icon = '';
+    let uri = '';
+
+    if (node.type == 'audio') {
+        servType = 'webradio';
+        albumart = node.image;
+        uri = node.URL;
+    } else if (node.type == 'link') {
+        return null;
+    } else {
+        return null;
+    }
+
+    var item = {
+        service: 'webradio',
+        type: servType,
+        title: node.text,
+        artist: '',
+        album: '',
+        albumart: albumart,
+        icon: icon,
+        uri: uri,
+    };
+
+    return item;
+}
+
+ControllerWebradio.prototype.initTuneIn = function() {
+    var self = this;
+    var defer = libQ.defer();
+
+    var tuneinRoot = self.tuneIn.browse();
+    tuneinRoot.then(function(results) {
+        var navTreeRoot = [];
+
+        var body = results.body;
+        for (var i in body) {
+            navTreeRoot.push(body[i]);
+        }
+        defer.resolve(navTreeRoot);
+    })
+        .catch(function(err) {
+            self.logger.error(err);
+            defer.reject(new Error('[TuneIn] Cannot list navTree Root nodes: ' + err));
+        });
+};
+
+ControllerWebradio.prototype.handleTuneInUri = function(curUri) {
+    var self = this;
+    var response;
+
+    curUri = curUri.replace('radio/','');
+    self.logger.info('TuneIn handleBrowseUri: ' + curUri);
+    if (curUri === 'tunein') {
+        self.resetHistory();
+        response = self.listRoot(curUri);
+        return response;
+    } else {
+        self.historyAdd(curUri);
+        var l1Exp = '^tunein\/([a-z]+)$';
+        var l1Match = curUri.match(l1Exp);
+
+        if (l1Match != null) {
+            response = self.browseCategory(l1Match[1]);
+            return response;
+        } else {
+            var l2Exp = /^tunein\/(browse|show)\/\?+([=0-9a-zA-Z&:~]+)$/
+            let l2Match = curUri.match(l2Exp);
+            if (l2Match != null) {
+                response = self.browseList(curUri, l2Match[1]);
+                return response;
+            }
+            self.logger.error('Unknown URI: ' + curUri);
+        }
+    }
+};
+
+
+ControllerWebradio.prototype.resetHistory = function() {
+    var self = this;
+
+    self.urlHistory = [];
+    self.historyIndex = -1;
+}
+
+ControllerWebradio.prototype.historyAdd = function(uri) {
+    var self = this;
+
+    // If the new url is equal to the previous one
+    // this means it's a "Back" action
+    if (self.urlHistory[self.historyIndex - 1] == uri) {
+        self.historyPop()
+    } else {
+        self.urlHistory.push(uri);
+        self.historyIndex++;
+    }
+}
+
+ControllerWebradio.prototype.historyPop = function(uri) {
+    var self = this;
+
+    self.urlHistory.pop();
+    self.historyIndex--;
+}
+
+ControllerWebradio.prototype.getPrevUri = function() {
+    var self = this;
+    var url;
+
+    if (self.historyIndex >= 0) {
+        url = self.urlHistory[self.historyIndex - 1];
+    } else {
+        url = '/';
+    }
+
+    if (url.indexOf('radio') < 0) {
+        url = 'radio/' + url;
+    }
+
+    return url;
+}
+
+ControllerWebradio.prototype.browseList = function(uri, listType) {
+    var self = this;
+    var defer = libQ.defer();
+    var response;
+    var tuneinRoot;
+
+    self.logger.info('[TuneIn] Fetching (' + listType + ') results For ' + uri);
+
+    let parsedUrl = url.parse(uri, true);
+    if (listType == 'show') {
+        tuneinRoot = self.tuneIn.browse_show(parsedUrl.query);
+    } else {
+        tuneinRoot = self.tuneIn.browse(parsedUrl.query);
+    }
+    tuneinRoot.then(function(results) {
+        response = self.parseResults(results, parsedUrl.search);
+        defer.resolve(response);
+    })
+        .catch(function(err) {
+            self.logger.error(err);
+            defer.reject(new Error('Cannot list category items for ' + uri + ': ' + err));
+        });
+
+    return defer.promise;
+}
+
+ControllerWebradio.prototype.browseCategory = function(category) {
+    var self = this;
+    var defer = libQ.defer();
+    var response;
+    var tuneinRoot;
+
+    if (category == 'local') {
+        tuneinRoot = self.tuneIn.browse_local();
+    } else if (category == 'music') {
+        tuneinRoot = self.tuneIn.browse_music();
+    } else if (category == 'talk') {
+        tuneinRoot = self.tuneIn.browse_talk();
+    } else if (category == 'sports') {
+        tuneinRoot = self.tuneIn.browse_sports();
+    } else if (category == 'location') {
+        tuneinRoot = self.tuneIn.browse_locations();
+    } else if (category == 'language') {
+        tuneinRoot = self.tuneIn.browse_langs();
+    } else if (category == 'podcast') {
+        tuneinRoot = self.tuneIn.browse_podcast();
+    } else if (category == 'popular') {
+        tuneinRoot = self.tuneIn.browse_popular();
+    } else if (category == 'best') {
+        tuneinRoot = self.tuneIn.browse_best();
+    } else {
+        defer.reject(new Error('Unknown category list: ' + category));
+    }
+
+    tuneinRoot.then(function(results) {
+        response = self.parseResults(results, category);
+        defer.resolve(response);
+    })
+        .catch(function(err) {
+            self.logger.error(err);
+            defer.reject(new Error('Cannot list category items for ' + category + ': ' + err));
+        });
+
+    return defer.promise;
+}
+
+ControllerWebradio.prototype.parseResults = function(results, category) {
+    var self = this;
+    var defer = libQ.defer();
+
+    var response = {
+        navigation: {
+            lists: [ ],
+            prev: {
+                uri: self.getPrevUri(),
+            },
+        },
+    };
+
+    let body = results.body;
+    let curList = 0;
+
+    for (var i in body) {
+        if (body[i].children) {
+            // This is a list, parse it properly
+            let childList = self.getNavigationList(body[i], category);
+            if (childList) {
+                response.navigation.lists.push(childList)
+                curList++;
+            }
+        } else {
+            if (response.navigation.lists[curList] == undefined) {
+                let firstList = {
+                    availableListViews: [
+                        'list',
+                    ],
+                    items: [],
+                };
+                response.navigation.lists.push(firstList);
+            }
+            let item = self.getNavigationItem(body[i], category);
+            if (item) {
+                response.navigation.lists[curList].items.push(item);
+            }
+        }
+    }
+
+    return(response);
+}
+
+ControllerWebradio.prototype.getNavigationList = function(nodeList, category) {
+    var self = this;
+
+    var list = {
+        availableListViews: [
+            'list',
+        ],
+        items: [
+        ],
+    };
+
+    list.icon = 'fa icon';
+
+    let children = nodeList.children;
+    for (var i in children) {
+        let item = self.getNavigationItem(children[i], category);
+        if (item) {
+            list.items.push(item);
+        }
+    }
+
+    return list;
+}
+
+ControllerWebradio.prototype.getNavigationItem = function(node, category) {
+    var self = this;
+
+    let servType = '';
+    let albumart = '';
+    let icon = '';
+    let uri = '';
+
+    if (node.type == 'audio') {
+        servType = 'webradio';
+        albumart = node.image;
+        uri = node.URL;
+    } else if (node.type == 'link') {
+        let urlBase = 'radio/tunein/browse/';
+        if (node.item == 'show') {
+            return null;
+        }
+
+        servType = 'radio-category';
+        icon = 'fa fa-folder-open-o';
+        if (node.URLObj) {
+            uri = urlBase + node.URLObj.search;
+        } else {
+            let urlObj = url.parse(node.URL);
+            uri = urlBase + urlObj.search;
+        }
+    } else {
+        return null;
+    }
+
+    var item = {
+        service: 'webradio',
+        type: servType,
+        title: node.text,
+        artist: '',
+        album: '',
+        albumart: albumart,
+        icon: icon,
+        uri: uri,
+    };
+
+    return item;
+}
+
+ControllerWebradio.prototype.getNavigationItemIcon = function(text) {
+    var self = this;
+    switch(text) {
+        case 'Local Radio':
+            return 'fa fa-map-marker'
+            break;
+        case 'Music':
+            return 'fa fa-music'
+            break;
+        case 'Talk':
+            return 'fa fa-comments-o'
+            break;
+        case 'Sports':
+            return 'fa fa-heartbeat'
+            break;
+        case 'By Location':
+            return 'fa fa-globe'
+            break;
+        case 'By Language':
+            return 'fa fa-map-signs'
+            break;
+        default:
+            return 'fa fa-folder-open-o'
+    }
+
 }
