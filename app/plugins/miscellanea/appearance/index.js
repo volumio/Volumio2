@@ -182,7 +182,7 @@ volumioAppearance.prototype.getUiSettings = function()
     var language = config.get('language_code');
     var theme = config.get('theme');
     var background_type = config.get('background_type');
-    var playbackMode = self.getAdditionalConf('music_service', 'mpd', 'playback_mode', 'continuous');
+    var playbackMode = self.getAdditionalConf('music_service', 'mpd', 'playback_mode', 'single');
 
     if (background_type === 'background') {
         var background_title = config.get('background_title');
