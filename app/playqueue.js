@@ -140,15 +140,18 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         {
             service=item.service;
 
-            if(service==='webradio' || item.uri.startsWith('cdda:'))
+            if( item.uri.startsWith('cdda:'))
             {
                 item.name=item.title;
                 if (!item.albumart) {
                     item.albumart="/albumart";
                 }
                 promiseArray.push(libQ.resolve(item));
+            } else if (service==='webradio') {
+                promiseArray.push(this.commandRouter.executeOnPlugin('music_service', 'webradio', 'explodeUri', item));
+            } else  {
+                promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
             }
-            else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
         } else {
 
             //backward compatibility with SPOP plugin
