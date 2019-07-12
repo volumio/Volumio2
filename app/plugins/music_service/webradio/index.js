@@ -46,6 +46,11 @@ ControllerWebradio.prototype.onStart = function() {
     this.addToBrowseSources();
 
     this.mpdPlugin=this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+
+    /*
+    Tune-in code has been imported from Piffio's (https://github.com/piffio) Tune-in radio plugin
+    https://github.com/volumio/volumio-plugins/commits/master/plugins/music_service/tunein_radio
+     */
     var tuneinOptions = {
         protocol: 'https',
         cacheRequests: true,
