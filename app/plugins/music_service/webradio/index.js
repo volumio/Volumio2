@@ -161,7 +161,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: 'Local Radio',
+                            title: self.commandRouter.getI18nString('WEBRADIO.LOCAL_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-map-marker',
@@ -179,7 +179,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: 'Popular',
+                            title: self.commandRouter.getI18nString('WEBRADIO.POPULAR_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-thumbs-o-up',
@@ -188,7 +188,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: 'Best',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BEST_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-diamond',
@@ -198,7 +198,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: 'By Language',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BY_LANGUAGE'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-map-signs',
@@ -207,7 +207,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: 'Music',
+                            title: self.commandRouter.getI18nString('WEBRADIO.BY_GENRE_RADIOS'),
                             artist: '',
                             album: '',
                             icon: 'fa fa-music',
@@ -216,7 +216,7 @@ ControllerWebradio.prototype.listRoot=function() {
                         {
                             service: 'webradio',
                             type: 'radio-category',
-                            title: 'Talk',
+                         title: self.commandRouter.getI18nString('WEBRADIO.TALK_RADIOS'),
                             artist: '',
                             album: '',
                             'icon': 'fa fa-comments-o',

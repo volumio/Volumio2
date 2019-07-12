@@ -329,7 +329,12 @@
     "TOP_500_RADIOS":"Le migliori 500",
     "BY_GENRE_RADIOS":"Per genere",
     "BY_COUNTRY_RADIOS":"Per nazione",
-    "WEBRADIO":"Web Radio"
+    "WEBRADIO":"Web Radio",
+    "LOCAL_RADIOS":"Radio Locali",
+    "POPULAR_RADIOS":"Radio Popolari",
+    "BEST_RADIOS":"Le Radio Migliori",
+    "BY_LANGUAGE":"Per lingua",
+    "TALK_RADIOS":"Talk Show"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Conferma la disinstallazione del Plugin",

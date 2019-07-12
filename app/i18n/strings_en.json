@@ -331,7 +331,12 @@
     "TOP_500_RADIOS":"Top 500 Radios",
     "BY_GENRE_RADIOS":"By genre",
     "BY_COUNTRY_RADIOS":"By country",
-    "WEBRADIO":"Web Radio"
+    "WEBRADIO":"Web Radio",
+    "LOCAL_RADIOS":"Local Radios",
+    "POPULAR_RADIOS":"Popular Radios",
+    "BEST_RADIOS":"Best Radios",
+    "BY_LANGUAGE":"By Language",
+    "TALK_RADIOS":"Talk Radios"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
