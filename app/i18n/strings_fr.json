@@ -78,8 +78,8 @@
     "CONNECT_OUTPUT_DEVICE_1":"Connectez",
     "CONNECT_OUTPUT_DEVICE_2":"au périphérique",
     "CONNECT_OUTPUT_DEVICE_2":"au périphérique ou selectionnez une autre sortie audio",
-    "PLAYBACK_MODE":"Playback Mode",
-    "PLAYBACK_MODE_DOC":"Vous pouvez choisir le comportement de lecture : Continue remplacera la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoute seulement le morceau selectionné",
+    "PLAYBACK_MODE":"Mode de lecture",
+    "PLAYBACK_MODE_DOC":"Vous pouvez choisir le comportement de lecture : Continue remplacera la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoutera seulement le morceau selectionné",
     "PLAYBACK_MODE_CONTINUOUS":"Continue",
     "PLAYBACK_MODE_SINGLE":"Unitaire"  
     },
@@ -324,7 +324,7 @@
     "FULL_SETTINGS_SET_EXTENDED":"Accès à toutes les options de réglage",
     "SIMPLE_SETTINGS_SET":"Mode réglage simplifié",
     "SIMPLE_SETTINGS_SET_EXTENDED":"Accès seulement aux réglages de base",
-    "KEEP_PRESSED_TO_TURN_OFF_IN":"Gardez appuyer pour éteindre",
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Maintenir appuyé pour éteindre",
     "TURN_OFF_IN":"Eteindre"  
   },
   "WEBRADIO":{
