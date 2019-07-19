@@ -6,6 +6,7 @@ var api = require('/volumio/http/restapi.js');
 var bodyParser = require('body-parser');
 var ifconfig = require('wireless-tools/ifconfig');
 var unirest = require('unirest');
+var _ = require('underscore');
 
 var pushNotificationsUrls = [];
 
@@ -147,22 +148,27 @@ interfaceApi.prototype.logStart = function (sCommand) {
 
 interfaceApi.prototype.pluginRestEndpoint = function (req, res) {
     var self = this;
-
-    if (req.method == "POST") {
+    
+    if (req.query && !_.isEmpty(req.query)) {
         var payload = req.query;
     }
 
-    if (req.method == "POST") {
+    if (req.body && !_.isEmpty(req.body)) {
         var payload = req.body;
     }
 
-    var result = self.executeRestEndpoint(payload);
-    result.then(function(response) {
-        res.json({'success': true});
-    })
-    .fail(function(error){
-        res.json({'success': false, 'error': error});
-    })
+    if (payload) {
+        var result = self.executeRestEndpoint(payload);
+        result.then(function(response) {
+            res.json({'success': true});
+        })
+            .fail(function(error){
+                res.json({'success': false, 'error': error});
+            })
+    } else {
+        res.json({'success': false, 'error': 'No Payload specified'});
+    }
+
 };
 
 interfaceApi.prototype.executeRestEndpoint = function(data) {
