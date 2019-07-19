@@ -198,7 +198,18 @@
     "ENABLED":"Abilitato",
     "DISABLED":"Disabilitato",
     "NO_RESULTS":"Nessun risultato",
-    "REMOVE_FAIL":"Rimozione non riuscita"
+    "REMOVE_FAIL":"Rimozione non riuscita",
+    "CONNECTED":"Connesso",
+    "DISCONNECTED":"Disconnesso",
+    "LOGIN":"Accesso",
+    "LOGOUT":"Uscita",
+    "USERNAME":"Nome Utente",
+    "PASSWORD":"Password",
+    "LOGGING_IN":"Accesso",
+    "LOGIN_SUCCESS": "Accesso eseguito",
+    "LOGIN_FAIL":"Accesso Fallito",
+    "LOGGING_OUT":"Uscita",
+    "LOGOUT_SUCCESS":"Uscita con successo"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",

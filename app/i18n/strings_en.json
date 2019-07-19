@@ -200,7 +200,16 @@
     "NO_RESULTS":"No results",
     "REMOVE_FAIL":"Could not remove",
     "CONNECTED":"Connected",
-    "DISCONNECTED":"Disconnected"
+    "DISCONNECTED":"Disconnected",
+    "LOGIN":"Login",
+    "LOGOUT":"Logout",
+    "USERNAME":"Username",
+    "PASSWORD":"Password",
+    "LOGGING_IN":"Logging in",
+    "LOGIN_SUCCESS": "Successfully logged in",
+    "LOGIN_FAIL":"failed to log in",
+    "LOGGING_OUT":"Logging out",
+    "LOGOUT_SUCCESS":"Successfully logged out"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
