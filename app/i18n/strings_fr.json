@@ -73,7 +73,15 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Active la possibilité de lire de plus nombreux formats audio. Cependant, cela ralentira la création de la bibliothèque musicale. Si désactivé Volumio pourra toujours lire la pluplart des fichiers et la création sera plus rapide.",
     "USB_DAC_CONNECTED":"Dac USB DAC Connecté",
     "NO_OUTPUT_DEVICE":"Pas de sortie audio disponible",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Connecté un péréphérique audio à ce matériel"
+    "NO_OUTPUT_DEVICE_MESSAGE":"Connectez un périphérique audio à ce matériel",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"La sortie audio choisie n'est pas disponible",
+    "CONNECT_OUTPUT_DEVICE_1":"Connectez",
+    "CONNECT_OUTPUT_DEVICE_2":"au périphérique",
+    "CONNECT_OUTPUT_DEVICE_2":"au périphérique ou selectionnez une autre sortie audio",
+    "PLAYBACK_MODE":"Mode de lecture",
+    "PLAYBACK_MODE_DOC":"Vous pouvez choisir le comportement de lecture : Continue remplacera la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoutera seulement le morceau selectionné",
+    "PLAYBACK_MODE_CONTINUOUS":"Continue",
+    "PLAYBACK_MODE_SINGLE":"Unitaire"  
     },
 	
     "NETWORK": {
@@ -229,7 +237,9 @@
     "ALBUMART_RESET_CACHE_DOC":"Volumio met en cache les images des albums pour améliorer la performance, cependant cela empèche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums ",
     "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
     "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement",
-    "BROWSE_SOURCES_VISIBILITY":"Visibilité des Sources"  
+    "BROWSE_SOURCES_VISIBILITY":"Visibilité des Sources",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Activer l'interface experimentale de Volumio3",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface experimentale de Volumio3"
    },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
@@ -313,15 +323,22 @@
     "FULL_SETTINGS_SET":"Mode réglage expert",
     "FULL_SETTINGS_SET_EXTENDED":"Accès à toutes les options de réglage",
     "SIMPLE_SETTINGS_SET":"Mode réglage simplifié",
-    "SIMPLE_SETTINGS_SET_EXTENDED":"Accès seulement aux réglages de base"
+    "SIMPLE_SETTINGS_SET_EXTENDED":"Accès seulement aux réglages de base",
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Maintenir appuyé pour éteindre",
+    "TURN_OFF_IN":"Eteindre"  
   },
   "WEBRADIO":{
-    "MY_WEB_RADIOS":"Mes Web Radios",
+    "MY_WEB_RADIOS":"Mes radios Internet",
     "FAVOURITE_RADIOS":"Radios Favorites",
     "TOP_500_RADIOS":"Top 500 Radios",
     "BY_GENRE_RADIOS":"Par genre",
     "BY_COUNTRY_RADIOS":"Par pays",
-    "WEBRADIO":"Web Radio"
+    "WEBRADIO":"Radio Internet",
+    "LOCAL_RADIOS":"Radios locales",
+    "POPULAR_RADIOS":"Radios populaires",
+    "BEST_RADIOS":"Meilleures Radios",
+    "BY_LANGUAGE":"Par Langue",
+    "TALK_RADIOS":"Emissions Radios"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
