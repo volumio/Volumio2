@@ -36,7 +36,7 @@
       "label": "TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI",
       "icon": "fa-language",
       "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setVolumio3UI"},
-      "hidden":false,
+      "hidden":true,
       "saveButton": {
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
