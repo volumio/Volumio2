@@ -8,6 +8,7 @@
     {"id":"piano-dac","name":"Allo Piano","overlay":"allo-piano-dac-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"allo-piano-dac-plus-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"applepi-dac","name":"ApplePi DAC","overlay":"applepi-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
+    {"id":"i-sabre-q2m","name":"Audiophonics I-SABRE-Q2M","overlay":"i-sabre-q2m","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"48","needsreboot":"yes"},
     {"id":"fe-pi-audio","name":"Fe-Pi Audio","overlay":"fe-pi-audio","alsanum":"1","mixer":"PCM","modules":"","script":"","needsreboot":"yes"},
     {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-amp","name":"HiFiBerry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
