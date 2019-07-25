@@ -958,7 +958,6 @@ ControllerAlsa.prototype.getAplayInfo = function () {
 }
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
-
 	var mixers = [];
 	var outdev = this.config.get('outputdevice');
 	if (outdev == 'softvolume'){
@@ -990,6 +989,10 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 		}
 	} catch (e) {}
 
+    if (volumioDeviceName === 'primo' && device === '1,1') {
+        mixers = [];
+	}
+
 	return mixers
 }
 
@@ -1004,6 +1007,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
     var outputdevice = self.config.get('outputdevice');
+    var ignoreGenMixers = false;
 
     var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
@@ -1053,10 +1057,17 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 		}
 	}
-	if (defaultmixer) {
+    if (volumioDeviceName === 'primo' && device === '1,1') {
+        defaultmixer = '';
+    }
+
+    if (defaultmixer) {
 		this.mixertype = 'Hardware';
 	} else {
 		try {
+            if (volumioDeviceName === 'primo' && device === '1,1') {
+                ignoreGenMixers = true;
+            }
             if (device.indexOf(',') >= 0) {
             	device = device.charAt(0);
 
@@ -1097,6 +1108,13 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 				}
 
 			}
+
+            if (ignoreGenMixers) {
+				self.logger.info('Ignoring Mixers Options');
+                self.logger.info('Device ' + device + ' does not have any Mixer Control Available');
+                this.mixertype = 'None';
+                self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'None');
+            }
 		} catch (e) {}
 	}
 	if (this.config.has('mixer_type') == false) {
