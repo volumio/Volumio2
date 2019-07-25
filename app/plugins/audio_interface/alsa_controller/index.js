@@ -284,7 +284,12 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			}
 
+
 			value = self.getAdditionalConf('music_service', 'mpd', 'dop', false);
+            if (volumioDeviceName === 'primo' && outdevicename === 'Analog RCA Output') {
+                value = true;
+                uiconf.sections[2].content[0].hidden = true;
+            }
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
 
@@ -937,7 +942,11 @@ ControllerAlsa.prototype.getAplayInfo = function () {
             		self.logger.error('Could not read volumio variant: ' + e);
 				}
 				if (sysVariant === 'volumio' || sysVariant === 'primo') {
-                    		self.commandRouter.sharedVars.addConfigValue('device_vendor_model', 'string', 'Volumio Primo');
+							if (self.commandRouter.sharedVars.get('device_vendor_model') !== 'Volumio Primo') {
+
+                                self.commandRouter.sharedVars.addConfigValue('device_vendor_model', 'string', 'Volumio Primo');
+                                self.commandRouter.sharedVars.set('device_vendor_model', 'Volumio Primo');
+							}
             				volumioDeviceName = 'primo';
 				}
 			}
