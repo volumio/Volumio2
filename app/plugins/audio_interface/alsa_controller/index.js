@@ -403,8 +403,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
             	defer.resolve(uiconf);
 			})
 		})
-		.fail(function()
+		.fail(function(e)
 		{
+			self.logger.error('Error retrieving UIConf: ' + e);
 			defer.reject(new Error());
 		})
 
@@ -859,7 +860,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                                 var subdevice = Number(currentCard.number);
                                 name = currentCard.prettyname;
                                 if (volumioDeviceName === 'primo') {
-									if (name === 'Audio Jack Out') {
+									if (name === 'Audio Jack Out' || name === 'HDMI') {
                                         currentCard.ignore = true;
 									}
 								}
@@ -896,8 +897,9 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			}
         }
         if (volumioDeviceName === 'primo') {
-            cards.unshift(cards[2]);
-            cards.splice(3, 1);
+        	// Not necessary anymore since we ignore HDMI
+            //cards.unshift(cards[2]);
+            //cards.splice(3, 1);
         }
 	} catch (e) {
 		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
@@ -1529,7 +1531,7 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
     	var found = false;
     	for (var i in cards) {
     		var currentCard = cards[i];
-    		if (currentCard.id === outdev && currentCard.name === outdevName) {
+    		if (currentCard && currentCard.id && currentCard.name && currentCard.id === outdev && currentCard.name === outdevName) {
     			found = true;
 			}
 		}
