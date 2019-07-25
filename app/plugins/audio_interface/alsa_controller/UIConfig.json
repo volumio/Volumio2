@@ -219,6 +219,7 @@
         {
           "id": "playback_mode",
           "element": "select",
+          "hidden": true,
           "doc": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE",
           "value":  {
