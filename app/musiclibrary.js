@@ -516,7 +516,7 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
 				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.LAST_100');
 				break;
 			default:
-			console.log('Cannot find translation for source'+self.browseSources[i].name)
+			console.log('Cannot find translation for source '+self.browseSources[i].name)
 		}
 
 		}
