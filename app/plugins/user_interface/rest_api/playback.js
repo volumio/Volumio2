@@ -258,7 +258,7 @@ RESTApiPlayback.prototype.playbackGetQueue=function(req, res) {
     var self=this;
 
     var queue=this.commandRouter.volumioGetQueue();
-    res.json(queue)
+    res.json({"queue":queue})
 };
 
 RESTApiPlayback.prototype.playbackGetState=function(req, res) {

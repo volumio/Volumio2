@@ -100,7 +100,7 @@ RESTApiBrowse.prototype.getZones=function(req,res) {
 
     var zones = this.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'getDevices');
     if (zones && zones.list) {
-        res.json(zones.list);
+        res.json({"zones":zones.list});
     }
     else {
         res.json({'error':'Error retrieving zones'});
