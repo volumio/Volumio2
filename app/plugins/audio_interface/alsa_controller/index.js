@@ -1563,7 +1563,7 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
     			found = true;
 			}
 		}
-		if (!found) {
+		if (!found && outdevName !== undefined) {
     		var message = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.CONNECT_OUTPUT_DEVICE_1') + ' ' + outdevName + ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.CONNECT_OUTPUT_DEVICE_2');
             var responseData = {
                 title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.OUTPUT_DEVICE_NOT_AVAILABLE'),
