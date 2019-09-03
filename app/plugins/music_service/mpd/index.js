@@ -1003,7 +1003,8 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			}
 
 			if (systemHw && systemHw === 'vim1' && realDev && realDev === '0,1') {
-                var conf6 = conf5.replace("${dop}", dop + os.EOL + '                buffer_time     "5000000"');
+				var dopString = dop + '"' +  os.EOL + '                buffer_time     "5000000';
+                var conf6 = conf5.replace("${dop}", dopString);
 			} else {
                 var conf6 = conf5.replace("${dop}", dop);
 			}
