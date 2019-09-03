@@ -965,6 +965,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
+                var realDev = outdev;
                 if (outdev.indexOf(',') >= 0) {
                     mixerdev = 'hw:'+outdev;
                     outdev = 'hw:'+outdev;
@@ -972,9 +973,10 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                     mixerdev = 'hw:'+outdev;
                     outdev = 'hw:'+outdev+',0';
 				}
-
 			} else {
 				mixerdev = 'SoftMaster';
+                var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+
 			}
 
             var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');
@@ -993,8 +995,18 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 				var dop = 'no';
 			}
 
-			var conf6 = conf5.replace("${dop}", dop);
+			// VIM1 fix for buffer on SPDIF OUTPUT
+			try {
+                var systemHw = execSync("cat /etc/os-release | grep ^VOLUMIO_HARDWARE | tr -d 'VOLUMIO_HARDWARE=\"'", { uid: 1000, gid: 1000}).toString().replace('\n', '');
+			} catch(e) {
+				self.logger.error('Could not parse Volumio hardware: ' + e);
+			}
 
+			if (systemHw && systemHw === 'vim1' && realDev && realDev === '0,1') {
+                var conf6 = conf5.replace("${dop}", dop + os.EOL + '                buffer_time     "5000000"');
+			} else {
+                var conf6 = conf5.replace("${dop}", dop);
+			}
 
 			if (mixer) {
 				if (mixer.length > 0 && mpdvolume) {
@@ -1042,7 +1054,9 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
             }
 
             fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
-                if (err) return console.log(err);
+                if (err) {
+                	self.logger.info('Could not write mpd.conf:' + err);
+                }
             });
         });
 
