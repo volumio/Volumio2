@@ -151,6 +151,7 @@ CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
 	this.callCallback("volumioupdatevolume", vol);
+	this.writeVolumeStatusFiles(vol);
 	return this.stateMachine.updateVolume(vol);
 };
 
@@ -186,6 +187,26 @@ CoreCommandRouter.prototype.setStartupVolume = function () {
         return this.volumeControl.setStartupVolume();
     }
 };
+
+CoreCommandRouter.prototype.writeVolumeStatusFiles = function (vol) {
+
+	if (vol.mute !== undefined && vol.mute === true) {
+		this.executeWriteVolumeStatusFiles(0);
+	} else if (vol && vol.vol && typeof vol.vol == 'number') {
+        this.executeWriteVolumeStatusFiles(vol.vol);
+	} else {
+        this.executeWriteVolumeStatusFiles(100);
+	}
+};
+
+CoreCommandRouter.prototype.executeWriteVolumeStatusFiles = function (value) {
+    fs.writeFile('/tmp/volume', value, function (err) {
+        if (err) {
+        	this.logger.error('Could not save Volume value to status file: ' + err);
+		}
+    });
+};
+
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
 	if (this.callbacks[name] == undefined) {
