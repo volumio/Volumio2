@@ -20,11 +20,20 @@ RESTApiBrowse.prototype.browseListing=function(req,res) {
     var uri;
     var defer;
     var ipAddress=this.commandRouter.sharedVars.get('ipAddress');
+    var filters = {};
 
     if (req.query && req.query.uri) {
         uri=decodeURIComponent(req.query.uri);
     } else {
         uri='/';
+    }
+
+    if (req.query && req.query.offset) {
+        filters.offset = req.query.offset;
+    }
+
+    if (req.query && req.query.limit) {
+        filters.limit = req.query.limit;
     }
 
     if(uri === '/') {
@@ -39,7 +48,7 @@ RESTApiBrowse.prototype.browseListing=function(req,res) {
         res.json(content);
     } else {
         var response;
-        response = this.commandRouter.musicLibrary.executeBrowseSource(uri);
+        response = this.commandRouter.musicLibrary.executeBrowseSource(uri, filters);
         response.then(function (result) {
             res.json(result);
         }).fail(function () {
