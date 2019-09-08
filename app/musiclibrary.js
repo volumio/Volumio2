@@ -3,7 +3,8 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libCrypto = require('crypto');
-var fs=require('fs-extra');
+var fs = require('fs-extra');
+var _ = require('underscore');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
@@ -367,11 +368,17 @@ CoreMusicLibrary.prototype.applyBrowseFilters = function(data, filters) {
     var self = this;
     var promise=libQ.defer();
 
+    if(!_.isEmpty(filters)) {
+        var filterObj = JSON.parse(JSON.stringify(data));
+    } else {
+        var filterObj = data;
+    }
+
     // Offset
     if (filters && filters.offset !== undefined)  {
         var offset = self.validateFilterNumber(filters.offset);
         if (offset) {
-            data = self.applyBrowseOffset(data, offset);
+            filterObj = self.applyBrowseOffset(filterObj, offset);
         }
     }
 
@@ -379,10 +386,10 @@ CoreMusicLibrary.prototype.applyBrowseFilters = function(data, filters) {
     if (filters && filters.limit !== undefined)  {
         var limit = self.validateFilterNumber(filters.limit);
         if (limit) {
-            data = self.applyBrowseLimit(data, limit);
+            filterObj = self.applyBrowseLimit(filterObj, limit);
         }
     }
-    promise.resolve(data);
+    promise.resolve(filterObj);
 
     return promise.promise;
 }
