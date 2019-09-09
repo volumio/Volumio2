@@ -518,49 +518,79 @@ var retrieveAlbumart = function (artist, album, size, cb) {
         size = null;
     }
 
-    var data = '';
-    var sizes = ['small', 'medium', 'large', 'extralarge', 'mega'];
-    var method = (album === null) ? 'artist' : 'album';
-    var http = require('http');
-    var artist = artist.replace ("&", "and");
-    var options = {
-        host: 'ws.audioscrobbler.com',
-        port: 80,
-        path: encodeURI('/2.0/?format=json&api_key=' + apiKey + '&method=' + method + '.getinfo&artist=' + artist + '&album=' + album)
-    };
-    http.get(options, function(resp){
-        resp.on('data', function(chunk){
-            data += chunk;
-        });
-        resp.on('end', function(){
-            try {
-                var json = JSON.parse(data);
-            } catch(e) {
-                return cb('JSON Error: ' + e, '');
-            }
+    if (album === null) {
+        var data = '';
+        var http = require('http');
+        var artist = artist.replace ("&", "and");
+        var url = 'http://us-central1-metavolumio.cloudfunctions.net' + encodeURI('/metas/v1/getDatas?mode=artistArt&artist=' + artist);
+        http.get(url, function(resp){
+            resp.on('data', function(chunk){
+                data += chunk;
+            });
+            resp.on('end', function(){
+                try {
+                    var json = JSON.parse(data);
+                } catch(e) {
+                    return cb('JSON Error: ' + e, '');
+                }
 
-            if (typeof(json.error) !== 'undefined'){
-                // Error
-                return cb('JSON Error: ' + json.message, '');
-            } else if (sizes.indexOf(size) !== -1 && json[method] && json[method].image){
-                // Return image in specific size
-                json[method].image.forEach(function(e, i) {
-                    if (e.size === size){
-                        cb(null, e['#text']);
-                    }
-                });
-            } else if (json[method] && json[method].image) {
-                // Return largest image
-                var i = json[method].image.length - 2;
-                cb(null, json[method].image[i]['#text']);
-            } else {
-                // No image art found
-                cb('Error: No image found.', '');
-            }
+                if (json.success && json.data && json.data.length){
+                    cb(null, json.data);
+                } else  {
+                    // No image art found
+                    cb('Error: No image found.', '');
+                }
+            });
+        }).on("error", function(e){
+            return cb('Got error: ' + e.message);
         });
-    }).on("error", function(e){
-        return cb('Got error: ' + e.message);
-    });
+    } else {
+        var data = '';
+        var sizes = ['small', 'medium', 'large', 'extralarge', 'mega'];
+        var method = (album === null) ? 'artist' : 'album';
+        var http = require('http');
+        var artist = artist.replace ("&", "and");
+        var options = {
+            host: 'ws.audioscrobbler.com',
+            port: 80,
+            path: encodeURI('/2.0/?format=json&api_key=' + apiKey + '&method=' + method + '.getinfo&artist=' + artist + '&album=' + album)
+        };
+        http.get(options, function(resp){
+            resp.on('data', function(chunk){
+                data += chunk;
+            });
+            resp.on('end', function(){
+                try {
+                    var json = JSON.parse(data);
+                } catch(e) {
+                    return cb('JSON Error: ' + e, '');
+                }
+
+                if (typeof(json.error) !== 'undefined'){
+                    // Error
+                    return cb('JSON Error: ' + json.message, '');
+                } else if (sizes.indexOf(size) !== -1 && json[method] && json[method].image){
+                    // Return image in specific size
+                    json[method].image.forEach(function(e, i) {
+                        if (e.size === size){
+                            cb(null, e['#text']);
+                        }
+                    });
+                } else if (json[method] && json[method].image) {
+                    // Return largest image
+                    var i = json[method].image.length - 2;
+                    cb(null, json[method].image[i]['#text']);
+                } else {
+                    // No image art found
+                    cb('Error: No image found.', '');
+                }
+            });
+        }).on("error", function(e){
+            return cb('Got error: ' + e.message);
+        });
+    }
+
+
 };
 
 module.exports.processExpressRequest = processExpressRequest;
