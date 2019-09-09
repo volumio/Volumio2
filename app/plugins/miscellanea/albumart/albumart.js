@@ -528,7 +528,6 @@ var retrieveAlbumart = function (artist, album, size, cb) {
                 data += chunk;
             });
             resp.on('end', function(){
-                console.log(data)
                 try {
                     var json = JSON.parse(data);
                 } catch(e) {
@@ -543,7 +542,6 @@ var retrieveAlbumart = function (artist, album, size, cb) {
                 }
             });
         }).on("error", function(e){
-            console.log(e)
             return cb('Got error: ' + e.message);
         });
     } else {
