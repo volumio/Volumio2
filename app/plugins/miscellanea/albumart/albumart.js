@@ -6,8 +6,10 @@ var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 var apiKey = '4cb074e4b8ec4ee9ad3eb37d6f7eb240';
 var diskCache = true;
+var variant = 'none';
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -19,6 +21,12 @@ var logger = new (winston.Logger)({
 		})
 	]
 });
+
+try {
+    variant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString().replace('\n','');
+} catch(e) {
+    variant = 'none';
+}
 
 var albumArtRootFolder = '/data/albumart/web';
 var mountAlbumartFolder= '/data/albumart/folder';
@@ -520,10 +528,10 @@ var retrieveAlbumart = function (artist, album, size, cb) {
 
     if (album === null) {
         var data = '';
-        var http = require('http');
+        var https = require('https');
         var artist = artist.replace ("&", "and");
-        var url = 'http://us-central1-metavolumio.cloudfunctions.net' + encodeURI('/metas/v1/getDatas?mode=artistArt&artist=' + artist);
-        http.get(url, function(resp){
+        var url = 'https://meta.volumio.org' + encodeURI('/metas/v1/getDatas?mode=artistArt&artist=' + artist + '&variant=' + variant);
+        https.get(url, function(resp){
             resp.on('data', function(chunk){
                 data += chunk;
             });
