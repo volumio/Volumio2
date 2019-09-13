@@ -315,18 +315,22 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri, filters) {
     var response;
     //console.log('--------------------------'+curUri)
     if (curUri != undefined) {
+        try {
+            self.parseBrowseSource(curUri)
+                .then(function(result){
+                    return self.applyBrowseFilters(result, filters);
+                })
+                .then(function(result){
+                    promise.resolve(result);
+                })
+                .fail(function (error) {
+                    self.logger.error('Failed to execute browseSource: ' + error);
+                    promise.reject(error)
+                });
+        } catch(e) {
+            self.logger.error('Failed to execute browseSource: ' + e);
+        }
 
-        self.parseBrowseSource(curUri)
-            .then(function(result){
-                return self.applyBrowseFilters(result, filters);
-            })
-            .then(function(result){
-                promise.resolve(result);
-            })
-            .fail(function (error) {
-                self.logger.error('Failed to execute browseSource: ' + error);
-                promise.reject(error)
-            });
     } else {
         promise.resolve({});
     }
