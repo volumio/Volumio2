@@ -449,7 +449,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 		var remainingTime=this.currentSongDuration-this.currentSeek;
 		if (remainingTime < 0)
 		{
-			this.commandRouter.pushConsoleMessage("ERROR increasePlaybackTimer remainingTime:" + remainingTime + " negative - askedForPrefetch:" + this.askedForPrefetch + " - simulateStopStartDone:" + this.simulateStopStartDone);
+			//this.commandRouter.pushConsoleMessage("ERROR increasePlaybackTimer remainingTime:" + remainingTime + " negative - askedForPrefetch:" + this.askedForPrefetch + " - simulateStopStartDone:" + this.simulateStopStartDone);
 			remainingTime = 0;
 		}
 
@@ -498,7 +498,9 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 			this.startPlaybackTimer();
 
-		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
+		} else {
+            setTimeout(this.increasePlaybackTimer.bind(this),250);
+		}
 	}
 };
 
