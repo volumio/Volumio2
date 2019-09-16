@@ -127,7 +127,7 @@ app.route('/plugin-upload')
             });
         });
     });
-
+// TODO CHECK INCOMING SIZE LESS THAN 500KB
 app.route('/backgrounds-upload')
     .post(function (req, res, next) {
 
@@ -163,6 +163,70 @@ app.route('/backgrounds-upload')
 
         });
     });
+// TODO CHECK INCOMING SIZE LESS THAN 500KB
+app.route('/albumart-upload')
+    .post(function (req, res, next) {
+        var artist;
+        var album;
+        var filePath;
+        var fstream;
+
+        req.pipe(req.busboy);
+        req.busboy.on('field', (fieldName, value) => {
+            if (fieldName === 'artist' && value !== undefined) {
+                this.artist = value;
+            }
+            if (fieldName === 'album' && value !== undefined) {
+                this.album = value;
+            }
+            if (fieldName === 'filePath' && value !== undefined) {
+                this.filePath = value;
+            }
+        });
+
+        req.busboy.on('file', (fieldname, file, filename) => {
+            console.log("Uploading albumart: " + filename);
+            extension = filename.split('.').pop().toLowerCase();
+            var allowedExtensions = ['jpg', 'jpeg', 'png'];
+            if (allowedExtensions.indexOf(extension) > -1) {
+                filename = 'cover' + '.' + extension;
+                var albumartDir = '/data/albumart';
+                if (this.filePath !== undefined) {
+                    var customAlbumartPath = path.join(albumartDir, 'personal', 'path', this.filePath);
+                } else if (this.artist !== undefined && this.album !== undefined) {
+                    var customAlbumartPath = path.join(albumartDir, 'personal', 'album', this.artist, this.album);
+                } else if (this.artist !== undefined) {
+                    var customAlbumartPath = path.join(albumartDir, 'personal', 'artist', this.artist);
+                } else {
+                    console.log('Error: no path, artist or album specified');
+                    return res.status(500);
+                }
+
+                try {
+                    fs.ensureDirSync(customAlbumartPath);
+                } catch (err) {
+                    console.log('Cannot Create Personal Albumart DIR : ' + err);
+                    return res.status(500);
+                }
+
+                try {
+                    fs.emptyDirSync(customAlbumartPath);
+                } catch(e) {
+                    console.log('Could not clear personal albumart folder: ' + e);
+                }
+
+                var personalCoverPath = path.join(customAlbumartPath, filename);
+                fstream = fs.createWriteStream(personalCoverPath);
+                file.pipe(fstream);
+                fstream.on('close', function () {
+                    console.log("Custom Albumart Upload Finished");
+                    res.status(200)
+                });
+            } else {
+                console.log("Albumart file format not allowed " + filename);
+            }
+        });
+ });
 
 plugin.use(express.static(path.join(plugindir)));
 background.use(express.static(path.join(backgrounddir)));
