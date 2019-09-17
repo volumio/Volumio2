@@ -31,6 +31,7 @@ try {
 var albumArtRootFolder = '/data/albumart/web';
 var mountAlbumartFolder= '/data/albumart/folder';
 var mountMetadataFolder= '/data/albumart/metadata';
+var mountPersonalFolder= '/data/albumart/personal';
 
 var setFolder = function (newFolder) {
 	//logger.info("Setting folder " + newFolder);
@@ -42,6 +43,9 @@ var setFolder = function (newFolder) {
 
     mountMetadataFolder= S(newFolder).ensureRight('/').s+'metadata/';
     fs.ensureDirSync(mountMetadataFolder);
+
+    mountPersonalFolder= S(newFolder).ensureRight('/').s+'personal/';
+    fs.ensureDirSync(mountPersonalFolder);
 };
 
 var searchOnline = function (defer, web) {
@@ -79,14 +83,28 @@ var searchOnline = function (defer, web) {
 	 * Loading album art from network
 	 */
 	var folder;
+	var personalFolder;
 
 	if(album)
     {
         folder= albumArtRootFolder + artist + '/' + album + '/';
+        personalFolder = mountPersonalFolder + 'album/' + artist + '/' + album + '/';
     }
     else
     {
         folder= albumArtRootFolder + artist + '/';
+        personalFolder = mountPersonalFolder + 'artist/' + artist + '/';
+    }
+
+    try {
+        var personalFiles = fs.readdirSync(personalFolder);
+        var allowedExtensions = ['jpg', 'jpeg', 'png'];
+        var extension = personalFiles[0].split('.').pop().toLowerCase();
+        if (allowedExtensions.indexOf(extension) > -1) {
+            return defer.resolve(personalFolder + personalFiles[0]);
+        }
+    } catch(e) {
+	    //console.log(e);
     }
 
 	var fileName = resolution;

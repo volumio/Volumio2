@@ -256,7 +256,7 @@ volumioAppearance.prototype.generateThumbnails = function(){
                             .quality(60)
                             .write(backgroundPath+'/thumbnail-'+f);
                     }).catch(function (err) {
-                        console.error(err);
+                        console.error('Failed to create thumbnail :' + err);
                     });
                 }
 
@@ -480,3 +480,10 @@ volumioAppearance.prototype.setVolumio3UI = function (data) {
 
     self.commandRouter.broadcastMessage("openModal", responseData)
 };
+
+volumioAppearance.prototype.sendSizeErrorToasMessage = function (size) {
+    var self = this;
+    return self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('APPEARANCE.UPLOAD_FAILED'), self.commandRouter.getI18nString('APPEARANCE.IMAGE_MUST_BE_LESS_THAN') + ' ' + size + ' MB');
+};
+
+
