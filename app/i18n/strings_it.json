@@ -246,7 +246,9 @@
     "METADATA_IMAGE_DOC":"Se abilitato, quando non sono state trovate albumart nella cartella del file, il sistema estrarrà le albumart dai file stessi, ove presenti. Questo impatterà negativamente nel tempo di visualizzazione delle albumart",
     "BROWSE_SOURCES_VISIBILITY":"Icone Sorgenti",
     "VOLUMIO3_EXPERIMENTAL_UI":"Abilita l'interfaccia sperimentale Volumio3",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Abilita l'interfaccia sperimentale Volumio3"
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Abilita l'interfaccia sperimentale Volumio3",
+    "UPLOAD_FAILED":"Caricamento Fallito",
+    "IMAGE_MUST_BE_LESS_THAN":"L'immagine deve essere inferiore a"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"La Mia Musica",

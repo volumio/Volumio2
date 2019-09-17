@@ -58,7 +58,7 @@ if (process.env.VOLUMIO_3_UI === 'true') {
     app.use(express.static(path.join(__dirname, 'www')));
 }
 
-app.use(busboy());
+app.use(busboy({ immediate: true }));
 app.use(allowCrossDomain);
 
 app.use('/dev', dev);
@@ -101,77 +101,116 @@ dev.use(function(err, req, res, next) {
 
 app.route('/plugin-upload')
     .post(function (req, res, next) {
+        this.fileData = null;
 
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
-            console.log("Uploading: " + filename);
-            var uniquename = libUUID.v4() + '.zip';
-            console.log("Created safe filename as '"+uniquename+"'");
-
-            try {
-                fs.ensureDirSync(plugindir)
-            } catch (err) {
-                console.log('Cannot Create Plugin Dir ' + plugindir)
-            }
-            //Path where image will be uploaded
-            fstream = fs.createWriteStream(plugindir + '/' + uniquename);
-            file.pipe(fstream);
-            fstream.on('close', function () {
-                console.log("Upload Finished of " + filename + " as " + uniquename);
-                var socket= io.connect('http://localhost:3000');
-                var pluginurl= 'http://127.0.0.1:3000/plugin-serve/' + uniquename;
-                socket.emit('installPlugin', { url:pluginurl});
-                res.sendStatus(200);
-                //res.redirect('/');
+        req.busboy.on('file', (fieldname, file, filename) => {
+            this.filename = filename;
+            file.on('data', (data) => {
+                if (this.fileData === null) {
+                    this.fileData = data;
+                } else {
+                    this.fileData = Buffer.concat([this.fileData, data]);
+                }
             });
         });
+
+        req.busboy.on('finish', () => {
+            if (!this.filename) {
+                console.log('Plugin Upload No file attached');
+                return res.status(500);
+            }
+            if (this.fileData) {
+                console.log("Uploading: " + filename);
+                this.uniquename = libUUID.v4() + '.zip';
+                console.log("Created safe filename as '" + this.uniquename + "'");
+                try {
+                    fs.ensureDirSync(plugindir)
+                } catch (err) {
+                    console.log('Cannot Create Plugin Dir ' + plugindir)
+                }
+                fs.writeFile(plugindir + '/' + this.uniquename, this.fileData, (err)=> {
+                    if (err) {
+                        console.log('Plugin upload failed: ' +err);
+                    } else {
+                        var socket= io.connect('http://localhost:3000');
+                        var pluginurl= 'http://127.0.0.1:3000/plugin-serve/' + this.uniquename;
+                        socket.emit('installPlugin', { url:pluginurl});
+                        res.sendStatus(200);
+                    }
+                });
+            }
+        });
     });
-// TODO CHECK INCOMING SIZE LESS THAN 500KB
+
 app.route('/backgrounds-upload')
     .post(function (req, res, next) {
+        this.fileData = null;
 
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
+        req.busboy.on('file', (fieldname, file, filename) => {
+            this.filename = filename;
+            file.on('data', (data) => {
+                if (this.fileData === null) {
+                    this.fileData = data;
+                } else {
+                    this.fileData = Buffer.concat([this.fileData, data]);
+                }
+            });
+        });
+
+        req.busboy.on('finish', () => {
+            if (!this.filename) {
+                console.log('Background upload No file attached');
+                return res.status(500);
+            }
+            if (this.fileData && this.fileData.length > 3000000) {
+                console.log('Background upload size exceeds 3 MB, aborting');
+                var socket = io.connect('http://localhost:3000');
+                socket.emit('callMethod', {'endpoint':'miscellanea/appearance','method':'sendSizeErrorToasMessage','data':'3'});
+                return res.status(500);
+            }
             var allowedExtensions = ['jpg', 'jpeg', 'png'];
-            var extension = filename.split('.').pop().toLowerCase();
-
+            var extension = this.filename.split('.').pop().toLowerCase();
             if (allowedExtensions.indexOf(extension) > -1) {
-                console.log("Uploading: " + filename);
-
+                console.log("Uploading: " + this.filename);
                 try {
                     fs.ensureDirSync(backgrounddir)
                 } catch (err) {
                     console.log('Cannot Create Background DIR ')
                 }
-
-                var properfilename = filename.replace(/ /g,'-');
-                fstream = fs.createWriteStream('/data/backgrounds/' + properfilename);
-                file.pipe(fstream);
-                fstream.on('close', function () {
-                    console.log("Upload Finished of " + properfilename);
-                    var socket= io.connect('http://localhost:3000');
-                    socket.emit('regenerateThumbnails', '');
-                    res.status(201);
-                    //res.redirect('/');
+                var properfilename = this.filename.replace(/ /g, '-');
+                var bgFileName = '/data/backgrounds/' + properfilename;
+                fs.writeFile(bgFileName, this.fileData, (err)=> {
+                    if (err){
+                        console.log('Error Saving Custom Albumart: ' + err);
+                    } else {
+                        console.log('Background Successfully Uploaded');
+                        var socket = io.connect('http://localhost:3000');
+                        socket.emit('regenerateThumbnails', '');
+                        res.status(201);
+                    }
                 });
-            } else {
-                console.log("Background file format not allowed " + filename);
             }
-
-
         });
     });
-// TODO CHECK INCOMING SIZE LESS THAN 500KB
+
 app.route('/albumart-upload')
     .post(function (req, res, next) {
         var artist;
         var album;
         var filePath;
-        var fstream;
+        this.fileData = null;
 
-        req.pipe(req.busboy);
+        req.busboy.on('file', (fieldname, file, filename) => {
+            this.filename = filename;
+            file.on('data', (data) => {
+                if (this.fileData === null) {
+                    this.fileData = data;
+                } else {
+                    this.fileData = Buffer.concat([this.fileData, data]);
+                }
+            });
+        });
+
         req.busboy.on('field', (fieldName, value) => {
             if (fieldName === 'artist' && value !== undefined) {
                 this.artist = value;
@@ -184,44 +223,65 @@ app.route('/albumart-upload')
             }
         });
 
-        req.busboy.on('file', (fieldname, file, filename) => {
-            console.log("Uploading albumart: " + filename);
-            extension = filename.split('.').pop().toLowerCase();
+        req.busboy.on('finish', () => {
+            if (!this.filename) {
+                console.log('Albumart upload No file attached');
+                return res.status(500);
+            }
+            if (this.fileData && this.fileData.length > 1000000) {
+                console.log('Albumart upload size exceeds 1MB, aborting');
+                var socket = io.connect('http://localhost:3000');
+                socket.emit('callMethod', {'endpoint':'miscellanea/appearance','method':'sendSizeErrorToasMessage','data':'1'});
+                return res.status(500);
+            }
+            console.log("Uploading albumart: " + this.filename);
+            extension = this.filename.split('.').pop().toLowerCase();
             var allowedExtensions = ['jpg', 'jpeg', 'png'];
             if (allowedExtensions.indexOf(extension) > -1) {
-                filename = 'cover' + '.' + extension;
+                this.filename = 'cover' + '.' + extension;
                 var albumartDir = '/data/albumart';
+                var cacheId = Math.floor(Math.random() * 1001);
                 if (this.filePath !== undefined) {
-                    var customAlbumartPath = path.join(albumartDir, 'personal', 'path', this.filePath);
+                    var customAlbumartPath = encodeURI(path.join(albumartDir, 'personal', 'path', this.filePath));
+                    var returnAlbumartPath = '/albumart?cacheid=' + cacheId + '&web=' + '/extralarge'
                 } else if (this.artist !== undefined && this.album !== undefined) {
-                    var customAlbumartPath = path.join(albumartDir, 'personal', 'album', this.artist, this.album);
+                    var customAlbumartPath = encodeURI(path.join(albumartDir, 'personal', 'album', this.artist, this.album));
+                    var returnAlbumartPath = '/albumart?cacheid=' + cacheId + '&web=' + encodeURI( this.artist + '/' + this.album) + '/extralarge';
                 } else if (this.artist !== undefined) {
-                    var customAlbumartPath = path.join(albumartDir, 'personal', 'artist', this.artist);
+                    var customAlbumartPath = encodeURI(path.join(albumartDir, 'personal', 'artist', this.artist));
+                    var returnAlbumartPath = '/albumart?cacheid=' + cacheId + '&web=' + encodeURI( this.artist) + '/extralarge';
                 } else {
                     console.log('Error: no path, artist or album specified');
                     return res.status(500);
                 }
 
-                try {
-                    fs.ensureDirSync(customAlbumartPath);
-                } catch (err) {
-                    console.log('Cannot Create Personal Albumart DIR : ' + err);
-                    return res.status(500);
-                }
+                if (this.fileData !== null) {
+                    try {
+                        fs.ensureDirSync(customAlbumartPath);
+                    } catch (err) {
+                        console.log('Cannot Create Personal Albumart DIR : ' + err);
+                        return res.status(500);
+                    }
 
-                try {
-                    fs.emptyDirSync(customAlbumartPath);
-                } catch(e) {
-                    console.log('Could not clear personal albumart folder: ' + e);
-                }
+                    try {
+                        fs.emptyDirSync(customAlbumartPath);
+                    } catch(e) {
+                        console.log('Could not clear personal albumart folder: ' + e);
+                    }
 
-                var personalCoverPath = path.join(customAlbumartPath, filename);
-                fstream = fs.createWriteStream(personalCoverPath);
-                file.pipe(fstream);
-                fstream.on('close', function () {
-                    console.log("Custom Albumart Upload Finished");
-                    res.status(200)
-                });
+                    var personalCoverPath = path.join(customAlbumartPath, this.filename);
+
+                    fs.writeFile(personalCoverPath, this.fileData, (err) => {
+                        if (err){
+                            console.log('Error Saving Custom Albumart: ' + err);
+                        } else {
+                            console.log("Custom Albumart Upload Finished");
+                            var socket = io.connect('http://localhost:3000');
+                            socket.emit('callMethod', {'endpoint':'miscellanea/albumart','method':'clearAlbumartCache','data':''});
+                            res.json({"path":returnAlbumartPath});
+                        }
+                    });
+                }
             } else {
                 console.log("Albumart file format not allowed " + filename);
             }
