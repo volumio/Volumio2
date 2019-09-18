@@ -3244,19 +3244,15 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
-				//Include track number if tracknumber variable is set to 'true'
-					if (!tracknumbers) {
-						var title = self.searchFor(lines, i + 1, 'Title:');
-					}
-					else {
-						var title1 = self.searchFor(lines, i + 1, 'Title:');
-						var track = self.searchFor(lines, i + 1, 'Track:');
-                        if(track && title1) {
-                            var title = track + " - " + title1;
-                        } else {
-                            var title = title1;
-                        }
-					}
+			
+                    var track = self.searchFor(lines, i + 1, 'Track:');
+                    var title = self.searchFor(lines, i + 1, 'Title:');
+
+                    //Include track number if tracknumbers variable is set to 'true'
+                    if (tracknumbers && track) {
+                        var title = track + " - " + title;
+                    }
+
                     var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
                     duration = duration + parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -3274,7 +3270,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                         artist: artist,
                         album: album,
                         type: 'song',
-                        tracknumber: 0,
+                        tracknumber: track,
                         duration: time,
                         trackType: path.split('.').pop()
                     });
