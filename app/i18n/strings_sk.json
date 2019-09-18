@@ -73,7 +73,14 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Toto nastavenie umožní načítať rôzne formáty audio súborov, avšak môže spomaliť vytváranie hudobnej knižnice. Ak je voľba zakázaná, hlavné formáty budu spracované a vytváranie hudobnej knižnice bude oveľa rýchlejšie.",
     "USB_DAC_CONNECTED":"USB DAC pripojený",
     "NO_OUTPUT_DEVICE":"Žiaden audiovýstup nieje k dispozícii",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Pripojte výstupné zvukové zariadenie."
+    "NO_OUTPUT_DEVICE_MESSAGE":"Pripojte výstupné zvukové zariadenie.",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"Zvolené výstupné zariadenie nieje dostupné",
+    "CONNECT_OUTPUT_DEVICE_1":"Prosím pripojte",
+    "CONNECT_OUTPUT_DEVICE_2":"k jednotke alebo vyberte iné výstupné zariadenie z možností prehrávania",
+    "PLAYBACK_MODE":"Režim prehrávania",
+    "PLAYBACK_MODE_DOC":"Môžete zvoliť správanie pri prehrávaní: Priebežné nahradí vašu aktuálnu frontu všetkými skladbami v albume alebo zozname skladieb, Jeden pridá do fronty iba skladbu, ktorú ste vybrali na prehratie",
+    "PLAYBACK_MODE_CONTINUOUS":"Priebežné",
+    "PLAYBACK_MODE_SINGLE":"Jeden"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Nastavenie siete",
@@ -193,7 +200,16 @@
   "NO_RESULTS":"Žiadne výsledky",
   "REMOVE_FAIL":"Nemožno odobrať",
   "CONNECTED":"Pripojené",
-  "DISCONNECTED":"Odpojené"
+  "DISCONNECTED":"Odpojené",
+  "LOGIN":"Prihlásenie",
+  "LOGOUT":"Odhlásenie",
+  "USERNAME":"Používateľské meno",
+  "PASSWORD":"Heslo",
+  "LOGGING_IN":"Prihlasovanie",
+  "LOGIN_SUCCESS": "Úspešne prihlásený",
+  "LOGIN_FAIL":"Nepodarilo sa prihlásiť",
+  "LOGGING_OUT":"Odhlasovanie",
+  "LOGOUT_SUCCESS":"Úspešne odhlásený"
   },
   "APPEARANCE":{
     "APPEARANCE":"Vzhľad",
@@ -228,7 +244,9 @@
     "ALBUMART_RESET_CACHE_DOC":"Systém ukladá obrázky albumov pre zvýšenie výkonu, ale toto zabraňuje zobrazovať novo pridané obrázky. Vyčistením úložiska obrázkov sa budú zobrazovať aj nové obrázky",
     "METADATA_IMAGE":"Zobrazovať vložené obrázky",
     "METADATA_IMAGE_DOC":"Ak je povolené, systém sa pokúsi získať obrázok priamo z hudobných súborov. Toto zvyšuje čas načítavania obrázkov albumov.",
-    "BROWSE_SOURCES_VISIBILITY":"Viditeľnosť zdrojov"
+    "BROWSE_SOURCES_VISIBILITY":"Viditeľnosť zdrojov",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Povoliť experimentálne používateľské rozhranie Volumio3",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Povoliť experimentálne používateľské rozhranie Volumio3"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Moja hudba",
@@ -308,7 +326,13 @@
     "SUCCESSFULLY_DELETED_FOLDER":"Úspešne vymazaná zložka",
     "ERROR_DELETING_FOLDER":"Chyba pri odstraňovaní zložky",
     "SHOW_ADVANCED_SETTINGS":"Zobraziť pokročilé nastavenia",
-    "SHOW_ADVANCED_SETTINGS_DOC":"Ak je táto možnosť povolená, systém zobrazí niektoré rozšírené nastavenia, ktoré umožnia pokročilé vylepšenia. Tieto nastavenia by mali prevádzkovať iba odborníci"
+    "SHOW_ADVANCED_SETTINGS_DOC":"Ak je táto možnosť povolená, systém zobrazí niektoré rozšírené nastavenia, ktoré umožnia pokročilé vylepšenia. Tieto nastavenia by mali prevádzkovať iba odborníci",
+    "FULL_SETTINGS_SET":"Režim úplného nastavenia",
+    "FULL_SETTINGS_SET_EXTENDED":"Chcem všetky možnosti nastavenia",
+    "SIMPLE_SETTINGS_SET":"Režim jednoduchého nastavenia",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"Chcem jednoduché možnosti nastavenia",
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Ak chcete funkciu vypnúť, stlačte",
+    "TURN_OFF_IN":"Vypnúť"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Moje webová rádiá",
@@ -316,7 +340,12 @@
     "TOP_500_RADIOS":"500 najobľúbenejších rádií",
     "BY_GENRE_RADIOS":"Podľa žánru",
     "BY_COUNTRY_RADIOS":"Podľa štátu",
-    "WEBRADIO":"Webové rádio"
+    "WEBRADIO":"Webové rádio",
+    "LOCAL_RADIOS":"Lokálne rádia",
+    "POPULAR_RADIOS":"Populárne rádia",
+    "BEST_RADIOS":"Najlepšie rádia",
+    "BY_LANGUAGE":"Podľa jazyka",
+    "TALK_RADIOS":"Hovorené slovo"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Odinštalovanie zásuvného modulu",
