@@ -160,7 +160,11 @@ interfaceApi.prototype.pluginRestEndpoint = function (req, res) {
     if (payload) {
         var result = self.executeRestEndpoint(payload);
         result.then(function(response) {
-            res.json({'success': true});
+            if (response) {
+                res.json({'success': true, 'data': response});
+            } else {
+                res.json({'success': true});
+            }
         })
             .fail(function(error){
                 res.json({'success': false, 'error': error});
@@ -189,7 +193,12 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
                         defer.resolve(result);
                     })
                 } else {
-                    defer.resolve('OK');
+                    if (execute) {
+                        defer.resolve(execute);
+                    } else {
+                        defer.resolve();
+                    }
+
                 }
             }
         }
