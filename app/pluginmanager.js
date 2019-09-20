@@ -628,22 +628,6 @@ PluginManager.prototype.getPlugin = function (category, name) {
 	}
 };
 
-PluginManager.prototype.getPluginsMyMusicConfig = function () {
-	let self = this;
-	let defer = libQ.defer()
-
-	// So far this capability is only exposed to MyVolumio plugins. We might consider enabling it for core plugins as well in the future.
-	if (this.myVolumioPluginManager !== undefined) {
-		let pluginsMyMysicConfig = self.myVolumioPluginManager.getPluginsMyMusicConfig();
-		pluginsMyMysicConfig.then(function (conf) {
-			defer.resolve(conf);
-		}).fail(function () {
-			defer.resolve(false);
-		});
-		return defer.promise;
-	}
-};
-
 /**
  * Returns path for a specific configuration file for a plugin (identified by its context)
  * @param context
