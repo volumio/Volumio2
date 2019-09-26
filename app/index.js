@@ -500,7 +500,7 @@ CoreCommandRouter.prototype.replaceAndPlay = function (data) {
 };
 
 CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayCue');
     this.stateMachine.clearQueue();
 
     if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
