@@ -155,7 +155,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         } else {
 
             //backward compatibility with SPOP plugin
-            if(item.uri.startsWith('spotify:'))
+            if(item.uri != undefined && item.uri.startsWith('spotify:'))
             {
                 service='spop';
             }
