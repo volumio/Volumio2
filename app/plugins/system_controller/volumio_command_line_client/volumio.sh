@@ -153,6 +153,9 @@ case "$1" in
         usbdetach)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioDetach"
         ;;
+        scanaudioinputs)
+           /usr/bin/curl "http://127.0.0.1:3000/api/pluginEndpoint?endpoint=scanAudioInputs"
+        ;;
         vstart)
             vstart
             ;;

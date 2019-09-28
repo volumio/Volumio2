@@ -3,6 +3,7 @@
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
+var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var libQ = require('kew');
 var ShairportReader = require('./shairport-sync-reader/shairport-sync-reader.js');
@@ -22,7 +23,7 @@ function AirPlayInterface(context) {
     this.logger = this.commandRouter.logger;
     this.obj={
         status: 'play',
-        service:'airplay',
+        service:'airplay_emulation',
         title: '',
         artist: '',
         album: '',
@@ -123,9 +124,14 @@ AirPlayInterface.prototype.startShairportSync = function () {
         outdev = 'plughw:'+outdev+',0';
     }
 
-
+    var buffer_size_line;
     var mixer = this.commandRouter.sharedVars.get('alsa.outputdevicemixer');
     var name = this.commandRouter.sharedVars.get('system.name');
+    var isPrimo = self.detectPrimo();
+    // With Primo we need to set a lower buffer size
+    if (isPrimo && outdev === 'plughw:0,0') {
+        buffer_size_line = 'buffer_size = 5536;';
+    }
 
 
     var fs = require('fs');
@@ -139,6 +145,11 @@ AirPlayInterface.prototype.startShairportSync = function () {
         var conf = data;
         conf = conf.replace("${name}", name);
         conf = conf.replace("${device}", outdev);
+        if (buffer_size_line && buffer_size_line.length) {
+            conf = conf.replace("${buffer_size_line}", buffer_size_line);
+        } else {
+            conf = conf.replace("${buffer_size_line}", "");
+        }
         conf = conf.replace("${mixer}", mixer);
         var onDemand_line = '';
         if (!onDemand){
@@ -169,7 +180,7 @@ function startShairportSync(self) {
 AirPlayInterface.prototype.stopShairportSync = function () {
     var self = this;
 
-    exec("sudo systemctl stop airplay", function (error, stdout, stderr) {
+    exec("/usr/bin/sudo /usr/bin/killall shairport-sync", {uid:1000, gid:1000}, function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
         }
@@ -222,12 +233,23 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
         self.obj.albumart="/albumart";
 
         if (!onDemand) {
-            self.context.coreCommand.volumioStop();
             self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
-            self.context.coreCommand.stateMachine.setVolatile({
-                service:"airplay",
+            var state = self.commandRouter.stateMachine.getState();
+            if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+                // if Initial startup do not kill shairport
+                self.commandRouter.stateMachine.unSetVolatile();
+            } else {
+                self.context.coreCommand.volumioStop();
+            }
+            setTimeout(()=>{
+                self.context.coreCommand.stateMachine.setVolatile({
+                service:'airplay_emulation',
                 callback: self.unsetVol.bind(self)
             });
+            self.pushAirplayMeta();
+            }, 1000)
+
+
         }
     })
 
@@ -250,10 +272,10 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
         }
 
         if (meta.assr != undefined && meta.assr.length > 0) {
-            self.obj.samplerate=meta.assr/1000+' KHz';
+            self.obj.samplerate=meta.assr/1000+' kHz';
             self.obj.bitdepth='16 bit';
         } else {
-            self.obj.samplerate='44.1 KHz';
+            self.obj.samplerate='44.1 kHz';
             self.obj.bitdepth='16 bit';
         }
 
@@ -273,7 +295,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 
     pipeReader.on('prgr', function(meta) {
 
-        var samplerate = (self.obj.samplerate.replace(' KHz', '')*1000);
+        var samplerate = (self.obj.samplerate.replace(' kHz', '')*1000);
         var duration = Math.round(parseFloat((meta.end-meta.start)/samplerate));
         var seek = (Math.round(parseFloat((meta.current-meta.start)/samplerate)))*1000;
 
@@ -310,7 +332,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 AirPlayInterface.prototype.pushAirplayMeta = function () {
     var self = this;
     self.seekTimerAction();
-    self.context.coreCommand.servicePushState(self.obj, 'airplay');
+    self.context.coreCommand.servicePushState(self.obj, 'airplay_emulation');
 }
 
 AirPlayInterface.prototype.getAlbumArt = function (data, path,icon) {
@@ -340,9 +362,25 @@ AirPlayInterface.prototype.airPlayStop = function () {
 
 AirPlayInterface.prototype.unsetVol = function () {
     var self = this;
-    console.log('STOPPING SHAIRPORT');
 
-    self.stopAirplay();
+    if (!onDemand) {
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+            console.log('STOPPING SHAIRPORT');
+            self.stopAirplay();
+            setTimeout(()=>{
+                return libQ.resolve()
+            },500)
+        } else {
+            setTimeout(()=>{
+                return libQ.resolve()
+            },500)
+        }
+    } else {
+        setTimeout(()=>{
+            return libQ.resolve()
+        },500)
+    }
 };
 
 AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data) {
@@ -353,7 +391,24 @@ AirPlayInterface.prototype.getAdditionalConf = function (type, controller, data)
 AirPlayInterface.prototype.stop = function () {
     var self = this;
     var defer = libQ.defer();
-    defer.resolve('');
+
+    if (!onDemand) {
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service === 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+            self.stopShairportSync();
+            setTimeout(()=> {
+                self.startShairportSync();
+            },5000)
+            setTimeout(()=> {
+                defer.resolve('');
+            },1000)
+        } else {
+            defer.resolve('');
+        }
+    } else {
+        defer.resolve('');
+    }
+
     return defer.promise
 };
 
@@ -361,14 +416,13 @@ AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
     var self = this;
 
     this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
-
     try {
         this.commandRouter.volumioStop().then(()=>{
 
             self.context.coreCommand.volumioStop();
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
         self.context.coreCommand.stateMachine.setVolatile({
-            service:"airplay",
+            service:'airplay_emulation',
             callback: self.unsetVol.bind(self)
         });
     });
@@ -377,7 +431,7 @@ AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
         self.context.coreCommand.volumioStop();
         self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
         self.context.coreCommand.stateMachine.setVolatile({
-            service:"airplay",
+            service:'airplay_emulation',
             callback: self.unsetVol.bind(self)
         });
     }
@@ -399,7 +453,13 @@ AirPlayInterface.prototype.stopAirplay = function () {
     if (onDemand) {
         self.stopShairportSync();
     } else {
-        self.startShairportSync();
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
+            self.stopShairportSync();
+            setTimeout(() => {
+                self.startShairportSync();
+            },5000)
+        }
     }
 };
 
@@ -416,5 +476,21 @@ AirPlayInterface.prototype.seekTimerAction = function() {
     } else {
         clearInterval(seekTimer);
         seekTimer = undefined;
+    }
+};
+
+AirPlayInterface.prototype.detectPrimo = function () {
+    var self = this;
+
+    try {
+        var primoAudioDevice = execSync('aplay -l | grep es90x8q2m-dac-dai-0').toString();
+        if (primoAudioDevice.length > 0) {
+            return true
+        } else {
+            return false
+        }
+    } catch(e) {
+        self.logger.info('Could not detect Primo: ' + e);
+        return false
     }
 };

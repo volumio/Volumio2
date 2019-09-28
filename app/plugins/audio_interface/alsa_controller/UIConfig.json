@@ -98,7 +98,8 @@
           "audio_buffer_size",
           "buffer_before_play",
 		  "persistent_queue",
-          "iso"
+          "iso",
+          "playback_mode"
         ]
       },
       "content": [
@@ -149,7 +150,7 @@
           "options": [
             {
               "value":1024,
-              "label": "128 KB"
+              "label": "1 MB"
             },
             {
               "value":2048,
@@ -214,6 +215,28 @@
           "doc": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK",
           "value":false
+        },
+        {
+          "id": "playback_mode",
+          "element": "select",
+          "hidden": true,
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE",
+          "value":  {
+            "value": "ccontinuous",
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_CONTINUOUS"
+          },
+          "options": [
+            {
+              "value": "continuous",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_CONTINUOUS"
+            },
+            {
+              "value": "single",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_SINGLE"
+            }
+          ]
+
         }
       ]
     },

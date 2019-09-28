@@ -90,7 +90,8 @@ ControllerSystem.prototype.getUIConfig = function () {
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[0].value',self.config.get('playerName'));
     self.configManager.setUIConfigParam(uiconf,'sections[0].content[1].value',self.config.get('startupSound'));
     var advancedSettingsStatus = self.getAdvancedSettingsStatus();
-    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value', advancedSettingsStatus);
+    self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].value.value', advancedSettingsStatus);
+    self.configManager.setUIConfigParam(uiconf, 'sections[0].content[3].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[0].content[3].options'), advancedSettingsStatus));
     if (process.env.SHOW_ADVANCED_SETTINGS_MODE_SELECTOR === 'true') {
         self.configManager.setUIConfigParam(uiconf,'sections[0].content[3].hidden', false);
 	}
@@ -154,8 +155,8 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 
 		})
-		.fail(function()
-		{
+		.fail(function(error)
+		{   self.logger.info(error);
 			defer.reject(new Error());
 		})
 
@@ -239,9 +240,9 @@ ControllerSystem.prototype.saveGeneralSettings = function (data) {
         self.config.set('startupSound', data['startup_sound']);
     }
 
-    if (data['advanced_settings'] != undefined) {
-        self.config.set('advanced_settings_mode', data['advanced_settings']);
-        process.env.ADVANCED_SETTINGS_MODE = data['advanced_settings'];
+    if (data['advanced_settings'] !== undefined && data['advanced_settings'].value !== undefined) {
+        self.config.set('advanced_settings_mode', data['advanced_settings'].value);
+        process.env.ADVANCED_SETTINGS_MODE = data['advanced_settings'].value;
     }
 
     var oldPlayerName = self.config.get('playerName');
@@ -999,4 +1000,44 @@ ControllerSystem.prototype.getAdvancedSettingsStatus = function () {
 	} else {
     	return false
 	}
+};
+
+ControllerSystem.prototype.getExperienceAdvancedSettings = function () {
+    var self = this;
+
+    var simpleSettingsString = self.commandRouter.getI18nString('SYSTEM.SIMPLE_SETTINGS_SET_EXTENDED');
+    var fullSettingsString = self.commandRouter.getI18nString('SYSTEM.FULL_SETTINGS_SET_EXTENDED');
+    var advancedSettingsStatus = self.getAdvancedSettingsStatus();
+    var advancedSettingsStatusObject = {id: false, label: simpleSettingsString};
+    if (advancedSettingsStatus) {
+        advancedSettingsStatusObject = {id: true, label: fullSettingsString}
+    }
+    var responseObject = {
+        "options": [{id: false, label: simpleSettingsString}, {id: true, label: fullSettingsString}],
+        "status": advancedSettingsStatusObject
+    }
+
+    return responseObject
+};
+
+ControllerSystem.prototype.setExperienceAdvancedSettings = function (data) {
+    var self = this;
+
+    self.logger.info('Saving Experience Advanced Settings');
+    if (data !== undefined) {
+        self.config.set('advanced_settings_mode', data);
+        process.env.ADVANCED_SETTINGS_MODE = data;
+    }
+};
+
+ControllerSystem.prototype.getLabelForSelect = function (options, key) {
+    var self=this;
+
+    var n = options.length;
+    for (var i = 0; i < n; i++) {
+        if (options[i].value == key)
+            return options[i].label;
+    }
+
+    return 'Error';
 };

@@ -54,7 +54,8 @@
     {"id":"hifiberry-amp","name":"HiFiBerry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dac","name":"HiFiBerry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dacplus","name":"HiFiBerry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
-    {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"iqamp-unmute.sh","needsreboot":"yes"}
+    {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"iqamp-unmute.sh","needsreboot":"yes"},
+	{"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"}
   ]}
   ]}
 

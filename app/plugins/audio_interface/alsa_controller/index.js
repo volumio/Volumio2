@@ -284,7 +284,12 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
 			}
 
+
 			value = self.getAdditionalConf('music_service', 'mpd', 'dop', false);
+            if (volumioDeviceName === 'primo' && outdevicename === 'Analog RCA Output') {
+                value = true;
+                uiconf.sections[2].content[0].hidden = true;
+            }
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[0].options'), value));
 
@@ -312,7 +317,11 @@ ControllerAlsa.prototype.getUIConfig = function () {
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value', value);
             self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[6].options'), value));
 
-			value = self.config.get('volumestart');
+            value = self.getAdditionalConf('music_service', 'mpd', 'playback_mode', 'single');
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[7].value.value', value);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[7].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[7].options'), value));
+
+            value = self.config.get('volumestart');
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.value', value);
 			self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[2].options'), value));
 
@@ -399,8 +408,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
             	defer.resolve(uiconf);
 			})
 		})
-		.fail(function()
+		.fail(function(e)
 		{
+			self.logger.error('Error retrieving UIConf: ' + e);
 			defer.reject(new Error());
 		})
 
@@ -667,6 +677,11 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 	self.setConfigParam({key: 'volumemax', value: data.volumemax.value});
 	self.setConfigParam({key: 'volumecurvemode', value: data.volumecurvemode.value});
 	self.setConfigParam({key: 'volumesteps', value: data.volumesteps.value});
+	var currentState = self.commandRouter.volumioGetState();
+	if (currentState && currentState.volume !== undefined && currentState.mute !== undefined) {
+		var currentVolume = currentState.volume;
+		var currentMute =  currentState.mute;
+	}
 
     var mpdvalue = self.config.get('mpdvolume', false)
     if (mpdvalue != data.mpdvolume) {
@@ -688,18 +703,22 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 			mixers.splice(index, 1);
 		}
         data.mixer.value = mixers[0];
+
 	}
     var outValue = self.config.get('outputdevice', 'none');
     if (outValue === 'softvolume') {
 		var currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+        self.disableSoftMixer(currentDeviceNumber);
 		self.config.set('outputdevice', currentDeviceNumber);
         self.config.delete('softvolumenumber');
         self.commandRouter.sharedVars.set('alsa.outputdevice', currentDeviceNumber);
     }
+    self.restorePreviousVolumeLevel(currentVolume, currentMute, false);
 	self.setConfigParam({key: 'mixer', value: data.mixer.value});
 	} else if (data.mixer_type.value === 'Software') {
 		var outdevice = self.config.get('outputdevice');
 		if (outdevice != 'softvolume'){
+            self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
 			self.enableSoftMixer(outdevice);
 			var outdevice = 'softvolume';
             self.config.set('outputdevice', outdevice);
@@ -713,13 +732,11 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
             this.config.set('outputdevice', outdevice);
             self.config.delete('softvolumenumber');
             self.restartMpd.bind(self);
+            self.disableSoftMixer(outdevice);
 		}
 		self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
-		self.disableSoftMixer(outdevice);
 	}
 	self.setConfigParam({key: 'mixer_type', value: data.mixer_type.value});
-
-
 
 	self.logger.info('Volume configurations have been set');
 	self.commandRouter.sharedVars.set('alsa.outputdevicemixer', data.mixer.value);
@@ -848,7 +865,7 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                                 var subdevice = Number(currentCard.number);
                                 name = currentCard.prettyname;
                                 if (volumioDeviceName === 'primo') {
-									if (name === 'Audio Jack Out') {
+									if (name === 'Audio Jack Out' || name === 'HDMI') {
                                         currentCard.ignore = true;
 									}
 								}
@@ -885,8 +902,9 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 			}
         }
         if (volumioDeviceName === 'primo') {
-            cards.unshift(cards[2]);
-            cards.splice(3, 1);
+        	// Not necessary anymore since we ignore HDMI
+            //cards.unshift(cards[2]);
+            //cards.splice(3, 1);
         }
 	} catch (e) {
 		var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
@@ -923,7 +941,12 @@ ControllerAlsa.prototype.getAplayInfo = function () {
 				} catch(e) {
             		self.logger.error('Could not read volumio variant: ' + e);
 				}
-				if (sysVariant === 'volumio') {
+				if (sysVariant === 'volumio' || sysVariant === 'primo') {
+							if (self.commandRouter.sharedVars.get('device_vendor_model') !== 'Volumio Primo') {
+
+                                self.commandRouter.sharedVars.addConfigValue('device_vendor_model', 'string', 'Volumio Primo');
+                                self.commandRouter.sharedVars.set('device_vendor_model', 'Volumio Primo');
+							}
             				volumioDeviceName = 'primo';
 				}
 			}
@@ -935,7 +958,6 @@ ControllerAlsa.prototype.getAplayInfo = function () {
 }
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
-
 	var mixers = [];
 	var outdev = this.config.get('outputdevice');
 	if (outdev == 'softvolume'){
@@ -967,6 +989,10 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 		}
 	} catch (e) {}
 
+    if (volumioDeviceName === 'primo' && device === '1,1') {
+        mixers = [];
+	}
+
 	return mixers
 }
 
@@ -981,6 +1007,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
 	var cards = self.getAlsaCards();
     var outputdevice = self.config.get('outputdevice');
+    var ignoreGenMixers = false;
 
     var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
@@ -1030,10 +1057,17 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 
 		}
 	}
-	if (defaultmixer) {
+    if (volumioDeviceName === 'primo' && device === '1,1') {
+        defaultmixer = '';
+    }
+
+    if (defaultmixer) {
 		this.mixertype = 'Hardware';
 	} else {
 		try {
+            if (volumioDeviceName === 'primo' && device === '1,1') {
+                ignoreGenMixers = true;
+            }
             if (device.indexOf(',') >= 0) {
             	device = device.charAt(0);
 
@@ -1067,13 +1101,20 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
                     } else {
                         self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
                         this.mixertype = 'None';
-                        self.commandRouter.sharedVars.set('alsa.outputdevicemixer', none);
+                        self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'None');
                         //defaultmixer = 'SoftMaster';
                         //self.enableSoftMixer(device);
                     }
 				}
 
 			}
+
+            if (ignoreGenMixers) {
+				self.logger.info('Ignoring Mixers Options');
+                self.logger.info('Device ' + device + ' does not have any Mixer Control Available');
+                this.mixertype = 'None';
+                self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'None');
+            }
 		} catch (e) {}
 	}
 	if (this.config.has('mixer_type') == false) {
@@ -1468,14 +1509,18 @@ ControllerAlsa.prototype.getAudioDevices  = function () {
 ControllerAlsa.prototype.usbAudioAttach  = function () {
 	var self = this;
 
-    var usbHotplug = self.config.get('usb_hotplug', false);
-    if (usbHotplug && !ignoreUsbAudioAttach) {
+    var usbHotplug = self.config.get('usb_hotplug', true);
+    var outdev = this.config.get('outputdevice');
+    if (usbHotplug && !ignoreUsbAudioAttach && outdev === '5') {
         var cards = self.getAlsaCards();
         var usbCardName = self.getLabelForSelectedCard(cards, 5);
         var usbData = {"disallowPush":true,"output_device":{"value":"5","label":usbCardName},"i2s":false};
         self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.USB_DAC_CONNECTED'), usbCardName);
         self.commandRouter.closeModals();
         self.saveAlsaOptions(usbData);
+        setTimeout(()=>{
+            self.commandRouter.executeOnPlugin('music_service', 'raat', 'restartRaat', '');
+		}, 500)
 	}
 
 }
@@ -1492,6 +1537,8 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
     var self = this;
 
     var cards = self.getAlsaCards();
+    var outdev = this.config.get('outputdevice');
+    var outdevName = this.config.get('outputdevicename');
     if (cards.length === 0) {
         var responseData = {
             title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_OUTPUT_DEVICE'),
@@ -1507,6 +1554,33 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
             ]
         }
         self.commandRouter.broadcastMessage("openModal", responseData);
+        self.commandRouter.executeOnPlugin('music_service', 'raat', 'onStop', '');
+	} else {
+    	var found = false;
+    	for (var i in cards) {
+    		var currentCard = cards[i];
+    		if (currentCard && currentCard.id && currentCard.name && currentCard.id === outdev && currentCard.name === outdevName) {
+    			found = true;
+			}
+		}
+		if (!found && outdevName !== undefined) {
+    		var message = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.CONNECT_OUTPUT_DEVICE_1') + ' ' + outdevName + ' ' + self.commandRouter.getI18nString('PLAYBACK_OPTIONS.CONNECT_OUTPUT_DEVICE_2');
+            var responseData = {
+                title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.OUTPUT_DEVICE_NOT_AVAILABLE'),
+                message: message,
+                size: 'lg',
+                buttons: [
+                    {
+                        name: self.commandRouter.getI18nString('COMMON.GOT_IT'),
+                        class: 'btn btn-info ng-scope',
+                        emit:'',
+                        payload:''
+                    }
+                ]
+            }
+            self.commandRouter.broadcastMessage("openModal", responseData);
+            self.commandRouter.executeOnPlugin('music_service', 'raat', 'onStop', '');
+		}
 	}
 };
 
@@ -1541,4 +1615,22 @@ ControllerAlsa.prototype.checkCurrentAudioDeviceAvailable  = function () {
 		}
 		return found
 	}
+};
+
+ControllerAlsa.prototype.restorePreviousVolumeLevel  = function (volume, mute, softmixer) {
+    var self = this;
+
+    self.logger.info('Restoring Previous Volume level: ' + volume + ' ' + mute + ' ' + softmixer);
+    if (softmixer) {
+        self.commandRouter.volumiosetvolume(100);
+	}
+
+    setTimeout(()=>{
+        self.commandRouter.volumiosetvolume(parseInt(volume));
+        if (mute) {
+        	//self.commandRouter.volumiosetvolume('mute');
+        } else {
+        	//self.commandRouter.volumiosetvolume('unmute');
+        }
+    }, 4500)
 };
