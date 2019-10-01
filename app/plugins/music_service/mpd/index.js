@@ -1,5 +1,3 @@
-/*jshint -W097 */
-
 'use strict';
 
 var cacheManager = require('cache-manager');
@@ -2194,11 +2192,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
             defer.resolve(list);
         });
-    }
-
-        // do I need an elseif for 'composers://'' here?
-
-    else if(uri.startsWith('artists://')) {
+    } else if(uri.startsWith('artists://')) {
         /*
          artists://AC%2FDC/Rock%20or%20Bust in service mpd
          */
@@ -3022,21 +3016,14 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
 
 //composers  (PW:this one picks up the click on the Composers button)
     else if (curUri.startsWith('composers://')) {
-        console.log('PW: COMPOSERS');
         if (curUri == 'composers://') {
-            console.log('PW: COMPOSERS-IF - sends off to listComposers function');
             response = self.listComposers(curUri);
-            console.log('PW: curUri: ' + curUri);
         }
-        else
-        {
+        else {
             if(splitted.length==3) {  //No album name
-                console.log('PW: COMPOSERS-1st ELSE - sends to listComposer');
                 response = self.listComposer(curUri,2,'composers://','composers://');  //Pass back to listComposer
-                console.log('PW: curUri: ' + curUri);
             }
             else {  //Has album name
-                console.log('PW: goes into 2nd else');
                 response = self.listAlbumSongs(curUri,3,'composers://'+ splitted[2]);  //Pass to listAlbumSongs with artist and album name
             }
         }
@@ -3367,32 +3354,22 @@ ControllerMpd.prototype.listComposers = function () {
         }
     };
     if (singleBrowse) {
-        response.navigation.prev ={'uri': 'music-library'}
+        response.navigation.prev = {'uri': 'music-library'};
     }
 
     var cmd = libMpd.cmd;
 	var artistlist = "composer";
 	var artistbegin = "Composer: ";
 
-	if (artistsort) {
-		artistlist = "albumartist";
-		artistbegin = "AlbumArtist: ";
-	}
-
 	self.clientMpd.sendCommand(cmd("list", [artistlist]), function (err, msg) {  //List composers
-
         if(err)
             defer.reject(new Error('Cannot list artist'));
-        else
-        {
+        else {
             var splitted=msg.split('\n');
 
-            for(var i in splitted)
-            {
-
+            for(var i in splitted) {
 				if(splitted[i].startsWith(artistbegin))  {
                     var artist=splitted[i].substring(artistbegin.length);
-
 
                     if(artist!=='') {
                         var codedArtists=encodeURIComponent(artist);
@@ -3402,9 +3379,8 @@ ControllerMpd.prototype.listComposers = function () {
                             type: 'folder',
                             title: artist,
                             albumart: albumart,
-                            uri: 'composers://' + codedArtists       //PW: when this one is changed, the script hangs when click composer - goes back to throwing broswe error when 'goto function' is added to
+                            uri: 'composers://' + codedArtists
                         }
-
                         response.navigation.lists[0].items.push(item);
                     }
                 }
@@ -3421,7 +3397,6 @@ ControllerMpd.prototype.listComposers = function () {
  * list composer
  */
 ControllerMpd.prototype.listComposer = function (curUri,index,previous,uriBegin) {
-	console.log('PW: ARRIVING IN listComposer function');
     var self = this;
 
     var defer = libQ.defer();
@@ -3471,11 +3446,7 @@ ControllerMpd.prototype.listComposer = function (curUri,index,previous,uriBegin)
 		var VA = 0;
 		var cmd = libMpd.cmd;
 		var safeArtist = artist.replace(/"/g,'\\"');
-		console.log('PW: artist:' + artist);
-		console.log('PW: safeArtist:' + safeArtist);
-		console.log('PW: MPD READY THEN FUNCTION BEGINS');
 		if (uriBegin === 'genres://')  {
-			console.log('PW: mpdReady IF');
 			var genre = decodeURIComponent(splitted[2]);
 			var safeGenre = genre.replace(/"/g,'\\"');
 			var findartist = "find artist \"" + safeArtist + "\" genre \"" + safeGenre + "\" ";
@@ -3483,18 +3454,15 @@ ControllerMpd.prototype.listComposer = function (curUri,index,previous,uriBegin)
 
 		else {
 			if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
-				console.log('PW: mpdReady first else');
 				var findartist = "find albumartist \"" + safeArtist + "\"";
 				VA = 1;
 			}
 			else {
-				                            //artist is NOT in compilation array so use artist or albumartist
+				//artist is NOT in compilation array so use artist or albumartist
 				if (artistsort) {						//Fix - now set by artistsort variable
-					console.log('PW: mpdReady 2nd else - artistsort');
 					var findartist = "find albumartist \"" + safeArtist + "\"";
 				}
 				else {
-					console.log('PW: mpdReady 3rd else - findartist');
 					var findartist = "find artist \"" + safeArtist + "\"";
 				}
 			}
@@ -3505,14 +3473,10 @@ ControllerMpd.prototype.listComposer = function (curUri,index,previous,uriBegin)
 		if(msg=='') { //If there is no data (msg) get data first, else just parseListAlbum
 
 			self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {
-				console.log('PW: goto parseListAlbum IF');
 				self.parseListAlbum(err,msg,defer,response,uriBegin,VA);  		// do I need to create a special parseListAlbum function for composers?
 
 				});
-            }
-
-            else {
-                console.log('PW: goto parseListAlbum ELSE');
+            } else {
 				self.parseListAlbum(err,msg,defer,response,uriBegin,VA);
 			}
         });
@@ -3700,14 +3664,10 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 
 ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin,VA) {
 
-	  console.log('PW: ARRIVING @ parseListAlbum')
     var self=this;
     var list = [];
     var albums=[],albumarts=[];
     if (msg) {
-			 console.log('PW: parseListAlbum IF - inside msg');
-
-
         var path;
         var name;
         var lines = msg.split('\n');
@@ -3756,7 +3716,6 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                     uri: 'music-library/'+path
                 });
 
-console.log('PW: arriving at blue block');
                 // The first expression in the following "if" statement prevents dummy-albums from being
                 //  created for orphaned tracks (tracks without an album). Such dummy-albums aren't required,
                 //  as orphaned tracks remain accessible from the tracks-list.
@@ -3796,7 +3755,6 @@ console.log('PW: arriving at blue block');
     }
     else
     {
-			  console.log('PW: parseListAlbum ELSE ');
         self.logger.info(err);
         defer.reject(new Error());
     }
