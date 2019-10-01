@@ -655,13 +655,14 @@ PlaylistManager.prototype.saveJSONFile = function(localFolder, fileName, data)
     var self=this;
     var defer=libQ.defer();
 
-    if((this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === 'true'))
-    {
+    if(this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === 'true' && this.commandRouter.sharedVars.get('myvolumio.uid') !== '0')
+    {   self.logger.info('Saving Cloud item ' + fileName);
         return self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'saveCloudItem', {
             fileName:fileName,
             data:data
         });
     } else {
+        self.logger.info('Saving local item ' + fileName);
         fs.writeJson(localFolder + fileName, data, function (err) {
             if (err)
                 defer.reject(new Error());

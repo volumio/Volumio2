@@ -193,7 +193,7 @@ AlbumArt.prototype.saveAlbumartOptions = function (data) {
 AlbumArt.prototype.clearAlbumartCache = function () {
 	var self = this;
 
-    exec('/bin/rm -rf /data/albumart/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+    exec('/bin/rm -rf /data/albumart/folder/* /data/albumart/metadata/* /data/albumart/web/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
             if (error) {
                 console.log('Cannot Delete Albumart Cache DirectoryB: ' + error);
                 self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEAR_ERROR'));

@@ -151,6 +151,7 @@ CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
 	this.callCallback("volumioupdatevolume", vol);
+	this.writeVolumeStatusFiles(vol);
 	return this.stateMachine.updateVolume(vol);
 };
 
@@ -186,6 +187,26 @@ CoreCommandRouter.prototype.setStartupVolume = function () {
         return this.volumeControl.setStartupVolume();
     }
 };
+
+CoreCommandRouter.prototype.writeVolumeStatusFiles = function (vol) {
+
+	if (vol.mute !== undefined && vol.mute === true) {
+		this.executeWriteVolumeStatusFiles(0);
+	} else if (vol && vol.vol && typeof vol.vol == 'number') {
+        this.executeWriteVolumeStatusFiles(vol.vol);
+	} else {
+        this.executeWriteVolumeStatusFiles(100);
+	}
+};
+
+CoreCommandRouter.prototype.executeWriteVolumeStatusFiles = function (value) {
+    fs.writeFile('/tmp/volume', value, function (err) {
+        if (err) {
+        	this.logger.error('Could not save Volume value to status file: ' + err);
+		}
+    });
+};
+
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
 	if (this.callbacks[name] == undefined) {
@@ -441,22 +462,45 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 
 	return this.stateMachine.addQueueItems(arrayItems);
 };
-CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
+CoreCommandRouter.prototype.replaceAndPlay = function (data) {
+	var defer = libQ.defer();
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
 
-    if (arrayItems.uri != undefined &&
-		arrayItems.uri.indexOf('playlists/') >= 0 &&
-		arrayItems.uri.indexOf('://') == -1) {
-        return this.playPlaylist(arrayItems.title)
-    } else  {
-        return this.stateMachine.addQueueItems(arrayItems);
-    }
+    if (data.uri != undefined) {
+    	if (data.uri.indexOf('playlists/') >= 0 && data.uri.indexOf('://') == -1) {
+            this.playPlaylist(data.title);
+            defer.resolve();
+		} else {
+            this.stateMachine.addQueueItems(data)
+                .then((e)=> {
+                	this.volumioPlay(e.firstItemIndex);
+            		defer.resolve();
+        	});
+		}
+    } else if (data.list && data.index) {
+        this.stateMachine.addQueueItems(data.list)
+            .then(()=>{
+                this.volumioPlay(data.index);
+        		defer.resolve();
+            });
+    } else if ((!(data.list && data.index) && data.item && data.item.uri)) {
+        this.stateMachine.addQueueItems(data.item)
+            .then((e)=>{
+                this.volumioPlay(e.firstItemIndex);
+        		defer.resolve();
+            });
+    } else {
+    	self.logger.error('Could not Replace and Play Item');
+        defer.reject('Could not Replace and Play Item');
+	}
+
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayCue');
     this.stateMachine.clearQueue();
 
     if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
@@ -1542,8 +1586,17 @@ CoreCommandRouter.prototype.volumioFFWDRew = function (millisecs) {
     return this.stateMachine.ffwdRew(millisecs);
 };
 
+CoreCommandRouter.prototype.volumioSkipBackwards = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSkipBackwards');
 
+    return this.stateMachine.skipBackwards(data);
+};
 
+CoreCommandRouter.prototype.volumioSkipForward = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSkipForward');
+
+    return this.stateMachine.skipForward(data);
+};
 
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
@@ -2087,6 +2140,22 @@ CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
     return this.executeOnPlugin('system_controller', 'system', 'getAdvancedSettingsStatus', '');
 }
 
+CoreCommandRouter.prototype.getExperienceAdvancedSettings = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getExperienceAdvancedSettings', '');
+}
+
+CoreCommandRouter.prototype.broadcastUiSettings = function () {
+    var self=this;
+    var returnedData = self.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
+
+    if (returnedData != undefined) {
+        returnedData.then(function (data) {
+            self.broadcastMessage('pushUiSettings', data);
+        });
+    }
+}
 
 // ============================  AUDIO OUTPUTS =================================
 

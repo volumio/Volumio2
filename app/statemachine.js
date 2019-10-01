@@ -73,6 +73,10 @@ CoreStateMachine.prototype.getState = function () {
             this.volatileState.albumart = '/albumart';
         }
 
+        if (this.volatileState.repeatMode === undefined) {
+            this.volatileState.repeatMode = 'all';
+        }
+
         return {
             status: this.volatileState.status,
             title: this.volatileState.title,
@@ -86,9 +90,10 @@ CoreStateMachine.prototype.getState = function () {
             samplerate: this.volatileState.samplerate,
             bitdepth: this.volatileState.bitdepth,
             channels: this.volatileState.channels,
-            random: false,
-            repeat: false,
-            repeatSingle:false,
+            random: this.volatileState.random,
+            repeat: this.volatileState.repeat,
+            repeatSingle:this.volatileState.repeatSingle,
+            enableSkip: this.volatileState.enableSkip,
             consume: false,
             volume: this.currentVolume,
             mute: this.currentMute,
@@ -442,6 +447,12 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 
 		var remainingTime=this.currentSongDuration-this.currentSeek;
+		if (remainingTime < 0)
+		{
+			//this.commandRouter.pushConsoleMessage("ERROR increasePlaybackTimer remainingTime:" + remainingTime + " negative - askedForPrefetch:" + this.askedForPrefetch + " - simulateStopStartDone:" + this.simulateStopStartDone);
+			remainingTime = 0;
+		}
+
 		if(remainingTime>=0 && remainingTime<5000 && this.askedForPrefetch==false)
 		{
 			this.askedForPrefetch=true;
@@ -487,7 +498,9 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 
 			this.startPlaybackTimer();
 
-		} else setTimeout(this.increasePlaybackTimer.bind(this),250);
+		} else {
+            setTimeout(this.increasePlaybackTimer.bind(this),250);
+		}
 	}
 };
 
@@ -594,6 +607,20 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
   } else {
     this.volatileService = undefined;
 
+    // On slow devices, nodejs might update mpd before the scheduled setTimeout ends.
+    // To handle this, make a direct call to increasePlaybackTimer to force another mpd update.
+    // Sometimes the mpd update occurs more than 500ms before the end of the scheduled setTimeout.              
+    // Setting currentSeek = currentSongDuration ensures a setTimeout increase of no more than 500ms.
+	if (this.askedForPrefetch)
+	{
+		// Debug if the workaround is applicable
+		this.commandRouter.pushDebugConsoleMessage('ERROR Prefetch 500ms setTimeout missed >> directly calling increasePlaybackTimer');
+		this.commandRouter.pushDebugConsoleMessage("ERROR this.runPlaybackTimer:" + this.runPlaybackTimer + " this.currentSongDuration:" + this.currentSongDuration + " - this.currentSeek:" + this.currentSeek + " - this.prefetchDone:"+this.prefetchDone+ " - this.simulateStopStartDone:"+this.simulateStopStartDone);
+
+		this.currentSeek = this.currentSongDuration;
+		this.increasePlaybackTimer();
+	}
+  
     var trackBlock = this.getTrack(this.currentPosition);
 	}
 
@@ -1351,12 +1378,13 @@ CoreStateMachine.prototype.serviceStop = function () {
 		var trackBlock = this.getTrack(this.currentPosition);
 		if (trackBlock && trackBlock.service){
 			return this.commandRouter.serviceStop(trackBlock.service);
-		} else if (this.isUpnp) {
-			var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
-			return mpdPlugin.stop();
-		} else {
-            return libQ.resolve();
-		}
+            //} else if (this.isUpnp) {
+            // var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+            // return mpdPlugin.stop();
+        } else {
+            var mpdPlugin = this.commandRouter.pluginManager.getPlugin('music_service', 'mpd');
+            return mpdPlugin.stop();
+        }
 	}
 };
 
@@ -1477,22 +1505,41 @@ CoreStateMachine.prototype.removeQueueItem = function (nIndex) {
 };
 
 CoreStateMachine.prototype.setRandom = function (value) {
-	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRandom '+value);
+	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRandom '+ value);
 
-	this.currentRandom=value;
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.random === "function") {
+            volatilePlugin.random(value);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No random method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.currentRandom=value;
 
-	this.pushState().fail(this.pushError.bind(this));
+        this.pushState().fail(this.pushError.bind(this));
+	}
 };
 
 CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
-	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRepeat '+value+ ' single '+repeatSingle);
+	this.commandRouter.pushConsoleMessage('CoreStateMachine::setRepeat '+ value + ' single '+ repeatSingle);
 
-	this.currentRepeat=value;
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.repeat === "function") {
+            volatilePlugin.repeat(value,repeatSingle);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No repeat method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.currentRepeat=value;
 
-	if(repeatSingle!=undefined)
-	    this.currentRepeatSingleSong=repeatSingle;
+        if (repeatSingle!=undefined) {
+            this.currentRepeatSingleSong=repeatSingle;
+		}
 
-	this.pushState().fail(this.pushError.bind(this));
+        this.pushState().fail(this.pushError.bind(this));
+	}
 };
 
 CoreStateMachine.prototype.setConsume = function (value) {
@@ -1501,6 +1548,36 @@ CoreStateMachine.prototype.setConsume = function (value) {
 	this.currentConsume=value;
 
 	this.pushState().fail(this.pushError.bind(this));
+};
+
+CoreStateMachine.prototype.skipBackwards = function (data) {
+    this.commandRouter.pushConsoleMessage('CoreStateMachine::skipBackwards '+ data);
+
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.skipBackwards === "function") {
+            volatilePlugin.skipBackwards(data);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No skipBackwards method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.commandRouter.pushConsoleMessage('WARNING: skipBackwards method is only available for volatile plugins');
+    }
+};
+
+CoreStateMachine.prototype.skipForward = function (data) {
+    this.commandRouter.pushConsoleMessage('CoreStateMachine::skipForward '+ data);
+
+    if(this.isVolatile){
+        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+        if (typeof volatilePlugin.skipForward === "function") {
+            volatilePlugin.skipForward(data);
+        } else {
+            this.commandRouter.pushConsoleMessage('WARNING: No skipForward method for plugin ' + this.volatileService);
+        }
+    } else {
+        this.commandRouter.pushConsoleMessage('WARNING: SkipForward method is only available for volatile plugins');
+    }
 };
 
 CoreStateMachine.prototype.moveQueueItem = function (from,to) {

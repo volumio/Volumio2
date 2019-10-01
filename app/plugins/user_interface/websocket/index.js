@@ -75,10 +75,7 @@ function InterfaceWebUI(context) {
 
 			connWebSocket.on('replaceAndPlay', function (data) {
 
-				self.commandRouter.replaceAndPlay(data)
-				.then(function(e){
-					return self.commandRouter.volumioPlay(e.firstItemIndex);
-				});
+				return self.commandRouter.replaceAndPlay(data)
 			});
 
             connWebSocket.on('replaceAndPlayCue', function (data) {
@@ -106,7 +103,7 @@ function InterfaceWebUI(context) {
                     });
 
             });
-
+		
 			connWebSocket.on('addPlay', function (data) {
 
                 self.commandRouter.addQueueItems(data)
@@ -261,7 +258,15 @@ function InterfaceWebUI(context) {
                 return self.commandRouter.volumioRepeat(data.value,data.repeatSingle);
 			});
 
-			connWebSocket.on('serviceUpdateTracklist', function (sService) {
+        	connWebSocket.on('skipBackwards', function (data) {
+            	return self.commandRouter.volumioSkipBackwards(data);
+        	});
+
+        	connWebSocket.on('skipForward', function (data) {
+            	return self.commandRouter.volumioSkipForward(data);
+        	});
+
+        	connWebSocket.on('serviceUpdateTracklist', function (sService) {
 				return self.commandRouter.serviceUpdateTracklist(sService);
 			});
 
@@ -939,9 +944,6 @@ function InterfaceWebUI(context) {
 						}
 					});
 				}
-				else console.log("Plugin multiroom or method getMultiroom not found");
-
-
 			});
 
 			/**
@@ -1590,6 +1592,19 @@ function InterfaceWebUI(context) {
 				}
 			});
 
+        	connWebSocket.on('getExperienceAdvancedSettings', function () {
+            	var selfConnWebSocket = this;
+
+            	var experienceAdvancedSettings = self.commandRouter.getExperienceAdvancedSettings();
+            	selfConnWebSocket.emit('pushExperienceAdvancedSettings', experienceAdvancedSettings);
+        	});
+
+        	connWebSocket.on('setExperienceAdvancedSettings', function (data) {
+            	var selfConnWebSocket = this;
+
+                return self.commandRouter.executeOnPlugin('system_controller', 'system', 'setExperienceAdvancedSettings', data);
+        	});
+
 			connWebSocket.on('setOutputDevices', function (data) {
 				var selfConnWebSocket = this;
 				data.disallowPush = true;
@@ -1609,6 +1624,18 @@ function InterfaceWebUI(context) {
 
 				selfConnWebSocket.emit('pushDonePage', laststep);
 			});
+
+        	connWebSocket.on('setDeviceActivationCode', function (data) {
+            	var selfConnWebSocket = this;
+
+                var codeCheck = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'checkDeviceCode', data);
+
+                if (codeCheck != undefined) {
+                    codeCheck.then(function (data) {
+                        selfConnWebSocket.emit('pushDeviceActivationCodeResult', data);
+                    });
+                }
+        	});
 
 			connWebSocket.on('checkPassword', function (data) {
 				var selfConnWebSocket = this;

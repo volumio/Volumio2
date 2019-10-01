@@ -1029,8 +1029,8 @@ PluginManager.prototype.renameFolder = function (folder) {
 
 	exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log("ERROR: "+ error);
-			defer.reject(new Error());
+			self.logger.error('Error renaming plugin folder: ' + error);
+			defer.reject(error);
 		}
 		else {
 
@@ -1059,8 +1059,8 @@ PluginManager.prototype.moveToCategory = function (folder) {
 		self.createFolder(newFolderName)
 			.then (exec("/bin/mv " + folder + " " + newFolderName , function (error, stdout, stderr) {
 				if (error !== null) {
-					console.log("ERROR: "+ error);
-					defer.reject(new Error());
+                    self.logger.error('Error moving plugin folder: ' + error);
+					defer.reject(error);
 				}
 				else {
                     execSync('/bin/sync', { uid: 1000, gid:1000, encoding: 'utf8' });
@@ -1168,7 +1168,7 @@ PluginManager.prototype.rollbackInstall = function (folder) {
 
 //This method uses synchronous methods only in order to block the whole volumio and don't let it access plugins methods
 //this in order to avoid "multithreading" issues. Returning a promise just in case the method would be used in a promise chain
-PluginManager.prototype.pluginFolderCleanup = function () {
+PluginManager.prototype.pluginFolderCleanup = function (cleanup) {
 	var self=this;
 	var defer=libQ.defer();
 
@@ -1200,8 +1200,14 @@ PluginManager.prototype.pluginFolderCleanup = function () {
 							self.logger.debug("Plugin "+pluginName+" found. Leaving it untouched.");
 						}
 						else {
-							self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Not Starting it.");
+							// Removed because it caused plugins deletion on new plugins addition
+							//self.logger.info("Plugin "+pluginName+" found in folder but missing in configuration. Not Starting it.");
 							//fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
+							if (cleanup !== undefined && cleanup === true) {
+								// If we uninstall the plugin, cleanup the directory
+                                self.logger.info("Cleaning folder for " + pluginName);
+                                fs.removeSync(self.pluginPath[i]+'/'+categories[j]+'/'+pluginName);
+							}
 						}
 					}
 					else
@@ -1272,7 +1278,7 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
 				self.pushMessage('installPluginStatus',{'progress': 90, 'message': 'Plugin removed from registry', 'title' : modaltitle});
 				return e;
 			}).
-			then(self.pluginFolderCleanup.bind(self))
+			then(self.pluginFolderCleanup.bind(self, true))
 			.then(function(e)
 			{
 				self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'Plugin uninstalled', 'title' : modaltitle, 'buttons':[{'name':'Close','class': 'btn btn-warning'}]});

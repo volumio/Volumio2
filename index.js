@@ -15,6 +15,7 @@ var albumart = require(__dirname + '/app/plugins/miscellanea/albumart/albumart.j
 albumart.setFolder('/data/albumart');
 
 expressApp.get('/albumart', albumart.processExpressRequest);
+expressApp.get('/tinyart/*', albumart.processExpressRequestTinyArt);
 
 expressApp.use(function (err, req, res, next) {
   /**

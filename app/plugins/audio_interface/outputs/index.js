@@ -311,28 +311,32 @@ outputs.prototype.setAudioOutputVolume = function (data) {
 
 	if (data && data.id && parseInt(data.volume) * 0 === 0 && typeof data.mute === "boolean") {
 		data.volume = parseInt(data.volume);
-		let i = self.checkElement(data.id);
 
-		if(i >= 0) {
+        if (data.type === 'device' && data.host !== undefined) {
+            self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'setRemoteDeviceVolume', data)
+        } else {
+            let i = self.checkElement(data.id);
 
-			let path = self.output.availableOutputs[i - 1].plugin;
+            if(i >= 0) {
 
-			let type = path.split("/")[0];
+                let path = self.output.availableOutputs[i - 1].plugin;
 
-			let name = path.split("/")[1];
+                let type = path.split("/")[0];
 
-			self.commandRouter.executeOnPlugin(type, name, "setAudioOutputVolume", data)
-				.then(function () {
-				})
-				.fail(function () {
-					self.commandRouter.pushToastMessage('error',
-						'plugin output failure', 'Failed to set audio output volume of ' + data.id);
-				})
-		}
-		else {
-			self.logger.error('Could not set audio output volume: ' + data.id +
-				' device not found');
-		}
+                let name = path.split("/")[1];
+
+                self.commandRouter.executeOnPlugin(type, name, "setAudioOutputVolume", data)
+                    .then(function () {
+                    })
+                    .fail(function () {
+                        self.commandRouter.pushToastMessage('error', 'plugin output failure', 'Failed to set audio output volume of ' + data.id);
+                    })
+            }
+            else {
+                self.logger.error('Could not set audio output volume: ' + data.id + ' device not found');
+            }
+        }
+
 	}
 	else{
 		self.logger.error('Could not set audio output volume: missing data, id, volume or mute fields');

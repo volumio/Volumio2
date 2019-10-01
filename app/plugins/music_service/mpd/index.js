@@ -791,6 +791,17 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 		self.config.set('persistent_queue', data['persistent_queue']);
 	}
 
+
+	var playbackMode = self.config.get('playback_mode', 'continuous');
+	var playbackModeNew = data['playback_mode'].value;
+
+	if (playbackMode !== playbackModeNew) {
+        self.config.set('playback_mode', data['playback_mode'].value);
+        setTimeout(()=>{
+        	self.commandRouter.broadcastUiSettings();
+		},300)
+	}
+
     if (isonew != iso) {
         self.config.set('iso', data['iso']);
         if (isonew) {
@@ -954,6 +965,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
+                var realDev = outdev;
                 if (outdev.indexOf(',') >= 0) {
                     mixerdev = 'hw:'+outdev;
                     outdev = 'hw:'+outdev;
@@ -961,9 +973,10 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                     mixerdev = 'hw:'+outdev;
                     outdev = 'hw:'+outdev+',0';
 				}
-
 			} else {
 				mixerdev = 'SoftMaster';
+                var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+
 			}
 
             var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');
@@ -982,8 +995,19 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 				var dop = 'no';
 			}
 
-			var conf6 = conf5.replace("${dop}", dop);
+			// VIM1 fix for buffer on SPDIF OUTPUT
+			try {
+                var systemHw = execSync("cat /etc/os-release | grep ^VOLUMIO_HARDWARE | tr -d 'VOLUMIO_HARDWARE=\"'", { uid: 1000, gid: 1000}).toString().replace('\n', '');
+			} catch(e) {
+				self.logger.error('Could not parse Volumio hardware: ' + e);
+			}
 
+			if (systemHw && systemHw === 'vim1' && realDev && realDev === '0,1') {
+				var dopString = dop + '"' +  os.EOL + '                buffer_time     "5000000';
+                var conf6 = conf5.replace("${dop}", dopString);
+			} else {
+                var conf6 = conf5.replace("${dop}", dop);
+			}
 
 			if (mixer) {
 				if (mixer.length > 0 && mpdvolume) {
@@ -1031,7 +1055,9 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
             }
 
             fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
-                if (err) return console.log(err);
+                if (err) {
+                	self.logger.info('Could not write mpd.conf:' + err);
+                }
             });
         });
 
@@ -2093,14 +2119,18 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
 
-		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
+		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array for albumartist
 			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 		}
 		else {
             // This section is commented beacuse, although correct it results in some albums not playing.
-            // Until we find a better way to handle this we search just for album
-			//var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
-            var GetAlbum = "find album \""+safeAlbumName+"\"";
+            // Until we find a better way to handle this we search just for album if there is no artist.
+			if (safeArtistName !== null || safeArtistName !== "") { // is a artist ?
+				var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+			}
+			else { // No artist.
+				var GetAlbum = "find album \""+safeAlbumName+"\"";
+			}
 		}
 
 		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {
@@ -3214,19 +3244,15 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
-				//Include track number if tracknumber variable is set to 'true'
-					if (!tracknumbers) {
-						var title = self.searchFor(lines, i + 1, 'Title:');
-					}
-					else {
-						var title1 = self.searchFor(lines, i + 1, 'Title:');
-						var track = self.searchFor(lines, i + 1, 'Track:');
-                        if(track && title1) {
-                            var title = track + " - " + title1;
-                        } else {
-                            var title = title1;
-                        }
-					}
+			
+                    var track = self.searchFor(lines, i + 1, 'Track:');
+                    var title = self.searchFor(lines, i + 1, 'Title:');
+
+                    //Include track number if tracknumbers variable is set to 'true'
+                    if (tracknumbers && track) {
+                        var title = track + " - " + title;
+                    }
+
                     var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
                     duration = duration + parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -3244,7 +3270,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                         artist: artist,
                         album: album,
                         type: 'song',
-                        tracknumber: 0,
+                        tracknumber: track,
                         duration: time,
                         trackType: path.split('.').pop()
                     });

@@ -9,7 +9,7 @@
   },
   "audio_buffer_size":{
     "type": "number",
-    "value": 8192
+    "value": 2048
   },
   "buffer_before_play":{
     "type": "string",
