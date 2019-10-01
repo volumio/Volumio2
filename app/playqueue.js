@@ -140,7 +140,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         {
             service=item.service;
 
-            if(item.uri != undefined && item.uri.startsWith('cdda:'))
+            if( item.uri.startsWith('cdda:'))
             {
                 item.name=item.title;
                 if (!item.albumart) {
