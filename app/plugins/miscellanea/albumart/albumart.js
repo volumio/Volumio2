@@ -526,8 +526,6 @@ var processExpressRequest = function (req, res) {
 
 /**
  *    This method processes incoming request from express, for the tinyart function that provides a simpler url for arts, and only online fetching
- *
- *    To achieve this assign this function to a path like /:artist/:album/:resolution
  **/
 var processExpressRequestTinyArt = function (req, res) {
     var rawQuery=req.url;
@@ -538,12 +536,18 @@ var processExpressRequestTinyArt = function (req, res) {
     } else if (splitted.length === 2) {
         // Tiny art for artists
         var icon = 'users';
-        var web = encodeURIComponent(splitted[0]) + '//' + splitted[1];
+        var artist = encodeURIComponent(splitted[1]);
+        var size = encodeURIComponent(splitted[0]);
+        var web = artist + '//' + size;
     } else if (splitted.length === 3) {
         // Tiny art for albums
-        var icon ='dot-circle-o'
-        var web = encodeURIComponent(splitted[0]) + '/' + encodeURIComponent(splitted[1]) + '/' + splitted[2];
+        var icon ='dot-circle-o';
+        var artist = encodeURIComponent(splitted[1]);
+        var album = encodeURIComponent(splitted[2]);
+        var size = encodeURIComponent(splitted[0]);
+        var web = artist + '/' + album + '/' + size;
     }
+
 
     var promise = processRequest(web, '', false);
     promise.then(function (filePath) {
