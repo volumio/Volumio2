@@ -524,6 +524,47 @@ var processExpressRequest = function (req, res) {
 		});
 };
 
+/**
+ *    This method processes incoming request from express, for the tinyart function that provides a simpler url for arts, and only online fetching
+ *
+ *    To achieve this assign this function to a path like /:artist/:album/:resolution
+ **/
+var processExpressRequestTinyArt = function (req, res) {
+    var rawQuery=req.url;
+    var splitted = rawQuery.replace(/_/g, ' ').replace('/tinyart/', '').split('/').filter(function(el) { return el; });
+
+    if (splitted.length < 2) {
+        console.log('Error in tinart request: missing fields');
+    } else if (splitted.length === 2) {
+        // Tiny art for artists
+        var icon = 'users';
+        var web = encodeURIComponent(splitted[0]) + '//' + splitted[1];
+    } else if (splitted.length === 3) {
+        // Tiny art for albums
+        var icon ='dot-circle-o'
+        var web = encodeURIComponent(splitted[0]) + '/' + encodeURIComponent(splitted[1]) + '/' + splitted[2];
+    }
+
+    var promise = processRequest(web, '', false);
+    promise.then(function (filePath) {
+        res.setHeader('Cache-Control', 'public, max-age=2628000')
+        res.sendFile(filePath);
+    })
+        .fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=2628000')
+            if(icon!==undefined){
+                res.sendFile(__dirname + '/icons/'+icon+'.svg');
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=2628000')
+                try{
+                    res.sendFile(__dirname + '/default.jpg');
+                } catch(e) {
+                    res.sendFile(__dirname + '/default.png');
+                }
+            }
+        });
+};
+
 var sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
 }
@@ -620,5 +661,6 @@ var retrieveAlbumart = function (artist, album, size, cb) {
 };
 
 module.exports.processExpressRequest = processExpressRequest;
+module.exports.processExpressRequestTinyArt = processExpressRequestTinyArt;
 module.exports.processRequest = processRequest;
 module.exports.setFolder = setFolder;
