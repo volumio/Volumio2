@@ -469,7 +469,7 @@ CoreCommandRouter.prototype.replaceAndPlay = function (data) {
 	this.stateMachine.clearQueue();
 
     if (data.uri != undefined) {
-    	if (data.uri.indexOf('playlists/') >= 0) {
+    	if (data.uri.indexOf('playlists/') >= 0 && data.uri.indexOf('://') == -1) {
             this.playPlaylist(data.title);
             defer.resolve();
 		} else {
