@@ -551,10 +551,7 @@ var processExpressRequestTinyArt = function (req, res) {
 
     var promise = processRequest(web, '', false);
     promise.then(function (filePath) {
-        res.setHeader('Cache-Control', 'public, max-age=2628000');
-        if (album !== undefined) {
-            res.setHeader('content-type', 'image/png');
-        }
+        res.setHeader('Cache-Control', 'public, max-age=2628000')
         res.sendFile(filePath);
     })
         .fail(function () {
