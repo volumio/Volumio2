@@ -435,7 +435,7 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                 }
                 else if(uri.startsWith("artists://"))
                 {
-                    var s = uri.split('/'):
+                    var s = uri.split('/');
                     if (s.length == 3) {
                         // no album in uri
                         mpdPlugin.listArtist(uri,2,'')
