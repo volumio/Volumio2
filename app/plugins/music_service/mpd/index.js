@@ -12,7 +12,7 @@ var exec = require('child_process').exec;
 var convert = require('convert-seconds');
 var pidof = require('pidof');
 var parser = require('cue-parser');
-var mm = require('musicmetadata');
+var mm = require('music-metadata');
 var os = require('os');
 var execSync = require('child_process').execSync;
 var ignoreupdate = false;
@@ -25,6 +25,7 @@ var artistsort = true;
 var dsd_autovolume = false;
 var singleBrowse = false;
 var startup = true;
+var stickingMusicLibrary = false;
 
 // Define the ControllerMpd class
 module.exports = ControllerMpd;
@@ -393,6 +394,9 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 	if (objTrackInfo.file != undefined) {
 		resp.uri = objTrackInfo.file;
 		resp.trackType = objTrackInfo.file.split('.').pop();
+		if (resp.trackType.length > 10) {
+            resp.trackType = '';
+        }
 		if (resp.uri.indexOf('cdda:///') >= 0) {
 			resp.trackType = 'CD Audio';
 			resp.title = resp.uri.replace('cdda:///', 'Track ');
@@ -537,10 +541,10 @@ ControllerMpd.prototype.parseState = function (objState) {
 				var nSampleRateRaw = '11.2 MHz';
 				nBitDepth = '1 bit'
 			} else {
-				var nSampleRateRaw = nSampleRateRaw + ' KHz';
+				var nSampleRateRaw = nSampleRateRaw + ' kHz';
 			}
 		} else {
-			var nSampleRateRaw = nSampleRateRaw + ' KHz';
+			var nSampleRateRaw = nSampleRateRaw + ' kHz';
 		}
 		nSampleRate = nSampleRateRaw;
 
@@ -789,6 +793,17 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
 		self.config.set('persistent_queue', data['persistent_queue']);
 	}
 
+
+	var playbackMode = self.config.get('playback_mode', 'continuous');
+	var playbackModeNew = data['playback_mode'].value;
+
+	if (playbackMode !== playbackModeNew) {
+        self.config.set('playback_mode', data['playback_mode'].value);
+        setTimeout(()=>{
+        	self.commandRouter.broadcastUiSettings();
+		},300)
+	}
+
     if (isonew != iso) {
         self.config.set('iso', data['iso']);
         if (isonew) {
@@ -952,6 +967,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 			var mixerdev = '';
 			var mixerstrings = '';
 			if (outdev != 'softvolume' ) {
+                var realDev = outdev;
                 if (outdev.indexOf(',') >= 0) {
                     mixerdev = 'hw:'+outdev;
                     outdev = 'hw:'+outdev;
@@ -959,9 +975,10 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                     mixerdev = 'hw:'+outdev;
                     outdev = 'hw:'+outdev+',0';
 				}
-
 			} else {
 				mixerdev = 'SoftMaster';
+                var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+
 			}
 
             var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');
@@ -980,8 +997,19 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 				var dop = 'no';
 			}
 
-			var conf6 = conf5.replace("${dop}", dop);
+			// VIM1 fix for buffer on SPDIF OUTPUT
+			try {
+                var systemHw = execSync("cat /etc/os-release | grep ^VOLUMIO_HARDWARE | tr -d 'VOLUMIO_HARDWARE=\"'", { uid: 1000, gid: 1000}).toString().replace('\n', '');
+			} catch(e) {
+				self.logger.error('Could not parse Volumio hardware: ' + e);
+			}
 
+			if (systemHw && systemHw === 'vim1' && realDev && realDev === '0,1') {
+				var dopString = dop + '"' +  os.EOL + '                buffer_time     "5000000';
+                var conf6 = conf5.replace("${dop}", dopString);
+			} else {
+                var conf6 = conf5.replace("${dop}", dop);
+			}
 
 			if (mixer) {
 				if (mixer.length > 0 && mpdvolume) {
@@ -1029,7 +1057,9 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
             }
 
             fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
-                if (err) return console.log(err);
+                if (err) {
+                	self.logger.info('Could not write mpd.conf:' + err);
+                }
             });
         });
 
@@ -1127,7 +1157,6 @@ ControllerMpd.prototype.browsePlaylist = function (uri) {
 
 	var defer = libQ.defer();
 	var name = uri.split('/')[1];
-	console.log(uri)
 
     var response={
         "navigation": {
@@ -1214,167 +1243,191 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                                      {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: self.commandRouter.getI18nString('COMMON.COMPOSERS'), uri: 'composers://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: self.commandRouter.getI18nString('COMMON.ARTISTS'), uri: 'artists://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: self.commandRouter.getI18nString('COMMON.ALBUMS'), uri: 'albums://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: self.commandRouter.getI18nString('COMMON.MEDIA_SERVERS'), uri: 'upnp', type: 'title'}];
+                    {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'title'}];
 
                 for (var i in browseSources) {
                     list.push(browseSources[i]);
                 }
+
+                if (self.commandRouter.getPluginEnabled('music_service','upnp_browser')){
+                    list.push({albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png',title: self.commandRouter.getI18nString('COMMON.MEDIA_SERVERS'), uri: 'upnp', type: 'title'});
+				}
             }
-			if (msg) {
-                var s0 = sections[0] + '/';
-				var path;
-				var name;
-				var dirtype;
-				var lines = msg.split('\n');
-				for (var i = 0; i < lines.length; i++) {
-					var line = lines[i];
+            if (uri === 'music-library' && stickingMusicLibrary) {
+                var musicLibrary = [{albumart: self.getAlbumArt('', '','microchip'), title: 'INTERNAL', uri: 'music-library/INTERNAL', type: 'folder'},
+                    {albumart: self.getAlbumArt('', '','server'), title: 'NAS', uri: 'music-library/NAS', type: 'folder'},
+                    {albumart: self.getAlbumArt('', '','usb'), title: 'USB', uri: 'music-library/USB', type: 'folder'}]
 
-					if (line.indexOf('directory:') === 0) {
-                        var diricon = 'fa fa-folder-open-o';
-						path = line.slice(11);
-						var namearr = path.split('/');
+                for (var i in musicLibrary) {
+                    list.push(musicLibrary[i]);
+                }
+            } else {
+                if (msg) {
+                    var s0 = sections[0] + '/';
+                    var path;
+                    var name;
+                    var dirtype;
+                    var lines = msg.split('\n');
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i];
 
-						if (uri === 'music-library') {
-                            switch(path) {
-                                case 'INTERNAL':
-                                    var albumart = self.getAlbumArt('', '','microchip');
-                                    break;
-                                case 'NAS':
-                                    var albumart = self.getAlbumArt('', '','server');
-                                    break;
-                                case 'USB':
-                                    var albumart = self.getAlbumArt('', '','usb');
-                                    break;
-                                default:
-                                    var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+                        if (line.indexOf('directory:') === 0) {
+                            var diricon = 'fa fa-folder-open-o';
+                            path = line.slice(11);
+                            var namearr = path.split('/');
+                            name = namearr[namearr.length - 1];
+
+                            // early out to exclude hidden folders (eg. ".Trashes")
+                            if (name.startsWith('.')) {
+                                continue;
                             }
-						} else {
-                            var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
-						}
 
-						if (namearr.length == 2 && namearr[0] == 'USB') {
-                            dirtype = 'remdisk';
-                            diricon = 'fa fa-usb';
-						} else {
-							dirtype = 'folder';
-						}
+                            if (uri === 'music-library') {
+                                switch(path) {
+                                    case 'INTERNAL':
+                                        var albumart = self.getAlbumArt('', '','microchip');
+                                        break;
+                                    case 'NAS':
+                                        var albumart = self.getAlbumArt('', '','server');
+                                        break;
+                                    case 'USB':
+                                        var albumart = self.getAlbumArt('', '','usb');
+                                        break;
+                                    default:
+                                        var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+                                }
+                            } else {
+                                var albumart = self.getAlbumArt('', '/mnt/' + path,'folder-o');
+                            }
+                            if (namearr.length == 2 && namearr[0] == 'USB') {
+                                dirtype = 'remdisk';
+                                diricon = 'fa fa-usb';
+                            } else if (uri.indexOf('music-library/INTERNAL') >= 0) {
+                                dirtype = 'internal-folder';
+                            } else {
+                                dirtype = 'folder';
+                            }
 
-						name = namearr.pop();
-						list.push({
-							type: dirtype,
-							title: name,
-							service:'mpd',
-							albumart: albumart,
-							uri: s0 + path
-						});
-					}
-					else if (line.indexOf('playlist:') === 0) {
-						path = line.slice(10);
-						name = path.split('/').pop();
-						if (path.endsWith('.cue')) {
-							try {
-								var cuesheet = parser.parse('/mnt/' + path);
+                            list.push({
+                                type: dirtype,
+                                title: name,
+                                service:'mpd',
+                                albumart: albumart,
+                                uri: s0 + path
+                            });
+                        }
+                        else if (line.indexOf('playlist:') === 0) {
+                            path = line.slice(10);
+                            name = path.split('/').pop();
+                            if (path.endsWith('.cue')) {
+                                try {
+                                    var cuesheet = parser.parse('/mnt/' + path);
 
-								list.push({
-									service: 'mpd',
-									type: 'cuefile',
-									title: name,
-									icon: 'fa fa-list-ol',
-									uri: s0 + path
-								});
-								var tracks = cuesheet.files[0].tracks;
-								for (var j in tracks) {
+                                    list.push({
+                                        service: 'mpd',
+                                        type: 'cuefile',
+                                        title: name,
+                                        icon: 'fa fa-list-ol',
+                                        uri: s0 + path
+                                    });
+                                    var tracks = cuesheet.files[0].tracks;
+                                    for (var j in tracks) {
 
-									list.push({
-										service: 'mpd',
-										type: 'cuesong',
-										title: tracks[j].title,
-										artist: tracks[j].performer,
-										album: path.substring(path.lastIndexOf("/") + 1),
-										number: tracks[j].number - 1,
-										icon: 'fa fa-music',
-										uri: s0 + path
-									});
-								}
-							} catch (err) {
-								self.logger.info('Cue Parser - Cannot parse ' + path);
-							}
-						} else {
-							list.push({
-								service: 'mpd',
-								type: 'song',
-								title: name,
-								icon: 'fa fa-list-ol',
-								uri: s0 + path
-							});
-						}
-					}
-					else if (line.indexOf('file:') === 0) {
-						var path = line.slice(6);
-						var name = path.split('/').pop();
+                                        list.push({
+                                            service: 'mpd',
+                                            type: 'cuesong',
+                                            title: tracks[j].title,
+                                            artist: tracks[j].performer,
+                                            album: path.substring(path.lastIndexOf("/") + 1),
+                                            number: tracks[j].number - 1,
+                                            icon: 'fa fa-music',
+                                            uri: s0 + path
+                                        });
+                                    }
+                                } catch (err) {
+                                    self.logger.info('Cue Parser - Cannot parse ' + path);
+                                }
+                            } else {
+                                list.push({
+                                    service: 'mpd',
+                                    type: 'song',
+                                    title: name,
+                                    icon: 'fa fa-list-ol',
+                                    uri: s0 + path
+                                });
+                            }
+                        }
+                        else if (line.indexOf('file:') === 0) {
+                            var path = line.slice(6);
+                            var name = path.split('/').pop();
 
-						var artist = self.searchFor(lines, i + 1, 'Artist:');
-						var album = self.searchFor(lines, i + 1, 'Album:');
-						if (!tracknumbers) {
-							var title = self.searchFor(lines, i + 1, 'Title:');
-						}
-						else {
-							var title1 = self.searchFor(lines, i + 1, 'Title:');
-							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
-						}
-						var year,albumart,tracknumber,duration,composer,genre;
-						if(self.commandRouter.sharedVars.get('extendedMetas'))
-                        {
-                            year = self.searchFor(lines, i + 1, 'Date:');
-                            if(year)
+                            var artist = self.searchFor(lines, i + 1, 'Artist:');
+                            var album = self.searchFor(lines, i + 1, 'Album:');
+                            if (!tracknumbers) {
+                                var title = self.searchFor(lines, i + 1, 'Title:');
+                            }
+                            else {
+                                var title1 = self.searchFor(lines, i + 1, 'Title:');
+                                var track = self.searchFor(lines, i + 1, 'Track:');
+                                if(track && title1) {
+                                    var title = track + " - " + title1;
+                                } else {
+                                    var title = title1;
+                                }
+                            }
+                            var year,albumart,tracknumber,duration,composer,genre;
+                            if(self.commandRouter.sharedVars.get('extendedMetas'))
                             {
-                                year=parseInt(year);
+                                year = self.searchFor(lines, i + 1, 'Date:');
+                                if(year)
+                                {
+                                    year=parseInt(year);
+                                }
+
+                                albumart = self.getAlbumArt({artist: artist, album: album},
+                                    self.getParentFolder('/mnt/' + path),'fa-tags');
+                                tracknumber = self.searchFor(lines, i + 1, 'Track:');
+
+                                if(tracknumber)
+                                {
+                                    var split=tracknumber.split('/');
+                                    tracknumber=parseInt(split[0]);
+                                }
+
+                                duration = self.searchFor(lines, i + 1, 'Time:');
+                                composer=artist;
+                                genre = self.searchFor(lines, i + 1, 'Genre:');
                             }
 
-                            albumart = self.getAlbumArt({artist: artist, album: album},
-                                self.getParentFolder('/mnt/' + path),'fa-tags');
-                            tracknumber = self.searchFor(lines, i + 1, 'Track:');
 
-                            if(tracknumber)
-                            {
-                                var split=tracknumber.split('/');
-                                tracknumber=parseInt(split[0]);
+                            if (title) {
+                                title = title;
+                            } else {
+                                title = name;
                             }
-
-                            duration = self.searchFor(lines, i + 1, 'Time:');
-                            composer=artist;
-                            genre = self.searchFor(lines, i + 1, 'Genre:');
+                            var albumart = self.getAlbumArt('', self.getParentFolder('/mnt/' + path), 'music');
+                            list.push({
+                                service: 'mpd',
+                                type: 'song',
+                                title: title,
+                                artist: artist,
+                                album: album,
+                                uri: s0 + path,
+                                year:year,
+                                albumart:albumart,
+                                genre:genre,
+                                tracknumber:tracknumber,
+                                duration:duration,
+                                composer:composer
+                            });
                         }
 
-
-						if (title) {
-							title = title;
-						} else {
-							title = name;
-						}
-                        var albumart = self.getAlbumArt('', self.getParentFolder('/mnt/' + path), 'music');
-						list.push({
-							service: 'mpd',
-							type: 'song',
-							title: title,
-							artist: artist,
-							album: album,
-							uri: s0 + path,
-                            year:year,
-                            albumart:albumart,
-                            genre:genre,
-                            tracknumber:tracknumber,
-                            duration:duration,
-                            composer:composer
-						});
-					}
-
-				}
+                    }
+                }
+                else {
+                    self.logger.info(err);
+                }
 			}
-			else self.logger.info(err);
-
 			defer.resolve({
 				navigation: {
 					prev: {
@@ -1384,7 +1437,10 @@ ControllerMpd.prototype.lsInfo = function (uri) {
 				}
 			});
 		});
-	});
+	}).fail(function (e) {
+            self.logger.error('Could not execute lsinfo on URI: ' + uri + ' error: ' + e);
+            defer.reject('')
+        });
 	return defer.promise;
 };
 
@@ -1422,7 +1478,11 @@ ControllerMpd.prototype.listallFolder = function (uri) {
                         else {
                             var title1 = self.searchFor(lines, i + 1, 'Title:');
                             var track = self.searchFor(lines, i + 1, 'Track:');
-                            var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
                         }
                         var albumart = self.getAlbumArt({artist: albumartist, album: album},self.getParentFolder('/mnt/' + path),'fa-tags');
 
@@ -1572,7 +1632,11 @@ ControllerMpd.prototype.search = function (query) {
 						else {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
 						}
                         if (title == undefined) {
                             title = name[count - 1];
@@ -1942,7 +2006,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 								else {
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
-									var title = track + " - " + title1 + "HERE";
+                                    if(track && title1) {
+                                        var title = track + " - " + title1;
+                                    } else {
+                                        var title = title1;
+                                    }
 								}
                                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2006,7 +2074,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 								else {
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
-									var title = track + " - " + title1 + "HERE";
+                                    if(track && title1) {
+                                        var title = track + " - " + title1;
+                                    } else {
+                                        var title = title1;
+                                    }
 								}
 								var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2049,11 +2121,19 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeArtistName = artistName.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
-		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
+
+		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array or albumartist
+			var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
 		}
 		else {
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+            // This section is commented beacuse, although correct it results in some albums not playing.
+            // Until we find a better way to handle this we search just for album if there is no artist.
+			if (safeArtistName !== null || safeArtistName !== "") { // is a artist ?
+				var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
+			}
+			else { // No artist.
+				var GetAlbum = "find album \""+safeAlbumName+"\"";
+			}
 		}
 
 		self.clientMpd.sendCommand(cmd(GetAlbum, []), function (err, msg) {
@@ -2078,7 +2158,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 						else {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
 						}
                         var albumart=self.getAlbumArt({artist: artist, album: album,icon:'dot-circle-o'}, self.getParentFolder('/mnt/'+path));
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -2189,7 +2273,11 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 						else {
 							var title1 = self.searchFor(lines, i + 1, 'Title:');
 							var track = self.searchFor(lines, i + 1, 'Track:');
-							var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
 						}
                         var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -2377,7 +2465,11 @@ ControllerMpd.prototype.exploderArtist=function(err,msg,defer) {
 				else {
 					var title1 = self.searchFor(lines, i + 1, 'Title:');
 					var track = self.searchFor(lines, i + 1, 'Track:');
-					var title = track + " - " + title1;
+                    if(track && title1) {
+                        var title = track + " - " + title1;
+                    } else {
+                        var title = title1;
+                    }
 				}
                 var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder('/mnt/'+path));
                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -2459,10 +2551,14 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
     if(  ((uri.indexOf(".iso") < 0) && (uri.indexOf(".ISO") < 0)) && (stat != undefined && stat.isDirectory()) )
     {
-        var files=libFsExtra.readdirSync(uri);
-
-        for(var i in files)
-            uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+    	try {
+            var files=libFsExtra.readdirSync(uri);
+            for(var i in files) {
+                uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
+            }
+		} catch(e) {
+            console.log("Failed to stat '" + uri + "'");
+		}
     }
     else if (isofile){
 
@@ -2516,7 +2612,11 @@ ControllerMpd.prototype.scanFolder=function(uri)
 								else {
 									var title1 = self.searchFor(lines, i + 1, 'Title:');
 									var track = self.searchFor(lines, i + 1, 'Track:');
-									var title = track + " - " + title1;
+                                    if(track && title1) {
+                                        var title = track + " - " + title1;
+                                    } else {
+                                        var title = title1;
+                                    }
 								}
                                 var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2608,7 +2708,11 @@ ControllerMpd.prototype.explodeISOFile = function (uri) {
                         else {
                             var title1 = self.searchFor(lines, i + 1, 'Title:');
                             var track = self.searchFor(lines, i + 1, 'Track:');
-                            var title = track + " - " + title1;
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
                         }
                         var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
 
@@ -2727,15 +2831,19 @@ ControllerMpd.prototype.seek = function(position) {
     var command = 'seek ';
     var cmd = libMpd.cmd;
 
-
+    if (self.clientMpd !== undefined) {
         self.clientMpd.sendCommand(cmd(command, ['0',position/1000]), function (err, msg) {
             if (msg) {
                 self.logger.info(msg);
             }
-            else self.logger.info(err);
+            else self.logger.error(err);
 
             defer.resolve();
         });
+	} else {
+    	self.logger.error('Could not seek because there is no mpd connection')
+	}
+
 
     return defer.promise;
 };
@@ -3169,15 +3277,15 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
-				//Include track number if tracknumber variable is set to 'true'
-					if (!tracknumbers) {
-						var title = self.searchFor(lines, i + 1, 'Title:');
-					}
-					else {
-						var title1 = self.searchFor(lines, i + 1, 'Title:');
-						var track = self.searchFor(lines, i + 1, 'Track:');
-						var title = track + " - " + title1;
-					}
+			
+                    var track = self.searchFor(lines, i + 1, 'Track:');
+                    var title = self.searchFor(lines, i + 1, 'Title:');
+
+                    //Include track number if tracknumbers variable is set to 'true'
+                    if (tracknumbers && track) {
+                        var title = track + " - " + title;
+                    }
+
                     var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
                     var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
                     duration = duration + parseInt(self.searchFor(lines, i + 1, 'Time:'));
@@ -3195,7 +3303,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
                         artist: artist,
                         album: album,
                         type: 'song',
-                        tracknumber: 0,
+                        tracknumber: track,
                         duration: time,
                         trackType: path.split('.').pop()
                     });
@@ -3624,7 +3732,11 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
 				else {
 					var title1 = self.searchFor(lines, i + 1, 'Title:');
 					var track = self.searchFor(lines, i + 1, 'Track:');
-					var title = track + " - " + title1;
+                    if(track && title1) {
+                        var title = track + " - " + title1;
+                    } else {
+                        var title = title1;
+                    }
 				}
                 var albumart=self.getAlbumArt({artist: artist, album: album}, self.getParentFolder(path),'dot-circle-o');
 
@@ -3823,14 +3935,18 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                             var artist = self.searchFor(lines, i + 1, 'Artist:');
 							var albumartist = self.searchFor(lines, i + 1, 'AlbumArtist:');
                             var album = self.searchFor(lines, i + 1, 'Album:');
-					//Include track number if tracknumber variable is set to 'true'
+					        //Include track number if tracknumber variable is set to 'true'
 							if (!tracknumbers) {
 								var title = self.searchFor(lines, i + 1, 'Title:');
 							}
 							else {
 								var title1 = self.searchFor(lines, i + 1, 'Title:');
 								var track = self.searchFor(lines, i + 1, 'Track:');
-								var title = track + " - " + title1;
+                                if(track && title1 ) {
+                                    var title = track + " - " + title1;
+                                } else {
+                                    var title = title1;
+                                }
 							}
                             var albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path),'dot-circle-o');;
 
@@ -4026,11 +4142,13 @@ ControllerMpd.prototype.loadLibrarySettings=function(){
     var compilationConf = this.config.get('compilation', 'Various,various,Various Artists,various artists,VA,va')
     var artistsortConf = this.config.get('artistsort', true);
     var singleBrowseConf = this.config.get('singleBrowse', false);
+    var stickingMusicLibraryConf = this.config.get('stickingMusicLibrary', false);
 
     tracknumbers = tracknumbersConf;
     compilation = compilationConf.split(',');
     artistsort = artistsortConf;
     singleBrowse = singleBrowseConf;
+    stickingMusicLibrary = stickingMusicLibraryConf;
 }
 
 ControllerMpd.prototype.saveMusicLibraryOptions=function(data){
@@ -4117,4 +4235,43 @@ ControllerMpd.prototype.checkUSBDrives = function(){
 	}).fail((e)=>{
     	self.logger.error('Error in refreshing USB drives list' + e);
 	})
+}
+
+ControllerMpd.prototype.deleteFolder = function(data){
+    var self = this;
+    var defer = libQ.defer();
+
+    if (data && data.curUri && data.item && data.item.uri) {
+    	var folderToDelete = data.item.uri.replace('music-library','/mnt');
+        exec('/usr/bin/sudo /bin/rm -rf "' + folderToDelete + '"', {uid:1000, gid:1000},
+            function (error, stdout, stderr) {
+                if (error){
+                    self.logger.error('Cannot delete folder: ' + error);
+                    defer.reject('Cannot delete folder ' + data.curUri)
+                } else {
+                    var list = self.lsInfo(data.curUri);
+                    list.then((list) => {
+						var items = list.navigation.lists[0].items;
+                    	for (var i in items) {
+                    		if (items[i].uri === data.item.uri) {
+                                list.navigation.lists[0].items.splice(i, 1);
+							}
+						}
+						defer.resolve(list)
+                }).
+                    fail((e) => {
+                        self.logger.error('Error in refreshing USB drives list' + e);
+                        defer.reject(e)
+                })
+                }
+        });
+
+	}
+
+    exec('/bin/sync', {uid:1000, gid:1000}, function (error, stdout, stderr) {
+    	if (error) {
+    		self.logger.error('Cannot execute sync')
+		}
+        });
+	return defer.promise
 }

@@ -1,6 +1,7 @@
 { "devices":[
   {"name":"Raspberry PI","data":[
     {"id":"adafruit-max98357","name":"Adafruit MAX98357","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
+    {"id":"adafruit-uda1334a","name":"Adafruit UDA1334A","overlay":"hifiberry-dac,i2s-mmap","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-boss-dac","name":"Allo BOSS","overlay":"allo-boss-dac-pcm512x-audio","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-digione","name":"Allo DigiOne","overlay":"allo-digione","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-katana-dac","name":"Allo Katana","overlay":"allo-katana-dac-audio","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
@@ -23,6 +24,8 @@
     {"id":"justboom-digi","name":"JustBoom Digi Boards","overlay":"justboom-digi","alsanum":"1","mixer":"","modules":"","script":"","eeprom_name":["JustBoom Digi HAT","JustBoom Digi HAT v1.1"],"needsreboot":"yes"},
     {"id":"mamboberry-dac","name":"Mamboberry LS DAC+","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"nanosound-dac","name":"NanoSound DAC","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
+    {"id":"osa-dacberry-one-plus","name":"OSA DACBerry ONE+","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
+    {"id":"osa-dacberry-pro","name":"OSA DACBerry PRO","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"no"},
     {"id":"502-dac","name":"PI 2 Design 502DAC","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"502-dac-pro","name":"PI 2 Design 502DAC Pro","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"503hta-hybrid","name":"PI 2 Design 503HTA Hybrid Tube Amp","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
@@ -30,7 +33,8 @@
     {"id":"phat-dac","name":"pHAT DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"picade-hat","name":"Picade HAT","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes","eeprom_name":["Picade HAT"]},
     {"id":"pisound","name":"pisound","overlay":"pisound","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"no"},
-    {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
+    {"id":"raspiaudio","name":"raspiaudio","overlay":"googlevoicehat-soundcard","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"} ,
+	  {"id":"raspidacv3","name":"RaspiDACv3","overlay":"raspidac3","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"soekris-dac","name":"Soekris dam 1021","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"speaker-phat","name":"Speaker pHAT","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
@@ -50,7 +54,8 @@
     {"id":"hifiberry-amp","name":"HiFiBerry Amp","overlay":"hifiberry-amp","alsanum":"1","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dac","name":"HiFiBerry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dacplus","name":"HiFiBerry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
-    {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"iqamp-unmute.sh","needsreboot":"yes"}
+    {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"iqamp-unmute.sh","needsreboot":"yes"},
+	{"id":"rpi-dac","name":"R-PI DAC","overlay":"rpi-dac","alsanum":"1","mixer":"Digital","modules":"","script":"","needsreboot":"yes"}
   ]}
   ]}
 

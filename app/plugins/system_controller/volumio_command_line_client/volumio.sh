@@ -14,6 +14,7 @@ volume                             Gives Current Volume Information
 volume <desired volume>            Sets Volume at desired level 0-100
 volume mute                        Mutes
 volume unmute                      Unmutes
+volume toggle                      Mutes/Unmutes
 volume plus                        Increases Volume of one step
 volume minus                       Decreases Volume of one step
 seek plus                          Forwards 10 seconds in the song
@@ -27,6 +28,7 @@ random                             Toggles randomization of queue
 
 play
 pause
+toggle                             Toggles between play/pause
 next
 previous
 stop
@@ -81,7 +83,7 @@ pull() {
 cd /
 echo "Stopping Volumio"
 sudo systemctl stop volumio.service
-sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $@
 
 echo "Pull completed, restarting Volumio"
 sudo systemctl start volumio.service
@@ -150,6 +152,9 @@ case "$1" in
         ;;
         usbdetach)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioDetach"
+        ;;
+        scanaudioinputs)
+           /usr/bin/curl "http://127.0.0.1:3000/api/pluginEndpoint?endpoint=scanAudioInputs"
         ;;
         vstart)
             vstart

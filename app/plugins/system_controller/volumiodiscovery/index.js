@@ -9,7 +9,8 @@ var io=require('socket.io-client');
 var exec = require('child_process').exec;
 var libQ = require('kew');
 var ip = require('ip');
-var ifconfig = require('wireless-tools/ifconfig');
+var unirest = require('unirest');
+var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js');
 
 // Define the ControllerVolumioDiscovery class
 
@@ -211,16 +212,23 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse=function()
 			}
 
 			//console.log(service);
-			self.context.coreCommand.pushConsoleMessage('mDNS: Found device '+service.txtRecord.volumioName);
+			self.context.coreCommand.pushConsoleMessage('mDNS: Found device ' + service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.name',"string",service.txtRecord.volumioName);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.addresses',"array",service.addresses);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.port',"string",service.port);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.status',"string",'stop');
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.volume',"number",0);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.mute',"boolean",false);
+            foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.volumeAvailable',"boolean",true);
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.artist',"string",'');
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.track',"string",'');
 			foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.albumart',"string",'');
+
+            var type = 'device';
+            if (service.txtRecord.type) {
+                type = service.txtRecord.type;
+            }
+            foundVolumioInstances.addConfigValue(service.txtRecord.UUID+'.type',"string",type);
 
 			self.connectToRemoteVolumio(service.txtRecord.UUID,service.addresses[0]);
 
@@ -297,6 +305,11 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 				foundVolumioInstances.set(uuid+'.artist',data.artist);
 				foundVolumioInstances.set(uuid+'.track',data.title);
 				foundVolumioInstances.set(uuid+'.albumart',data.albumart);
+				var volumeAvailable = true;
+				if (data.disableVolumeControl) {
+                    volumeAvailable = false;
+				}
+                foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
 				var toAdvertise=self.getDevices();
 				self.commandRouter.pushMultiroomDevices(toAdvertise);
 			});
@@ -334,6 +347,11 @@ ControllerVolumioDiscovery.prototype.saveDeviceInfo=function(data)
 	foundVolumioInstances.set(uuid+'.artist',data.artist);
 	foundVolumioInstances.set(uuid+'.track',data.title);
 	foundVolumioInstances.set(uuid+'.albumart',data.albumart);
+    var volumeAvailable = true;
+    if (data.disableVolumeControl) {
+        volumeAvailable = false;
+    }
+    foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
 
 
 };
@@ -355,8 +373,6 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 	{
 		var key=keys[i];
 
-
-
 		var osname=foundVolumioInstances.get(key+'.name');
 		var port=foundVolumioInstances.get(key+'.port');
 		var status=foundVolumioInstances.get(key+'.status');
@@ -365,11 +381,11 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 		var artist=foundVolumioInstances.get(key+'.artist');
 		var track=foundVolumioInstances.get(key+'.track');
 		var albumart=foundVolumioInstances.get(key+'.albumart');
+        var type=foundVolumioInstances.get(key+'.type');
+        var volumeAvailable=foundVolumioInstances.get(key+'.volumeAvailable');
 
 		var isSelf=key==myuuid;
-
-
-
+		
 		var addresses=foundVolumioInstances.get(key+'.addresses');
 
 		for(var j in addresses)
@@ -406,6 +422,8 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 				host:'http://'+address.toString(),
 				name:osname.capitalize(),
 				isSelf:isSelf,
+				type:type,
+				volumeAvailable:volumeAvailable,
 				state: {
 					status: status,
 					volume: volume,
@@ -415,7 +433,6 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 					albumart: albumartstring.toString()
 				}
 			};
-
 
 			response.list.push(device);
 		}
@@ -549,3 +566,21 @@ ControllerVolumioDiscovery.prototype.receiveMultiroomDeviceUpdate = function(inf
 // 				callback(toAdvertise);
 // 			}
 // }
+
+ControllerVolumioDiscovery.prototype.setRemoteDeviceVolume = function (data) {
+    let self = this;
+	
+    self.logger.info('Setting Remote Device Volume: ' + data.host);
+
+    let url = data.host + "/api/v1/commands/?cmd=volume&volume=" + data.volume;
+
+    unirest.get(url)
+        .timeout(3000)
+        .end(function (response) {
+            if (response && response.status === 200) {
+                self.logger.info("Done setting volume on: ", data.host);
+            } else {
+                self.logger.error('Cannot set Remote Device Volume');
+            }
+        });
+};

@@ -4,7 +4,6 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
-var config = new (require('v-conf'))();
 
 // Define the ControllerMyMusic class
 module.exports = ControllerMyMusic;
@@ -28,8 +27,9 @@ ControllerMyMusic.prototype.getConfigurationFiles = function () {
 ControllerMyMusic.prototype.onVolumioStart = function () {
 	var self = this;
 
-	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
-	config.loadFile(configFile);
+    var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
+    self.config = new (require('v-conf'))();
+    self.config.loadFile(configFile);
 
     return libQ.resolve();
 };
@@ -64,7 +64,12 @@ ControllerMyMusic.prototype.getUIConfig = function () {
             __dirname+'/../../../i18n/strings_en.json',
             __dirname + '/UIConfig.json')
             .then(function(uiconf)
-            {
+            {   var advancedSettingsStatus = self.commandRouter.getAdvancedSettingsStatus();
+                if (advancedSettingsStatus === false) {
+                    uiconf.sections[3].hidden = true;
+                    uiconf.sections[4].hidden = true;
+                    uiconf.sections[5].hidden = true;
+                }
                 var enableweb = self.getAdditionalConf('miscellanea', 'albumart', 'enableweb', true);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value', enableweb);
                 self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[3].content[0].options'), enableweb));
@@ -95,19 +100,46 @@ ControllerMyMusic.prototype.getUIConfig = function () {
                 var ffmpeg = self.getAdditionalConf('music_service', 'mpd', 'ffmpegenable', false);
                 self.configManager.setUIConfigParam(uiconf, 'sections[4].content[3].value', ffmpeg);
 
+                try {
+                    var disabledSources = self.getDisabledSources();
+                    var browseSources = self.commandRouter.volumioGetBrowseSources();
+                    for (var i in browseSources) {
+                        var source = browseSources[i];
+                        var enabled = true;
+                        uiconf.sections[5].saveButton.data.push(source.uri);
+                        if (disabledSources && disabledSources.includes(source.uri)) {
+                            enabled = false;
+                        }
+                        var sourceSetting = {
+                            "id": source.uri,
+                            "element": "switch",
+                            "label": source.name,
+                            "value": enabled
+                        };
+                        uiconf.sections[5].content.push(sourceSetting);
+                    }
+                } catch(e) {
+                    self.logger.error('Could not retrieve disabled sources: ' + e);
+                }
+
+                if (process.env.HIDE_BROWSE_SOURCES_VISIBILITY_SELECTOR === 'true') {
+                    uiconf.sections[5].hidden = true;
+                }
+
                 if (sconf) {
-                    var insertInto = 2;
-                	for (var i in sconf.sections) {
-                		var streamingSection = sconf.sections[i];
+                    var insertInto = 3;
+                    for (var i in sconf.sections) {
+                        var streamingSection = sconf.sections[i];
                         uiconf.sections.splice(insertInto, 0, streamingSection);
                         insertInto++
-					}
-				}
+                    }
+                }
 
                 defer.resolve(uiconf);
             })
-            .fail(function()
+            .fail(function(error)
             {
+                self.logger.error('Could not build UIconfig for MyMusic: ' + error)
                 defer.reject(new Error());
             })
 	})
@@ -198,4 +230,39 @@ ControllerMyMusic.prototype.getLabelForSelect = function (options, key) {
 
     return 'Error';
 };
+
+ControllerMyMusic.prototype.updateMusicLibraryBrowseSourcesVisibility = function (data) {
+    var self=this;
+
+    var disabledSourcesString = '';
+    // Workaround to save arrays in v-conf
+    for (var key in data) {
+        var source = key;
+        var enabled = data[key];
+        if (data[key] === false) {
+            if (disabledSourcesString.length) {
+                disabledSourcesString = disabledSourcesString + '|';
+            }
+            disabledSourcesString = disabledSourcesString + source;
+        }
+    }
+    self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('APPEARANCE.BROWSE_SOURCES_VISIBILITY'));
+    self.config.set('sources_disabled', disabledSourcesString);
+    return self.commandRouter.volumioUpdateToBrowseSources();
+};
+
+ControllerMyMusic.prototype.getDisabledSources = function () {
+    var self=this;
+    // Workaround to read arrays in v-conf
+    try {
+        var disabledSourcesString = self.config.get('sources_disabled', []);
+        var disabledSourcesArray = disabledSourcesString.split('|');
+    } catch(e) {
+        var disabledSourcesArray = [];
+    }
+
+    return disabledSourcesArray;
+};
+
+
 

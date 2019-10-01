@@ -30,6 +30,7 @@ else {
     albumart.setFolder(process.argv[3]);
 
     app.get('/albumart', albumart.processExpressRequest);
+    app.get('/tinyart/*', albumart.processExpressRequestTinyArt);
 
     app.use(function (err, req, res, next) {
         /**

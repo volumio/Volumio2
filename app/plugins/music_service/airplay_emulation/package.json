@@ -12,7 +12,7 @@
     "prettyName": "Shairport-Sync",
     "plugin_type": "music_service",
     "boot_priority":10,
-    "is_my_music_plugin":false,
+    "is_my_music_plugin":true,
     "has_configuration":false
   }
 }

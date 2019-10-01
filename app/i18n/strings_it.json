@@ -1,6 +1,6 @@
 {
   "PLAYBACK_OPTIONS":{
-    "PLAYBACK_OPTIONS_TITLE":"Opzioni di Riproduzione",
+    "PLAYBACK_OPTIONS_TITLE":"Opzioni di Riproduzione Generali",
     "AUDIO_OUTPUT":"Uscita Audio",
     "OUTPUT_DEVICE_DOC":"Periferica Audio",
     "OUTPUT_DEVICE":"Periferica Audio",
@@ -45,6 +45,7 @@
     "ADVANCED_AUDIO_TWEAKS":"Impostazioni avanzate dell'audio",
     "AUDIO_RESAMPLING":"Resampling Audio",
     "AUDIO_RESAMPLING_SETTINGS_SAVED":"Impostazioni del resampling salvate correttamente",
+    "AUDIO_RESAMPLING_DOC":"Controlla le impostazioni di resampling dell'audio. Valida solo per la riproduzione di files locali (non viene applicata a  Shairport e servizi di terze parti come ROON)",
     "TARGET_BITDEPTH":"Bit depth",
     "TARGET_SAMPLERATE":"Sample rate",
     "NATIVE":"Nativa",
@@ -72,7 +73,14 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Se abilitata, il sistema sarà in grado di supportare un maggior numero di formati, tuttavia la scansione della musica avverrà in maniera considerevolmente più lenta. Se disabilitata, il sistema sarà comunque in grado di leggere i formati di file più diffusi.",
     "USB_DAC_CONNECTED":"DAC USB Connesso",
     "NO_OUTPUT_DEVICE":"Nessuna uscita audio disponibile",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità"
+    "NO_OUTPUT_DEVICE_MESSAGE":"Connettere un uscita audio all'unità",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"L'uscita audio selezionata non è disponibile",
+    "CONNECT_OUTPUT_DEVICE_1":"Si prega di connettere",
+    "CONNECT_OUTPUT_DEVICE_2":"all'unità o seleziona un altra uscita audio dalle impostazioni di riproduzione",
+    "PLAYBACK_MODE":"Modalità di riproduzione",
+    "PLAYBACK_MODE_DOC":"Puoi selezionare la modalirà di riproduzione: La modalità continua rimpiazzerà la coda corrente con tutte le tracce presenti in un album o in una playlist, la modalità singola aggiungerà unicamente la canzone selezionata",
+    "PLAYBACK_MODE_CONTINUOUS":"Continua",
+    "PLAYBACK_MODE_SINGLE":"Singola"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Impostazioni di rete",
@@ -184,9 +192,24 @@
     "SETTINGS_SAVED_SUCCESSFULLY":"Impostazioni applicate",
     "SETTINGS_SAVE_ERROR":"Errore nell'applicare le impostazioni",
     "ERROR":"Errore",
-    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a destra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"E' cominciata la scansione della tua libreria musicale. L'icona in basso a sinistra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
     "GOT_IT":"Capito",
-    "MEDIA_SERVERS":"Server multimediali"
+    "MEDIA_SERVERS":"Server multimediali",
+    "ENABLED":"Abilitato",
+    "DISABLED":"Disabilitato",
+    "NO_RESULTS":"Nessun risultato",
+    "REMOVE_FAIL":"Rimozione non riuscita",
+    "CONNECTED":"Connesso",
+    "DISCONNECTED":"Disconnesso",
+    "LOGIN":"Accesso",
+    "LOGOUT":"Uscita",
+    "USERNAME":"Nome Utente",
+    "PASSWORD":"Password",
+    "LOGGING_IN":"Accesso",
+    "LOGIN_SUCCESS": "Accesso eseguito",
+    "LOGIN_FAIL":"Accesso Fallito",
+    "LOGGING_OUT":"Uscita",
+    "LOGOUT_SUCCESS":"Uscita con successo"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -220,7 +243,12 @@
     "ALBUMART_RESET_CACHE":"Elimina Cache Albumart",
     "ALBUMART_RESET_CACHE_DOC":"Il sistema immagazzina (cache) le albumart per migliorare le performance, questo meccanismo impedisce alle albumart aggiunte di recente di venire visualizzate. Eliminando la cache le ultime albumart verranno visualizzate",
     "METADATA_IMAGE":"Mostra Albumart integrate",
-    "METADATA_IMAGE_DOC":"Se abilitato, quando non sono state trovate albumart nella cartella del file, il sistema estrarrà le albumart dai file stessi, ove presenti. Questo impatterà negativamente nel tempo di visualizzazione delle albumart"
+    "METADATA_IMAGE_DOC":"Se abilitato, quando non sono state trovate albumart nella cartella del file, il sistema estrarrà le albumart dai file stessi, ove presenti. Questo impatterà negativamente nel tempo di visualizzazione delle albumart",
+    "BROWSE_SOURCES_VISIBILITY":"Icone Sorgenti",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Abilita l'interfaccia sperimentale Volumio3",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Abilita l'interfaccia sperimentale Volumio3",
+    "UPLOAD_FAILED":"Caricamento Fallito",
+    "IMAGE_MUST_BE_LESS_THAN":"L'immagine deve essere inferiore a"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"La Mia Musica",
@@ -294,7 +322,19 @@
     "STARTING_SOFTWARE_UPDATE":"Aggiornamento di sistema iniziato",
     "CHECKING_SYSTEM_INTEGRITY":"Controllo dell'integrità del sistema in corso",
     "SYSTEM_INTEGRITY_CHECK_FAILED":"Il controllo dell'integrità del Sistema è fallito, sono stati rilevati files modificati manualmente. L'aggiornamento di sistema non è possibile in queste circorstanze. Eseguire un ripristino ai dati di fabbrica oppure Cancella i dati utente e riprovare.",
-    "UPDATE_FAILED":"Update failed"
+    "UPDATE_FAILED":"Update failed",
+    "DELETE_FOLDER":"Eliminazione cartella",
+    "DELETING_FOLDER":"Eliminando la cartella",
+    "SUCCESSFULLY_DELETED_FOLDER":"Cartella eliminata correttamente",
+    "ERROR_DELETING_FOLDER":"Errore nell'eliminazione della cartella",
+    "SHOW_ADVANCED_SETTINGS":"Mostra impostazioni avanzate",
+    "SHOW_ADVANCED_SETTINGS_DOC":"Se abilitato, il sistema mostrerà le impostazioni avanzate. E' consigliato modificare queste impostazioni solo ad utenti esperti",
+    "FULL_SETTINGS_SET":"Impostazioni Avanzate Complete",
+    "FULL_SETTINGS_SET_EXTENDED":"Voglio il controllo avanzato",
+    "SIMPLE_SETTINGS_SET":"Impostazioni Semplificate",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"Voglio le opzioni semplificate",
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Tieni premuto per spegnere in",
+    "TURN_OFF_IN":"Spegnimento in"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",
@@ -302,7 +342,12 @@
     "TOP_500_RADIOS":"Le migliori 500",
     "BY_GENRE_RADIOS":"Per genere",
     "BY_COUNTRY_RADIOS":"Per nazione",
-    "WEBRADIO":"Web Radio"
+    "WEBRADIO":"Web Radio",
+    "LOCAL_RADIOS":"Radio Locali",
+    "POPULAR_RADIOS":"Radio Popolari",
+    "BEST_RADIOS":"Le Radio Migliori",
+    "BY_LANGUAGE":"Per lingua",
+    "TALK_RADIOS":"Talk Show"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Conferma la disinstallazione del Plugin",
@@ -312,7 +357,10 @@
     "DOWNLOADING_FROM":"Scaricando il Plugin da ",
     "DOWNLOADING":"Scaricando il Plugin",
     "NO_CONFIGURATION_AVAILABLE":"Nessuna configurazione disponibile",
-    "PLUGIN_START_ERROR":"Avvio del plugin è fallito. Aggiorna il plugin o contatta lo sviluppatore."
+    "PLUGIN_START_ERROR":"Avvio del plugin è fallito. Aggiorna il plugin o contatta lo sviluppatore.",
+    "CONFIRM_PLUGIN_INSTALL":"Installa Plugin",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Attenzione, i plugin sono sviluppati da terze parti e potrebbero inficiare le prestazioni del sistema o comportare instabilità. Volete proseguire con l'installazione",
+    "INSTALL":"Installa"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulazioni",
@@ -332,6 +380,8 @@
     "SUCCESSFULLY_UPDATED_TO_VERSION":"Aggiornamento eseguito con successo alla versione",
     "SYSTEM_RESTART_REQUIRED":"Si prega di riavviare il dispositivo",
     "SYSTEM_RESTART_IN":"Il vostro dispositivo si riavverà in ",
-    "UPDATE":"Aggiornamento"
+    "UPDATE":"Aggiornamento",
+    "CHECKING_FOR_UPDATES":"Controllando gli Aggiornamenti",
+    "CHECKING_FOR_UPDATES_WAIT":"Attendere"
   }
 }

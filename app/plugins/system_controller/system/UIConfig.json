@@ -13,7 +13,8 @@
         "label": "TRANSLATE.COMMON.SAVE",
         "data": [
           "player_name",
-          "startup_sound"
+          "startup_sound",
+          "advanced_settings"
         ]
       },
       "content": [
@@ -37,8 +38,28 @@
           "element": "button",
           "label": "TRANSLATE.WIZARD.RUN_FIRST_CONFIG_WIZARD",
           "onClick": {"type":"emit", "message":"runFirstConfigWizard", "data":""}
+        },
+        {
+          "id":"advanced_settings",
+          "element": "select",
+          "doc": "TRANSLATE.SYSTEM.SHOW_ADVANCED_SETTINGS_DOC",
+          "label": "TRANSLATE.SYSTEM.SHOW_ADVANCED_SETTINGS",
+          "hidden":true,
+          "value":  {
+            "value":true,
+            "label": "TRANSLATE.SYSTEM.FULL_SETTINGS_SET"
+          },
+          "options": [
+            {
+              "value":true,
+              "label": "TRANSLATE.SYSTEM.FULL_SETTINGS_SET"
+            },
+            {
+              "value":false,
+              "label": "TRANSLATE.SYSTEM.SIMPLE_SETTINGS_SET"
+            }
+          ]
         }
-
       ]
     },
     {

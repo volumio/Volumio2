@@ -131,33 +131,36 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
         if (item.uri != undefined) {
             self.commandRouter.logger.info("Adding Item to queue: " + item.uri);
-        }
 
+            var service='mpd';
 
-        var service='mpd';
-
-        if(item.service)
-        {
-            service=item.service;
-
-            if(service==='webradio' || item.uri.startsWith('cdda:'))
+            if(item.service)
             {
-                item.name=item.title;
-                if (!item.albumart) {
-                    item.albumart="/albumart";
+                service=item.service;
+
+                if( item.uri.startsWith('cdda:'))
+                {
+                    item.name=item.title;
+                    if (!item.albumart) {
+                        item.albumart="/albumart";
+                    }
+                    promiseArray.push(libQ.resolve(item));
+                } else if (service==='webradio') {
+                    promiseArray.push(this.commandRouter.executeOnPlugin('music_service', 'webradio', 'explodeUri', item));
+                } else  {
+                    promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
                 }
-                promiseArray.push(libQ.resolve(item));
-            }
-            else  promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
-        } else {
+            } else {
 
-            //backward compatibility with SPOP plugin
-            if(item.uri.startsWith('spotify:'))
-            {
-                service='spop';
+                //backward compatibility with SPOP plugin
+                if(item.uri.startsWith('spotify:'))
+                {
+                    service='spop';
+                }
+
+                promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
             }
 
-            promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
         }
     }
 
@@ -249,7 +252,7 @@ CorePlayQueue.prototype.saveQueue = function () {
     var self=this;
     this.commandRouter.pushConsoleMessage('CorePlayQueue::saveQueue');
 
-    fs.writeJson('/data/queue', self.arrayQueue, function (err) {
+    fs.writeJson('/data/queue', self.arrayQueue, {spaces: 2}, function (err) {
         if(err)
             self.commandRouter.logger.info("An error occurred saving queue to disk: "+err);
     });

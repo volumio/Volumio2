@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var execSync = require('child_process').execSync;
 var libQ = require('kew');
 var os = require('os');
+var path = require('path');
 
 
 // Define the CommandLineClient class
@@ -19,18 +20,9 @@ function CommandLineClient(context) {
 CommandLineClient.prototype.onVolumioStart = function () {
 	var self = this;
 
-	this.commandRouter.sharedVars.registerCallback('alsa.outputdevicemixer', this.outputDeviceCallback.bind(this));
-
 	self.buildVolumeFiles();
 
 	return libQ.resolve();
-};
-
-
-
-CommandLineClient.prototype.outputDeviceCallback = function (value) {
-	var self = this;
-	self.buildVolumeFiles();
 };
 
 CommandLineClient.prototype.getConfigParam = function (key) {
@@ -53,37 +45,25 @@ CommandLineClient.prototype.getAdditionalConf = function (type, controller, data
 
 CommandLineClient.prototype.buildVolumeFiles = function () {
 	var self = this;
-	
-	var device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
-	var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
-    var mixer_type = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer_type');
 
-	if (mixerdev === 'SoftMaster') {
-		device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
-	}
-	var mixer = '"'+mixerdev+'"';
-	var volumecurve = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumecurvemode');
-
-    if (volumecurve == 'logarithmic'){
-        var getcommand = "volume=`/usr/bin/amixer -M get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
-    } else {
-        var getcommand = "volume=`/usr/bin/amixer get -c " + device + " " + mixer + " | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1`";
-    }
-
-    if (mixer_type != 'None') {
-        self.writeVolumeFiles('/tmp/setvolume')
-        self.writeVolumeFiles('/tmp/getvolume', getcommand)
-	} else {
-    	try {
-            fs.writeFileSync('/tmp/setvolume', '#!/bin/bash\necho 100', 'utf8');
-            fs.writeFileSync('/tmp/getvolume', '#!/bin/bash\necho 100', 'utf8');
+    var getCommand = 'volume=`/bin/cat /tmp/volume`';
+    try {
+        var getVolumeTemplate = fs.readFileSync(path.join(__dirname, 'getvolume.sh.template'));
+        var setVolumeTemplate = fs.readFileSync(path.join(__dirname, 'setvolume.sh.template'));
+	} catch(e) {}
+	if (getVolumeTemplate && getVolumeTemplate.length && setVolumeTemplate && setVolumeTemplate.length) {
+        try {
+            fs.writeFileSync('/tmp/setvolume', setVolumeTemplate, 'utf8');
+            fs.writeFileSync('/tmp/getvolume', getVolumeTemplate, 'utf8');
             execSync('/bin/chmod a+x /tmp/getvolume', {uid: 1000, gid: 1000})
             execSync('/bin/chmod a+x /tmp/setvolume', {uid: 1000, gid: 1000})
-		} catch(e) {
-
-		}
-	}
-
+        } catch(e) {
+			console.log('Could not write template files')
+        }
+    } else {
+        self.writeVolumeFiles('/tmp/setvolume')
+        self.writeVolumeFiles('/tmp/getvolume', getCommand)
+    }
 };
 
 CommandLineClient.prototype.writeVolumeFiles = function (path , content) {

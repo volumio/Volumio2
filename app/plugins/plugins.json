@@ -10,6 +10,16 @@
         "value": "STARTED"
       }
     },
+    "inputs": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      },
+      "status": {
+        "type": "string",
+        "value": "STARTED"
+      }
+    },
     "mpd": {
       "enabled": {
         "type": "boolean",
@@ -62,6 +72,12 @@
 	}
   },
   "audio_interface": {
+    "outputs": {
+      "enabled": {
+        "type": "boolean",
+        "value": true
+      }
+    },
     "upnp": {
       "enabled": {
         "type": "boolean",

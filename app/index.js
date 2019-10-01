@@ -151,11 +151,12 @@ CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
 // Volumio Update Volume
 CoreCommandRouter.prototype.volumioupdatevolume = function (vol) {
 	this.callCallback("volumioupdatevolume", vol);
+	this.writeVolumeStatusFiles(vol);
 	return this.stateMachine.updateVolume(vol);
 };
 
 // Volumio Retrieve Volume
-CoreCommandRouter.prototype.volumioretrievevolume = function (vol) {
+CoreCommandRouter.prototype.volumioretrievevolume = function () {
 	this.pushConsoleMessage('CoreCommandRouter::volumioRetrievevolume');
 	return this.volumeControl.retrievevolume();
 };
@@ -174,6 +175,38 @@ CoreCommandRouter.prototype.updateVolumeScripts = function (data) {
         return this.volumeControl.updateVolumeScript(data);
     }
 };
+
+CoreCommandRouter.prototype.retrieveVolumeLevels = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioRetrieveVolumeLevels');
+    return this.stateMachine.getcurrentVolume();
+};
+
+CoreCommandRouter.prototype.setStartupVolume = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumiosetStartupVolume');
+    if (this.volumeControl){
+        return this.volumeControl.setStartupVolume();
+    }
+};
+
+CoreCommandRouter.prototype.writeVolumeStatusFiles = function (vol) {
+
+	if (vol.mute !== undefined && vol.mute === true) {
+		this.executeWriteVolumeStatusFiles(0);
+	} else if (vol && vol.vol && typeof vol.vol == 'number') {
+        this.executeWriteVolumeStatusFiles(vol.vol);
+	} else {
+        this.executeWriteVolumeStatusFiles(100);
+	}
+};
+
+CoreCommandRouter.prototype.executeWriteVolumeStatusFiles = function (value) {
+    fs.writeFile('/tmp/volume', value, function (err) {
+        if (err) {
+        	this.logger.error('Could not save Volume value to status file: ' + err);
+		}
+    });
+};
+
 
 CoreCommandRouter.prototype.addCallback = function (name, callback) {
 	if (this.callbacks[name] == undefined) {
@@ -226,6 +259,11 @@ CoreCommandRouter.prototype.volumioGetBrowseSources = function () {
 	return this.musicLibrary.getBrowseSources();
 };
 
+CoreCommandRouter.prototype.volumioGetVisibleBrowseSources = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioGetVisibleSources');
+    return this.musicLibrary.getVisibleBrowseSources();
+};
+
 CoreCommandRouter.prototype.volumioAddToBrowseSources = function (data) {
 	this.pushConsoleMessage('CoreCommandRouter::volumioAddToBrowseSources' + data);
 	return this.musicLibrary.addToBrowseSources(data);
@@ -237,7 +275,7 @@ CoreCommandRouter.prototype.volumioRemoveToBrowseSources = function (data) {
 };
 
 CoreCommandRouter.prototype.volumioUpdateToBrowseSources = function (name,data) {
-	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources' + data);
+	this.pushConsoleMessage('CoreCommandRouter::volumioUpdateToBrowseSources');
 	return this.musicLibrary.updateBrowseSources(name,data);
 };
 
@@ -424,20 +462,45 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 
 	return this.stateMachine.addQueueItems(arrayItems);
 };
-CoreCommandRouter.prototype.replaceAndPlay = function (arrayItems) {
+CoreCommandRouter.prototype.replaceAndPlay = function (data) {
+	var defer = libQ.defer();
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
 
-    if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
-        return this.playPlaylist(arrayItems.title)
-    } else  {
-        return this.stateMachine.addQueueItems(arrayItems);
-    }
+    if (data.uri != undefined) {
+    	if (data.uri.indexOf('playlists/') >= 0 && data.uri.indexOf('://') == -1) {
+            this.playPlaylist(data.title);
+            defer.resolve();
+		} else {
+            this.stateMachine.addQueueItems(data)
+                .then((e)=> {
+                	this.volumioPlay(e.firstItemIndex);
+            		defer.resolve();
+        	});
+		}
+    } else if (data.list && data.index) {
+        this.stateMachine.addQueueItems(data.list)
+            .then(()=>{
+                this.volumioPlay(data.index);
+        		defer.resolve();
+            });
+    } else if ((!(data.list && data.index) && data.item && data.item.uri)) {
+        this.stateMachine.addQueueItems(data.item)
+            .then((e)=>{
+                this.volumioPlay(e.firstItemIndex);
+        		defer.resolve();
+            });
+    } else {
+    	self.logger.error('Could not Replace and Play Item');
+        defer.reject('Could not Replace and Play Item');
+	}
+
+	return defer.promise;
 };
 
 CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayCue');
     this.stateMachine.clearQueue();
 
     if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
@@ -1167,6 +1230,11 @@ CoreCommandRouter.prototype.broadcastMessage = function (msg, value) {
 
 CoreCommandRouter.prototype.pushMultiroomDevices = function (data) {
 	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+    if (audioOutputPlugin != undefined && typeof audioOutputPlugin.pushOutputsState === "function") {
+        audioOutputPlugin.pushOutputsState(data);
+    }
 	return libQ.all(
 		libFast.map(this.pluginManager.getPluginNames('user_interface'), function (sInterface) {
 			var thisInterface = self.pluginManager.getPlugin('user_interface', sInterface);
@@ -1184,6 +1252,7 @@ CoreCommandRouter.prototype.pushMultiroom = function (data) {
 			if (typeof thisInterface.pushMultiroom === "function")
 				return thisInterface.pushMultiroom(data);
 		})
+
 	);
 };
 
@@ -1283,6 +1352,13 @@ CoreCommandRouter.prototype.volumioPlay = function (N) {
 	{
 		return this.stateMachine.play(N);
 	}
+};
+
+// Volumio Play
+CoreCommandRouter.prototype.volumioVolatilePlay = function () {
+    this.pushConsoleMessage('CoreCommandRouter::volumioVolatilePlay');
+
+    return this.stateMachine.volatilePlay();
 };
 
 // Volumio Toggle
@@ -1510,8 +1586,17 @@ CoreCommandRouter.prototype.volumioFFWDRew = function (millisecs) {
     return this.stateMachine.ffwdRew(millisecs);
 };
 
+CoreCommandRouter.prototype.volumioSkipBackwards = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSkipBackwards');
 
+    return this.stateMachine.skipBackwards(data);
+};
 
+CoreCommandRouter.prototype.volumioSkipForward = function (data) {
+    this.pushConsoleMessage('CoreCommandRouter::volumioSkipForward');
+
+    return this.stateMachine.skipForward(data);
+};
 
 
 CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
@@ -1575,11 +1660,16 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
     var self=this;
     var language_code=this.sharedVars.get('language_code');
 
-    this.logger.info("Loading i18n strings for locale "+language_code);
-
-    this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
-    this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
-
+	this.i18nStringsDefaults=fs.readJsonSync(__dirname+'/i18n/strings_en.json');
+	
+    try {
+        this.logger.info("Loading i18n strings for locale "+language_code);
+    	this.i18nStrings=fs.readJsonSync(__dirname+'/i18n/strings_'+language_code+".json");
+    } catch(e){
+        this.logger.error("Failed to load i18n strings for locale "+language_code + ": " +e);
+        this.i18nStrings = this.i18nStringsDefaults;
+    }
+    
     var categories=this.pluginManager.getPluginCategories();
     for(var i in categories)
     {
@@ -1593,7 +1683,7 @@ CoreCommandRouter.prototype.loadI18nStrings = function () {
             if (instance && instance.getI18nFile) {
               var pluginI18NFile = instance.getI18nFile(language_code);
               if (pluginI18NFile && fs.pathExistsSync(pluginI18NFile)) {
-                var pluginI18nStrings = fs.readJSONSync(pluginI18NFile);
+                var pluginI18nStrings = fs.readJsonSync(pluginI18NFile);
       
                 for (var locale in pluginI18nStrings) {
                   // check if locale does not already exist to avoid that volumio
@@ -1617,7 +1707,7 @@ CoreCommandRouter.prototype.i18nJson = function (dictionaryFile,defaultDictionar
 
 
 	try {
-		fs.statSync(dictionaryFile);
+		fs.readJsonSync(dictionaryFile);
 	} catch(e) {
 		dictionaryFile = defaultDictionaryFile;
 	}
@@ -2001,23 +2091,29 @@ CoreCommandRouter.prototype.enableDisableMyMusicPlugin = function (data) {
 
 CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
     var self=this;
+    var updated = false;
 
-	if (data.endpoint && data.type && data.name && data.method) {
-		if (self.pluginsRestEndpoints.length) {
-			for (var i in self.pluginsRestEndpoints) {
-				var endpoint = self.pluginsRestEndpoints[i];
-				if (endpoint.endpoint === data.endpoint) {
-                    self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
-					endpoint = data;
-				}
-			}
-		} else {
+    if (data.endpoint && data.type && data.name && data.method) {
+        if (self.pluginsRestEndpoints.length) {
+            for (var i in self.pluginsRestEndpoints) {
+                var endpoint = self.pluginsRestEndpoints[i];
+                if (endpoint.endpoint === data.endpoint) {
+                    updated = true;
+                    endpoint = data;
+                    return self.logger.info('Updating ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+                }
+            }
+            if (!updated) {
+                self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
+                self.pluginsRestEndpoints.push(data);
+            }
+        } else {
             self.logger.info('Adding ' + data.endpoint + ' REST Endpoint for plugin: ' + data.type + '/' + data.name);
-            self.pluginsRestEndpoints.push(data)
+            self.pluginsRestEndpoints.push(data);
         }
-	} else {
+    } else {
         self.logger.error('Not Adding plugin to REST Endpoints, missing parameters');
-	}
+    }
 }
 
 CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
@@ -2025,3 +2121,119 @@ CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
 
     return self.pluginsRestEndpoints
 }
+
+CoreCommandRouter.prototype.getPluginEnabled = function (category, pluginName) {
+    var self=this;
+
+    return this.pluginManager.isEnabled(category, pluginName);
+}
+
+CoreCommandRouter.prototype.getSystemVersion = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+}
+
+CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getAdvancedSettingsStatus', '');
+}
+
+CoreCommandRouter.prototype.getExperienceAdvancedSettings = function () {
+    var self=this;
+
+    return this.executeOnPlugin('system_controller', 'system', 'getExperienceAdvancedSettings', '');
+}
+
+CoreCommandRouter.prototype.broadcastUiSettings = function () {
+    var self=this;
+    var returnedData = self.executeOnPlugin('miscellanea', 'appearance', 'getUiSettings', '');
+
+    if (returnedData != undefined) {
+        returnedData.then(function (data) {
+            self.broadcastMessage('pushUiSettings', data);
+        });
+    }
+}
+
+// ============================  AUDIO OUTPUTS =================================
+
+
+CoreCommandRouter.prototype.addAudioOutput = function (data) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.addAudioOutput === "function") {
+		return audioOutputPlugin.addAudioOutput(data);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+
+};
+
+CoreCommandRouter.prototype.updateAudioOutput = function (data) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.updateAudioOutput === "function") {
+		return audioOutputPlugin.updateAudioOutput(data);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.removeAudioOutput = function (id) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.removeAudioOutput === "function") {
+		return audioOutputPlugin.removeAudioOutput(id);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.getAudioOutputs = function () {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.getAudioOutputs === "function") {
+		return audioOutputPlugin.getAudioOutputs();
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.enableAudioOutput = function (data) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.enableAudioOutput === "function") {
+		return audioOutputPlugin.enableAudioOutput(data);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.disableAudioOutput = function (id) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.disableAudioOutput === "function") {
+		return audioOutputPlugin.disableAudioOutput(id);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.setAudioOutputVolume = function (data) {
+	var self = this;
+
+	var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+	if (audioOutputPlugin != undefined && typeof audioOutputPlugin.setAudioOutputVolume === "function") {
+		return audioOutputPlugin.setAudioOutputVolume(data);
+	} else {
+		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
