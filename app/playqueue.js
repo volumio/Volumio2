@@ -131,7 +131,6 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
         if (item.uri != undefined) {
             self.commandRouter.logger.info("Adding Item to queue: " + item.uri);
-        }
 
 
         var service='mpd';
@@ -161,6 +160,8 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
             }
 
             promiseArray.push(this.commandRouter.explodeUriFromService(service,item.uri));
+        }
+
         }
     }
 
