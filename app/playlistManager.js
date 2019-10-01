@@ -435,12 +435,23 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                 }
                 else if(uri.startsWith("artists://"))
                 {
-                    mpdPlugin.listArtist(uri,2,'')
-                    .then(function(entries){
-                        listingDefer.resolve(entries.navigation.lists[1].items);
-                    }).fail(function(){
-                        listingDefer.reject(new Error());
-                    })
+                    var s = uri.split('/');
+                    if (s.length == 3) {
+                        // no album in uri
+                        mpdPlugin.listArtist(uri,2,'')
+                        .then(function(entries){
+                            listingDefer.resolve(entries.navigation.lists[1].items);
+                        }).fail(function(){
+                            listingDefer.reject(new Error());
+                        })
+                    } else if (s.length > 3) {
+                        mpdPlugin.listAlbumSongs(uri,2,'')
+                        .then(function(entries){
+                            listingDefer.resolve(entries.navigation.lists[0].items);
+                        }).fail(function(){
+                            listingDefer.reject(new Error());
+                        })
+                    }
                 }
                 else if(uri.startsWith("albums://"))
                 {
