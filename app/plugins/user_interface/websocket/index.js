@@ -108,12 +108,13 @@ function InterfaceWebUI(context) {
                 var tracks=data;
                 var index=0;
                 if (data.list != undefined) {
-                  tracks=data.list;
-                  if (data.index != undefined)
-                    index=data.index;
+                    tracks=data.list;
+                    if (data.index != undefined) {
+                        index=data.index;
+                    }
                 }
-                self.commandRouter.addQueueItems(tracks)
-                        return self.commandRouter.volumioPlay(e.firstItemIndex+index);
+                self.commandRouter.addQueueItems(tracks);
+                return self.commandRouter.volumioPlay(e.firstItemIndex+index);
             });
 
 			});
