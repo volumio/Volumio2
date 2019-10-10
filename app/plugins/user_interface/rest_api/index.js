@@ -188,9 +188,12 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
                 executed = true;
                 self.logger.info('Executing endpoint ' + endpoint.endpoint);
                 var execute = self.commandRouter.executeOnPlugin(endpoint.type, endpoint.name, endpoint.method, data.data);
-                if (Promise.resolve(execute) == execute) {
+                if (Promise.resolve(execute).catch((e)=>{}) == execute) {
                     execute.then(function(result) {
                         defer.resolve(result);
+                    })
+                    .catch(function(error){
+                        defer.reject(error);
                     })
                 } else {
                     if (execute) {
