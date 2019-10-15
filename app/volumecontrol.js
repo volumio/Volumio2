@@ -134,6 +134,7 @@ function CoreVolumeController(commandRouter) {
                         if (resOnlyVol === null) {
                             cb(new Error('Alsa Mixer Error: failed to parse output'));
                         } else {
+                            hasHWMute = false;
                             var volOut = parseInt(resOnlyVol[1], 10);
                             if (volOut === 0) {
                                 var muteOut = true;
@@ -146,6 +147,7 @@ function CoreVolumeController(commandRouter) {
                             });
                         }
                     } else {
+                        hasHWMute = true;
                         cb(null, {
                             volume: parseInt(res[1], 10),
                             muted: (res[2] == 'off')
@@ -235,9 +237,15 @@ function CoreVolumeController(commandRouter) {
 	};
 
 	self.setMuted = function (val, cb) {
-		amixer(['set', '-c', device, mixer , (val ? 'mute' : 'unmute')], function (err) {
-			cb(err);
-		});
+	    if (hasHWMute) {
+            amixer(['set', '-c', device, mixer , (val ? 'mute' : 'unmute')], function (err) {
+                cb(err);
+            });
+        } else {
+            amixer(['set', '-c', device, mixer , (val ? 0 : premutevolume)], function (err) {
+                cb(err);
+            });
+        }
 	};
 }
 
