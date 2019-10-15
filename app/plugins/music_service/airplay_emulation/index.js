@@ -393,6 +393,7 @@ AirPlayInterface.prototype.stop = function () {
     var defer = libQ.defer();
 
     if (!onDemand) {
+        self.logger.info('Airplay Stop with convenience switching');
         var state = self.commandRouter.stateMachine.getState();
         if (state && state.service && state.service === 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
             self.stopShairportSync();
@@ -401,7 +402,7 @@ AirPlayInterface.prototype.stop = function () {
             },5000)
             setTimeout(()=> {
                 defer.resolve('');
-            },1000)
+            },2500)
         } else {
             defer.resolve('');
         }
