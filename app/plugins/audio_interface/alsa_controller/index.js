@@ -222,10 +222,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				}
 
 			}
-			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
-				value: 'Software',
-				label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
-			});
+			// Hide software volume for Primo Analog out
+            var avoidSoftwareMixer = false;
+            if (volumioDeviceName === 'primo' && outdevicename === 'Analog RCA Output') {
+                avoidSoftwareMixer = true;
+            }
+
+            if (!avoidSoftwareMixer) {
+                self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
+                    value: 'Software',
+                    label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
+                });
+			}
 
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 				value: 'None',
