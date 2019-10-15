@@ -548,9 +548,23 @@ var processExpressRequestTinyArt = function (req, res) {
     var promise = processRequest(web, '', false);
     promise.then(function (filePath) {
         res.setHeader('Cache-Control', 'public, max-age=2628000')
-        res.sendFile(filePath);
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+            } else {
+                res.removeHeader('Transfer-Encoding');
+                res.removeHeader('Access-Control-Allow-Headers');
+                res.removeHeader('Access-Control-Allow-Methods');
+                res.removeHeader('Access-Control-Allow-Origin');
+                res.removeHeader('Cache-Control');
+                res.removeHeader('Content-Type');
+                res.removeHeader('X-Powered-By');
+                res.setHeader('Connection', 'Keep-Alive');
+                res.setHeader('Keep-Alive', 'imeout=15, max=767');
+                res.end(data, 'binary');
+            }
+        })
     })
-        .fail(function () {
+        .fail(function (e) {
             res.setHeader('Cache-Control', 'public, max-age=2628000')
             if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
