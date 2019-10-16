@@ -1550,6 +1550,9 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
 
     var cards = self.getAlsaCards();
     var outdev = this.config.get('outputdevice');
+    if (outdev === 'softvolume') {
+        outdev = self.config.get('softvolumenumber', 'none');
+	}
     var outdevName = this.config.get('outputdevicename');
     if (cards.length === 0) {
         var responseData = {
