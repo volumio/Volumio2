@@ -731,10 +731,14 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 			var outdevice = 'softvolume';
             self.config.set('outputdevice', outdevice);
             self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
+		} else {
+            self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
 		}
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
 		var outdevice = self.config.get('outputdevice');
+        self.setConfigParam({key: 'volumemax', value: '100'});
+        self.restorePreviousVolumeLevel('100', false, false);
 		if (outdevice === 'softvolume'){
             var outdevice = self.config.get('softvolumenumber');
             this.config.set('outputdevice', outdevice);
