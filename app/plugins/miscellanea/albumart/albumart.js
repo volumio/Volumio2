@@ -524,6 +524,91 @@ var processExpressRequest = function (req, res) {
 		});
 };
 
+var processExpressRequestDirect = function (req, res) {
+    var rawQuery=req._parsedUrl.query;
+
+    var web = req.query.web;
+    var path = req.query.path;
+    var icon = req.query.icon;
+    var sourceicon = req.query.sourceicon;
+    var sectionimage = req.query.sectionimage;
+    var meta = false;
+    if (req.query.metadata != undefined && req.query.metadata === 'true') {
+        meta = true;
+    }
+
+    if(rawQuery !== undefined && rawQuery !== null)
+    {
+        var splitted=rawQuery.split('&');
+        for(var i in splitted)
+        {
+            var itemSplitted=splitted[i].split('=');
+            if(itemSplitted[0]==='web')
+                web=itemSplitted[1];
+            else if(itemSplitted[0]==='path')
+                path=itemSplitted[1];
+            else if(itemSplitted[0]==='icon')
+                icon=itemSplitted[1];
+        }
+    }
+
+    //var starttime=Date.now();
+    var promise = processRequest(web, path, meta);
+    promise.then(function (filePath) {
+        //logger.info('Sending file ' + filePath);
+
+        //var stoptime=Date.now();
+        //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
+        res.setHeader('Cache-Control', 'public, max-age=2628000')
+        return sendTinyArt(req, res, filePath);
+    })
+        .fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=2628000')
+            if(icon!==undefined){
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.svg');
+            } else if (sectionimage!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var sectionimageFile = pluginPaths[i] + sectionimage;
+                        if(fs.existsSync(sectionimageFile)) {
+                            return sendTinyArt(req, res, sectionimageFile);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        return sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        return sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return sendTinyArt(req, res, pluginIcon);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        return sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        return sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=2628000')
+                try{
+                    return sendTinyArt(req, res, __dirname + '/default.jpg');
+                } catch(e) {
+                    return sendTinyArt(req, res, __dirname + '/default.png');
+                }
+            }
+        });
+};
+
 /**
  *    This method processes incoming request from express, for the tinyart function that provides a simpler url for arts, and only online fetching
  *
@@ -695,5 +780,6 @@ var retrieveAlbumart = function (artist, album, size, cb) {
 
 module.exports.processExpressRequest = processExpressRequest;
 module.exports.processExpressRequestTinyArt = processExpressRequestTinyArt;
+module.exports.processExpressRequestDirect = processExpressRequestDirect;
 module.exports.processRequest = processRequest;
 module.exports.setFolder = setFolder;

@@ -31,6 +31,7 @@ else {
 
     app.get('/albumart', albumart.processExpressRequest);
     app.get('/tinyart/*', albumart.processExpressRequestTinyArt);
+    app.get('/albumartd', albumart.processExpressRequestDirect);
 
     app.use(function (err, req, res, next) {
         /**

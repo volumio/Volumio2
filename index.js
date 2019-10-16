@@ -16,6 +16,7 @@ albumart.setFolder('/data/albumart');
 
 expressApp.get('/albumart', albumart.processExpressRequest);
 expressApp.get('/tinyart/*', albumart.processExpressRequestTinyArt);
+expressApp.get('/albumartd', albumart.processExpressRequestDirect);
 
 expressApp.use(function (err, req, res, next) {
   /**
