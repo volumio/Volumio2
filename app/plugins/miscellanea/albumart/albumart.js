@@ -535,6 +535,8 @@ var processExpressRequestTinyArt = function (req, res) {
 
     if (splitted.length < 2) {
         console.log('Error in tinart request: missing fields');
+    } else if (req.query.sourceicon) {
+        var sourceicon = req.query.sourceicon;
     } else if (splitted.length === 2) {
         // Tiny art for artists
         var icon = 'users';
@@ -544,40 +546,57 @@ var processExpressRequestTinyArt = function (req, res) {
         var icon ='dot-circle-o'
         var web = encodeURIComponent(splitted[0]) + '/' + encodeURIComponent(splitted[1]) + '/' + splitted[2];
     }
-
     var promise = processRequest(web, '', false);
     promise.then(function (filePath) {
-        res.setHeader('Cache-Control', 'public, max-age=2628000')
-        fs.readFile(filePath, (err, data) => {
-            if (err) {
-            } else {
-                res.removeHeader('Transfer-Encoding');
-                res.removeHeader('Access-Control-Allow-Headers');
-                res.removeHeader('Access-Control-Allow-Methods');
-                res.removeHeader('Access-Control-Allow-Origin');
-                res.removeHeader('Cache-Control');
-                res.removeHeader('Content-Type');
-                res.removeHeader('X-Powered-By');
-                res.setHeader('Connection', 'Keep-Alive');
-                res.setHeader('Keep-Alive', 'imeout=15, max=767');
-                res.end(data, 'binary');
-            }
-        })
+        return sendTinyArt(req, res, filePath)
     })
         .fail(function (e) {
-            res.setHeader('Cache-Control', 'public, max-age=2628000')
             if(icon!==undefined){
-                res.sendFile(__dirname + '/icons/'+icon+'.svg');
-            } else {
-                res.setHeader('Cache-Control', 'public, max-age=2628000')
-                try{
-                    res.sendFile(__dirname + '/default.jpg');
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.svg');
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return sendTinyArt(req, res, pluginIcon);
+                        }
+                    }
                 } catch(e) {
-                    res.sendFile(__dirname + '/default.png');
+                    try {
+                        sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else {
+                try{
+                    sendTinyArt(req, res, __dirname + '/default.jpg');
+                } catch(e) {
+                    sendTinyArt(req, res, __dirname + '/default.png');
                 }
             }
         });
 };
+
+var sendTinyArt = function (req, res, filePath) {
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            console.log('Error Reading Tinyart path: ' + err);
+        } else {
+            res.removeHeader('Transfer-Encoding');
+            res.removeHeader('Access-Control-Allow-Headers');
+            res.removeHeader('Access-Control-Allow-Methods');
+            res.removeHeader('Access-Control-Allow-Origin');
+            res.removeHeader('Cache-Control');
+            res.removeHeader('Content-Type');
+            res.removeHeader('X-Powered-By');
+            res.setHeader('Connection', 'Keep-Alive');
+            res.setHeader('Keep-Alive', 'imeout=15, max=767');
+            res.end(data, 'binary');
+        }
+    })
+}
 
 var sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
