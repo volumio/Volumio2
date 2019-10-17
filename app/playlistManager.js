@@ -176,7 +176,7 @@ PlaylistManager.prototype.enqueue = function (name) {
                         var item = {
                             service: data[i].service,
                             uri: data[i].uri,
-                            name: data[i].title,
+                            title: data[i].title,
                             artist: data[i].artist,
                             album: data[i].album,
                             albumart: data[i].albumart
@@ -740,7 +740,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 				else {
 					self.commandRouter.volumioClearQueue();
 
-					var uris = [];
+          var array = [];
 					for (var i in data) {
 						var uri;
 						var fullUri = S(data[i].uri);
@@ -758,10 +758,19 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                             service='mpd';
                         else service=data[i].service;
 
-						uris.push({uri:uri,service:service});
+                        var item = {
+                          service: service,
+                          uri: uri,
+                          title: data[i].title,
+                          artist: data[i].artist,
+                          album: data[i].album,
+                          albumart: data[i].albumart
+                        }
+
+                        array.push(item);
 					}
 
-                    self.commandRouter.addQueueItems(uris)
+          self.commandRouter.addQueueItems(array)
                         .then(function()
                         {
                             self.commandRouter.volumioPlay(0);
