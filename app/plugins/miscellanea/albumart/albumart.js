@@ -442,8 +442,8 @@ var processRequest = function (web, path, meta) {
 var processExpressRequest = function (req, res) {
     var rawQuery=req._parsedUrl.query;
 
-	var web = req.query.web;
-	var path = req.query.path;
+    var web = req.query.web;
+    var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
     var sectionimage = req.query.sectionimage;
@@ -469,20 +469,20 @@ var processExpressRequest = function (req, res) {
     }
 
     //var starttime=Date.now();
-	var promise = processRequest(web, path, meta);
-	promise.then(function (filePath, maxage) {
-			//logger.info('Sending file ' + filePath);
+    var promise = processRequest(web, path, meta);
+    promise.then(function (filePath, maxage) {
+            //logger.info('Sending file ' + filePath);
 
             //var stoptime=Date.now();
             //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
-		    res.setHeader('Cache-Control', 'public, max-age=' . maxage)
-			res.sendFile(filePath);
-		})
-		.fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=' . maxage);
+            res.sendFile(filePath);
+        })
+        .fail(function () {
             res.setHeader('Cache-Control', 'public, max-age=' . maxage)
-		    if(icon!==undefined){
+            if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
-			} else if (sectionimage!==undefined) {
+            } else if (sectionimage!==undefined) {
                 var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
                     for (i = 0; i < pluginPaths.length; i++) {
@@ -513,16 +513,16 @@ var processExpressRequest = function (req, res) {
                     } catch(e) {
                         res.sendFile(__dirname + '/default.png');
                     }
-				}
-			} else {
-			    res.setHeader('Cache-Control', 'public, max-age=' . maxage)
+                }
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=' . maxage)
                 try{
                     res.sendFile(__dirname + '/default.jpg');
                 } catch(e) {
                     res.sendFile(__dirname + '/default.png');
                 }
-			}
-		});
+            }
+        });
 };
 
 var processExpressRequestDirect = function (req, res) {
