@@ -447,6 +447,7 @@ var processExpressRequest = function (req, res) {
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
     var sectionimage = req.query.sectionimage;
+    var maxage = 2628000; // 30d 10h
     var meta = false;
     if (req.query.metadata != undefined && req.query.metadata === 'true') {
         meta = true;
@@ -469,16 +470,16 @@ var processExpressRequest = function (req, res) {
 
     //var starttime=Date.now();
 	var promise = processRequest(web, path, meta);
-	promise.then(function (filePath) {
+	promise.then(function (filePath, maxage) {
 			//logger.info('Sending file ' + filePath);
 
             //var stoptime=Date.now();
             //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
-		    res.setHeader('Cache-Control', 'public, max-age=2628000')
+		    res.setHeader('Cache-Control', 'public, max-age=' . maxage)
 			res.sendFile(filePath);
 		})
 		.fail(function () {
-            res.setHeader('Cache-Control', 'public, max-age=2628000')
+            res.setHeader('Cache-Control', 'public, max-age=' . maxage)
 		    if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
 			} else if (sectionimage!==undefined) {
@@ -514,7 +515,7 @@ var processExpressRequest = function (req, res) {
                     }
 				}
 			} else {
-			    res.setHeader('Cache-Control', 'public, max-age=2628000')
+			    res.setHeader('Cache-Control', 'public, max-age=' . maxage)
                 try{
                     res.sendFile(__dirname + '/default.jpg');
                 } catch(e) {
