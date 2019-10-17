@@ -1855,6 +1855,13 @@ function InterfaceWebUI(context) {
             });
         });
 
+        connWebSocket.on('getDeviceHWUUID', function () {
+            var selfConnWebSocket = this;
+
+            var hwuuid = self.commandRouter.getHwuuid();
+            selfConnWebSocket.emit('pushDeviceHWUUID', hwuuid);
+        });
+
 	});
 };
 

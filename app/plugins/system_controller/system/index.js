@@ -1041,3 +1041,17 @@ ControllerSystem.prototype.getLabelForSelect = function (options, key) {
 
     return 'Error';
 };
+
+ControllerSystem.prototype.getHwuuid = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    try {
+        var macaddr = fs.readFileSync('/sys/class/net/eth0/address', "utf8");
+        var anonid = macaddr.toString().replace(':','');
+    } catch (e) {
+        var anonid = this.config.get('uuid');
+    }
+
+    return crypto.createHash('md5').update(anonid).digest("hex");
+};

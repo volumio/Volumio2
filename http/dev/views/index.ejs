@@ -51,6 +51,15 @@
 			</button>
 		</form>
 
+		<h3>Device Identification</h3>
+		<span id="hwuuid"></span>
+		<form class="hwuuid-form">
+			<input id="hwuuid-text" type="text" style="border: 1px solid black; width: 600px;"/>
+			<button class="btn" id="hwuuid-copy-button" type="button" data-clipboard-demo data-clipboard-target="#hwuuid-text" style="display:none">
+				Copy to clipboard
+			</button>
+		</form>
+
 		<h3>Play Queue</h3>
 		<ol id='div-playqueue' start='0'></ol>
 

@@ -2237,3 +2237,9 @@ CoreCommandRouter.prototype.setAudioOutputVolume = function (data) {
 		this.logger.error('WARNING: No Audio Output plugin found');
 	}
 };
+
+CoreCommandRouter.prototype.getHwuuid = function () {
+    var self = this;
+
+    return self.executeOnPlugin('system_controller', 'system', 'getHwuuid', '');
+};
