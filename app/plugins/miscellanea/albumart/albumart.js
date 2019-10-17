@@ -479,7 +479,7 @@ var processExpressRequest = function (req, res) {
             res.sendFile(filePath);
         })
         .fail(function () {
-            res.setHeader('Cache-Control', 'public, max-age=' . maxage)
+            res.setHeader('Cache-Control', 'public, max-age=' . maxage);
             if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
             } else if (sectionimage!==undefined) {
@@ -515,7 +515,7 @@ var processExpressRequest = function (req, res) {
                     }
                 }
             } else {
-                res.setHeader('Cache-Control', 'public, max-age=' . maxage)
+                res.setHeader('Cache-Control', 'public, max-age=' . maxage);
                 try{
                     res.sendFile(__dirname + '/default.jpg');
                 } catch(e) {
