@@ -53,11 +53,17 @@ function CoreCommandRouter(server) {
     // Start the music library
     this.musicLibrary = new (require('./musiclibrary.js'))(this);
 
-    // Start plugins
-    this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server);
+	// Start plugins
+	this.configManager = new(require(__dirname+'/configManager.js'))(this.logger);
+	let myVolumioPluginManagerPath = '/myvolumio/app/myvolumio-pluginmanager';
+    if (fs.existsSync(myVolumioPluginManagerPath)) {
+		this.logger.info('MYVOLUMIO Environment detected');
+		let myVolumioPluginManager = new (require(myVolumioPluginManagerPath))(this, server, this.configManager);
+		this.extraPluginManager = myVolumioPluginManager;
+    }
+    this.pluginManager = new (require(__dirname + '/pluginmanager.js'))(this, server, this.extraPluginManager);
     this.pluginManager.checkIndex();
     this.pluginManager.pluginFolderCleanup();
-    this.configManager=new(require(__dirname+'/configManager.js'))(this.logger);
 
     this.pluginManager.startPlugins();
 
