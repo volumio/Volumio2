@@ -170,7 +170,7 @@ PlaylistManager.prototype.enqueue = function (name) {
                     var promises = [];
                     var promise;
 
-                    var array = [];
+                    var playlist = [];
 
                     for (var i in data) {
                         var item = {
@@ -182,10 +182,10 @@ PlaylistManager.prototype.enqueue = function (name) {
                             albumart: data[i].albumart
                         }
 
-                        array.push(item);
+                        playlist.push(item);
                     }
 
-                    self.commandRouter.addQueueItems(array);
+                    self.commandRouter.addQueueItems(playlist);
 
                     defer.resolve();
                 }
@@ -740,7 +740,7 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 				else {
 					self.commandRouter.volumioClearQueue();
 
-          var array = [];
+          var playlist = [];
 					for (var i in data) {
 						var uri;
 						var fullUri = S(data[i].uri);
@@ -767,10 +767,10 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
                           albumart: data[i].albumart
                         }
 
-                        array.push(item);
+            playlist.push(item);
 					}
 
-          self.commandRouter.addQueueItems(array)
+          self.commandRouter.addQueueItems(playlist)
                         .then(function()
                         {
                             self.commandRouter.volumioPlay(0);
