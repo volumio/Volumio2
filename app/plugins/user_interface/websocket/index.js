@@ -431,12 +431,16 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var returnedData = self.musicLibrary.goto(data);
-				returnedData.then(function (result) {
-					selfConnWebSocket.emit('pushBrowseLibrary', result);
-				});
+				if (returnedData) {
+                    returnedData.then(function (result) {
+                        selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                    .fail(function () {
+                        // No goto method available
+                    });
+				}
 			});
-
-
+		
 			connWebSocket.on('GetTrackInfo', function (data) {
 				var selfConnWebSocket = this;
 				selfConnWebSocket.emit('pushGetTrackInfo', data);
