@@ -1824,7 +1824,8 @@ PluginManager.prototype.addMyMusicPlugin = function (pluginInfo) {
         	'prettyName':pluginInfo.volumio_info.prettyName,
         	'name':pluginInfo.name,
 			'category':pluginInfo.volumio_info.plugin_type,
-			'hasConfiguration':pluginInfo.volumio_info.has_configuration
+			'hasConfiguration':pluginInfo.volumio_info.has_configuration,
+			'isMyVolumioPlugin':pluginInfo.volumio_info.is_myvolumio_plugin
 		}
         self.myMusicPlugins.push(plugin);
 	} catch (e) {
@@ -1842,6 +1843,14 @@ PluginManager.prototype.getMyMusicPlugins = function () {
         plugin.enabled = self.config.get(plugin.category + '.' + plugin.name + '.enabled');
         if (self.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
             plugin.active = true;
+		}
+
+		// TODO FIX 
+		if (plugin.isMyVolumioPlugin) {
+            plugin.enabled = self.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.enabled');
+            if (self.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
+                plugin.active = true;
+            }
 		}
 	}
 
