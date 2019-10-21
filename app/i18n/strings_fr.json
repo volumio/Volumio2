@@ -204,7 +204,7 @@
     "LOGIN":"Connexion",
     "LOGOUT":"Déconnexion",
     "USERNAME":"Utilisateur",
-    "PASSWORD":"Mot de passe,
+    "PASSWORD":"Mot de passe",
     "LOGGING_IN":"Connexion en cours",
     "LOGIN_SUCCESS": "Connexion avec succès",
     "LOGIN_FAIL":"Echec de la connexion",
