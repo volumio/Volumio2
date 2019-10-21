@@ -1847,8 +1847,8 @@ PluginManager.prototype.getMyMusicPlugins = function () {
 
 		// TODO FIX 
 		if (plugin.isMyVolumioPlugin) {
-            plugin.enabled = self.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.enabled');
-            if (self.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
+            plugin.enabled = this.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.enabled');
+            if (this.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
                 plugin.active = true;
             }
 		}
@@ -1864,7 +1864,11 @@ PluginManager.prototype.enableDisableMyMusicPlugin = function (data) {
 
     if (data.enabled) {
         self.logger.info('Enabling MyMusic plugin ' + data.name);
-        var enable = self.enableAndStartPlugin(data.category, data.name);
+        if (data.isMyVolumioPlugin) {
+            var enable = this.myVolumioPluginManager.enableAndStartPlugin(data.category, data.name);
+		} else {
+            var enable = self.enableAndStartPlugin(data.category, data.name);
+		}
         enable.then(function(result) {
 			var plugins = self.getMyMusicPlugins()
 			plugins.then(function(list){
@@ -1876,7 +1880,11 @@ PluginManager.prototype.enableDisableMyMusicPlugin = function (data) {
 		})
 	} else {
         self.logger.info('Disabling MyMusic plugin ' + data.name);
-        var disable = self.disableAndStopPlugin(data.category, data.name);
+        if (data.isMyVolumioPlugin) {
+            var disable = this.myVolumioPluginManager.disableAndStopPlugin(data.category, data.name);
+        } else {
+            var disable = self.disableAndStopPlugin(data.category, data.name);
+        }
         disable.then(function(result) {
             var plugins = self.getMyMusicPlugins()
             plugins.then(function(list){
