@@ -979,7 +979,7 @@ PluginManager.prototype.createFolder = function (folder) {
 	var defer=libQ.defer();
 
 	fs.mkdirs(folder, function (err) {
-		if (err) defer.reject(new Error('Error creating folder: ' + e ));
+		if (err) defer.reject(new Error('Error creating folder: ' + err));
 		else
 		{
 			defer.resolve(folder);
