@@ -76,14 +76,12 @@
     "NO_OUTPUT_DEVICE_MESSAGE":"Connectez un périphérique audio à ce matériel",
     "OUTPUT_DEVICE_NOT_AVAILABLE":"La sortie audio choisie n'est pas disponible",
     "CONNECT_OUTPUT_DEVICE_1":"Connectez",
-    "CONNECT_OUTPUT_DEVICE_2":"au périphérique",
     "CONNECT_OUTPUT_DEVICE_2":"au périphérique ou sélectionnez une autre sortie audio",
     "PLAYBACK_MODE":"Mode de lecture",
     "PLAYBACK_MODE_DOC":"Vous pouvez choisir le comportement de lecture : Continue remplacera la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoutera seulement le morceau sélectionné",
     "PLAYBACK_MODE_CONTINUOUS":"Continue",
     "PLAYBACK_MODE_SINGLE":"Unitaire"  
     },
-
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau câblé",
@@ -202,7 +200,16 @@
     "NO_RESULTS":"Pas de résultat",
     "REMOVE_FAIL":"Impossible de retirer",
     "CONNECTED":"Connecté",
-    "DISCONNECTED":"Déconnecté"
+    "DISCONNECTED":"Déconnecté",
+    "LOGIN":"Connexion",
+    "LOGOUT":"Déconnexion",
+    "USERNAME":"Utilisateur",
+    "PASSWORD":"Mot de passe,
+    "LOGGING_IN":"Connexion en cours",
+    "LOGIN_SUCCESS": "Connexion avec succès",
+    "LOGIN_FAIL":"Echec de la connexion",
+    "LOGGING_OUT":"Deconnexion en cours",
+    "LOGOUT_SUCCESS":"Déconnexion avec succès"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -239,8 +246,10 @@
     "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement",
     "BROWSE_SOURCES_VISIBILITY":"Visibilité des sources",
     "VOLUMIO3_EXPERIMENTAL_UI":"Activer l'interface expérimentale de Volumio3",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface expérimentale de Volumio3"
-   },
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface expérimentale de Volumio3",
+    "UPLOAD_FAILED":"Upload failed",
+    "IMAGE_MUST_BE_LESS_THAN":"L taille de l'image doit être infériieure à"
+  },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
     "PLAYBACK_OPTIONS":"Lecture",
