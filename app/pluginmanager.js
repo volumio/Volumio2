@@ -1873,10 +1873,16 @@ PluginManager.prototype.enableDisableMyMusicPlugin = function (data) {
 			var plugins = self.getMyMusicPlugins()
 			plugins.then(function(list){
 				defer.resolve(list);
+                var title = self.coreCommand.getI18nString('COMMON.ENABLED');
+                self.coreCommand.pushToastMessage('success', title, data.prettyName);
 			})
 		})
 		.fail(function (e) {
-
+			self.logger.error('Could not Enable MyMusic Plugin: ' + e);
+            var plugins = self.getMyMusicPlugins()
+            plugins.then(function(list){
+                defer.resolve(list);
+            })
 		})
 	} else {
         self.logger.info('Disabling MyMusic plugin ' + data.name);
@@ -1889,6 +1895,8 @@ PluginManager.prototype.enableDisableMyMusicPlugin = function (data) {
             var plugins = self.getMyMusicPlugins()
             plugins.then(function(list){
                 defer.resolve(list);
+                var title = self.coreCommand.getI18nString('COMMON.DISABLED');
+                self.coreCommand.pushToastMessage('success', title, data.prettyName);
             })
         })
             .fail(function (e) {
