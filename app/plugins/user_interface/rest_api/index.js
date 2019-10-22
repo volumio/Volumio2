@@ -36,7 +36,8 @@ function interfaceApi(context) {
     api.get('/getzones', this.browse.getZones.bind(this.browse));
 
     // System
-    api.get('/ping', this.system.ping.bind(this.browse));
+    api.get('/ping', this.system.ping.bind(this.system));
+    api.get('/getSystemVersion', this.system.getSystemVersion.bind(this.browse));
 
     // Playback
     api.get('/commands', this.playback.playbackCommands.bind(this.playback));
