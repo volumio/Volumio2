@@ -611,7 +611,7 @@ ControllerWebradio.prototype.explodeUri = function(data) {
             });
 
     } else {
-        data.name=data.title;
+        if (data.title) data.name=data.title;
         if (!data.albumart) {
             data.albumart="/albumart";
         }
