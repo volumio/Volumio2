@@ -43,6 +43,7 @@ last_100.prototype.onStart = function () {
 last_100.prototype.listenState = function () {
     var self = this;
 
+    var currentSong = {"uri":""};
     var socket= io.connect('http://localhost:3000');
     socket.emit('getState', '');
 
@@ -52,34 +53,36 @@ last_100.prototype.listenState = function () {
         var newlastStates = [];
         if (data.status != 'stop' && data.service != 'webradio' && data.volatile != true){
             if (data.uri != currentSong.uri){
-                currentSong.uri = data.uri;
-                var currentsong = {uri:data.uri, service:data.service,title:data.title,
-                    artist:data.artist, album:data.album, albumart:data.albumart, type:'song'};
-                newlastStates.push(currentsong);
-                try {
-                    // This may not always return an array
-                    var lastStates = fs.readJsonSync(stateFile, {throws: true});
-                } catch (e) {
-                    var lastStates = [];
-                }
-                if (Array.isArray(lastStates) && lastStates.length > 0) {
-                    var j = 0;
-                    for (var i in lastStates) {
-                        if ((lastStates[i].uri != currentSong.uri) && j < 99) {
-                            newlastStates.push(lastStates[i]);
-                            j++;
-                        }
+                if (data.service && data.title && data.artist && data.album) {
+                    if (data.uri.startsWith('http://') || data.uri.startsWith('https://')) {
+                        data = self.parseStreamingUri(data);
+                    }
+                    currentSong.uri = data.uri;
+                    var currentsong = {uri:data.uri, service:data.service,title:data.title, artist:data.artist, album:data.album, albumart:data.albumart, type:'song'};
+                    newlastStates.push(currentsong);
+                    try {
+                        // This may not always return an array
+                        var lastStates = fs.readJsonSync(stateFile, {throws: true});
+                    } catch (e) {
+                        var lastStates = [];
+                    }
+                    if (Array.isArray(lastStates) && lastStates.length > 0) {
+                        var j = 0;
+                        for (var i in lastStates) {
+                            if ((lastStates[i].uri != currentSong.uri) && j < 99) {
+                                newlastStates.push(lastStates[i]);
+                                j++;
+                            }
 
+                        }
+                    }
+                    try {
+                        fs.outputJsonSync(stateFile, newlastStates, {spaces: 2});
+                    } catch (e) {
+                        console.log('Error saving last played file: '+e);
                     }
                 }
-                try {
-                    fs.outputJsonSync(stateFile, newlastStates);
-                } catch (e) {
-                    console.log('Error saving last played file: '+e);
-                }
             }
-
-
         }
     })
 }
@@ -137,7 +140,7 @@ last_100.prototype.handleBrowseUri = function (curUri) {
 }
 
 last_100.prototype.addToBrowseSources = function () {
-    var data = {albumart: '/albumart?sourceicon=music_service/last_100/icon.svg', name: 'Last_100', uri: 'Last_100', plugin_type:'music_service',
+    var data = {albumart: '/albumart?sourceicon=music_service/last_100/icon.png', name: 'Last_100', uri: 'Last_100', plugin_type:'music_service',
         plugin_name:'last_100'};
     this.commandRouter.volumioAddToBrowseSources(data);
 };
@@ -202,4 +205,18 @@ last_100.prototype.getAdditionalConf = function () {
 last_100.prototype.setAdditionalConf = function () {
     var self = this;
     //Perform your tasks to set additional config data here
+};
+
+last_100.prototype.parseStreamingUri = function (data) {
+    var self = this;
+    try {
+        var queue = this.commandRouter.volumioGetQueue();
+        var currentSong = Object.assign({}, queue[data.position]);
+        if (currentSong.realUri) {
+            currentSong.uri = currentSong.realUri;
+        }
+        return currentSong
+    } catch(e) {
+        return data
+    }
 };

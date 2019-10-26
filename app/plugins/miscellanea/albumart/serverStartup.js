@@ -1,3 +1,4 @@
+#!/usr/local/bin/node
 'use strict';
 
 var cluster = require('cluster');
@@ -29,6 +30,8 @@ else {
     albumart.setFolder(process.argv[3]);
 
     app.get('/albumart', albumart.processExpressRequest);
+    app.get('/tinyart/*', albumart.processExpressRequestTinyArt);
+    app.get('/albumartd', albumart.processExpressRequestDirect);
 
     app.use(function (err, req, res, next) {
         /**

@@ -1,0 +1,21 @@
+{
+	"name": "outputs",
+	"version": "1.0.0",
+	"description": "plugin to store and broacast available audio outputs.",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Volumio Team",
+	"license": "ISC",
+	"volumio_info": {
+		"prettyName": "outputs",
+		"icon": "fa-lightbulb-o",
+		"plugin_type": "audio_interface"
+	},
+	"dependencies": {
+		"fs-extra": "^0.28.0",
+		"kew": "^0.7.0",
+		"v-conf": "^1.4.0"
+	}
+}

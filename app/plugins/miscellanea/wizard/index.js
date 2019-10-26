@@ -129,7 +129,7 @@ volumioWizard.prototype.getConfigParam = function (key) {
 
 volumioWizard.prototype.getShowWizard = function () {
     var self = this;
-    var show = self.config.get('show_wizard', true);
+    var show = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getShowWizard', '');
 
     return  show
 };
@@ -147,6 +147,17 @@ volumioWizard.prototype.getWizardSteps = function () {
         if (steps[i].indexOf("conf") <= -1)  {
             var step = fs.readJsonSync((__dirname + '/wizard_steps/' + steps[i]),  'utf8', {throws: false});
             if (step.show){
+                stepsArray.push(step);
+            }
+            if (step.name === 'devicecode') {
+                var isVolumioDevice = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'showActivationCode', '');
+                if (isVolumioDevice) {
+                    step.show = true;
+                    stepsArray.push(step);
+                }
+            }
+            if (step.name === 'advancedsettings' && (process.env.SHOW_ADVANCED_SETTINGS_MODE_SELECTOR === 'true')) {
+                step.show = true;
                 stepsArray.push(step);
             }
         }
@@ -258,7 +269,8 @@ volumioWizard.prototype.setSkip = function () {
     var self = this;
 
     self.logger.info('Wizard skipped')
-    self.config.set('show_wizard', false);
+    self.commandRouter.executeOnPlugin('system_controller', 'system', 'setShowWizard', false);
+    self.commandRouter.broadcastMessage("closeWizard", '');
 };
 
 volumioWizard.prototype.setReboot = function (data) {
@@ -273,8 +285,10 @@ volumioWizard.prototype.setReboot = function (data) {
 volumioWizard.prototype.setCloseWizard = function () {
     var self = this;
 
-    self.config.set('show_wizard', false);
+    self.commandRouter.executeOnPlugin('system_controller', 'system', 'setShowWizard', false);
     self.logger.info('Wizard terminated Successfully');
+    self.commandRouter.broadcastMessage("closeWizard", '');
+
     if (I2Sreboot) {
         self.logger.info('Player Reboot required after I2S DAC has been enabled in wizard');
         self.pushReboot();
@@ -316,7 +330,12 @@ volumioWizard.prototype.getDonationsArray = function () {
 volumioWizard.prototype.getDonation = function () {
     var self = this;
 
-    var donation = self.config.get('donation', true)
+    var hideDonationForVolumioDevices = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'detectVolumioHardware', '');
+    if (!hideDonationForVolumioDevices) {
+        var donation = self.config.get('donation', true)
+    } else {
+        var donation = false;
+    }
 
     return donation;
 };
@@ -328,11 +347,16 @@ volumioWizard.prototype.getDoneMessage = function () {
     var showMessage = self.config.get('show_message', true);
     var respcongratulations =  self.commandRouter.getI18nString('WIZARD.CONGRATULATIONS');
     var resptitle = systemName + ' ' + self.commandRouter.getI18nString('WIZARD.DEVICE_SUCCESSFULLY_CONFIGURED');
+    var isVolumioDevice = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'detectVolumioHardware', '');
+    if (isVolumioDevice) {
+        showMessage = false;
+    }
     var respmessage = self.commandRouter.getI18nString('WIZARD.PLEASE_DONATE');
     if (showMessage) {
         var response = {congratulations: respcongratulations, title: resptitle, message : respmessage}
     } else {
         var response = {congratulations: respcongratulations, title: resptitle, message : ''}
     }
+
     return response;
 };

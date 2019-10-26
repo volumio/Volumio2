@@ -28,6 +28,9 @@ socket.on('connect', function() {
 	// Get the play queue
 	emitEvent('getQueue', '');
 
+	// Get the HW UUID
+    socket.emit('getDeviceHWUUID', '');
+
 	// Request the music library root
 	//emitEvent('getLibraryFilters', 'root');
 
@@ -76,6 +79,12 @@ socket.on('pushSendBugReport', function(data) {
 	document.getElementById("copy-button").style.display = "inline";
 	document.getElementById("log-message").innerHTML = "Log successfully sent, this is the link to your log file";
 
+});
+
+socket.on('pushDeviceHWUUID', function(data) {
+
+    document.getElementById('hwuuid-text').value = data;
+    document.getElementById("hwuuid-copy-button").style.display = "inline";
 });
 
 

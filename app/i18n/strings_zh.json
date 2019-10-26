@@ -74,6 +74,7 @@
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"这个选项控制了读取更多音频格式文件的能力，但它会降低音乐库数据库创建速度。如果禁用，系统仍会获取到大多数音频文件信息，但音乐库扫描速度加快很多。"
   },
   "NETWORK": {
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "请继续进行下一步",
     "NETWORK_SETTINGS":"网络设定",
     "WIRED_NETWORK":"有线网络",
     "AUTOMATIC_IP":"自动获取 IP",
@@ -107,7 +108,8 @@
     "ENABLE_CUSTOM_DNS":"允许定制的DNS",
     "PRIMARY_DNS":"主DNS",
     "SECONDARYY_DNS":"附DNS",
-    "DNS_ERROR_INFO":"请正确填写2个DNS服务地址。"
+    "DNS_ERROR_INFO":"请正确填写2个DNS服务地址。",
+    "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL":"成功与....网络连接,请继续进行下一步"
   },
   "NETWORKFS":{
     "ALIAS_DOC":"设置一个别名显示在NAS的挂载点中",
@@ -173,7 +175,9 @@
     "CONTINUE":"继续",
     "SETTINGS_SAVED_SUCCESSFULLY":"保存设置成功",
     "SETTINGS_SAVE_ERROR":"保存设置时发生错误",
-    "ERROR":"Error"
+    "ERROR":"Error",
+    "UPDATING_MUSIC_DB_WAIT_MESSAGE":"您的音乐库正在扫描，在此期间，系统可能会反应缓慢。请在音乐索引完毕后，再进行其他操作",
+    "GOT_IT":"知道了"
   },
   "APPEARANCE":{
     "APPEARANCE":"外观",
@@ -276,5 +280,10 @@
     "UPDATING_PLUGIN":"升级插件",
     "DOWNLOADING_FROM":"下载插件(从) ",
     "DOWNLOADING":"下载插件"
-  }
+  },
+  "WIZARD":{
+    "CONGRATULATIONS":"祝贺",
+    "RUN_FIRST_CONFIG_WIZARD":"运行第一次的配置向导",
+    "DEVICE_SUCCESSFULLY_CONFIGURED": "播放器已经配置完毕，可以播放了"
+}
 }

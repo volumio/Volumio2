@@ -136,5 +136,21 @@
 	"BY_GENRE_RADIOS":"За жанром",
 	"BY_COUNTRY_RADIOS":"По країні",
 	"WEBRADIO":"Інтернет-радіо"
+  },
+  "PLUGINS":{
+    "CONFIRM_PLUGIN_UNINSTALL":"Підтвердьте видалення плагіна",
+    "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Ви впевнені, що хочете видалити цей плагін",
+    "UNINSTALL":"Видалити",
+    "UPDATING_PLUGIN":"Updating Plugin",
+    "DOWNLOADING_FROM":"Downloading Plugin from ",
+    "DOWNLOADING":"Downloading Plugin",
+    "NO_CONFIGURATION_AVAILABLE":"No configuration available",
+    "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer"
+  },
+  "WIZARD":{
+    "CONGRATULATIONS":"Congratulations",
+    "DEVICE_SUCCESSFULLY_CONFIGURED":"has been configured and it's ready to play",
+    "PLEASE_DONATE":"If you like Volumio please consider donating. You can make the difference for this project!",
+    "RUN_FIRST_CONFIG_WIZARD":"Run first config Wizard"
   }
 }
