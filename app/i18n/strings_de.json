@@ -117,7 +117,6 @@
     "WIRELESS_NETWORK_CONNECTION_DEFER2":"sobald die Ersteinrichtung abgeschlossen ist",
     "HOTSPOT_FALLBACK":"Automatischer Hotspot-Modus",
     "HOTSPOT_FALLBACK_DOC":"Wenn diese Option aktiviert ist, startet im Hotspot-Modus, sobald keine bekannte WLAN-Verbindung mehr verfügbar ist. Wenn diese Option inaktiv ist, versucht dauerhaft, ein bekanntes WLAN-Netzwerk zu finden."
->>>>>>> 0b9279fa6125327588395bccaddba81cda50df4b
   },
   "NETWORKFS":{
     "ALIAS_DOC":"Alias für das Netzwerklaufwerk vergeben",
@@ -171,7 +170,6 @@
     "ARTIST":"Interpret",
     "ALBUMS":"Alben",
     "ALBUM":"Album",
->>>>>>> 0b9279fa6125327588395bccaddba81cda50df4b
 	"GENRE":"Genre",
     "GENRES":"Genres",
     "TRACKS":"Titel",
@@ -225,7 +223,6 @@
     "ALBUMART_RESET_CACHE_DOC":"Für bessere Leistung speichert das System Albenbilder im Cache zwischen. Dadurch werden Albenbilder neu hinzugefügter Titel nicht sofort angezeigt. Durch ein Zurücksetzen des Caches werden auch neu hinzugefügte Albenbilder angezeigt",
     "METADATA_IMAGE":"Eingebettete Albumbilder anzeigen",
     "METADATA_IMAGE_DOC":"Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern"
->>>>>>> 0b9279fa6125327588395bccaddba81cda50df4b
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Meine Musik",
@@ -304,7 +301,6 @@
     "DELETING_FOLDER":"Verzeichnis wird gelöscht",
     "SUCCESSFULLY_DELETED_FOLDER":"Verzeichnis erfolgreich gelöscht",
     "ERROR_DELETING_FOLDER":"Fehler beim Löschen des Verzeichnisses"
->>>>>>> 0b9279fa6125327588395bccaddba81cda50df4b
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Meine Radiosender",
@@ -345,6 +341,5 @@
     "UPDATE":"Aktualisierung",
     "CHECKING_FOR_UPDATES":"Aktualisierungen werden gesucht",
     "CHECKING_FOR_UPDATES_WAIT":"Bitte warten"
->>>>>>> 0b9279fa6125327588395bccaddba81cda50df4b
   }
 }
