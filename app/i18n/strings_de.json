@@ -71,8 +71,15 @@
     "EXTENDED_FILE_FORMAT_SUPPORT":"Erweiterte Dateiformat-Unterstützung",
     "EXTENDED_FILE_FORMAT_SUPPORT_DOC":"Mit dieser Einstellung kann ein größeres Spektrum an Audioformaten gelesen werden. Dabei kann es zu Geschwindigkeitseinbußen beim Erstellen der Musikbibliothek-Datenbank kommen. Auch ohne diese Einstellung unterstützt das System die meisten gängigen Audioformate",
     "USB_DAC_CONNECTED":"USB DAC verbunden",
-    "NO_OUTPUT_DEVICE":"Kein Audio-Gerät verfügbar",
-    "NO_OUTPUT_DEVICE_MESSAGE":"Bitte verbinden Sie ein Audio-Gerät"
+    "NO_OUTPUT_DEVICE":"Kein Audiogerät verfügbar",
+    "NO_OUTPUT_DEVICE_MESSAGE":"Bitte verbinden Sie ein Audiogerät",
+    "OUTPUT_DEVICE_NOT_AVAILABLE":"Das gewählte Audiogerät ist nicht verfügbar",
+    "CONNECT_OUTPUT_DEVICE_1":"Bitte verbinde",
+    "CONNECT_OUTPUT_DEVICE_2":"mit dem Volumio-Gerät oder wähle ein andere Audiogerät aus den Wiedergabe-Optionen.",
+    "PLAYBACK_MODE":"Abspielmodus",
+    "PLAYBACK_MODE_DOC":"You can select the plabyack Behaviour: Continuous will replace your current queue with all the songs in an album or a playlist, single will only add to queue the song you selected to play",
+    "PLAYBACK_MODE_CONTINUOUS":"Fortlaufend",
+    "PLAYBACK_MODE_SINGLE":"Einzelnd"
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Netzwerkeinstellungen",
@@ -188,7 +195,20 @@
     "GOT_IT":"Verstanden",
     "MEDIA_SERVERS":"Medienserver",
     "ENABLED":"Aktiviert",
-    "DISABLED":"Deaktiviert"
+    "DISABLED":"Deaktiviert",
+    "NO_RESULTS":"Keine Ergebnisse",
+    "REMOVE_FAIL":"Entfernen fehlgeschlagen",
+    "CONNECTED":"Verbindung hergestellt",
+    "DISCONNECTED":"Verbindung getrennt",
+    "LOGIN":"Anmelden",
+    "LOGOUT":"Abmelden",
+    "USERNAME":"Benutzername",
+    "PASSWORD":"Passwort",
+    "LOGGING_IN":"Anmelden",
+    "LOGIN_SUCCESS": "Anmeldung erfolgreich",
+    "LOGIN_FAIL":"Anmeldung fehlgeschlagen",
+    "LOGGING_OUT":"Abmelden",
+    "LOGOUT_SUCCESS":"Abmeldung erfolgreich"
   },
   "APPEARANCE":{
     "APPEARANCE":"Aussehen",
@@ -222,7 +242,12 @@
     "ALBUMART_RESET_CACHE":"Albumbilder Cache zurücksetzen",
     "ALBUMART_RESET_CACHE_DOC":"Für bessere Leistung speichert das System Albenbilder im Cache zwischen. Dadurch werden Albenbilder neu hinzugefügter Titel nicht sofort angezeigt. Durch ein Zurücksetzen des Caches werden auch neu hinzugefügte Albenbilder angezeigt",
     "METADATA_IMAGE":"Eingebettete Albumbilder anzeigen",
-    "METADATA_IMAGE_DOC":"Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern"
+    "METADATA_IMAGE_DOC":"Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern",
+    "BROWSE_SOURCES_VISIBILITY":"Quellen-Sichtbarkeit",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Experimentelle Volumio3-Oberfläche anzeigen",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Aktiviert die experimentelle Volumio3-Benutzeroberfläche. Neustart erforderlich!",
+    "UPLOAD_FAILED":"Upload fehlgeschlagen",
+    "IMAGE_MUST_BE_LESS_THAN":"Bilddatei muss kleiner sein als"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Meine Musik",
@@ -300,7 +325,15 @@
     "DELETE_FOLDER":"Lösche Verzeichnis",
     "DELETING_FOLDER":"Verzeichnis wird gelöscht",
     "SUCCESSFULLY_DELETED_FOLDER":"Verzeichnis erfolgreich gelöscht",
-    "ERROR_DELETING_FOLDER":"Fehler beim Löschen des Verzeichnisses"
+    "ERROR_DELETING_FOLDER":"Fehler beim Löschen des Verzeichnisses",
+    "SHOW_ADVANCED_SETTINGS":"Erweiterte Einstellungen anzeigen",
+    "SHOW_ADVANCED_SETTINGS_DOC":"Der vereinfachte Modus zeigt nur die nötigsten Einstellungsoptionen für Volumio. Im erweiterten Modus werden sämtliche Optionen angezeigt. Einige dieser Einstellungen sollten nur von Experten verändert werden.",
+    "FULL_SETTINGS_SET":"Erweiterter Modus",
+    "FULL_SETTINGS_SET_EXTENDED":"Der erweiterte Modus zeigt sämtliche Einstellungsoptionen für Volumio an.",
+    "SIMPLE_SETTINGS_SET":"Vereinfachter Modus",
+    "SIMPLE_SETTINGS_SET_EXTENDED":"Der vereinfachte Modus zeigt nur die wichtigsten Einstellungsoptionen für Volumio an.",
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Keep pressed to turn off in",
+    "TURN_OFF_IN":"Turn off in"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Meine Radiosender",
@@ -308,7 +341,12 @@
     "TOP_500_RADIOS":"Die 500 besten Sender",
     "BY_GENRE_RADIOS":"Sender nach Genre",
     "BY_COUNTRY_RADIOS":"Sender nach Land",
-    "WEBRADIO":"Internetradio"
+    "WEBRADIO":"Internetradio",
+    "LOCAL_RADIOS":"Lokale Sender",
+    "POPULAR_RADIOS":"Beliebte Sender",
+    "BEST_RADIOS":"Beste Sender",
+    "BY_LANGUAGE":"Nach Spraceh",
+    "TALK_RADIOS":"Talk-Sender"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Deinstallation des Plugins bestätigen",
@@ -318,7 +356,10 @@
     "DOWNLOADING_FROM":"Plugin herunterladen von ",
     "DOWNLOADING":"Plugin wird heruntergeladen",
     "NO_CONFIGURATION_AVAILABLE":"Konfiguration nicht verfügbar",
-    "PLUGIN_START_ERROR":"Dieses Plugin startet nicht. Bitte installiere eine aktualisierte Version oder kontaktiere den Entwickler des Plugins"
+    "PLUGIN_START_ERROR":"Dieses Plugin startet nicht. Bitte installiere eine aktualisierte Version oder kontaktiere den Entwickler des Plugins",
+    "CONFIRM_PLUGIN_INSTALL":"Plugin installieren",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Achtung! Community-Plugins werden von Drittanbietern entwickelt und können die Systemstabilität beeinträchtigen. Willst du dieses Plugin dennoch installieren?",
+    "INSTALL":"Installieren"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Glückwunsch",
