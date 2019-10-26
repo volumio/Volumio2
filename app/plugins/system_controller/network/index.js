@@ -101,9 +101,9 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 	var wirelessenabled = false;
 		try {
-		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/operstate", { uid: 1000, gid: 1000, encoding: 'utf8'});
+		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/flags", { uid: 1000, gid: 1000, encoding: 'utf8'});
 			var wirelessstatus = wirelessstatusraw.replace(/\r?\n/g, '');
-		if ( wirelessstatus == 'up') {
+		if ( wirelessstatus == '0x1003') {
 			wirelessenabled = true;
 			}
 			}catch (e) {
@@ -135,33 +135,36 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[4].content[0].value = config.get('enable_hotspot');
 			}
 			if (!wirelessenabled) {
+                uiconf.sections[4].hidden = true;
 				uiconf.sections[4].content[0].value = false;
 			}
 
+			uiconf.sections[4].content[1].value = config.get('hotspot_fallback', false);
+
 			if (config.get('hotspot_name') == undefined) {
-				uiconf.sections[4].content[1].value = 'Volumio';
+				uiconf.sections[4].content[2].value = 'Volumio';
 			} else {
-				uiconf.sections[4].content[1].value = config.get('hotspot_name');
+				uiconf.sections[4].content[2].value = config.get('hotspot_name');
 			}
 
 			if (config.get('hotspot_protection') == undefined) {
-				uiconf.sections[4].content[2].value = true;
+				uiconf.sections[4].content[3].value = true;
 			} else {
-				uiconf.sections[4].content[2].value = config.get('hotspot_protection');
+				uiconf.sections[4].content[3].value = config.get('hotspot_protection');
 			}
 
 			if (config.get('hotspot_password') == undefined) {
-				uiconf.sections[4].content[3].value = 'volumio2';
+				uiconf.sections[4].content[4].value = 'volumio2';
 			} else {
-				uiconf.sections[4].content[3].value = config.get('hotspot_password');
+				uiconf.sections[4].content[4].value = config.get('hotspot_password');
 			}
 
 			if (config.get('hotspot_channel') == undefined) {
-				uiconf.sections[4].content[4].value.value = 4;
-				uiconf.sections[4].content[4].value.label = '4';
+				uiconf.sections[4].content[5].value.value = 4;
+				uiconf.sections[4].content[5].value.label = '4';
 			} else {
-				uiconf.sections[4].content[4].value.value = Number(config.get('hotspot_channel'));
-				uiconf.sections[4].content[4].value.label = config.get('hotspot_channel');
+				uiconf.sections[4].content[5].value.value = Number(config.get('hotspot_channel'));
+				uiconf.sections[4].content[5].value.label = config.get('hotspot_channel');
 			}
 
 			if (config.get('enable_custom_dns') == undefined) {
@@ -182,9 +185,16 @@ ControllerNetwork.prototype.getUIConfig = function () {
 				uiconf.sections[5].content[2].value = config.get('secondary_dns');
 			}
 
+            var advancedSettingsStatus = self.commandRouter.getAdvancedSettingsStatus();
+            if (advancedSettingsStatus === false) {
+                uiconf.sections[1].hidden = true;
+                uiconf.sections[2].hidden = true;
+                uiconf.sections[4].hidden = true;
+                uiconf.sections[5].hidden = true;
+            }
 			//console.log(uiconf);
-
 			defer.resolve(uiconf);
+
 		})
 		.fail(function()
 		{
@@ -204,13 +214,13 @@ ControllerNetwork.prototype.setUIConfig = function (data) {
 ControllerNetwork.prototype.getConf = function (varName) {
 	var self = this;
 
-	return self.config.get(varName);
+	return config.get(varName);
 };
 
 ControllerNetwork.prototype.setConf = function (varName, varValue) {
 	var self = this;
 
-	self.config.set(varName, varValue);
+	config.set(varName, varValue);
 };
 
 //Optional functions exposed for making development easier and more clear
@@ -555,19 +565,22 @@ ControllerNetwork.prototype.saveHotspotSettings = function (data) {
 	var hotspot = config.get('enable_hotspot');
 	if (hotspot == undefined) {
 		config.addConfigValue('enable_hotspot', 'boolean', data.enable_hotspot);
+        config.addConfigValue('hotspot_fallback', 'boolean', data.hotspot_fallback);
 		config.addConfigValue('hotspot_name', 'string', data.hotspot_name);
 		config.addConfigValue('hotspot_protection', 'boolean', data.hotspot_protection);
 		config.addConfigValue('hotspot_password', 'string', data.hotspot_password);
 		config.addConfigValue('hotspot_channel', 'string', data.hotspot_channel.label);
-		self.rebuildHotspotConfig();
 	} else {
 		config.set('enable_hotspot', data.enable_hotspot);
+        config.set('hotspot_fallback', data.hotspot_fallback);
 		config.set('hotspot_name', data.hotspot_name);
 		config.set('hotspot_protection', data.hotspot_protection);
 		config.set('hotspot_password', data.hotspot_password);
 		config.set('hotspot_channel', data.hotspot_channel.label);
-		self.rebuildHotspotConfig();
 	}
+		setTimeout(function(){
+            self.rebuildHotspotConfig();
+        },1000)
 
 
 
@@ -1019,4 +1032,24 @@ ControllerNetwork.prototype.getWiredInfo = function () {
     });
 
     return defer.promise
+};
+
+ControllerNetwork.prototype.wirelessEnable = function () {
+    var self = this;
+
+    config.set('wireless_enabled', true);
+
+    setTimeout(()=>{
+        self.commandRouter.wirelessRestart();
+	},500)
+};
+
+ControllerNetwork.prototype.wirelessDisable = function () {
+    var self = this;
+
+    config.set('wireless_enabled', false);
+
+    setTimeout(()=>{
+        self.commandRouter.wirelessRestart();
+	},500)
 };

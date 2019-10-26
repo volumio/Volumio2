@@ -74,7 +74,8 @@ class ShairportSyncReader extends EventEmitter {
 					delete this._rtptime.pict;
 					break;
 				case 'stal':
-					this.emit('error', data.code);
+					console.log('WARNING: Shairport Sync STAL')
+					//this.emit('error', data.code);
 					break;
 				case 'PICT':
 					if (this._rtptime.pict === this._rtptime.meta && data.cont.length) {

@@ -3,110 +3,111 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var libCrypto = require('crypto');
-var libBase64Url = require('base64-url');
-var fs=require('fs-extra');
+var fs = require('fs-extra');
+var _ = require('underscore');
 
 // Define the CoreMusicLibrary class
 module.exports = CoreMusicLibrary;
 function CoreMusicLibrary (commandRouter) {
-	// This fixed variable will let us refer to 'this' object at deeper scopes
-	var self = this;
+    // This fixed variable will let us refer to 'this' object at deeper scopes
+    var self = this;
 
-	// Save a reference to the parent commandRouter
-	self.commandRouter = commandRouter;
+    // Save a reference to the parent commandRouter
+    self.commandRouter = commandRouter;
+    self.logger = self.commandRouter.logger;
 
-	// Start up a extra metadata handler
-	//self.metadataCache = new (require('./metadatacache.js'))(self);
+    // Start up a extra metadata handler
+    //self.metadataCache = new (require('./metadatacache.js'))(self);
 
-	// Specify the preference for service when adding tracks to the queue
-	self.servicePriority = ['mpd', 'spop'];
+    // Specify the preference for service when adding tracks to the queue
+    self.servicePriority = ['mpd', 'spop'];
 
-	// The library contains hash tables for genres, artists, albums, and tracks
-	self.library = {};
-	self.libraryIndex = {};
-	self.libraryIndex.root = {
-		name: 'root',
-		uid: 'root',
-		type: 'index',
-		children: []
-	}
-	self.arrayIndexDefinitions = [
-		{
-			'name': 'Genres by Name',
-			'table': 'genre',
-			'sortby': 'name',
-			'datapath': [{
-				'name': 'name',
-				'type': 'type',
-				'uid': 'uid'
-			}]
-		},
-		{
-			'name': 'Artists by Name',
-			'table': 'artist',
-			'sortby': 'name',
-			'datapath': [{
-				'name': 'name',
-				'uid': 'uid',
-				'type': 'type',
-				'genres': ['genreuids', '#', {'name': 'name', 'uid': 'uid'}]
-			}]
-		},
-		{
-			'name': 'Albums by Name',
-			'table': 'album',
-			'sortby': 'name',
-			'datapath': [{
-				'name': 'name',
-				'uid': 'uid',
-				'type': 'type',
-				'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}]
-			}]
-		},
-		{
-			'name': 'Albums by Artist',
-			'table': 'album',
-			'sortby': 'artistuids:#:name',
-			'datapath': [{
-				'name': 'name',
-				'uid': 'uid',
-				'type': 'type',
-				'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}]
-			}]
-		},
-		{
-			'name': 'Tracks by Name',
-			'table': 'track',
-			'sortby': 'name',
-			'datapath': [{
-				'name': 'name',
-				'uid': 'uid',
-				'type': 'type',
-				'album': ['albumuids', '#0', {'name': 'name', 'uid': 'uid'}],
-				'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}]
-			}]
-		}
-	];
-	self.queueItemDataPath = [
-		{
-			'name': 'name',
-			'uid': 'uid',
-			'type': 'type',
-			'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}],
-			'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}],
-			'tracknumber': 'tracknumber',
-			'date': 'date'
-		}
-	];
+    // The library contains hash tables for genres, artists, albums, and tracks
+    self.library = {};
+    self.libraryIndex = {};
+    self.libraryIndex.root = {
+        name: 'root',
+        uid: 'root',
+        type: 'index',
+        children: []
+    }
+    self.arrayIndexDefinitions = [
+        {
+            'name': 'Genres by Name',
+            'table': 'genre',
+            'sortby': 'name',
+            'datapath': [{
+                'name': 'name',
+                'type': 'type',
+                'uid': 'uid'
+            }]
+        },
+        {
+            'name': 'Artists by Name',
+            'table': 'artist',
+            'sortby': 'name',
+            'datapath': [{
+                'name': 'name',
+                'uid': 'uid',
+                'type': 'type',
+                'genres': ['genreuids', '#', {'name': 'name', 'uid': 'uid'}]
+            }]
+        },
+        {
+            'name': 'Albums by Name',
+            'table': 'album',
+            'sortby': 'name',
+            'datapath': [{
+                'name': 'name',
+                'uid': 'uid',
+                'type': 'type',
+                'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}]
+            }]
+        },
+        {
+            'name': 'Albums by Artist',
+            'table': 'album',
+            'sortby': 'artistuids:#:name',
+            'datapath': [{
+                'name': 'name',
+                'uid': 'uid',
+                'type': 'type',
+                'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}]
+            }]
+        },
+        {
+            'name': 'Tracks by Name',
+            'table': 'track',
+            'sortby': 'name',
+            'datapath': [{
+                'name': 'name',
+                'uid': 'uid',
+                'type': 'type',
+                'album': ['albumuids', '#0', {'name': 'name', 'uid': 'uid'}],
+                'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}]
+            }]
+        }
+    ];
+    self.queueItemDataPath = [
+        {
+            'name': 'name',
+            'uid': 'uid',
+            'type': 'type',
+            'albums': ['albumuids', '#', {'name': 'name', 'uid': 'uid'}],
+            'artists': ['artistuids', '#', {'name': 'name', 'uid': 'uid'}],
+            'tracknumber': 'tracknumber',
+            'date': 'date'
+        }
+    ];
 
-	// The Browse Sources Array is the list showed on Browse Page
-	var sourcesJson = '/volumio/app/browsesources.json'
+    // The Browse Sources Array is the list showed on Browse Page
+    var sourcesJson = '/volumio/app/browsesources.json'
     if (fs.existsSync(sourcesJson)) {
         self.browseSources = fs.readJsonSync((sourcesJson),  'utf8', {throws: false});
     } else {
         self.browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', name: 'Favourites', uri: 'favourites',plugin_type:'',plugin_name:''},
-            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.svg', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
-            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.svg', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', name: 'Playlists', uri: 'playlists',plugin_type:'music_service',plugin_name:'mpd'},
+            {albumart: '/albumart?sourceicon=music_service/mpd/musiclibraryicon.png', name: 'Music Library', uri: 'music-library',plugin_type:'music_service',plugin_name:'mpd'},
             {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',name: 'Artists', uri: 'artists://',plugin_type:'music_service',plugin_name:'mpd'},
             {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',name: 'Albums', uri: 'albums://',plugin_type:'music_service',plugin_name:'mpd'},
             {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',name: 'Genres', uri: 'genres://',plugin_type:'music_service',plugin_name:'mpd'}
@@ -114,117 +115,122 @@ function CoreMusicLibrary (commandRouter) {
     }
 
 
-	// Start library promise as rejected, so requestors do not wait for it if not immediately available.
-	// This is okay because no part of Volumio requires a populated library to function.
-	//self.libraryReadyDeferred = null;
-	//self.libraryReady = libQ.reject('Library not yet loaded.');
+    // Start library promise as rejected, so requestors do not wait for it if not immediately available.
+    // This is okay because no part of Volumio requires a populated library to function.
+    //self.libraryReadyDeferred = null;
+    //self.libraryReady = libQ.reject('Library not yet loaded.');
 
-	// Attempt to load library from database on disk
-	//self.sLibraryPath = __dirname + '/db/musiclibrary';
-	//self.loadLibraryFromDB()
-	//	.fail(libFast.bind(self.pushError, self));
+    // Attempt to load library from database on disk
+    //self.sLibraryPath = __dirname + '/db/musiclibrary';
+    //self.loadLibraryFromDB()
+    //	.fail(libFast.bind(self.pushError, self));
 }
 
 // Public methods -----------------------------------------------------------------------------------
 
 // Return a music library view for a given object UID
 CoreMusicLibrary.prototype.getListing = function(sUid, objOptions) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getListing');
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::getListing');
 
-	return self.libraryReady
-		.then(function() {
-			//TODO implement use of nEntries and nOffset for paging of results
-			var arrayPath = objOptions.datapath;
-			var sSortBy = objOptions.sortby;
+    return self.libraryReady
+        .then(function() {
+            //TODO implement use of nEntries and nOffset for paging of results
+            var arrayPath = objOptions.datapath;
+            var sSortBy = objOptions.sortby;
 
-			var objRequested = self.getLibraryObject(sUid);
-			if (!sSortBy && arrayPath.length === 0) {
-				return objRequested;
-			} else if (!sSortBy) {
-				return self.getObjectInfo(objRequested, arrayPath);
-			} else if (arrayPath.length === 0) {
-				// TODO - return raw object?
-			} else {
-				// TODO - sort data before returning
-				return self.getObjectInfo(objRequested, arrayPath);
-			}
-		});
+            var objRequested = self.getLibraryObject(sUid);
+            if (!sSortBy && arrayPath.length === 0) {
+                return objRequested;
+            } else if (!sSortBy) {
+                return self.getObjectInfo(objRequested, arrayPath);
+            } else if (arrayPath.length === 0) {
+                // TODO - return raw object?
+            } else {
+                // TODO - sort data before returning
+                return self.getObjectInfo(objRequested, arrayPath);
+            }
+        });
 }
 
 CoreMusicLibrary.prototype.getIndex = function(sUid) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreLibraryFS::getIndex');
-	return libQ.resolve(self.libraryIndex[sUid].children);
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreLibraryFS::getIndex');
+    return libQ.resolve(self.libraryIndex[sUid].children);
 }
 
 CoreMusicLibrary.prototype.addQueueUids = function(arrayUids) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::addUidsToQueue');
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::addUidsToQueue');
 
-	return self.libraryReady
-		.then(function () {
-			var arrayQueueItems = [];
+    return self.libraryReady
+        .then(function () {
+            var arrayQueueItems = [];
 
-			libFast.map(arrayUids, function(sCurrentUid) {
-				var objCurrent = self.getLibraryObject(sCurrentUid);
-				if (objCurrent.type === 'track') {
-					arrayQueueItems.push(self.makeQueueItem(objCurrent));
-				} else {
-					libFast.map(Object.keys(objCurrent.trackuids), function(sCurrentKey) {
-						// TODO - allow adding tracks per a given sort order
-						var objCurrentTrack = self.getLibraryObject(sCurrentKey);
-						arrayQueueItems.push(self.makeQueueItem(objCurrentTrack));
-					});
-				}
-			});
-			self.commandRouter.addQueueItems(arrayQueueItems);
-		});
+            libFast.map(arrayUids, function(sCurrentUid) {
+                var objCurrent = self.getLibraryObject(sCurrentUid);
+                if (objCurrent.type === 'track') {
+                    arrayQueueItems.push(self.makeQueueItem(objCurrent));
+                } else {
+                    libFast.map(Object.keys(objCurrent.trackuids), function(sCurrentKey) {
+                        // TODO - allow adding tracks per a given sort order
+                        var objCurrentTrack = self.getLibraryObject(sCurrentKey);
+                        arrayQueueItems.push(self.makeQueueItem(objCurrentTrack));
+                    });
+                }
+            });
+            self.commandRouter.addQueueItems(arrayQueueItems);
+        });
 }
 
 CoreMusicLibrary.prototype.makeQueueItem = function(objTrack) {
-	var self = this;
+    var self = this;
 
-	for (i = 0; i < self.servicePriority.length; i++) {
-		if (self.servicePriority[i] in objTrack.uris) {
-			var objQueueItem = objTrack.uris[self.servicePriority[i]];
-			objQueueItem.service = self.servicePriority[i];
-			var objTrackInfo = self.getObjectInfo(objTrack, self.queueItemDataPath);
+    for (i = 0; i < self.servicePriority.length; i++) {
+        if (self.servicePriority[i] in objTrack.uris) {
+            var objQueueItem = objTrack.uris[self.servicePriority[i]];
+            objQueueItem.service = self.servicePriority[i];
+            var objTrackInfo = self.getObjectInfo(objTrack, self.queueItemDataPath);
 
-			libFast.map(Object.keys(objTrackInfo), function(sCurField) {
-				objQueueItem[sCurField] = objTrackInfo[sCurField];
-			});
+            libFast.map(Object.keys(objTrackInfo), function(sCurField) {
+                objQueueItem[sCurField] = objTrackInfo[sCurField];
+            });
 
-			return objQueueItem;
-		}
-	}
-	return {};
+            return objQueueItem;
+        }
+    }
+    return {};
 }
 
 CoreMusicLibrary.prototype.pushError = function(sReason) {
-	var self = this;
-	self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::pushError(' + sReason + ')');
+    var self = this;
+    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::pushError(' + sReason + ')');
 
-	// Return a resolved empty promise to represent completion
-	return libQ.resolve();
+    // Return a resolved empty promise to represent completion
+    return libQ.resolve();
 }
 
 //Retrieve Browse Sources
 
 
 CoreMusicLibrary.prototype.getBrowseSources = function() {
-	var self = this;
+    var self = this;
 
+    return self.browseSources;
+}
 
-	return self.browseSources;
+CoreMusicLibrary.prototype.getVisibleBrowseSources = function() {
+    var self = this;
 
+    var visibleSources = self.setDisabledBrowseSources(self.browseSources);
+    return visibleSources;
 }
 
 CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
-	var self = this;
+    var self = this;
 
-	if(data.name!= undefined) {
-	    self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
+    if(data.name!= undefined) {
+        self.commandRouter.pushConsoleMessage('[' + Date.now() + '] ' + 'CoreMusicLibrary::Adding element ' + data.name);
 
         var replaced=false;
 
@@ -242,9 +248,9 @@ CoreMusicLibrary.prototype.addToBrowseSources = function(data) {
         }
         if(replaced===false)
             self.browseSources.push(data);
-	}
-	var response = self.getBrowseSources();
-	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+    }
+    var response = self.getBrowseSources();
+    return self.pushBrowseSources(response);
 }
 
 CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
@@ -256,14 +262,14 @@ CoreMusicLibrary.prototype.removeBrowseSource = function(name) {
                 return true;
         });
     }
-	var response = self.getBrowseSources();
-	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+    var response = self.getBrowseSources();
+    return self.pushBrowseSources(response);
 }
 
 CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
     var self = this;
 
-    if(data.name!= undefined) {
+    if(data && data.name!= undefined) {
         for(var i in self.browseSources)
         {
             var source=self.browseSources[i];
@@ -273,18 +279,66 @@ CoreMusicLibrary.prototype.updateBrowseSources = function(name,data) {
                 source.uri=data.uri;
                 source.plugin_type=data.plugin_type;
                 source.plugin_name=data.plugin_name;
+                if (data.albumart != undefined) {
+                    source.albumart=data.albumart;
+                }
             }
         }
     }
-	var response = self.getBrowseSources();
-	return self.commandRouter.broadcastMessage('pushBrowseSources', response);
+    var response = self.getBrowseSources();
+
+    return self.pushBrowseSources(response);
 }
 
-CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
+CoreMusicLibrary.prototype.setSourceActive = function(uri) {
     var self = this;
 
+    for(var i in self.browseSources)
+    {
+        var source=self.browseSources[i];
+        if(source.uri==uri) {
+            source.active = true;
+        } else {
+            source.active = false;
+        }
+    }
+
+    var response = self.getBrowseSources();
+
+    return self.pushBrowseSources(response);
+}
+
+CoreMusicLibrary.prototype.executeBrowseSource = function(curUri, filters) {
+    var self = this;
+    var promise=libQ.defer();
+
     var response;
-	//console.log('--------------------------'+curUri)
+    //console.log('--------------------------'+curUri)
+    if (curUri != undefined) {
+        try {
+            self.parseBrowseSource(curUri)
+                .then(function(result){
+                    return self.applyBrowseFilters(result, filters);
+                })
+                .then(function(result){
+                    promise.resolve(result);
+                })
+                .fail(function (error) {
+                    self.logger.error('Failed to execute browseSource: ' + error);
+                    promise.reject(error)
+                });
+        } catch(e) {
+            self.logger.error('Failed to execute browseSource: ' + e);
+        }
+
+    } else {
+        promise.resolve({});
+    }
+    return promise.promise;
+}
+
+CoreMusicLibrary.prototype.parseBrowseSource = function(curUri) {
+    var self = this;
 
     if (curUri.startsWith('favourites')) {
         return self.commandRouter.playListManager.listFavourites(curUri);
@@ -294,7 +348,9 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
 
         return this.search({"value": splitted[2]});
     } else if (curUri.startsWith('playlists') || curUri.startsWith('artists://') || curUri.startsWith('albums://') || curUri.startsWith('genres://')) {
-            return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
+        return self.commandRouter.executeOnPlugin('music_service','mpd','handleBrowseUri',curUri);
+    } else if (curUri.startsWith('upnp')) {
+        return self.commandRouter.executeOnPlugin('music_service','upnp_browser','handleBrowseUri',curUri);
     } else {
         for(var i in self.browseSources)
         {
@@ -310,28 +366,56 @@ CoreMusicLibrary.prototype.executeBrowseSource = function(curUri) {
         promise.resolve({});
         return promise.promise;
     }
-
 }
 
+CoreMusicLibrary.prototype.applyBrowseFilters = function(data, filters) {
+    var self = this;
+    var promise=libQ.defer();
+
+    if(!_.isEmpty(filters)) {
+        var filterObj = JSON.parse(JSON.stringify(data));
+    } else {
+        var filterObj = data;
+    }
+
+    // Offset
+    if (filters && filters.offset !== undefined)  {
+        var offset = self.validateFilterNumber(filters.offset);
+        if (offset) {
+            filterObj = self.applyBrowseOffset(filterObj, offset);
+        }
+    }
+
+    // Limit
+    if (filters && filters.limit !== undefined)  {
+        var limit = self.validateFilterNumber(filters.limit);
+        if (limit) {
+            filterObj = self.applyBrowseLimit(filterObj, limit);
+        }
+    }
+    promise.resolve(filterObj);
+
+    return promise.promise;
+}
 
 CoreMusicLibrary.prototype.search = function(data) {
-	var self = this;
+    var self = this;
 
-	var query = {};
-	var defer = libQ.defer();
+    var query = {};
+    var defer = libQ.defer();
     var deferArray=[];
-	var searcharray = [];
-	if (data.value) {
-		if (data.type) {
-			query = {"value": data.value, "type": data.type};
-		} else {
-			query = {"value": data.value};
-		}
+    var searcharray = [];
+    if (data.value) {
+        if (data.type) {
+            query = {"value": data.value, "type": data.type, "uri":data.uri};
+        } else {
+            query = {"value": data.value, "uri":data.uri};
+        }
 
         var executed=[];
 
 
-		var enableSelectiveSearch
+        var enableSelectiveSearch
         enableSelectiveSearch=this.commandRouter.sharedVars.get("selective_search")
 
 		/*
@@ -367,7 +451,7 @@ CoreMusicLibrary.prototype.search = function(data) {
             searchAll=true
         }
 
-		if(searchAll)
+        if(searchAll)
         {
             console.log("Searching all installed plugins")
             /**
@@ -415,117 +499,172 @@ CoreMusicLibrary.prototype.search = function(data) {
             }
         }
 
-		libQ.all(deferArray)
+        libQ.all(deferArray)
             .then(function (result) {
-
-                console.log("GOT EVERYTHING, SHOWING SEARCH RESULT")
+                self.logger.info('All search sources collected, pushing search results');
 
                 var searchResult={
                     "navigation": {
+                        "isSearchResult": true,
                         "lists": []
                     }
                 };
 
-
                 for(var i in result)
                 {
-                    if(result[i]!== undefined && result[i]!==null)
+                    if(result[i]!== undefined && result[i]!==null) {
                         searchResult.navigation.lists=searchResult.navigation.lists.concat(result[i]);
+                    }
                 }
-
-                fs.writeJson('searchResult.json', searchResult, err => {
-                    if (err) return console.error(err)
-
-                    console.log('success!')
-            })
-
+                if (!searchResult.navigation.lists.length) {
+                    var noResultTitle = {"type":"title","title":self.commandRouter.getI18nString('COMMON.NO_RESULTS'),"availableListViews":["list"], "items":[]};
+                    searchResult.navigation.lists[0]= noResultTitle
+                }
                 defer.resolve(searchResult);
             })
             .fail(function (err) {
-                console.log('Search error in Plugin: '+source.plugin_name+". Details: "+err);
+                self.loger.error('Search error in Plugin: '+source.plugin_name+". Details: "+err);
                 defer.reject(new Error());
             });
-	} else {
-
-	}
-	return defer.promise;
-}
-
-
-// Helper functions ------------------------------------------------------------------------------------
-
-// Create a URL safe hashkey for a given string. The result will be a constant length string containing
-// upper and lower case letters, numbers, '-', and '_'.
-function convertStringToHashkey(input) {
-    if (input === null) {
-        input = '';
+    } else {
 
     }
-
-	return libBase64Url.escape(libCrypto.createHash('sha256').update(input, 'utf8').digest('base64'));
+    return defer.promise;
 }
-
-// Takes a nested array of strings and produces a comma-delmited string. Example:
-// ['a', [['b', 'c'], 'd']] -> 'a, b, c, d'
-function flattenArrayToCSV(arrayInput) {
-	if (typeof arrayInput === "object") {
-		return libFast.reduce(arrayInput, function(sReturn, curEntry, nIndex) {
-			if (nIndex > 0) {
-				return sReturn + ", " + flattenArrayToCSV(curEntry);
-			} else {
-				return flattenArrayToCSV(curEntry);
-			}
-		},"");
-	} else {
-		return arrayInput;
-	}
-}
-
 
 CoreMusicLibrary.prototype.updateBrowseSourcesLang = function() {
-	var self = this;
+    var self = this;
 
-	console.log('Updating browse sources language');
+    console.log('Updating browse sources language');
 
-	for (var i in  self.browseSources) {
+    for (var i in  self.browseSources) {
 
-		if(self.browseSources[i]!==undefined) {
-			
-		switch(self.browseSources[i].uri) {
-			case 'favourites':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
-				break;
-			case 'playlists':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
-				break;
-			case 'music-library':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
-				break;
-			case 'artists://':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
-				break;
-			case 'albums://':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
-				break;
-			case 'genres://':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.GENRES');
-				break;
-			case 'radio':
-				self.browseSources[i].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
-				break;
-			case 'Last_100':
-				self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.LAST_100');
-				break;
-			default:
-			console.log('Cannot find translation for source'+self.browseSources[i].name)
-		}
+        if(self.browseSources[i]!==undefined) {
 
-		}
-	}
+            switch(self.browseSources[i].uri) {
+                case 'favourites':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.FAVOURITES');
+                    break;
+                case 'playlists':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.PLAYLISTS');
+                    break;
+                case 'music-library':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.MUSIC_LIBRARY');
+                    break;
+                case 'artists://':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ARTISTS');
+                    break;
+                case 'albums://':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.ALBUMS');
+                    break;
+                case 'genres://':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.GENRES');
+                    break;
+                case 'radio':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('WEBRADIO.WEBRADIO');
+                    break;
+                case 'Last_100':
+                    self.browseSources[i].name = self.commandRouter.getI18nString('COMMON.LAST_100');
+                    break;
+                default:
+                    console.log('Cannot find translation for source'+self.browseSources[i].name)
+            }
+
+        }
+    }
+    return this.pushBrowseSources(self.browseSources);
 }
 
 CoreMusicLibrary.prototype.goto=function(data){
-    var response = this.commandRouter.executeOnPlugin('music_service','mpd','goto',data);
-    return response;
+    var stateMachine = this.commandRouter.stateMachine
+    var curState=stateMachine.getTrack(stateMachine.currentPosition);
 
+    var response;
+
+    if(curState) {
+        data.uri = curState.uri
+        response = this.commandRouter.executeOnPlugin('music_service',curState.service,'goto',data);
+    }
+    else response = this.commandRouter.executeOnPlugin('music_service','mpd','goto',data);
+    return response;
 }
+
+CoreMusicLibrary.prototype.pushBrowseSources=function(data){
+    var self = this;
+
+    var visibleSources = self.setDisabledBrowseSources(data);
+    return this.commandRouter.broadcastMessage('pushBrowseSources', visibleSources);
+}
+
+CoreMusicLibrary.prototype.setDisabledBrowseSources=function(data){
+    var self = this;
+    var visibleSources = [];
+
+    try {
+        var disabledSources = self.commandRouter.executeOnPlugin('miscellanea','my_music','getDisabledSources','');
+        for (var i in data) {
+            var source = data[i];
+            if (!disabledSources.includes(source.uri)) {
+                visibleSources.push(source)
+            }
+        }
+    } catch(e) {
+        visibleSources = data;
+    }
+
+    return visibleSources;
+}
+
+CoreMusicLibrary.prototype.validateFilterNumber=function(filterNumber){
+    var self = this;
+
+    if (typeof filterNumber != 'number') {
+        filterNumber = parseInt(filterNumber);
+    }
+    if (typeof filterNumber == 'number' && filterNumber > 0) {
+        return filterNumber;
+    } else {
+    	return false;
+	}
+}
+
+CoreMusicLibrary.prototype.applyBrowseOffset=function(data, offset){
+    var self = this;
+
+    if (data && data.navigation && data.navigation.lists &&  data.navigation.lists.length) {
+        for (var i in data.navigation.lists) {
+            var list = data.navigation.lists[i];
+            list.count = list.items.length;
+            list.items.splice(0, offset);
+            if (list.filters === undefined) {
+                list.filters = {};
+            }
+            list.filters.offset = offset;
+        }
+        return data;
+    } else {
+        return data;
+    }
+}
+
+CoreMusicLibrary.prototype.applyBrowseLimit=function(data, limit){
+    var self = this;
+
+    if (data && data.navigation && data.navigation.lists &&  data.navigation.lists.length) {
+        for (var i in data.navigation.lists) {
+            var list = data.navigation.lists[i];
+			if(!list.count) {
+                list.count = list.items.length;
+			}
+            list.items = list.items.splice(0, limit);
+            if (list.filters === undefined) {
+                list.filters = {};
+            }
+			list.filters.limit = limit;
+        }
+        return data;
+    } else {
+        return data;
+    }
+}
+

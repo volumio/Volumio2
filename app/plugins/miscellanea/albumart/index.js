@@ -1,8 +1,8 @@
 'use strict';
 
 var exec = require('child_process').exec;
+var fork = require("child_process").fork;
 var libQ = require('kew');
-var nodetools = require('nodetools');
 var enableweb = true;
 var defaultwebsize = 'large';
 var cacheid = '';
@@ -28,28 +28,39 @@ AlbumArt.prototype.onVolumioStart = function() {
 
 	self.config = new (require('v-conf'))();
 	self.config.loadFile(configFile);
+	self.startAlbumartServer();
 
-	enableweb = self.config.get('enableweb', true);
-	defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
-	cacheid = self.config.get('cacheid', 0);
-	if (cacheid === 0) {
-	    cacheid = Math.floor(Math.random() * 1000);
-	    self.config.set('cacheid',cacheid)
+
+
+    return libQ.resolve();
+};
+
+AlbumArt.prototype.startAlbumartServer = function() {
+    var self = this;
+
+    enableweb = self.config.get('enableweb', true);
+    defaultwebsize = self.config.get('defaultwebsize', 'extralarge');
+    cacheid = self.config.get('cacheid', 0);
+    if (cacheid === 0) {
+        cacheid = Math.floor(Math.random() * 1000);
+        self.config.set('cacheid',cacheid)
     }
     metadataimage = self.config.get('metadataimage', false);
 
-	//Starting server
-	exec('/usr/local/bin/node '+__dirname+'/serverStartup.js '+self.config.get('port')+' '+self.config.get('folder'),
-		function (error, stdout, stderr) {
+    //Starting server
+    var albumartServerCmdArray = [self.config.get('port'),self.config.get('folder')];
+    var albumartServer = fork(__dirname+'/serverStartup.js', albumartServerCmdArray);
 
-			if (error !== null) {
-				console.log('Got an error: '+error);
-			}
-			else console.log('Album art server started up');
+    albumartServer.on('error', function(error) {
+        console.log('Albumart Server Error: ' + error);
+    });
 
-		});
-
-    return libQ.resolve();
+    albumartServer.on('close', function(error) {
+        console.log('Albumart Server FATAL ERROR: ' + error);
+        setTimeout(()=>{
+        	self.startAlbumartServer();
+		}, 5000)
+    });
 };
 
 AlbumArt.prototype.onStop = function() {
@@ -102,11 +113,11 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
     if (data != undefined && data.artist != undefined && enableweb) {
         //performing decode since we cannot assume client will pass decoded strings
 
-        artist = nodetools.urlDecode(data.artist);
+        artist = decodeURIComponent(data.artist);
 
         if(data.album)
         {
-            album = nodetools.urlDecode(data.album);
+            album = decodeURIComponent(data.album);
         }
         else
         {
@@ -119,7 +130,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
 			size=defaultwebsize;
 		}
 
-        web = '&web=' + nodetools.urlEncode(artist) + '/' + nodetools.urlEncode(album) + '/'+size;
+        web = '&web=' + encodeURIComponent(artist) + '/' + encodeURIComponent(album) + '/'+size;
     }
 	} catch (e) {
 	console.log('Cannot compose Albumart path')
@@ -132,7 +143,7 @@ AlbumArt.prototype.getAlbumArt = function (data, path,icon) {
     }
 
     if (path != undefined) {
-        url = url + '&path=' + nodetools.urlEncode(path);
+        url = url + '&path=' + encodeURIComponent(path);
     }
 
     if(icon!==undefined) {
@@ -182,7 +193,7 @@ AlbumArt.prototype.saveAlbumartOptions = function (data) {
 AlbumArt.prototype.clearAlbumartCache = function () {
 	var self = this;
 
-    exec('/bin/rm -rf /data/albumart/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+    exec('/bin/rm -rf /data/albumart/folder/* /data/albumart/metadata/* /data/albumart/web/*', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
             if (error) {
                 console.log('Cannot Delete Albumart Cache DirectoryB: ' + error);
                 self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('APPEARANCE.ALBUMART_SETTINGS'), self.commandRouter.getI18nString('APPEARANCE.ALBUMART_CACHE_CLEAR_ERROR'));

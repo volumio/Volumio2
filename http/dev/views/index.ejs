@@ -41,22 +41,21 @@
 		<button id='button-sshenable' class='control-websocket' disabled>ENABLE</button>
 		<button id='button-sshdisable' class='control-websocket' disabled>DISABLE</button>
 
-		<h3>Plugin Upload</h3>
-		<form ref='uploadForm'
-			  id='uploadForm'
-			  action='/plugin-upload'
-			  method='post'
-			  encType="multipart/form-data">
-			<input type="file" name="Choose Plugin" />
-			<input type='submit' value='Upload!' />
-		</form>
-
 		<h3>Send Log or bug report</h3>
 		<span id="log-message"></span>
 		<form class="bug-form">
 			<input id="bug-form-description" type="text" placeholder="Describe what you were doing/why you are sending the report." style="border: 1px solid black; width: 600px;"/>
 			<button id="bug-form-button" type="bug-form-submit">Send</button>
 			<button class="btn" id="copy-button" type="button" data-clipboard-demo data-clipboard-target="#bug-form-description" style="display:none">
+				Copy to clipboard
+			</button>
+		</form>
+
+		<h3>Device Unique Identification Code</h3>
+		<span id="hwuuid"></span>
+		<form class="hwuuid-form">
+			<input id="hwuuid-text" type="text" style="border: 1px solid black; width: 600px;"/>
+			<button class="btn" id="hwuuid-copy-button" type="button" data-clipboard-demo data-clipboard-target="#hwuuid-text" style="display:none">
 				Copy to clipboard
 			</button>
 		</form>

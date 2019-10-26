@@ -189,7 +189,7 @@ ControllerI2s.prototype.eepromDetect = function () {
 
 		});
 	} catch(e) {
-		//self.i2cDetect();
+        defer.resolve({eeeprom:''});
 	}
 	return defer.promise;
 };
@@ -379,7 +379,6 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 	var response =  '';
 
 	var outdevicename = data;
-	console.log('PROC')
 
 	for(var k = 0; k < dacdata.devices.length; k++)
 	{
@@ -439,10 +438,19 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {
 	var self = this;
-	var bootstring = 'dtoverlay='+ data + os.EOL;
-	var searchexp = new RegExp(i2sOverlayBanner + 'dtoverlay=.*' + os.EOL);
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    var bootstring = 'dtoverlay='+ data + os.EOL;
+    var searchexp = new RegExp(i2sOverlayBanner + 'dtoverlay=.*' + os.EOL);
+    var i2sFile = '/boot/config.txt';
+
+    if (devicename === 'Tinkerboard') {
+    	bootstring = 'intf:' + bootstring;
+        i2sFile = '/boot/hw_intf.conf';
+        searchexp = new RegExp(i2sOverlayBanner + 'intf:dtoverlay=.*' + os.EOL);
+	}
+
 	
-	fs.readFile('/boot/config.txt', 'utf8', function (err,configTxt) {
+	fs.readFile(i2sFile, 'utf8', function (err,configTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
@@ -456,7 +464,7 @@ ControllerI2s.prototype.writeI2SDAC = function (data) {
   				newConfigTxt = configTxt + os.EOL + i2sOverlayBanner + bootstring + os.EOL;
  			}			
 
-  			fs.writeFile('/boot/config.txt', newConfigTxt, 'utf8', function (err) {
+  			fs.writeFile(i2sFile, newConfigTxt, 'utf8', function (err) {
 				if (err) self.logger.error('Cannot write config.txt file: '+err);
   			});
   		}	
@@ -466,18 +474,25 @@ ControllerI2s.prototype.writeI2SDAC = function (data) {
 
 ControllerI2s.prototype.disableI2SDAC = function () {
 	var self = this;
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    var i2sFile = '/boot/config.txt';
 	var searchexp = new RegExp(os.EOL + os.EOL + '*' + i2sOverlayBanner + 'dtoverlay=.*' + os.EOL + '*');
+
+    if (devicename === 'Tinkerboard') {
+        i2sFile = '/boot/hw_intf.conf';
+        searchexp = new RegExp(i2sOverlayBanner + 'intf:dtoverlay=.*' + os.EOL);
+    }
 
 	this.config.set("i2s_enabled", false);
 
-	fs.readFile('/boot/config.txt', 'utf8', function (err,configTxt) {
+	fs.readFile(i2sFile, 'utf8', function (err,configTxt) {
   		if (err) {
 			self.logger.error('Cannot read config.txt file: '+err);
   		}
   		else {
   			configTxt = configTxt.replace(searchexp,os.EOL);
   			
-  			fs.writeFile('/boot/config.txt', configTxt, 'utf8', function (err) {
+  			fs.writeFile(i2sFile, configTxt, 'utf8', function (err) {
 				if (err) self.logger.error('Cannot write config.txt file: '+err);
   			});
   			
@@ -646,8 +661,7 @@ ControllerI2s.prototype.writeModulesFile = function (modules) {
 
 	exec("/usr/bin/sudo /bin/chmod 777 "+ modulesfile, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Cannot set permissions for /etc/modules: ' + error);
-
+            self.logger.error('Cannot set permissions for /etc/modules: ' + error);
 		} else {
 			var ws = fs.createWriteStream(modulesfile);
 			ws.cork();

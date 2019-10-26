@@ -1,14 +1,15 @@
 'use strict';
 
-var albumart = require('album-art');
 var Q = require('kew');
 var download = require('file-download');
 var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
-var nodetools = require('nodetools');
 var exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
+var apiKey = '4cb074e4b8ec4ee9ad3eb37d6f7eb240';
 var diskCache = true;
+var variant = 'none';
 
 var winston = require('winston');
 var logger = new (winston.Logger)({
@@ -21,9 +22,16 @@ var logger = new (winston.Logger)({
 	]
 });
 
+try {
+    variant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString().replace('\n','');
+} catch(e) {
+    variant = 'none';
+}
+
 var albumArtRootFolder = '/data/albumart/web';
 var mountAlbumartFolder= '/data/albumart/folder';
 var mountMetadataFolder= '/data/albumart/metadata';
+var mountPersonalFolder= '/data/albumart/personal';
 
 var setFolder = function (newFolder) {
 	//logger.info("Setting folder " + newFolder);
@@ -35,6 +43,9 @@ var setFolder = function (newFolder) {
 
     mountMetadataFolder= S(newFolder).ensureRight('/').s+'metadata/';
     fs.ensureDirSync(mountMetadataFolder);
+
+    mountPersonalFolder= S(newFolder).ensureRight('/').s+'personal/';
+    fs.ensureDirSync(mountPersonalFolder);
 };
 
 var searchOnline = function (defer, web) {
@@ -72,26 +83,48 @@ var searchOnline = function (defer, web) {
 	 * Loading album art from network
 	 */
 	var folder;
+	var personalFolder;
 
 	if(album)
     {
         folder= albumArtRootFolder + artist + '/' + album + '/';
+        personalFolder = mountPersonalFolder + 'album/' + artist + '/' + album + '/';
     }
     else
     {
         folder= albumArtRootFolder + artist + '/';
+        personalFolder = mountPersonalFolder + 'artist/' + artist + '/';
+    }
+
+    try {
+        var personalFiles = fs.readdirSync(personalFolder);
+        var allowedExtensions = ['jpg', 'jpeg', 'png'];
+        var extension = personalFiles[0].split('.').pop().toLowerCase();
+        if (allowedExtensions.indexOf(extension) > -1) {
+            return defer.resolve(personalFolder + personalFiles[0]);
+        }
+    } catch(e) {
+	    //console.log(e);
     }
 
 	var fileName = resolution;
-
-	fs.ensureDirSync(folder);
+	try {
+		fs.ensureDirSync(folder);
+	} catch(e) {
+		defer.reject(new Error(e));
+            	return defer.promise;
+	}
 	var infoPath = folder + 'info.json';
 
 	var infoJson = {};
 
 	if (fs.existsSync(infoPath) == false) {
 		fs.ensureFileSync(infoPath);
-		fs.writeJsonSync(infoPath, infoJson);
+        try {
+            fs.writeJsonSync(infoPath, infoJson);
+        } catch(e) {
+            console.log('Error in writing albumart JSON file: ' + e);
+        }
 	}
 
 	var stats = fs.statSync(infoPath);
@@ -113,9 +146,9 @@ var searchOnline = function (defer, web) {
     if (infoJson[resolution] == undefined) {
 
         try {
-            var decodedArtist=nodetools.urlDecode(artist);
-            var decodedAlbum=nodetools.urlDecode(album);
-            var decodedResolution=nodetools.urlDecode(resolution);
+            var decodedArtist = decodeURIComponent(artist);
+            var decodedAlbum = decodeURIComponent(album);
+            var decodedResolution = decodeURIComponent(resolution);
         } catch(e) {
            //console.log("ERROR getting albumart info from JSON file: " + e);
             defer.reject(new Error(err));
@@ -126,7 +159,7 @@ var searchOnline = function (defer, web) {
 			decodedAlbum = decodedAlbum|| null;
 		}
 
-		albumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
+        retrieveAlbumart(decodedArtist, decodedAlbum, decodedResolution, function (err, url) {
             if (err) {
                 //console.log("ERROR getting albumart: " + err + " for Infopath '" + infoPath + "'");
                 defer.reject(new Error(err));
@@ -160,8 +193,11 @@ var searchOnline = function (defer, web) {
                     return defer.promise;
                 }
             }
-			
-            fs.writeJsonSync(infoPath, infoJson);
+            try {
+                fs.writeJsonSync(infoPath, infoJson);
+            } catch(e) {
+                console.log('Error in writing albumart JSON file: ' + e);
+            }
         });
 	}
 	else {
@@ -210,7 +246,7 @@ var searchInFolder = function (defer, path, web, meta) {
 			//console.log("Searching for cover " + coverFile);
 			if (fs.existsSync(coverFile)) {
                 var size = fs.statSync(coverFile).size;
-                // Limit the size of local arts to about 5MB 
+                // Limit the size of local arts to about 5MB
                 if (size < 5000000) {
                     if (diskCache) {
                         var cacheFile=mountAlbumartFolder+'/'+coverFolder+'/extralarge.jpeg';
@@ -260,7 +296,9 @@ var searchMeta = function (defer, coverFolder, web, meta) {
         return searchOnline(defer, web);
 	}
 
-    var fileName = coverFolder + '/' + S(files[0]);
+	var middleFileIndex = Math.floor(files.length/2);
+    var fileName = coverFolder + '/' + S(files[middleFileIndex]);
+
     fs.stat(fileName, function (err, stats) {
         if (err) {
             return searchOnline(defer, web);
@@ -275,7 +313,13 @@ var searchMeta = function (defer, coverFolder, web, meta) {
                             var metaCacheFile = mountMetadataFolder+'/'+ coverFolder+'/metadata.jpeg';
                             var extract = '/usr/bin/exiftool -b -Picture "'+ fileName + '" > "' + metaCacheFile + '"';
 
-                            fs.ensureFileSync(metaCacheFile);
+                            try {
+                                fs.ensureFileSync(metaCacheFile);
+                            } catch(e) {
+                                console.log('ERROR: Cannot create metadata albumart folder: '+e)
+                            }
+
+
                             exec(extract, {uid: 1000, gid: 1000, encoding: 'utf8'},  function (error, stdout, stderr) {
                                 if (error) {
                                     return searchOnline(defer, web);
@@ -314,9 +358,9 @@ var processRequest = function (web, path, meta) {
 	}
 
 	if (path != undefined) {
-        path=nodetools.urlDecode(path);
+        path = decodeURIComponent(path);
 
-        path=sanitizeUri(path);
+        path = sanitizeUri(path);
 
         if(path.startsWith('/')){
         	if (path.startsWith('/tmp/')){
@@ -398,10 +442,12 @@ var processRequest = function (web, path, meta) {
 var processExpressRequest = function (req, res) {
     var rawQuery=req._parsedUrl.query;
 
-	var web = req.query.web;
-	var path = req.query.path;
+    var web = req.query.web;
+    var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
+    var sectionimage = req.query.sectionimage;
+    var maxage = 2628000; // 30d 10h
     var meta = false;
     if (req.query.metadata != undefined && req.query.metadata === 'true') {
         meta = true;
@@ -423,51 +469,318 @@ var processExpressRequest = function (req, res) {
     }
 
     //var starttime=Date.now();
-	var promise = processRequest(web, path, meta);
-	promise.then(function (filePath) {
-			//logger.info('Sending file ' + filePath);
+    var promise = processRequest(web, path, meta);
+    promise.then(function (filePath, maxage) {
+            //logger.info('Sending file ' + filePath);
 
             //var stoptime=Date.now();
             //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
-		    res.setHeader('Cache-Control', 'public, max-age=2628000')
-			res.sendFile(filePath);
-		})
-		.fail(function () {
-            res.setHeader('Cache-Control', 'public, max-age=2628000')
-		    if(icon!==undefined){
+            res.setHeader('Cache-Control', 'public, max-age=' + maxage);
+            res.sendFile(filePath);
+        })
+        .fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=' + maxage);
+            if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
-			} else if (sourceicon!==undefined) {
+            } else if (sectionimage!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
-                	var corepluginurl = '/volumio/app/plugins/' + sourceicon;
-                	var pluginurl = '/data/plugins/' + sourceicon;
-                	if (fs.existsSync(corepluginurl)) {
-                        res.sendFile(corepluginurl);
-                	} else {
-                    	res.sendFile(pluginurl);
-                	}
-            	}	catch(e) {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var sectionimageFile = pluginPaths[i] + sectionimage;
+                        if(fs.existsSync(sectionimageFile)) {
+                            return res.sendFile(sectionimageFile);
+                        }
+                    }
+                }catch(e) {
                     try{
                         res.sendFile(__dirname + '/default.jpg');
                     } catch(e) {
                         res.sendFile(__dirname + '/default.png');
                     }
-				}
-			} else {
-			    res.setHeader('Cache-Control', 'public, max-age=2628000')
+                }
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return res.sendFile(pluginIcon);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        res.sendFile(__dirname + '/default.jpg');
+                    } catch(e) {
+                        res.sendFile(__dirname + '/default.png');
+                    }
+                }
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=' + maxage);
                 try{
                     res.sendFile(__dirname + '/default.jpg');
                 } catch(e) {
                     res.sendFile(__dirname + '/default.png');
                 }
-			}
-		});
+            }
+        });
 };
+
+var processExpressRequestDirect = function (req, res) {
+    var rawQuery=req._parsedUrl.query;
+
+    var web = req.query.web;
+    var path = req.query.path;
+    var icon = req.query.icon;
+    var sourceicon = req.query.sourceicon;
+    var sectionimage = req.query.sectionimage;
+    var meta = false;
+    if (req.query.metadata != undefined && req.query.metadata === 'true') {
+        meta = true;
+    }
+
+    if(rawQuery !== undefined && rawQuery !== null)
+    {
+        var splitted=rawQuery.split('&');
+        for(var i in splitted)
+        {
+            var itemSplitted=splitted[i].split('=');
+            if(itemSplitted[0]==='web')
+                web=itemSplitted[1];
+            else if(itemSplitted[0]==='path')
+                path=itemSplitted[1];
+            else if(itemSplitted[0]==='icon')
+                icon=itemSplitted[1];
+        }
+    }
+
+    //var starttime=Date.now();
+    var promise = processRequest(web, path, meta);
+    promise.then(function (filePath) {
+        //logger.info('Sending file ' + filePath);
+
+        //var stoptime=Date.now();
+        //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
+        res.setHeader('Cache-Control', 'public, max-age=2628000')
+        return sendTinyArt(req, res, filePath);
+    })
+        .fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=2628000')
+            if(icon!==undefined){
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.svg');
+            } else if (sectionimage!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var sectionimageFile = pluginPaths[i] + sectionimage;
+                        if(fs.existsSync(sectionimageFile)) {
+                            return sendTinyArt(req, res, sectionimageFile);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        return sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        return sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return sendTinyArt(req, res, pluginIcon);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        return sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        return sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=2628000')
+                try{
+                    return sendTinyArt(req, res, __dirname + '/default.jpg');
+                } catch(e) {
+                    return sendTinyArt(req, res, __dirname + '/default.png');
+                }
+            }
+        });
+};
+
+/**
+ *    This method processes incoming request from express, for the tinyart function that provides a simpler url for arts, and only online fetching
+ *
+ *    To achieve this assign this function to a path like /:artist/:album/:resolution
+ **/
+var processExpressRequestTinyArt = function (req, res) {
+    var rawQuery=req.url;
+    var splitted = rawQuery.replace(/_/g, ' ').replace('/tinyart/', '').split('/').filter(function(el) { return el; });
+
+    if (splitted.length < 2) {
+        console.log('Error in tinart request: missing fields');
+    } else if (req.query.sourceicon) {
+        var sourceicon = req.query.sourceicon;
+    } else if (splitted.length === 2) {
+        // Tiny art for artists
+        var icon = 'users';
+        var web = encodeURIComponent(splitted[0]) + '//' + splitted[1];
+    } else if (splitted.length === 3) {
+        // Tiny art for albums
+        var icon ='dot-circle-o'
+        var web = encodeURIComponent(splitted[0]) + '/' + encodeURIComponent(splitted[1]) + '/' + splitted[2];
+    }
+    var promise = processRequest(web, '', false);
+    promise.then(function (filePath) {
+        return sendTinyArt(req, res, filePath)
+    })
+        .fail(function (e) {
+            if(icon!==undefined){
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.svg');
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return sendTinyArt(req, res, pluginIcon);
+                        }
+                    }
+                } catch(e) {
+                    try {
+                        sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else {
+                try{
+                    sendTinyArt(req, res, __dirname + '/default.jpg');
+                } catch(e) {
+                    sendTinyArt(req, res, __dirname + '/default.png');
+                }
+            }
+        });
+};
+
+var sendTinyArt = function (req, res, filePath) {
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            console.log('Error Reading Tinyart path: ' + err);
+        } else {
+            res.removeHeader('Transfer-Encoding');
+            res.removeHeader('Access-Control-Allow-Headers');
+            res.removeHeader('Access-Control-Allow-Methods');
+            res.removeHeader('Access-Control-Allow-Origin');
+            res.removeHeader('Cache-Control');
+            res.removeHeader('Content-Type');
+            res.removeHeader('X-Powered-By');
+            res.setHeader('Connection', 'Keep-Alive');
+            res.setHeader('Keep-Alive', 'imeout=15, max=767');
+            res.end(data, 'binary');
+        }
+    })
+}
 
 var sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
 }
 
+// Included this code as an effort to reduce dependencies
+// Original code at https://github.com/lacymorrow/album-art/tree/66755c918ece5093cf32d49f6263144f6669d695
+// Copyright MIT © Lacy Morrow https://lacymorrow.github.io/
+
+var retrieveAlbumart = function (artist, album, size, cb) {
+    if (typeof artist !== 'string') {
+        return cb('No valid artist supplied', '');
+    }
+    if (typeof album === 'function') {
+        cb = album;
+        album = size = null;
+    } else if (typeof size === 'function') {
+        cb = size;
+        size = null;
+    }
+
+    if (album === null) {
+        var data = '';
+        var https = require('https');
+        var artist = artist.replace ("&", "and");
+        var url = 'https://meta.volumio.org' + encodeURI('/metas/v1/getDatas?mode=artistArt&artist=' + artist + '&variant=' + variant);
+        https.get(url, function(resp){
+            resp.on('data', function(chunk){
+                data += chunk;
+            });
+            resp.on('end', function(){
+                try {
+                    var json = JSON.parse(data);
+                } catch(e) {
+                    return cb('JSON Error: ' + e, '');
+                }
+
+                if (json.success && json.data && json.data.length){
+                    cb(null, json.data);
+                } else  {
+                    // No image art found
+                    cb('Error: No image found.', '');
+                }
+            });
+        }).on("error", function(e){
+            return cb('Got error: ' + e.message);
+        });
+    } else {
+        var data = '';
+        var sizes = ['small', 'medium', 'large', 'extralarge', 'mega'];
+        var method = (album === null) ? 'artist' : 'album';
+        var http = require('http');
+        var artist = artist.replace ("&", "and");
+        var options = {
+            host: 'ws.audioscrobbler.com',
+            port: 80,
+            path: encodeURI('/2.0/?format=json&api_key=' + apiKey + '&method=' + method + '.getinfo&artist=' + artist + '&album=' + album)
+        };
+        http.get(options, function(resp){
+            resp.on('data', function(chunk){
+                data += chunk;
+            });
+            resp.on('end', function(){
+                try {
+                    var json = JSON.parse(data);
+                } catch(e) {
+                    return cb('JSON Error: ' + e, '');
+                }
+
+                if (typeof(json.error) !== 'undefined'){
+                    // Error
+                    return cb('JSON Error: ' + json.message, '');
+                } else if (sizes.indexOf(size) !== -1 && json[method] && json[method].image){
+                    // Return image in specific size
+                    json[method].image.forEach(function(e, i) {
+                        if (e.size === size){
+                            cb(null, e['#text']);
+                        }
+                    });
+                } else if (json[method] && json[method].image) {
+                    // Return largest image
+                    var i = json[method].image.length - 2;
+                    cb(null, json[method].image[i]['#text']);
+                } else {
+                    // No image art found
+                    cb('Error: No image found.', '');
+                }
+            });
+        }).on("error", function(e){
+            return cb('Got error: ' + e.message);
+        });
+    }
+
+
+};
 
 module.exports.processExpressRequest = processExpressRequest;
+module.exports.processExpressRequestTinyArt = processExpressRequestTinyArt;
+module.exports.processExpressRequestDirect = processExpressRequestDirect;
 module.exports.processRequest = processRequest;
 module.exports.setFolder = setFolder;

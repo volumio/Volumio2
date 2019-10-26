@@ -1,0 +1,29 @@
+[global]
+netbios name = {NAME}
+server string = Audiophile Music Player
+workgroup = WORKGROUP
+security = user
+map to guest = Bad User
+encrypt passwords = yes
+wins support = yes
+local master = no
+preferred master = no
+os level = 30
+
+[Internal Storage]
+        comment = {NAME} Internal Music Folder
+        path = /data/INTERNAL
+        read only = no
+        guest ok = yes
+
+[USB]
+        comment = {NAME} USB Music Folder
+        path = /mnt/USB
+        read only = no
+        guest ok = yes
+
+[NAS]
+        comment = {NAME} NAS Music Folder
+        path = /mnt/NAS
+        read only = no
+        guest ok = yes
