@@ -1,7 +1,7 @@
 {
-  "volumestart":{
+    "volumestart": {
     "type": "string",
-    "value": "disabled"
+    "value": "30"
   },
   "volumemax":{
     "type": "string",
