@@ -104,18 +104,12 @@ function InterfaceWebUI(context) {
 
             });
 		
-            connWebSocket.on('addPlay', function (data) {
-                var tracks=data;
-                var index=0;
-                if (data.list != undefined) {
-                  tracks=data.list;
-                  if (data.index != undefined)
-                    index=data.index;
-                }
-                self.commandRouter.addQueueItems(tracks)
-                        return self.commandRouter.volumioPlay(e.firstItemIndex+index);
-            });
+			connWebSocket.on('addPlay', function (data) {
 
+                self.commandRouter.addQueueItems(data)
+                    .then(function(e){
+                        return self.commandRouter.volumioPlay(e.firstItemIndex);
+                    });
 			});
 
 			connWebSocket.on('addPlayCue', function (data) {
@@ -437,12 +431,16 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var returnedData = self.musicLibrary.goto(data);
-				returnedData.then(function (result) {
-					selfConnWebSocket.emit('pushBrowseLibrary', result);
-				});
+				if (returnedData) {
+                    returnedData.then(function (result) {
+                        selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                    .fail(function () {
+                        // No goto method available
+                    });
+				}
 			});
-
-
+		
 			connWebSocket.on('GetTrackInfo', function (data) {
 				var selfConnWebSocket = this;
 				selfConnWebSocket.emit('pushGetTrackInfo', data);
@@ -1859,6 +1857,13 @@ function InterfaceWebUI(context) {
                 self.printToastMessage('error', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'),  self.commandRouter.getI18nString('SYSTEM.ERROR_DELETING_FOLDER'));
 				self.logger.error(error);
             });
+        });
+
+        connWebSocket.on('getDeviceHWUUID', function () {
+            var selfConnWebSocket = this;
+
+            var hwuuid = self.commandRouter.getHwuuid();
+            selfConnWebSocket.emit('pushDeviceHWUUID', hwuuid);
         });
 
 	});
