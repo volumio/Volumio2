@@ -479,7 +479,7 @@ CoreCommandRouter.prototype.replaceAndPlay = function (data) {
             		defer.resolve();
         	});
 		}
-    } else if (data.list && data.index) {
+    } else if (data.list!=undefined && data.index!=undefined) {
         this.stateMachine.addQueueItems(data.list)
             .then(()=>{
                 this.volumioPlay(data.index);
