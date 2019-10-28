@@ -485,7 +485,7 @@ CoreCommandRouter.prototype.replaceAndPlay = function (data) {
                 this.volumioPlay(data.index);
         		defer.resolve();
             });
-    } else if ((!(data.list!=undefined && data.index!=undefined) && data.item!=undefined && data.item.uri!=undefined)) {
+    } else if ( (data.list==undefined && data.index==undefined) && data.item!=undefined && data.item.uri!=undefined) {
         this.stateMachine.addQueueItems(data.item)
             .then((e)=>{
                 this.volumioPlay(e.firstItemIndex);
