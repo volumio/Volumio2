@@ -333,8 +333,8 @@
     "FULL_SETTINGS_SET_EXTENDED":"Ich möchte alle Einstellungen sehen",
     "SIMPLE_SETTINGS_SET":"Einfache Einstellungen",
     "SIMPLE_SETTINGS_SET_EXTENDED":"Ich möchte nur die nötigsten Einstellungen sehen",
-    "KEEP_PRESSED_TO_TURN_OFF_IN":"Keep pressed to turn off in",
-    "TURN_OFF_IN":"Turn off in"
+    "KEEP_PRESSED_TO_TURN_OFF_IN":"Zum Ausschalten, gedrückt halten für",
+    "TURN_OFF_IN":"Gedrückt halten für"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Meine Radiosender",
