@@ -518,6 +518,7 @@ CoreStateMachine.prototype.updateVolume = function (Volume) {
 
 //Gets current Volume and Mute Status
 CoreStateMachine.prototype.getcurrentVolume = function () {
+    var self = this;
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::getcurrentVolume');
 	this.commandRouter.volumioretrievevolume().then((volumeData)=>{
     	self.currentVolume = volumeData.vol;
