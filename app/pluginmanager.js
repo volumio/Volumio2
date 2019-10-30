@@ -1763,6 +1763,7 @@ PluginManager.prototype.checkIndex = function () {
 	var defer=libQ.defer();
 
 	coreConf.loadFile(__dirname+'/plugins/plugins.json');
+	self.fullPluginPath = self.pluginPath.concat(['/myvolumio/plugins/']);
 
 	// checking that all key exist
 	var categories=coreConf.getKeys();
@@ -1798,8 +1799,8 @@ PluginManager.prototype.checkIndex = function () {
 			var key = category + '.' + plugin;
 
 			var plugin_exists = false;
-			for (var d in self.pluginPath) {
-				var package_json = self.getPackageJson(self.pluginPath[d] + category + '/' + plugin);
+			for (var d in self.fullPluginPath) {
+				var package_json = self.getPackageJson(self.fullPluginPath[d] + category + '/' + plugin);
 				plugin_exists = plugin_exists | (package_json !== undefined);
 			}
 
@@ -1847,10 +1848,14 @@ PluginManager.prototype.getMyMusicPlugins = function () {
 
 		// TODO FIX 
 		if (plugin.isMyVolumioPlugin) {
+            plugin.active = false;
             plugin.enabled = this.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.enabled');
             if (this.myVolumioPluginManager.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
                 plugin.active = true;
             }
+            if (plugin.enabled === undefined) {
+                plugin.enabled = plugin.active;
+			}
 		}
 	}
 
