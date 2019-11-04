@@ -2118,9 +2118,8 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeArtistName = artistName.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
-
 		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array or albumartist
-			var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 		}
 		else {
             // This section is commented beacuse, although correct it results in some albums not playing.
