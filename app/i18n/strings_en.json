@@ -390,6 +390,9 @@
     "FEATURE_NOT_AVAILABLE":"Feature not available with current plan",
     "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"This feature cannot be enabled, since it's not available in your current MyVolumio Plan",
     "PLAN_REQUIRED":"is required to use this functionality",
-    "UPGRADE_YOUR_PLAN_NOW":"Upgrade your plan now"
+    "UPGRADE_YOUR_PLAN_NOW":"Upgrade your plan now",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio is not enabled on this device",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"To use this functionality, please enable MyVolumio on this device from your device list",
+    "GOTO_DEVICE_LIST":"Go to My Devices list"
   }
 }
