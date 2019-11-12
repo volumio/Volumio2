@@ -209,7 +209,8 @@
     "LOGIN_SUCCESS": "Erfolgreich eingeloggt",
     "LOGIN_FAIL":"Login fehlgeschlagen",
     "LOGGING_OUT":"Ausloggen",
-    "LOGOUT_SUCCESS":"Erfolgreich ausgeloggt"
+    "LOGOUT_SUCCESS":"Erfolgreich ausgeloggt",
+    "OR":"oder"
   },
   "APPEARANCE":{
     "APPEARANCE":"Aussehen",
@@ -261,7 +262,8 @@
     "SLEEP":"Schlaffunktion",
     "CREDITS":"Mitwirkende",
     "SHUTDOWN":"Herunterfahren",
-    "HELP":"Hilfe"
+    "HELP":"Hilfe",
+    "SOURCES":"Quellen"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Wecker",
@@ -383,5 +385,14 @@
     "UPDATE":"Aktualisierung",
     "CHECKING_FOR_UPDATES":"Aktualisierungen werden gesucht",
     "CHECKING_FOR_UPDATES_WAIT":"Bitte warten"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Funktion mit aktuellem Plan nicht verfügbar",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"Diese Funktion kann nicht aktiviert werden, da sie nicht Bestandteil deines aktuellen MyVolumio Plans ist",
+    "PLAN_REQUIRED":"wird für diese Funktion benötigt",
+    "UPGRADE_YOUR_PLAN_NOW":"Führe jetzt ein Plan-Upgrade durch",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio ist auf diesem Gerät nicht aktiviert",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"Um diese Funktion zu nutzen, aktiviere in der Geräteliste MyVolumio für dieses Gerät",
+    "GOTO_DEVICE_LIST":"Zur Geräteliste"
   }
 }
