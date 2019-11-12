@@ -209,7 +209,8 @@
     "LOGIN_SUCCESS": "Accesso eseguito",
     "LOGIN_FAIL":"Accesso Fallito",
     "LOGGING_OUT":"Uscita",
-    "LOGOUT_SUCCESS":"Uscita con successo"
+    "LOGOUT_SUCCESS":"Uscita con successo",
+    "OR":"o"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -384,5 +385,11 @@
     "UPDATE":"Aggiornamento",
     "CHECKING_FOR_UPDATES":"Controllando gli Aggiornamenti",
     "CHECKING_FOR_UPDATES_WAIT":"Attendere"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Funzionalità non disponibile nel piano corrente",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"Questa funzionalità non è inclusa nel piano MyVolumio corrente e non può essere attivata",
+    "PLAN_REQUIRED":"necessario per usare questa funzionalità",
+    "UPGRADE_YOUR_PLAN_NOW":"Cambia il tuo piano adesso"
   }
 }

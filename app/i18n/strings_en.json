@@ -209,7 +209,8 @@
     "LOGIN_SUCCESS": "Successfully logged in",
     "LOGIN_FAIL":"failed to log in",
     "LOGGING_OUT":"Logging out",
-    "LOGOUT_SUCCESS":"Successfully logged out"
+    "LOGOUT_SUCCESS":"Successfully logged out",
+    "OR":"or"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -384,5 +385,11 @@
     "UPDATE":"Update",
     "CHECKING_FOR_UPDATES":"Checking for Updates",
     "CHECKING_FOR_UPDATES_WAIT":"Please Wait"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Feature not available with current plan",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"This feature cannot be enabled, since it's not available in your current MyVolumio Plan",
+    "PLAN_REQUIRED":"is required to use this functionality",
+    "UPGRADE_YOUR_PLAN_NOW":"Upgrade your plan now"
   }
 }
