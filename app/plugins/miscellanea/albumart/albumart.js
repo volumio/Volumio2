@@ -566,7 +566,7 @@ var processExpressRequestDirect = function (req, res) {
         .fail(function () {
             res.setHeader('Cache-Control', 'public, max-age=2628000')
             if(icon!==undefined){
-                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.svg');
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.jpg');
             } else if (sectionimage!==undefined) {
                 var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
@@ -638,7 +638,7 @@ var processExpressRequestTinyArt = function (req, res) {
     })
         .fail(function (e) {
             if(icon!==undefined){
-                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.svg');
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.jpg');
             } else if (sourceicon!==undefined) {
                 var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
