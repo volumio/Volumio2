@@ -261,7 +261,8 @@
     "SLEEP":"Sleep",
     "CREDITS":"Crediti",
     "SHUTDOWN":"Spegni",
-    "HELP":"Aiuto"
+    "HELP":"Aiuto",
+    "SOURCES":"Sorgenti"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Sveglia",
