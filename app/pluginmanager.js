@@ -664,7 +664,7 @@ PluginManager.prototype.checkRequiredConfigurationParameters = function (require
 PluginManager.prototype.installPlugin = function (url) {
 	var self=this;
 	var defer=libQ.defer();
-	var modaltitle= 'Installing Plugin';
+	var modaltitle= self.coreCommand.getI18nString('PLUGINS.INSTALLING_PLUGIN');
 	var advancedlog = '';
 	var ended = false;
 	var downloadCommand;
@@ -682,7 +682,7 @@ PluginManager.prototype.installPlugin = function (url) {
 		downloadCommand = "/bin/mv /tmp/plugins/" + droppedFile + " /tmp/downloaded_plugin.zip";
 	}
 
-	self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
+	self.pushMessage('installPluginStatus',{'progress': 10, 'message': self.coreCommand.getI18nString('PLUGINS.DOWNLOADING_PLUGIN'),'title' : modaltitle, 'advancedLog': advancedlog});
 
 
 	exec(downloadCommand, function (error, stdout, stderr) {
@@ -698,7 +698,7 @@ PluginManager.prototype.installPlugin = function (url) {
 			self.rmDir('/tmp/plugins');
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			self.logger.info(currentMessage);
-			currentMessage = 'Creating folder on disk';
+			currentMessage = self.coreCommand.getI18nString('PLUGINS.CREATING_INSTALL_LOCATION');
 			advancedlog = advancedlog + "<br>" + currentMessage;
 
 			var pluginFolder = '/data/temp/downloaded_plugin';
@@ -713,28 +713,28 @@ PluginManager.prototype.installPlugin = function (url) {
 				}))
 				.then(self.unzipPackage.bind(self))
 				.then(function (e) {
-					currentMessage = 'Unpacking plugin';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.UNPACKING_PLUGIN');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
 				})
 				.then(self.checkPluginDoesntExist.bind(self))
 				.then(function (e) {
-					currentMessage = 'Checking for duplicate plugin';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.CHECKING_DUPLICATE_PLUGIN');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 50, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
 				})
 				.then(self.renameFolder.bind(self))
 				.then(function (e) {
-					currentMessage = 'Copying Plugin into location';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.COPYING_PLUGIN_TO_LOCATION');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 60, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
 				})
 				.then(self.moveToCategory.bind(self))
 				.then(function (e) {
-					currentMessage = 'Installing dependencies';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.INSTALLING_NECESSARY_UTILITIES');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					var logfile = '/tmp/installog';
@@ -761,7 +761,7 @@ PluginManager.prototype.installPlugin = function (url) {
 				})
 				.then(self.executeInstallationScript.bind(self))
 				.then(function (e) {
-					currentMessage = 'Adding plugin to registry';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.FINALIZING_INSTALLATION');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 90, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
@@ -778,7 +778,7 @@ PluginManager.prototype.installPlugin = function (url) {
                     currentMessage = name + ' ' + self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED') + ', ' + self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN_NOW_QUESTION');
 					var enablePayload = {'name':package_json.name, 'category':category, 'action':'enable'};
 					var buttons = [{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}, {'name':self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN'),'class': 'btn btn-info', 'emit':'pluginManager', 'payload':enablePayload}]
-					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':buttons});
+					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED'), 'advancedLog': advancedlog, 'buttons':buttons});
 					return folder;
 				})
 				.then(function () {
@@ -787,13 +787,13 @@ PluginManager.prototype.installPlugin = function (url) {
 					self.tempCleanup();
 				})
 				.fail(function (e) {
-					currentMessage = 'The following error occurred when installing the plugin: ' + e;
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.PLUGIN_INSTALL_ERROR_OCCURRED') + ' ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The following error occurred when installing the plugin: ' + e,
-						'title' : modaltitle+' Error',
-						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
+						'message': currentMessage,
+						'title' : modaltitle + ' ' + self.coreCommand.getI18nString('COMMON.ERROR'),
+						'buttons':[{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}],
 						'advancedLog': advancedlog
 					});
 
@@ -809,7 +809,7 @@ PluginManager.prototype.installPlugin = function (url) {
 PluginManager.prototype.updatePlugin = function (data) {
 	var self=this;
 	var defer=libQ.defer();
-	var modaltitle= 'Updating plugin';
+	var modaltitle= self.coreCommand.getI18nString('PLUGINS.UPDATING_PLUGIN');
 	var advancedlog = '';
 	var url = data.url;
 	var category = data.category;
@@ -827,7 +827,7 @@ PluginManager.prototype.updatePlugin = function (data) {
         downloadCommand = "/bin/mv /tmp/plugins/"+ droppedFile +" /tmp/downloaded_plugin.zip";
 	}
 
-    self.pushMessage('installPluginStatus',{'progress': 10, 'message': 'Downloading plugin','title' : modaltitle, 'advancedLog': advancedlog});
+    self.pushMessage('installPluginStatus',{'progress': 10, 'message': self.coreCommand.getI18nString('PLUGINS.DOWNLOADING_PLUGIN'),'title' : modaltitle, 'advancedLog': advancedlog});
 
 
     exec(downloadCommand, function (error, stdout, stderr) {
@@ -842,7 +842,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 			currentMessage = "END DOWNLOAD: "+url;
 			advancedlog = advancedlog + "<br>" + currentMessage;
 			self.logger.info(currentMessage);
-			currentMessage = 'Creating folder on disk';
+			currentMessage = self.coreCommand.getI18nString('PLUGINS.CREATING_INSTALL_LOCATION');
 			advancedlog = advancedlog + "<br>" + currentMessage;
 
 			var pluginFolder = '/data/temp/downloaded_plugin';
@@ -851,7 +851,7 @@ PluginManager.prototype.updatePlugin = function (data) {
 			self.stopPlugin(category,name)
 				.then(function(e)
 				{
-					self.pushMessage('installPluginStatus',{'progress': 20, 'message': 'Plugin stopped', 'title' : modaltitle});
+					self.pushMessage('installPluginStatus',{'progress': 20, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_STOPPED'), 'title' : modaltitle});
 					return e;
 				})
 				.then(self.pushMessage.bind(self, 'installPluginStatus', {
@@ -862,21 +862,21 @@ PluginManager.prototype.updatePlugin = function (data) {
 				}))
 				.then(self.unzipPackage.bind(self))
 				.then(function (e) {
-					currentMessage = 'Unpacking plugin';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.UNPACKING_PLUGIN');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
 				})
 				.then(self.renameFolder.bind(self))
 				.then(function (e) {
-					currentMessage = 'Updating Plugin Files';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.UPDATING_PLUGIN_FILES');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 60, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
 				})
 				.then(self.moveToCategory.bind(self))
 				.then(function (e) {
-					currentMessage = 'Installing dependencies';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.INSTALLING_NECESSARY_UTILITIES');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					var logfile = '/tmp/installog';
@@ -899,20 +899,20 @@ PluginManager.prototype.updatePlugin = function (data) {
 				})
 				.then(self.executeInstallationScript.bind(self))
 				.then(function (e) {
-					currentMessage = 'Adding plugin to registry';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.FINALIZING_INSTALLATION');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {'progress': 90, 'message': currentMessage, 'title' : modaltitle, 'advancedLog': advancedlog});
 					return e;
 				})
 				.then(function (folder) {
-					currentMessage = 'Plugin Successfully Installed';
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_UPDATED_PLUGIN');
 					advancedlog = advancedlog + "<br>" + currentMessage;
 
 					var package_json = self.getPackageJson(folder);
 					var name = package_json.name;
 					var category = package_json.volumio_info.plugin_type;
 
-					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':[{'name':'Close','class': 'btn btn-warning'}]});
+					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_COMPLETED'), 'advancedLog': advancedlog, 'buttons':[{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}]});
 					return folder;
 				})
 				.then(function () {
@@ -922,13 +922,13 @@ PluginManager.prototype.updatePlugin = function (data) {
 					self.enablePlugin(category,name);
 				})
 				.fail(function (e) {
-					currentMessage = 'The following error occurred when installing the plugin: ' + e;
+					currentMessage = self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_ERROR_OCCURRED') + ' ' + e;
 					advancedlog = advancedlog + "<br>" + currentMessage;
 					self.pushMessage('installPluginStatus', {
 						'progress': 0,
-						'message': 'The following error occurred when installing the plugin: ' + e,
-						'title' : modaltitle+' Error',
-						'buttons':[{'name':'Close','class': 'btn btn-warning'}],
+						'message': currentMessage,
+						'title' : self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_FAILED'),
+						'buttons':[{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}],
 						'advancedLog': advancedlog
 					});
 
@@ -1253,45 +1253,45 @@ PluginManager.prototype.unInstallPlugin = function (category,name) {
 	var defer=libQ.defer();
 
 	var key=category+'.'+name;
-	var modaltitle= 'Uninstalling Plugin '+name;
+	var modaltitle= self.coreCommand.getI18nString('PLUGINS.UNINSTALLING_PLUGIN') + ' '+name;
 	if(self.config.has(key))
 	{
 		self.logger.info("Uninstalling plugin "+name);
 		self.stopPlugin(category,name)
 			.then(function(e)
 			{
-				self.pushMessage('installPluginStatus',{'progress': 30, 'message': 'Plugin stopped', 'title' : modaltitle});
+				self.pushMessage('installPluginStatus',{'progress': 30, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_STOPPED'), 'title' : modaltitle});
 				return e;
 			}).
 			then(self.disablePlugin.bind(self,category,name))
 			.then(function(e)
 			{
-				self.pushMessage('installPluginStatus',{'progress': 60, 'message': 'Plugin disabled', 'title' : modaltitle});
+				self.pushMessage('installPluginStatus',{'progress': 60, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_DISABLED'), 'title' : modaltitle});
 				return e;
 			}).
             then(self.executeUninstallationScript.bind(self,category,name))
             .then(function(e)
             {
-                self.pushMessage('installPluginStatus',{'progress': 70, 'message': 'Plugin dependencies removed', 'title' : modaltitle});
+                self.pushMessage('installPluginStatus',{'progress': 70, 'message': self.coreCommand.getI18nString('PLUGINS.REMOVING_NECESSARY_UTILITIES'), 'title' : modaltitle});
                 return e;
             }).
 			then(self.removePluginFromConfiguration.bind(self,category,name))
 			.then(function(e)
 			{
-				self.pushMessage('installPluginStatus',{'progress': 90, 'message': 'Plugin removed from registry', 'title' : modaltitle});
+				self.pushMessage('installPluginStatus',{'progress': 90, 'message': self.coreCommand.getI18nString('PLUGINS.FINALIZING_UNINSTALL'), 'title' : modaltitle});
 				return e;
 			}).
 			then(self.pluginFolderCleanup.bind(self, true))
 			.then(function(e)
 			{
-				self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'Plugin uninstalled', 'title' : modaltitle, 'buttons':[{'name':'Close','class': 'btn btn-warning'}]});
+				self.pushMessage('installPluginStatus',{'progress': 100, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALLED'), 'title' : modaltitle, 'buttons':[{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}]});
 				return e;
 			}).
 			then(function(e){
 				defer.resolve();
 			})
 			.fail(function(e){
-				self.pushMessage('installPluginStatus',{'progress': 100, 'message': 'An error occurred uninstalling the plugin. Details: '+e, 'title' : modaltitle+' Error', 'buttons':[{'name':'Close','class': 'btn btn-warning'}]});
+				self.pushMessage('installPluginStatus',{'progress': 100, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALL_ERROR_OCCURRED') + ': ' + e, 'title' : self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALL_FAILED'), 'buttons':[{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}]});
 				defer.reject(new Error());
 			});
 	}
@@ -1676,7 +1676,7 @@ PluginManager.prototype.getPluginDetails = function (data) {
 			size: 'lg',
 			buttons: [
 				{
-					name: 'Close',
+					name: self.coreCommand.getI18nString('COMMON.CLOSE'),
 					class: 'btn btn-warning'
 				}
 			]
