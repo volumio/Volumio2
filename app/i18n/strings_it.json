@@ -210,7 +210,8 @@
     "LOGIN_FAIL":"Accesso Fallito",
     "LOGGING_OUT":"Uscita",
     "LOGOUT_SUCCESS":"Uscita con successo",
-    "OR":"o"
+    "OR":"o",
+    "SOURCES":"Sorgenti"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
