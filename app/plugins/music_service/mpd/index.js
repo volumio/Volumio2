@@ -1054,7 +1054,17 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                conf12 += data;
             }
 
-            fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
+            var additionalConfs = self.getSpecialCardConfig();
+            var specialSettings = '';
+            if (additionalConfs && additionalConfs.length) {
+                specialSettings = '### Device Special Settings'
+                for (var i in additionalConfs) {
+                    specialSettings = specialSettings + os.EOL + '                ' + additionalConfs[i];
+                }
+            }
+            var conf13 = conf12.replace("${special_settings}", specialSettings);
+
+            fs.writeFile("/etc/mpd.conf", conf13, 'utf8', function (err) {
                 if (err) {
                 	self.logger.info('Could not write mpd.conf:' + err);
                 }
@@ -4051,4 +4061,21 @@ ControllerMpd.prototype.deleteFolder = function(data){
 		}
         });
 	return defer.promise
+}
+
+ControllerMpd.prototype.getSpecialCardConfig = function(){
+    var self = this;
+
+    try {
+        var specialCardsConfig = libFsExtra.readJsonSync(__dirname + '/special_cards_config.json');
+    } catch(e) {
+        var specialCardsConfig = {};
+    }
+    var outdevName = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevicename');
+
+    if (specialCardsConfig[outdevName] && specialCardsConfig[outdevName].length) {
+    	return specialCardsConfig[outdevName]
+	} else {
+    	return null
+	}
 }
