@@ -776,8 +776,8 @@ PluginManager.prototype.installPlugin = function (url) {
 						var name = package_json.volumio_info.prettyName;
 					}
                     currentMessage = name + ' ' + self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED') + ', ' + self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN_NOW_QUESTION');
-					var enablePayload = {'category':category,'plugin':package_json.name, 'action':'enable'};
-					var buttons = [{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}, {'name':self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN'),'class': 'btn btn-info', 'emit':'enablePlugin', 'payload':enablePayload}]
+					var enablePayload = {'name':package_json.name, 'category':category, 'action':'enable'};
+					var buttons = [{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}, {'name':self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN'),'class': 'btn btn-info', 'emit':'pluginManager', 'payload':enablePayload}]
 					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':buttons});
 					return folder;
 				})
