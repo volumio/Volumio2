@@ -210,7 +210,8 @@
     "LOGIN_FAIL":"failed to log in",
     "LOGGING_OUT":"Logging out",
     "LOGOUT_SUCCESS":"Successfully logged out",
-    "OR":"or"
+    "OR":"or",
+    "SOURCES":"Sources"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
