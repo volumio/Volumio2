@@ -211,7 +211,8 @@
     "LOGGING_OUT":"Logging out",
     "LOGOUT_SUCCESS":"Successfully logged out",
     "OR":"or",
-    "SOURCES":"Sources"
+    "SOURCES":"Sources",
+    "CLOSE":"Close"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -363,7 +364,10 @@
     "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer",
     "CONFIRM_PLUGIN_INSTALL":"Install Plugin",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin",
-    "INSTALL":"Install"
+    "INSTALL":"Install",
+    "SUCCESSFULLY_INSTALLED":"Successfully Installed",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Do you want to enable the plugin now?",
+    "ENABLE_PLUGIN":"Enable Plugin"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",

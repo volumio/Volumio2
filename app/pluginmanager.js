@@ -768,14 +768,17 @@ PluginManager.prototype.installPlugin = function (url) {
 				})
 				.then(self.addPluginToConfig.bind(self))
 				.then(function (folder) {
-					currentMessage = 'Plugin Successfully Installed';
 					advancedlog = advancedlog + "<br>" + currentMessage;
-
 					var package_json = self.getPackageJson(folder);
-					var name = package_json.name;
-					var category = package_json.volumio_info.plugin_type;
-
-					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':[{'name':'Close','class': 'btn btn-warning'}]});
+                    var category = package_json.volumio_info.plugin_type;
+                    var name = package_json.name;
+					if (package_json.volumio_info && package_json.volumio_info.prettyName) {
+						var name = package_json.volumio_info.prettyName;
+					}
+                    currentMessage = name + ' ' + self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED') + ', ' + self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN_NOW_QUESTION');
+					var enablePayload = {'category':category,'plugin':package_json.name, 'action':'enable'};
+					var buttons = [{'name':self.coreCommand.getI18nString('COMMON.CLOSE'),'class': 'btn btn-warning'}, {'name':self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN'),'class': 'btn btn-info', 'emit':'enablePlugin', 'payload':enablePayload}]
+					self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title' : modaltitle+' Completed', 'advancedLog': advancedlog, 'buttons':buttons});
 					return folder;
 				})
 				.then(function () {
