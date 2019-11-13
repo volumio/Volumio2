@@ -1251,7 +1251,6 @@ function InterfaceWebUI(context) {
 
                 if (returnedData != undefined) {
                     returnedData.then(function (installedPLugins) {
-                        self.logger.info(JSON.stringify(installedPLugins));
                         selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
                     });
                 }
