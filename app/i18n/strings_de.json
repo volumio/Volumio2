@@ -43,7 +43,8 @@
     "MIXER_TYPE":"Art des Mischers",
 	"MIXER_TYPE_DOC":"Legt die Art des Mischers fest: Keine = Keine Lautstärke-Regelung. Software = Lautstärkeregler vorhanden, aber mit Einschränkungen bei der Tonqualität. Hardware = Lautstärkeregler vorhanden bei voller Tonqualität (empfohlen).",
 	"ADVANCED_AUDIO_TWEAKS":"Erweiterte Audio-Optimierung",
-	"AUDIO_RESAMPLING":"Audio Resampling",
+  "AUDIO_RESAMPLING":"Audio Resampling",
+    "AUDIO_RESAMPLING_DOC":"Diese Einstellung bietet Optionen für das Audio Resampling. Nur relevant für die Wiedergabe von lokalen Audiodateien. (Wirkt sich nicht auf Shairport oder Diensten von Drittanbietern wie Roon aus)",
 	"AUDIO_RESAMPLING_SETTINGS_SAVED":"Audio-Resampling-Einstellungen wurden gespeichert",
 	"TARGET_BITDEPTH":"Ziel-Bittiefe",
 	"TARGET_SAMPLERATE":"Ziel-Abtastrate",
@@ -80,7 +81,6 @@
     "PLAYBACK_MODE_DOC":"Du kannst das Wiedergabeverhalten einstellen: Durchlaufend ersetzt deine aktuelle Warteschlange mit den Titeln eines Albums oder einer Playlist. Einzeln fügt lediglich den Titel zur Warteschlange hinzu",
     "PLAYBACK_MODE_CONTINUOUS":"Durchlaufend",
     "PLAYBACK_MODE_SINGLE":"Einzeln"
-
   },
   "NETWORK": {
     "NETWORK_SETTINGS":"Netzwerkeinstellungen",
@@ -211,7 +211,8 @@
     "LOGGING_OUT":"Ausloggen",
     "LOGOUT_SUCCESS":"Erfolgreich ausgeloggt",
     "OR":"oder",
-    "SOURCES":"Quellen"
+    "SOURCES":"Quellen",
+    "CLOSE":"Schließen"
   },
   "APPEARANCE":{
     "APPEARANCE":"Aussehen",
@@ -363,7 +364,34 @@
     "PLUGIN_START_ERROR":"Dieses Plugin startet nicht. Bitte installiere eine aktualisierte Version oder kontaktiere den Entwickler des Plugins",
     "CONFIRM_PLUGIN_INSTALL":"Plugin installieren",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warnung: Community Plugins werden von dritten Personen entwikelt und können zu unerwarteten Systemverhalten und Stabilitätsproblemen führen. Möchtest du dieses Plugin wirklich installieren",
-    "INSTALL":"Installieren"
+    "INSTALL":"Installieren",
+    "SUCCESSFULLY_INSTALLED":"Installation erfolgreich",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Möchtest du das Plugin jetzt aktivieren?",
+    "ENABLE_PLUGIN":"Plugin aktivieren",
+    "DOWNLOADING_PLUGIN":"Plugin wird geladen",
+    "INSTALLING_PLUGIN":"Plugin wird installeirt",
+    "CREATING_INSTALL_LOCATION":"Erstelle Installationspfad",
+    "UNPACKING_PLUGIN":"Plugin wird entpackt",
+    "CHECKING_DUPLICATE_PLUGIN":"Prüfe, ob Plugin bereits existiert",
+    "COPYING_PLUGIN_TO_LOCATION":"Kopiere Plugin in sein Verzeichnis",
+    "INSTALLING_NECESSARY_UTILITIES":"Installiere benötigte Komponenten",
+    "FINALIZING_INSTALLATION":"Installation wird abgeschlossen",
+    "PLUGIN_INSTALL_COMPLETED":"Aktualisierung des Plugins abgeschlossen",
+    "PLUGIN_INSTALL_ERROR_OCCURRED":"Es ist ein Fehler während der Plugin-Installation aufgetreten",
+    "UPDATING_PLUGIN":"Plugin wird aktualisiert",
+    "PLUGIN_STOPPED":"Plugin wurde gestoppt",
+    "UPDATING_PLUGIN_FILES":"Aktualisiere Plugin-Dateien",
+    "SUCCESSFULLY_UPDATED_PLUGIN":"Plugin erfolgreich aktualisiert",
+    "PLUGIN_UPDATE_COMPLETED":"Aktualisierung des Plugins abgeschlossen",
+    "PLUGIN_UPDATE_FAILED":"Aktualisierung des Plugins fehlgeschlagen",
+    "PLUGIN_UPDATE_ERROR_OCCURRED":"Es ist ein Fehler während der Aktualisierung des Plugins aufgetreten",
+    "UNINSTALLING_PLUGIN":"Plugin wird deinstalliert",
+    "PLUGIN_DISABLED":"Plugin deaktiviert",
+    "REMOVING_NECESSARY_UTILITIES":"Entferne vom Plugin benötigte Komponenten",
+    "FINALIZING_UNINSTALL":"Deinstallation des Plugins wird abgeschlossen",
+    "PLUGIN_UNINSTALLED":"Plugin erfolgreich deinstalliert",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED":"Es ist ein Fehler während der Deinstallation des Plugins aufgetreten",
+    "PLUGIN_UNINSTALL_FAILED":"Deinstallation des Plugins fehlgeschlagen"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Glückwunsch",
