@@ -464,6 +464,7 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 };
 CoreCommandRouter.prototype.replaceAndPlay = function (data) {
 	var defer = libQ.defer();
+	var self = this;
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
@@ -479,7 +480,7 @@ CoreCommandRouter.prototype.replaceAndPlay = function (data) {
             		defer.resolve();
         	});
 		}
-    } else if (data.list && data.index) {
+    } else if (data.list && data.index !== undefined) {
         this.stateMachine.addQueueItems(data.list)
             .then(()=>{
                 this.volumioPlay(data.index);
