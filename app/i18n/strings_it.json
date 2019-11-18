@@ -209,7 +209,10 @@
     "LOGIN_SUCCESS": "Accesso eseguito",
     "LOGIN_FAIL":"Accesso Fallito",
     "LOGGING_OUT":"Uscita",
-    "LOGOUT_SUCCESS":"Uscita con successo"
+    "LOGOUT_SUCCESS":"Uscita con successo",
+    "OR":"o",
+    "SOURCES":"Sorgenti",
+    "CLOSE":"Chiudi"
   },
   "APPEARANCE": {
     "APPEARANCE":"Effetti Visivi",
@@ -261,7 +264,8 @@
     "SLEEP":"Sleep",
     "CREDITS":"Crediti",
     "SHUTDOWN":"Spegni",
-    "HELP":"Aiuto"
+    "HELP":"Aiuto",
+    "SOURCES":"Sorgenti"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Sveglia",
@@ -360,7 +364,34 @@
     "PLUGIN_START_ERROR":"Avvio del plugin è fallito. Aggiorna il plugin o contatta lo sviluppatore.",
     "CONFIRM_PLUGIN_INSTALL":"Installa Plugin",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Attenzione, i plugin sono sviluppati da terze parti e potrebbero inficiare le prestazioni del sistema o comportare instabilità. Volete proseguire con l'installazione",
-    "INSTALL":"Installa"
+    "INSTALL":"Installa",
+    "SUCCESSFULLY_INSTALLED":"Installato con successo",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Attivare il plugin ora?",
+    "ENABLE_PLUGIN":"Attiva Plugin",
+    "DOWNLOADING_PLUGIN":"Scaricando il plugin",
+    "INSTALLING_PLUGIN":"Installando il plugin",
+    "CREATING_INSTALL_LOCATION":"Creando la destinazione",
+    "UNPACKING_PLUGIN":"Estraendo il plugin",
+    "CHECKING_DUPLICATE_PLUGIN":"Controllando se vi sono plugin duplicati",
+    "COPYING_PLUGIN_TO_LOCATION":"Copiando il plugin nella destinazione",
+    "INSTALLING_NECESSARY_UTILITIES":"Installando i servizi accessori",
+    "FINALIZING_INSTALLATION":"Finalizzando l'installazione",
+    "PLUGIN_INSTALL_COMPLETED":"Installazione del plugin completata",
+    "PLUGIN_INSTALL_ERROR_OCCURRED":"Errore durante l'installazione del plugin",
+    "UPDATING_PLUGIN":"Aggiornando il plugin",
+    "PLUGIN_STOPPED":"Plugin fermato",
+    "UPDATING_PLUGIN_FILES":"Aggiornando i file del plugin",
+    "SUCCESSFULLY_UPDATED_PLUGIN":"Plugin aggiornato con successo",
+    "PLUGIN_UPDATE_COMPLETED":"Aggiornamento del plugin completato",
+    "PLUGIN_UPDATE_FAILED":"Aggiornamento del plugin fallito",
+    "PLUGIN_UPDATE_ERROR_OCCURRED":"Errore durante l'aggiornamento del plugin",
+    "UNINSTALLING_PLUGIN":"Disinstallando il plugin",
+    "PLUGIN_DISABLED":"Plugin disattivato",
+    "REMOVING_NECESSARY_UTILITIES":"Rimuovendo i servizi accessori",
+    "FINALIZING_UNINSTALL":"Finalizzando la disinstallazione",
+    "PLUGIN_UNINSTALLED":"Plugin disinstallato con successo",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED":"Errore durante la disinstallazione del plugin",
+    "PLUGIN_UNINSTALL_FAILED":"Disinstallazione del plugin fallita"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulazioni",
@@ -383,5 +414,14 @@
     "UPDATE":"Aggiornamento",
     "CHECKING_FOR_UPDATES":"Controllando gli Aggiornamenti",
     "CHECKING_FOR_UPDATES_WAIT":"Attendere"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Funzionalità non disponibile nel piano corrente",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"Questa funzionalità non è inclusa nel piano MyVolumio corrente e non può essere attivata",
+    "PLAN_REQUIRED":"necessario per usare questa funzionalità",
+    "UPGRADE_YOUR_PLAN_NOW":"Cambia il tuo piano adesso",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio non è attivo sul tuo dispositivo",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"Per usare quest funzionalità, attiva MyVolumio sul tuo dispositivo dalla tua lista di dispositivi",
+    "GOTO_DEVICE_LIST":"Vai alla mia lista di dispositivi"
   }
 }

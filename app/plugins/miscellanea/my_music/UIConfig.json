@@ -1,6 +1,6 @@
 {
   "page": {
-    "label": "TRANSLATE.COMMON.MY_MUSIC"
+    "label": "TRANSLATE.COMMON.SOURCES"
   },
   "sections": [
     {"coreSection":"my-music"},

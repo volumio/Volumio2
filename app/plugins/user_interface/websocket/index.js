@@ -1251,7 +1251,6 @@ function InterfaceWebUI(context) {
 
                 if (returnedData != undefined) {
                     returnedData.then(function (installedPLugins) {
-                        self.logger.info(JSON.stringify(installedPLugins));
                         selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
                     });
                 }
@@ -1818,15 +1817,6 @@ function InterfaceWebUI(context) {
             var enableDisableMyMusicPlugin = self.commandRouter.enableDisableMyMusicPlugin(data);
             enableDisableMyMusicPlugin.then(function(plugins) {
                 selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
-                var title = self.commandRouter.getI18nString('COMMON.DISABLED');
-                if (data.enabled) {
-                	title = self.commandRouter.getI18nString('COMMON.ENABLED');
-				}
-                selfConnWebSocket.emit('pushToastMessage', {
-                    type: 'success',
-                    title: title,
-                    message: data.prettyName
-                });
 			})
             .fail(function (error) {
                 self.logger.error(error);
