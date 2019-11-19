@@ -457,9 +457,9 @@ CoreMusicLibrary.prototype.search = function(data) {
             /**
              * Searching over all plugins
              */
-
-            for (var i = 0; i < self.browseSources.length; i++) {
-                var source=self.browseSources[i];
+            var searchableSources = self.getVisibleBrowseSources();
+            for (var i = 0; i < searchableSources.length; i++) {
+                var source=searchableSources[i];
 
                 var key=source.plugin_type+'_'+source.plugin_name;
                 if(executed.indexOf(key)==-1)
