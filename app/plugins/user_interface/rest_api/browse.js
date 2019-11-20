@@ -43,7 +43,7 @@ RESTApiBrowse.prototype.browseListing=function(req,res) {
             }]
         }};
 
-        var browseSourcesList = this.commandRouter.volumioGetBrowseSources();
+        var browseSourcesList = this.commandRouter.volumioGetVisibleBrowseSources();
         content.navigation.lists = browseSourcesList;
         res.json(content);
     } else {
