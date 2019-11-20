@@ -2244,3 +2244,17 @@ CoreCommandRouter.prototype.getHwuuid = function () {
 
     return self.executeOnPlugin('system_controller', 'system', 'getHwuuid', '');
 };
+
+CoreCommandRouter.prototype.setOauthData = function (data) {
+    var self = this;
+
+    var pluginCategory = data.plugin.split('/')[0];
+    var pluginName = data.plugin.split('/')[1];
+
+    var thisPlugin = this.pluginManager.getPlugin(pluginCategory, pluginName);
+    if (thisPlugin != undefined && typeof thisPlugin.oauthLogin === "function") {
+        return thisPlugin.oauthLogin(data);
+    } else {
+        self.logger.error('Could not execute OAUTH Login: no function for plugin ' + pluginCategory + ' ' + pluginName);
+	}
+};

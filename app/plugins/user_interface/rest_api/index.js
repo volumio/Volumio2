@@ -56,6 +56,9 @@ function interfaceApi(context) {
     api.post('/pushNotificationUrls', this.addPushNotificationUrls.bind(this));
     api.delete('/pushNotificationUrls', this.removePushNotificationUrls.bind(this));
 
+    // OAUTH
+    api.get('/oauth', this.system.oauth.bind(this.system));
+
 };
 
 interfaceApi.prototype.printConsoleMessage = function (message) {
