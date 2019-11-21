@@ -50,6 +50,7 @@ ControllerMpd.prototype.play = function (N) {
 
 //MPD Add
 ControllerMpd.prototype.add = function (data) {
+    var self = this;
 	this.commandRouter.pushToastMessage('success', data + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 	return this.sendMpdCommand('add', [data]);
 };
@@ -83,6 +84,7 @@ ControllerMpd.prototype.seek = function (timepos) {
 
 //MPD Random
 ControllerMpd.prototype.random = function (randomcmd) {
+    var self = this;
 	var string = randomcmd ? 1 : 0;
 	this.commandRouter.pushToastMessage('success', "Random", string === 1 ? self.commandRouter.getI18nString('COMMON.ON') : self.commandRouter.getI18nString('COMMON.OFF'));
 	return this.sendMpdCommand('random', [string])
@@ -90,6 +92,7 @@ ControllerMpd.prototype.random = function (randomcmd) {
 
 //MPD Repeat
 ControllerMpd.prototype.repeat = function (repeatcmd) {
+    var self = this;
 	var string = repeatcmd ? 1 : 0;
 	this.commandRouter.pushToastMessage('success', "Repeat", string === 1 ? self.commandRouter.getI18nString('COMMON.ON') : self.commandRouter.getI18nString('COMMON.ON'));
 	return this.sendMpdCommand('repeat', [string]);

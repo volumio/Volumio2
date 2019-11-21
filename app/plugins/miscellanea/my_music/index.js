@@ -53,7 +53,6 @@ ControllerMyMusic.prototype.onRestart = function () {
 ControllerMyMusic.prototype.getUIConfig = function () {
 	var self = this;
 
-	var self = this;
 	var lang_code = self.commandRouter.sharedVars.get('language_code');
 
 	var defer=libQ.defer();
