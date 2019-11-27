@@ -239,35 +239,43 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
         createDir = false;
     }
 
-    mountutil.mount(pointer, mountpoint, {"createDir": createDir, "fstype": fstype, "fsopts": fsopts}, function (result) {
-        if (result.error) {
+    try {
+        mountutil.mount(pointer, mountpoint, {"createDir": createDir, "fstype": fstype, "fsopts": fsopts}, function (result) {
+            if (result.error) {
 
-            if (result.error.indexOf('Permission denied') >= 0) {
-                result.error = 'Permission denied';
-            } else {
-                var splitreason = result.error.split('mount error');
-                // if the split does not match, splitreason[1] is undefined
-                if (splitreason.length > 1) result.error = splitreason[1];
-            }
-            responsemessage = {status:"fail", reason:result.error}
-            defer.resolve(responsemessage);
-            if (data.init) {
-                if (trial < 4) {
-                    trial++
-                    self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
-                    setTimeout(function () {
-                        self.mountShare({init:true, key:data.key, trial:trial});
-                    }, 5000);
+                if (result.error.indexOf('Permission denied') >= 0) {
+                    result.error = 'Permission denied';
                 } else {
-                    self.logger.info("Cannot mount NAS at system boot, trial number "+trial+" ,stopping");
+                    var splitreason = result.error.split('mount error');
+                    // if the split does not match, splitreason[1] is undefined
+                    if (splitreason.length > 1) result.error = splitreason[1];
                 }
-            }
-        } else {
-            responsemessage = {status:"success"}
-            defer.resolve(responsemessage);
+                responsemessage = {status:"fail", reason:result.error}
+                defer.resolve(responsemessage);
+                if (data.init) {
+                    if (trial < 4) {
+                        trial++
+                        self.logger.info("Cannot mount NAS "+mountid+" at system boot, trial number "+trial+" ,retrying in 5 seconds");
+                        setTimeout(function () {
+                            self.mountShare({init:true, key:data.key, trial:trial});
+                        }, 5000);
+                    } else {
+                        self.logger.info("Cannot mount NAS at system boot, trial number "+trial+" ,stopping");
+                    }
+                }
+            } else {
+                responsemessage = {status:"success"}
+                defer.resolve(responsemessage);
 
-        }
-    });
+            }
+        });
+    } catch(e) {
+        self.logger.error('Could not mount NAS: ' + e );
+        responsemessage = {status:"fail", reason:e}
+        defer.resolve(responsemessage);
+    }
+
+
 
     return defer.promise;
 };
