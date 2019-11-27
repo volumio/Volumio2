@@ -1255,13 +1255,17 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	this.commandRouter.pushConsoleMessage('CoreStateMachine::next');
 
 	if(this.isVolatile){
-        var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof volatilePlugin.next === "function") {
-            volatilePlugin.next();
+        if (this.volatileService) {
+            var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+            if (typeof volatilePlugin.next === "function") {
+                volatilePlugin.next();
+            } else {
+                this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.volatileService);
+            }
         } else {
-            this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.volatileService);
+            this.commandRouter.pushConsoleMessage('WARNING: Cannot execute Action because no volatile plugin is defined');
         }
-	} else{
+	} else {
 		//self.setConsumeUpdateService(undefined);
 		if (this.isConsume && this.consumeState.service != undefined) {
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
@@ -1395,13 +1399,17 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 	var self=this;
 
 	if(this.isVolatile){
-		var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof volatilePlugin.previous === "function") {
-            volatilePlugin.previous();
-        } else {
-            this.commandRouter.pushConsoleMessage('WARNING: No previous method for plugin ' + this.volatileService);
-        }
-	}else{
+		if (this.volatileService) {
+            var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
+            if (typeof volatilePlugin.previous === "function") {
+                volatilePlugin.previous();
+            } else {
+                this.commandRouter.pushConsoleMessage('WARNING: No previous method for plugin ' + this.volatileService);
+            }
+		} else {
+            this.commandRouter.pushConsoleMessage('WARNING: Cannot execute Action because no volatile plugin is defined');
+		}
+	} else {
 		//self.setConsumeUpdateService(undefined);
 		this.commandRouter.pushConsoleMessage('CoreStateMachine::previous');
 
