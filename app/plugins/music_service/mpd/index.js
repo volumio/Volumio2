@@ -358,6 +358,9 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 
 			}
 			return libQ.resolve(respobject);
+		})
+        .fail(function(error){
+        	self.logger.error('Could not send mpd command: ' + sCommand);
 		});
 };
 
@@ -2657,6 +2660,9 @@ ControllerMpd.prototype.scanFolder=function(uri)
                     }
                     else defer.resolve({});
                     });
+                })
+                .fail(function(error){
+                    self.logger.error('Could not scan mpd folder: ' + error);
                 });
 
             return defer.promise;
