@@ -1,7 +1,7 @@
 'use strict';
 
 var Q = require('kew');
-var download = require('file-download');
+var url = require('url');
 var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
@@ -169,17 +169,13 @@ var searchOnline = function (defer, web) {
                     var splitted = url.split('.');
                     var fileExtension = splitted[splitted.length - 1];
                     var diskFileName = uuid.v4() + '.' + fileExtension;
+                    var fileName = folder + diskFileName;
 
-                    var options = {
-                        directory: folder,
-                        filename: diskFileName
-                    };
-
-					//console.log("URL: " + url);
-                    download(url, options, function (err) {
-                        if (err) defer.reject(new Error(err));
-                        else {
-                            //waiting 2 secodns to flush data on disk. Should use a better method
+                    //console.log("URL: " + url);
+                    download(url, fileName, function (err) {
+                        if (err) {
+                            defer.reject(new Error(err));
+                        } else {
                             setTimeout(function(){
                                 defer.resolve(folder + diskFileName);
                             },500);
@@ -775,8 +771,25 @@ var retrieveAlbumart = function (artist, album, size, cb) {
             return cb('Got error: ' + e.message);
         });
     }
+};
 
+var download = function (uri, dest, cb) {
+    var url = require('url');
+    var protocol = url.parse(uri).protocol.slice(0, -1);
 
+    var request = require(protocol).get(uri, function(response) {
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+            var file = fs.createWriteStream(dest);
+            response.pipe(file);
+            file.on('finish', function() {
+                file.close(cb);
+            });
+        } else if (response.headers.location) {
+            download(response.headers.location, dest, cb);
+        } else {
+            cb(response.statusMessage)
+        }
+    });
 };
 
 module.exports.processExpressRequest = processExpressRequest;
