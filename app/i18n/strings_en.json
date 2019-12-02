@@ -248,8 +248,8 @@
     "METADATA_IMAGE":"Show embedded albumart",
     "METADATA_IMAGE_DOC":"When enabled, if no albumart file can be found in the folder, the system will attempt to extract any albumart embedded in your music files. This will most likely increase albumart loading times",
     "BROWSE_SOURCES_VISIBILITY":"Sources Visibility",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Enable Volumio3 Experimental User Interface",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Volumio3 Experimental User Interface",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Enable Experimental User Interface",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Experimental User Interface",
     "UPLOAD_FAILED":"Upload failed",
     "IMAGE_MUST_BE_LESS_THAN":"Image size must be less than"
   },
