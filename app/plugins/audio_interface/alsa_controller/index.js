@@ -993,7 +993,7 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 						mixer = mixer + ',1';
 					}
 				}
-                if (mixer.indexOf('Clock Validity') < 0) {
+                if (self.checkValidMixer(mixer)) {
                     mixers.push(mixer);
                 }
 
@@ -1094,7 +1094,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 						var line2 = line[0].split(',')
 						var mixerspace = line2[0].replace(/'/g, "");
 						var mixer = mixerspace.replace(" ", "");
-                        if (mixer.indexOf('Clock Validity') < 0) {
+                        if (self.checkValidMixer(mixer)) {
                             mixers.push(mixer);
                         }
 					}
@@ -1648,4 +1648,19 @@ ControllerAlsa.prototype.restorePreviousVolumeLevel  = function (volume, mute, s
         	//self.commandRouter.volumiosetvolume('unmute');
         }
     }, 4500)
+};
+
+ControllerAlsa.prototype.checkValidMixer  = function (mixerName) {
+    var self = this;
+
+    var invalidMixersNames = ['Clock Validity', 'Tx Source'];
+    var isValidMixer = true;
+
+    for (var i in invalidMixersNames) {
+        if (mixerName.indexOf(invalidMixersNames[i]) > -1){
+        	isValidMixer = false;
+		}
+	}
+
+	return isValidMixer
 };
