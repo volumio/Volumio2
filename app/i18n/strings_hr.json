@@ -248,8 +248,8 @@
     "METADATA_IMAGE":"Prikaži umetnute slike albuma",
     "METADATA_IMAGE_DOC":"Ako je omogućeno, ako se u mapi ne može pronaći nijedna albumska datoteka, sustav će pokušati izvući bilo koju sliku albuma ugrađenu u vaše glazbene datoteke. To će najvjerojatnije povećati vrijeme učitavanja albuma",
     "BROWSE_SOURCES_VISIBILITY":"Pretraživanje po izvorima",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Omogući Volumio3 eksperimentalno korisničko sučelje",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Omogućite Volumio3 eksperimentalno korisničko sučelje",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Omogući eksperimentalno korisničko sučelje",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Omogućite eksperimentalno korisničko sučelje",
     "UPLOAD_FAILED":"Prijenos nije uspio",
     "IMAGE_MUST_BE_LESS_THAN":"Veličina slike mora biti manja od"
   },

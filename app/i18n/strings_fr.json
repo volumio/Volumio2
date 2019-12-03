@@ -248,8 +248,8 @@
     "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
     "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement",
     "BROWSE_SOURCES_VISIBILITY":"Visibilité des sources",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Activer l'interface expérimentale de Volumio3",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface expérimentale de Volumio3",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Activer l'interface expérimentale",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface expérimentale",
     "UPLOAD_FAILED":"Upload failed",
     "IMAGE_MUST_BE_LESS_THAN":"L taille de l'image doit être infériieure à"
   },

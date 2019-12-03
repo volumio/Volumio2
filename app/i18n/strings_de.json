@@ -248,8 +248,8 @@
     "METADATA_IMAGE":"Eingebettete Albumbilder anzeigen",
     "METADATA_IMAGE_DOC":"Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern",
     "BROWSE_SOURCES_VISIBILITY":"Quellen Sichtbarkeit",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Aktiviere experimentelle Volumio3 Benutzeroberfläche",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Aktiviere experimentelle Volumio3 Benutzeroberfläche",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Aktiviere experimentelle Benutzeroberfläche",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Aktiviere experimentelle Benutzeroberfläche",
     "UPLOAD_FAILED":"Upload fehlgeschlagen",
     "IMAGE_MUST_BE_LESS_THAN":"Bildgröße darf nicht größer sein als"
   },

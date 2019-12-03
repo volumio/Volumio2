@@ -245,8 +245,8 @@
     "METADATA_IMAGE":"Gömülü Albüm resmini Göster",
     "METADATA_IMAGE_DOC":"Ektinleştirildiğinde, dizinde hiçbir albüm resmi dosyası yoksa , sistem müzik dosyalarına gömülü albüm resimlerini çıkarmaya çalışır. Bu büyük olasılıkla albüm resmi yükleme sürelerini artıracaktır",
     "BROWSE_SOURCES_VISIBILITY":"Kaynak Görünürlüğü",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Volumio3 Deneysel Kullanıcı Arayüzü Etkinleştirme",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Volumio3 Deneysel Kullanıcı Arayüzü Etkinleştir",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Deneysel Kullanıcı Arayüzü Etkinleştirme",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Deneysel Kullanıcı Arayüzü Etkinleştir",
     "UPLOAD_FAILED":"Yükleme başarısız",
     "IMAGE_MUST_BE_LESS_THAN":"Resim boyutu daha küçük olmalıdır"
   },
