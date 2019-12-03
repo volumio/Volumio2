@@ -27,6 +27,13 @@ kernelinstall() {
     apt-get update && apt-get install -y build-essential bc;
   fi
 
+  echo "Checking if other dependencies are installed"
+  if [ $(dpkg-query -W -f='${Status}' bison 2>/dev/null | grep -c "ok installed") -eq 0 ];
+  then
+    echo "Installing other dependencies essential"
+    apt-get update && apt-get install -y bison flex libssl-dev;
+  fi
+
   cd /home/volumio
   if [ -f "/boot/.firmware_revision_kernel" ]; then
     FIRMWARE_REV=`cat /boot/.firmware_revision_kernel`
