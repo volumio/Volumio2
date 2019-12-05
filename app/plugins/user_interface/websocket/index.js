@@ -305,14 +305,17 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('callMethod', function (dataJson) {
 				var promise;
 
-				var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
-				var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
+				try {
+                    var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
+                    var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
 
-                self.logger.info("CALLMETHOD: "+category+" "+name+" "+dataJson.method+" "+dataJson.data);
-				var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
-				if (promise != undefined) {
-							connWebSocket.emit(promise.message, promise.payload);
-				} else {
+                    self.logger.info("CALLMETHOD: "+category+" "+name+" "+dataJson.method+" "+dataJson.data);
+                    var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
+                    if (promise != undefined) {
+                        connWebSocket.emit(promise.message, promise.payload);
+                    }
+				} catch(e){
+					self.logger.error('Failed callmethod call: ' + e);
 				}
 			});
 
