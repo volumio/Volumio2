@@ -143,7 +143,7 @@ AirPlayInterface.prototype.startShairportSync = function () {
         }
 
         var conf = data;
-        conf = conf.replace("${name}", name);
+        conf = conf.replace("${name}", name.charAt(0).toUpperCase() + name.slice(1));
         conf = conf.replace("${device}", outdev);
         if (buffer_size_line && buffer_size_line.length) {
             conf = conf.replace("${buffer_size_line}", buffer_size_line);
