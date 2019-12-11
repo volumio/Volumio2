@@ -211,7 +211,7 @@
   "LOGGING_OUT":"Odhlasovanie",
   "LOGOUT_SUCCESS":"Úspešne odhlásený",
   "OR":"alebo",
-  "SOURCES":"Zdroje hudby",
+  "SOURCES":"Hudobné zdroje",
   "CLOSE":"Zatvoriť"
   },
   "APPEARANCE":{
@@ -265,7 +265,7 @@
     "CREDITS":"Poďakovanie",
     "SHUTDOWN":"Vypnúť",
     "HELP":"Pomoc",
-    "SOURCES":"Zdroje hudby"
+    "SOURCES":"Hudobné zdroje"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Budík",
