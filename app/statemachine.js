@@ -1257,7 +1257,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
 	if(this.isVolatile){
         if (this.volatileService) {
             var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-            if (typeof volatilePlugin.next === "function") {
+            if (volatilePlugin && typeof volatilePlugin.next === "function") {
                 volatilePlugin.next();
             } else {
                 this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.volatileService);
@@ -1401,7 +1401,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 	if(this.isVolatile){
 		if (this.volatileService) {
             var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-            if (typeof volatilePlugin.previous === "function") {
+            if (volatilePlugin && typeof volatilePlugin.previous === "function") {
                 volatilePlugin.previous();
             } else {
                 this.commandRouter.pushConsoleMessage('WARNING: No previous method for plugin ' + this.volatileService);
@@ -1518,7 +1518,7 @@ CoreStateMachine.prototype.setRandom = function (value) {
 
     if(this.isVolatile){
         var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof volatilePlugin.random === "function") {
+        if (volatilePlugin && typeof volatilePlugin.random === "function") {
             volatilePlugin.random(value);
         } else {
             this.commandRouter.pushConsoleMessage('WARNING: No random method for plugin ' + this.volatileService);
@@ -1535,7 +1535,7 @@ CoreStateMachine.prototype.setRepeat = function (value,repeatSingle) {
 
     if(this.isVolatile){
         var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof volatilePlugin.repeat === "function") {
+        if (volatilePlugin && typeof volatilePlugin.repeat === "function") {
             volatilePlugin.repeat(value,repeatSingle);
         } else {
             this.commandRouter.pushConsoleMessage('WARNING: No repeat method for plugin ' + this.volatileService);
@@ -1564,7 +1564,7 @@ CoreStateMachine.prototype.skipBackwards = function (data) {
 
     if(this.isVolatile){
         var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof volatilePlugin.skipBackwards === "function") {
+        if (volatilePlugin && typeof volatilePlugin.skipBackwards === "function") {
             volatilePlugin.skipBackwards(data);
         } else {
             this.commandRouter.pushConsoleMessage('WARNING: No skipBackwards method for plugin ' + this.volatileService);
@@ -1579,7 +1579,7 @@ CoreStateMachine.prototype.skipForward = function (data) {
 
     if(this.isVolatile){
         var volatilePlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.volatileService);
-        if (typeof volatilePlugin.skipForward === "function") {
+        if (volatilePlugin && typeof volatilePlugin.skipForward === "function") {
             volatilePlugin.skipForward(data);
         } else {
             this.commandRouter.pushConsoleMessage('WARNING: No skipForward method for plugin ' + this.volatileService);
