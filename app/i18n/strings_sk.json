@@ -209,7 +209,10 @@
   "LOGIN_SUCCESS": "Úspešne prihlásený",
   "LOGIN_FAIL":"Nepodarilo sa prihlásiť",
   "LOGGING_OUT":"Odhlasovanie",
-  "LOGOUT_SUCCESS":"Úspešne odhlásený"
+  "LOGOUT_SUCCESS":"Úspešne odhlásený",
+  "OR":"alebo",
+  "SOURCES":"Hudobné zdroje",
+  "CLOSE":"Zatvoriť"
   },
   "APPEARANCE":{
     "APPEARANCE":"Vzhľad",
@@ -246,7 +249,9 @@
     "METADATA_IMAGE_DOC":"Ak je povolené, systém sa pokúsi získať obrázok priamo z hudobných súborov. Toto zvyšuje čas načítavania obrázkov albumov.",
     "BROWSE_SOURCES_VISIBILITY":"Viditeľnosť zdrojov",
     "VOLUMIO3_EXPERIMENTAL_UI":"Povoliť experimentálne používateľské rozhranie",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Povoliť experimentálne používateľské rozhranie"
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Povoliť experimentálne používateľské rozhranie",
+    "UPLOAD_FAILED":"Nahrávanie zlyhalo",
+    "IMAGE_MUST_BE_LESS_THAN":"Veľkosť obrázka musí byť menšia ako"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"Moja hudba",
@@ -259,7 +264,8 @@
     "SLEEP":"Spánok",
     "CREDITS":"Poďakovanie",
     "SHUTDOWN":"Vypnúť",
-    "HELP":"Pomoc"
+    "HELP":"Pomoc",
+    "SOURCES":"Hudobné zdroje"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Budík",
@@ -358,7 +364,34 @@
     "PLUGIN_START_ERROR":"Tento plugin sa nedá spustiť. Nainštalujte aktualizovanú verziu alebo kontaktujte vývojára",
     "CONFIRM_PLUGIN_INSTALL":"Inštalovať Plugin",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Upozornenie, komunitné pluginy sú vyvíjané vývojármi tretích strán a môžu mať za následok neočakávané správanie a systémovú nestabilitiu. Naozaj chcete nainštalovať tento plugin",
-    "INSTALL":"Inštalovať"
+    "INSTALL":"Inštalovať",
+    "SUCCESSFULLY_INSTALLED":"Úspešne nainštalované",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Chcete zaplnúť plugin teraz?",
+    "ENABLE_PLUGIN":"Zapnúť Plugin",
+    "DOWNLOADING_PLUGIN":"Sťahovanie pluginu",
+    "INSTALLING_PLUGIN":"Inštalovanie pluginu",
+    "CREATING_INSTALL_LOCATION":"Vytvára sa miesto na inštaláciu",
+    "UNPACKING_PLUGIN":"Rozbaľovanie pluginu",
+    "CHECKING_DUPLICATE_PLUGIN":"Kontrola duplikátu pluginu",
+    "COPYING_PLUGIN_TO_LOCATION":"Kopíruje sa plugin na miesto",
+    "INSTALLING_NECESSARY_UTILITIES":"Inštalácia potrebných nástrojov",
+    "FINALIZING_INSTALLATION":"Dokončenie inštalácie",
+    "PLUGIN_INSTALL_COMPLETED":"Aktualizácia pluginu bola dokončená",
+    "PLUGIN_INSTALL_ERROR_OCCURRED":"Počas inštalácie pluginu sa vyskytla chyba",
+    "UPDATING_PLUGIN":"Aktualizácia pluginu",
+    "PLUGIN_STOPPED":"Plugin zastavený",
+    "UPDATING_PLUGIN_FILES":"Aktualizáciu súborov pluginu",
+    "SUCCESSFULLY_UPDATED_PLUGIN":"Plugin úspešne aktualizovaný",
+    "PLUGIN_UPDATE_COMPLETED":"Aktualizácia pluginu dokončená",
+    "PLUGIN_UPDATE_FAILED":"Nepodarilo sa aktualizovať plugin",
+    "PLUGIN_UPDATE_ERROR_OCCURRED":"Počas aktualizácie pluginu sa vyskytla neočakávaná chyba",
+    "UNINSTALLING_PLUGIN":"Odinštalovávanie pluginu",
+    "PLUGIN_DISABLED":"Plugin vypnutý",
+    "REMOVING_NECESSARY_UTILITIES":"Odstránenie nepotrebných nástrojov",
+    "FINALIZING_UNINSTALL":"Dokončenie odinštalovania pluginu",
+    "PLUGIN_UNINSTALLED":"Plugin úspešne odinštalovaný",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED":"Počas odinštalovávania pluginu nastala neočakávaná chyba",
+    "PLUGIN_UNINSTALL_FAILED":"Odinštalovanie pluginu zlyhalo"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Gratulujem",
@@ -381,5 +414,14 @@
     "UPDATE":"Aktualizovať",
     "CHECKING_FOR_UPDATES":"Kontrola aktualizácii",
     "CHECKING_FOR_UPDATES_WAIT":"Počkajte prosím"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Funkcia nie je k dispozícii pri súčasnom pláne",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"Túto funkciu nie je možné povoliť, pretože nie je k dispozícii vo vašom aktuálnom pláne MyVolumio",
+    "PLAN_REQUIRED":"je potrebný na použitie tejto funkcie",
+    "UPGRADE_YOUR_PLAN_NOW":"Inovujte teraz svoj plán",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio nie je na tomto zariadení povolené",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"Ak chcete používať túto funkciu, povoľte na tomto zariadení MyVolumio",
+    "GOTO_DEVICE_LIST":"Prejdite na Moje zariadenia"
   }
 }
