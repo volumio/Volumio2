@@ -36,7 +36,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
     self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
     config.loadFile(self.configFile);
 
-    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
+    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code', 'en'));
     self.createThumbnailPath();
 
     return libQ.resolve();

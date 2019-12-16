@@ -107,11 +107,13 @@ PluginManager.prototype.initializeConfiguration = function (package_json, plugin
 			var configurationFile = configurationFiles[i];
 
 			var destConfigurationFile = configFolder + configurationFile;
-			if (!fs.existsSync(destConfigurationFile)) {
-				fs.copySync(folder + '/' + configurationFile, destConfigurationFile);
-			}
-			else
-			{
+			if (self.checkConfigFileEmpty(destConfigurationFile)) {
+				try {
+                    fs.copySync(folder + '/' + configurationFile, destConfigurationFile);
+				} catch(e) {
+                    self.logger.error("Could not copy default configuration to " + destConfigurationFile);
+				}
+			} else {
 				var requiredConfigParametersFile=folder+'/requiredConf.json';
 				if (fs.existsSync(requiredConfigParametersFile)) {
 					self.logger.info("Applying required configuration parameters for plugin "+package_json.name);
@@ -1912,6 +1914,24 @@ PluginManager.prototype.enableDisableMyMusicPlugin = function (data) {
             })
 	}
 	return defer.promise
+}
+
+PluginManager.prototype.checkConfigFileEmpty = function (destConfigurationFile) {
+    var self=this;
+
+    if (!fs.existsSync(destConfigurationFile)){
+    	return true
+    } else {
+    	try {
+            if (fs.readFileSync(destConfigurationFile).toString().length){
+            	return false
+            } else {
+            	return true
+            }
+        }catch(e) {
+    		return true
+        }
+    }
 }
 
 
