@@ -48,7 +48,7 @@
     "music-metadata": "^3.6.0",
     "node-cache": "^4.1.1",
     "node-schedule": "^1.2.3",
-    "node-ssdp": "^3.2.5",
+    "node-ssdp": "^4.0.0",
     "node-tunein-radio": "^0.3.4",
     "node-uuid": "^1.4.8",
     "pidof": "^1.0.2",
