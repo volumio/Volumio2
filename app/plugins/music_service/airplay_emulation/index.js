@@ -462,25 +462,33 @@ AirPlayInterface.prototype.sendShairportStopCommand = function () {
     var self = this;
     var defer = libQ.defer();
 
+    var mode = 'killall';
+    //var mode = 'dbus';
+
     self.logger.info('Stopping Airplay Playback with DBUS Call');
 
-    exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Stop", function (error, stdout, stderr) {
-        if (error !== null) {
-            self.logger.info('Error stopping Airplay Playback with DBUS Call: ' + error);
-        } else {
-            setTimeout(()=>{
-                var killShairport = true;
-                if (killShairport) {
-                    self.gracefulRestart();
-                }
-            }, 500)
-            setTimeout(()=>{
-                // Waiting 500ms to make sure audio device is properly released
+    if (mode === 'dbus') {
+        exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Stop", function (error, stdout, stderr) {
+            if (error !== null) {
+                self.logger.info('Error stopping Airplay Playback with DBUS Call: ' + error);
+            } else {
+                setTimeout(()=>{
+                    // Waiting 500ms to make sure audio device is properly released
+                    defer.resolve();
+                },500)
+            }
+        });
+    } else {
+        exec('/usr/bin/sudo /bin/systemctl restart shairport-sync', function (error, stdout, stderr) {
+            if (error !== null) {
+                self.logger.info('Shairport-sync error: ' + error);
+            } else {
+                self.logger.info('Shairport-Sync retarted');
                 defer.resolve();
-            },4500)
-        }
-    });
-
+            }
+        });
+    }
+    
     return defer.promise
 };
 
