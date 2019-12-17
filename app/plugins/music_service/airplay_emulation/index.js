@@ -462,32 +462,19 @@ AirPlayInterface.prototype.sendShairportStopCommand = function () {
     var self = this;
     var defer = libQ.defer();
 
-    var mode = 'killall';
-    //var mode = 'dbus';
+    self.logger.info('Stopping Airplay Playback and sending pause command to client via USR2');
 
-    self.logger.info('Stopping Airplay Playback with DBUS Call');
-
-    if (mode === 'dbus') {
-        exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Stop", function (error, stdout, stderr) {
-            if (error !== null) {
-                self.logger.info('Error stopping Airplay Playback with DBUS Call: ' + error);
-            } else {
-                setTimeout(()=>{
-                    // Waiting 500ms to make sure audio device is properly released
-                    defer.resolve();
-                },500)
-            }
-        });
-    } else {
-        exec('/usr/bin/sudo /bin/systemctl restart shairport-sync', function (error, stdout, stderr) {
-            if (error !== null) {
-                self.logger.info('Shairport-sync error: ' + error);
-            } else {
-                self.logger.info('Shairport-Sync retarted');
-                defer.resolve();
-            }
-        });
-    }
+    exec('/usr/bin/sudo /bin/kill -USR2 $(pidof shairport-sync)', function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Cannot execute Shairport-sync USR2 kill: ' + error);
+        } else {
+            self.logger.info('Shairport-Sync paused with USR2');
+            setTimeout(()=>{
+                self.gracefulRestart();
+            },1000)
+            defer.resolve();
+        }
+    });
     
     return defer.promise
 };
@@ -495,6 +482,7 @@ AirPlayInterface.prototype.sendShairportStopCommand = function () {
 AirPlayInterface.prototype.gracefulRestart = function () {
     var self = this;
 
+    self.logger.info('Restarting Shairport-Sync after stop');
     exec('/usr/bin/sudo /bin/systemctl restart shairport-sync', function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
