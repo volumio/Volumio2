@@ -166,13 +166,12 @@ AirPlayInterface.prototype.startShairportSync = function () {
 };
 
 function startShairportSync(self) {
-    exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
+    exec('/usr/bin/sudo /bin/systemctl restart shairport-sync', function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
-        }
-        else {
+        } else {
             self.logger.info('Shairport-Sync Started');
-                self.startShairportSyncMeta();
+            self.startShairportSyncMeta();
         }
     });
 }
@@ -180,11 +179,10 @@ function startShairportSync(self) {
 AirPlayInterface.prototype.stopShairportSync = function () {
     var self = this;
 
-    exec("/usr/bin/sudo /usr/bin/killall shairport-sync", {uid:1000, gid:1000}, function (error, stdout, stderr) {
+    exec('/usr/bin/sudo /bin/systemctl stop shairport-sync', {uid:1000, gid:1000}, function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
-        }
-        else {
+        } else {
             self.logger.info('Shairport-Sync Stopped');
         }
     });
@@ -247,7 +245,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
                 callback: self.unsetVol.bind(self)
             });
             self.pushAirplayMeta();
-            }, 1000)
+        }, 1000)
 
 
         }
@@ -399,10 +397,10 @@ AirPlayInterface.prototype.stop = function () {
             self.stopShairportSync();
             setTimeout(()=> {
                 self.startShairportSync();
-            },5000)
+        },5000)
             setTimeout(()=> {
                 defer.resolve('');
-            },2500)
+        },2500)
         } else {
             defer.resolve('');
         }
@@ -459,7 +457,7 @@ AirPlayInterface.prototype.stopAirplay = function () {
             self.stopShairportSync();
             setTimeout(() => {
                 self.startShairportSync();
-            },5000)
+        },5000)
         }
     }
 };
