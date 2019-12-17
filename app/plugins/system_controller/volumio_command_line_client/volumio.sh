@@ -141,11 +141,17 @@ case "$1" in
                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random"
             fi
             ;;
-        startairplay)
-           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=startAirplay"
+        startairplayplayback)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=startAirplayPlayback"
         ;;
-        stopairplay)
-           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
+        stopairplayplayback)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplayPlayback"
+        ;;
+        airplayactive)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=airplayActive"
+        ;;
+        airplayinactive)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=airplayInactive"
         ;;
         usbattach)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioAttach"
