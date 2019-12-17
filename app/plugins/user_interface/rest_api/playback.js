@@ -200,22 +200,44 @@ RESTApiPlayback.prototype.playbackCommands=function(req, res) {
                     res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                 });
         }
-        else if(req.query.cmd == "startAirplay"){
+        else if(req.query.cmd == "startAirplayPlayback"){
             var timeStart = Date.now();
-            self.logStart('Client requests Start Airplay metadata parsing')
+            self.logStart('Client requests Start Airplay PlaybackRoutine')
                 .then(function () {
-                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'startAirplayMeta', '');
+                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'startAirplayPlayback', '');
                 })
                 .fail(self.pushError.bind(self))
                 .done(function () {
                     res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
                 });
         }
-        else if(req.query.cmd == "stopAirplay"){
+        else if(req.query.cmd == "stopAirplayPlayback"){
             var timeStart = Date.now();
-            self.logStart('Client requests Start Airplay metadata parsing')
+            self.logStart('Client requests Stop Airplay Playback')
                 .then(function () {
-                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'airPlayStop', '');
+                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'stopAirplayPlayback', '');
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else if(req.query.cmd == "airplayActive"){
+            var timeStart = Date.now();
+            self.logStart('Client requests AirplayActive')
+                .then(function () {
+                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'setAirplayActive', '');
+                })
+                .fail(self.pushError.bind(self))
+                .done(function () {
+                    res.json({'time':timeStart, 'response':req.query.cmd + " Success"});
+                });
+        }
+        else if(req.query.cmd == "airplayInactive"){
+            var timeStart = Date.now();
+            self.logStart('Client requests AirplayInactive')
+                .then(function () {
+                    self.commandRouter.executeOnPlugin('music_service', 'airplay_emulation', 'setAirplayInctive', '');
                 })
                 .fail(self.pushError.bind(self))
                 .done(function () {
