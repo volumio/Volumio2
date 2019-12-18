@@ -3516,7 +3516,12 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
 					var artist = self.searchFor(lines, i + 1, 'AlbumArtist:');
 				}
 				else {
-					var artist = self.searchFor(lines, i + 1, 'Artist:');
+                    if (artistsort) {						//Fix - now set by artistsort variable
+                        var findartist = 'AlbumArtist:';
+                    } else {
+                        var findartist = 'Artist:';
+                    }
+					var artist = self.searchFor(lines, i + 1, findartist);
 				}
                 var album = self.searchFor(lines, i + 1, 'Album:');
 				var genre = self.searchFor(lines, i + 1, 'Genre:');
