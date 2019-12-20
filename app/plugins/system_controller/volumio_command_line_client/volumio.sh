@@ -55,6 +55,8 @@ plugin publish                     publishes the plugin on git
 plugin install                     installs the plugin locally
 plugin update                      updates the plugin
 logdump <description>              dump logs to $LOGDUMP instead of uploading
+init-edit <initramfs filename>     unpacks the initramfs, feeds nano with the init script and upon nano exit, rebuilds initramfs
+
 
 [[VOLUMIO UPDATER]]
 updater forceupdate                Updates to latest version
@@ -96,6 +98,10 @@ sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/d
 
 kernelsource() {
 sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+}
+
+init-edit() {
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/init-edit.sh -f $1
 }
 
 case "$1" in
@@ -141,11 +147,17 @@ case "$1" in
                /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=random"
             fi
             ;;
-        startairplay)
-           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=startAirplay"
+        startairplayplayback)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=startAirplayPlayback"
         ;;
-        stopairplay)
-           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplay"
+        stopairplayplayback)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=stopAirplayPlayback"
+        ;;
+        airplayactive)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=airplayActive"
+        ;;
+        airplayinactive)
+           /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=airplayInactive"
         ;;
         usbattach)
            /usr/bin/curl "http://127.0.0.1:3000/api/v1/commands/?cmd=usbAudioAttach"
@@ -194,7 +206,10 @@ case "$1" in
 	    logdump)
 	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;
-        plugin)
+	    init-edit)
+		init-edit $2
+	    ;;
+	    plugin)
             if [ "$2" != "" ]; then
                 if [ "$2" == "init" ]; then
                     echo ""
