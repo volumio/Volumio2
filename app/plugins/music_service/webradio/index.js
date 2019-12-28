@@ -825,7 +825,7 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error("Cannot list Favourites"));
+            defer.reject(new Error("Cannot list MyWebRadios"));
         });
 
     return defer.promise;
