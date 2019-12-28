@@ -607,7 +607,7 @@ ControllerWebradio.prototype.explodeUri = function(data) {
         })
             .catch(function(err) {
                 self.logger.error(err);
-                defer.reject(new Error('Cannot retrieve details for stram ' + uri + ': ' + err));
+                defer.reject(new Error('Cannot retrieve details for stream ' + uri + ': ' + err));
             });
 
     } else {
@@ -825,7 +825,7 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error("Cannot list Favourites"));
+            defer.reject(new Error("Cannot list MyWebRadios"));
         });
 
     return defer.promise;
