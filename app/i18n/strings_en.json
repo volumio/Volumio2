@@ -212,7 +212,8 @@
     "LOGOUT_SUCCESS":"Successfully logged out",
     "OR":"or",
     "SOURCES":"Sources",
-    "CLOSE":"Close"
+    "CLOSE":"Close",
+    "CANNOT_LIST":"Cannot list"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
