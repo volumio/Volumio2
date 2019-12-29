@@ -793,7 +793,7 @@ PlaylistManager.prototype.commonGetPlaylistContent = function (folder, name) {
 		else {
 			fs.readJson(filePath, function (err, data) {
 				if (err)
-					defer.reject(new Error("Error reading playlist from" + filePath));
+					defer.reject(new Error("Error reading playlist from " + filePath));
 				else {
 					defer.resolve(data);
 				}
