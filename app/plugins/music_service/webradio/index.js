@@ -825,7 +825,7 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error("Cannot list MyWebRadios"));
+            defer.reject(new Error(self.commandRouter.getI18nString('COMMON.CANNOT_LIST') + ' ' + self.commandRouter.getI18nString('WEBRADIO.MY_WEB_RADIOS')));
         });
 
     return defer.promise;
@@ -884,7 +884,7 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error("Cannot list Favourites"));
+            defer.reject(new Error(self.commandRouter.getI18nString('COMMON.CANNOT_LIST' + ' ' + self.commandRouter.getI18nString('COMMON.FAVOURITES')));
         });
 
     return defer.promise;
