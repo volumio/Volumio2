@@ -352,7 +352,8 @@
     "POPULAR_RADIOS":"Popular Radios",
     "BEST_RADIOS":"Best Radios",
     "BY_LANGUAGE":"By Language",
-    "TALK_RADIOS":"Talk Radios"
+    "TALK_RADIOS":"Talk Radios",
+    "SHOUTCAST_ERROR":"An error occurred while querying SHOUTCAST"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
