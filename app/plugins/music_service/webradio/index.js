@@ -328,7 +328,7 @@ ControllerWebradio.prototype.listRadioGenres = function () {
 
                 defer.resolve(response);
             }
-            else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+            else defer.reject(new Error(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR')));
         });
 
     return defer.promise;
@@ -415,7 +415,7 @@ ControllerWebradio.prototype.listRadioForGenres = function (curUri) {
 
                 defer.resolve(response);
             }
-            else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+            else defer.reject(new Error(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR')));
         });
 
     return defer.promise;
@@ -511,7 +511,7 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 
                 defer.resolve(response);
             }
-            else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+            else defer.reject(new Error(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR')));
         });
 
 
@@ -1041,7 +1041,7 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
             }
             else
             {
-                self.commandRouter.logger.info('An error occurred while querying SHOUTCAST');
+                self.commandRouter.logger.info(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR'));
                 defer.resolve([]);
             }
         });
