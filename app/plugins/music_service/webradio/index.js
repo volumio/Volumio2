@@ -884,7 +884,7 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error(self.commandRouter.getI18nString('COMMON.CANNOT_LIST' + ' ' + self.commandRouter.getI18nString('COMMON.FAVOURITES')));
+            defer.reject(new Error(self.commandRouter.getI18nString('COMMON.CANNOT_LIST') + ' ' + self.commandRouter.getI18nString('COMMON.FAVOURITES')));
         });
 
     return defer.promise;
