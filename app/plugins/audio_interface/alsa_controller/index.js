@@ -68,7 +68,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 		this.updateVolumeSettings();
 	}
 
-	this.logger.debug("Creating shared var alsa.outputdevice");
+	self.logger.debug("Creating shared var alsa.outputdevice");
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
