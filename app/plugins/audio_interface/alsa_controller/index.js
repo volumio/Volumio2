@@ -970,6 +970,8 @@ ControllerAlsa.prototype.getAplayInfo = function () {
 }
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
+    var self = this;
+
 	var mixers = [];
 	var outdev = this.config.get('outputdevice');
 	if (outdev == 'softvolume'){
