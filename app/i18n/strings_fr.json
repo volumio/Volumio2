@@ -212,7 +212,8 @@
     "LOGOUT_SUCCESS":"Déconnexion avec succès",
     "OR":"ou",
     "SOURCES":"Sources",
-    "CLOSE":"Fermer"
+    "CLOSE":"Fermer",
+    "CANNOT_LIST":"Impossible de lister"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -351,7 +352,8 @@
     "POPULAR_RADIOS":"Radios populaires",
     "BEST_RADIOS":"Meilleures Radios",
     "BY_LANGUAGE":"Par Langue",
-    "TALK_RADIOS":"Emissions Radios"
+    "TALK_RADIOS":"Emissions Radios",
+    "SHOUTCAST_ERROR":"Une erreur s'est produite lors de l'accès à SHOUTCAST"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
