@@ -3,6 +3,7 @@ var execSync = require('child_process').execSync;
 var fs = require('fs-extra');
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
+var path = require('path');
 // Using port 3000 for the debug interface
 expressApp.set('port', 3000);
 
@@ -15,6 +16,8 @@ var albumart = require(__dirname + '/app/plugins/miscellanea/albumart/albumart.j
 albumart.setFolder('/data/albumart');
 
 expressApp.get('/albumart', albumart.processExpressRequest);
+expressApp.get('/tinyart/*', albumart.processExpressRequestTinyArt);
+expressApp.get('/albumartd', albumart.processExpressRequestDirect);
 
 expressApp.use(function (err, req, res, next) {
   /**
@@ -31,7 +34,11 @@ expressApp.use(function (err, req, res, next) {
 var commandRouter = new (require('./app/index.js'))(httpServer);
 
 expressApp.get('/?*', function (req, res) {
-  res.redirect('/');
+    if (process.env.VOLUMIO_3_UI === 'true') {
+        res.sendFile(path.join(__dirname,'http', 'www3', 'index.html'));
+    } else {
+        res.sendFile(path.join(__dirname,'http', 'www', 'index.html'));
+    }
 });
 
 process.on('uncaughtException', (error) => {

@@ -68,7 +68,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 		this.updateVolumeSettings();
 	}
 
-	this.logger.debug("Creating shared var alsa.outputdevice");
+	self.logger.debug("Creating shared var alsa.outputdevice='" + this.config.get('outputdevice') + "'");
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
 	this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
 	this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
@@ -222,10 +222,18 @@ ControllerAlsa.prototype.getUIConfig = function () {
 				}
 
 			}
-			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
-				value: 'Software',
-				label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
-			});
+			// Hide software volume for Primo Analog out
+            var avoidSoftwareMixer = false;
+            if (volumioDeviceName === 'primo' && outdevicename === 'Analog RCA Output') {
+                avoidSoftwareMixer = true;
+            }
+
+            if (!avoidSoftwareMixer) {
+                self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
+                    value: 'Software',
+                    label: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.SOFTWARE')
+                });
+			}
 
 			self.configManager.pushUIConfigParam(uiconf, 'sections[3].content[0].options', {
 				value: 'None',
@@ -723,10 +731,14 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
 			var outdevice = 'softvolume';
             self.config.set('outputdevice', outdevice);
             self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
+		} else {
+            self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
 		}
 	} else if (data.mixer_type.value === 'None'){
 		self.setConfigParam({key: 'mixer', value: ''});
 		var outdevice = self.config.get('outputdevice');
+        self.setConfigParam({key: 'volumemax', value: '100'});
+        self.restorePreviousVolumeLevel('100', false, false);
 		if (outdevice === 'softvolume'){
             var outdevice = self.config.get('softvolumenumber');
             this.config.set('outputdevice', outdevice);
@@ -958,6 +970,8 @@ ControllerAlsa.prototype.getAplayInfo = function () {
 }
 
 ControllerAlsa.prototype.getMixerControls  = function (device) {
+    var self = this;
+
 	var mixers = [];
 	var outdev = this.config.get('outputdevice');
 	if (outdev == 'softvolume'){
@@ -981,7 +995,7 @@ ControllerAlsa.prototype.getMixerControls  = function (device) {
 						mixer = mixer + ',1';
 					}
 				}
-                if (mixer.indexOf('Clock Validity') < 0) {
+                if (self.checkValidMixer(mixer)) {
                     mixers.push(mixer);
                 }
 
@@ -1082,7 +1096,7 @@ ControllerAlsa.prototype.setDefaultMixer  = function (device) {
 						var line2 = line[0].split(',')
 						var mixerspace = line2[0].replace(/'/g, "");
 						var mixer = mixerspace.replace(" ", "");
-                        if (mixer.indexOf('Clock Validity') < 0) {
+                        if (self.checkValidMixer(mixer)) {
                             mixers.push(mixer);
                         }
 					}
@@ -1538,6 +1552,9 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable  = function () {
 
     var cards = self.getAlsaCards();
     var outdev = this.config.get('outputdevice');
+    if (outdev === 'softvolume') {
+        outdev = self.config.get('softvolumenumber', 'none');
+	}
     var outdevName = this.config.get('outputdevicename');
     if (cards.length === 0) {
         var responseData = {
@@ -1633,4 +1650,19 @@ ControllerAlsa.prototype.restorePreviousVolumeLevel  = function (volume, mute, s
         	//self.commandRouter.volumiosetvolume('unmute');
         }
     }, 4500)
+};
+
+ControllerAlsa.prototype.checkValidMixer  = function (mixerName) {
+    var self = this;
+
+    var invalidMixersNames = ['Clock Validity', 'Tx Source'];
+    var isValidMixer = true;
+
+    for (var i in invalidMixersNames) {
+        if (mixerName.indexOf(invalidMixersNames[i]) > -1){
+        	isValidMixer = false;
+		}
+	}
+
+	return isValidMixer
 };

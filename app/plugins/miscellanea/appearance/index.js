@@ -36,7 +36,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
     self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
     config.loadFile(self.configFile);
 
-    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
+    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code', 'en'));
     self.createThumbnailPath();
 
     return libQ.resolve();
@@ -151,10 +151,10 @@ volumioAppearance.prototype.getUIConfig = function () {
                 self.logger.error(e)
             }
 
-            if (sysVariant === 'volumio') {
+            if (fs.existsSync('/volumio/http/www3')) {
                 self.configManager.setUIConfigParam(uiconf, 'sections[2].hidden', false);
             }
-
+            
             var showVolumio3UI = false;
             if (process.env.VOLUMIO_3_UI === 'true') {
                 showVolumio3UI = true;

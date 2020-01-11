@@ -1,6 +1,10 @@
 general =
 {
     name = "${name}";
+};
+
+diagnostics =
+{
     log_verbosity = 0;
 };
 
@@ -13,7 +17,10 @@ alsa =
 sessioncontrol =
 {
   allow_session_interruption = "yes";
-  run_this_after_play_ends = "/usr/local/bin/volumio stopairplay";
+  run_this_before_play_begins= "/usr/local/bin/volumio startairplayplayback";
+  run_this_after_play_ends = "/usr/local/bin/volumio stopairplayplayback";
+  run_this_before_entering_active_state="/usr/local/bin/volumio airplayactive";
+  run_this_after_exiting_active_state="/usr/local/bin/volumio airplayinactive";
 };
 
 metadata =

@@ -209,7 +209,11 @@
     "LOGIN_SUCCESS": "Successfully logged in",
     "LOGIN_FAIL":"failed to log in",
     "LOGGING_OUT":"Logging out",
-    "LOGOUT_SUCCESS":"Successfully logged out"
+    "LOGOUT_SUCCESS":"Successfully logged out",
+    "OR":"or",
+    "SOURCES":"Sources",
+    "CLOSE":"Close",
+    "CANNOT_LIST":"Cannot list"
   },
   "APPEARANCE":{
     "APPEARANCE":"Appearance",
@@ -245,8 +249,8 @@
     "METADATA_IMAGE":"Show embedded albumart",
     "METADATA_IMAGE_DOC":"When enabled, if no albumart file can be found in the folder, the system will attempt to extract any albumart embedded in your music files. This will most likely increase albumart loading times",
     "BROWSE_SOURCES_VISIBILITY":"Sources Visibility",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Enable Volumio3 Experimental User Interface",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Volumio3 Experimental User Interface",
+    "VOLUMIO3_EXPERIMENTAL_UI":"Enable Experimental User Interface",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Experimental User Interface",
     "UPLOAD_FAILED":"Upload failed",
     "IMAGE_MUST_BE_LESS_THAN":"Image size must be less than"
   },
@@ -261,7 +265,8 @@
     "SLEEP":"Sleep",
     "CREDITS":"Credits",
     "SHUTDOWN":"Shutdown",
-    "HELP":"Help"
+    "HELP":"Help",
+    "SOURCES":"Sources"
   },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Alarm Clock",
@@ -347,7 +352,8 @@
     "POPULAR_RADIOS":"Popular Radios",
     "BEST_RADIOS":"Best Radios",
     "BY_LANGUAGE":"By Language",
-    "TALK_RADIOS":"Talk Radios"
+    "TALK_RADIOS":"Talk Radios",
+    "SHOUTCAST_ERROR":"An error occurred while querying SHOUTCAST"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirm plugin uninstall",
@@ -360,7 +366,34 @@
     "PLUGIN_START_ERROR":"This plugin is failing to start. Please install updated version, or contact plugin developer",
     "CONFIRM_PLUGIN_INSTALL":"Install Plugin",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin",
-    "INSTALL":"Install"
+    "INSTALL":"Install",
+    "SUCCESSFULLY_INSTALLED":"Successfully Installed",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Do you want to enable the plugin now?",
+    "ENABLE_PLUGIN":"Enable Plugin",
+    "DOWNLOADING_PLUGIN":"Downloading plugin",
+    "INSTALLING_PLUGIN":"Installing plugin",
+    "CREATING_INSTALL_LOCATION":"Creating install location",
+    "UNPACKING_PLUGIN":"Unpacking plugin",
+    "CHECKING_DUPLICATE_PLUGIN":"Checking for duplicate plugin",
+    "COPYING_PLUGIN_TO_LOCATION":"Copying plugin to location",
+    "INSTALLING_NECESSARY_UTILITIES":"Installing necessary utilities",
+    "FINALIZING_INSTALLATION":"Finalizing installation",
+    "PLUGIN_INSTALL_COMPLETED":"Plugin update completed",
+    "PLUGIN_INSTALL_ERROR_OCCURRED":"An error occurred while installing the plugin",
+    "UPDATING_PLUGIN":"Updating plugin",
+    "PLUGIN_STOPPED":"Plugin stopped",
+    "UPDATING_PLUGIN_FILES":"Updating plugin files",
+    "SUCCESSFULLY_UPDATED_PLUGIN":"Successfully updated plugin",
+    "PLUGIN_UPDATE_COMPLETED":"Plugin update completed",
+    "PLUGIN_UPDATE_FAILED":"Plugin update failed",
+    "PLUGIN_UPDATE_ERROR_OCCURRED":"An error occurred while updating the plugin",
+    "UNINSTALLING_PLUGIN":"Uninstalling plugin",
+    "PLUGIN_DISABLED":"Plugin disabled",
+    "REMOVING_NECESSARY_UTILITIES":"Removing necessary utilities",
+    "FINALIZING_UNINSTALL":"Finalizing plugin uninstall",
+    "PLUGIN_UNINSTALLED":"Plugin successfully uninstalled",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED":"An error occurred while uninstalling the plugin",
+    "PLUGIN_UNINSTALL_FAILED":"Plugin uninstall failed"
   },
   "WIZARD":{
     "CONGRATULATIONS":"Congratulations",
@@ -383,5 +416,14 @@
     "UPDATE":"Update",
     "CHECKING_FOR_UPDATES":"Checking for Updates",
     "CHECKING_FOR_UPDATES_WAIT":"Please Wait"
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Feature not available with current plan",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"This feature cannot be enabled, since it's not available in your current MyVolumio Plan",
+    "PLAN_REQUIRED":"is required to use this functionality",
+    "UPGRADE_YOUR_PLAN_NOW":"Upgrade your plan now",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio is not enabled on this device",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"To use this functionality, please enable MyVolumio on this device from your device list",
+    "GOTO_DEVICE_LIST":"Go to My Devices list"
   }
 }

@@ -708,7 +708,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
 
-        if(data.ssid!=configuredSSID && configuredSSID.length > 0)
+        if(data.ssid!=configuredSSID && configuredSSID !== undefined && configuredSSID.length > 0)
         {
             var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 

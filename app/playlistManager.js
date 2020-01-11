@@ -134,7 +134,10 @@ PlaylistManager.prototype.removeFromPlaylist = function (name, service, uri) {
 };
 
 PlaylistManager.prototype.playPlaylist = function (name) {
-	var self = this;
+    var self = this;
+    
+	// notify potential clients / plugins of the playlist requested
+	self.commandRouter.broadcastMessage('playingPlaylist', name);
 
 	self.commandRouter.pushConsoleMessage('Play playlist ' + name);
 
@@ -435,12 +438,23 @@ PlaylistManager.prototype.commonAddToPlaylist = function (folder, name, service,
                 }
                 else if(uri.startsWith("artists://"))
                 {
-                    mpdPlugin.listArtist(uri,2,'')
-                    .then(function(entries){
-                        listingDefer.resolve(entries.navigation.lists[1].items);
-                    }).fail(function(){
-                        listingDefer.reject(new Error());
-                    })
+                    var s = uri.split('/');
+                    if (s.length == 3) {
+                        // no album in uri
+                        mpdPlugin.listArtist(uri,2,'')
+                        .then(function(entries){
+                            listingDefer.resolve(entries.navigation.lists[1].items);
+                        }).fail(function(){
+                            listingDefer.reject(new Error());
+                        })
+                    } else if (s.length > 3) {
+                        mpdPlugin.listAlbumSongs(uri,2,'')
+                        .then(function(entries){
+                            listingDefer.resolve(entries.navigation.lists[0].items);
+                        }).fail(function(){
+                            listingDefer.reject(new Error());
+                        })
+                    }
                 }
                 else if(uri.startsWith("albums://"))
                 {
@@ -655,7 +669,7 @@ PlaylistManager.prototype.saveJSONFile = function(localFolder, fileName, data)
     var self=this;
     var defer=libQ.defer();
 
-    if(this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === 'true' && this.commandRouter.sharedVars.get('myvolumio.uid') !== '0')
+    if(this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === true && this.commandRouter.sharedVars.get('myvolumio.uid') !== '0')
     {   self.logger.info('Saving Cloud item ' + fileName);
         return self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'saveCloudItem', {
             fileName:fileName,
@@ -779,7 +793,7 @@ PlaylistManager.prototype.commonGetPlaylistContent = function (folder, name) {
 		else {
 			fs.readJson(filePath, function (err, data) {
 				if (err)
-					defer.reject(new Error("Error reading playlist"));
+					defer.reject(new Error("Error reading playlist from " + filePath));
 				else {
 					defer.resolve(data);
 				}

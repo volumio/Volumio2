@@ -104,8 +104,9 @@ AlarmClock.prototype.getConf = function()
 
 AlarmClock.prototype.fireAlarm = function(alarm) {
 	var self = this;
-	self.commandRouter.playPlaylist(alarm.playlist);
 
+	self.logger.info('Starting Scheduled Playlist ' + alarm.playlist);
+	self.commandRouter.playPlaylist(alarm.playlist);
 }
 
 AlarmClock.prototype.clearJobs = function () {
@@ -130,16 +131,13 @@ AlarmClock.prototype.applyConf = function(conf) {
 		var rule = new schedule.RecurrenceRule();
 		rule.minute = d.getMinutes();
 		rule.hour = d.getHours();
+		let currentItem = Object.assign({}, item);
 
 		if (item.enabled) {
-
-		var func = self.fireAlarm.bind(self);
-		var j = schedule.scheduleJob(rule, function(){
-		  func(item);
-		});
-
-		self.logger.info("Alarm: Scheduling " + j.name + " at " +rule.hour + ":" + rule.minute) ;
-		self.jobs.push(j);
+			self.jobs[i] = schedule.scheduleJob(rule, function(){
+            	self.fireAlarm(currentItem);
+			});
+			self.logger.info("Alarm: Scheduling Playlist " + item.playlist + " at " +rule.hour + ":" + rule.minute) ;
         }
 	}
 }

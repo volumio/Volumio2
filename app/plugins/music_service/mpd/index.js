@@ -50,6 +50,7 @@ ControllerMpd.prototype.play = function (N) {
 
 //MPD Add
 ControllerMpd.prototype.add = function (data) {
+    var self = this;
 	this.commandRouter.pushToastMessage('success', data + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 	return this.sendMpdCommand('add', [data]);
 };
@@ -83,6 +84,7 @@ ControllerMpd.prototype.seek = function (timepos) {
 
 //MPD Random
 ControllerMpd.prototype.random = function (randomcmd) {
+    var self = this;
 	var string = randomcmd ? 1 : 0;
 	this.commandRouter.pushToastMessage('success', "Random", string === 1 ? self.commandRouter.getI18nString('COMMON.ON') : self.commandRouter.getI18nString('COMMON.OFF'));
 	return this.sendMpdCommand('random', [string])
@@ -90,6 +92,7 @@ ControllerMpd.prototype.random = function (randomcmd) {
 
 //MPD Repeat
 ControllerMpd.prototype.repeat = function (repeatcmd) {
+    var self = this;
 	var string = repeatcmd ? 1 : 0;
 	this.commandRouter.pushToastMessage('success', "Repeat", string === 1 ? self.commandRouter.getI18nString('COMMON.ON') : self.commandRouter.getI18nString('COMMON.ON'));
 	return this.sendMpdCommand('repeat', [string]);
@@ -1054,7 +1057,17 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
                conf12 += data;
             }
 
-            fs.writeFile("/etc/mpd.conf", conf12, 'utf8', function (err) {
+            var additionalConfs = self.getSpecialCardConfig();
+            var specialSettings = '';
+            if (additionalConfs && additionalConfs.length) {
+                specialSettings = '### Device Special Settings'
+                for (var i in additionalConfs) {
+                    specialSettings = specialSettings + os.EOL + '                ' + additionalConfs[i];
+                }
+            }
+            var conf13 = conf12.replace("${special_settings}", specialSettings);
+
+            fs.writeFile("/etc/mpd.conf", conf13, 'utf8', function (err) {
                 if (err) {
                 	self.logger.info('Could not write mpd.conf:' + err);
                 }
@@ -2118,15 +2131,14 @@ ControllerMpd.prototype.explodeUri = function(uri) {
         var safeArtistName = artistName.replace(/"/g,'\\"');
         var safeAlbumName = albumName.replace(/"/g,'\\"');
 
-
-		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array for albumartist
+		if (compilation.indexOf(artistName)>-1) {  //artist is in Various Artists array or albumartist
 			var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 		}
 		else {
             // This section is commented beacuse, although correct it results in some albums not playing.
             // Until we find a better way to handle this we search just for album if there is no artist.
 			if (safeArtistName !== null || safeArtistName !== "") { // is a artist ?
-				var GetAlbum = "find album \""+safeAlbumName+"\"" + " artist \"" +safeArtistName+"\"";
+				var GetAlbum = "find album \""+safeAlbumName+"\"" + " albumartist \"" +safeArtistName+"\"";
 			}
 			else { // No artist.
 				var GetAlbum = "find album \""+safeAlbumName+"\"";
@@ -2236,7 +2248,7 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 				var GetMatches = "find genre \"" + safeGenreName + "\" album \"" + safeAlbumName + "\"";
 			}
 			else {                                      //artist is NOT in compilation array so use artist
-				var GetMatches = "find genre \"" + safeGenreName + "\" artist \"" +  safeArtistName + "\" album \"" + safeAlbumName + "\"";
+				var GetMatches = "find genre \"" + safeGenreName + "\" albumartist \"" +  safeArtistName + "\" album \"" + safeAlbumName + "\"";
 			}
         }
 
@@ -2995,7 +3007,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 			var findstring = "find album \"" + safeAlbumName + "\" genre \"" + safeGenre + "\" ";
 		}
 		else {
-			var findstring = "find album \"" + safeAlbumName + "\" artist \"" + safeAlbumartist + "\" genre \"" + safeGenre + "\" ";
+			var findstring = "find album \"" + safeAlbumName + "\" albumartist \"" + safeAlbumartist + "\" genre \"" + safeGenre + "\" ";
 		}
 	}
 	else if (splitted[0] == 'albums:') { //album
@@ -3014,12 +3026,16 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 		var albumName = decodeURIComponent(splitted[3]);
 		var safeArtist = artist.replace(/"/g,'\\"');
 		var safeAlbumName = albumName.replace(/"/g,'\\"');
+
+		/* This section is commented because we should use albumartist: if albumartist tag does not exist, it will fallback to artist
 		if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
 			var typeofartist = 'albumartist';
 		}
 		else {                                      //artist is NOT in compilation array so use artist
 			var typeofartist = 'artist';
 		}
+		*/
+        var typeofartist = 'albumartist';
 		var findstring = "find album \"" + safeAlbumName + "\" " + typeofartist + " \"" + safeArtist + "\" ";
 	}
     var response={
@@ -3263,7 +3279,7 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 		if (uriBegin === 'genres://')  {
 			var genre = decodeURIComponent(splitted[2]);
 			var safeGenre = genre.replace(/"/g,'\\"');
-			var findartist = "find artist \"" + safeArtist + "\" genre \"" + safeGenre + "\" ";
+			var findartist = "find albumartist \"" + safeArtist + "\" genre \"" + safeGenre + "\" ";
 		}
 
 		else {
@@ -3323,7 +3339,12 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
 					var artist = self.searchFor(lines, i + 1, 'AlbumArtist:');
 				}
 				else {
-					var artist = self.searchFor(lines, i + 1, 'Artist:');
+                    if (artistsort) {						//Fix - now set by artistsort variable
+                        var findartist = 'AlbumArtist:';
+                    } else {
+                        var findartist = 'Artist:';
+                    }
+					var artist = self.searchFor(lines, i + 1, findartist);
 				}
                 var album = self.searchFor(lines, i + 1, 'Album:');
 				var genre = self.searchFor(lines, i + 1, 'Genre:');
@@ -3511,7 +3532,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
         .then(function() {
             var cmd = libMpd.cmd;
             if (genreArtist != 'undefined') {
-            var findString = "find genre \"" + safeGenreName + "\" artist \"" + safeGenreArtist + "\" ";
+            var findString = "find genre \"" + safeGenreName + "\" albumartist \"" + safeGenreArtist + "\" ";
             }
             else {
                 var findString = "find genre \"" + safeGenreName + "\"";
@@ -3871,4 +3892,21 @@ ControllerMpd.prototype.deleteFolder = function(data){
 		}
         });
 	return defer.promise
+}
+
+ControllerMpd.prototype.getSpecialCardConfig = function(){
+    var self = this;
+
+    try {
+        var specialCardsConfig = libFsExtra.readJsonSync(__dirname + '/special_cards_config.json');
+    } catch(e) {
+        var specialCardsConfig = {};
+    }
+    var outdevName = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevicename');
+
+    if (specialCardsConfig[outdevName] && specialCardsConfig[outdevName].length) {
+    	return specialCardsConfig[outdevName]
+	} else {
+    	return null
+	}
 }

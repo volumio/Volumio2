@@ -10,11 +10,10 @@ var ShairportReader = require('./shairport-sync-reader/shairport-sync-reader.js'
 var pipeReader;
 var seekTimer;
 var onDemand = false;
-
+var airplayActive = false;
 
 // Define the UpnpInterface class
 module.exports = AirPlayInterface;
-
 
 function AirPlayInterface(context) {
     // Save a reference to the parent commandRouter
@@ -56,7 +55,9 @@ AirPlayInterface.prototype.onVolumioStart = function () {
 AirPlayInterface.prototype.onStart = function () {
     var self = this;
 
-    onDemand = this.config.get('on_demand', false);
+    if (process.env.SHAIRPORT_SYNC_ON_DEMAND === "true") {
+        onDemand = true;
+    }
 
     if (onDemand) {
         var data = {"albumart": "/albumart?sourceicon=music_service/airplay_emulation/shairporticon.png", "name": "Shairport-Sync", "uri": "airplayOnDemand","plugin_type":"music_service","plugin_name": "airplay_emulation", "static":true};
@@ -133,46 +134,46 @@ AirPlayInterface.prototype.startShairportSync = function () {
         buffer_size_line = 'buffer_size = 5536;';
     }
 
-
     var fs = require('fs');
-
-    var self = this;
     fs.readFile(__dirname + "/shairport-sync.conf.tmpl", 'utf8', function (err, data) {
         if (err) {
-            return console.log(err);
-        }
-
-        var conf = data;
-        conf = conf.replace("${name}", name);
-        conf = conf.replace("${device}", outdev);
-        if (buffer_size_line && buffer_size_line.length) {
-            conf = conf.replace("${buffer_size_line}", buffer_size_line);
+            self.logger.error('Could not read default Shairport Sync Conf: ' + err);
         } else {
-            conf = conf.replace("${buffer_size_line}", "");
-        }
-        conf = conf.replace("${mixer}", mixer);
-        var onDemand_line = '';
-        if (!onDemand){
-            onDemand_line = 'run_this_after_play_ends = "/usr/local/bin/volumio stopairplay";'
-        }
-        conf = conf.replace('"${run_this_after_play_ends}"', onDemand_line)
+            var conf = data;
+            conf = conf.replace("${name}", name);
+            conf = conf.replace("${device}", outdev);
+            if (buffer_size_line && buffer_size_line.length) {
+                conf = conf.replace("${buffer_size_line}", buffer_size_line);
+            } else {
+                conf = conf.replace("${buffer_size_line}", "");
+            }
+            conf = conf.replace("${mixer}", mixer);
+            var onDemand_line = '';
+            if (!onDemand){
+                onDemand_line = 'run_this_after_play_ends = "/usr/local/bin/volumio stopairplay";'
+            }
+            conf = conf.replace('"${run_this_after_play_ends}"', onDemand_line);
+            fs.writeFile("/tmp/shairport-sync.conf", conf, 'utf8', function (err) {
+                if (err) {
+                    self.logger.info('Could not write Shairport Sync Configuration: ' + err);
+                } else {
+                    startShairportSync(self);
+                }
 
-
-        fs.writeFile("/etc/shairport-sync.conf", conf, 'utf8', function (err) {
-            if (err) return console.log(err);
-            startShairportSync(self);
-        });
+            });
+        }
     });
 };
 
 function startShairportSync(self) {
-    exec("sudo systemctl restart airplay", function (error, stdout, stderr) {
+    self.logger.info('Starting Shairport Sync');
+
+    exec('/usr/bin/sudo /bin/systemctl restart shairport-sync', function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
-        }
-        else {
+        } else {
             self.logger.info('Shairport-Sync Started');
-                self.startShairportSyncMeta();
+            self.startShairportSyncMeta();
         }
     });
 }
@@ -180,11 +181,10 @@ function startShairportSync(self) {
 AirPlayInterface.prototype.stopShairportSync = function () {
     var self = this;
 
-    exec("/usr/bin/sudo /usr/bin/killall shairport-sync", {uid:1000, gid:1000}, function (error, stdout, stderr) {
+    exec('/usr/bin/sudo /bin/systemctl stop shairport-sync', {uid:1000, gid:1000}, function (error, stdout, stderr) {
         if (error !== null) {
             self.logger.info('Shairport-sync error: ' + error);
-        }
-        else {
+        } else {
             self.logger.info('Shairport-Sync Stopped');
         }
     });
@@ -222,8 +222,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
 
     // Play begin
     pipeReader.on('pbeg', function(data) {
-        self.context.coreCommand.pushConsoleMessage("Airplay started streaming");
-
+        self.logger.info("Airplay started streaming, receiving metadatas");
         self.obj.status='play';
         self.obj.title="";
         self.obj.artist="";
@@ -233,23 +232,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
         self.obj.albumart="/albumart";
 
         if (!onDemand) {
-            self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
-            var state = self.commandRouter.stateMachine.getState();
-            if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
-                // if Initial startup do not kill shairport
-                self.commandRouter.stateMachine.unSetVolatile();
-            } else {
-                self.context.coreCommand.volumioStop();
-            }
-            setTimeout(()=>{
-                self.context.coreCommand.stateMachine.setVolatile({
-                service:'airplay_emulation',
-                callback: self.unsetVol.bind(self)
-            });
-            self.pushAirplayMeta();
-            }, 1000)
-
-
+            self.prepareAirplayPlayback();
         }
     })
 
@@ -354,9 +337,12 @@ AirPlayInterface.prototype.getAlbumArt = function (data, path,icon) {
 
 AirPlayInterface.prototype.airPlayStop = function () {
     var self = this;
+
+    /*
     self.context.coreCommand.stateMachine.unSetVolatile();
     self.context.coreCommand.stateMachine.resetVolumioState().then(
         self.context.coreCommand.volumioStop.bind(self.commandRouter));
+        */
 
 };
 
@@ -366,16 +352,13 @@ AirPlayInterface.prototype.unsetVol = function () {
     if (!onDemand) {
         var state = self.commandRouter.stateMachine.getState();
         if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
-            console.log('STOPPING SHAIRPORT');
-            self.stopAirplay();
-            setTimeout(()=>{
-                return libQ.resolve()
-            },500)
+            return self.sendShairportStopCommand();
         } else {
             setTimeout(()=>{
                 return libQ.resolve()
-            },500)
+            },1500)
         }
+        return self.sendShairportStopCommand();
     } else {
         setTimeout(()=>{
             return libQ.resolve()
@@ -392,19 +375,9 @@ AirPlayInterface.prototype.stop = function () {
     var self = this;
     var defer = libQ.defer();
 
+    self.logger.info('Airplay Stop');
     if (!onDemand) {
-        var state = self.commandRouter.stateMachine.getState();
-        if (state && state.service && state.service === 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
-            self.stopShairportSync();
-            setTimeout(()=> {
-                self.startShairportSync();
-            },5000)
-            setTimeout(()=> {
-                defer.resolve('');
-            },1000)
-        } else {
-            defer.resolve('');
-        }
+        return self.sendShairportStopCommand();
     } else {
         defer.resolve('');
     }
@@ -441,8 +414,6 @@ AirPlayInterface.prototype.startShairportSyncOnDemand = function () {
 
 AirPlayInterface.prototype.handleBrowseUri = function (uri) {
     var self = this;
-
-    console.log(uri)
 };
 
 AirPlayInterface.prototype.stopAirplay = function () {
@@ -452,14 +423,6 @@ AirPlayInterface.prototype.stopAirplay = function () {
 
     if (onDemand) {
         self.stopShairportSync();
-    } else {
-        var state = self.commandRouter.stateMachine.getState();
-        if (state && state.service && state.service !== 'airplay_emulation' && self.commandRouter.stateMachine.isVolatile) {
-            self.stopShairportSync();
-            setTimeout(() => {
-                self.startShairportSync();
-            },5000)
-        }
     }
 };
 
@@ -470,7 +433,7 @@ AirPlayInterface.prototype.seekTimerAction = function() {
         if (seekTimer === undefined) {
             seekTimer = setInterval(()=>{
                 this.obj.seek = this.obj.seek + 1000;
-            //console.log('SEEK: ' + this.obj.seek);
+                //console.log('SEEK: ' + this.obj.seek);
         }, 1000)
         }
     } else {
@@ -493,4 +456,148 @@ AirPlayInterface.prototype.detectPrimo = function () {
         self.logger.info('Could not detect Primo: ' + e);
         return false
     }
+};
+
+AirPlayInterface.prototype.sendShairportStopCommand = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    self.logger.info('Stopping Airplay Playback and sending pause command to client via USR2');
+
+    exec('/usr/bin/sudo /bin/kill -USR2 $(pidof shairport-sync)', function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Cannot execute Shairport-sync USR2 kill: ' + error);
+        } else {
+            self.logger.info('Shairport-Sync paused with USR2');
+            setTimeout(()=>{
+                self.gracefulRestart();
+            },1000)
+            defer.resolve();
+        }
+    });
+    
+    return defer.promise
+};
+
+AirPlayInterface.prototype.gracefulRestart = function () {
+    var self = this;
+
+    self.logger.info('Restarting Shairport-Sync after stop');
+    exec('/usr/bin/sudo /bin/systemctl restart shairport-sync', function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Shairport-sync error: ' + error);
+        } else {
+            self.logger.info('Shairport-Sync retarted');
+        }
+    });
+};
+
+
+AirPlayInterface.prototype.startAirplayPlayback = function () {
+    var self = this;
+
+    self.logger.info('Airplay playback start');
+
+    self.prepareAirplayPlayback();
+};
+
+AirPlayInterface.prototype.stopAirplayPlayback = function () {
+    var self = this;
+
+    self.logger.info('Airplay playback stop');
+
+    if (!onDemand) {
+        var state = self.commandRouter.stateMachine.getState();
+        if (state && state.service && state.service === 'airplay_emulation') {
+            self.logger.info('Airplay Playback Stopped, clearing state');
+            self.context.coreCommand.stateMachine.resetVolumioState();
+        }
+    }
+};
+
+AirPlayInterface.prototype.setAirplayActive = function () {
+    var self = this;
+    airplayActive = true;
+};
+
+AirPlayInterface.prototype.setAirplayInctive = function () {
+    var self = this;
+    airplayActive = false;
+};
+
+
+AirPlayInterface.prototype.prepareAirplayPlayback = function () {
+    var self = this;
+
+    var state = self.commandRouter.stateMachine.getState();
+    if (state && state.service && state.service !== 'airplay_emulation') {
+        if (self.commandRouter.stateMachine.isVolatile) {
+            self.commandRouter.stateMachine.unSetVolatile();
+        } else {
+            self.context.coreCommand.volumioStop();
+            self.context.coreCommand.stateMachine.setConsumeUpdateService(undefined);
+        }
+
+    }
+    setTimeout(()=>{
+        self.context.coreCommand.stateMachine.setVolatile({
+        service:'airplay_emulation',
+        callback: self.unsetVol.bind(self)
+    });
+        self.pushAirplayMeta();
+    }, 1000)
+};
+
+// Playback controls
+// TODO: Find an event that signals playback pause and enable them.
+// See https://github.com/mikebrady/shairport-sync/blob/master/documents/sample%20dbus%20commands
+
+AirPlayInterface.prototype.play = function () {
+    var self = this;
+
+    self.logger.info('Airplay Play with DBUS Call');
+    exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Play", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Error Airplay DBUS Call Play: ' + error);
+        }
+    });
+};
+
+AirPlayInterface.prototype.pause = function () {
+    var self = this;
+
+    self.logger.info('Airplay Pause with DBUS Call');
+    exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Pause", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Error Airplay DBUS Call Pause: ' + error);
+        }
+    });
+};
+
+AirPlayInterface.prototype.next = function () {
+    var self = this;
+
+    self.logger.info('Airplay Next with DBUS Call');
+    exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Next", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Error Airplay DBUS Call Next: ' + error);
+        }
+    });
+};
+
+AirPlayInterface.prototype.previous = function () {
+    var self = this;
+
+    self.logger.info('Airplay Previous with DBUS Call');
+    exec("/usr/bin/dbus-send --system --print-reply --type=method_call --dest=org.gnome.ShairportSync '/org/gnome/ShairportSync' org.gnome.ShairportSync.RemoteControl.Previous", function (error, stdout, stderr) {
+        if (error !== null) {
+            self.logger.info('Error Airplay DBUS Call Previous: ' + error);
+        }
+    });
+};
+
+AirPlayInterface.prototype.seek = function () {
+    var self = this;
+
+    self.logger.info('Airplay Seek not available');
 };
