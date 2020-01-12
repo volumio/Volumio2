@@ -2366,36 +2366,19 @@ ControllerMpd.prototype.explodeUri = function(uri) {
 
             var uriPath='/mnt/'+self.sanitizeUri(uri);
             //self.commandRouter.logger.info('----------------------------'+uriPath);
-            var uris=self.scanFolder(uriPath);
-            var response=[];
 
-            libQ.all(uris)
+            // Try to scan path for songs first;
+            // if that fails, the path might address a playlist file
+            return self.scanFolder(uriPath)
                 .then(function(result)
                 {
-                    for(var j in result)
-                    {
+                    //self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result));
 
-                        //self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result[j]));
-
-                        if(result!==undefined && result[j].uri!==undefined) {
-                            response.push({
-                                uri: self.fromPathToUri(result[j].uri),
-                                service: 'mpd',
-                                name: result[j].name,
-                                artist: result[j].artist,
-                                album: result[j].album,
-                                type: 'track',
-                                tracknumber: result[j].tracknumber,
-                                albumart: result[j].albumart,
-                                duration: result[j].duration,
-                                samplerate: result[j].samplerate,
-                                bitdepth: result[j].bitdepth,
-                                trackType: result[j].trackType
-                            });
-                        }
-
+                    if (result.length) {
+                        return result;
                     }
-                    defer.resolve(response);
+
+                    return self.explodePlaylistFile(uriPath);
                 }).fail(function(err)
             {
                 self.commandRouter.logger.info("explodeURI: ERROR "+err);
@@ -2537,33 +2520,28 @@ ControllerMpd.prototype.fromPathToUri = function (uri) {
 ControllerMpd.prototype.scanFolder=function(uri)
 {
     var self=this;
-    var uris=[];
-    var isofile = false;
+    var isofile = uri.toLowerCase().endsWith('.iso');
 
-    if ((uri.indexOf(".iso") >= 0) || (uri.indexOf(".ISO") >= 0)){
-        var uri2 = uri.substr(0, uri.lastIndexOf("/"));
-        if ((uri2.indexOf(".iso") >= 0) || (uri2.indexOf(".ISO") >= 0)){
-        } else {
-            isofile = true
-        }
-    } else {
-        try {
-            var stat = libFsExtra.statSync(uri);
-        } catch (err) {
-            console.log("scanFolder - failure to stat '" + uri + "'");
-            return uris;
-        }
+    try {
+        var stat = libFsExtra.statSync(uri);
+    } catch (err) {
+        console.log('scanFolder - failure to stat "' + uri + '" - ' + err.toString());
+        return libQ.resolve([]);
     }
 
-    if(  ((uri.indexOf(".iso") < 0) && (uri.indexOf(".ISO") < 0)) && (stat != undefined && stat.isDirectory()) )
-    {
+    if (stat && stat.isDirectory()) {
     	try {
             var files=libFsExtra.readdirSync(uri);
-            for(var i in files) {
-                uris=uris.concat(self.scanFolder(uri+'/'+files[i]));
-            }
+            var promises = files.map(function (file) {
+                return self.scanFolder(uri + '/' + file);
+            });
+            return libQ.all(promises).then(function (results) {
+                // results is an array of arrays, which need to be concatenated into a single array
+                return [].concat.apply([], results);
+            });
 		} catch(e) {
-            console.log("Failed to stat '" + uri + "'");
+            console.log('scanFolder - failure to readdir "' + uri + '" - ' + e.toString());
+            return libQ.resolve([]);
 		}
     }
     else if (isofile){
@@ -2592,15 +2570,21 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
             self.mpdReady.then(function () {
                 self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
-                    var list = [];
-                    if (msg) {
+                    // The file may be a single song, or a container with multiple songs
+                    defer.resolve(self.parseMpdCommandResponse(msg));
+                });
+            });
 
+            return defer.promise;
 
-                        var s0 = sections[0] + '/';
-                        var path;
-                        var name;
-                        var lines = msg.split('\n');
-                        var isSolved=false;
+    }
+};
+
+ControllerMpd.prototype.parseMpdCommandResponse = function(msg) {
+	var self = this;
+
+                        var list = [];
+                        var lines = (msg || '').split('\n');
 
                         for (var i = 0; i < lines.length; i++) {
                             var line = lines[i];
@@ -2611,60 +2595,48 @@ ControllerMpd.prototype.scanFolder=function(uri)
 
                                 var artist = self.searchFor(lines, i + 1, 'Artist:');
                                 var album = self.searchFor(lines, i + 1, 'Album:');
-						//Include track number if tracknumber variable is set to 'true'
-								if (!tracknumbers) {
-									var title = self.searchFor(lines, i + 1, 'Title:');
-								}
-								else {
-									var title1 = self.searchFor(lines, i + 1, 'Title:');
-									var track = self.searchFor(lines, i + 1, 'Track:');
-                                    if(track && title1) {
-                                        var title = track + " - " + title1;
-                                    } else {
-                                        var title = title1;
-                                    }
-								}
-                                var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                                var title = self.searchFor(lines, i + 1, 'Title:');
+                                var track = self.searchFor(lines, i + 1, 'Track:') || 0;
+                                var albumArtist = self.searchFor(lines, i + 1, 'AlbumArtist:');
+                                var time = Math.round(parseFloat(self.searchFor(lines, i + 1, 'duration:')))
+                                    || parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                                var year = parseInt(self.searchFor(lines, i + 1, 'Date:')) || '';
 
-                                if (title) {
-                                    title = title;
-                                } else {
-                                    title = name;
+                                var itemUri = path.includes('://') ? path : ('music-library/' + path);
+
+                                var albumart = self.getAlbumArt({
+                                    artist: albumArtist || artist,
+                                    album: album
+                                }, self.getAlbumArtPathFromUri(itemUri));
+
+                                // Include track number if tracknumbers variable is set to 'true'
+                                if (tracknumbers && track && title) {
+                                    title = track + " - " + title;
                                 }
-								self.commandRouter.logger.info("ALBUMART "+self.getAlbumArt({artist:artist,album: album},uri));
-								self.commandRouter.logger.info("URI "+uri);
 
-                                defer.resolve({
-                                    uri: 'music-library/'+self.fromPathToUri(uri),
+                                self.commandRouter.logger.info("ALBUMART "+albumart);
+                                self.commandRouter.logger.info("URI "+itemUri);
+
+                                list.push({
+                                    uri: itemUri,
                                     service: 'mpd',
-                                    name: title,
-                                    artist: artist,
+                                    name: title || name,
+                                    artist: artist || albumArtist,
                                     album: album,
                                     type: 'track',
-                                    tracknumber: 0,
-									albumart: self.getAlbumArt({artist:artist,album: album},self.getAlbumArtPathFromUri(uri)),
+                                    tracknumber: track,
+                                    albumart: albumart,
                                     duration: time,
-                                    trackType: uri.split('.').pop()
+                                    year: year,
+                                    samplerate: '',
+                                    bitdepth: '',
+                                    trackType: itemUri.split('.').pop(),
                                 });
-
-                            isSolved=true;
                             }
                         }
 
-                        if(isSolved===false)
-                            defer.resolve({});
-
-                    }
-                    else defer.resolve({});
-                    });
-                });
-
-            return defer.promise;
-
-    }
-
-    return uris;
-}
+	return list;
+};
 
 ControllerMpd.prototype.explodeISOFile = function (uri) {
     var self = this;
@@ -2762,6 +2734,30 @@ ControllerMpd.prototype.explodeISOFile = function (uri) {
     });
 
     return defer.promise;
+};
+
+ControllerMpd.prototype.explodePlaylistFile = function (path) {
+	var self = this;
+
+	var defer = libQ.defer();
+	var sections = path.split('/');
+	var command = 'listplaylistinfo';
+
+	if (sections.length > 1) {
+		var folderToList = sections.slice(2).join('/');
+		var safeFolderToList = folderToList.replace(/"/g,'\\"');
+		command += ' "' + safeFolderToList + '"';
+	}
+
+	var cmd = libMpd.cmd;
+
+	self.mpdReady.then(function () {
+		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+			defer.resolve(self.parseMpdCommandResponse(msg));
+		});
+	});
+
+	return defer.promise;
 };
 
 
