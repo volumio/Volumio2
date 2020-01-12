@@ -2320,17 +2320,72 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             }
         });
     }
-    else {
-    	// Try to scan path for songs first;
-		// if that fails, the path might address a playlist file
-		var uriPath = '/mnt/'+self.sanitizeUri(uri);
-		return self.scanFolder(uriPath).then(function (results) {
-			if (results.length) {
-				return results;
-			}
+    else if(uri.endsWith('.iso')) {
+        var uriPath = '/mnt/' + self.sanitizeUri(uri);
 
-			return self.explodePlaylistFile(uriPath);
-		});
+        var uris = self.scanFolder(uriPath);
+        var response = [];
+
+        libQ.all(uris)
+            .then(function (result) {
+                // IF we need to explode the whole iso file
+                if (Array.isArray(result)) {
+                    result = result[0]
+                    defer.resolve(result);
+                } else {
+                    for (var j in result) {
+
+                        //self.commandRouter.logger.info("----->>>>> " + JSON.stringify(result[j]));
+                        //console.log('AAAAAAAAALLLLLLLLLLLLLLLLLLLLL'+result[j].albumart)
+                        var albumartiso = result[j].albumart.substring(0, result[j].albumart.lastIndexOf("%2F"));
+                        if (result !== undefined && result[j].uri !== undefined) {
+                            response.push({
+                                uri: self.fromPathToUri(result[j].uri),
+                                service: 'mpd',
+                                name: result[j].name,
+                                artist: result[j].artist,
+                                album: result[j].album,
+                                type: 'track',
+                                tracknumber: result[j].tracknumber,
+                                albumart: albumartiso,
+                                duration: result[j].duration,
+                                samplerate: result[j].samplerate,
+                                bitdepth: result[j].bitdepth,
+                                trackType: result[j].trackType
+                            });
+                        }
+
+                    }
+                    defer.resolve(response);
+                }
+
+            })
+    }
+    else {
+
+
+            var uriPath='/mnt/'+self.sanitizeUri(uri);
+            //self.commandRouter.logger.info('----------------------------'+uriPath);
+
+            // Try to scan path for songs first;
+            // if that fails, the path might address a playlist file
+            return self.scanFolder(uriPath)
+                .then(function(result)
+                {
+                    //self.commandRouter.logger.info("----->>>>> "+JSON.stringify(result));
+
+                    if (result.length) {
+                        return result;
+                    }
+
+                    return self.explodePlaylistFile(uriPath);
+                }).fail(function(err)
+            {
+                self.commandRouter.logger.info("explodeURI: ERROR "+err);
+                defer.resolve([]);
+            });
+
+
     }
 
     return defer.promise;
@@ -2437,6 +2492,18 @@ ControllerMpd.prototype.exploderArtist=function(err,msg,defer) {
     }
 }
 
+ControllerMpd.prototype.fromUriToPath = function (uri) {
+    var sections = uri.split('/');
+    var prev = '';
+
+    if (sections.length > 1) {
+
+        prev = sections.slice(1, sections.length).join('/');
+    }
+    return prev;
+
+};
+
 ControllerMpd.prototype.fromPathToUri = function (uri) {
     var sections = uri.split('/');
     var prev = '';
@@ -2450,126 +2517,232 @@ ControllerMpd.prototype.fromPathToUri = function (uri) {
 };
 
 
-ControllerMpd.prototype.scanFolder = function(path) {
-    var self = this;
+ControllerMpd.prototype.scanFolder=function(uri)
+{
+    var self=this;
+    var isofile = uri.toLowerCase().endsWith('.iso');
 
-	try {
-		var stat = libFsExtra.statSync(path);
-	} catch (e) {
-		console.log('scanFolder - failure to stat "' + path + '" - ' + e.toString());
-		return libQ.resolve([]);
-	}
+    try {
+        var stat = libFsExtra.statSync(uri);
+    } catch (err) {
+        console.log('scanFolder - failure to stat "' + uri + '" - ' + err.toString());
+        return libQ.resolve([]);
+    }
 
-	if (stat && stat.isDirectory()) {
+    if (stat && stat.isDirectory()) {
     	try {
-            var files = libFsExtra.readdirSync(path);
+            var files=libFsExtra.readdirSync(uri);
+            var promises = files.map(function (file) {
+                return self.scanFolder(uri + '/' + file);
+            });
+            return libQ.all(promises).then(function (results) {
+                // results is an array of arrays, which need to be concatenated into a single array
+                return [].concat.apply([], results);
+            });
 		} catch(e) {
-			console.log('scanFolder - failure to readdir "' + path + '" - ' + e.toString());
+            console.log('scanFolder - failure to readdir "' + uri + '" - ' + e.toString());
             return libQ.resolve([]);
 		}
+    }
+    else if (isofile){
 
-		var promises = files.map(function (file) {
-			return self.scanFolder(path + '/' + file);
-		});
+        var defer=libQ.defer();
+        var uris = self.explodeISOFile(uri);
+        defer.resolve(uris);
+        return defer.promise
+    }
+    else {
+            var defer=libQ.defer();
 
-		return libQ.all(promises).then(function (results) {
-			// results is an array of arrays, which need to be concatenated into a single array
-			return [].concat.apply([], results);
-		});
-	}
+            var sections = uri.split('/');
+            var folderToList = '';
+            var command = 'lsinfo';
 
-	// The file may be a single song, or a container with multiple songs
+            if (sections.length > 1) {
+                folderToList = sections.slice(2).join('/');
 
-	var sections = path.split('/');
-	var command = 'lsinfo';
-	if (sections.length > 1) {
-		var folderToList = sections.slice(2).join('/');
-		var safeFolderToList = folderToList.replace(/"/g,'\\"');
-		command += ' "' + safeFolderToList + '"';
-	}
+                var safeFolderToList = folderToList.replace(/"/g,'\\"');
+                command += ' "' + safeFolderToList + '"';
 
-	var cmd = libMpd.cmd;
-	var defer = libQ.defer();
+            }
 
-	self.mpdReady.then(function () {
-		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
-			defer.resolve(self.parseMpdCommandResponse(msg));
-		});
-	});
+            var cmd = libMpd.cmd;
 
-	return defer.promise;
+            self.mpdReady.then(function () {
+                self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+                    // The file may be a single song, or a container with multiple songs
+                    defer.resolve(self.parseMpdCommandResponse(msg));
+                });
+            });
+
+            return defer.promise;
+
+    }
 };
 
-ControllerMpd.prototype.parseMpdCommandResponse = function(msg, deduceTrackNumbers) {
+ControllerMpd.prototype.parseMpdCommandResponse = function(msg) {
 	var self = this;
 
-	var lines = (msg || '').split('\n');
-	var trackNumber = 0;
-	var list = [];
+                        var list = [];
+                        var lines = (msg || '').split('\n');
 
-	for (var i = 0; i < lines.length; i++) {
-		var line = lines[i];
+                        for (var i = 0; i < lines.length; i++) {
+                            var line = lines[i];
 
-		if (line.indexOf('file:') === 0) {
-			var path = line.slice(6);
-			var name = path.split('/').pop();
+                            if (line.indexOf('file:') === 0) {
+                                var path = line.slice(6);
+                                var name = path.split('/').pop();
 
-			var track = self.searchFor(lines, i + 1, 'Track:');
-			var title = self.searchFor(lines, i + 1, 'Title:') || name;
-			var artist = self.searchFor(lines, i + 1, 'Artist:');
-			var album = self.searchFor(lines, i + 1, 'Album:');
-			var albumArtist = self.searchFor(lines, i + 1, 'AlbumArtist:');
-			var duration = Math.round(parseFloat(self.searchFor(lines, i + 1, 'duration:')))
-				|| parseInt(self.searchFor(lines, i + 1, 'Time:'));
-			var year = parseInt(self.searchFor(lines, i + 1, 'Date:')) || '';
+                                var artist = self.searchFor(lines, i + 1, 'Artist:');
+                                var album = self.searchFor(lines, i + 1, 'Album:');
+                                var title = self.searchFor(lines, i + 1, 'Title:');
+                                var track = self.searchFor(lines, i + 1, 'Track:') || 0;
+                                var albumArtist = self.searchFor(lines, i + 1, 'AlbumArtist:');
+                                var time = Math.round(parseFloat(self.searchFor(lines, i + 1, 'duration:')))
+                                    || parseInt(self.searchFor(lines, i + 1, 'Time:'));
+                                var year = parseInt(self.searchFor(lines, i + 1, 'Date:')) || '';
 
-			// Deduce track number
-			trackNumber++;
-			if (!track && deduceTrackNumbers) {
-				track = trackNumber;
-			}
+                                var itemUri = path.includes('://') ? path : ('music-library/' + path);
 
-			// Include track number if tracknumbers variable is set to 'true'
-			if (tracknumbers && track && title) {
-				title = track + ' - ' + title;
-			}
+                                var albumart = self.getAlbumArt({
+                                    artist: albumArtist || artist,
+                                    album: album
+                                }, self.getAlbumArtPathFromUri(itemUri));
 
-			var itemUri = path.includes('://') ? path : ('music-library/' + path);
+                                // Include track number if tracknumbers variable is set to 'true'
+                                if (tracknumbers && track && title) {
+                                    title = track + " - " + title;
+                                }
 
-			var albumart = self.getAlbumArt(
-				{
-					artist: albumArtist || artist,
-					album: album
-				},
-				self.getAlbumArtPathFromUri(itemUri)
-			);
+                                self.commandRouter.logger.info("ALBUMART "+albumart);
+                                self.commandRouter.logger.info("URI "+itemUri);
 
-			list.push({
-				uri: itemUri,
-				service: 'mpd',
-				name: title,
-				artist: artist || albumArtist,
-				album: album,
-				type: 'track',
-				tracknumber: track,
-				albumart: albumart,
-				duration: duration,
-				year: year,
-				samplerate: '',
-				bitdepth: '',
-				trackType: itemUri.split('.').pop(),
-			});
-		}
-	}
+                                list.push({
+                                    uri: itemUri,
+                                    service: 'mpd',
+                                    name: title || name,
+                                    artist: artist || albumArtist,
+                                    album: album,
+                                    type: 'track',
+                                    tracknumber: track,
+                                    albumart: albumart,
+                                    duration: time,
+                                    year: year,
+                                    samplerate: '',
+                                    bitdepth: '',
+                                    trackType: itemUri.split('.').pop(),
+                                });
+                            }
+                        }
 
 	return list;
+};
+
+ControllerMpd.prototype.explodeISOFile = function (uri) {
+    var self = this;
+
+
+    var defer = libQ.defer();
+    var sections = uri.split('/');
+    var folderToList = '';
+    var command = 'lsinfo';
+    var ISOlist = [];
+
+    if (sections.length > 1) {
+        folderToList = sections.slice(2).join('/');
+
+        var safeFolderToList = folderToList.replace(/"/g,'\\"');
+        command += ' "' + safeFolderToList + '"';
+
+    }
+
+    var cmd = libMpd.cmd;
+
+    self.mpdReady.then(function () {
+        self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
+
+            if (msg) {
+                var s0 = sections[0] + '/';
+                var path;
+                var name;
+                var lines = msg.split('\n');
+                var isSolved=false;
+
+                for (var i = 0; i < lines.length; i++) {
+
+                    var line = lines[i];
+
+                    if (line.indexOf('file:') === 0) {
+                        var path = line.slice(6);
+                        var name = path.split('/').pop();
+
+                        var artist = self.searchFor(lines, i + 1, 'Artist:');
+                        var album = self.searchFor(lines, i + 1, 'Album:');
+                        var ISOuri = self.searchFor(lines, i, 'file:');
+                        //Include track number if tracknumber variable is set to 'true'
+                        if (!tracknumbers) {
+                            var title = self.searchFor(lines, i + 1, 'Title:');
+                        }
+                        else {
+                            var title1 = self.searchFor(lines, i + 1, 'Title:');
+                            var track = self.searchFor(lines, i + 1, 'Track:');
+                            if(track && title1) {
+                                var title = track + " - " + title1;
+                            } else {
+                                var title = title1;
+                            }
+                        }
+                        var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
+
+                        if (title) {
+                            title = title;
+                        } else {
+                            title = name;
+                        }
+                        self.commandRouter.logger.info("ALBUMART " + self.getAlbumArt({
+                                artist: artist,
+                                album: album
+                            }, uri));
+                        self.commandRouter.logger.info("URI " + uri);
+
+                        ISOlist.push({
+                            uri: ISOuri,
+                            service: 'mpd',
+                            name: title,
+                            artist: artist,
+                            album: album,
+                            type: 'track',
+                            tracknumber: 0,
+                            albumart: self.getAlbumArt({
+                                artist: artist,
+                                album: album
+                            }, self.getAlbumArtPathFromUri(uri)),
+                            duration: time,
+                            samplerate: '',
+                            bitdepth: '',
+                            trackType: uri.split('.').pop()
+                        });
+                    }
+
+                }
+                defer.resolve(ISOlist);
+            } else {
+                defer.resolve([]);
+            }
+
+        });
+    });
+
+    return defer.promise;
 };
 
 ControllerMpd.prototype.explodePlaylistFile = function (path) {
 	var self = this;
 
-	var command = 'listplaylistinfo';
+	var defer = libQ.defer();
 	var sections = path.split('/');
+	var command = 'listplaylistinfo';
+
 	if (sections.length > 1) {
 		var folderToList = sections.slice(2).join('/');
 		var safeFolderToList = folderToList.replace(/"/g,'\\"');
@@ -2577,7 +2750,6 @@ ControllerMpd.prototype.explodePlaylistFile = function (path) {
 	}
 
 	var cmd = libMpd.cmd;
-	var defer = libQ.defer();
 
 	self.mpdReady.then(function () {
 		self.clientMpd.sendCommand(cmd(command, []), function (err, msg) {
@@ -2587,6 +2759,7 @@ ControllerMpd.prototype.explodePlaylistFile = function (path) {
 
 	return defer.promise;
 };
+
 
 
 //----------------------- new play system ----------------------------
@@ -3083,7 +3256,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 
                     var artist = self.searchFor(lines, i + 1, 'Artist:');
                     var album = self.searchFor(lines, i + 1, 'Album:');
-
+			
                     var track = self.searchFor(lines, i + 1, 'Track:');
                     var title = self.searchFor(lines, i + 1, 'Title:');
 
