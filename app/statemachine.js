@@ -1267,7 +1267,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
         }
 	} else {
 		//self.setConsumeUpdateService(undefined);
-		if (this.isConsume && this.consumeState.service != undefined) {
+		if (this.isConsume && this.consumeState.service != undefined && this.consumeState.service !== 'webradio') { 
 			var thisPlugin = this.commandRouter.pluginManager.getPlugin('music_service', this.consumeState.service);
             if (typeof thisPlugin.next === "function") {
                 thisPlugin.next();
@@ -1427,7 +1427,7 @@ CoreStateMachine.prototype.previous = function (promisedResponse) {
 			}
 
 		} else if (this.currentStatus === 'play') {
-			if (this.isConsume && this.consumeState.service != undefined) {
+			if (this.isConsume && this.consumeState.service != undefined && this.consumeState.service !== 'webradio') { 
                 var thisPlugin = this.commandRouter.getMusicPlugin(this.consumeState.service);
                 if (!this.previousTrackonPrev && typeof thisPlugin.seek === "function") {
                     thisPlugin.seek(0);
