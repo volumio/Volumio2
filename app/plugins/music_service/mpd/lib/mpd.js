@@ -89,12 +89,16 @@ MpdClient.prototype.setupIdling = function() {
 MpdClient.prototype.sendCommand = function(command, callback) {
 	var self = this;
 	callback = callback || noop.bind(this);
-	assert.ok(self.idling);
-	self.send("noidle\n");
-	self.sendWithCallback(command, callback);
-	self.sendWithCallback("idle", function(err, msg) {
-		self.handleIdleResultsLoop(err, msg);
-	});
+	try {
+        assert.ok(self.idling);
+        self.send("noidle\n");
+        self.sendWithCallback(command, callback);
+        self.sendWithCallback("idle", function(err, msg) {
+            self.handleIdleResultsLoop(err, msg);
+        });
+	} catch(e) {
+        self.emit('error', e.message);
+	}
 };
 
 MpdClient.prototype.sendCommands = function(commandList, callback) {
