@@ -31,6 +31,7 @@
     {"name": "snd-sun8i-i2s-dac", "multidevice": false, "prettyname": "I2S", "defaultmixer": "","type":"integrated"},
     {"name": "H3 Audio Codec", "multidevice": false, "prettyname": "Onboard Audio", "defaultmixer": "DAC","type":"integrated"},
     {"name": "HDA Intel PCH", "multidevice": true, "devices":[{"number":0, "prettyname": "Analog Out", "defaultmixer": ""},{"number":3, "prettyname": "HDMI", "defaultmixer": ""}]},
+    {"name": "Intel ICH6", "multidevice": true, "devices":[{"number":0, "prettyname": "HDMI", "defaultmixer": ""},{"number":4, "prettyname": "SPDIF", "defaultmixer": ""}]},
     {"name": "bytcr-rt5651", "multidevice": false, "prettyname": "Headphone Jack", "defaultmixer": "HP","type":"integrated"},
     {"name": "Intel HDMI/DP LPE Audio", "multidevice": true, "devices":[{"number":2, "prettyname": "HDMI", "defaultmixer": ""}],"type":"integrated"},
     {"name": "AML-AUGESOUND", "multidevice": true, "devices":[{"number":0, "prettyname": "HDMI Audio", "defaultmixer": ""}, {"number":1, "prettyname": "Line Out/ Headphones", "defaultmixer": "DAC Digital"}, {"number":2, "prettyname": "SPDIF", "defaultmixer": ""}],"type":"integrated"},
