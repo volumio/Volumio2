@@ -618,35 +618,45 @@ ControllerMpd.prototype.onVolumioStart = function () {
 ControllerMpd.prototype.mpdInit = function () {
     var self = this;
 
+    if (process.env.WRITE_MPD_CONFIGURATION_ON_STARTUP === 'true') {
+        self.logger.info('Creating MPD Configuration file');
+        self.createMPDFile(function (error) {
+            if (error !== undefined && error !== null) {
+                self.logger.error('Could not create MPD File on system start: ' + error);
+            }
+            else {
+                self.restartMpd(function (error) {
+                    if (error !== null && error != undefined) {
+                        self.logger.error('Cannot start MPD on system Start: ' + error);
+                    } else {
+                        self.initializeMpdConnection();
+                    }
+                });
+            }
+        });
+    } else {
+        self.initializeMpdConnection();
+    }
+};
 
-    self.createMPDFile(function (error) {
-        if (error !== undefined && error !== null) {
-            self.logger.error('Could not create MPD File on system start: ' + error);
-        }
-        else {
-            self.restartMpd(function (error) {
-                if (error !== null && error != undefined) {
-                    self.logger.error('Cannot start MPD on system Start: ' + error);
-                } else {
-                    // Connect to MPD only if process MPD is running
-                    pidof('mpd', function (err, pid) {
-                        if (err) {
-                            self.logger.error('Cannot initialize  MPD Connection: MPD is not running: ' + err);
-                        } else {
-                            if (pid) {
-                                self.logger.info('MPD running with PID' + pid + ' ,establishing connection');
-                                self.mpdEstablish();
+ControllerMpd.prototype.initializeMpdConnection = function () {
+    var self = this;
 
-                            } else {
-                                self.logger.error('Cannot initialize  MPD Connection: MPD is not running');
-                            }
-                        }
-                    });
-                }
-            });
+    // Connect to MPD only if process MPD is running
+    pidof('mpd', function (err, pid) {
+        if (err) {
+            self.logger.error('Cannot initialize  MPD Connection: MPD is not running: ' + err);
+        } else {
+            if (pid) {
+                self.logger.info('MPD running with PID' + pid + ' ,establishing connection');
+                self.mpdEstablish();
+
+            } else {
+                self.logger.error('Cannot initialize  MPD Connection: MPD is not running');
+            }
         }
     });
-};
+}
 
 ControllerMpd.prototype.mpdEstablish = function () {
     var self = this;
