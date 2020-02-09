@@ -63,6 +63,7 @@ updater userdata                   Wipes all user data
 updater testmode                   Enables or disables Test mode, allowing to receive beta builds
 updater cleanupdate                Updates to latest version and cleans user data, allowing a start like a newly flashed image
 updater restorevolumio             Delete all manually edited files from /volumio folder, restoring a pristine volumio core system
+internet                           Enables or disbles internet access, accepted commands: on | off
 "
 
 }
@@ -96,6 +97,10 @@ sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/d
 
 kernelsource() {
 sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+}
+
+internet() {
+/volumio/app/plugins/system_controller/volumio_command_line_client/commands/internet.sh "$@"
 }
 
 case "$1" in
@@ -196,6 +201,9 @@ case "$1" in
             ;;
 	    kernelsource)
 	        kernelsource
+            ;;
+            internet)
+                internet $@
             ;;
 	    logdump)
 	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
