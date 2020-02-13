@@ -928,25 +928,25 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 ControllerAlsa.prototype.getAplayInfo = function () {
     var self = this;
     var defer = libQ.defer();
-    let cards = [];
-    let namesArray = [];
-    let currentCard,card;
+    var cards = [];
+    var namesArray = [];
     try {
-        const aplaycmd = execSync('/usr/bin/aplay -l', {uid: 1000, gid: 1000, encoding: 'utf8'});
-        // printf(_("card %i: %s [%s], device %i: %s [%s]\n")
-        const cardRegex = /^card\s(\d+).+?\[(.+?)\].+device\s(\d+)/gm;
-        while ((card = cardRegex.exec(aplaycmd)) != null) {
-          let id = card[1];
-          let name = card[2];
-          let device = card[3];
-          if (id != currentCard) {
-            cards.push({id: id, name: name})
-          } else {
-            console.log(`alsa_controller: Skipping device[${device}] of card[${id}] - ${name}`);
-					}
-          namesArray.push(name);
-          currentCard = id;
-        }
+        var aplaycmd = execSync('/usr/bin/aplay -l', {uid: 1000, gid: 1000, encoding: 'utf8'});
+            var currentCard;
+            var line = aplaycmd.split('\n')
+            for (var i = 0; i < line.length; i++) {
+                if (line[i].indexOf('card')>= 0) {
+                    var info = line[i].split(',')[0];
+                    var num = info.split(':')[0].replace('card ', '');
+                    var name = info.split('[')[1].replace(']', '');
+                    var card = {'id': num, 'name': name};
+                    if (num != currentCard) {
+                        cards.push(card);
+                    }
+                    namesArray.push(name);
+                    currentCard = num;
+                }
+            }
             if ((namesArray.includes('TinkerAudio OnBoard') || namesArray.includes('USB Audio OnBoard')) && namesArray.includes('ES90x8Q2M DAC')){
             	try {
                     var sysVariant = execSync("cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d 'VOLUMIO_VARIANT=\"'").toString().replace('\n','');
