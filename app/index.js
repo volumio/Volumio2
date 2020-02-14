@@ -1983,18 +1983,19 @@ CoreCommandRouter.prototype.setMyVolumioToken = function (data) {
 CoreCommandRouter.prototype.getMyVolumioStatus = function () {
     var self=this;
     var defer = libQ.defer();
+    var notLoggedInResponseObject = {"loggedIn":false};
 
     var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioStatus', '');
-
     if (response != undefined) {
         response.then(function (result) {
             defer.resolve(result);
-        })
-            .fail(function () {
-                var jsonobject = {"loggedIn":false}
-                defer.resolve(jsonobject);
-            });
-    }
+        }).fail(function () {
+			defer.resolve(notLoggedInResponseObject);
+		});
+    } else {
+    	// MyVolumio plugin not loaded
+        defer.resolve(notLoggedInResponseObject);
+	}
 
     return defer.promise;
 }
