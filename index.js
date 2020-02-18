@@ -50,7 +50,7 @@ process.on('uncaughtException', (error) => {
   } else {
     var errorMessage = 'Unknown';
   }
-  execSync('/usr/local/bin/node /volumio/crashreport.js "' + errorMessage + '"');
+  execSync('/usr/bin/node /volumio/crashreport.js "' + errorMessage + '"');
   if (process.env.EXIT_ON_EXCEPTION === "true") {
     process.exit(1);
   }

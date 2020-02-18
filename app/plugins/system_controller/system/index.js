@@ -470,7 +470,7 @@ ControllerSystem.prototype.sendBugReport = function (message) {
 		if (i < (n-1)) description = description + "\\'";
 	}
 
-	exec("/usr/local/bin/node /volumio/logsubmit.js " + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+	exec("/usr/bin/node /volumio/logsubmit.js " + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
 			self.logger.info('Cannot send bug report: ' + error);
 		} else {
