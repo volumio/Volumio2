@@ -452,33 +452,21 @@ volumioAppearance.prototype.setVolumio3UI = function (data) {
 
     if (data &&  data.volumio3_ui === true) {
         try {
-            execSync("/usr/bin/touch /data/volumio3ui");
+            execSync("/bin/rm /data/volumio2ui");
+            process.env.VOLUMIO_3_UI = 'true';
+            self.commandRouter.reloadUi();
         } catch(e) {
             self.logger.error(e)
         }
     } else {
         try {
-            execSync("/bin/rm /data/volumio3ui");
+            execSync("/usr/bin/touch /data/volumio2ui");
+            process.env.VOLUMIO_3_UI = 'false';
+            self.commandRouter.reloadUi();
         } catch(e) {
             self.logger.error(e)
         }
     }
-
-    var responseData = {
-        title: 'Restart the system',
-        message: 'In order for changes to take effect, restart the system and reload manually your browser once the system has restarted',
-        size: 'lg',
-        buttons: [
-            {
-                name: 'Restart System',
-                class: 'btn btn-info',
-                emit:'reboot',
-                payload:''
-            }
-        ]
-    }
-
-    self.commandRouter.broadcastMessage("openModal", responseData)
 };
 
 volumioAppearance.prototype.sendSizeErrorToasMessage = function (size) {
