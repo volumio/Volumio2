@@ -12,7 +12,7 @@ echo "Stopping Volumio service"
 if [ ! -d "$NODEMON_DIR" ]; then
   echo "Installing nodemon"
   cd /volumio
-  /bin/npm install nodemon
+  /usr/bin/npm install nodemon
 fi
 
 if [ ! -f "$DEV_FILE" ]; then
@@ -22,5 +22,3 @@ fi
 echo 'Starting Volumio with debugger at' $ETH_IP:$PORT
 cd /volumio
 ./node_modules/.bin/nodemon --inspect="$ETH_IP":"$PORT" index.js
-
-
