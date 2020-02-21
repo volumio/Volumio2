@@ -33,7 +33,7 @@
     {
       "id": "volumio3_ui_section",
       "element": "section",
-      "label": "TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI",
+      "label": "TRANSLATE.APPEARANCE.USER_INTERFACE_LAYOUT_DESIGN",
       "icon": "fa-language",
       "onSave": {"type":"controller", "endpoint":"miscellanea/appearance", "method":"setVolumio3UI"},
       "hidden":true,
@@ -46,10 +46,23 @@
       "content": [
         {
           "id": "volumio3_ui",
-          "element": "switch",
-          "doc":"TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI_DOC",
-          "label": "TRANSLATE.APPEARANCE.VOLUMIO3_EXPERIMENTAL_UI",
-          "value":false
+          "element": "select",
+          "doc":"TRANSLATE.APPEARANCE.USER_INTERFACE_LAYOUT_DESIGN_DOC",
+          "label": "TRANSLATE.APPEARANCE.USER_INTERFACE_LAYOUT_DESIGN",
+          "value":  {
+            "value":true,
+            "label": "TRANSLATE.APPEARANCE.USER_INTERFACE_CONTEMPORARY"
+          },
+          "options": [
+            {
+              "value":true,
+              "label": "TRANSLATE.APPEARANCE.USER_INTERFACE_CONTEMPORARY"
+            },
+            {
+              "value":false,
+              "label": "TRANSLATE.APPEARANCE.USER_INTERFACE_CLASSIC"
+            }
+          ]
         }
       ]
     }

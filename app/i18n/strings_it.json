@@ -251,7 +251,11 @@
     "VOLUMIO3_EXPERIMENTAL_UI":"Abilita l'interfaccia utente sperimentale",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Abilita l'interfaccia utente sperimentale",
     "UPLOAD_FAILED":"Caricamento Fallito",
-    "IMAGE_MUST_BE_LESS_THAN":"L'immagine deve essere inferiore a"
+    "IMAGE_MUST_BE_LESS_THAN":"L'immagine deve essere inferiore a",
+    "USER_INTERFACE_LAYOUT_DESIGN":"Stile dell'interfaccia utente",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC":"Seleziona lo stile desiderato dell'interfaccia utente. L'interfaccia contemporanea offre un esperienza ispirata ai riproduttori musicali più diffusi. L'interfaccia classica offre uno stile minimale basato su un architettura a 3 sezioni.",
+    "USER_INTERFACE_CONTEMPORARY":"Contemporanea",
+    "USER_INTERFACE_CLASSIC":"Classica"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"La Mia Musica",

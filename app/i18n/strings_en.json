@@ -252,7 +252,11 @@
     "VOLUMIO3_EXPERIMENTAL_UI":"Enable Experimental User Interface",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Enable Experimental User Interface",
     "UPLOAD_FAILED":"Upload failed",
-    "IMAGE_MUST_BE_LESS_THAN":"Image size must be less than"
+    "IMAGE_MUST_BE_LESS_THAN":"Image size must be less than",
+    "USER_INTERFACE_LAYOUT_DESIGN":"User Interface layout design",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC":"Select the desired user interface layout design. Contemporary UI offers an experience based on the most popular music players UI. Classic has a 3 tab design, offering a more minimalistic approach ",
+    "USER_INTERFACE_CONTEMPORARY":"Contemporary",
+    "USER_INTERFACE_CLASSIC":"Classic"
   },
   "MAIN_MENU":{
     "MY_MUSIC":"My Music",

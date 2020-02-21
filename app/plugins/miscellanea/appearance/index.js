@@ -156,10 +156,13 @@ volumioAppearance.prototype.getUIConfig = function () {
             }
             
             var showVolumio3UI = false;
+            var uiLayoutSettingLabel = self.commandRouter.getI18nString('APPEARANCE.USER_INTERFACE_CLASSIC');
             if (process.env.VOLUMIO_3_UI === 'true') {
                 showVolumio3UI = true;
+                uiLayoutSettingLabel = self.commandRouter.getI18nString('APPEARANCE.USER_INTERFACE_CONTEMPORARY');
             }
-            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', showVolumio3UI);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', showVolumio3UI);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', uiLayoutSettingLabel);
 
             defer.resolve(uiconf);
         })
@@ -450,7 +453,7 @@ volumioAppearance.prototype.getConfigParam = function (key) {
 volumioAppearance.prototype.setVolumio3UI = function (data) {
     var self = this;
 
-    if (data &&  data.volumio3_ui === true) {
+    if (data &&  data.volumio3_ui.value === true) {
         try {
             execSync("/bin/rm /data/volumio2ui");
             process.env.VOLUMIO_3_UI = 'true';
