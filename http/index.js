@@ -18,6 +18,7 @@ var background = express();
 var plugindir = '/tmp/plugins';
 var backgrounddir = '/data/backgrounds';
 var volumio2UIFlagFile = '/data/volumio2ui';
+var volumio3UIFolderPath = '/volumio/http/www3';
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -48,7 +49,7 @@ app.use(compression())
 
 // Serving Volumio3 UI
 // Checking if we use Volumio3 UI
-if (fs.existsSync(volumio2UIFlagFile)) {
+if (fs.existsSync(volumio2UIFlagFile) || !fs.existsSync(volumio3UIFolderPath)) {
     process.env.VOLUMIO_3_UI = 'false';
 } else {
     process.env.VOLUMIO_3_UI = 'true';
