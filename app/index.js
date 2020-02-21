@@ -15,17 +15,6 @@ function CoreCommandRouter(server) {
 	var logfile = '/var/log/volumio.log';
 
 	fs.ensureFileSync(logfile);
-	fs.watchFile(logfile, function () {
-		fs.stat(logfile, function (err, stats) {
-			if (stats.size > 15728640) {
-				var now = new Date();
-				console.log('******** LOG FILE REACHED 15MB IN SIZE, CLEANING IT ********');
-				fs.writeFile(logfile, '------------------- Log Cleaned at '+ now + ' -------------------', function(){
-					console.log('******** LOG FILE SUCCESSFULLY CLEANED ********');
-				})
-			}
-		});
-	});
 	this.logger = new (winston.Logger)({
 		transports: [
 			new (winston.transports.Console)(),
