@@ -336,7 +336,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 
 				 var networkresults = {"available": networksarray}
 
-                 exself.enrichNetworks(networksarray);
+                 //exself.enrichNetworks(networksarray);
 				 defer.resolve(networkresults);
 			 } catch (e)
 			 {console.log('Cannot use fallback scanning method: '+e)}
@@ -344,7 +344,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 			 var networksarray = networks;
 			 var networkresults = {"available": networksarray}
 
-             exself.enrichNetworks(networksarray);
+             //exself.enrichNetworks(networksarray);
 			 defer.resolve(networkresults);
 		 }
 
