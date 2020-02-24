@@ -9,6 +9,7 @@ var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var calltrials = 0;
 var additionalSVInfo;
+const { v4: uuidv4 } = require('uuid');
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -37,8 +38,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
   var uuid = this.config.get('uuid');
   if (uuid == undefined) {
     console.log('No id defined. Creating one');
-    var uuid = require('node-uuid');
-    self.config.addConfigValue('uuid', 'string', uuid.v4());
+    self.config.addConfigValue('uuid', 'string', uuidv4());
   }
 
   this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
