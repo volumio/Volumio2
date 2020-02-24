@@ -6,12 +6,12 @@ var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
-var libUUID = require('node-uuid');
 var udev = require('udev');
 var S = require('string');
 var _ = require('underscore');
 var removableMountPoint = '/mnt/';
 var mountPointFile = '/data/configuration/mountPoints';
+const { v4: uuidv4 } = require('uuid');
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -403,7 +403,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
     return defer.promise;
   }
 
-  uuid = libUUID.v4();
+  uuid = uuidv4();
   self.logger.info('No correspondence found in configuration for share ' + name + ' on IP ' + ip);
 
   var saveshare = self.saveShareConf('NasMounts', uuid, name, ip, path, fstype, username, password, options);
