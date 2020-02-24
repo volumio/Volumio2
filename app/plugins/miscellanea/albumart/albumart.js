@@ -348,7 +348,6 @@ var processRequest = function (web, path, meta) {
 	var defer = Q.defer();
 
 	if (web == undefined && path == undefined) {
-	    logger.info('No input data');
 		defer.reject(new Error(''));
 		return defer.promise;
 	}

@@ -8,8 +8,8 @@ var iwlist = require('./lib/iwlist.js');
 var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
 var ip = require('ip');
-var isOnline = require('is-online');
 var os = require('os');
+var crypto = require('crypto')
 
 
 // Define the ControllerNetwork class
@@ -336,7 +336,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 
 				 var networkresults = {"available": networksarray}
 
-                 exself.enrichNetworks(networksarray);
+                 //exself.enrichNetworks(networksarray);
 				 defer.resolve(networkresults);
 			 } catch (e)
 			 {console.log('Cannot use fallback scanning method: '+e)}
@@ -344,7 +344,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 			 var networksarray = networks;
 			 var networkresults = {"available": networksarray}
 
-             exself.enrichNetworks(networksarray);
+             //exself.enrichNetworks(networksarray);
 			 defer.resolve(networkresults);
 		 }
 
@@ -528,11 +528,18 @@ ControllerNetwork.prototype.getData = function (data, key) {
 ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 	var self = this;
 
+	if (!data['ssid']) {
+		self.logger.error('Could not save Wifi Network, no SSID specified');
+		return
+	}
 	self.logger.info("Saving new wireless network");
 
 	var network_ssid = data['ssid'];
 	var network_pass = data['password'];
 
+	if (data && data.security && data.security.includes('wpa') && network_pass) {
+		network_pass = self.getHashedWPAPassphrase(network_ssid, network_pass);
+	}
     var index=this.searchNetworkInConfig(network_ssid);
 
     if(index>-1)
@@ -699,6 +706,9 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
         }
         if (self.isWPA(data.pass)){
             netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+        }
+        if (self.isWPAHashed(data.pass)){
+            netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk=' + data.pass.replace('hash::', '') + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
         } else {
             self.logger.error('Not saving Password for network '+ data.ssid + ': shorter than 8 chars');
         }
@@ -723,6 +733,9 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
                 }
                 if (self.isWPA(configuredPASS)) {
                     netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWPAHashed(data.pass)){
+                    netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk=' + data.pass.replace('hash::', '') + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
                 } else {
                     self.logger.error('Not saving Password for network ' + configuredSSID + ': shorter than 8 chars');
                 }
@@ -984,6 +997,16 @@ ControllerNetwork.prototype.isWPA = function (data) {
 	 }
 };
 
+ControllerNetwork.prototype.isWPAHashed = function (data) {
+    var self = this;
+
+    if (data.length === 70 && data.includes('hash::')) {
+        return true
+    } else {
+        return false
+    }
+};
+
 ControllerNetwork.prototype.getWirelessInfo = function () {
     var self = this;
     var defer = libQ.defer();
@@ -1052,4 +1075,18 @@ ControllerNetwork.prototype.wirelessDisable = function () {
     setTimeout(()=>{
         self.commandRouter.wirelessRestart();
 	},500)
+};
+
+ControllerNetwork.prototype.getHashedWPAPassphrase = function (ssid, passphrase) {
+    var self = this;
+
+    try {
+        var hashedWPAPassphrase = 'hash::' + crypto.pbkdf2Sync(passphrase, ssid, 4096, 32, 'sha1').toString('hex');
+	} catch (e) {
+    	self.logger.error('Could not hash passphrase: ' + e );
+    	self.logger.info('Using clear passphrase');
+        var hashedWPAPassphrase = passphrase;
+	}
+
+	return hashedWPAPassphrase
 };

@@ -15,17 +15,6 @@ function CoreCommandRouter(server) {
 	var logfile = '/var/log/volumio.log';
 
 	fs.ensureFileSync(logfile);
-	fs.watchFile(logfile, function () {
-		fs.stat(logfile, function (err, stats) {
-			if (stats.size > 15728640) {
-				var now = new Date();
-				console.log('******** LOG FILE REACHED 15MB IN SIZE, CLEANING IT ********');
-				fs.writeFile(logfile, '------------------- Log Cleaned at '+ now + ' -------------------', function(){
-					console.log('******** LOG FILE SUCCESSFULLY CLEANED ********');
-				})
-			}
-		});
-	});
 	this.logger = new (winston.Logger)({
 		transports: [
 			new (winston.transports.Console)(),
@@ -1983,18 +1972,19 @@ CoreCommandRouter.prototype.setMyVolumioToken = function (data) {
 CoreCommandRouter.prototype.getMyVolumioStatus = function () {
     var self=this;
     var defer = libQ.defer();
+    var notLoggedInResponseObject = {"loggedIn":false};
 
     var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioStatus', '');
-
     if (response != undefined) {
         response.then(function (result) {
             defer.resolve(result);
-        })
-            .fail(function () {
-                var jsonobject = {"loggedIn":false}
-                defer.resolve(jsonobject);
-            });
-    }
+        }).fail(function () {
+			defer.resolve(notLoggedInResponseObject);
+		});
+    } else {
+    	// MyVolumio plugin not loaded
+        defer.resolve(notLoggedInResponseObject);
+	}
 
     return defer.promise;
 }

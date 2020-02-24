@@ -33,11 +33,12 @@ expressApp.use(function (err, req, res, next) {
 
 var commandRouter = new (require('./app/index.js'))(httpServer);
 
-expressApp.get('/?*', function (req, res) {
-    if (process.env.VOLUMIO_3_UI === 'true') {
-        res.sendFile(path.join(__dirname,'http', 'www3', 'index.html'));
+expressApp.get('/?*', function(req, res) {
+  var userAgent = req.get('user-agent');
+  if (userAgent === 'volumiokiosk' || process.env.VOLUMIO_3_UI === 'false') {
+    res.sendFile(path.join(__dirname, 'http', 'www', 'index.html'));
     } else {
-        res.sendFile(path.join(__dirname,'http', 'www', 'index.html'));
+    res.sendFile(path.join(__dirname, 'http', 'www3', 'index.html'));
     }
 });
 
