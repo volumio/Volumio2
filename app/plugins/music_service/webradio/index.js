@@ -904,7 +904,7 @@ ControllerWebradio.prototype.search = function (data) {
         "items": []
     };
 
-    var search = data.value.toLowerCase();
+    var search = data.value.toLowerCase().replace(' ', '*');
     var tuneInSerch = self.searchWithTuneIn(search).then(function (value) {
         return value;
     });
