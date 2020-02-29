@@ -903,8 +903,7 @@ ControllerWebradio.prototype.search = function (data) {
         ],
         "items": []
     };
-
-    var search = data.value.toLowerCase().replace(' ', '*');
+    var search = data.value.normalize ("NFKD").replace (/[\u0300-\u036F]/g, "").replace(/[' ']/g, '*').toLowerCase();
     var tuneInSerch = self.searchWithTuneIn(search).then(function (value) {
         return value;
     });
