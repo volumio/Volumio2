@@ -5,7 +5,6 @@ var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
-var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var calltrials = 0;
 var additionalSVInfo;
@@ -363,42 +362,30 @@ ControllerSystem.prototype.registerCallback = function (callback) {
 };
 
 ControllerSystem.prototype.getSystemVersion = function () {
-  var self = this;
-  var defer = libQ.defer();
-  var file = fs.readFileSync('/etc/os-release').toString().split('\n');
-  var releaseinfo = {
-    systemversion: null,
-    builddate: null,
-    variant: null,
-    hardware: null
+  const defer = libQ.defer();
+  const osReleaseFile = fs.readFileSync('/etc/os-release').toString();
+  const releaseInfo = {
+    systemversion: 'VOLUMIO_VERSION',
+    builddate: 'VOLUMIO_BUILD_DATE',
+    variant: 'VOLUMIO_VARIANT',
+    hardware: 'VOLUMIO_HARDWARE'
   };
-  // console.log(file);
-  var nLines = file.length;
-  var str;
-  for (var l = 0; l < nLines; l++) {
-    if (file[l].match(/VOLUMIO_VERSION/i)) {
-      str = file[l].split('=');
-      releaseinfo.systemversion = str[1].replace(/\"/gi, '');
-    }
-    if (file[l].match(/VOLUMIO_BUILD_DATE/i)) {
-      str = file[l].split('=');
-      releaseinfo.builddate = str[1].replace(/\"/gi, '');
-    }
-    if (file[l].match(/VOLUMIO_VARIANT/i)) {
-      str = file[l].split('=');
-      releaseinfo.variant = str[1].replace(/\"/gi, '');
-    }
-    if (file[l].match(/VOLUMIO_HARDWARE/i)) {
-      str = file[l].split('=');
-      releaseinfo.hardware = str[1].replace(/\"/gi, '');
+
+  for (const key in releaseInfo) {
+    const needle = releaseInfo[key];
+    const regEx = new RegExp(`^${needle}=(.*)$`, 'gm');
+    const res = regEx.exec(osReleaseFile);
+    // No need to check if we actually captured something, will be null
+    if (res) {
+      releaseInfo[key] = res[1].replace(/^"|"$/g, '');
     }
   }
 
   if (additionalSVInfo) {
-    releaseinfo.additionalSVInfo = additionalSVInfo;
+    releaseInfo.additionalSVInfo = additionalSVInfo;
   }
 
-  defer.resolve(releaseinfo);
+  defer.resolve(releaseInfo);
 
   return defer.promise;
 };
