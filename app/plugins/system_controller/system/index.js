@@ -392,24 +392,10 @@ ControllerSystem.prototype.registerCallback = function (callback) {
 
 ControllerSystem.prototype.getSystemVersion = function () {
   const defer = libQ.defer();
-  const osReleaseFile = fs.readFileSync('/etc/os-release').toString();
-  const releaseInfo = {
-    systemversion: 'VOLUMIO_VERSION',
-    builddate: 'VOLUMIO_BUILD_DATE',
-    variant: 'VOLUMIO_VARIANT',
-    hardware: 'VOLUMIO_HARDWARE'
-  };
-
-  for (const key in releaseInfo) {
-    const needle = releaseInfo[key];
-    const regEx = new RegExp(`^${needle}=(.*)$`, 'gm');
-    const res = regEx.exec(osReleaseFile);
-    // No need to check if we actually captured something, will be null
-    if (res) {
-      releaseInfo[key] = res[1].replace(/^"|"$/g, '');
-    }
-  }
-
+  
+  const releaseInfo = this.commandRouter.getSystemVersion();
+  
+  // TOOD: Does versionChangeDetect need to know about this addition?
   if (additionalSVInfo) {
     releaseInfo.additionalSVInfo = additionalSVInfo;
   }
@@ -1000,19 +986,18 @@ ControllerSystem.prototype.saveHDMISettings = function (data) {
 };
 
 ControllerSystem.prototype.versionChangeDetect = function () {
-  var self = this;
-
-  var info = self.getSystemVersion();
-  info.then(function (infos) {
-    if (infos != undefined && infos.systemversion != undefined) {
-      var systemVersion = self.config.get('system_version', 'none');
-      if (systemVersion !== infos.systemversion) {
-        self.config.set('system_version', infos.systemversion);
-        self.logger.info('Version has changed, forcing UI Reload');
-        return self.commandRouter.reloadUi();
+  // var self = this;
+  
+  const currentSystemVersion = this.commandRouter.getSystemVersion(true).then(
+    (sysVer) => {
+      configSysVer = this.config('system_version','none');
+      if (sysVer && configSysVer !== configSysVer) {
+        this.config.set('system_version', infos.systemversion);
+        this.logger.info('Version has changed, forcing UI Reload');
+        return this.commandRouter.reloadUi();
       }
     }
-  });
+  );
 };
 
 ControllerSystem.prototype.getMainDiskUsage = function () {

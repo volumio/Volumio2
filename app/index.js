@@ -2056,10 +2056,42 @@ CoreCommandRouter.prototype.getPluginEnabled = function (category, pluginName) {
   return this.pluginManager.isEnabled(category, pluginName);
 };
 
-CoreCommandRouter.prototype.getSystemVersion = function () {
-  var self = this;
+// We assume that the system version information doesn't chnge during runtime,
+// so keep it in memory instead of parsing os-release each time.
+// TODO:
+//  Does the same hold for VOLUMIO_VARIANT?
+//  versionChangeDetect seems to handle this.
+//  by using config.set('system_version')
+CoreCommandRouter.prototype.getSystemVersion = function (force) {
+  // var self = this;
+  // return this.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+  const defer = libQ.defer();
 
-  return this.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+  if (force || !this.systemVersion) {
+    const osReleaseFile = fs.readFileSync('/etc/os-release').toString();
+    const releaseInfo = {
+      systemversion: 'VOLUMIO_VERSION',
+      builddate: 'VOLUMIO_BUILD_DATE',
+      variant: 'VOLUMIO_VARIANT',
+      hardware: 'VOLUMIO_HARDWARE'
+    };
+
+    for (const key in releaseInfo) {
+      const needle = releaseInfo[key];
+      const regEx = new RegExp(`^${needle}=(.*)$`, 'gm'); // overkill
+      const res = regEx.exec(osReleaseFile);
+      // No need to check if we actually captured something, will be null
+      if (res) {
+        releaseInfo[key] = res[1].replace(/^"|"$/g, '');
+      }
+    }
+
+    this.systemVersion = releaseInfo;
+    defer.resolve(releaseInfo);
+  } else {
+    defer.resolve(this.systemVersion);
+  }
+  return defer.promise;
 };
 
 CoreCommandRouter.prototype.getAdvancedSettingsStatus = function () {
