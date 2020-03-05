@@ -903,12 +903,38 @@ ControllerWebradio.prototype.search = function (data) {
         ],
         "items": []
     };
+    
+     function dynamicSort(property) {
+    var sortOrder = 1;
+
+    if(property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+
+    return function (a,b) {
+        if(sortOrder == -1){
+            return b[property].localeCompare(a[property]);
+        }else{
+            return a[property].localeCompare(b[property]);
+        }        
+    }
+} 
+
     var search = data.value.normalize ("NFKD").replace (/[\u0300-\u036F]/g, "").replace(/[' ']/g, '*').toLowerCase();
     var tuneInSerch = self.searchWithTuneIn(search).then(function (value) {
-        return value;
-    });
+ 
+    value.sort(dynamicSort("title"));
+   
+    return value;
+     });
+
+    
     var shoutcastSearch = self.searchWithShoutcast(search).then(function (value) {
-        return value;
+ 
+    value.sort(dynamicSort("title"));
+    
+    return value;
     });
 
     libQ.all([tuneInSerch,shoutcastSearch]).then(function(result){
@@ -916,9 +942,9 @@ ControllerWebradio.prototype.search = function (data) {
         for (i = 0; i < result.length; i++) {
             if (Array.isArray(result[i])) {
                 Array.prototype.push.apply(list.items,result[i]);
-                list.items.concat(result[i]);
-            }
-        }
+                       list.items.concat(result[i]);
+   			}
+  		}
         defer.resolve(list);
     });
     return defer.promise
