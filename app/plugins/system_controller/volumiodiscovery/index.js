@@ -297,21 +297,10 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 		var socket= io.connect('http://'+ip+':3000');
 		socket.on('connect',function()
 		{
-			socket.on('pushState',function(data)
-			{
-				foundVolumioInstances.set(uuid+'.status',data.status);
-				foundVolumioInstances.set(uuid+'.volume',data.volume);
-				foundVolumioInstances.set(uuid+'.mute',data.mute);
-				foundVolumioInstances.set(uuid+'.artist',data.artist);
-				foundVolumioInstances.set(uuid+'.track',data.title);
-				foundVolumioInstances.set(uuid+'.albumart',data.albumart);
-				var volumeAvailable = true;
-				if (data.disableVolumeControl) {
-                    volumeAvailable = false;
-				}
-                foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
-				var toAdvertise=self.getDevices();
-				self.commandRouter.pushMultiroomDevices(toAdvertise);
+
+            socket.emit('getState','');
+			socket.on('pushState',function(data) {
+				self.pushMultiRoomStatusUpdate(uuid, data);
 			});
             socket.on('disconnect',function() {
             	setTimeout(()=>{
@@ -324,7 +313,29 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 		});
 
 		self.remoteConnections.set(uuid,socket);
+	} else {
+        var selfState = self.commandRouter.volumioGetState();
+        self.pushMultiRoomStatusUpdate(uuid, selfState);
 	}
+
+};
+
+ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate=function(uuid, data) {
+    var self = this;
+
+    foundVolumioInstances.set(uuid+'.status',data.status);
+    foundVolumioInstances.set(uuid+'.volume',data.volume);
+    foundVolumioInstances.set(uuid+'.mute',data.mute);
+    foundVolumioInstances.set(uuid+'.artist',data.artist);
+    foundVolumioInstances.set(uuid+'.track',data.title);
+    foundVolumioInstances.set(uuid+'.albumart',data.albumart);
+    var volumeAvailable = true;
+    if (data.disableVolumeControl) {
+        volumeAvailable = false;
+    }
+    foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
+    var toAdvertise=self.getDevices();
+    self.commandRouter.pushMultiroomDevices(toAdvertise);
 
 };
 
