@@ -313,6 +313,14 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 				var toAdvertise=self.getDevices();
 				self.commandRouter.pushMultiroomDevices(toAdvertise);
 			});
+            socket.on('disconnect',function() {
+            	setTimeout(()=>{
+                    self.handleUngracefulDeviceDisappear(uuid);
+                	socket.close();
+				}, 4000)
+
+
+            });
 		});
 
 		self.remoteConnections.set(uuid,socket);
@@ -583,4 +591,20 @@ ControllerVolumioDiscovery.prototype.setRemoteDeviceVolume = function (data) {
                 self.logger.error('Cannot set Remote Device Volume');
             }
         });
+};
+
+ControllerVolumioDiscovery.prototype.handleUngracefulDeviceDisappear = function(uuid) {
+    var self=this;
+
+    if (foundVolumioInstances.get(uuid+'.name')) {
+        try {
+            self.logger.info('mDNS: Device ' + foundVolumioInstances.get(uuid+'.name') + ' disapperared ungracefully from network');
+            foundVolumioInstances.delete(uuid);
+            self.remoteConnections.remove(uuid);
+            var toAdvertise=self.getDevices();
+            self.commandRouter.pushMultiroomDevices(toAdvertise);
+        } catch(e) {
+            self.logger.error('mDNS: Failed to remove ungraceful device: ' + e);
+        }
+	}
 };
