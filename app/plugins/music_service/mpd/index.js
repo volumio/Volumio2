@@ -277,7 +277,6 @@ ControllerMpd.prototype.getState = function () {
 	 })*/
         .then(function (objState) {
             var collectedState = self.parseState(objState);
-
             // If there is a track listed as currently playing, get the track info
             if (collectedState.position !== null) {
                 return self.sendMpdCommand('playlistinfo', [collectedState.position])
@@ -462,6 +461,12 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
         artUrl = this.getAlbumArt(web, file);
     }
 
+    if (objTrackInfo.bitrate){
+        resp.bitrate = objTrackInfo.bitrate;
+    } else {
+        resp.bitrate = null;
+    }
+
     resp.albumart = artUrl;
 
     return resp;
@@ -572,6 +577,11 @@ ControllerMpd.prototype.parseState = function (objState) {
         updatedb = true;
     }
 
+    var bitrate = null;
+    if ('bitrate' in objState) {
+        bitrate = objState.bitrate + ' Kbps';
+    }
+
     return {
         status: sStatus,
         position: nPosition,
@@ -582,7 +592,8 @@ ControllerMpd.prototype.parseState = function (objState) {
         channels: nChannels,
         random: random,
         updatedb: updatedb,
-        repeat: repeat
+        repeat: repeat,
+        bitrate: bitrate
     };
 };
 

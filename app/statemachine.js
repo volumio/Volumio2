@@ -134,6 +134,7 @@ CoreStateMachine.prototype.getState = function () {
                 samplerate: this.consumeState.samplerate,
                 bitdepth: this.consumeState.bitdepth,
                 channels: this.consumeState.channels,
+				bitrate: this.consumeState.bitrate,
                 random: this.currentRandom,
                 repeat: this.currentRepeat,
                 repeatSingle: this.currentRepeatSingleSong,
@@ -716,6 +717,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 						samplerate:sRate,
 						bitdepth:bDepth,
 						channels:stateService.channels,
+                        bitrate:stateService.bitrate,
 						stream:stateService.isStreaming
 					};
 				} else {
@@ -733,6 +735,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
 						samplerate:stateService.samplerate,
 						bitdepth:stateService.bitdepth,
 						channels:stateService.channels,
+                        bitrate:stateService.bitrate,
 						stream:stateService.isStreaming,
 						service:stateService.service
 					};
