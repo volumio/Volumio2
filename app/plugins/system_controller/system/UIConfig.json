@@ -99,19 +99,12 @@
           "description": "TRANSLATE.SYSTEM.CHECK_UPDATES_DESCR",
           "onClick": {"type":"emit", "message":"updateCheck", "data":"search-for-upgrade"}
         },
-        {
-          "id":"user",
-          "element": "button",
-          "label": "TRANSLATE.SYSTEM.DELETE_USER_DATA",
-          "description": "TRANSLATE.SYSTEM.DELETE_USER_DATA_DESCR",
-          "onClick": {"type":"emit", "message":"deleteUserData", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.DELETE_USER_DATA_TITLE", "message": "TRANSLATE.SYSTEM.DELETE_USER_DATA_MESSAGE"}}
-        },
          {
             "id":"factory",
               "element": "button",
               "label": "TRANSLATE.SYSTEM.FACTORY_RESET",
               "description": "TRANSLATE.SYSTEM.FACTORY_RESET_DESCR",
-              "onClick": {"type":"emit", "message":"factoryReset", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.FACTORY_RESET_TITLE", "message": "TRANSLATE.SYSTEM.FACTORY_RESET_MESSAGE"}}
+              "onClick": {"type":"emit", "message":"deleteUserData", "data":" ", "askForConfirm": {"title": "TRANSLATE.SYSTEM.FACTORY_RESET_TITLE", "message": "TRANSLATE.SYSTEM.FACTORY_RESET_MESSAGE"}}
           }
       ]
 
