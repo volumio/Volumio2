@@ -249,7 +249,6 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 			 var networksarray = [];
 			 var arraynumber = 0;
 
-
 			 try {
 				 var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", {encoding: 'utf8'});
 
@@ -284,14 +283,13 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 								 var dbmraw = scanResults[1].split('.');
 								 var dbm = Number(dbmraw[0]);
 								 var rel = 100 + dbm;
-
-								 if (rel >= 65)
+								 if (rel >= 45)
 									 signal = 5;
-								 else if (rel >= 50)
-									 signal = 4;
 								 else if (rel >= 40)
-									 signal = 3;
+									 signal = 4;
 								 else if (rel >= 30)
+									 signal = 3;
+								 else if (rel >= 20)
 									 signal = 2;
 								 else if (rel >= 1)
 									 signal = 1;
