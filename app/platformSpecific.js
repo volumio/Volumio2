@@ -53,6 +53,7 @@ PlatformSpecific.prototype.networkRestart = function () {
 		// Restart Upmpdcli
 		setTimeout(function () {
 			self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
+            self.coreCommand.executeOnPlugin('system_controller', 'network', 'onNetworkingRestart', '');
 		}, 10000);
 	});
 };
@@ -72,6 +73,7 @@ PlatformSpecific.prototype.wirelessRestart = function () {
             // Restart Upmpdcli
             setTimeout(function () {
                 self.coreCommand.executeOnPlugin('audio_interface', 'upnp', 'onRestart', '');
+                self.coreCommand.executeOnPlugin('system_controller', 'network', 'onNetworkingRestart', '');
             }, 10000);
 		}
 

@@ -926,7 +926,7 @@ ControllerNetwork.prototype.isWPA = function (data) {
 ControllerNetwork.prototype.isWPAHashed = function (data) {
     var self = this;
 
-    if (data.length === 70 && data.includes('hash::')) {
+    if (data && data.length === 70 && data && data.includes('hash::')) {
         return true
     } else {
         return false
@@ -1168,5 +1168,8 @@ ControllerNetwork.prototype.parseInfoNetworkResults = function (data) {
 	return response
 };
 
-
+ControllerNetwork.prototype.onNetworkingRestart = function () {
+    var self = this;
+    return self.commandRouter.broadcastMessage('pushInfoNetworkReload', '');
+};
 
