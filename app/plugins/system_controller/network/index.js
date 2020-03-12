@@ -9,7 +9,8 @@ var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
 var ip = require('ip');
 var os = require('os');
-var crypto = require('crypto')
+var crypto = require('crypto');
+var wirelessNetworksScanCache;
 
 
 // Define the ControllerNetwork class
@@ -324,6 +325,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 				 var networkresults = {"available": networksarray}
 
                  //exself.enrichNetworks(networksarray);
+                 wirelessNetworksScanCache = networkresults;
 				 defer.resolve(networkresults);
 			 } catch (e) {
 			 	self.logger.error('Cannot use fallback scanning method: ' + e);
@@ -333,6 +335,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 			 var networkresults = {"available": networksarray}
 
              //exself.enrichNetworks(networksarray);
+             wirelessNetworksScanCache = networkresults;
 			 defer.resolve(networkresults);
 		 }
 
@@ -1170,4 +1173,11 @@ ControllerNetwork.prototype.onNetworkingRestart = function () {
     var self = this;
     return self.commandRouter.broadcastMessage('pushInfoNetworkReload', '');
 };
+
+ControllerNetwork.prototype.getWirelessNetworksScanCache = function () {
+    var self = this;
+
+    return wirelessNetworksScanCache
+};
+
 

@@ -836,8 +836,11 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('getWirelessNetworks', function () {
 				var selfConnWebSocket = this;
 
+                var wirelessNetworksCache = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessNetworksScanCache', '');
+                if (wirelessNetworksCache) {
+                    selfConnWebSocket.emit('pushWirelessNetworks', wirelessNetworksCache);
+				}
 				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessNetworks', '');
-
 				if (returnedData != undefined) {
 					returnedData.then(function (data) {
 						selfConnWebSocket.emit('pushWirelessNetworks', data);
