@@ -35,8 +35,8 @@
     {"name": "bytcr-rt5651", "multidevice": false, "prettyname": "Headphone Jack", "defaultmixer": "HP","type":"integrated"},
     {"name": "Intel HDMI/DP LPE Audio", "multidevice": true, "devices":[{"number":2, "prettyname": "HDMI", "defaultmixer": ""}],"type":"integrated"},
     {"name": "AML-AUGESOUND", "multidevice": true, "devices":[{"number":0, "prettyname": "HDMI Audio", "defaultmixer": ""}, {"number":1, "prettyname": "Line Out/ Headphones", "defaultmixer": "DAC Digital"}, {"number":2, "prettyname": "SPDIF", "defaultmixer": ""}],"type":"integrated"},
-    {"name": "AML-AUGESOUND-V", "multidevice": true, "devices":[{"number":0, "prettyname": "I2S + SPDIF + HDMI", "defaultmixer": ""}, {"number":1, "prettyname": "HDMI only", "defaultmixer": ""}, {"number":2, "prettyname": "SPDIF + HDMI", "defaultmixer": ""}],"type":"integrated"},
-    {"name": "AML-MESONAUDIO", "multidevice": true, "devices":[{"number":1, "prettyname": "I2S + SPDIF + HDMI", "defaultmixer": ""}, {"number":1, "prettyname": "SPDIF + HDMI", "defaultmixer": ""}],"type":"integrated"},
+    {"name": "AML-AUGESOUND-V", "multidevice": true, "devices":[{"number":0, "prettyname": "I2S + SPDIF + HDMI", "defaultmixer": "DAC Digital"}, {"number":1, "prettyname": "HDMI only", "defaultmixer": "DAC Digital"}, {"number":2, "prettyname": "SPDIF + HDMI", "defaultmixer": "DAC Digital"}],"type":"integrated"},
+    {"name": "AML-MESONAUDIO", "multidevice": true, "devices":[{"number":1, "prettyname": "I2S+SPDIF+HDMI", "defaultmixer": ""}, {"number":1, "prettyname": "SPDIF+HDMI", "defaultmixer": ""}],"type":"integrated"},
     {"name": "AML-M8AUDIO", "multidevice": true, "devices":[{"number":0, "prettyname": "I2S", "defaultmixer": "", "ignore": true}, {"number":1, "prettyname": "SPDIF", "defaultmixer": ""}, {"number":2, "prettyname": "PCM", "defaultmixer": "", "ignore": true}],"type":"integrated"}
   ]
 }
