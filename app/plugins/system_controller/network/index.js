@@ -245,8 +245,8 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 		 var self = this;
 
 		 if (err) {
-		 	self.logger.error('An error occurred while scanning: ' + err);
-		 	self.logger.info('Cannot use regular scanning, forcing with ap-force');
+		 	exself.logger.error('An error occurred while scanning: ' + err);
+		 	exself.logger.info('Cannot use regular scanning, forcing with ap-force');
 			 var networksarray = [];
 			 var arraynumber = 0;
 
@@ -328,7 +328,7 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
                  wirelessNetworksScanCache = networkresults;
 				 defer.resolve(networkresults);
 			 } catch (e) {
-			 	self.logger.error('Cannot use fallback scanning method: ' + e);
+			 	exself.logger.error('Cannot use fallback scanning method: ' + e);
 			 }
 		 } else {
 			 var networksarray = networks;
