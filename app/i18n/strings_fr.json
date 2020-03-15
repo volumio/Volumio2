@@ -343,7 +343,10 @@
     "SIMPLE_SETTINGS_SET":"Mode réglage simplifié",
     "SIMPLE_SETTINGS_SET_EXTENDED":"Accès seulement aux réglages de base",
     "KEEP_PRESSED_TO_TURN_OFF_IN":"Maintenir appuyé pour éteindre",
-    "TURN_OFF_IN":"Eteindre"  
+    "TURN_OFF_IN":"Eteindre",
+    "PRIVACY_SETTINGS":"Paramètres de vie privée",
+    "ALLOW_UI_STATISTICS":"Autoriser la collecte d'informations sur l'utilisation",
+    "ALLOW_UI_STATISTICS_DOC":"Autoriser la collecte d'information sur l'utilisation de l'interface de Volummio via Facebook Pixel et Google Analytics. Ces données sont utilisées pour améliorer Volumio. Pour plus d'information sur ce qui est collecté, merci de consulter volumio.org/privacy-policy"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes radios Internet",
