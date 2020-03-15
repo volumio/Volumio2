@@ -4,11 +4,28 @@ var fs = require('fs-extra');
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
 var path = require('path');
+
+global.metrics = {
+  start: {}, 
+  time: (label) => {
+    metrics.start[label] = process.hrtime();
+  },
+  end: {},
+  log: (label) => {
+    metrics.end[label] = process.hrtime(metrics.start[label]);
+    console.log(`\u001b[34m [Metrics] \u001b[39m ${label}: \u001b[31m ${metrics.end[label][0]}s ${(metrics.end[label][1] / 1000000).toFixed(2)}ms \u001b[39m`)
+  }
+};
+  
+// metrics.start.WebUI = process.hrtime();
+metrics.time('WebUI');
+
 // Using port 3000 for the debug interface
 expressApp.set('port', 3000);
 
 var httpServer = expressApp.listen(expressApp.get('port'), function () {
   console.log('Express server listening on port ' + httpServer.address().port);
+  metrics.log('WebUI');
 });
 
 var albumart = require(__dirname + '/app/plugins/miscellanea/albumart/albumart.js');
