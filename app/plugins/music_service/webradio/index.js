@@ -1084,6 +1084,7 @@ ControllerWebradio.prototype.searchWithTuneIn = function (search) {
         var body = results.body;
         for (var i in body) {
             let item = self.getTuneInNavigationItem(body[i], 'tunein_radio');
+
             if (item) {
                 items.push(item);
             }
@@ -1223,7 +1224,7 @@ ControllerWebradio.prototype.getTuneInNavigationItem = function(node, category) 
     let icon = '';
     let uri = '';
 
-    if (node.type == 'audio') {
+    if (node.type == 'audio' && node.item !== undefined && node.item === 'station') {
         servType = 'webradio';
         albumart = node.image;
         uri = node.URL;
