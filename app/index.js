@@ -11,6 +11,7 @@ var vconf = require('v-conf');
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
+	metrics.time('CommandRouter');
 
 	var logfile = '/var/log/volumio.log';
 
@@ -68,10 +69,11 @@ function CoreCommandRouter(server) {
     this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
     this.pushConsoleMessage('BOOT COMPLETED');
+    metrics.log('CommandRouter');
 
     this.startupSound();
 	this.closeModals();
-
+	
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
