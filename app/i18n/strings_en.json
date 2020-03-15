@@ -343,7 +343,10 @@
     "SIMPLE_SETTINGS_SET":"Simplified Settings Mode",
     "SIMPLE_SETTINGS_SET_EXTENDED":"I want a simplified set of options",
     "KEEP_PRESSED_TO_TURN_OFF_IN":"Keep pressed to turn off in",
-    "TURN_OFF_IN":"Turn off in"
+    "TURN_OFF_IN":"Turn off in",
+    "PRIVACY_SETTINGS":"Privacy Settings",
+    "ALLOW_UI_STATISTICS":"Allow UI Statistics collection",
+    "ALLOW_UI_STATISTICS_DOC":"Allow the collection of behavioural and usage statistics on Volumio UI via Facebbook Pixel and Google Analytitcs. Those datas are used to improve Volumio user experience. For further informations about how we collect and process data please refer to volumio.org/privacy-policy"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

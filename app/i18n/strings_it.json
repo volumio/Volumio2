@@ -342,7 +342,11 @@
     "SIMPLE_SETTINGS_SET":"Impostazioni Semplificate",
     "SIMPLE_SETTINGS_SET_EXTENDED":"Voglio le opzioni semplificate",
     "KEEP_PRESSED_TO_TURN_OFF_IN":"Tieni premuto per spegnere in",
-    "TURN_OFF_IN":"Spegnimento in"
+    "TURN_OFF_IN":"Spegnimento in",
+    "PRIVACY_SETTINGS":"Impostazioni Privacy",
+    "ALLOW_UI_STATISTICS":"Consenti raccolta di statistiche",
+    "ALLOW_UI_STATISTICS_DOC":"Consente la raccolta di statistiche comportamentali e di uso delll'interfaccia tramite Facebbook Pixel e Google Analytitcs. Questi dati ci permettono di migliorare l'esperienza utente. Per ulteriori informazioni consultare volumio.org/privacy-policy"
+
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Le mie Web Radio",

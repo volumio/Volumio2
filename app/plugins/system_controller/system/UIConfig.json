@@ -130,6 +130,29 @@
       "label": "TRANSLATE.SYSTEM.CREDITS_OPEN_SOURCE_LICENSES",
       "onClick": {"type":"goto", "pageName":"credits"}
     }]
+    },
+    {
+      "id": "section_privacy_settings",
+      "element": "section",
+      "hidden": true,
+      "label": "TRANSLATE.SYSTEM.PRIVACY_SETTINGS",
+      "icon": "fa-shield",
+      "onSave": {"type":"controller", "endpoint":"system_controller/system", "method":"savePrivacySettings"},
+      "saveButton": {
+        "label": "TRANSLATE.COMMON.SAVE",
+        "data": [
+          "allow_ui_statistics"
+        ]
+      },
+      "content": [
+        {
+          "id":"allow_ui_statistics",
+          "element": "switch",
+          "doc": "TRANSLATE.SYSTEM.ALLOW_UI_STATISTICS_DOC",
+          "label": "TRANSLATE.SYSTEM.ALLOW_UI_STATISTICS",
+          "value": true
+        }
+      ]
     }
   ]
 }

@@ -1874,6 +1874,20 @@ function InterfaceWebUI(context) {
             selfConnWebSocket.emit('pushDeviceHWUUID', hwuuid);
         });
 
+        connWebSocket.on('getPrivacySettings', function () {
+            var selfConnWebSocket = this;
+
+            var privacySettings = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getPrivacySettings', '');
+            if (privacySettings != undefined) {
+                privacySettings.then(function (result) {
+                    selfConnWebSocket.emit('pushPrivacySettings', result);
+                })
+                    .fail(function (e) {
+
+                    });
+            }
+        });
+
 	});
 };
 
