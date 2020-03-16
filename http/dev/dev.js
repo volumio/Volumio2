@@ -30,6 +30,9 @@ socket.on('connect', function() {
 
 	// Get the HW UUID
     socket.emit('getDeviceHWUUID', '');
+  
+	// Get app metrics
+	socket.emit('getMetrics', '');
 
 	// Request the music library root
 	//emitEvent('getLibraryFilters', 'root');
@@ -87,6 +90,16 @@ socket.on('pushDeviceHWUUID', function(data) {
     document.getElementById("hwuuid-copy-button").style.display = "inline";
 });
 
+socket.on('pushMetrics', function (data) {
+  let table = '<table>';
+  table += '<tr><td>Module</td><td>Seconds</td><td>Millisecond</td></tr>';
+  for (const met in data) {
+    table += `<tr><td> ${met} </td><td> ${data[met][0]} </td><td> ${(data[met][1] / 1000000).toFixed(2)} </td></tr>`;
+  }
+  table += '</table>';
+  document.getElementById('metrics-text').innerHTML = table;
+  console.log(table);
+});
 
 // Define internal functions ----------------------------------------------
 function clearConsole() {
@@ -227,4 +240,3 @@ for (var i = 0; i < btns.length; i++) {
 		e.currentTarget.removeAttribute('aria-label');
 	});
 }
-

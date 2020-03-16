@@ -1873,6 +1873,12 @@ function InterfaceWebUI(context) {
             var hwuuid = self.commandRouter.getHwuuid();
             selfConnWebSocket.emit('pushDeviceHWUUID', hwuuid);
         });
+				
+        connWebSocket.on('getMetrics', function () {
+            const selfConnWebSocket = this;
+            const metrics_dump = metrics.dump();
+            selfConnWebSocket.emit('pushMetrics', metrics_dump);
+        });
 
         connWebSocket.on('getPrivacySettings', function () {
             var selfConnWebSocket = this;
@@ -2042,6 +2048,3 @@ InterfaceWebUI.prototype.broadcastMessage = function(emit,payload) {
 		this.libSocketIO.sockets.emit(emit,payload);
 	}
 };
-
-
-
