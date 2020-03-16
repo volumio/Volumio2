@@ -92,7 +92,7 @@ socket.on('pushDeviceHWUUID', function(data) {
 
 socket.on('pushMetrics', function (data) {
   let table = '<table>';
-  table += '<tr><td>Module</td><td>Seconds</td><td>Millisecond</td></tr>';
+  table += '<tr><th>Module</th><th>Seconds</th><th>Milliseconds</th></tr>';
   for (const met in data) {
     table += `<tr><td> ${met} </td><td> ${data[met][0]} </td><td> ${(data[met][1] / 1000000).toFixed(2)} </td></tr>`;
   }
