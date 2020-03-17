@@ -295,9 +295,9 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 	var plugin = self.getPlugin(category, name);
 
 	if(plugin)
-	{
+	{ 
 		if(plugin.onStart!==undefined)
-		{
+		{  
 		    var myPromise = plugin.onStart();
 			self.config.set(category + '.' + name + '.status', "STARTED");
 
@@ -310,14 +310,14 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 
 			defer.resolve();
 			return myPromise;
-
+			
 		}
 		else
 		{
 			self.config.set(category + '.' + name + '.status', "STARTED");
 			defer.resolve();
 		}
-
+		
 	} else defer.resolve();
 
 	return defer.promise;
@@ -330,7 +330,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
     var plugin = self.getPlugin(category, name);
 
     if(plugin)
-    {
+    {   
         if(plugin.onStart!==undefined)
         {
             self.logger.info("PLUGIN START: "+name);
@@ -353,7 +353,7 @@ PluginManager.prototype.startPlugin = function (category, name) {
             self.config.set(category + '.' + name + '.status', "STARTED");
             defer.resolve();
         }
-
+			 
     } else defer.resolve();
 
     return defer.promise;
@@ -410,7 +410,9 @@ PluginManager.prototype.startCorePlugins = function () {
 */
 
 	self.corePlugins.forEach(function (value,key) {
+		metrics.time(value.name);
 		defer_startList.push(self.startCorePlugin(value.category,value.name));
+		metrics.log(value.name);
 	});
 
 	return libQ.all(defer_startList);
@@ -1699,12 +1701,14 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
 	self.enablePlugin(category,name)
 		.then(function(e)
 		{
+			metrics.time(name);
 			var folder=self.findPluginFolder(category,name);
 			return self.loadCorePlugin(folder);
 		})
 		.then(self.startPlugin.bind(this,category,name))
 		.then(function(e)
-		{
+		{ 
+			metrics.log(name);
 			self.logger.info("Done.");
 			defer.resolve('ok');
 		})
@@ -1933,5 +1937,3 @@ PluginManager.prototype.checkConfigFileEmpty = function (destConfigurationFile) 
         }
     }
 }
-
-
