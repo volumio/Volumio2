@@ -74,7 +74,7 @@ function PluginManager (ccommand, server) {
 
   var myVolumioPMPath = '/myvolumio/app/myvolumio-pluginmanager';
   if (fs.existsSync(myVolumioPMPath)) {
-    	this.logger.info('MYVOLUMIO Environment detected');
+    this.logger.info('MYVOLUMIO Environment detected');
     self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager, self.config);
   }
 }
@@ -179,7 +179,7 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
       defer.resolve();
     }
   } else {
-	 	self.logger.info('Plugin ' + name + ' is not enabled');
+    self.logger.info('Plugin ' + name + ' is not enabled');
     defer.resolve();
   }
 
@@ -232,10 +232,10 @@ PluginManager.prototype.loadCorePlugins = function () {
 
   /*
     each plugin's onVolumioStart() is launched by priority order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by boot-priority order, or else...)
+  Note: there is no resolution strategy: each plugin completes
+  at it's own pace, and in whatever order.
+  Should completion order matter, a new promise strategy should be
+  implemented below (chain by boot-priority order, or else...)
 */
   priority_array.forEach(function (plugin_array) {
     if (plugin_array != undefined) {
@@ -272,7 +272,7 @@ PluginManager.prototype.startCorePlugin = function (category, name) {
 
   if (plugin) {
     if (plugin.onStart !== undefined) {
-		    var myPromise = plugin.onStart();
+      var myPromise = plugin.onStart();
       self.config.set(category + '.' + name + '.status', 'STARTED');
 
       if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
@@ -360,10 +360,10 @@ PluginManager.prototype.startCorePlugins = function () {
 
   /*
     each plugin's onStart() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
+  Note: there is no resolution strategy: each plugin completes
+  at it's own pace, and in whatever order.
+  Should completion order matter, a new promise strategy should be
+  implemented below (chain by start order, or else...)
 */
 
   self.corePlugins.forEach(function (value, key) {
@@ -381,10 +381,10 @@ PluginManager.prototype.stopPlugins = function () {
 
   /*
     each plugin's onStop() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
+  Note: there is no resolution strategy: each plugin completes
+  at it's own pace, and in whatever order.
+  Should completion order matter, a new promise strategy should be
+  implemented below (chain by start order, or else...)
 */
 
   self.corePlugins.forEach(function (value, key) {
@@ -405,7 +405,7 @@ PluginManager.prototype.getPluginCategories = function () {
     if (libFast.indexOf(categories, metadata.category) == -1) { categories.push(metadata.category); }
   }
   if (self.myVolumioPluginManager !== undefined) {
-    let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
+    const myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
     categories.concat(myVolumioCategories);
   }
 
@@ -424,7 +424,7 @@ PluginManager.prototype.getPluginNames = function (category) {
   }
 
   if (self.myVolumioPluginManager !== undefined) {
-    let myVolumioNames = self.myVolumioPluginManager.getPluginNames();
+    const myVolumioNames = self.myVolumioPluginManager.getPluginNames();
     names.concat(myVolumioNames);
   }
 
@@ -439,7 +439,7 @@ PluginManager.prototype.getPluginNames = function (category) {
 PluginManager.prototype.getAllPlugNames = function (category) {
   var self = this;
 
-  var plugFile = fs.readJsonSync(('/data/configuration/plugins.json'), 'utf-8', {throws: false});
+  var plugFile = fs.readJsonSync(('/data/configuration/plugins.json'), 'utf-8', { throws: false });
   var plugins = [];
   for (var i in plugFile) {
     if (i == category) {
@@ -469,9 +469,9 @@ PluginManager.prototype.getPluginsMatrix = function () {
     for (var j = 0; j < plugNames.length; j++) {
       var name = plugNames[j];
       var enabled = self.isEnabled(catNames[i], plugNames[j]);
-      catPlugin.push({name, enabled});
+      catPlugin.push({ name, enabled });
     }
-    plugins.push({cName, catPlugin});
+    plugins.push({ cName, catPlugin });
   }
   return plugins;
 };
@@ -483,11 +483,11 @@ PluginManager.prototype.onVolumioShutdown = function () {
   self.logger.info('___________ PLUGINS: Run Shutdown Tasks ___________');
 
   /*
-	each plugin's onVolumioShutdown() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
+  each plugin's onVolumioShutdown() is launched following plugins.json order.
+  Note: there is no resolution strategy: each plugin completes
+  at it's own pace, and in whatever order.
+  Should completion order matter, a new promise strategy should be
+  implemented below (chain by start order, or else...)
 */
 
   self.corePlugins.forEach(function (value, key) {
@@ -530,11 +530,11 @@ PluginManager.prototype.onVolumioReboot = function () {
   var defer_onRebootList = [];
   self.logger.info('___________ PLUGINS: Run onVolumioReboot Tasks ___________');
   /*
-	each plugin's onVolumioReboot() is launched following plugins.json order.
-	Note: there is no resolution strategy: each plugin completes
-	at it's own pace, and in whatever order.
-	Should completion order matter, a new promise strategy should be
-	implemented below (chain by start order, or else...)
+  each plugin's onVolumioReboot() is launched following plugins.json order.
+  Note: there is no resolution strategy: each plugin completes
+  at it's own pace, and in whatever order.
+  Should completion order matter, a new promise strategy should be
+  implemented below (chain by start order, or else...)
 */
 
   self.corePlugins.forEach(function (value, key) {
@@ -589,9 +589,9 @@ PluginManager.prototype.getPlugin = function (category, name) {
 PluginManager.prototype.getConfigurationFile = function (context, fileName) {
   var self = this;
   return S(self.configurationFolder).ensureRight('/').s +
-		S(context.getEnvVariable('category')).ensureRight('/').s +
-		S(context.getEnvVariable('name')).ensureRight('/').s +
-		fileName;
+    S(context.getEnvVariable('category')).ensureRight('/').s +
+    S(context.getEnvVariable('name')).ensureRight('/').s +
+    fileName;
 };
 
 PluginManager.prototype.checkRequiredConfigurationParameters = function (requiredFile, configFile) {
@@ -631,7 +631,7 @@ PluginManager.prototype.installPlugin = function (url) {
     downloadCommand = '/bin/mv /tmp/plugins/' + droppedFile + ' /tmp/downloaded_plugin.zip';
   }
 
-  self.pushMessage('installPluginStatus', {'progress': 10, 'message': self.coreCommand.getI18nString('PLUGINS.DOWNLOADING_PLUGIN'), 'title': modaltitle, 'advancedLog': advancedlog});
+  self.pushMessage('installPluginStatus', { progress: 10, message: self.coreCommand.getI18nString('PLUGINS.DOWNLOADING_PLUGIN'), title: modaltitle, advancedLog: advancedlog });
 
   exec(downloadCommand, function (error, stdout, stderr) {
     if (error !== null) {
@@ -651,37 +651,37 @@ PluginManager.prototype.installPlugin = function (url) {
 
       self.createFolder(pluginFolder)
         .then(self.pushMessage.bind(self, 'installPluginStatus', {
-          'progress': 30,
-          'message': currentMessage,
-          'title': modaltitle,
-          'advancedLog': advancedlog
+          progress: 30,
+          message: currentMessage,
+          title: modaltitle,
+          advancedLog: advancedlog
         }))
         .then(self.unzipPackage.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.UNPACKING_PLUGIN');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 40, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(self.checkPluginDoesntExist.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.CHECKING_DUPLICATE_PLUGIN');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 50, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 50, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(self.renameFolder.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.COPYING_PLUGIN_TO_LOCATION');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 60, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 60, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(self.moveToCategory.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.INSTALLING_NECESSARY_UTILITIES');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 70, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           var logfile = '/tmp/installog';
 
           fs.ensureFile(logfile, function (err) {
@@ -697,7 +697,7 @@ PluginManager.prototype.installPlugin = function (url) {
                 self.logger.info(data);
                 if (ended === false) {
                   advancedlog = advancedlog + '<br>' + data;
-                  self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+                  self.pushMessage('installPluginStatus', { progress: 70, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
                 }
               }
             });
@@ -708,7 +708,7 @@ PluginManager.prototype.installPlugin = function (url) {
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.FINALIZING_INSTALLATION');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 90, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 90, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(self.addPluginToConfig.bind(self))
@@ -721,9 +721,9 @@ PluginManager.prototype.installPlugin = function (url) {
             var name = package_json.volumio_info.prettyName;
           }
           currentMessage = name + ' ' + self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED') + ', ' + self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN_NOW_QUESTION');
-          var enablePayload = {'name': package_json.name, 'category': category, 'action': 'enable'};
-          var buttons = [{'name': self.coreCommand.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-warning'}, {'name': self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN'), 'class': 'btn btn-info', 'emit': 'pluginManager', 'payload': enablePayload}];
-          self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title': self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED'), 'advancedLog': advancedlog, 'buttons': buttons});
+          var enablePayload = { name: package_json.name, category: category, action: 'enable' };
+          var buttons = [{ name: self.coreCommand.getI18nString('COMMON.CLOSE'), class: 'btn btn-warning' }, { name: self.coreCommand.getI18nString('PLUGINS.ENABLE_PLUGIN'), class: 'btn btn-info', emit: 'pluginManager', payload: enablePayload }];
+          self.pushMessage('installPluginStatus', { progress: 100, message: currentMessage, title: self.coreCommand.getI18nString('PLUGINS.SUCCESSFULLY_INSTALLED'), advancedLog: advancedlog, buttons: buttons });
           return folder;
         })
         .then(function () {
@@ -735,11 +735,11 @@ PluginManager.prototype.installPlugin = function (url) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.PLUGIN_INSTALL_ERROR_OCCURRED') + ' ' + e;
           advancedlog = advancedlog + '<br>' + currentMessage;
           self.pushMessage('installPluginStatus', {
-            'progress': 0,
-            'message': currentMessage,
-            'title': modaltitle + ' ' + self.coreCommand.getI18nString('COMMON.ERROR'),
-            'buttons': [{'name': self.coreCommand.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-warning'}],
-            'advancedLog': advancedlog
+            progress: 0,
+            message: currentMessage,
+            title: modaltitle + ' ' + self.coreCommand.getI18nString('COMMON.ERROR'),
+            buttons: [{ name: self.coreCommand.getI18nString('COMMON.CLOSE'), class: 'btn btn-warning' }],
+            advancedLog: advancedlog
           });
 
           defer.reject(new Error());
@@ -772,7 +772,7 @@ PluginManager.prototype.updatePlugin = function (data) {
     downloadCommand = '/bin/mv /tmp/plugins/' + droppedFile + ' /tmp/downloaded_plugin.zip';
   }
 
-  self.pushMessage('installPluginStatus', {'progress': 10, 'message': self.coreCommand.getI18nString('PLUGINS.DOWNLOADING_PLUGIN'), 'title': modaltitle, 'advancedLog': advancedlog});
+  self.pushMessage('installPluginStatus', { progress: 10, message: self.coreCommand.getI18nString('PLUGINS.DOWNLOADING_PLUGIN'), title: modaltitle, advancedLog: advancedlog });
 
   exec(downloadCommand, function (error, stdout, stderr) {
     if (error !== null) {
@@ -792,34 +792,34 @@ PluginManager.prototype.updatePlugin = function (data) {
 
       self.stopPlugin(category, name)
         .then(function (e) {
-          self.pushMessage('installPluginStatus', {'progress': 20, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_STOPPED'), 'title': modaltitle});
+          self.pushMessage('installPluginStatus', { progress: 20, message: self.coreCommand.getI18nString('PLUGINS.PLUGIN_STOPPED'), title: modaltitle });
           return e;
         })
         .then(self.pushMessage.bind(self, 'installPluginStatus', {
-          'progress': 30,
-          'message': currentMessage,
-          'title': modaltitle,
-          'advancedLog': advancedlog
+          progress: 30,
+          message: currentMessage,
+          title: modaltitle,
+          advancedLog: advancedlog
         }))
         .then(self.unzipPackage.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.UNPACKING_PLUGIN');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 40, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(self.renameFolder.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.UPDATING_PLUGIN_FILES');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 60, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 60, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(self.moveToCategory.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.INSTALLING_NECESSARY_UTILITIES');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 70, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           var logfile = '/tmp/installog';
 
           fs.ensureFile(logfile, function (err) {
@@ -832,7 +832,7 @@ PluginManager.prototype.updatePlugin = function (data) {
               } else {
                 self.logger.info(data);
                 advancedlog = advancedlog + '<br>' + data;
-                self.pushMessage('installPluginStatus', {'progress': 70, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+                self.pushMessage('installPluginStatus', { progress: 70, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
               }
             });
           });
@@ -842,7 +842,7 @@ PluginManager.prototype.updatePlugin = function (data) {
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.FINALIZING_INSTALLATION');
           advancedlog = advancedlog + '<br>' + currentMessage;
-          self.pushMessage('installPluginStatus', {'progress': 90, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          self.pushMessage('installPluginStatus', { progress: 90, message: currentMessage, title: modaltitle, advancedLog: advancedlog });
           return e;
         })
         .then(function (folder) {
@@ -853,7 +853,7 @@ PluginManager.prototype.updatePlugin = function (data) {
           var name = package_json.name;
           var category = package_json.volumio_info.plugin_type;
 
-          self.pushMessage('installPluginStatus', {'progress': 100, 'message': currentMessage, 'title': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_COMPLETED'), 'advancedLog': advancedlog, 'buttons': [{'name': self.coreCommand.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-warning'}]});
+          self.pushMessage('installPluginStatus', { progress: 100, message: currentMessage, title: self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_COMPLETED'), advancedLog: advancedlog, buttons: [{ name: self.coreCommand.getI18nString('COMMON.CLOSE'), class: 'btn btn-warning' }] });
           return folder;
         })
         .then(function () {
@@ -866,11 +866,11 @@ PluginManager.prototype.updatePlugin = function (data) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_ERROR_OCCURRED') + ' ' + e;
           advancedlog = advancedlog + '<br>' + currentMessage;
           self.pushMessage('installPluginStatus', {
-            'progress': 0,
-            'message': currentMessage,
-            'title': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_FAILED'),
-            'buttons': [{'name': self.coreCommand.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-warning'}],
-            'advancedLog': advancedlog
+            progress: 0,
+            message: currentMessage,
+            title: self.coreCommand.getI18nString('PLUGINS.PLUGIN_UPDATE_FAILED'),
+            buttons: [{ name: self.coreCommand.getI18nString('COMMON.CLOSE'), class: 'btn btn-warning' }],
+            advancedLog: advancedlog
           });
 
           defer.reject(new Error());
@@ -942,7 +942,7 @@ PluginManager.prototype.unzipPackage = function () {
 
   }
 
-  exec('/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d ' + extractFolder, {maxBuffer: 816000}, function (error) {
+  exec('/usr/bin/miniunzip -o /tmp/downloaded_plugin.zip -d ' + extractFolder, { maxBuffer: 816000 }, function (error) {
     if (error !== null) {
       defer.reject(new Error('Error unzipping plugin: ' + error));
     } else {
@@ -1166,34 +1166,34 @@ PluginManager.prototype.unInstallPlugin = function (category, name) {
     self.logger.info('Uninstalling plugin ' + name);
     self.stopPlugin(category, name)
       .then(function (e) {
-        self.pushMessage('installPluginStatus', {'progress': 30, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_STOPPED'), 'title': modaltitle});
+        self.pushMessage('installPluginStatus', { progress: 30, message: self.coreCommand.getI18nString('PLUGINS.PLUGIN_STOPPED'), title: modaltitle });
         return e;
       })
       .then(self.disablePlugin.bind(self, category, name))
       .then(function (e) {
-        self.pushMessage('installPluginStatus', {'progress': 60, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_DISABLED'), 'title': modaltitle});
+        self.pushMessage('installPluginStatus', { progress: 60, message: self.coreCommand.getI18nString('PLUGINS.PLUGIN_DISABLED'), title: modaltitle });
         return e;
       })
       .then(self.executeUninstallationScript.bind(self, category, name))
       .then(function (e) {
-        self.pushMessage('installPluginStatus', {'progress': 70, 'message': self.coreCommand.getI18nString('PLUGINS.REMOVING_NECESSARY_UTILITIES'), 'title': modaltitle});
+        self.pushMessage('installPluginStatus', { progress: 70, message: self.coreCommand.getI18nString('PLUGINS.REMOVING_NECESSARY_UTILITIES'), title: modaltitle });
         return e;
       })
       .then(self.removePluginFromConfiguration.bind(self, category, name))
       .then(function (e) {
-        self.pushMessage('installPluginStatus', {'progress': 90, 'message': self.coreCommand.getI18nString('PLUGINS.FINALIZING_UNINSTALL'), 'title': modaltitle});
+        self.pushMessage('installPluginStatus', { progress: 90, message: self.coreCommand.getI18nString('PLUGINS.FINALIZING_UNINSTALL'), title: modaltitle });
         return e;
       })
       .then(self.pluginFolderCleanup.bind(self, true))
       .then(function (e) {
-        self.pushMessage('installPluginStatus', {'progress': 100, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALLED'), 'title': modaltitle, 'buttons': [{'name': self.coreCommand.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-warning'}]});
+        self.pushMessage('installPluginStatus', { progress: 100, message: self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALLED'), title: modaltitle, buttons: [{ name: self.coreCommand.getI18nString('COMMON.CLOSE'), class: 'btn btn-warning' }] });
         return e;
       })
       .then(function (e) {
         defer.resolve();
       })
       .fail(function (e) {
-        self.pushMessage('installPluginStatus', {'progress': 100, 'message': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALL_ERROR_OCCURRED') + ': ' + e, 'title': self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALL_FAILED'), 'buttons': [{'name': self.coreCommand.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-warning'}]});
+        self.pushMessage('installPluginStatus', { progress: 100, message: self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALL_ERROR_OCCURRED') + ': ' + e, title: self.coreCommand.getI18nString('PLUGINS.PLUGIN_UNINSTALL_FAILED'), buttons: [{ name: self.coreCommand.getI18nString('COMMON.CLOSE'), class: 'btn btn-warning' }] });
         defer.reject(new Error());
       });
   } else defer.reject(new Error("Plugin doesn't exist"));
@@ -1397,7 +1397,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
   if (installed != undefined) {
     installed.then(function (installedPlugins) {
       for (var e = 0; e < installedPlugins.length; e++) {
-        var pluginpretty = {'prettyName': installedPlugins[e].prettyName, 'version': installedPlugins[e].version, 'category': installedPlugins[e].category};
+        var pluginpretty = { prettyName: installedPlugins[e].prettyName, version: installedPlugins[e].version, category: installedPlugins[e].category };
         myplugins.push(pluginpretty);
       }
     });
@@ -1613,7 +1613,7 @@ PluginManager.prototype.findPluginFolder = function (category, name) {
 
 PluginManager.prototype.getPrettyName = function (package_json) {
   if (package_json.volumio_info !== undefined &&
-		package_json.volumio_info.prettyName !== undefined) { return package_json.volumio_info.prettName; } else return package_json.name;
+    package_json.volumio_info.prettyName !== undefined) { return package_json.volumio_info.prettName; } else return package_json.name;
 };
 
 PluginManager.prototype.checkIndex = function () {
@@ -1676,15 +1676,15 @@ PluginManager.prototype.addMyMusicPlugin = function (pluginInfo) {
   try {
     self.logger.info('Adding plugin ' + pluginInfo.name + ' to MyMusic Plugins');
     var plugin = {
-        	'prettyName': pluginInfo.volumio_info.prettyName,
-        	'name': pluginInfo.name,
-      'category': pluginInfo.volumio_info.plugin_type,
-      'hasConfiguration': pluginInfo.volumio_info.has_configuration,
-      'isMyVolumioPlugin': pluginInfo.volumio_info.is_myvolumio_plugin
+      prettyName: pluginInfo.volumio_info.prettyName,
+      name: pluginInfo.name,
+      category: pluginInfo.volumio_info.plugin_type,
+      hasConfiguration: pluginInfo.volumio_info.has_configuration,
+      isMyVolumioPlugin: pluginInfo.volumio_info.is_myvolumio_plugin
     };
     self.myMusicPlugins.push(plugin);
   } catch (e) {
-    	self.logger.error('Cannot add ' + pluginInfo.name + ' to MyMusic Plugins, error: ' + e);
+    self.logger.error('Cannot add ' + pluginInfo.name + ' to MyMusic Plugins, error: ' + e);
   }
 };
 
@@ -1693,7 +1693,7 @@ PluginManager.prototype.getMyMusicPlugins = function () {
   var defer = libQ.defer();
 
   for (var i in self.myMusicPlugins) {
-    	var plugin = self.myMusicPlugins[i];
+    var plugin = self.myMusicPlugins[i];
     plugin.active = false;
     plugin.enabled = self.config.get(plugin.category + '.' + plugin.name + '.enabled');
     if (self.config.get(plugin.category + '.' + plugin.name + '.status') === 'STARTED') {
@@ -1769,16 +1769,16 @@ PluginManager.prototype.checkConfigFileEmpty = function (destConfigurationFile) 
   var self = this;
 
   if (!fs.existsSync(destConfigurationFile)) {
-    	return true;
+    return true;
   } else {
-    	try {
+    try {
       if (fs.readFileSync(destConfigurationFile).toString().length) {
-            	return false;
+        return false;
       } else {
-            	return true;
+        return true;
       }
     } catch (e) {
-    		return true;
+      return true;
     }
   }
 };
