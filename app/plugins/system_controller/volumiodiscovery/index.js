@@ -324,6 +324,9 @@ ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate=function(uuid, da
     var self = this;
 
     foundVolumioInstances.set(uuid+'.status',data.status);
+    if (data.volume === undefined) {
+        data.volume = 0;
+	};
     foundVolumioInstances.set(uuid+'.volume',data.volume);
     foundVolumioInstances.set(uuid+'.mute',data.mute);
     foundVolumioInstances.set(uuid+'.artist',data.artist);
