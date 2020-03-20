@@ -1,3 +1,5 @@
+/*jshint -W097 */
+
 'use strict';
 
 var cacheManager = require('cache-manager');
@@ -354,7 +356,7 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
             if ('error' in respobject) {
                 self.commandRouter.broadcastToastMessage('error', 'Error', respobject.error)
 
-                self.sendMpdCommand('clearerror', [])
+                self.sendMpdCommand('clearerror', []);
 
             }
             return libQ.resolve(respobject);
@@ -692,7 +694,7 @@ ControllerMpd.prototype.mpdEstablish = function () {
             self.checkUSBDrives();
             self.listAlbums();
         }
-    })
+    });
 
     // Catch and log errors
     self.clientMpd.on('error', function (err) {
@@ -871,7 +873,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
                             payload:''
                         }
                     ]
-                }
+                };
 
                 self.commandRouter.broadcastMessage("openModal", responseData);
             }, 1000);
@@ -1173,7 +1175,7 @@ ControllerMpd.prototype.listPlaylists = function (uri) {
         }
     };
     if (singleBrowse) {
-        response.navigation.prev ={'uri': 'music-library'}
+        response.navigation.prev ={'uri': 'music-library'};
     }
     var promise = self.commandRouter.playListManager.listPlaylist();
     promise.then(function (data) {
@@ -1286,7 +1288,8 @@ ControllerMpd.prototype.lsInfo = function (uri) {
             if (singleBrowse && uri === 'music-library') {
                 prev = '/';
                 var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: self.commandRouter.getI18nString('COMMON.FAVOURITES'), uri: 'favourites', type: 'title'},
-                    {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'title'},
+                                     {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'title'},
+                                     {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: self.commandRouter.getI18nString('COMMON.COMPOSERS'), uri: 'composers://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png',title: self.commandRouter.getI18nString('COMMON.ARTISTS'), uri: 'artists://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png',title: self.commandRouter.getI18nString('COMMON.ALBUMS'), uri: 'albums://', type: 'title'},
                     {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png',title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'title'}];
@@ -2240,6 +2243,9 @@ ControllerMpd.prototype.explodeUri = function(uri) {
             defer.resolve(list);
         });
     }
+
+        // do I need an elseif for 'composers://'' here?
+
     else if(uri.startsWith('artists://')) {
 		/*
 		 artists://AC%2FDC/Rock%20or%20Bust in service mpd
@@ -3060,6 +3066,32 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
         }
     }
 
+
+
+//composers  (PW:this one picks up the click on the Composers button)
+    else if (curUri.startsWith('composers://')) {
+        console.log('PW: COMPOSERS');
+        if (curUri == 'composers://') {
+            console.log('PW: COMPOSERS-IF - sends off to listComposers function');
+            response = self.listComposers(curUri);
+            console.log('PW: curUri: ' + curUri);
+        }
+        else
+        {
+            if(splitted.length==3) {  //No album name
+                console.log('PW: COMPOSERS-1st ELSE - sends to listComposer');
+                response = self.listComposer(curUri,2,'composers://','composers://');  //Pass back to listComposer
+                console.log('PW: curUri: ' + curUri);
+            }
+            else {  //Has album name
+                console.log('PW: goes into 2nd else');
+                response = self.listAlbumSongs(curUri,3,'composers://'+ splitted[2]);  //Pass to listAlbumSongs with artist and album name
+            }
+        }
+    }
+
+
+
 //artists
     else if (curUri.startsWith('artists://')) {
 
@@ -3097,6 +3129,7 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
                 response = self.listAlbumSongs(curUri,4,'genres://'+splitted[4] +"/"+splitted[5]);
             }
         }
+
 
 
     }
@@ -3360,6 +3393,192 @@ ControllerMpd.prototype.listAlbumSongs = function (uri,index,previous) {
 
 };
 
+
+
+/**
+ *
+ * list composers
+ */
+ControllerMpd.prototype.listComposers = function () {
+
+    var self = this;
+
+    var defer = libQ.defer();
+
+    var response = {
+        "navigation": {
+        "lists": [{
+            "availableListViews": [
+                "list",
+                "grid"
+            ],
+            "items": [
+
+            ]
+        }]
+        }
+    };
+    if (singleBrowse) {
+        response.navigation.prev ={'uri': 'music-library'}
+    }
+
+    var cmd = libMpd.cmd;
+	var artistlist = "composer";
+	var artistbegin = "Composer: ";
+
+	if (artistsort) {
+		artistlist = "albumartist";
+		artistbegin = "AlbumArtist: ";
+	}
+
+	self.clientMpd.sendCommand(cmd("list", [artistlist]), function (err, msg) {  //List composers
+
+        if(err)
+            defer.reject(new Error('Cannot list artist'));
+        else
+        {
+            var splitted=msg.split('\n');
+
+            for(var i in splitted)
+            {
+
+				if(splitted[i].startsWith(artistbegin))  {
+                    var artist=splitted[i].substring(artistbegin.length);
+
+
+                    if(artist!=='') {
+                        var codedArtists=encodeURIComponent(artist);
+                        var albumart=self.getAlbumArt({artist:codedArtists},undefined,'users');
+                        var item={
+                            service: "mpd",
+                            type: 'folder',
+                            title: artist,
+                            albumart: albumart,
+                            uri: 'composers://' + codedArtists       //PW: when this one is changed, the script hangs when click composer - goes back to throwing broswe error when 'goto function' is added to
+                        }
+
+                        response.navigation.lists[0].items.push(item);
+                    }
+                }
+            }
+            defer.resolve(response);
+        }
+    });
+    return defer.promise;
+
+};
+
+/**
+ *
+ * list composer
+ */
+ControllerMpd.prototype.listComposer = function (curUri,index,previous,uriBegin) {
+	console.log('PW: ARRIVING IN listComposer function');
+    var self = this;
+
+    var defer = libQ.defer();
+
+    var splitted=curUri.split('/');
+    var albumart=self.getAlbumArt({artist:decodeURIComponent(splitted[index])},undefined,'users');
+
+    var response = {
+        "navigation": {
+            "lists": [{
+                "title": self.commandRouter.getI18nString('COMMON.ALBUMS') + " (" + decodeURIComponent(splitted[index]) + ")",
+                "icon": "fa icon",
+                "availableListViews": [
+                    "list",
+                    "grid"
+                ],
+                "items": [
+
+                ]
+            },
+                {
+                    "title": self.commandRouter.getI18nString('COMMON.TRACKS') + " (" + decodeURIComponent(splitted[index]) + ")",
+                    "icon": "fa icon",
+                    "availableListViews": [
+                    "list"
+                    ],
+                    "items": [
+
+                    ]
+                }],
+            "prev": {
+                "uri": previous
+            },
+            info: {
+                uri: curUri,
+                title:  decodeURIComponent(splitted[index]),
+                service: 'mpd',
+                type:  'artist',
+                albumart: albumart
+            }
+        }
+    };
+
+    self.mpdReady
+    .then(function() {
+		var artist=decodeURIComponent(splitted[index]);
+		var VA = 0;
+		var cmd = libMpd.cmd;
+		var safeArtist = artist.replace(/"/g,'\\"');
+		console.log('PW: artist:' + artist);
+		console.log('PW: safeArtist:' + safeArtist);
+		console.log('PW: MPD READY THEN FUNCTION BEGINS');
+		if (uriBegin === 'genres://')  {
+			console.log('PW: mpdReady IF');
+			var genre = decodeURIComponent(splitted[2]);
+			var safeGenre = genre.replace(/"/g,'\\"');
+			var findartist = "find artist \"" + safeArtist + "\" genre \"" + safeGenre + "\" ";
+		}
+
+		else {
+			if (compilation.indexOf(artist)>-1) {       //artist is in compilation array so use albumartist
+				console.log('PW: mpdReady first else');
+				var findartist = "find albumartist \"" + safeArtist + "\"";
+				VA = 1;
+			}
+			else {
+				                            //artist is NOT in compilation array so use artist or albumartist
+				if (artistsort) {						//Fix - now set by artistsort variable
+					console.log('PW: mpdReady 2nd else - artistsort');
+					var findartist = "find albumartist \"" + safeArtist + "\"";
+				}
+				else {
+					console.log('PW: mpdReady 3rd else - findartist');
+					var findartist = "find artist \"" + safeArtist + "\"";
+				}
+			}
+		}
+
+        self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {   //get data (msg)
+
+		if(msg=='') { //If there is no data (msg) get data first, else just parseListAlbum
+
+			self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {
+				console.log('PW: goto parseListAlbum IF');
+				self.parseListAlbum(err,msg,defer,response,uriBegin,VA);  		// do I need to create a special parseListAlbum function for composers?
+
+				});
+            }
+
+            else {
+                console.log('PW: goto parseListAlbum ELSE');
+				self.parseListAlbum(err,msg,defer,response,uriBegin,VA);
+			}
+        });
+    });
+
+    return defer.promise;
+
+};
+
+
+
+
+
+
 /**
  *
  * list artists
@@ -3533,10 +3752,12 @@ ControllerMpd.prototype.listArtist = function (curUri,index,previous,uriBegin) {
 
 ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin,VA) {
 
+	  console.log('PW: ARRIVING @ parseListAlbum')
     var self=this;
     var list = [];
     var albums=[],albumarts=[];
     if (msg) {
+			 console.log('PW: parseListAlbum IF - inside msg');
 
 
         var path;
@@ -3592,6 +3813,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
                     uri: 'music-library/'+path
                 });
 
+console.log('PW: arriving at blue block');
                 // The first expression in the following "if" statement prevents dummy-albums from being
                 //  created for orphaned tracks (tracks without an album). Such dummy-albums aren't required,
                 //  as orphaned tracks remain accessible from the tracks-list.
@@ -3631,6 +3853,7 @@ ControllerMpd.prototype.parseListAlbum= function(err,msg,defer,response,uriBegin
     }
     else
     {
+			  console.log('PW: parseListAlbum ELSE ');
         self.logger.info(err);
         defer.reject(new Error());
     }
@@ -3919,8 +4142,11 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
         });
 }
 
+
 ControllerMpd.prototype.goto=function(data){
-    if (data.type=='artist') {
+	  if (data.type=='composer') {
+        return this.listComposer('composers://'+encodeURIComponent(data.value),2,'', 'albums://'+encodeURIComponent(data.value)+'/')
+	  } else if (data.type=='artist') {
         return this.listArtist('artists://'+encodeURIComponent(data.value),2,'', 'albums://'+encodeURIComponent(data.value)+'/')
     } else if (data.type=='album'){
         return this.listAlbumSongs("albums://"+encodeURIComponent(data.artist)+'/'+encodeURIComponent(data.album),2,'albums://'+encodeURIComponent(data.artist)+'/');

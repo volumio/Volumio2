@@ -178,6 +178,8 @@
     "ARTIST":"Interpret",
     "ALBUMS":"Alben",
     "ALBUM":"Album",
+    "COMPOSERS":"Komponisten",
+	  "COMPOSER":"Komponist",
 	"GENRE":"Genre",
     "GENRES":"Genres",
     "TRACKS":"Titel",
