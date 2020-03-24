@@ -346,7 +346,8 @@
     "TURN_OFF_IN":"Turn off in",
     "PRIVACY_SETTINGS":"Privacy Settings",
     "ALLOW_UI_STATISTICS":"Allow UI Statistics collection",
-    "ALLOW_UI_STATISTICS_DOC":"Allow the collection of behavioural and usage statistics on Volumio UI via Facebbook Pixel and Google Analytitcs. Those datas are used to improve Volumio user experience. For further informations about how we collect and process data please refer to volumio.org/privacy-policy"
+    "ALLOW_UI_STATISTICS_DOC":"Allow the collection of behavioural and usage statistics on Volumio UI via Facebbook Pixel and Google Analytitcs. Those datas are used to improve Volumio user experience. For further informations about how we collect and process data please refer to volumio.org/privacy-policy",
+    "ALLOW_UI_STATISTICS_WIZARD":"Help Volumio development by sending usage statistics"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"My Web Radios",

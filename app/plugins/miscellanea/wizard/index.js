@@ -332,7 +332,7 @@ volumioWizard.prototype.getDonation = function () {
 
     var hideDonationForVolumioDevices = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'detectVolumioHardware', '');
     if (!hideDonationForVolumioDevices) {
-        var donation = self.config.get('donation', true)
+        var donation = self.config.get('donation', false)
     } else {
         var donation = false;
     }

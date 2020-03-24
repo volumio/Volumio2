@@ -124,7 +124,7 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	}
 
-	var allowUiStatistics = self.config.get('allow_ui_statistics', true);
+	var allowUiStatistics = self.config.get('allow_ui_statistics', false);
 	uiconf.sections[6].content[0].value = allowUiStatistics;
 	try {
 	    var variant = execSync('cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d \'VOLUMIO_VARIANT="\'').toString().replace(/\n/g, '');
@@ -1071,7 +1071,7 @@ ControllerSystem.prototype.getPrivacySettings = function () {
     var self = this;
     var defer = libQ.defer();
 
-    var allowUIStatistics = self.config.get('allow_ui_statistics', true);
+    var allowUIStatistics = self.config.get('allow_ui_statistics', false);
     var privacySettings = {
         allowUIStatistics: allowUIStatistics
     };
@@ -1089,6 +1089,28 @@ ControllerSystem.prototype.getPrivacySettings = function () {
     })
 
     return defer.promise;
+};
+
+ControllerSystem.prototype.getPrivacySettingsWizard = function () {
+    var self = this;
+
+    var privacyWizardMessage = self.commandRouter.getI18nString('SYSTEM.ALLOW_UI_STATISTICS_WIZARD');
+    var privacySettingsObject = {
+        allowUiStatistics: self.config.get('allow_ui_statistics', false),
+        showPrivacyOptIn: false,
+        message: privacyWizardMessage
+    }
+
+    try {
+        var variant = execSync('cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d \'VOLUMIO_VARIANT="\'').toString().replace(/\n/g, '');
+    } catch(e) {
+        var variant = 'other';
+    }
+    if (variant === 'volumio') {
+        privacySettingsObject.showPrivacyOptIn = true;
+    }
+
+    return privacySettingsObject;
 };
 
 ControllerSystem.prototype.savePrivacySettings = function (data) {
