@@ -276,7 +276,10 @@
         {
           "id": "mixer",
           "element": "select",
-          "hidden": false,
+          "visibleIf": {
+            "field": "mixer_type",
+            "value": "Hardware"
+          },
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
