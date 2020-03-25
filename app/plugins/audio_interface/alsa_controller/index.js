@@ -11,6 +11,7 @@ var spawn = require('child_process').spawn;
 var ignoreUsbAudioDetach = false;
 var ignoreUsbAudioAttach = false;
 var volumioDeviceName = '';
+var additionalUISections = [];
 
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
@@ -403,14 +404,15 @@ ControllerAlsa.prototype.getUIConfig = function () {
                 uiconf.sections[4].hidden = true;
             }
 
-            var rConf = self.commandRouter.getUIConfigOnPlugin('music_service', 'raat', '');
-			rConf.then((conf)=>{
-				if (conf.sections.length) {
-                    uiconf.sections.splice(4, 0, conf.sections[0]);
-                    defer.resolve(uiconf);
-				} else {
-					defer.resolve(uiconf);
+            var additionalConfs = self.getAdditionalUISections();
+            additionalConfs.then((conf)=>{
+            	for (var i in conf) {
+            		var additionalConf = conf[i];
+            		if (additionalConf && additionalConf.section && additionalConf.position) {
+                        uiconf.sections.splice(additionalConf.position, 0, additionalConf.section);
+					}
 				}
+            	defer.resolve(uiconf);
 			})
 			.fail(()=>{
             	defer.resolve(uiconf);
@@ -426,6 +428,45 @@ ControllerAlsa.prototype.getUIConfig = function () {
 };
 
 
+
+ControllerAlsa.prototype.getAdditionalUISections = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    var uiSectionsDefer = [];
+
+    if (additionalUISections.length) {
+    	for (var i in additionalUISections){
+    		var section = additionalUISections[i];
+    		var pluginType = section.split('/')[0];
+    		var pluginName = section.split('/')[1];
+			var additionalUISection = self.commandRouter.executeOnPlugin(pluginType, pluginName, 'getAdditionalUiSection');
+            uiSectionsDefer.push(additionalUISection);
+            libQ.all(uiSectionsDefer).then((uiSectionsResult)=>{
+                defer.resolve(uiSectionsResult)
+            })
+			.fail(()=>{
+                defer.resolve({});
+        	});
+    	}
+	} else {
+    	defer.resolve({})
+	}
+
+	return defer.promise
+}
+
+ControllerAlsa.prototype.addAdditionalUISections = function (data) {
+    var self = this;
+
+    // Add additional UI Sections, must be = type/plugin
+    if (data) {
+    	if (additionalUISections && additionalUISections.indexOf(data) === -1) {
+    		self.logger.info('Additional UI Settings Added for plugin ' + data);
+    		additionalUISections.push(data);
+		}
+	}
+}
 
 ControllerAlsa.prototype.saveDSPOptions = function (data) {
 	var self = this;
