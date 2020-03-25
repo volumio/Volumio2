@@ -442,13 +442,13 @@ ControllerAlsa.prototype.getAdditionalUISections = function () {
     		var pluginName = section.split('/')[1];
 			var additionalUISection = self.commandRouter.executeOnPlugin(pluginType, pluginName, 'getAdditionalUiSection');
             uiSectionsDefer.push(additionalUISection);
-            libQ.all(uiSectionsDefer).then((uiSectionsResult)=>{
-                defer.resolve(uiSectionsResult)
-            })
-			.fail(()=>{
-                defer.resolve({});
-        	});
     	}
+        libQ.all(uiSectionsDefer).then((uiSectionsResult)=>{
+            defer.resolve(uiSectionsResult)
+    	})
+		.fail(()=>{
+            defer.resolve({});
+    	});
 	} else {
     	defer.resolve({})
 	}
