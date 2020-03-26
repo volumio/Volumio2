@@ -21,6 +21,9 @@ var premutevolume = '';
 var mixertype = '';
 var devicename = '';
 var volumescript = {'enabled':false, 'setvolumescript':'', 'getvolumescript':''};
+var volumeOverride = false;
+var overridePluginType;
+var overridePluginName;
 
 module.exports = CoreVolumeController;
 function CoreVolumeController(commandRouter) {
@@ -286,7 +289,13 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 	mixertype = data.mixertype
 	devicename = data.name;
 
-
+	if (data.volumeOverride) {
+        volumeOverride = true;
+        overridePluginType = data.pluginType;
+        overridePluginName = data.pluginName;
+    } else {
+        volumeOverride = false;
+    }
 
 	return self.retrievevolume();
 }
@@ -304,108 +313,135 @@ CoreVolumeController.prototype.updateVolumeScript = function (data) {
 // Public methods -----------------------------------------------------------------------------------
 CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
 	var self = this;
-	var defer = libQ.defer();
-	self.logger.info('VolumeController::SetAlsaVolume' + VolumeInteger);
-    if (mixertype === 'None') {
-        Volume.vol = 100;
-        Volume.mute = false;
-        Volume.disableVolumeControl = true;
-        defer.resolve(Volume)
+
+    if (volumeOverride) {
+        return this.commandRouter.executeOnPlugin(overridePluginType, overridePluginName, 'alsavolume', VolumeInteger);
     } else {
-        switch (VolumeInteger) {
-            case 'mute':
-                //Mute
-                self.getVolume(function (err, vol) {
-                    if (vol == null) {
-                        vol =  currentvolume
+        var defer = libQ.defer();
+        self.logger.info('VolumeController::SetAlsaVolume' + VolumeInteger);
+        if (mixertype === 'None') {
+            Volume.vol = 100;
+            Volume.mute = false;
+            Volume.disableVolumeControl = true;
+            defer.resolve(Volume)
+        } else {
+            switch (VolumeInteger) {
+                case 'mute':
+                    //Mute
+                    self.getVolume(function (err, vol) {
+                        if (vol == null) {
+                            vol = currentvolume
+                        }
+                        currentmute = true;
+                        premutevolume = vol;
+                        if (mixertype === 'Software') {
+                            Volume.vol = currentvolume;
+                            Volume.mute = true;
+                            Volume.disableVolumeControl = false;
+                            defer.resolve(Volume)
+                            self.setVolume(0, function (err) {
+                                if (err) {
+                                    self.logger.error('Cannot set ALSA Volume: ' + err);
+                                }
+                            });
+                        } else {
+                            Volume.vol = premutevolume;
+                            Volume.mute = true;
+                            Volume.disableVolumeControl = false;
+                            defer.resolve(Volume)
+                            self.setMuted(true, function (err) {
+
+                            });
+                        }
+                    });
+                    break;
+                case 'unmute':
+                    //Unmute
+                    currentmute = false;
+                    //Log Volume Control
+                    Volume.vol = premutevolume;
+                    Volume.mute = false;
+                    Volume.disableVolumeControl = false;
+                    currentvolume = premutevolume;
+                    defer.resolve(Volume)
+                    self.setVolume(premutevolume, function (err) {
+                        if (err) {
+                            self.logger.error('Cannot set ALSA Volume: ' + err);
+                        }
+                    });
+                    break;
+                case 'toggle':
+                    // Mute or unmute, depending on current state
+                    if (Volume.mute) {
+                        defer.resolve(self.alsavolume('unmute'));
                     }
-                    currentmute = true;
-                    premutevolume = vol;
-                    if (mixertype === 'Software') {
-                        Volume.vol = currentvolume;
-                        Volume.mute = true;
+                    else {
+                        defer.resolve(self.alsavolume('mute'));
+                    }
+                    break;
+                case '+':
+                    self.getVolume(function (err, vol) {
+
+                        if (vol == null || currentmute) {
+                            vol = currentvolume;
+                        }
+                        VolumeInteger = Number(vol) + Number(volumesteps);
+                        if (VolumeInteger > 100) {
+                            VolumeInteger = 100;
+                        }
+                        if (VolumeInteger > maxvolume) {
+                            VolumeInteger = maxvolume;
+                        }
+                        currentvolume = VolumeInteger;
+                        Volume.vol = VolumeInteger
+                        Volume.mute = false;
                         Volume.disableVolumeControl = false;
                         defer.resolve(Volume)
-                        self.setVolume(0, function (err) {
+                        self.setVolume(VolumeInteger, function (err) {
                             if (err) {
                                 self.logger.error('Cannot set ALSA Volume: ' + err);
                             }
                         });
-                    } else {
-                        Volume.vol = premutevolume;
-                        Volume.mute = true;
+                    });
+                    break;
+                case '-':
+                    //Decrease volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
+                    self.getVolume(function (err, vol) {
+                        if (vol == null || currentmute) {
+                            vol = currentvolume
+                        }
+                        VolumeInteger = Number(vol) - Number(volumesteps);
+                        if (VolumeInteger < 0) {
+                            VolumeInteger = 0;
+                        }
+                        if (VolumeInteger > maxvolume) {
+                            VolumeInteger = maxvolume;
+                        }
+                        currentvolume = VolumeInteger;
+                        Volume.vol = VolumeInteger
+                        Volume.mute = false;
                         Volume.disableVolumeControl = false;
                         defer.resolve(Volume)
-                        self.setMuted(true, function (err) {
-
+                        self.setVolume(VolumeInteger, function (err) {
+                            if (err) {
+                                self.logger.error('Cannot set ALSA Volume: ' + err);
+                            }
                         });
-                    }
-                });
-                break;
-            case 'unmute':
-                //Unmute
-                currentmute = false;
-                //Log Volume Control
-                Volume.vol = premutevolume;
-                Volume.mute = false;
-                Volume.disableVolumeControl = false;
-                currentvolume = premutevolume;
-                defer.resolve(Volume)
-                self.setVolume(premutevolume, function (err) {
-                    if (err) {
-                        self.logger.error('Cannot set ALSA Volume: ' + err);
-                    }
-                });
-                break;
-            case 'toggle':
-                // Mute or unmute, depending on current state
-                if (Volume.mute){
-                    defer.resolve(self.alsavolume('unmute'));
-                }
-                else {
-                    defer.resolve(self.alsavolume('mute'));
-                }
-                break;
-            case '+':
-                self.getVolume(function (err, vol) {
-
-                    if (vol == null || currentmute) {
-                        vol =  currentvolume;
-                    }
-                    VolumeInteger = Number(vol)+Number(volumesteps);
-                    if (VolumeInteger > 100){
-                        VolumeInteger = 100;
-                    }
-                    if (VolumeInteger > maxvolume){
-                        VolumeInteger = maxvolume;
-                    }
-                    currentvolume = VolumeInteger;
-                    Volume.vol = VolumeInteger
-                    Volume.mute = false;
-                    Volume.disableVolumeControl = false;
-                    defer.resolve(Volume)
-                    self.setVolume(VolumeInteger, function (err) {
-                        if (err) {
-                            self.logger.error('Cannot set ALSA Volume: ' + err);
-                        }
                     });
-                });
-                break;
-            case '-':
-                //Decrease volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
-                self.getVolume(function (err, vol) {
-                    if (vol == null || currentmute) {
-                        vol =  currentvolume
-                    }
-                    VolumeInteger = Number(vol)-Number(volumesteps);
-                    if (VolumeInteger < 0){
+                    break;
+                default:
+                    // Set the volume with numeric value 0-100
+                    if (VolumeInteger < 0) {
                         VolumeInteger = 0;
                     }
-                    if (VolumeInteger > maxvolume){
+                    if (VolumeInteger > 100) {
+                        VolumeInteger = 100;
+                    }
+                    if (VolumeInteger > maxvolume) {
                         VolumeInteger = maxvolume;
                     }
                     currentvolume = VolumeInteger;
-                    Volume.vol = VolumeInteger
+                    Volume.vol = VolumeInteger;
                     Volume.mute = false;
                     Volume.disableVolumeControl = false;
                     defer.resolve(Volume)
@@ -414,70 +450,51 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
                             self.logger.error('Cannot set ALSA Volume: ' + err);
                         }
                     });
-                });
-                break;
-            default:
-                // Set the volume with numeric value 0-100
-                if (VolumeInteger < 0){
-                    VolumeInteger = 0;
-                }
-                if (VolumeInteger > 100){
-                    VolumeInteger = 100;
-                }
-                if (VolumeInteger > maxvolume){
-                    VolumeInteger = maxvolume;
-                }
-                currentvolume = VolumeInteger;
-                Volume.vol = VolumeInteger;
-                Volume.mute = false;
-                Volume.disableVolumeControl = false;
-                defer.resolve(Volume)
-                self.setVolume(VolumeInteger, function (err) {
-                    if (err) {
-                        self.logger.error('Cannot set ALSA Volume: ' + err);
-                    }
-                });
+            }
         }
-	}
-
-	return defer.promise
+        return defer.promise
+    }
 };
 
 CoreVolumeController.prototype.retrievevolume = function () {
 	var self = this;
-	var defer = libQ.defer();
-	if (mixertype === 'None') {
-        Volume.vol = 100;
-        Volume.mute = false;
-        Volume.disableVolumeControl = true;
-        return libQ.resolve(Volume)
-            .then(function (Volume) {
-                defer.resolve(Volume);
-                self.commandRouter.volumioupdatevolume(Volume);
-            });
-	} else if (mixertype === 'Software') {
-        exec("/usr/bin/amixer -M get -c " + device + " 'SoftMaster' | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1", function (error, stdout, stderr) {
-            if (error) {
-                self.logger.error('Cannot read softvolume: ' + error);
-            } else {
-                var volume = stdout.replace('\n','');
-                currentvolume = volume;
-                if (currentvolume === '0') {
-                    currentmute = true;
-                } else {
-                    currentmute = false;
-                }
-                Volume.vol = volume;
-                Volume.mute = currentmute;
-                Volume.disableVolumeControl = false;
-                return libQ.resolve(Volume)
-                    .then(function (Volume) {
-                        defer.resolve(Volume);
-                        self.commandRouter.volumioupdatevolume(Volume);
-                    });
-            }
-        });
+
+    if (volumeOverride) {
+        return this.commandRouter.executeOnPlugin(overridePluginType, overridePluginName, 'retrievevolume', '');
     } else {
+        var defer = libQ.defer();
+        if (mixertype === 'None') {
+            Volume.vol = 100;
+            Volume.mute = false;
+            Volume.disableVolumeControl = true;
+            return libQ.resolve(Volume)
+                .then(function (Volume) {
+                    defer.resolve(Volume);
+                    self.commandRouter.volumioupdatevolume(Volume);
+                });
+        } else if (mixertype === 'Software') {
+            exec("/usr/bin/amixer -M get -c " + device + " 'SoftMaster' | awk '$0~/%/{print}' | cut -d '[' -f2 | tr -d '[]%' | head -1", function (error, stdout, stderr) {
+                if (error) {
+                    self.logger.error('Cannot read softvolume: ' + error);
+                } else {
+                    var volume = stdout.replace('\n','');
+                    currentvolume = volume;
+                    if (currentvolume === '0') {
+                        currentmute = true;
+                    } else {
+                        currentmute = false;
+                    }
+                    Volume.vol = volume;
+                    Volume.mute = currentmute;
+                    Volume.disableVolumeControl = false;
+                    return libQ.resolve(Volume)
+                        .then(function (Volume) {
+                            defer.resolve(Volume);
+                            self.commandRouter.volumioupdatevolume(Volume);
+                        });
+                }
+            });
+        } else {
             this.getVolume(function (err, vol) {
                 self.getMuted(function (err, mute) {
                     if (err) {
@@ -502,7 +519,9 @@ CoreVolumeController.prototype.retrievevolume = function () {
                 });
             });
         }
-    return defer.promise
+        return defer.promise
+    }
+
 };
 
 CoreVolumeController.prototype.setStartupVolume = function () {

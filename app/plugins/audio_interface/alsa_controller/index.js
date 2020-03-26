@@ -12,6 +12,7 @@ var ignoreUsbAudioDetach = false;
 var ignoreUsbAudioAttach = false;
 var volumioDeviceName = '';
 var additionalUISections = [];
+var deviceVolumeOverride;
 
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
@@ -1446,8 +1447,19 @@ ControllerAlsa.prototype.updateVolumeSettings  = function () {
 		maxvolume : valvolumemax,
 		volumecurve : valvolumecurvemode,
 		volumestart : valvolumestart,
-		volumesteps : valvolumesteps
+		volumesteps : valvolumesteps,
+        volumeOverride : false
 	}
+
+
+    if (deviceVolumeOverride && deviceVolumeOverride.card !== undefined && deviceVolumeOverride.pluginType && deviceVolumeOverride.pluginName) {
+		if (deviceVolumeOverride.card.toString() === valdevice.toString()) {
+			self.logger.info('Applying Volume Override');
+			settings.volumeOverride = true;
+            settings.pluginType = deviceVolumeOverride.pluginType;
+            settings.pluginName = deviceVolumeOverride.pluginName;
+		}
+    }
 
 	return self.commandRouter.volumioUpdateVolumeSettings(settings)
 }
@@ -1707,3 +1719,15 @@ ControllerAlsa.prototype.checkValidMixer  = function (mixerName) {
 
 	return isValidMixer
 };
+
+ControllerAlsa.prototype.setDeviceVolumeOverride  = function (data) {
+    var self = this;
+    self.logger.info('Setting Device Volume Override');
+
+    if (data && data.card !== undefined && data.pluginType && data.pluginName) {
+        deviceVolumeOverride = data;
+        this.updateVolumeSettings();
+	} else {
+    	self.logger.error('Failed to set Device Volume Override: missing parameters');
+	}
+}
