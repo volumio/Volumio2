@@ -1180,4 +1180,15 @@ ControllerNetwork.prototype.getWirelessNetworksScanCache = function () {
     return wirelessNetworksScanCache
 };
 
-
+ControllerNetwork.prototype.forceHotspot = function () {
+    var self = this;
+	
+    fs.writeFile('/tmp/forcehotspot', '', function (err) {
+        if (err) {
+            self.logger.error('Cannot write /tmp/forcehotspot ' + error);
+        } else {
+            self.logger.error('Forcing Hotspot mode');
+            self.commandRouter.wirelessRestart();
+        }
+    });
+};
