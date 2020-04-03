@@ -411,8 +411,9 @@ PluginManager.prototype.startCorePlugins = function () {
 
 	self.corePlugins.forEach(function (value,key) {
 		metrics.time(value.name);
-		defer_startList.push(self.startCorePlugin(value.category,value.name));
-		metrics.log(value.name);
+		defer_startList.push(self.startCorePlugin(value.category,value.name).then(() => {
+			metrics.log(value.name)
+		}));
 	});
 
 	return libQ.all(defer_startList);
@@ -1701,14 +1702,12 @@ PluginManager.prototype.enableAndStartPlugin = function (category,name) {
 	self.enablePlugin(category,name)
 		.then(function(e)
 		{
-			metrics.time(name);
 			var folder=self.findPluginFolder(category,name);
 			return self.loadCorePlugin(folder);
 		})
 		.then(self.startPlugin.bind(this,category,name))
 		.then(function(e)
 		{ 
-			metrics.log(name);
 			self.logger.info("Done.");
 			defer.resolve('ok');
 		})
