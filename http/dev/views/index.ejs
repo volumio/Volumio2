@@ -33,9 +33,11 @@
 		<div id='playerstate'></div>
 		<br />
 
+		<div<%if (process.env.HIDE_TESTMODE_SELECTOR === 'true'){%> style="visibility:hidden"<%}%>>
 		<h3>Test Mode</h3>
 		<button id='button-testtrue' class='control-websocket' disabled>TRUE</button>
 		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>
+		</div>
 
 		<h3>SSH</h3>
 		<button id='button-sshenable' class='control-websocket' disabled>ENABLE</button>
