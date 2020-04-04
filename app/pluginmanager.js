@@ -18,7 +18,7 @@ var device = '';
 module.exports = PluginManager;
 
 
-function PluginManager(ccommand, server) {
+function PluginManager(ccommand, server, extraPluginManager) {
 	var self = this;
 
 	self.corePlugins = new HashMap();
@@ -73,11 +73,9 @@ function PluginManager(ccommand, server) {
 		}
 	}
 
-	var myVolumioPMPath = '/myvolumio/app/myvolumio-pluginmanager';
-    if (fs.existsSync(myVolumioPMPath)) {
-    	this.logger.info('MYVOLUMIO Environment detected');
-        self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager, self.config);
-    }
+	if (extraPluginManager !== undefined) {
+		self.extraPluginManager = extraPluginManager;
+	}
 }
 
 PluginManager.prototype.startPlugins = function () {
@@ -89,8 +87,8 @@ PluginManager.prototype.startPlugins = function () {
     this.loadCorePlugins();
     this.startCorePlugins();
 
-    if (this.myVolumioPluginManager !== undefined) {
-        this.myVolumioPluginManager.startPlugins();
+    if (this.extraPluginManager !== undefined) {
+        this.extraPluginManager.startPlugins();
 	}
 }
 
@@ -448,9 +446,9 @@ PluginManager.prototype.getPluginCategories = function () {
 		if (libFast.indexOf(categories, metadata.category) == -1)
 			categories.push(metadata.category);
 	}
-	if (self.myVolumioPluginManager !== undefined) {
-		let myVolumioCategories = self.myVolumioPluginManager.getPluginCategories();
-		categories.concat(myVolumioCategories);
+	if (self.extraPluginManager !== undefined && typeof self.extraPluginManager.getPluginCategories === 'function') {
+		let extraPluginCategories = self.extraPluginManager.getPluginCategories();
+		categories.concat(extraPluginCategories);
 	}
 
   return categories
@@ -468,9 +466,9 @@ PluginManager.prototype.getPluginNames = function (category) {
 			names.push(metadata.name);
 	}
 
-  if (self.myVolumioPluginManager !== undefined) {
-      let myVolumioNames = self.myVolumioPluginManager.getPluginNames();
-      names.concat(myVolumioNames);
+  if (self.extraPluginManager !== undefined && typeof self.extraPluginManager.getPluginNames === 'function') {
+      let extraPluginNames = self.extraPluginManager.getPluginNames();
+      names.concat(extraPluginNames);
   }
 
   return names
@@ -623,8 +621,8 @@ PluginManager.prototype.getPlugin = function (category, name) {
 	var self = this;
 	if (self.corePlugins.get(category + '.' + name)) {
 		return self.corePlugins.get(category + '.' + name).instance;
-	} else if (self.myVolumioPluginManager !== undefined) {
-        return self.myVolumioPluginManager.getPlugin(category, name);
+	} else if (self.extraPluginManager !== undefined && typeof self.extraPluginManager.getPlugin === 'function') {
+        return self.extraPluginManager.getPlugin(category, name);
     } else {
 		self.logger.error('Could not retrieve plugin ' + category + ' ' + name);
 	}
