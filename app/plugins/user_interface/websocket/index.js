@@ -104,13 +104,20 @@ function InterfaceWebUI(context) {
 
             });
 		
-			connWebSocket.on('addPlay', function (data) {
-
-                self.commandRouter.addQueueItems(data)
-                    .then(function(e){
-                        return self.commandRouter.volumioPlay(e.firstItemIndex);
-                    });
-			});
+            connWebSocket.on('addPlay', function (data) {
+                var tracks=data;
+                var index=0;
+                if (data.list != undefined) {
+                    tracks=data.list;
+                    if (data.index != undefined) {
+                        index=data.index;
+                    }
+                }
+                self.commandRouter.addQueueItems(tracks)
+                .then(function(e){
+                  return self.commandRouter.volumioPlay(e.firstItemIndex+index);
+                });
+            });
 
 			connWebSocket.on('addPlayCue', function (data) {
 				if (data.service == undefined || data.service == 'mpd') {
