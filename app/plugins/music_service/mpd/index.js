@@ -1049,7 +1049,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
             // KVIM1 and KVIM2 fix for audio issues with 44.1Khz
             if (systemHw && (systemHw === 'kvim1' || systemHw === 'kvim2')) {
                 dopString = dop + '"' + os.EOL + '                buffer_time     "4000000"';
-                dopString = dopString + os.EOL + '                buffer_period   "1000000';
+                dopString = dopString + os.EOL + '                period_time     "40000';
             }
 
             var conf6 = conf5.replace("${dop}", dopString);
