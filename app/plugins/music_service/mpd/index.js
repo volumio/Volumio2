@@ -579,7 +579,9 @@ ControllerMpd.prototype.parseState = function (objState) {
 
     var bitrate = null;
     if ('bitrate' in objState) {
-        bitrate = objState.bitrate + ' Kbps';
+        if (objState.bitrate !== '0') {
+            bitrate = objState.bitrate + ' Kbps';
+        }
     }
 
     return {
