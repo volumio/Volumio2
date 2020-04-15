@@ -586,7 +586,7 @@ ControllerNetwork.prototype.saveHotspotSettings = function (data) {
 	}
 };
 
-ControllerNetwork.prototype.rebuildHotspotConfig = function () {
+ControllerNetwork.prototype.rebuildHotspotConfig = function (forceHotspotConfiguration) {
 	var self = this;
 	var hostapdedimax = '/etc/hostapd/hostapd-edimax.conf';
 	var hostapd = '/etc/hostapd/hostapd.conf';
@@ -607,7 +607,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 					var ws = fs.createWriteStream(hostapdedimax);
 					ws.cork();
 
-					if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true') {
+					if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true' || forceHotspotConfiguration === true) {
 						ws.write('interface=wlan0\n');
 						ws.write('ssid='+hotspotname+'\n');
 						ws.write('channel='+hotspotchannel+'\n');
@@ -647,7 +647,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 				var hs = fs.createWriteStream(hostapd);
 				hs.cork();
 
-				if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true') {
+				if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true' || forceHotspotConfiguration === true) {
 					hs.write('interface=wlan0\n');
 					hs.write('ssid=' + hotspotname + '\n');
 					hs.write('channel=' + hotspotchannel + '\n');
@@ -1188,7 +1188,7 @@ ControllerNetwork.prototype.forceHotspot = function () {
             self.logger.error('Cannot write /tmp/forcehotspot ' + error);
         } else {
             self.logger.error('Forcing Hotspot mode');
-            self.commandRouter.wirelessRestart();
+            self.rebuildHotspotConfig(true);
         }
     });
 };
