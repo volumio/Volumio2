@@ -8,7 +8,6 @@ var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
 var fs = require('fs');
 var exec = require('child_process').exec;
-var pidof = require('pidof');
 var parser = require('cue-parser');
 var mm = require('music-metadata');
 var os = require('os');
@@ -655,14 +654,13 @@ ControllerMpd.prototype.initializeMpdConnection = function () {
     var self = this;
 
     // Connect to MPD only if process MPD is running
-    pidof('mpd', function (err, pid) {
-        if (err) {
-            self.logger.error('Cannot initialize  MPD Connection: MPD is not running: ' + err);
+    exec('/bin/pidof mpd', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+        if (error) {
+            self.logger.error('Cannot initialize  MPD Connection: MPD is not running');
         } else {
-            if (pid) {
-                self.logger.info('MPD running with PID' + pid + ' ,establishing connection');
+            if (stdout && stdout.length) {
+                self.logger.info('MPD running with PID' + stdout + ' ,establishing connection');
                 self.mpdEstablish();
-
             } else {
                 self.logger.error('Cannot initialize  MPD Connection: MPD is not running');
             }

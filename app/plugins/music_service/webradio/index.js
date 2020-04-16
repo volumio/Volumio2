@@ -3,7 +3,6 @@
 var libQ = require('kew');
 var libxmljs = require("libxmljs");
 var unirest = require('unirest');
-var pidof = require('pidof');
 var cachemanager=require('cache-manager');
 var memoryCache = cachemanager.caching({store: 'memory', max: 100, ttl: 10*60/*seconds*/});
 var libMpd = require('mpd');
