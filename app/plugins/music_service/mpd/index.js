@@ -7,7 +7,6 @@ var libQ = require('kew');
 var libFast = require('fast.js');
 var libFsExtra = require('fs-extra');
 var exec = require('child_process').exec;
-var convert = require('convert-seconds');
 var pidof = require('pidof');
 var parser = require('cue-parser');
 var mm = require('music-metadata');
@@ -2911,8 +2910,14 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
                     playtimesCount = playtimesCount + parseInt(splitted[i + 2].substring(10));
                 }
 
-                var convertedSecs = convert(playtimesCount);
-
+                try {
+                    var hours = Math.floor(playtimesCount / 3600);
+                    var minutes = Math.floor(playtimesCount / 60) - (hours * 60);
+                    var seconds = Math.floor(playtimesCount - (hours * 3600) - (minutes * 60));
+                    var playTimeString = hours + ':' + minutes + ':' + seconds;
+				} catch(e) {
+                    var playTimeString = '0:0:0';
+				}
 
                 self.clientMpd.sendCommand(cmd("list", ["album", "group", "albumartist"]), function (err, msg) {
                     if (!err) {
@@ -2928,7 +2933,7 @@ ControllerMpd.prototype.getMyCollectionStats = function () {
                             artists: artistsCount,
                             albums: albumsCount,
                             songs: songsCount,
-                            playtime: convertedSecs.hours + ':' + ('0' + convertedSecs.minutes).slice(-2) + ':' + ('0' + convertedSecs.seconds).slice(-2)
+                            playtime: playTimeString
                         };
                     }
 

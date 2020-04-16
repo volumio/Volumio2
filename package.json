@@ -23,7 +23,6 @@
     "compare-versions": "^3.0.1",
     "compression": "^1.6.2",
     "connect-busboy": "0.0.2",
-    "convert-seconds": "^1.0.1",
     "cue-parser": "0.0.4",
     "dotenv": "6.1.0",
     "ejs": "^2.5.6",
