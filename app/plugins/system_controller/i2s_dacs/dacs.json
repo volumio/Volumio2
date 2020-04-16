@@ -15,6 +15,7 @@
     {"id":"hifiberry-dac","name":"HiFiBerry DAC","overlay":"hifiberry-dac","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dacplus","name":"HiFiBerry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","eeprom_name":"HiFiBerry DAC+","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dacplusadc","name":"HiFiBerry DAC Plus ADC","overlay":"hifiberry-dacplusadc","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
+    {"id":"hifiberry-dacpluspro","name":"HiFiBerry DAC+ Pro","overlay":"hifiberry-dacplus","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dacplusadcpro","name":"HiFiBerry DAC Plus ADC PRO","overlay":"hifiberry-dacplusadcpro","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dacplusdsp","name":"HiFiBerry DAC Plus DSP","overlay":"hifiberry-dacplusdsp","alsanum":"1","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-digi","name":"HiFiBerry Digi","overlay":"hifiberry-digi","alsanum":"1","mixer":"","modules":"","script":"","needsreboot":"yes"},
