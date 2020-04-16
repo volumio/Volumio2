@@ -48,7 +48,6 @@
     "node-tunein-radio": "^0.3.4",
     "node-uuid": "^1.4.8",
     "require-from-string": "^2.0.2",
-    "shairport-sync-reader": "0.0.6",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
     "sort-on": "^2.0.0",
