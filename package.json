@@ -23,6 +23,7 @@
     "compression": "^1.6.2",
     "connect-busboy": "0.0.2",
     "cue-parser": "0.0.4",
+    "daap-parser": "^0.1.1",
     "dotenv": "6.1.0",
     "ejs": "^2.5.6",
     "express": "^4.15.3",
