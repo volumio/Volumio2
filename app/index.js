@@ -2251,3 +2251,24 @@ CoreCommandRouter.prototype.setOauthData = function (data) {
         self.logger.error('Could not execute OAUTH Login: no function for plugin ' + pluginCategory + ' ' + pluginName);
 	}
 };
+
+CoreCommandRouter.prototype.getCurrentIPAddresses = function () {
+    var self = this;
+
+    var networkPlugin = this.pluginManager.getPlugin('system_controller', 'network');
+    return networkPlugin.getCurrentIPAddresses();
+};
+
+CoreCommandRouter.prototype.getCachedPAddresses = function (data) {
+    var self = this;
+
+    var networkPlugin = this.pluginManager.getPlugin('system_controller', 'network');
+    return networkPlugin.getCachedPAddresses();
+};
+
+CoreCommandRouter.prototype.refreshCachedPAddresses = function () {
+    var self = this;
+
+    var networkPlugin = this.pluginManager.getPlugin('system_controller', 'network');
+    return networkPlugin.refreshCachedPAddresses();
+};

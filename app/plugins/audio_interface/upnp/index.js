@@ -4,7 +4,6 @@ var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var os = require('os');
 var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js')
-var ip = require('ip');
 var libQ = require('kew');
 var net = require('net');
 var mpdPort = 6599;
@@ -98,21 +97,19 @@ UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
 
 UpnpInterface.prototype.getCurrentIP = function () {
     var self = this;
-
     var defer = libQ.defer();
-    var ipaddr = '';
 
-    ifconfig.status('wlan0', function(err, status) {
-        if (status != undefined) {
-            if (status.ipv4_address != undefined) {
-                ipaddr = status.ipv4_address;
-                defer.resolve(ipaddr);
-            } else {
-                ipaddr = ip.address();
-                defer.resolve(ipaddr);
-            }
+    var ipAddresses = self.commandRouter.getCurrentIPAddresses();
+    ipAddresses.then((result)=> {
+        if (result.wlan0 && result.wlan0 !== '192.168.211.1') {
+            defer.resolve(result.wlan0);
+        } else {
+            defer.resolve(result.eth0);
         }
+    }).fail(function (err) {
+        defer.resolve('');
     });
+
     return defer.promise;
 };
 

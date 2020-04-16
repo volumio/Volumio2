@@ -7,10 +7,11 @@ var execSync = require('child_process').execSync;
 var iwlist = require('./lib/iwlist.js');
 var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
-var ip = require('ip');
 var os = require('os');
 var crypto = require('crypto');
 var wirelessNetworksScanCache;
+var cachedEth0IPAddress;
+var cachedWlan0IPAddress;
 
 
 // Define the ControllerNetwork class
@@ -33,6 +34,7 @@ ControllerNetwork.prototype.onVolumioStart = function () {
 	//getting configuration
 	var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
 	config.loadFile(configFile);
+	self.refreshCachedPAddresses();
 
     if(!config.has('wirelessNetworksSSID') && config.has('wlanssid'))
     {
@@ -942,6 +944,7 @@ ControllerNetwork.prototype.getWirelessInfo = function () {
     ifconfig.status('wlan0', function (err, status) {
         if (status != undefined) {
             if (status.ipv4_address != undefined) {
+                cachedWlan0IPAddress = status.ipv4_address;
                 if (status.ipv4_address != '192.168.211.1') {
                     response.connected = true
 					response.ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
@@ -969,6 +972,7 @@ ControllerNetwork.prototype.getWiredInfo = function () {
     ifconfig.status('eth0', function (err, status) {
         if (status != undefined) {
             if (status.ipv4_address != undefined) {
+                cachedEth0IPAddress = status.ipv4_address;
                 response.connected = true;
 				response.ip = status.ipv4_address;
                 defer.resolve(response)
@@ -1121,6 +1125,7 @@ ControllerNetwork.prototype.getEthernetIPAddress = function () {
 
     ifconfig.status('eth0', function (err, status) {
         if (!err && status != undefined && status.ipv4_address != undefined) {
+            cachedEth0IPAddress = status.ipv4_address;
         	defer.resolve(status.ipv4_address);
         } else {
             defer.resolve('');
@@ -1135,6 +1140,7 @@ ControllerNetwork.prototype.getWirelessIPAddress = function () {
 
     ifconfig.status('wlan0', function (err, status) {
         if (!err && status != undefined && status.ipv4_address != undefined) {
+            cachedWlan0IPAddress = status.ipv4_address;
             defer.resolve(status.ipv4_address);
         } else {
             defer.resolve('');
@@ -1171,6 +1177,8 @@ ControllerNetwork.prototype.parseInfoNetworkResults = function (data) {
 
 ControllerNetwork.prototype.onNetworkingRestart = function () {
     var self = this;
+
+    self.refreshCachedPAddresses();
     return self.commandRouter.broadcastMessage('pushInfoNetworkReload', '');
 };
 
@@ -1191,4 +1199,45 @@ ControllerNetwork.prototype.forceHotspot = function () {
             self.rebuildHotspotConfig(true);
         }
     });
+};
+
+ControllerNetwork.prototype.getCurrentIPAddresses = function () {
+    var self = this;
+    var defer = libQ.defer();
+    var defers = [
+    	self.getEthernetIPAddress(),
+        self.getWirelessIPAddress()
+    ];
+
+    libQ.all(defers)
+        .then(function (result) {
+        	defer.resolve({'eth0': result[0], 'wlan0': result[1]});
+        })
+        .fail(function (err) {
+            defer.resolve({'eth0': '', 'wlan0': ''});
+        });
+
+    return defer.promise;
+};
+
+ControllerNetwork.prototype.getCachedPAddresses = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    // The purpose of this function is to quickly return the last known IP Addresses
+	// Useful for plugins which require this information very often
+    var response = {
+    	'eth0' : cachedEth0IPAddress,
+		'wlan0' : cachedWlan0IPAddress
+	}
+    return response;
+};
+
+ControllerNetwork.prototype.refreshCachedPAddresses = function () {
+    var self = this;
+
+    self.logger.info('Refreshing Cached IP Addresses');
+
+    self.getEthernetIPAddress();
+    self.getWirelessIPAddress();
 };

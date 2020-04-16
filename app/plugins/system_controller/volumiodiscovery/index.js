@@ -8,7 +8,6 @@ var HashMap = require('hashmap');
 var io=require('socket.io-client');
 var exec = require('child_process').exec;
 var libQ = require('kew');
-var ip = require('ip');
 var unirest = require('unirest');
 var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js');
 
@@ -415,12 +414,13 @@ ControllerVolumioDiscovery.prototype.getDevices=function()
 			var address=addresses[j];
 			if (isSelf){
 
-				ifconfig.status('wlan0', function(err, status) {
-					if (status != undefined) {
-						if (status.ipv4_address != undefined) {
-							address = status.ipv4_address;
-						} else address = ip.address();
-					} }); address = ip.address();
+                var iPAddresses = self.commandRouter.getCachedPAddresses();
+                if (iPAddresses.wlan0 && iPAddresses.wlan0 !== '192.168.211.1') {
+                    address = iPAddresses.wlan0;
+				} else {
+                    address = iPAddresses.eth0;
+				}
+
 			} else {
 				if ( address.value[0] != undefined && address.value[0].value[0] != undefined){
 					address = address.value[0].value[0];
