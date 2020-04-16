@@ -50,7 +50,6 @@
     "require-from-string": "^2.0.2",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
-    "sort-on": "^2.0.0",
     "string": "^3.3.3",
     "tail": "^1.2.2",
     "timsort": "^0.3.0",
@@ -59,7 +58,6 @@
     "unirest": "^0.5.1",
     "v-conf": "^1.4.2",
     "winston": "^2.3.1",
-    "wireless-tools": "^0.19.0",
     "xmlbuilder": "^10.1.1",
     "yargs": "^8.0.1"
   },
