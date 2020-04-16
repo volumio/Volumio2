@@ -1,17 +1,14 @@
-const ShairportSyncReaderPIPE = require('./shairport-sync-reader-pipe');
+const ShairportSyncReaderUDP = require('./shairport-sync-reader-udp');
+
 
 var cache = {};
 
 module.exports = new Proxy(function() {}, {
 	construct: function(_, argumentsList) {
 		var opts = argumentsList[0],
-			key,
-			Class;
+			key = [opts.address, opts.port].join(':'),
+			Class = ShairportSyncReaderUDP;
 
-		if (!!opts.path) {
-			key = opts.path;
-			Class = ShairportSyncReaderPIPE;
-		}
 		if (!cache[key]) {
 			cache[key] = new Class(opts);
 		}

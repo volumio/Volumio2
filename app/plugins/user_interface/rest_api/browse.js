@@ -19,7 +19,6 @@ function RESTApiBrowse(context) {
 RESTApiBrowse.prototype.browseListing=function(req,res) {
     var uri;
     var defer;
-    var ipAddress=this.commandRouter.sharedVars.get('ipAddress');
     var filters = {};
 
     if (req.query && req.query.uri) {

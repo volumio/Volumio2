@@ -2259,7 +2259,7 @@ CoreCommandRouter.prototype.getCurrentIPAddresses = function () {
     return networkPlugin.getCurrentIPAddresses();
 };
 
-CoreCommandRouter.prototype.getCachedPAddresses = function (data) {
+CoreCommandRouter.prototype.getCachedPAddresses = function () {
     var self = this;
 
     var networkPlugin = this.pluginManager.getPlugin('system_controller', 'network');

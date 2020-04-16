@@ -4,7 +4,6 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
 var bodyParser = require('body-parser');
-var ifconfig = require('wireless-tools/ifconfig');
 var unirest = require('unirest');
 var _ = require('underscore');
 
@@ -19,7 +18,6 @@ function interfaceApi(context) {
     self.commandRouter = self.context.coreCommand;
     self.musicLibrary = self.commandRouter.musicLibrary;
     self.logger = self.commandRouter.logger;
-    this.setIPAddress();
 
     api.use('/v1', api);
     api.use(bodyParser.json());
@@ -221,25 +219,6 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
     }
 
     return defer.promise
-};
-
-
-interfaceApi.prototype.setIPAddress=function() {
-    var self = this;
-
-    ifconfig.status('wlan0',(err, status) => {
-        if(err) {
-            ifconfig.status('eth0',(err, status) => {
-                if(err) {
-                    self.logger.error("Cannot retrieve current ipAddress!");
-                } else {
-                    self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
-                }
-            });
-        } else {
-            self.commandRouter.sharedVars.set('ipAddress',status.ipv4_address);
-        }
-    });
 };
 
 interfaceApi.prototype.getPushNotificationUrls=function(req, res) {
