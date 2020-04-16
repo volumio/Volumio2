@@ -18,3 +18,31 @@ function RESTApiSystem(context) {
 RESTApiSystem.prototype.ping=function(req, res) {
     res.send('pong');
 };
+
+RESTApiSystem.prototype.getSystemVersion=function(req, res) {
+    var self = this;
+    var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion');
+
+    if (returnedData != undefined) {
+        returnedData.then(function (data) {
+            if (data != undefined) {
+                res.send(data);
+            }
+        });
+    }
+};
+
+RESTApiSystem.prototype.oauth=function(req, res) {
+    var self = this;
+
+    if (req.query && req.query.plugin) {
+        self.logger.info('Received OAUTH Data');
+        self.commandRouter.setOauthData(req.query);
+        return res.redirect(req.query.plugin_url);
+    } else {
+        self.logger.error('Could not set OAUTH data, missing plugin parameter');
+        return res.redirect(req.query.plugin_url)
+    }
+
+};
+

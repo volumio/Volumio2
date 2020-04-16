@@ -124,6 +124,17 @@ ControllerSystem.prototype.getUIConfig = function () {
 
 	}
 
+	var allowUiStatistics = self.config.get('allow_ui_statistics', true);
+	uiconf.sections[6].content[0].value = allowUiStatistics;
+	try {
+	    var variant = execSync('cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d \'VOLUMIO_VARIANT="\'').toString().replace(/\n/g, '');
+	} catch(e) {
+        var variant = 'other';
+	}
+	if (variant === 'volumio') {
+        uiconf.sections[6].hidden = false;
+    }
+
 
     if (showLanguageSelector) {
         self.commandRouter.i18nJson(__dirname+'/../../../i18n/strings_'+lang_code+'.json',
@@ -1040,4 +1051,52 @@ ControllerSystem.prototype.getLabelForSelect = function (options, key) {
     }
 
     return 'Error';
+};
+
+ControllerSystem.prototype.getHwuuid = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    try {
+        var macaddr = fs.readFileSync('/sys/class/net/eth0/address', "utf8");
+        var anonid = macaddr.toString().replace(':','');
+    } catch (e) {
+        var anonid = this.config.get('uuid');
+    }
+
+    return crypto.createHash('md5').update(anonid).digest("hex");
+};
+
+ControllerSystem.prototype.getPrivacySettings = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    var allowUIStatistics = self.config.get('allow_ui_statistics', true);
+    var privacySettings = {
+        allowUIStatistics: allowUIStatistics
+    };
+    exec('cat /etc/os-release | grep ^VOLUMIO_VARIANT | tr -d \'VOLUMIO_VARIANT="\'', function(err, data){
+        if (err) {
+            privacySettings.allowUIStatistics = false;
+            defer.resolve(privacySettings);
+        } else {
+            var variant = data.toString().replace(/\n/g, '');
+            if (variant !== 'volumio') {
+                privacySettings.allowUIStatistics = false;
+            }
+            defer.resolve(privacySettings);
+        }
+    })
+
+    return defer.promise;
+};
+
+ControllerSystem.prototype.savePrivacySettings = function (data) {
+    var self = this;
+    var defer = libQ.defer();
+
+    if (data && data.allow_ui_statistics !== undefined) {
+        self.config.set('allow_ui_statistics', data.allow_ui_statistics);
+    }
+    return self.commandRouter.reloadUi();
 };

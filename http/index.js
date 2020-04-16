@@ -17,7 +17,8 @@ var background = express();
 
 var plugindir = '/tmp/plugins';
 var backgrounddir = '/data/backgrounds';
-var volumio3UIFlagFile = '/data/volumio3ui';
+var volumio2UIFlagFile = '/data/volumio2ui';
+var volumio3UIFolderPath = '/volumio/http/www3';
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -48,15 +49,23 @@ app.use(compression())
 
 // Serving Volumio3 UI
 // Checking if we use Volumio3 UI
-if (fs.existsSync(volumio3UIFlagFile)) {
+if (fs.existsSync(volumio2UIFlagFile) || !fs.existsSync(volumio3UIFolderPath)) {
+    process.env.VOLUMIO_3_UI = 'false';
+} else {
     process.env.VOLUMIO_3_UI = 'true';
 }
 
-if (process.env.VOLUMIO_3_UI === 'true') {
-    app.use(express.static(path.join(__dirname, 'www3')));
-} else {
-    app.use(express.static(path.join(__dirname, 'www')));
-}
+var staticMiddlewareUI2 = express.static(path.join(__dirname, 'www'));
+var staticMiddlewareUI3 = express.static(path.join(__dirname, 'www3'));
+
+app.use(function(req, res, next) {
+    var userAgent = req.get('user-agent')
+    if (userAgent === 'volumiokiosk' || process.env.VOLUMIO_3_UI === 'false') {
+        staticMiddlewareUI2(req, res, next)
+    } else {
+        staticMiddlewareUI3(req, res, next)
+    }
+});
 
 app.use(busboy({ immediate: true }));
 app.use(allowCrossDomain);

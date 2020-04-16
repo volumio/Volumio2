@@ -3,11 +3,29 @@ var execSync = require('child_process').execSync;
 var fs = require('fs-extra');
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
+var path = require('path');
+
+global.metrics = {
+  start: {}, 
+  time: (label) => {
+    metrics.start[label] = process.hrtime();
+  },
+  end: {},
+  log: (label) => {
+    metrics.end[label] = process.hrtime(metrics.start[label]);
+    console.log(`\u001b[34m [Metrics] \u001b[39m ${label}: \u001b[31m ${metrics.end[label][0]}s ${(metrics.end[label][1] / 1000000).toFixed(2)}ms \u001b[39m`)
+  }
+};
+  
+// metrics.start.WebUI = process.hrtime();
+metrics.time('WebUI');
+
 // Using port 3000 for the debug interface
 expressApp.set('port', 3000);
 
 var httpServer = expressApp.listen(expressApp.get('port'), function () {
   console.log('Express server listening on port ' + httpServer.address().port);
+  metrics.log('WebUI');
 });
 
 var albumart = require(__dirname + '/app/plugins/miscellanea/albumart/albumart.js');
@@ -15,6 +33,8 @@ var albumart = require(__dirname + '/app/plugins/miscellanea/albumart/albumart.j
 albumart.setFolder('/data/albumart');
 
 expressApp.get('/albumart', albumart.processExpressRequest);
+expressApp.get('/tinyart/*', albumart.processExpressRequestTinyArt);
+expressApp.get('/albumartd', albumart.processExpressRequestDirect);
 
 expressApp.use(function (err, req, res, next) {
   /**
@@ -30,8 +50,13 @@ expressApp.use(function (err, req, res, next) {
 
 var commandRouter = new (require('./app/index.js'))(httpServer);
 
-expressApp.get('/?*', function (req, res) {
-  res.redirect('/');
+expressApp.get('/?*', function(req, res) {
+  var userAgent = req.get('user-agent');
+  if (userAgent === 'volumiokiosk' || process.env.VOLUMIO_3_UI === 'false') {
+    res.sendFile(path.join(__dirname, 'http', 'www', 'index.html'));
+    } else {
+    res.sendFile(path.join(__dirname, 'http', 'www3', 'index.html'));
+    }
 });
 
 process.on('uncaughtException', (error) => {

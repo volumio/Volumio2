@@ -36,7 +36,7 @@ volumioAppearance.prototype.onVolumioStart = function() {
     self.configFile=self.commandRouter.pluginManager.getConfigurationFile(self.context,'config.json');
     config.loadFile(self.configFile);
 
-    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code'));
+    this.commandRouter.sharedVars.addConfigValue('language_code','string',config.get('language_code', 'en'));
     self.createThumbnailPath();
 
     return libQ.resolve();
@@ -151,15 +151,18 @@ volumioAppearance.prototype.getUIConfig = function () {
                 self.logger.error(e)
             }
 
-            if (sysVariant === 'volumio') {
+            if (fs.existsSync('/volumio/http/www3')) {
                 self.configManager.setUIConfigParam(uiconf, 'sections[2].hidden', false);
             }
-
+            
             var showVolumio3UI = false;
+            var uiLayoutSettingLabel = self.commandRouter.getI18nString('APPEARANCE.USER_INTERFACE_CLASSIC');
             if (process.env.VOLUMIO_3_UI === 'true') {
                 showVolumio3UI = true;
+                uiLayoutSettingLabel = self.commandRouter.getI18nString('APPEARANCE.USER_INTERFACE_CONTEMPORARY');
             }
-            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value', showVolumio3UI);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.value', showVolumio3UI);
+            self.configManager.setUIConfigParam(uiconf, 'sections[2].content[0].value.label', uiLayoutSettingLabel);
 
             defer.resolve(uiconf);
         })
@@ -450,35 +453,23 @@ volumioAppearance.prototype.getConfigParam = function (key) {
 volumioAppearance.prototype.setVolumio3UI = function (data) {
     var self = this;
 
-    if (data &&  data.volumio3_ui === true) {
+    if (data &&  data.volumio3_ui.value === true) {
         try {
-            execSync("/usr/bin/touch /data/volumio3ui");
+            execSync("/bin/rm /data/volumio2ui");
+            process.env.VOLUMIO_3_UI = 'true';
+            self.commandRouter.reloadUi();
         } catch(e) {
             self.logger.error(e)
         }
     } else {
         try {
-            execSync("/bin/rm /data/volumio3ui");
+            execSync("/usr/bin/touch /data/volumio2ui");
+            process.env.VOLUMIO_3_UI = 'false';
+            self.commandRouter.reloadUi();
         } catch(e) {
             self.logger.error(e)
         }
     }
-
-    var responseData = {
-        title: 'Restart the system',
-        message: 'In order for changes to take effect, restart the system and reload manually your browser once the system has restarted',
-        size: 'lg',
-        buttons: [
-            {
-                name: 'Restart System',
-                class: 'btn btn-info',
-                emit:'reboot',
-                payload:''
-            }
-        ]
-    }
-
-    self.commandRouter.broadcastMessage("openModal", responseData)
 };
 
 volumioAppearance.prototype.sendSizeErrorToasMessage = function (size) {

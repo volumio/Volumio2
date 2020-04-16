@@ -297,26 +297,48 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function(uuid,ip) 
 		var socket= io.connect('http://'+ip+':3000');
 		socket.on('connect',function()
 		{
-			socket.on('pushState',function(data)
-			{
-				foundVolumioInstances.set(uuid+'.status',data.status);
-				foundVolumioInstances.set(uuid+'.volume',data.volume);
-				foundVolumioInstances.set(uuid+'.mute',data.mute);
-				foundVolumioInstances.set(uuid+'.artist',data.artist);
-				foundVolumioInstances.set(uuid+'.track',data.title);
-				foundVolumioInstances.set(uuid+'.albumart',data.albumart);
-				var volumeAvailable = true;
-				if (data.disableVolumeControl) {
-                    volumeAvailable = false;
-				}
-                foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
-				var toAdvertise=self.getDevices();
-				self.commandRouter.pushMultiroomDevices(toAdvertise);
+
+            socket.emit('getState','');
+			socket.on('pushState',function(data) {
+				self.pushMultiRoomStatusUpdate(uuid, data);
 			});
+            socket.on('disconnect',function() {
+            	setTimeout(()=>{
+                    self.handleUngracefulDeviceDisappear(uuid);
+                	socket.close();
+				}, 4000)
+
+
+            });
 		});
 
 		self.remoteConnections.set(uuid,socket);
+	} else {
+        var selfState = self.commandRouter.volumioGetState();
+        self.pushMultiRoomStatusUpdate(uuid, selfState);
 	}
+
+};
+
+ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate=function(uuid, data) {
+    var self = this;
+
+    foundVolumioInstances.set(uuid+'.status',data.status);
+    if (data.volume === undefined) {
+        data.volume = 0;
+	};
+    foundVolumioInstances.set(uuid+'.volume',data.volume);
+    foundVolumioInstances.set(uuid+'.mute',data.mute);
+    foundVolumioInstances.set(uuid+'.artist',data.artist);
+    foundVolumioInstances.set(uuid+'.track',data.title);
+    foundVolumioInstances.set(uuid+'.albumart',data.albumart);
+    var volumeAvailable = true;
+    if (data.disableVolumeControl) {
+        volumeAvailable = false;
+    }
+    foundVolumioInstances.set(uuid+'.volumeAvailable',volumeAvailable);
+    var toAdvertise=self.getDevices();
+    self.commandRouter.pushMultiroomDevices(toAdvertise);
 
 };
 
@@ -583,4 +605,20 @@ ControllerVolumioDiscovery.prototype.setRemoteDeviceVolume = function (data) {
                 self.logger.error('Cannot set Remote Device Volume');
             }
         });
+};
+
+ControllerVolumioDiscovery.prototype.handleUngracefulDeviceDisappear = function(uuid) {
+    var self=this;
+
+    if (foundVolumioInstances.get(uuid+'.name')) {
+        try {
+            self.logger.info('mDNS: Device ' + foundVolumioInstances.get(uuid+'.name') + ' disapperared ungracefully from network');
+            foundVolumioInstances.delete(uuid);
+            self.remoteConnections.remove(uuid);
+            var toAdvertise=self.getDevices();
+            self.commandRouter.pushMultiroomDevices(toAdvertise);
+        } catch(e) {
+            self.logger.error('mDNS: Failed to remove ungraceful device: ' + e);
+        }
+	}
 };

@@ -1,7 +1,7 @@
 'use strict';
 
 var Q = require('kew');
-var download = require('file-download');
+var url = require('url');
 var S = require('string');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
@@ -169,17 +169,13 @@ var searchOnline = function (defer, web) {
                     var splitted = url.split('.');
                     var fileExtension = splitted[splitted.length - 1];
                     var diskFileName = uuid.v4() + '.' + fileExtension;
+                    var fileName = folder + diskFileName;
 
-                    var options = {
-                        directory: folder,
-                        filename: diskFileName
-                    };
-
-					//console.log("URL: " + url);
-                    download(url, options, function (err) {
-                        if (err) defer.reject(new Error(err));
-                        else {
-                            //waiting 2 secodns to flush data on disk. Should use a better method
+                    //console.log("URL: " + url);
+                    download(url, fileName, function (err) {
+                        if (err) {
+                            defer.reject(new Error(err));
+                        } else {
                             setTimeout(function(){
                                 defer.resolve(folder + diskFileName);
                             },500);
@@ -352,7 +348,6 @@ var processRequest = function (web, path, meta) {
 	var defer = Q.defer();
 
 	if (web == undefined && path == undefined) {
-	    logger.info('No input data');
 		defer.reject(new Error(''));
 		return defer.promise;
 	}
@@ -442,11 +437,12 @@ var processRequest = function (web, path, meta) {
 var processExpressRequest = function (req, res) {
     var rawQuery=req._parsedUrl.query;
 
-	var web = req.query.web;
-	var path = req.query.path;
+    var web = req.query.web;
+    var path = req.query.path;
     var icon = req.query.icon;
     var sourceicon = req.query.sourceicon;
     var sectionimage = req.query.sectionimage;
+    var maxage = 2628000; // 30d 10h
     var meta = false;
     if (req.query.metadata != undefined && req.query.metadata === 'true') {
         meta = true;
@@ -468,20 +464,20 @@ var processExpressRequest = function (req, res) {
     }
 
     //var starttime=Date.now();
-	var promise = processRequest(web, path, meta);
-	promise.then(function (filePath) {
-			//logger.info('Sending file ' + filePath);
+    var promise = processRequest(web, path, meta);
+    promise.then(function (filePath, maxage) {
+            //logger.info('Sending file ' + filePath);
 
             //var stoptime=Date.now();
             //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
-		    res.setHeader('Cache-Control', 'public, max-age=2628000')
-			res.sendFile(filePath);
-		})
-		.fail(function () {
-            res.setHeader('Cache-Control', 'public, max-age=2628000')
-		    if(icon!==undefined){
+            res.setHeader('Cache-Control', 'public, max-age=' + maxage);
+            res.sendFile(filePath);
+        })
+        .fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=' + maxage);
+            if(icon!==undefined){
                 res.sendFile(__dirname + '/icons/'+icon+'.svg');
-			} else if (sectionimage!==undefined) {
+            } else if (sectionimage!==undefined) {
                 var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
                 try {
                     for (i = 0; i < pluginPaths.length; i++) {
@@ -512,17 +508,176 @@ var processExpressRequest = function (req, res) {
                     } catch(e) {
                         res.sendFile(__dirname + '/default.png');
                     }
-				}
-			} else {
-			    res.setHeader('Cache-Control', 'public, max-age=2628000')
+                }
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=' + maxage);
                 try{
                     res.sendFile(__dirname + '/default.jpg');
                 } catch(e) {
                     res.sendFile(__dirname + '/default.png');
                 }
-			}
-		});
+            }
+        });
 };
+
+var processExpressRequestDirect = function (req, res) {
+    var rawQuery=req._parsedUrl.query;
+
+    var web = req.query.web;
+    var path = req.query.path;
+    var icon = req.query.icon;
+    var sourceicon = req.query.sourceicon;
+    var sectionimage = req.query.sectionimage;
+    var meta = false;
+    if (req.query.metadata != undefined && req.query.metadata === 'true') {
+        meta = true;
+    }
+
+    if(rawQuery !== undefined && rawQuery !== null)
+    {
+        var splitted=rawQuery.split('&');
+        for(var i in splitted)
+        {
+            var itemSplitted=splitted[i].split('=');
+            if(itemSplitted[0]==='web')
+                web=itemSplitted[1];
+            else if(itemSplitted[0]==='path')
+                path=itemSplitted[1];
+            else if(itemSplitted[0]==='icon')
+                icon=itemSplitted[1];
+        }
+    }
+
+    //var starttime=Date.now();
+    var promise = processRequest(web, path, meta);
+    promise.then(function (filePath) {
+        //logger.info('Sending file ' + filePath);
+
+        //var stoptime=Date.now();
+        //logger.info('Serving request took '+(stoptime-starttime)+' milliseconds');
+        res.setHeader('Cache-Control', 'public, max-age=2628000')
+        return sendTinyArt(req, res, filePath);
+    })
+        .fail(function () {
+            res.setHeader('Cache-Control', 'public, max-age=2628000')
+            if(icon!==undefined){
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.jpg');
+            } else if (sectionimage!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var sectionimageFile = pluginPaths[i] + sectionimage;
+                        if(fs.existsSync(sectionimageFile)) {
+                            return sendTinyArt(req, res, sectionimageFile);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        return sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        return sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return sendTinyArt(req, res, pluginIcon);
+                        }
+                    }
+                }catch(e) {
+                    try{
+                        return sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        return sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=2628000')
+                try{
+                    return sendTinyArt(req, res, __dirname + '/default.jpg');
+                } catch(e) {
+                    return sendTinyArt(req, res, __dirname + '/default.png');
+                }
+            }
+        });
+};
+
+/**
+ *    This method processes incoming request from express, for the tinyart function that provides a simpler url for arts, and only online fetching
+ *
+ *    To achieve this assign this function to a path like /:artist/:album/:resolution
+ **/
+var processExpressRequestTinyArt = function (req, res) {
+    var rawQuery=req.url;
+    var splitted = rawQuery.replace(/_/g, ' ').replace('/tinyart/', '').split('/').filter(function(el) { return el; });
+
+    if (splitted.length < 2) {
+        console.log('Error in tinart request: missing fields');
+    } else if (req.query.sourceicon) {
+        var sourceicon = req.query.sourceicon;
+    } else if (splitted.length === 2) {
+        // Tiny art for artists
+        var icon = 'users';
+        var web = encodeURIComponent(splitted[0]) + '//' + splitted[1];
+    } else if (splitted.length === 3) {
+        // Tiny art for albums
+        var icon ='dot-circle-o'
+        var web = encodeURIComponent(splitted[0]) + '/' + encodeURIComponent(splitted[1]) + '/' + splitted[2];
+    }
+    var promise = processRequest(web, '', false);
+    promise.then(function (filePath) {
+        return sendTinyArt(req, res, filePath)
+    })
+        .fail(function (e) {
+            if(icon!==undefined){
+                return sendTinyArt(req, res, __dirname + '/icons/'+icon+'.jpg');
+            } else if (sourceicon!==undefined) {
+                var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
+                try {
+                    for (i = 0; i < pluginPaths.length; i++) {
+                        var pluginIcon = pluginPaths[i] + sourceicon;
+                        if(fs.existsSync(pluginIcon)) {
+                            return sendTinyArt(req, res, pluginIcon);
+                        }
+                    }
+                } catch(e) {
+                    try {
+                        sendTinyArt(req, res, __dirname + '/default.jpg');
+                    } catch(e) {
+                        sendTinyArt(req, res, __dirname + '/default.png');
+                    }
+                }
+            } else {
+                try{
+                    sendTinyArt(req, res, __dirname + '/default.jpg');
+                } catch(e) {
+                    sendTinyArt(req, res, __dirname + '/default.png');
+                }
+            }
+        });
+};
+
+var sendTinyArt = function (req, res, filePath) {
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            console.log('Error Reading Tinyart path: ' + err);
+        } else {
+            res.removeHeader('Transfer-Encoding');
+            res.removeHeader('Access-Control-Allow-Headers');
+            res.removeHeader('Access-Control-Allow-Methods');
+            res.removeHeader('Access-Control-Allow-Origin');
+            res.removeHeader('Cache-Control');
+            res.removeHeader('Content-Type');
+            res.removeHeader('X-Powered-By');
+            res.setHeader('Connection', 'Keep-Alive');
+            res.setHeader('Keep-Alive', 'imeout=15, max=767');
+            res.end(data, 'binary');
+        }
+    })
+}
 
 var sanitizeUri = function (uri) {
     return uri.replace('music-library/', '').replace('mnt/', '');
@@ -615,10 +770,29 @@ var retrieveAlbumart = function (artist, album, size, cb) {
             return cb('Got error: ' + e.message);
         });
     }
+};
 
+var download = function (uri, dest, cb) {
+    var url = require('url');
+    var protocol = url.parse(uri).protocol.slice(0, -1);
 
+    var request = require(protocol).get(uri, function(response) {
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+            var file = fs.createWriteStream(dest);
+            response.pipe(file);
+            file.on('finish', function() {
+                file.close(cb);
+            });
+        } else if (response.headers.location) {
+            download(response.headers.location, dest, cb);
+        } else {
+            cb(response.statusMessage)
+        }
+    });
 };
 
 module.exports.processExpressRequest = processExpressRequest;
+module.exports.processExpressRequestTinyArt = processExpressRequestTinyArt;
+module.exports.processExpressRequestDirect = processExpressRequestDirect;
 module.exports.processRequest = processRequest;
 module.exports.setFolder = setFolder;

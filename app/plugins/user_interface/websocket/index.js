@@ -305,14 +305,17 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('callMethod', function (dataJson) {
 				var promise;
 
-				var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
-				var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
+				try {
+                    var category = dataJson.endpoint.substring(0, dataJson.endpoint.indexOf('/'));
+                    var name = dataJson.endpoint.substring(dataJson.endpoint.indexOf('/') + 1);
 
-                self.logger.info("CALLMETHOD: "+category+" "+name+" "+dataJson.method+" "+dataJson.data);
-				var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
-				if (promise != undefined) {
-							connWebSocket.emit(promise.message, promise.payload);
-				} else {
+                    self.logger.info("CALLMETHOD: "+category+" "+name+" "+dataJson.method+" "+dataJson.data);
+                    var promise = self.commandRouter.executeOnPlugin(category, name, dataJson.method, dataJson.data);
+                    if (promise != undefined) {
+                        connWebSocket.emit(promise.message, promise.payload);
+                    }
+				} catch(e){
+					self.logger.error('Failed callmethod call: ' + e);
 				}
 			});
 
@@ -431,12 +434,16 @@ function InterfaceWebUI(context) {
 				var selfConnWebSocket = this;
 
 				var returnedData = self.musicLibrary.goto(data);
-				returnedData.then(function (result) {
-					selfConnWebSocket.emit('pushBrowseLibrary', result);
-				});
+				if (returnedData) {
+                    returnedData.then(function (result) {
+                        selfConnWebSocket.emit('pushBrowseLibrary', result);
+                    })
+                    .fail(function () {
+                        // No goto method available
+                    });
+				}
 			});
-
-
+		
 			connWebSocket.on('GetTrackInfo', function (data) {
 				var selfConnWebSocket = this;
 				selfConnWebSocket.emit('pushGetTrackInfo', data);
@@ -490,6 +497,15 @@ function InterfaceWebUI(context) {
 
 
 			// PLAYLIST MANAGEMENT
+                       connWebSocket.on('getPlaylistContent', function (data) {
+                            var selfConnWebSocket = this;
+
+                            var returnedData=self.commandRouter.playListManager.getPlaylistContent(data.name);
+                            returnedData.then(function (retData) {
+                              selfConnWebSocket.emit('pushPlaylistContent', {name:data.name,lists:[retData]});
+                            });
+                        });
+
 			connWebSocket.on('createPlaylist', function (data) {
 				var selfConnWebSocket = this;
 
@@ -820,8 +836,11 @@ function InterfaceWebUI(context) {
 			connWebSocket.on('getWirelessNetworks', function () {
 				var selfConnWebSocket = this;
 
+                var wirelessNetworksCache = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessNetworksScanCache', '');
+                if (wirelessNetworksCache) {
+                    selfConnWebSocket.emit('pushWirelessNetworks', wirelessNetworksCache);
+				}
 				var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWirelessNetworks', '');
-
 				if (returnedData != undefined) {
 					returnedData.then(function (data) {
 						selfConnWebSocket.emit('pushWirelessNetworks', data);
@@ -1238,7 +1257,6 @@ function InterfaceWebUI(context) {
 
                 if (returnedData != undefined) {
                     returnedData.then(function (installedPLugins) {
-                        self.logger.info(JSON.stringify(installedPLugins));
                         selfConnWebSocket.emit('pushInstalledPlugins',installedPLugins);
                     });
                 }
@@ -1637,6 +1655,18 @@ function InterfaceWebUI(context) {
                 }
         	});
 
+        connWebSocket.on('getDeviceActivationStatus', function () {
+            var selfConnWebSocket = this;
+
+            var codeCheck = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'getDeviceActivationStatus', '');
+
+            if (codeCheck != undefined) {
+                codeCheck.then(function (data) {
+                    selfConnWebSocket.emit('pushDeviceActivationStatus', data);
+                });
+            }
+        });
+
 			connWebSocket.on('checkPassword', function (data) {
 				var selfConnWebSocket = this;
 
@@ -1805,15 +1835,6 @@ function InterfaceWebUI(context) {
             var enableDisableMyMusicPlugin = self.commandRouter.enableDisableMyMusicPlugin(data);
             enableDisableMyMusicPlugin.then(function(plugins) {
                 selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
-                var title = self.commandRouter.getI18nString('COMMON.DISABLED');
-                if (data.enabled) {
-                	title = self.commandRouter.getI18nString('COMMON.ENABLED');
-				}
-                selfConnWebSocket.emit('pushToastMessage', {
-                    type: 'success',
-                    title: title,
-                    message: data.prettyName
-                });
 			})
             .fail(function (error) {
                 self.logger.error(error);
@@ -1844,6 +1865,27 @@ function InterfaceWebUI(context) {
                 self.printToastMessage('error', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'),  self.commandRouter.getI18nString('SYSTEM.ERROR_DELETING_FOLDER'));
 				self.logger.error(error);
             });
+        });
+
+        connWebSocket.on('getDeviceHWUUID', function () {
+            var selfConnWebSocket = this;
+
+            var hwuuid = self.commandRouter.getHwuuid();
+            selfConnWebSocket.emit('pushDeviceHWUUID', hwuuid);
+        });
+
+        connWebSocket.on('getPrivacySettings', function () {
+            var selfConnWebSocket = this;
+
+            var privacySettings = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getPrivacySettings', '');
+            if (privacySettings != undefined) {
+                privacySettings.then(function (result) {
+                    selfConnWebSocket.emit('pushPrivacySettings', result);
+                })
+                    .fail(function (e) {
+
+                    });
+            }
         });
 
 	});

@@ -76,14 +76,12 @@
     "NO_OUTPUT_DEVICE_MESSAGE":"Connectez un périphérique audio à ce matériel",
     "OUTPUT_DEVICE_NOT_AVAILABLE":"La sortie audio choisie n'est pas disponible",
     "CONNECT_OUTPUT_DEVICE_1":"Connectez",
-    "CONNECT_OUTPUT_DEVICE_2":"au périphérique",
     "CONNECT_OUTPUT_DEVICE_2":"au périphérique ou sélectionnez une autre sortie audio",
     "PLAYBACK_MODE":"Mode de lecture",
     "PLAYBACK_MODE_DOC":"Vous pouvez choisir le comportement de lecture : Continue remplacera la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoutera seulement le morceau sélectionné",
     "PLAYBACK_MODE_CONTINUOUS":"Continue",
     "PLAYBACK_MODE_SINGLE":"Unitaire"  
     },
-
   "NETWORK": {
     "NETWORK_SETTINGS":"Réglages du réseau",
     "WIRED_NETWORK":"Réseau câblé",
@@ -202,7 +200,20 @@
     "NO_RESULTS":"Pas de résultat",
     "REMOVE_FAIL":"Impossible de retirer",
     "CONNECTED":"Connecté",
-    "DISCONNECTED":"Déconnecté"
+    "DISCONNECTED":"Déconnecté",
+    "LOGIN":"Connexion",
+    "LOGOUT":"Déconnexion",
+    "USERNAME":"Utilisateur",
+    "PASSWORD":"Mot de passe",
+    "LOGGING_IN":"Connexion en cours",
+    "LOGIN_SUCCESS": "Connexion avec succès",
+    "LOGIN_FAIL":"Echec de la connexion",
+    "LOGGING_OUT":"Deconnexion en cours",
+    "LOGOUT_SUCCESS":"Déconnexion avec succès",
+    "OR":"ou",
+    "SOURCES":"Sources",
+    "CLOSE":"Fermer",
+    "CANNOT_LIST":"Impossible de lister"
   },
   "APPEARANCE":{
     "APPEARANCE":"Apparence",
@@ -238,9 +249,15 @@
     "METADATA_IMAGE":"Montrer les images inclues dans les fichiers",
     "METADATA_IMAGE_DOC":"Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement",
     "BROWSE_SOURCES_VISIBILITY":"Visibilité des sources",
-    "VOLUMIO3_EXPERIMENTAL_UI":"Activer l'interface expérimentale de Volumio3",
-    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface expérimentale de Volumio3"
-   },
+    "VOLUMIO3_EXPERIMENTAL_UI":"Activer l'interface expérimentale",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC":"Activer l'interface expérimentale",
+    "UPLOAD_FAILED":"Upload failed",
+    "IMAGE_MUST_BE_LESS_THAN":"La taille de l'image doit être inférieure à",
+    "USER_INTERFACE_LAYOUT_DESIGN":"Style de l'interface utilisateur",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC":"Selectionnez le style de l'interface utilisateur. Contemporain propose une experience utilisateur dans le style des lecteurs de musique les plus populaires. Classique propose une interface minimale, avec trois onglets ",
+    "USER_INTERFACE_CONTEMPORARY":"Contemporain",
+    "USER_INTERFACE_CLASSIC":"Classique"
+  },
   "MAIN_MENU":{
     "MY_MUSIC":"Ma Musique",
     "PLAYBACK_OPTIONS":"Lecture",
@@ -252,7 +269,8 @@
     "SLEEP":"Sommeil",
     "CREDITS":"Crédits",
     "SHUTDOWN":"Arrêt",
-    "HELP":"Aide"
+    "HELP":"Aide",
+    "SOURCES":"Sources"
       },
   "ALARM":{
     "ALARM_CLOCK_TITLE":"Réveil",
@@ -325,7 +343,10 @@
     "SIMPLE_SETTINGS_SET":"Mode réglage simplifié",
     "SIMPLE_SETTINGS_SET_EXTENDED":"Accès seulement aux réglages de base",
     "KEEP_PRESSED_TO_TURN_OFF_IN":"Maintenir appuyé pour éteindre",
-    "TURN_OFF_IN":"Eteindre"  
+    "TURN_OFF_IN":"Eteindre",
+    "PRIVACY_SETTINGS":"Paramètres de vie privée",
+    "ALLOW_UI_STATISTICS":"Autoriser la collecte d'informations sur l'utilisation",
+    "ALLOW_UI_STATISTICS_DOC":"Autoriser la collecte d'information sur l'utilisation de l'interface de Volummio via Facebook Pixel et Google Analytics. Ces données sont utilisées pour améliorer Volumio. Pour plus d'information sur ce qui est collecté, merci de consulter volumio.org/privacy-policy"
   },
   "WEBRADIO":{
     "MY_WEB_RADIOS":"Mes radios Internet",
@@ -338,7 +359,8 @@
     "POPULAR_RADIOS":"Radios populaires",
     "BEST_RADIOS":"Meilleures Radios",
     "BY_LANGUAGE":"Par Langue",
-    "TALK_RADIOS":"Emissions Radios"
+    "TALK_RADIOS":"Emissions Radios",
+    "SHOUTCAST_ERROR":"Une erreur s'est produite lors de l'accès à SHOUTCAST"
   },
   "PLUGINS":{
     "CONFIRM_PLUGIN_UNINSTALL":"Confirmer la désinstallation du plugin",
@@ -351,7 +373,34 @@
     "PLUGIN_START_ERROR":"Le démarrage de ce plugin a échoué. Mettez le à jour ou contactez le développeur",
     "CONFIRM_PLUGIN_INSTALL":"Installer le Plugin",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE":"Attention, les plugins développes par des tierces parties peuvent conduire à des instabilités ou des comportements anormaux du système. Etes vous sur de vouloir installer ce plugin?",
-    "INSTALL":"Installer"
+    "INSTALL":"Installer",
+    "SUCCESSFULLY_INSTALLED":"Installé avec succès",
+    "ENABLE_PLUGIN_NOW_QUESTION":"Voulez vous activer ce plugin maintenant?",
+    "ENABLE_PLUGIN":"Activer le plugin",
+    "DOWNLOADING_PLUGIN":"Télécharger le plugin",
+    "INSTALLING_PLUGIN":"Installation du plugin en cours",
+    "CREATING_INSTALL_LOCATION":"Création de l'emplacement de déstination",
+    "UNPACKING_PLUGIN":"Décompression du plugin",
+    "CHECKING_DUPLICATE_PLUGIN":"Vérification des doublons",
+    "COPYING_PLUGIN_TO_LOCATION":"Copie du plugin à destination",
+    "INSTALLING_NECESSARY_UTILITIES":"Installation des utilitaires nécéssaires",
+    "FINALIZING_INSTALLATION":"Finalisation de l'installation",
+    "PLUGIN_INSTALL_COMPLETED":"Mise à jour du plugin finie",
+    "PLUGIN_INSTALL_ERROR_OCCURRED":"Une erreur est survenue lors de l'installation du plugin",
+    "UPDATING_PLUGIN":"Mise à jour du plugin",
+    "PLUGIN_STOPPED":"Plugin arreté",
+    "UPDATING_PLUGIN_FILES":"Mise à jour des fichiers",
+    "SUCCESSFULLY_UPDATED_PLUGIN":"Plugin mis à jour avec succès",
+    "PLUGIN_UPDATE_COMPLETED":"Mise à jour du plugin terminée",
+    "PLUGIN_UPDATE_FAILED":"Echec de la mise à jour du plugin",
+    "PLUGIN_UPDATE_ERROR_OCCURRED":"Une erreur est survenue lors de la mise à jour",
+    "UNINSTALLING_PLUGIN":"Désinstallation du plugin",
+    "PLUGIN_DISABLED":"Plugin désactivé",
+    "REMOVING_NECESSARY_UTILITIES":"Désinstallation des utilitaires",
+    "FINALIZING_UNINSTALL":"Finalisation de la désinstallation du plugin",
+    "PLUGIN_UNINSTALLED":"Plugin désinstallé avec succès",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED":"Une erreur est survenue lors de la désinstallation du plugin",
+    "PLUGIN_UNINSTALL_FAILED":"Echec de la désinstallation"
   },
    "WIZARD":{
    "CONGRATULATIONS":"Félicitations !",
@@ -374,5 +423,14 @@
     "UPDATE":"Mise à jour",
     "CHECKING_FOR_UPDATES":"Recherche de mise à jour",
     "CHECKING_FOR_UPDATES_WAIT":"Merci de patienter"
-   }	
+  },
+  "MYVOLUMIO":{
+    "FEATURE_NOT_AVAILABLE":"Fonctionnalité non disponible avec le plan courant",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN":"Fonctionnalité ne peut être activée avec le plan courant de MyVolumio",
+    "PLAN_REQUIRED":"est nécéssaire pour utiliser cette fonctionnalité ",
+    "UPGRADE_YOUR_PLAN_NOW":"Changer de plan maintenant",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE":"MyVolumio n'est pas activé sur ce périphérique",
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY":"Pour utiliser cette fonctionalité, activez MyVolumio sur ce périphérique",
+    "GOTO_DEVICE_LIST":"Aller à ma liste de périphériques"
+  }
 }

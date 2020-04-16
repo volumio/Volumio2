@@ -80,7 +80,12 @@ UpnpInterface.prototype.onVolumioStart = function () {
         });
 
     });
-    self.server.listen(localport);
+    try {
+        self.server.listen(localport);
+    } catch(e) {
+        self.logger.error('Failed listening to UPNP Port: ' + e);
+    }
+
     return libQ.resolve();
 };
 

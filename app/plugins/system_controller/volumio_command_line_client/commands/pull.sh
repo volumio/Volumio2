@@ -31,6 +31,10 @@ echo "Copying Modules"
 cp -rp /volumio-current/node_modules /volumio/node_modules
 echo "Copying UI"
 cp -rp /volumio-current/http/www /volumio/http/www
+if [ -d "/volumio-current/http/www3" ]; then
+  echo "Copying Volumio3 UI"
+  cp -rp /volumio-current/http/www3 /volumio/http/www3
+fi
 echo "Getting Network Manager"
 wget https://raw.githubusercontent.com/volumio/Build/master/volumio/bin/wireless.js -O /volumio/app/plugins/system_controller/network/wireless.js
 if [ -d "/volumio-current/app/myvolumio-pluginmanager/" ]; then

@@ -36,7 +36,8 @@ function interfaceApi(context) {
     api.get('/getzones', this.browse.getZones.bind(this.browse));
 
     // System
-    api.get('/ping', this.system.ping.bind(this.browse));
+    api.get('/ping', this.system.ping.bind(this.system));
+    api.get('/getSystemVersion', this.system.getSystemVersion.bind(this.browse));
 
     // Playback
     api.get('/commands', this.playback.playbackCommands.bind(this.playback));
@@ -54,6 +55,9 @@ function interfaceApi(context) {
     api.get('/pushNotificationUrls', this.getPushNotificationUrls.bind(this));
     api.post('/pushNotificationUrls', this.addPushNotificationUrls.bind(this));
     api.delete('/pushNotificationUrls', this.removePushNotificationUrls.bind(this));
+
+    // OAUTH
+    api.get('/oauth', this.system.oauth.bind(this.system));
 
 };
 
@@ -188,9 +192,12 @@ interfaceApi.prototype.executeRestEndpoint = function(data) {
                 executed = true;
                 self.logger.info('Executing endpoint ' + endpoint.endpoint);
                 var execute = self.commandRouter.executeOnPlugin(endpoint.type, endpoint.name, endpoint.method, data.data);
-                if (Promise.resolve(execute) == execute) {
+                if (Promise.resolve(execute).catch((e)=>{}) == execute) {
                     execute.then(function(result) {
                         defer.resolve(result);
+                    })
+                    .catch(function(error){
+                        defer.reject(error);
                     })
                 } else {
                     if (execute) {

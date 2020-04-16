@@ -33,9 +33,11 @@
 		<div id='playerstate'></div>
 		<br />
 
+		<div<%if (process.env.HIDE_TESTMODE_SELECTOR === 'true'){%> style="visibility:hidden"<%}%>>
 		<h3>Test Mode</h3>
 		<button id='button-testtrue' class='control-websocket' disabled>TRUE</button>
 		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>
+		</div>
 
 		<h3>SSH</h3>
 		<button id='button-sshenable' class='control-websocket' disabled>ENABLE</button>
@@ -47,6 +49,15 @@
 			<input id="bug-form-description" type="text" placeholder="Describe what you were doing/why you are sending the report." style="border: 1px solid black; width: 600px;"/>
 			<button id="bug-form-button" type="bug-form-submit">Send</button>
 			<button class="btn" id="copy-button" type="button" data-clipboard-demo data-clipboard-target="#bug-form-description" style="display:none">
+				Copy to clipboard
+			</button>
+		</form>
+
+		<h3>Device Unique Identification Code</h3>
+		<span id="hwuuid"></span>
+		<form class="hwuuid-form">
+			<input id="hwuuid-text" type="text" style="border: 1px solid black; width: 600px;"/>
+			<button class="btn" id="hwuuid-copy-button" type="button" data-clipboard-demo data-clipboard-target="#hwuuid-text" style="display:none">
 				Copy to clipboard
 			</button>
 		</form>

@@ -8,8 +8,9 @@ var iwlist = require('./lib/iwlist.js');
 var ifconfig = require('./lib/ifconfig.js');
 var config = new (require('v-conf'))();
 var ip = require('ip');
-var isOnline = require('is-online');
 var os = require('os');
+var crypto = require('crypto');
+var wirelessNetworksScanCache;
 
 
 // Define the ControllerNetwork class
@@ -98,18 +99,7 @@ ControllerNetwork.prototype.getUIConfig = function () {
 
 
 	//Wireless
-
-	var wirelessenabled = false;
-		try {
-		var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/flags", { uid: 1000, gid: 1000, encoding: 'utf8'});
-			var wirelessstatus = wirelessstatusraw.replace(/\r?\n/g, '');
-		if ( wirelessstatus == '0x1003') {
-			wirelessenabled = true;
-			}
-			}catch (e) {
-
-			}
-
+    var wirelessenabled = self.getWirelessEnabled();
 	uiconf.sections[2].content[0].value = wirelessenabled;
 
 	//dhcp
@@ -255,11 +245,10 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 		 var self = this;
 
 		 if (err) {
-		 	console.log('An error occurred while scanning: '+err)
-		 	console.log('Cannot use regular scanning, forcing with ap-force')
+		 	exself.logger.error('An error occurred while scanning: ' + err);
+		 	exself.logger.info('Cannot use regular scanning, forcing with ap-force');
 			 var networksarray = [];
 			 var arraynumber = 0;
-
 
 			 try {
 				 var wirelessnets = execSync("/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force", {encoding: 'utf8'});
@@ -295,14 +284,13 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 								 var dbmraw = scanResults[1].split('.');
 								 var dbm = Number(dbmraw[0]);
 								 var rel = 100 + dbm;
-
-								 if (rel >= 65)
+								 if (rel >= 45)
 									 signal = 5;
-								 else if (rel >= 50)
-									 signal = 4;
 								 else if (rel >= 40)
-									 signal = 3;
+									 signal = 4;
 								 else if (rel >= 30)
+									 signal = 3;
+								 else if (rel >= 20)
 									 signal = 2;
 								 else if (rel >= 1)
 									 signal = 1;
@@ -336,15 +324,18 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
 
 				 var networkresults = {"available": networksarray}
 
-                 exself.enrichNetworks(networksarray);
+                 //exself.enrichNetworks(networksarray);
+                 wirelessNetworksScanCache = networkresults;
 				 defer.resolve(networkresults);
-			 } catch (e)
-			 {console.log('Cannot use fallback scanning method: '+e)}
+			 } catch (e) {
+			 	exself.logger.error('Cannot use fallback scanning method: ' + e);
+			 }
 		 } else {
 			 var networksarray = networks;
 			 var networkresults = {"available": networksarray}
 
-             exself.enrichNetworks(networksarray);
+             //exself.enrichNetworks(networksarray);
+             wirelessNetworksScanCache = networkresults;
 			 defer.resolve(networkresults);
 		 }
 
@@ -528,11 +519,18 @@ ControllerNetwork.prototype.getData = function (data, key) {
 ControllerNetwork.prototype.saveWirelessNetworkSettings = function (data) {
 	var self = this;
 
+	if (!data['ssid']) {
+		self.logger.error('Could not save Wifi Network, no SSID specified');
+		return
+	}
 	self.logger.info("Saving new wireless network");
 
 	var network_ssid = data['ssid'];
 	var network_pass = data['password'];
 
+	if (data && data.security && data.security.includes('wpa') && network_pass) {
+		network_pass = self.getHashedWPAPassphrase(network_ssid, network_pass);
+	}
     var index=this.searchNetworkInConfig(network_ssid);
 
     if(index>-1)
@@ -588,7 +586,7 @@ ControllerNetwork.prototype.saveHotspotSettings = function (data) {
 	}
 };
 
-ControllerNetwork.prototype.rebuildHotspotConfig = function () {
+ControllerNetwork.prototype.rebuildHotspotConfig = function (forceHotspotConfiguration) {
 	var self = this;
 	var hostapdedimax = '/etc/hostapd/hostapd-edimax.conf';
 	var hostapd = '/etc/hostapd/hostapd.conf';
@@ -600,7 +598,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 		fs.accessSync(hostapdedimax, fs.F_OK);
 		exec("/usr/bin/sudo /bin/chmod 777 "+ hostapdedimax, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 			if (error !== null) {
-				console.log('Cannot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
+				self.logger.error('Cannot set permissions for /etc/hostapd/hostapd-edimax.conf: ' + error);
 
 			} else {
 				self.logger.info('Permissions for /etc/hostapd/hostapd-edimax.conf')
@@ -609,7 +607,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 					var ws = fs.createWriteStream(hostapdedimax);
 					ws.cork();
 
-					if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true') {
+					if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true' || forceHotspotConfiguration === true) {
 						ws.write('interface=wlan0\n');
 						ws.write('ssid='+hotspotname+'\n');
 						ws.write('channel='+hotspotchannel+'\n');
@@ -640,7 +638,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 " + hostapd, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Cannot set permissions for /etc/hostapd/hostapd.conf: ' + error);
+			self.logger.error('Cannot set permissions for /etc/hostapd/hostapd.conf: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/hostapd/hostapd.conf')
@@ -649,7 +647,7 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function () {
 				var hs = fs.createWriteStream(hostapd);
 				hs.cork();
 
-				if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true') {
+				if (config.get('enable_hotspot') == true || config.get('enable_hotspot') == 'true' || forceHotspotConfiguration === true) {
 					hs.write('interface=wlan0\n');
 					hs.write('ssid=' + hotspotname + '\n');
 					hs.write('channel=' + hotspotchannel + '\n');
@@ -699,6 +697,9 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
         }
         if (self.isWPA(data.pass)){
             netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk="' + data.pass + '"' + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
+        }
+        if (self.isWPAHashed(data.pass)){
+            netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk=' + data.pass.replace('hash::', '') + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
         } else {
             self.logger.error('Not saving Password for network '+ data.ssid + ': shorter than 8 chars');
         }
@@ -708,7 +709,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
     {
         var configuredSSID=config.get('wirelessNetworksSSID['+index+']');
 
-        if(data.ssid!=configuredSSID && configuredSSID.length > 0)
+        if(data.ssid!=configuredSSID && configuredSSID !== undefined && configuredSSID.length > 0)
         {
             var configuredPASS=config.get('wirelessNetworksPASSWD['+index+']');
 
@@ -723,6 +724,9 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
                 }
                 if (self.isWPA(configuredPASS)) {
                     netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + configuredSSID + '"' + os.EOL + 'psk="' + configuredPASS + '"' + os.EOL + 'priority=0' + os.EOL + '}' + os.EOL;
+                }
+                if (self.isWPAHashed(data.pass)){
+                    netstring += 'network={' + os.EOL + 'scan_ssid=1' + os.EOL + 'ssid="' + data.ssid + '"' + os.EOL + 'psk=' + data.pass.replace('hash::', '') + os.EOL + 'priority=1'+os.EOL+'}' + os.EOL ;
                 } else {
                     self.logger.error('Not saving Password for network ' + configuredSSID + ': shorter than 8 chars');
                 }
@@ -748,7 +752,7 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 	exec("/usr/bin/sudo /bin/chmod 777 /etc/network/interfaces && /usr/bin/sudo /bin/chmod 777 /etc/dhcpcd.conf", {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Cannot set permissions for /etc/network/interfaces: ' + error);
+			self.logger.error('Cannot set permissions for /etc/network/interfaces: ' + error);
 
 		} else {
 			self.logger.info('Permissions for /etc/network/interfaces set')
@@ -820,88 +824,24 @@ ControllerNetwork.prototype.rebuildNetworkConfig = function () {
 
 ControllerNetwork.prototype.getInfoNetwork = function () {
 	var self = this;
-
 	var defer = libQ.defer();
-	var response = [];
-	var defers = [];
-	var ethspeed = execSync("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' });
-	if (ethspeed.replace('\n', '') == '1000Mb/s') {
-        ethspeed = '1Gb/s'
-	}
-	var wirelessspeedraw = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' });
-	var wirelessspeed = wirelessspeedraw.replace('=', '');
-	var ssid = execSync('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' });
-	var wirelessqualityraw1 = execSync("/usr/bin/sudo /sbin/iwconfig wlan0 | awk '{if ($1==\"Link\"){split($2,A,\"/\");print A[1]}}' | sed 's/Quality=//g'", { encoding: 'utf8' });
-	var wirelessqualityraw2 = wirelessqualityraw1.split('/')[0];
-	var wirelessquality = 0;
+	var responseObject = [];
+	var defers = [
+		self.getEthernetSpeed(),
+		self.getWirelessSpeed(),
+		self.getWirelessSSID(),
+		self.getWirelessQuality(),
+		self.getEthernetIPAddress(),
+		self.getWirelessIPAddress()
+	];
 
-	if (wirelessqualityraw2 >= 65)
-		wirelessquality = 5;
-	else if (wirelessqualityraw2 >= 50)
-		wirelessquality = 4;
-	else if (wirelessqualityraw2 >= 40)
-		wirelessquality = 3;
-	else if (wirelessqualityraw2 >= 30)
-		wirelessquality = 2;
-	else if (wirelessqualityraw2 >= 1)
-		wirelessquality = 1;
-
-	var ethip = ''
-	var wlanip = ''
-
-    try {
-        execSync("/usr/bin/wget -q  --timeout=1 --spider http://updates.volumio.org/");
-        var oll = 'yes';
-    } catch (e) {
-        var oll = 'no';
-    }
-
-    var ethdefer = libQ.defer();
-	defers.push(ethdefer)
-
-	ifconfig.status('eth0', function (err, status) {
-		if (status != undefined) {
-			if (status.ipv4_address != undefined) {
-				ethip = status.ipv4_address
-				var ethstatus = {type: "Wired", ip: ethip, status: "connected", speed: ethspeed, online: oll};
-				response.push(ethstatus);
-				ethdefer.resolve()
-			} else {
-                ethdefer.resolve()
-			}
-		} else {
-            ethdefer.resolve()
-		}
-	});
-
-    var wlandefer = libQ.defer();
-    defers.push(wlandefer)
-	ifconfig.status('wlan0', function (err, status) {
-		if (status != undefined) {
-			if (status.ipv4_address != undefined) {
-				if (status.ipv4_address == '192.168.211.1') {
-					var wlanstatus = {type: "Wireless", ssid: 'Hotspot', signal: 5, ip:'192.168.211.1', online: oll}
-				} else {
-					wlanip = status.ipv4_address;
-					var wlanstatus = {type: "Wireless", ssid: ssid, signal: wirelessquality,ip: wlanip, status: "connected", speed: wirelessspeed, online: oll}
-				}
-				response.push(wlanstatus);
-				wlandefer.resolve()
-			} else  {
-                wlandefer.resolve()
-			}
-		} else {
-            wlandefer.resolve()
-		}
-
-	});
     libQ.all(defers)
-        .then(function () {
-            defer.resolve(response)
+        .then(function (result) {
+			defer.resolve(self.parseInfoNetworkResults(result));
         })
         .fail(function (err) {
-            console.log('Cannot get all networks info'+err);
-            defer.reject(new Error());
+            self.logger.error('Cannot get all networks infos: ' + err);
+            defer.resolve('');
         });
 
 	return defer.promise;
@@ -984,6 +924,16 @@ ControllerNetwork.prototype.isWPA = function (data) {
 	 }
 };
 
+ControllerNetwork.prototype.isWPAHashed = function (data) {
+    var self = this;
+
+    if (data && data.length === 70 && data.includes('hash::')) {
+        return true
+    } else {
+        return false
+    }
+};
+
 ControllerNetwork.prototype.getWirelessInfo = function () {
     var self = this;
     var defer = libQ.defer();
@@ -1052,4 +1002,193 @@ ControllerNetwork.prototype.wirelessDisable = function () {
     setTimeout(()=>{
         self.commandRouter.wirelessRestart();
 	},500)
+};
+
+ControllerNetwork.prototype.getHashedWPAPassphrase = function (ssid, passphrase) {
+    var self = this;
+
+    try {
+        var hashedWPAPassphrase = 'hash::' + crypto.pbkdf2Sync(passphrase, ssid, 4096, 32, 'sha1').toString('hex');
+	} catch (e) {
+    	self.logger.error('Could not hash passphrase: ' + e );
+    	self.logger.info('Using clear passphrase');
+        var hashedWPAPassphrase = passphrase;
+	}
+
+	return hashedWPAPassphrase
+};
+
+ControllerNetwork.prototype.getWirelessEnabled = function () {
+    var self = this;
+
+    var wirelessenabled = false;
+    try {
+        var wirelessstatusraw = execSync("/bin/cat /sys/class/net/wlan0/flags", { uid: 1000, gid: 1000, encoding: 'utf8'});
+        var wirelessstatus = wirelessstatusraw.replace(/\r?\n/g, '');
+        if ( wirelessstatus == '0x1003') {
+            wirelessenabled = true;
+        }
+    } catch (e) {}
+
+    return wirelessenabled
+};
+
+ControllerNetwork.prototype.getEthernetSpeed = function () {
+	var self = this;
+	var defer = libQ.defer();
+
+    exec("/usr/bin/sudo /sbin/ethtool eth0 | grep -i speed | tr -d 'Speed:' | xargs", { encoding: 'utf8' }, function(error, data){
+    	if (error) {
+    		self.logger.error('Could not parse Etherned Speed: ' + error);
+    		defer.resolve('');
+		} else {
+            if (data.replace('\n', '') == '1000Mb/s') {
+                data = '1Gb/s';
+            }
+            defer.resolve(data);
+		}
+	});
+	return defer.promise
+};
+
+ControllerNetwork.prototype.getWirelessSpeed = function () {
+	var self = this;
+    var defer = libQ.defer();
+
+    exec("/usr/bin/sudo /sbin/iwconfig wlan0 | grep 'Bit Rate' | awk '{print $2,$3}' | tr -d 'Rate:' | xargs", { encoding: 'utf8' }, function(error, data){
+        if (error) {
+            self.logger.error('Could not parse Wireless Speed: ' + error);
+            defer.resolve('');
+        } else {
+            defer.resolve(data.replace('=', ''));
+        }
+    });
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getWirelessSSID = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    exec('/usr/bin/sudo /sbin/iwconfig wlan0 | grep ESSID | cut -d\\" -f2', { encoding: 'utf8' }, function(error, data){
+        if (error) {
+            self.logger.error('Could not parse Wireless SSID: ' + error);
+            defer.resolve('');
+        } else {
+            defer.resolve(data);
+        }
+    });
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getWirelessQuality = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    exec("/usr/bin/sudo /sbin/iwconfig wlan0 | awk '{if ($1==\"Link\"){split($2,A,\"Signal\");print A[1]}}' | sed 's/Quality=//g' | tr -d '\n'", { encoding: 'utf8' }, function(error, data){
+        if (error) {
+            self.logger.error('Could not parse Wireless Quality: ' + error);
+            defer.resolve('');
+        } else {
+            var wirelessquality = 0;
+			try {
+                var wirelessQualityPercentage = (parseInt(data.split('/')[0]) /  parseInt(data.split('/')[1])) * 100;
+			} catch(e) {
+                var wirelessQualityPercentage = 0;
+			}
+
+            if (wirelessQualityPercentage >= 65)
+                wirelessquality = 5;
+            else if (wirelessQualityPercentage >= 50)
+                wirelessquality = 4;
+            else if (wirelessQualityPercentage >= 40)
+                wirelessquality = 3;
+            else if (wirelessQualityPercentage >= 30)
+                wirelessquality = 2;
+            else if (wirelessQualityPercentage >= 1)
+                wirelessquality = 1;
+
+            defer.resolve(wirelessquality);
+        }
+    });
+
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getEthernetIPAddress = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    ifconfig.status('eth0', function (err, status) {
+        if (!err && status != undefined && status.ipv4_address != undefined) {
+        	defer.resolve(status.ipv4_address);
+        } else {
+            defer.resolve('');
+        }
+    });
+    return defer.promise
+};
+
+ControllerNetwork.prototype.getWirelessIPAddress = function () {
+    var self = this;
+    var defer = libQ.defer();
+
+    ifconfig.status('wlan0', function (err, status) {
+        if (!err && status != undefined && status.ipv4_address != undefined) {
+            defer.resolve(status.ipv4_address);
+        } else {
+            defer.resolve('');
+        }
+    });
+    return defer.promise
+
+};
+
+ControllerNetwork.prototype.parseInfoNetworkResults = function (data) {
+    var self = this;
+
+	var response = [];
+    var hotspotIP = '192.168.211.1';
+	var ethSpeed = data[0];
+    var wirelessSpeed = data[1]
+	var wirelessSSID = data[2];
+    var wirelessQuality = data[3];
+	var ethIP = data[4];
+	var wirelessIP = data[5];
+
+	if (ethIP) {
+		response.push({type: "Wired", ip: ethIP, status: "connected", speed: ethSpeed});
+	}
+
+	if (wirelessIP && wirelessIP === hotspotIP) {
+        response.push({type: "Wireless", ip: wirelessIP, ssid: "Hotspot", signal: 5});
+	} else if (wirelessIP) {
+        response.push({type: "Wireless", ip: wirelessIP, ssid: wirelessSSID, signal: wirelessQuality, status: "connected", speed: wirelessSpeed});
+	}
+
+	return response
+};
+
+ControllerNetwork.prototype.onNetworkingRestart = function () {
+    var self = this;
+    return self.commandRouter.broadcastMessage('pushInfoNetworkReload', '');
+};
+
+ControllerNetwork.prototype.getWirelessNetworksScanCache = function () {
+    var self = this;
+
+    return wirelessNetworksScanCache
+};
+
+ControllerNetwork.prototype.forceHotspot = function () {
+    var self = this;
+	
+    fs.writeFile('/tmp/forcehotspot', '', function (err) {
+        if (err) {
+            self.logger.error('Cannot write /tmp/forcehotspot ' + error);
+        } else {
+            self.logger.error('Forcing Hotspot mode');
+            self.rebuildHotspotConfig(true);
+        }
+    });
 };

@@ -328,7 +328,7 @@ ControllerWebradio.prototype.listRadioGenres = function () {
 
                 defer.resolve(response);
             }
-            else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+            else defer.reject(new Error(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR')));
         });
 
     return defer.promise;
@@ -415,7 +415,7 @@ ControllerWebradio.prototype.listRadioForGenres = function (curUri) {
 
                 defer.resolve(response);
             }
-            else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+            else defer.reject(new Error(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR')));
         });
 
     return defer.promise;
@@ -511,7 +511,7 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
 
                 defer.resolve(response);
             }
-            else defer.reject(new Error('An error occurred while querying SHOUTCAST'));
+            else defer.reject(new Error(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR')));
         });
 
 
@@ -607,11 +607,11 @@ ControllerWebradio.prototype.explodeUri = function(data) {
         })
             .catch(function(err) {
                 self.logger.error(err);
-                defer.reject(new Error('Cannot retrieve details for stram ' + uri + ': ' + err));
+                defer.reject(new Error('Cannot retrieve details for stream ' + uri + ': ' + err));
             });
 
     } else {
-        data.name=data.title;
+        if (data.title) data.name=data.title;
         if (!data.albumart) {
             data.albumart="/albumart";
         }
@@ -825,7 +825,7 @@ ControllerWebradio.prototype.listMyWebRadio = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error("Cannot list Favourites"));
+            defer.reject(new Error(self.commandRouter.getI18nString('COMMON.CANNOT_LIST') + ' ' + self.commandRouter.getI18nString('WEBRADIO.MY_WEB_RADIOS')));
         });
 
     return defer.promise;
@@ -884,7 +884,7 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
 
     })
         .fail(function () {
-            defer.reject(new Error("Cannot list Favourites"));
+            defer.reject(new Error(self.commandRouter.getI18nString('COMMON.CANNOT_LIST') + ' ' + self.commandRouter.getI18nString('COMMON.FAVOURITES')));
         });
 
     return defer.promise;
@@ -903,13 +903,38 @@ ControllerWebradio.prototype.search = function (data) {
         ],
         "items": []
     };
+    
+     function dynamicSort(property) {
+    var sortOrder = 1;
 
-    var search = data.value.toLowerCase();
+    if(property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+
+    return function (a,b) {
+        if(sortOrder == -1){
+            return b[property].localeCompare(a[property]);
+        }else{
+            return a[property].localeCompare(b[property]);
+        }        
+    }
+} 
+
+    var search = data.value.normalize ("NFKD").replace (/[\u0300-\u036F]/g, "").replace(/[' ']/g, '*').toLowerCase();
     var tuneInSerch = self.searchWithTuneIn(search).then(function (value) {
-        return value;
-    });
+ 
+    value.sort(dynamicSort("title"));
+   
+    return value;
+     });
+
+    
     var shoutcastSearch = self.searchWithShoutcast(search).then(function (value) {
-        return value;
+ 
+    value.sort(dynamicSort("title"));
+    
+    return value;
     });
 
     libQ.all([tuneInSerch,shoutcastSearch]).then(function(result){
@@ -917,9 +942,9 @@ ControllerWebradio.prototype.search = function (data) {
         for (i = 0; i < result.length; i++) {
             if (Array.isArray(result[i])) {
                 Array.prototype.push.apply(list.items,result[i]);
-                list.items.concat(result[i]);
-            }
-        }
+                       list.items.concat(result[i]);
+   			}
+  		}
         defer.resolve(list);
     });
     return defer.promise
@@ -1041,7 +1066,7 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
             }
             else
             {
-                self.commandRouter.logger.info('An error occurred while querying SHOUTCAST');
+                self.commandRouter.logger.info(self.commandRouter.getI18nString('WEBRADIO.SHOUTCAST_ERROR'));
                 defer.resolve([]);
             }
         });
@@ -1059,6 +1084,7 @@ ControllerWebradio.prototype.searchWithTuneIn = function (search) {
         var body = results.body;
         for (var i in body) {
             let item = self.getTuneInNavigationItem(body[i], 'tunein_radio');
+
             if (item) {
                 items.push(item);
             }
@@ -1198,7 +1224,7 @@ ControllerWebradio.prototype.getTuneInNavigationItem = function(node, category) 
     let icon = '';
     let uri = '';
 
-    if (node.type == 'audio') {
+    if (node.type == 'audio' && node.item !== undefined && node.item === 'station') {
         servType = 'webradio';
         albumart = node.image;
         uri = node.URL;

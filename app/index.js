@@ -11,21 +11,11 @@ var vconf = require('v-conf');
 // Define the CoreCommandRouter class
 module.exports = CoreCommandRouter;
 function CoreCommandRouter(server) {
+	metrics.time('CommandRouter');
 
 	var logfile = '/var/log/volumio.log';
 
 	fs.ensureFileSync(logfile);
-	fs.watchFile(logfile, function () {
-		fs.stat(logfile, function (err, stats) {
-			if (stats.size > 15728640) {
-				var now = new Date();
-				console.log('******** LOG FILE REACHED 15MB IN SIZE, CLEANING IT ********');
-				fs.writeFile(logfile, '------------------- Log Cleaned at '+ now + ' -------------------', function(){
-					console.log('******** LOG FILE SUCCESSFULLY CLEANED ********');
-				})
-			}
-		});
-	});
 	this.logger = new (winston.Logger)({
 		transports: [
 			new (winston.transports.Console)(),
@@ -79,10 +69,11 @@ function CoreCommandRouter(server) {
     this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
     this.pushConsoleMessage('BOOT COMPLETED');
+    metrics.log('CommandRouter');
 
     this.startupSound();
 	this.closeModals();
-
+	
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -463,29 +454,31 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 	return this.stateMachine.addQueueItems(arrayItems);
 };
 CoreCommandRouter.prototype.replaceAndPlay = function (data) {
+        var self=this;
 	var defer = libQ.defer();
+	var self = this;
 	this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
 	this.stateMachine.clearQueue();
 
     if (data.uri != undefined) {
-    	if (data.uri.indexOf('playlists/') >= 0) {
+    	if (data.uri.indexOf('playlists/') >= 0 && data.uri.indexOf('://') == -1) {
             this.playPlaylist(data.title);
             defer.resolve();
 		} else {
             this.stateMachine.addQueueItems(data)
                 .then((e)=> {
-                	this.volumioPlay(e.firstItemIndex);
-            		defer.resolve();
+                this.volumioPlay(e.firstItemIndex);
+            	defer.resolve();
         	});
-		}
-    } else if (data.list && data.index) {
+        }
+    } else if (data.list && data.index !== undefined) {
         this.stateMachine.addQueueItems(data.list)
             .then(()=>{
                 this.volumioPlay(data.index);
         		defer.resolve();
             });
-    } else if ((!(data.list && data.index) && data.item && data.item.uri)) {
+    } else if (data.item!=undefined && data.item.uri!=undefined) {
         this.stateMachine.addQueueItems(data.item)
             .then((e)=>{
                 this.volumioPlay(e.firstItemIndex);
@@ -500,7 +493,7 @@ CoreCommandRouter.prototype.replaceAndPlay = function (data) {
 };
 
 CoreCommandRouter.prototype.replaceAndPlayCue = function (arrayItems) {
-    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
+    this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayCue');
     this.stateMachine.clearQueue();
 
     if (arrayItems.uri != undefined && arrayItems.uri.indexOf('playlists/') >= 0) {
@@ -1981,18 +1974,19 @@ CoreCommandRouter.prototype.setMyVolumioToken = function (data) {
 CoreCommandRouter.prototype.getMyVolumioStatus = function () {
     var self=this;
     var defer = libQ.defer();
+    var notLoggedInResponseObject = {"loggedIn":false};
 
     var response = self.executeOnPlugin('system_controller', 'my_volumio', 'getMyVolumioStatus', '');
-
     if (response != undefined) {
         response.then(function (result) {
             defer.resolve(result);
-        })
-            .fail(function () {
-                var jsonobject = {"loggedIn":false}
-                defer.resolve(jsonobject);
-            });
-    }
+        }).fail(function () {
+			defer.resolve(notLoggedInResponseObject);
+		});
+    } else {
+    	// MyVolumio plugin not loaded
+        defer.resolve(notLoggedInResponseObject);
+	}
 
     return defer.promise;
 }
@@ -2235,5 +2229,25 @@ CoreCommandRouter.prototype.setAudioOutputVolume = function (data) {
 		return audioOutputPlugin.setAudioOutputVolume(data);
 	} else {
 		this.logger.error('WARNING: No Audio Output plugin found');
+	}
+};
+
+CoreCommandRouter.prototype.getHwuuid = function () {
+    var self = this;
+
+    return self.executeOnPlugin('system_controller', 'system', 'getHwuuid', '');
+};
+
+CoreCommandRouter.prototype.setOauthData = function (data) {
+    var self = this;
+
+    var pluginCategory = data.plugin.split('/')[0];
+    var pluginName = data.plugin.split('/')[1];
+
+    var thisPlugin = this.pluginManager.getPlugin(pluginCategory, pluginName);
+    if (thisPlugin != undefined && typeof thisPlugin.oauthLogin === "function") {
+        return thisPlugin.oauthLogin(data);
+    } else {
+        self.logger.error('Could not execute OAUTH Login: no function for plugin ' + pluginCategory + ' ' + pluginName);
 	}
 };
