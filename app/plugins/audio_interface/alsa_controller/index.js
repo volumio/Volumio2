@@ -1708,7 +1708,7 @@ ControllerAlsa.prototype.restorePreviousVolumeLevel  = function (volume, mute, s
 ControllerAlsa.prototype.checkValidMixer  = function (mixerName) {
     var self = this;
 
-    var invalidMixersNames = ['Clock Validity', 'Tx Source'];
+    var invalidMixersNames = ['Clock Validity', 'Tx Source', 'Internal Validity'];
     var isValidMixer = true;
 
     for (var i in invalidMixersNames) {
