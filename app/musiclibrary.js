@@ -509,15 +509,14 @@ CoreMusicLibrary.prototype.search = function(data) {
                     }
                 };
 
-                for(var i in result)
-                {
+                for(var i in result) {
                     if(result[i]!== undefined && result[i]!==null) {
                         searchResult.navigation.lists=searchResult.navigation.lists.concat(result[i]);
                     }
                 }
                 if (!searchResult.navigation.lists.length) {
                     var noResultTitle = {"type":"title","title":self.commandRouter.getI18nString('COMMON.NO_RESULTS'),"availableListViews":["list"], "items":[]};
-                    searchResult.navigation.lists[0]= noResultTitle
+                    searchResult.navigation.lists[0]= noResultTitle;
                 }
                 defer.resolve(searchResult);
             })

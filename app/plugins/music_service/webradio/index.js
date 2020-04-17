@@ -944,7 +944,11 @@ ControllerWebradio.prototype.search = function (data) {
                        list.items.concat(result[i]);
    			}
   		}
-        defer.resolve(list);
+        if (list.items.length) {
+            defer.resolve(list);
+        } else {
+            defer.resolve(null);
+        }
     });
     return defer.promise
 };
