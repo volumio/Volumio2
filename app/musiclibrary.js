@@ -671,31 +671,31 @@ CoreMusicLibrary.prototype.applyBrowseLimit=function(data, limit){
 CoreMusicLibrary.prototype.searchOnPlugin=function(plugin_type,plugin_name,query){
     var self = this;
     var searchTimeoutMS = 5000;
+    var alreadyResolved = false;
     var defer = libQ.defer();
 
-    var performedSearch = new Promise((resolve, reject) => {
-            self.commandRouter.executeOnPlugin(plugin_type,plugin_name,'search',query)
-            .then((result) => {
-                //TODO FIX, FOR SOME REASON THIS PROMISE IS NEVER RESOLVED
-                resolve(result)
-            })
-    });
-
-    var searchTimeout = new Promise((resolve, reject) => {
-        setTimeout(() => {
+    var performedSearch = self.commandRouter.executeOnPlugin(plugin_type,plugin_name,'search',query)
+    if (performedSearch !== undefined) {
+        performedSearch.then((result) => {
+            alreadyResolved = true;
+            defer.resolve(result);
+        })
+        .fail((error) => {
+            self.logger.error('Failed search in plugin ' + plugin_name + ': ' + error);
+            alreadyResolved = true;
+            defer.resolve(null);
+        })
+    } else {
+        alreadyResolved = true;
+        defer.resolve(null);
+    }
+    
+    setTimeout(() => {
+        if (!alreadyResolved) {
             self.logger.error('Search in plugin ' + plugin_name + ' timed out');
-            resolve('');
-            }, searchTimeoutMS);
-    });
-
-    Promise.race([performedSearch, searchTimeout])
-        .then((value) => {
-            defer.resolve(value);
-    })
-    .catch((error) => {
-        self.logger.error('Search error in plugin ' + plugin_name + ': ' + error);
-        defer.resolve('');
-    });
+            defer.resolve(null);
+        }
+    }, searchTimeoutMS);
 
     return defer.promise;
 }
