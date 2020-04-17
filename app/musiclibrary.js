@@ -468,8 +468,7 @@ CoreMusicLibrary.prototype.search = function(data) {
 
                     var response;
 
-                    response = self.commandRouter.executeOnPlugin(source.plugin_type,source.plugin_name,'search',query);
-
+                    response = self.searchOnPlugin(source.plugin_type,source.plugin_name,query)
                     if (response != undefined) {
                         deferArray.push(response);
                     }
@@ -667,4 +666,38 @@ CoreMusicLibrary.prototype.applyBrowseLimit=function(data, limit){
         return data;
     }
 }
+
+
+CoreMusicLibrary.prototype.searchOnPlugin=function(plugin_type,plugin_name,query){
+    var self = this;
+    var searchTimeoutMS = 5000;
+    var alreadyResolved = false;
+    var defer = libQ.defer();
+
+    var performedSearch = self.commandRouter.executeOnPlugin(plugin_type,plugin_name,'search',query)
+    if (performedSearch !== undefined) {
+        performedSearch.then((result) => {
+            alreadyResolved = true;
+            defer.resolve(result);
+        })
+        .fail((error) => {
+            self.logger.error('Failed search in plugin ' + plugin_name + ': ' + error);
+            alreadyResolved = true;
+            defer.resolve(null);
+        })
+    } else {
+        alreadyResolved = true;
+        defer.resolve(null);
+    }
+    
+    setTimeout(() => {
+        if (!alreadyResolved) {
+            self.logger.error('Search in plugin ' + plugin_name + ' timed out');
+            defer.resolve(null);
+        }
+    }, searchTimeoutMS);
+
+    return defer.promise;
+}
+
 
