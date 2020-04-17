@@ -1,9 +1,8 @@
-var dotenv = require('dotenv').config({ path: __dirname + '/.env' });
+var path = require('path');
+var dotenv = require('dotenv').config({ path: path.join(__dirname, '.env')});
 var execSync = require('child_process').execSync;
-var fs = require('fs-extra');
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
-var path = require('path');
 
 global.metrics = {
   start: {},
@@ -28,7 +27,7 @@ var httpServer = expressApp.listen(expressApp.get('port'), function () {
   metrics.log('WebUI');
 });
 
-var albumart = require(__dirname + '/app/plugins/miscellanea/albumart/albumart.js');
+var albumart = require(path.join(__dirname, '/app/plugins/miscellanea/albumart/albumart.js'));
 
 albumart.setFolder('/data/albumart');
 
@@ -45,7 +44,7 @@ expressApp.use(function (err, req, res, next) {
   /**
     * Sending back error code 500
   **/
-  res.sendFile(path.join(__dirname, '/app/plugins/miscellanea/albumart/default.png');
+  res.sendFile(path.join(__dirname, '/app/plugins/miscellanea/albumart/default.png'));
 });
 
 var commandRouter = new (require('./app/index.js'))(httpServer);
@@ -63,10 +62,11 @@ process.on('uncaughtException', (error) => {
   console.log('|||||||||||||||||||||||| WARNING: FATAL ERROR |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
   console.log(error);
   console.log('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||');
-  if (error.message != undefined) {
-    var errorMessage = error.message;
+  var errorMessage;
+  if (error.message !== undefined) {
+    errorMessage = error.message;
   } else {
-    var errorMessage = 'Unknown';
+    errorMessage = 'Unknown';
   }
   execSync('/usr/local/bin/node /volumio/crashreport.js "' + errorMessage + '"');
   if (process.env.EXIT_ON_EXCEPTION === 'true') {
