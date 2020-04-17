@@ -3,7 +3,7 @@
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var os = require('os');
-var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js')
+var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js');
 var libQ = require('kew');
 var net = require('net');
 var mpdPort = 6599;
@@ -12,305 +12,284 @@ var server;
 // Define the UpnpInterface class
 module.exports = UpnpInterface;
 
-
-function UpnpInterface(context) {
-    var self = this;
-    // Save a reference to the parent commandRouter
-    self.context = context;
-    self.commandRouter = self.context.coreCommand;
-    self.logger=self.commandRouter.logger;
-
+function UpnpInterface (context) {
+  var self = this;
+  // Save a reference to the parent commandRouter
+  self.context = context;
+  self.commandRouter = self.context.coreCommand;
+  self.logger = self.commandRouter.logger;
 }
 
 UpnpInterface.prototype.onVolumioStart = function () {
-    var self = this;
+  var self = this;
 
-    self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Upmpd Daemon');
-    self.startUpmpdcli();
+  self.context.coreCommand.pushConsoleMessage('[' + Date.now() + '] Starting Upmpd Daemon');
+  self.startUpmpdcli();
 
-    var boundMethod = self.onPlayerNameChanged.bind(self);
-    self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
+  var boundMethod = self.onPlayerNameChanged.bind(self);
+  self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
-    var localport  = 6599;
-    var remoteport = 6600;
-    var remoteaddr = "127.0.0.1";
+  var localport = 6599;
+  var remoteport = 6600;
+  var remoteaddr = '127.0.0.1';
 
-    self.server = net.createServer(function (socket) {
-        socket.setEncoding('utf8');
+  self.server = net.createServer(function (socket) {
+    socket.setEncoding('utf8');
 
+    socket.on('data', function (msg) {
+      var message = msg.toString();
+      // console.log('Upnp client: '+message );
+      if (message.indexOf('addid') !== -1) {
+        self.logger.info('Starting UPNP Playback');
+        self.prepareUpnpPlayback();
 
-        socket.on('data', function (msg) {
-            var message = msg.toString()
-            //console.log('Upnp client: '+message );
-            if (message.indexOf('addid') !== -1) {
-                self.logger.info('Starting UPNP Playback');
-                self.prepareUpnpPlayback();
-
-                setTimeout(function() {
-                    serviceSocket.write(msg);
-                }, 500)
-            } else if (message.indexOf('clear') !== -1) {
-                self.clearQueue();
-                setTimeout(function() {
-                    serviceSocket.write(msg);
-                }, 300)
-            } else {
-                try {
-                    serviceSocket.write(msg);
-                } catch (e) {
-                    console.log('Upnp client error: '+e);
-                }
-            }
-        });
-        socket.on('error', function (error) {
-            console.log('Upnp client error: '+error);
-        });
-
-
-        var serviceSocket = new net.Socket();
-        serviceSocket.connect(parseInt(remoteport), remoteaddr, function () {
-        });
-        serviceSocket.on("data", function (data) {
-            socket.write(data);
-        });
-
-        serviceSocket.on('error', function (error) {
-            self.logger.error('Upnp client error: '+error);
-        });
-
+        setTimeout(function () {
+          serviceSocket.write(msg);
+        }, 500);
+      } else if (message.indexOf('clear') !== -1) {
+        self.clearQueue();
+        setTimeout(function () {
+          serviceSocket.write(msg);
+        }, 300);
+      } else {
+        try {
+          serviceSocket.write(msg);
+        } catch (e) {
+          console.log('Upnp client error: ' + e);
+        }
+      }
     });
-    try {
-        self.server.listen(localport);
-    } catch(e) {
-        self.logger.error('Failed listening to UPNP Port: ' + e);
-    }
+    socket.on('error', function (error) {
+      console.log('Upnp client error: ' + error);
+    });
 
-    return libQ.resolve();
+    var serviceSocket = new net.Socket();
+    serviceSocket.connect(parseInt(remoteport), remoteaddr, function () {
+    });
+    serviceSocket.on('data', function (data) {
+      socket.write(data);
+    });
+
+    serviceSocket.on('error', function (error) {
+      self.logger.error('Upnp client error: ' + error);
+    });
+  });
+  try {
+    self.server.listen(localport);
+  } catch (e) {
+    self.logger.error('Failed listening to UPNP Port: ' + e);
+  }
+
+  return libQ.resolve();
 };
 
 UpnpInterface.prototype.onPlayerNameChanged = function (playerName) {
-    var self = this;
+  var self = this;
 
-    self.onRestart();
+  self.onRestart();
 };
 
-
 UpnpInterface.prototype.getCurrentIP = function () {
-    var self = this;
-    var defer = libQ.defer();
+  var self = this;
+  var defer = libQ.defer();
 
-    var ipAddresses = self.commandRouter.getCurrentIPAddresses();
-    ipAddresses.then((result)=> {
-        if (result.wlan0 && result.wlan0 !== '192.168.211.1') {
-            defer.resolve(result.wlan0);
-        } else {
-            defer.resolve(result.eth0);
-        }
-    }).fail(function (err) {
-        defer.resolve('');
-    });
+  var ipAddresses = self.commandRouter.getCurrentIPAddresses();
+  ipAddresses.then((result) => {
+    if (result.wlan0 && result.wlan0 !== '192.168.211.1') {
+      defer.resolve(result.wlan0);
+    } else {
+      defer.resolve(result.eth0);
+    }
+  }).fail(function (err) {
+    defer.resolve('');
+  });
 
-    return defer.promise;
+  return defer.promise;
 };
 
 UpnpInterface.prototype.onStop = function () {
-    var self = this;
-    var defer = libQ.defer();
+  var self = this;
+  var defer = libQ.defer();
 
-    exec('/usr/bin/sudo /bin/systemctl stop upmpdcli.service', function (error, stdout, stderr) {
-        if (error) {
-            self.logger.error('Cannot kill upmpdcli '+error);
-            defer.reject('');
-        } else {
-            self.server.close(function () {
-                self.server.unref();
-                defer.resolve('');
-            });
-        }
-    });
+  exec('/usr/bin/sudo /bin/systemctl stop upmpdcli.service', function (error, stdout, stderr) {
+    if (error) {
+      self.logger.error('Cannot kill upmpdcli ' + error);
+      defer.reject('');
+    } else {
+      self.server.close(function () {
+        self.server.unref();
+        defer.resolve('');
+      });
+    }
+  });
 
-
-    return defer.promise;
+  return defer.promise;
 };
 
 UpnpInterface.prototype.onRestart = function () {
-    var self = this;
+  var self = this;
 
-    exec('/usr/bin/sudo /usr/bin/killall upmpdcli', function (error, stdout, stderr) {
-        if (error) {
-            self.logger.error('Cannot kill upmpdcli '+error);
-        } self.startUpmpdcli();
-    });
+  exec('/usr/bin/sudo /usr/bin/killall upmpdcli', function (error, stdout, stderr) {
+    if (error) {
+      self.logger.error('Cannot kill upmpdcli ' + error);
+    } self.startUpmpdcli();
+  });
 };
 
 UpnpInterface.prototype.onInstall = function () {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.onUninstall = function () {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.getUIConfig = function () {
-    var self = this;
-
-
+  var self = this;
 };
 
 UpnpInterface.prototype.setUIConfig = function (data) {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.getConf = function (varName) {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.setConf = function (varName, varValue) {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
-//Optional functions exposed for making development easier and more clear
+// Optional functions exposed for making development easier and more clear
 UpnpInterface.prototype.getSystemConf = function (pluginName, varName) {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.setSystemConf = function (pluginName, varName) {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.getAdditionalConf = function () {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
 UpnpInterface.prototype.setAdditionalConf = function () {
-    var self = this;
-    //Perform your installation tasks here
+  var self = this;
+  // Perform your installation tasks here
 };
 
-UpnpInterface.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-}
+UpnpInterface.prototype.capitalize = function () {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+};
 
-UpnpInterface.prototype.startUpmpdcli = function() {
-    var self = this;
+UpnpInterface.prototype.startUpmpdcli = function () {
+  var self = this;
 
-    setTimeout( function() {
+  setTimeout(function () {
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var nameraw = systemController.getConf('playerName');
+    var name = nameraw.charAt(0).toUpperCase() + nameraw.slice(1);
 
-
-        var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
-        var nameraw = systemController.getConf('playerName');
-        var name = nameraw.charAt(0).toUpperCase() + nameraw.slice(1);
-
-        var upmpdcliconf = "/tmp/upmpdcli.conf";
-        var upmpdcliconftmpl = __dirname + "/upmpdcli.conf.tmpl";
-        var namestring = 'friendlyname = ' + name.replace(/-/g,' ') + os.EOL + 'ohproductroom = ' + name.replace(/-/g,' ') + os.EOL;
-        var ipaddress = self.getCurrentIP()
-        ipaddress.then(function (ipaddresspromise) {
-            fs.readFile(__dirname + "/presentation.html.tmpl", 'utf8', function (err, data) {
-                if (err) {
-                    return self.logger.log('Error writing Upnp presentation file: '+err);
-                }
-                var conf1 = data.replace('{IP-ADDRESS}', ipaddresspromise);
-
-                fs.writeFile("/tmp/presentation.html", conf1, 'utf8', function (err) {
-                    if (err) {
-                        self.logger.log('Error writing Upnp presentation file: '+err);
-                    }
-                });
-            });
-        });
-
-        fs.outputFile(upmpdcliconf, namestring , function (err) {
-
-            if (err) {
-                self.logger.error('Cannot write upnp conf file: '+err);
-            } else {
-                fs.appendFile(upmpdcliconf, fs.readFileSync(upmpdcliconftmpl), function (err) {
-                    if (err){
-                        self.logger.error('Cannot write upnp conf file: '+err);
-                    }
-                    upmpdcliexec();
-                });
-            }
-        })
-
-
-        function upmpdcliexec() {
-            exec('/usr/bin/sudo /bin/systemctl start upmpdcli.service', function (error, stdout, stderr) {
-                if (error) {
-                    self.logger.error('Cannot start Upmpdcli: '+error);
-                } else {
-                    self.logger.info('Upmpdcli Daemon Started');
-                }
-            });
+    var upmpdcliconf = '/tmp/upmpdcli.conf';
+    var upmpdcliconftmpl = __dirname + '/upmpdcli.conf.tmpl';
+    var namestring = 'friendlyname = ' + name.replace(/-/g, ' ') + os.EOL + 'ohproductroom = ' + name.replace(/-/g, ' ') + os.EOL;
+    var ipaddress = self.getCurrentIP();
+    ipaddress.then(function (ipaddresspromise) {
+      fs.readFile(__dirname + '/presentation.html.tmpl', 'utf8', function (err, data) {
+        if (err) {
+          return self.logger.log('Error writing Upnp presentation file: ' + err);
         }
+        var conf1 = data.replace('{IP-ADDRESS}', ipaddresspromise);
 
+        fs.writeFile('/tmp/presentation.html', conf1, 'utf8', function (err) {
+          if (err) {
+            self.logger.log('Error writing Upnp presentation file: ' + err);
+          }
+        });
+      });
+    });
 
-    }, 10000)
-}
+    fs.outputFile(upmpdcliconf, namestring, function (err) {
+      if (err) {
+        self.logger.error('Cannot write upnp conf file: ' + err);
+      } else {
+        fs.appendFile(upmpdcliconf, fs.readFileSync(upmpdcliconftmpl), function (err) {
+          if (err) {
+            self.logger.error('Cannot write upnp conf file: ' + err);
+          }
+          upmpdcliexec();
+        });
+      }
+    });
+
+    function upmpdcliexec () {
+      exec('/usr/bin/sudo /bin/systemctl start upmpdcli.service', function (error, stdout, stderr) {
+        if (error) {
+          self.logger.error('Cannot start Upmpdcli: ' + error);
+        } else {
+          self.logger.info('Upmpdcli Daemon Started');
+        }
+      });
+    }
+  }, 10000);
+};
 
 UpnpInterface.prototype.prepareUpnpPlayback = function () {
-    var self = this;
+  var self = this;
 
-    self.logger.info("Preparing playback through UPNP");
+  self.logger.info('Preparing playback through UPNP');
 
-    //self.commandRouter.volumioStop();
-    if (self.commandRouter.stateMachine.isVolatile) {
-        self.commandRouter.stateMachine.unSetVolatile();
-    }
-    if(this.commandRouter.stateMachine.isConsume)
-    {
-        self.logger.info("Consume mode");
+  // self.commandRouter.volumioStop();
+  if (self.commandRouter.stateMachine.isVolatile) {
+    self.commandRouter.stateMachine.unSetVolatile();
+  }
+  if (this.commandRouter.stateMachine.isConsume) {
+    self.logger.info('Consume mode');
+  }
+  var state = self.commandRouter.volumioGetState();
+  if (state !== undefined && state.service !== 'mpd') {
+    self.commandRouter.volumioStop();
+  }
 
-    }
-    var state = self.commandRouter.volumioGetState();
-    if (state !== undefined && state.service !== 'mpd') {
-        self.commandRouter.volumioStop();
-    }
-
-    this.commandRouter.stateMachine.setConsumeUpdateService('mpd', false, true);
-
-
+  this.commandRouter.stateMachine.setConsumeUpdateService('mpd', false, true);
 };
 
 UpnpInterface.prototype.startUpnpPlayback = function () {
-    var self = this;
+  var self = this;
 
-    self.logger.info("Starting playback through UPNP");
+  self.logger.info('Starting playback through UPNP');
 
-
-    //self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
+  // self.commandRouter.stateMachine.setConsumeUpdateService('mpd');
 };
 
 UpnpInterface.prototype.stopUpnpPlayback = function () {
-    var self = this;
+  var self = this;
 
-    self.logger.info("Stopping playback through UPNP");
-    if(this.commandRouter.stateMachine.isConsume)
-    {
-        self.logger.info("Stopping service currently in playback since Volumio is in Consume mode");
-        self.commandRouter.volumioStop();
-    }
-    this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
+  self.logger.info('Stopping playback through UPNP');
+  if (this.commandRouter.stateMachine.isConsume) {
+    self.logger.info('Stopping service currently in playback since Volumio is in Consume mode');
+    self.commandRouter.volumioStop();
+  }
+  this.commandRouter.stateMachine.setConsumeUpdateService(undefined);
 };
 
 UpnpInterface.prototype.clearQueue = function () {
-    var self = this;
+  var self = this;
 
-    self.logger.info("Clearing queue after UPNP request");
-    if (self.commandRouter.stateMachine.isVolatile) {
-        self.commandRouter.stateMachine.unSetVolatile();
-    }
+  self.logger.info('Clearing queue after UPNP request');
+  if (self.commandRouter.stateMachine.isVolatile) {
+    self.commandRouter.stateMachine.unSetVolatile();
+  }
 
-    setTimeout(()=>{
-        this.commandRouter.stateMachine.clearQueue();
-    }, 300)
+  setTimeout(() => {
+    this.commandRouter.stateMachine.clearQueue();
+  }, 300);
 };

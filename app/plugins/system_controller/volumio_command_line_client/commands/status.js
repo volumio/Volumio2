@@ -1,14 +1,11 @@
 #!/bin/node
-var io=require('socket.io-client');
+var io = require('socket.io-client');
 
-var socket= io.connect('http://localhost:3000');
+var socket = io.connect('http://localhost:3000');
 
 socket.emit('getState', '');
 
-socket.on('pushState',function(data)
-{
-    console.log(data);
-    process.exit()
+socket.on('pushState', function (data) {
+  console.log(data);
+  process.exit();
 });
-
-

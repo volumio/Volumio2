@@ -1,0 +1,7 @@
+app/plugins/music_service/airplay_emulation/shairport-sync-reader/*
+app/plugins/system_controller/network/lib/*
+app/plugins/system_controller/network/wireless.js
+app/plugins/music_service/mpd/lib/*
+http/dev/assets/*
+http/www/*
+http/www3/*

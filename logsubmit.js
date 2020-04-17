@@ -60,11 +60,10 @@ for (var itemN in commandArray) {
     console.log(e);
   }
   try {
-      execSync(itemWithoutput);
-  } catch(e) {
-      // A command has failed
+    execSync(itemWithoutput);
+  } catch (e) {
+    // A command has failed
   }
-
 }
 
 // remove sensitive information
