@@ -45,7 +45,7 @@ expressApp.use(function (err, req, res, next) {
   /**
     * Sending back error code 500
   **/
-  res.sendFile(__dirname + '/app/plugins/miscellanea/albumart/default.png');
+  res.sendFile(path.join(__dirname, '/app/plugins/miscellanea/albumart/default.png');
 });
 
 var commandRouter = new (require('./app/index.js'))(httpServer);

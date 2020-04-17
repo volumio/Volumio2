@@ -10,6 +10,11 @@
     "lint-staged": "lint-staged",
     "test": "npm install fs-extra && npm install --only=dev && ./node_modules/.bin/mocha --reporter spec"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "lint-staged": {
     "*.js": [
       "semistandard --fix",
