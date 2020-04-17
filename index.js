@@ -6,17 +6,17 @@ var expressApp = expressInstance.app;
 var path = require('path');
 
 global.metrics = {
-  start: {}, 
+  start: {},
   time: (label) => {
     metrics.start[label] = process.hrtime();
   },
   end: {},
   log: (label) => {
     metrics.end[label] = process.hrtime(metrics.start[label]);
-    console.log(`\u001b[34m [Metrics] \u001b[39m ${label}: \u001b[31m ${metrics.end[label][0]}s ${(metrics.end[label][1] / 1000000).toFixed(2)}ms \u001b[39m`)
+    console.log(`\u001b[34m [Metrics] \u001b[39m ${label}: \u001b[31m ${metrics.end[label][0]}s ${(metrics.end[label][1] / 1000000).toFixed(2)}ms \u001b[39m`);
   }
 };
-  
+
 // metrics.start.WebUI = process.hrtime();
 metrics.time('WebUI');
 
@@ -50,13 +50,13 @@ expressApp.use(function (err, req, res, next) {
 
 var commandRouter = new (require('./app/index.js'))(httpServer);
 
-expressApp.get('/?*', function(req, res) {
+expressApp.get('/?*', function (req, res) {
   var userAgent = req.get('user-agent');
   if (userAgent === 'volumiokiosk' || process.env.VOLUMIO_3_UI === 'false') {
     res.sendFile(path.join(__dirname, 'http', 'www', 'index.html'));
-    } else {
+  } else {
     res.sendFile(path.join(__dirname, 'http', 'www3', 'index.html'));
-    }
+  }
 });
 
 process.on('uncaughtException', (error) => {
@@ -69,7 +69,7 @@ process.on('uncaughtException', (error) => {
     var errorMessage = 'Unknown';
   }
   execSync('/usr/local/bin/node /volumio/crashreport.js "' + errorMessage + '"');
-  if (process.env.EXIT_ON_EXCEPTION === "true") {
+  if (process.env.EXIT_ON_EXCEPTION === 'true') {
     process.exit(1);
   }
 });
