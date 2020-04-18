@@ -58,7 +58,7 @@
     "underscore": "^1.8.3",
     "unirest": "^0.5.1",
     "v-conf": "^1.4.2",
-    "winston": "^2.3.1",
+    "winston": "^3.2.1",
     "xmlbuilder": "^10.1.1",
     "yargs": "^15.3.1"
   },
