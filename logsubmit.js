@@ -20,7 +20,7 @@ var commandArray = [
 // - an optional flag indicating the log should be saved locally, not uploaded
 var args = process.argv.slice(2);
 var description;
-if (args[0] == undefined) {
+if (args[0] === undefined) {
   description = 'Unknown';
 } else {
   description = '';
@@ -75,8 +75,8 @@ commandArray = [
   "sed -i -r -e 's/(mount .*username=)([^,]*,)(.*)$/\\1<elided>,\\3/'",
   "sed -i -r -e 's/(mount .*password=)([^,]*,)(.*)$/\\1<elided>,\\3/'"
 ];
-for (var itemN in commandArray) {
-  var item = commandArray[itemN];
+for (var itemN in commandArray) { // eslint-disable-line
+  var item = commandArray[itemN]; // eslint-disable-line
   var cmd = item + ' ' + logFile;
   try {
     execSync(cmd);
@@ -111,12 +111,7 @@ if (submit === 'yes') {
   execSync('mv -f ' + logFile + ' ' + storedLogFile);
 }
 
-function randomIntInc (low, high) {
-  return Math.floor(Math.random() * (high - low + 1) + low);
-}
-
 function getSystemVersion () {
-  var self = this;
   var file = fs.readFileSync('/etc/os-release').toString().split('\n');
 
   var nLines = file.length;
@@ -124,7 +119,7 @@ function getSystemVersion () {
   for (var l = 0; l < nLines; l++) {
     if (file[l].match(/VOLUMIO_VARIANT/i)) {
       str = file[l].split('=');
-      var variant = str[1].replace(/\"/gi, '');
+      var variant = str[1].replace(/\"/gi, ''); // eslint-disable-line
       return variant;
     }
   }

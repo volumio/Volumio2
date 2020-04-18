@@ -1,9 +1,9 @@
 var path = require('path');
-var dotenv = require('dotenv').config({ path: path.join(__dirname, '.env')});
+var dotenv = require('dotenv').config({ path: path.join(__dirname, '.env')}); // eslint-disable-line
 var execSync = require('child_process').execSync;
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
-
+/* eslint-disable */
 global.metrics = {
   start: {},
   time: (label) => {
@@ -15,7 +15,7 @@ global.metrics = {
     console.log(`\u001b[34m [Metrics] \u001b[39m ${label}: \u001b[31m ${metrics.end[label][0]}s ${(metrics.end[label][1] / 1000000).toFixed(2)}ms \u001b[39m`);
   }
 };
-
+/* eslint-disable */
 // metrics.start.WebUI = process.hrtime();
 metrics.time('WebUI');
 
@@ -47,7 +47,7 @@ expressApp.use(function (err, req, res, next) {
   res.sendFile(path.join(__dirname, '/app/plugins/miscellanea/albumart/default.png'));
 });
 
-var commandRouter = new (require('./app/index.js'))(httpServer);
+var commandRouter = new (require('./app/index.js'))(httpServer); // eslint-disable-line
 
 expressApp.get('/?*', function (req, res) {
   var userAgent = req.get('user-agent');

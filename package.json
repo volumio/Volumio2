@@ -82,6 +82,7 @@
       "app/plugins/system_controller/network/wireless.js",
       "app/plugins/music_service/mpd/lib/*",
       "http/dev/assets/*",
+      "http/dev/dev.js",
       "http/www/*",
       "http/www3/*"
     ]

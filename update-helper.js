@@ -1,5 +1,4 @@
 var fs = require('fs-extra');
-var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var io = require('socket.io-client');
 var inquirer = require('inquirer');

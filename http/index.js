@@ -5,16 +5,14 @@ var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var restapi = require('./restapi.js');
 var busboy = require('connect-busboy');
-var path = require('path');
 var fs = require('fs-extra');
 var io = require('socket.io-client');
 var libUUID = require('node-uuid');
-
 var app = express();
 var dev = express();
 var plugin = express();
 var background = express();
-
+/* eslint-disable */
 var plugindir = '/tmp/plugins';
 var backgrounddir = '/data/backgrounds';
 var volumio2UIFlagFile = '/data/volumio2ui';
@@ -26,7 +24,7 @@ var allowCrossDomain = function (req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 
   // intercept OPTIONS method
-  if (req.method == 'OPTIONS') {
+  if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {
     next();
@@ -124,7 +122,7 @@ app.route('/plugin-upload')
         return res.status(500);
       }
       if (this.fileData) {
-        console.log('Uploading: ' + filename);
+        console.log('Uploading: ' + this.filename);
         this.uniquename = libUUID.v4() + '.zip';
         console.log("Created safe filename as '" + this.uniquename + "'");
         try {
@@ -138,7 +136,7 @@ app.route('/plugin-upload')
           } else {
             var socket = io.connect('http://localhost:3000');
             var pluginurl = 'http://127.0.0.1:3000/plugin-serve/' + this.uniquename;
-            socket.emit('installPlugin', { url: pluginurl});
+            socket.emit('installPlugin', {url: pluginurl});
             res.sendStatus(200);
           }
         });

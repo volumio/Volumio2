@@ -1,6 +1,6 @@
 const modclean = require('modclean');
 const execSync = require('child_process').execSync;
-var modulesFolder = modulesFolder = process.cwd() + '/node_modules';
+var modulesFolder = modulesFolder = process.cwd() + '/node_modules'; // eslint-disable-line
 var folder = process.cwd();
 
 if (process.argv[2]) {

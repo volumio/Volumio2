@@ -1,28 +1,28 @@
 var moment = require('moment');
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
-var argv = require('yargs').argv;
+var argv = require('yargs').argv; // eslint-disable-line
 var logFile = '/tmp/crashdump';
 var lastCrashDescription = '/tmp/lastcrash';
 var description = 'Unknown';
 var fs = require('fs-extra');
 
-if (process.argv[2] != undefined) {
+if (process.argv[2] !== undefined) {
   description = "'" + process.argv[2] + "'";
 }
-var now = moment().format('YYYY-MM-DD HH:mm');
+
 var sinceTime = moment().subtract(1, 'minutes').format('YYYY-MM-DD HH:mm');
-var minuteDump = execSync('/usr/bin/sudo /bin/journalctl --since="' + sinceTime + '" > /tmp/crashdump', {uid: 1000, gid: 1000});
-var releaseDump = execSync('cat /etc/os-release >> /tmp/crashdump', {uid: 1000, gid: 1000});
+var minuteDump = execSync('/usr/bin/sudo /bin/journalctl --since="' + sinceTime + '" > /tmp/crashdump', {uid: 1000, gid: 1000}); // eslint-disable-line
+var releaseDump = execSync('cat /etc/os-release >> /tmp/crashdump', {uid: 1000, gid: 1000}); // eslint-disable-line
 var variant = getVariant();
 
 try {
   var lastReport = fs.readJSONSync(lastCrashDescription, {uid: 1000, gid: 1000}).description;
 } catch (e) {
-  var lastReport = 'last';
+  lastReport = 'last';
 }
 
-if (lastReport != description) {
+if (lastReport !== description) {
   sendCrashReport();
 }
 
@@ -44,7 +44,6 @@ function sendCrashReport () {
 }
 
 function getVariant () {
-  var self = this;
   var file = fs.readFileSync('/etc/os-release').toString().split('\n');
 
   var nLines = file.length;
@@ -52,7 +51,7 @@ function getVariant () {
   for (var l = 0; l < nLines; l++) {
     if (file[l].match(/VOLUMIO_VARIANT/i)) {
       str = file[l].split('=');
-      var variantRet = str[1].replace(/\"/gi, '');
+      var variantRet = str[1].replace(/\"/gi, ''); // eslint-disable-line
       return variantRet;
     }
   }

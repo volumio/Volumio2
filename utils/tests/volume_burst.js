@@ -3,7 +3,6 @@ var socket = io.connect('http://localhost:3000');
 var i = 0;
 var interval = 60;
 var results = [];
-var bursts = 4;
 var increasing = true;
 
 socket.on('pushState', function (data) {
@@ -18,26 +17,24 @@ socket.on('pushState', function (data) {
 });
 
 setInterval(function () {
+  var startTime = Date.now();
+  var item = {};
   if (increasing) {
     if (i <= 100) {
-      var startTime = Date.now();
-      var item = {'N': i, 'start': startTime, latency: ''};
+      item = {'N': i, 'start': startTime, latency: ''};
       results.push(item);
       socket.emit('volume', i);
       i++;
     } else {
-      increasingg = false;
       results = [];
     }
   } else {
-    if (i => 0) {
-      var startTime = Date.now();
-      var item = {'N': i, 'start': startTime, latency: ''};
+    if (i => 0) { // eslint-disable-line
+      item = {'N': i, 'start': startTime, latency: ''};
       results.push(item);
       socket.emit('volume', i);
       i--;
     } else {
-      increasingg = true;
       results = [];
     }
   }
