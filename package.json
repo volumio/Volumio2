@@ -56,7 +56,7 @@
     "timsort": "^0.3.0",
     "udev": "^0.4.0",
     "underscore": "^1.8.3",
-    "unirest": "^0.5.1",
+    "unirest": "^0.6.0",
     "v-conf": "^1.4.2",
     "winston": "^3.2.1",
     "xmlbuilder": "^10.1.1",
