@@ -15,7 +15,8 @@ function CoreCommandRouter (server) {
   var logfile = '/var/log/volumio.log';
 
   fs.ensureFileSync(logfile);
-  this.logger = new (winston.Logger)({
+  this.logger = winston.createLogger({
+    format: winston.format.simple(),
     transports: [
       new (winston.transports.Console)(),
       new (winston.transports.File)({

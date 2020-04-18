@@ -12,7 +12,8 @@ var diskCache = true;
 var variant = 'none';
 
 var winston = require('winston');
-var logger = new (winston.Logger)({
+var logger = winston.createLogger({
+  format: winston.format.simple(),
   transports: [
     new (winston.transports.Console)(),
     new (winston.transports.File)({
