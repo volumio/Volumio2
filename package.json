@@ -60,7 +60,7 @@
     "v-conf": "^1.4.2",
     "winston": "^2.3.1",
     "xmlbuilder": "^10.1.1",
-    "yargs": "^8.0.1"
+    "yargs": "^15.3.1"
   },
   "devDependencies": {
     "fs-extra": "^3.0.1",
