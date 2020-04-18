@@ -6,13 +6,13 @@
   "scripts": {
     "preinstall": "",
     "start": "nodejs ./index.js",
-    "lint": "semistandard \"./**/*.js\" --fix",
+    "lint": "semistandard \"./**/*.js\" --fix --verbose",
     "lint-staged": "lint-staged",
     "test": "npm install fs-extra && npm install --only=dev && ./node_modules/.bin/mocha --reporter spec"
   },
   "lint-staged": {
     "*.js": [
-      "semistandard --fix --quiet",
+      "semistandard --fix --verbose",
       "git add"
     ]
   },
@@ -65,7 +65,7 @@
     "fs-extra": "^3.0.1",
     "lint-staged": "^7.2.2",
     "mocha": "^3.2.0",
-    "semistandard": "12.0.1"
+    "semistandard": "^14.2.0"
   },
   "description": "Audiophile Music Player/Streamer",
   "repository": {
@@ -74,5 +74,16 @@
   },
   "bugs": {
     "url": "https://github.com/volumio/Volumio2/issues"
+  },
+  "semistandard": {
+    "ignore": [
+      "app/plugins/music_service/airplay_emulation/shairport-sync-reader/*",
+      "app/plugins/system_controller/network/lib/*",
+      "app/plugins/system_controller/network/wireless.js",
+      "app/plugins/music_service/mpd/lib/*",
+      "http/dev/assets/*",
+      "http/www/*",
+      "http/www3/*"
+    ]
   }
 }
