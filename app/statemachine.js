@@ -932,6 +932,26 @@ CoreStateMachine.prototype.getTrack = function (position) {
   return track;
 };
 
+/**
+ * wrapper for play and volatilePlay that maps to commandRouter.volumioPlay
+ * @param  {[Integer]} index         [track index]
+ * @param  {[boolean]} unSetVolatile [flag to force unSetVolatile]
+ * @return {[Promise]}               [description]
+ */
+CoreStateMachine.prototype.volumioPlay = function (index, unSetVolatile) {
+  this.commandRouter.pushConsoleMessage(`CoreStateMachine::volumioPlay<${index}>`);
+  if (this.isVolatile) {
+    // Force the volatile service to release the audio sink
+    if (index !== undefined || unSetVolatile) {
+      this.unSetVolatile();
+      return this.play(index);
+    }
+    return this.volatilePlay();
+  } else {
+    return this.play(index);
+  }
+};
+
 // Volumio Play Command
 CoreStateMachine.prototype.play = function (index) {
   var self = this;

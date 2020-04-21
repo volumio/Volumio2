@@ -1295,12 +1295,7 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
 // Volumio Play
 CoreCommandRouter.prototype.volumioPlay = function (N) {
   this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
-
-  this.stateMachine.unSetVolatile();
-
-  if (N === undefined) { return this.stateMachine.play(); } else {
-    return this.stateMachine.play(N);
-  }
+  return this.stateMachine.volumioPlay(N);
 };
 
 // Volumio Play
