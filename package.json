@@ -38,7 +38,6 @@
     "libxmljs": "^0.18.4",
     "linux-mountutils": "^1.0.2",
     "mdns": "^2.3.3",
-    "modclean": "^2.1.2",
     "moment": "^2.18.1",
     "mqtt": "^3.0.0",
     "music-metadata": "^6.3.7",
@@ -62,6 +61,7 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
+    "modclean": "^2.1.2",
     "fs-extra": "^3.0.1",
     "lint-staged": "^7.2.2",
     "mocha": "^3.2.0",
