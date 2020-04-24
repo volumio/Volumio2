@@ -664,8 +664,9 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
   }
 
   self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
-  self.setDefaultMixer(OutputDeviceNumber);
-
+   if ((self.config.get('outputdevice')) != 'Loopback') {
+	self.setDefaultMixer(OutputDeviceNumber);
+   }
   var respconfig = self.commandRouter.getUIConfigOnPlugin('audio_interface', 'alsa_controller', {});
 
   respconfig.then(function (config) {
