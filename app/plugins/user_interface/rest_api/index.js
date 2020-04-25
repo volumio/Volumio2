@@ -201,15 +201,17 @@ interfaceApi.prototype.executeRestEndpoint = function (data) {
         }
       }
     }
-    if (!executed) {
+    if (!executed && data.endpoint !== 'metavolumio') {
       var message = 'No valid Plugin REST Endpoint: ' + data.endpoint;
       self.logger.info(message);
       defer.reject(message);
     }
   } else {
-    var message = 'No valid Plugin REST Endpoint';
-    self.logger.info(message);
-    defer.reject(message);
+    if (data.endpoint !== 'metavolumio') {
+        var message = 'No valid Plugin REST Endpoint';
+        self.logger.info(message);
+        defer.reject(message);
+    }
   }
 
   return defer.promise;

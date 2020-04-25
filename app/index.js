@@ -1982,6 +1982,23 @@ CoreCommandRouter.prototype.addPluginRestEndpoint = function (data) {
   }
 };
 
+CoreCommandRouter.prototype.removePluginRestEndpoint = function (data) {
+    var self = this;
+    var updated = false;
+
+    if (data && data.endpoint) {
+        if (self.pluginsRestEndpoints.length) {
+            for (var i in self.pluginsRestEndpoints) {
+                var endpoint = self.pluginsRestEndpoints[i];
+                if (endpoint.endpoint === data.endpoint) {
+                    self.logger.info('Removing ' + data.endpoint + ' REST Endpoint');
+                    self.pluginsRestEndpoints.splice(i, 1);
+                }
+            }
+        }
+    }
+};
+
 CoreCommandRouter.prototype.getPluginsRestEndpoints = function () {
   var self = this;
 
