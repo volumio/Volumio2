@@ -19,7 +19,7 @@ var currentmute = false;
 var premutevolume = '';
 var mixertype = '';
 var devicename = '';
-var volumescript = {'enabled': false, 'setvolumescript': '', 'getvolumescript': ''};
+var volumescript = { enabled: false, setvolumescript: '', getvolumescript: '' };
 var volumeOverride = false;
 var overridePluginType;
 var overridePluginName;
@@ -42,14 +42,14 @@ function CoreVolumeController (commandRouter) {
       device = device.charAt(0);
     }
     var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
-    if ((cards[device] != undefined) && (cards[device].name != undefined)) {
+    if ((cards[device] !== undefined) && (cards[device].name !== undefined)) {
       devicename = cards[device].name;
     }
   }
   var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
 
   if (mixerdev.indexOf(',') >= 0) {
-    	var mixerarr = mixerdev.split(',');
+    var mixerarr = mixerdev.split(',');
     mixer = mixerarr[0] + ',' + mixerarr[1];
   } else {
     mixer = '"' + mixerdev + '"';
@@ -62,7 +62,7 @@ function CoreVolumeController (commandRouter) {
   var amixer = function (args, cb) {
     var ret = '';
     var err = null;
-    var p = spawn('amixer', args, {uid: 1000, gid: 1000});
+    var p = spawn('amixer', args, { uid: 1000, gid: 1000 });
 
     p.stdout.on('data', function (data) {
       ret += data;
@@ -88,21 +88,21 @@ function CoreVolumeController (commandRouter) {
     });
   };
 
-  var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
-  var reInfoOnlyVol = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[/i;
+  var reInfo = /[a-z][a-z ]*: Playback [0-9-]+ \[([0-9]+)%\] (?:[[0-9.-]+dB\] )?\[(on|off)\]/i;
+  var reInfoOnlyVol = /[a-z][a-z ]*: Playback [0-9-]+ \[([0-9]+)%\] (?:[[0-9.-]+dB\] )?\[/i;
   var getInfo = function (cb) {
     if (volumescript.enabled) {
       try {
-        var scriptvolume = execSync('/bin/sh ' + volumescript.getvolumescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
+        var scriptvolume = execSync('/bin/sh ' + volumescript.getvolumescript, { uid: 1000, gid: 1000, encoding: 'utf8' });
         self.logger.info('External Volume: ' + scriptvolume);
         Volume.mute = false;
-        if (volumescript.mapTo100 != undefined && volumescript.maxVol != undefined && volumescript.mapTo100) {
+        if (volumescript.mapTo100 !== undefined && volumescript.maxVol !== undefined && volumescript.mapTo100) {
           Volume.vol = parseInt((scriptvolume * 100) / volumescript.maxVol);
         } else {
           Volume.vol = scriptvolume;
         }
-        if (volumescript.getmutescript != undefined && volumescript.getmutescript.length > 0) {
-          var scriptmute = execSync('/bin/sh ' + volumescript.getmutescript, { uid: 1000, gid: 1000, encoding: 'utf8'});
+        if (volumescript.getmutescript !== undefined && volumescript.getmutescript.length > 0) {
+          var scriptmute = execSync('/bin/sh ' + volumescript.getmutescript, { uid: 1000, gid: 1000, encoding: 'utf8' });
           self.logger.info('External Volume: ' + scriptmute);
           if (parseInt(scriptmute) === 1) {
             Volume.mute = true;
@@ -117,10 +117,11 @@ function CoreVolumeController (commandRouter) {
         cb(new Error('Cannot execute Volume script'));
       }
     } else {
+      let volumeParamsArray;
       if (volumecurve === 'logarithmic') {
-        var volumeParamsArray = ['-M', 'get', '-c', device, mixer];
+        volumeParamsArray = ['-M', 'get', '-c', device, mixer];
       } else {
-        var volumeParamsArray = ['get', '-c', device, mixer];
+        volumeParamsArray = ['get', '-c', device, mixer];
       }
       amixer(volumeParamsArray, function (err, data) {
         if (err) {
@@ -134,10 +135,11 @@ function CoreVolumeController (commandRouter) {
             } else {
               hasHWMute = false;
               var volOut = parseInt(resOnlyVol[1], 10);
+              let muteOut;
               if (volOut === 0) {
-                var muteOut = true;
+                muteOut = true;
               } else {
-                var muteOut = false;
+                muteOut = false;
               }
               cb(null, {
                 volume: volOut,
@@ -148,7 +150,7 @@ function CoreVolumeController (commandRouter) {
             hasHWMute = true;
             cb(null, {
               volume: parseInt(res[1], 10),
-              muted: (res[2] == 'off')
+              muted: (res[2] === 'off')
             });
           }
         }
@@ -169,28 +171,29 @@ function CoreVolumeController (commandRouter) {
   self.setVolume = function (val, cb) {
     if (volumescript.enabled) {
       try {
-        if (volumescript.minVol != undefined && val < volumescript.minVol) {
+        if (volumescript.minVol !== undefined && val < volumescript.minVol) {
           val = volumescript.minVol;
         }
-
-        if (volumescript.mapTo100 != undefined && volumescript.maxVol != undefined && volumescript.mapTo100) {
-          var cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + parseInt(val * (volumescript.maxVol / 100));
+        let cmd;
+        if (volumescript.mapTo100 !== undefined && volumescript.maxVol !== undefined && volumescript.mapTo100) {
+          cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + parseInt(val * (volumescript.maxVol / 100));
         } else {
-          if (volumescript.maxVol != undefined && val > volumescript.maxVol) {
+          if (volumescript.maxVol !== undefined && val > volumescript.maxVol) {
             val = volumescript.maxVol;
           }
-          var cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + val;
+          cmd = '/bin/sh ' + volumescript.setvolumescript + ' ' + val;
         }
 
         self.logger.info('Volume script ' + cmd);
         Volume.mute = false;
-        if (volumescript.setmutescript != undefined && volumescript.setmutescript.length > 0) {
-                	if (val === 0) {
+        if (volumescript.setmutescript !== undefined && volumescript.setmutescript.length > 0) {
+          let scriptmute;
+          if (val === 0) {
             Volume.mute = true;
-            var scriptmute = execSync('/bin/sh ' + volumescript.setmutescript + ' 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            scriptmute = execSync('/bin/sh ' + volumescript.setmutescript + ' 1', { uid: 1000, gid: 1000, encoding: 'utf8' });
           } else {
-            execSync(cmd, { uid: 1000, gid: 1000, encoding: 'utf8', tty: 'pts/1'});
-            var scriptmute = execSync('/bin/sh ' + volumescript.setmutescript + ' 0', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync(cmd, { uid: 1000, gid: 1000, encoding: 'utf8', tty: 'pts/1' });
+            scriptmute = execSync('/bin/sh ' + volumescript.setmutescript + ' 0', { uid: 1000, gid: 1000, encoding: 'utf8' });
           }
           self.logger.info('External Volume: ' + scriptmute);
         }
@@ -205,18 +208,22 @@ function CoreVolumeController (commandRouter) {
         amixer(['-M', 'set', '-c', device, mixer, 'unmute', val + '%'], function (err) {
           cb(err);
         });
-        if (devicename == 'PianoDACPlus' || devicename == 'Allo Piano 2.1' || devicename == 'PianoDACPlus multicodec-0') {
+        if (devicename === 'PianoDACPlus' || devicename === 'Allo Piano 2.1' || devicename === 'PianoDACPlus multicodec-0') {
           amixer(['-M', 'set', '-c', device, 'Subwoofer', 'unmute', val + '%'], function (err) {
-
+            if (err) {
+              self.logger.error('Cannot set ALSA Volume: ' + err);
+            }
           });
         }
       } else {
         amixer(['set', '-c', device, mixer, 'unmute', val + '%'], function (err) {
           cb(err);
         });
-        if (devicename == 'PianoDACPlus' || devicename == 'Allo Piano 2.1' || devicename == 'PianoDACPlus multicodec-0') {
+        if (devicename === 'PianoDACPlus' || devicename === 'Allo Piano 2.1' || devicename === 'PianoDACPlus multicodec-0') {
           amixer(['set', '-c', device, 'Subwoofer', 'unmute', val + '%'], function (err) {
-
+            if (err) {
+              self.logger.error('Cannot set ALSA Volume: ' + err);
+            }
           });
         }
       }
@@ -234,7 +241,7 @@ function CoreVolumeController (commandRouter) {
   };
 
   self.setMuted = function (val, cb) {
-	    if (hasHWMute) {
+    if (hasHWMute) {
       amixer(['set', '-c', device, mixer, (val ? 'mute' : 'unmute')], function (err) {
         cb(err);
       });
@@ -296,7 +303,7 @@ CoreVolumeController.prototype.updateVolumeSettings = function (data) {
 CoreVolumeController.prototype.updateVolumeScript = function (data) {
   var self = this;
 
-  if (data.setvolumescript != undefined && data.getvolumescript != undefined) {
+  if (data.setvolumescript !== undefined && data.getvolumescript !== undefined) {
     self.logger.info('Updating Volume script: ' + JSON.stringify(data));
     volumescript = data;
   }
@@ -321,7 +328,10 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
         case 'mute':
           // Mute
           self.getVolume(function (err, vol) {
-            if (vol == null) {
+            if (err) {
+              self.logger.error('Cannot get ALSA Volume: ' + err);
+            }
+            if (vol === null) {
               vol = currentvolume;
             }
             currentmute = true;
@@ -342,7 +352,9 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
               Volume.disableVolumeControl = false;
               defer.resolve(Volume);
               self.setMuted(true, function (err) {
-
+                if (err) {
+                  self.logger.error('Cannot set mute ALSA: ' + err);
+                }
               });
             }
           });
@@ -372,7 +384,10 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
           break;
         case '+':
           self.getVolume(function (err, vol) {
-            if (vol == null || currentmute) {
+            if (err) {
+              self.logger.error('Cannot get ALSA Volume: ' + err);
+            }
+            if (vol === null || currentmute) {
               vol = currentvolume;
             }
             VolumeInteger = Number(vol) + Number(volumesteps);
@@ -397,7 +412,10 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
         case '-':
           // Decrease volume by one (TEST ONLY FUNCTION - IN PRODUCTION USE A NUMERIC VALUE INSTEAD)
           self.getVolume(function (err, vol) {
-            if (vol == null || currentmute) {
+            if (err) {
+              self.logger.error('Cannot get ALSA Volume: ' + err);
+            }
+            if (vol === null || currentmute) {
               vol = currentvolume;
             }
             VolumeInteger = Number(vol) - Number(volumesteps);
@@ -486,13 +504,16 @@ CoreVolumeController.prototype.retrievevolume = function () {
       });
     } else {
       this.getVolume(function (err, vol) {
+        if (err) {
+          self.logger.error('Cannot get ALSA Volume: ' + err);
+        }
         self.getMuted(function (err, mute) {
           if (err) {
             mute = false;
           }
           // Log volume control
           self.logger.info('VolumeController:: Volume=' + vol + ' Mute =' + mute);
-          if (vol == null) {
+          if (vol === null) {
             vol = currentvolume;
             mute = currentmute;
           } else {
@@ -517,7 +538,7 @@ CoreVolumeController.prototype.setStartupVolume = function () {
   var self = this;
 
   var startupVolume = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'volumestart');
-  if (startupVolume != 'disabled') {
+  if (startupVolume !== 'disabled') {
     self.logger.info('VolumeController:: Setting startup Volume ' + startupVolume);
     return self.commandRouter.volumiosetvolume(parseInt(startupVolume));
   }
