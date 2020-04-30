@@ -49,7 +49,11 @@
     "WEB_ALBUMART_ENABLE": "Web Albüm resmi",
     "WEB_ALBUMART_ENABLE_DOC": "Dosya dizininde resim bulunmazsa, Web'den Albüm resmi almayı etkinleştir",
     "WEB_ALBUMART_SIZE": "Web Albüm Resim Boyutu",
-    "WEB_ALBUMART_SIZE_DOC": "Web'den indirilen Albüm resmi boyutunu seçin: daha yüksek kalite daha uzun süreleri gerektirir. Düşük değerler yükleme sürelerini iyileştirebilir."
+    "WEB_ALBUMART_SIZE_DOC": "Web'den indirilen Albüm resmi boyutunu seçin: daha yüksek kalite daha uzun süreleri gerektirir. Düşük değerler yükleme sürelerini iyileştirebilir.",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Eklendi ",
@@ -116,7 +120,11 @@
     "TRACKS": "Eserler",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Müziğiniz taranıyor ve sol alt kısımdaki simge, tüm kütüphaneniz başarıyla dizine eklenene kadar dönmeye devam edecek. Sistem bu işlem sırasında daha az duyarlı olabileceğinden, müzik endekslenirken lütfen sistemi kullanmayın.",
     "USERNAME": "Kullanıcı adı",
-    "WITH": "ile"
+    "WITH": "ile",
+    "CANNOT_LIST": "",
+    "CLOSE": "",
+    "OR": "",
+    "SOURCES": ""
   },
   "MAIN_MENU": {
     "ALARM": "Uyandırma/Alarm",
@@ -129,7 +137,8 @@
     "PLUGINS": "Eklentiler",
     "SHUTDOWN": "Kapat",
     "SLEEP": "Uyku",
-    "SYSTEM": "Sistem"
+    "SYSTEM": "Sistem",
+    "SOURCES": ""
   },
   "NETWORK": {
     "AUTOMATIC_IP": "Otomatik IP",
@@ -286,7 +295,33 @@
     "NO_CONFIGURATION_AVAILABLE": "Yapılandırma Yok",
     "PLUGIN_START_ERROR": "Bu eklenti başlatılamıyor. Lütfen güncellenmiş bir sürümünü yükleyin veya eklenti geliştiricisine başvurun",
     "UNINSTALL": "Kaldır",
-    "UPDATING_PLUGIN": "Eklenti güncelle"
+    "UPDATING_PLUGIN": "Eklenti güncelle",
+    "CHECKING_DUPLICATE_PLUGIN": "",
+    "COPYING_PLUGIN_TO_LOCATION": "",
+    "CREATING_INSTALL_LOCATION": "",
+    "DOWNLOADING_PLUGIN": "",
+    "ENABLE_PLUGIN": "",
+    "ENABLE_PLUGIN_NOW_QUESTION": "",
+    "FINALIZING_INSTALLATION": "",
+    "FINALIZING_UNINSTALL": "",
+    "INSTALLING_NECESSARY_UTILITIES": "",
+    "INSTALLING_PLUGIN": "",
+    "PLUGIN_DISABLED": "",
+    "PLUGIN_INSTALL_COMPLETED": "",
+    "PLUGIN_INSTALL_ERROR_OCCURRED": "",
+    "PLUGIN_STOPPED": "",
+    "PLUGIN_UNINSTALLED": "",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED": "",
+    "PLUGIN_UNINSTALL_FAILED": "",
+    "PLUGIN_UPDATE_COMPLETED": "",
+    "PLUGIN_UPDATE_ERROR_OCCURRED": "",
+    "PLUGIN_UPDATE_FAILED": "",
+    "REMOVING_NECESSARY_UTILITIES": "",
+    "SUCCESSFULLY_INSTALLED": "",
+    "SUCCESSFULLY_UPDATED_PLUGIN": "",
+    "UNINSTALLING_PLUGIN": "",
+    "UNPACKING_PLUGIN": "",
+    "UPDATING_PLUGIN_FILES": ""
   },
   "SYSTEM": {
     "CANNOT_REMOVE_MEDIA": "Medya kaldırılamıyor",
@@ -346,7 +381,10 @@
     "TURN_OFF_IN": "Kapat/Turn off in",
     "UPDATE_ALREADY_LATEST_VERSION": "Zaten enson sürümdesiniz",
     "UPDATE_FAILED": "Güncelleme başarısız oldu",
-    "VIDEO_OUT_OPTIONS": "Video/Görüntü çıkışı seçenekleri"
+    "VIDEO_OUT_OPTIONS": "Video/Görüntü çıkışı seçenekleri",
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
+    "PRIVACY_SETTINGS": ""
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Güncellemeler denetleniyor",
@@ -375,12 +413,22 @@
     "POPULAR_RADIOS": "Popüler Radyolar",
     "TALK_RADIOS": "Sohbet Radyoları",
     "TOP_500_RADIOS": "Zirveki 500 Radyo",
-    "WEBRADIO": "Web Radyosu"
+    "WEBRADIO": "Web Radyosu",
+    "SHOUTCAST_ERROR": ""
   },
   "WIZARD": {
     "CONGRATULATIONS": "Tebrikler",
     "DEVICE_SUCCESSFULLY_CONFIGURED": "Sisteminiz yapılandırıldı ve oynatmaya hazır",
     "PLEASE_DONATE": "Volumio'yu beğeniyorsanız, lütfen bağış yapmayı düşünün. Bu proje için fark yaratabilirsiniz!",
     "RUN_FIRST_CONFIG_WIZARD": "İlk yapılandırma Sihirbazını çalıştır"
+  },
+  "MYVOLUMIO": {
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY": "",
+    "FEATURE_NOT_AVAILABLE": "",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN": "",
+    "GOTO_DEVICE_LIST": "",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "",
+    "PLAN_REQUIRED": "",
+    "UPGRADE_YOUR_PLAN_NOW": ""
   }
 }

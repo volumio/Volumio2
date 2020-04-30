@@ -43,7 +43,17 @@
     "WEB_ALBUMART_ENABLE": "網路專輯封面",
     "WEB_ALBUMART_ENABLE_DOC": "啟用從網路下載專輯封面，如果資料夾中沒找到圖片的話",
     "WEB_ALBUMART_SIZE": "網路專輯封面檔案大小",
-    "WEB_ALBUMART_SIZE_DOC": "選擇從網路下載專輯封面的檔案大小：高畫質需要較長讀取時間。較低畫質對讀取時間有幫助。"
+    "WEB_ALBUMART_SIZE_DOC": "選擇從網路下載專輯封面的檔案大小：高畫質需要較長讀取時間。較低畫質對讀取時間有幫助。",
+    "ALBUMART_CACHE_CLEAR_ERROR": "",
+    "BROWSE_SOURCES_VISIBILITY": "",
+    "IMAGE_MUST_BE_LESS_THAN": "",
+    "UPLOAD_FAILED": "",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": "",
+    "VOLUMIO3_EXPERIMENTAL_UI": "",
+    "VOLUMIO3_EXPERIMENTAL_UI_DOC": ""
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "已經加 ",
@@ -95,7 +105,26 @@
     "TRACK": "曲目",
     "TRACKS": "曲目",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "正在掃描您的音樂，左下方的圖標將繼續轉動，直到您的所有音樂庫成功索引為止。 由於在此操作過程中系統的響應速度可能較慢，因此在索引音樂時請不要使用本系統",
-    "WITH": "用"
+    "WITH": "用",
+    "CANNOT_LIST": "",
+    "CLOSE": "",
+    "CONNECTED": "",
+    "DISCONNECTED": "",
+    "ENABLED": "",
+    "LOGGING_IN": "",
+    "LOGGING_OUT": "",
+    "LOGIN": "",
+    "LOGIN_FAIL": "",
+    "LOGIN_SUCCESS": "",
+    "LOGOUT": "",
+    "LOGOUT_SUCCESS": "",
+    "MEDIA_SERVERS": "",
+    "NO_RESULTS": "",
+    "OR": "",
+    "PASSWORD": "",
+    "REMOVE_FAIL": "",
+    "SOURCES": "",
+    "USERNAME": ""
   },
   "MAIN_MENU": {
     "ALARM": "鬧鐘",
@@ -107,7 +136,9 @@
     "PLUGINS": "外掛",
     "SHUTDOWN": "關機",
     "SLEEP": "睡眠",
-    "SYSTEM": "系統"
+    "SYSTEM": "系統",
+    "HELP": "",
+    "SOURCES": ""
   },
   "NETWORK": {
     "AUTOMATIC_IP": "自動取得 IP",
@@ -149,7 +180,9 @@
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "請進行下一步",
     "WIRELESS_RESTART_ERROR": "重新啟動無線網路時發生錯誤： ",
     "WIRELESS_RESTART_SUCCESS": "成功重新啟動無線網路",
-    "WIRELESS_RESTART_TITLE": "重新啟動無線網路"
+    "WIRELESS_RESTART_TITLE": "重新啟動無線網路",
+    "HOTSPOT_FALLBACK": "",
+    "HOTSPOT_FALLBACK_DOC": ""
   },
   "NETWORKFS": {
     "ALIAS_DOC": "選擇一個別名顯示在 NAS 的掛載點中",
@@ -158,7 +191,8 @@
     "NETWORK_DRIVE": "網路硬碟",
     "REMOVED": "已經移除分享資料夾",
     "SHARE_MOUNT_SUCCESS": "已經加入網路硬碟",
-    "SHARE_NOT_CONFIGURED": "這個資料夾尚未設定"
+    "SHARE_NOT_CONFIGURED": "這個資料夾尚未設定",
+    "ERROR_PATH_UNDEFINED": ""
   },
   "PLAYBACK_OPTIONS": {
     "ADVANCED_AUDIO_TWEAKS": "進階音效控制細項",
@@ -230,7 +264,18 @@
     "VOLUME_CURVE_MODE_DOC": "自然（對數式）是符合人類習性的音量改變方法，別動它除非您的系統聽起來音量改變過於陡峭 ",
     "VOLUME_NORMALIZATION": "音量正規化",
     "VOLUME_NORMALIZATION_DOC": "如果開啟，Volumio 會在播放時針對個別曲目正規化音量，也許對音質有負面影響",
-    "VOLUME_OPTIONS": "音量選項"
+    "VOLUME_OPTIONS": "音量選項",
+    "AUDIO_RESAMPLING_DOC": "",
+    "CONNECT_OUTPUT_DEVICE_1": "",
+    "CONNECT_OUTPUT_DEVICE_2": "",
+    "NO_OUTPUT_DEVICE": "",
+    "NO_OUTPUT_DEVICE_MESSAGE": "",
+    "OUTPUT_DEVICE_NOT_AVAILABLE": "",
+    "PLAYBACK_MODE": "",
+    "PLAYBACK_MODE_CONTINUOUS": "",
+    "PLAYBACK_MODE_DOC": "",
+    "PLAYBACK_MODE_SINGLE": "",
+    "USB_DAC_CONNECTED": ""
   },
   "PLAYLIST": {
     "ADDED_TITLE": "已加入",
@@ -246,7 +291,37 @@
     "DOWNLOADING_FROM": "下載外掛從 ",
     "NO_CONFIGURATION_AVAILABLE": "沒有設定",
     "UNINSTALL": "移除",
-    "UPDATING_PLUGIN": "更新外掛"
+    "UPDATING_PLUGIN": "更新外掛",
+    "CHECKING_DUPLICATE_PLUGIN": "",
+    "CONFIRM_PLUGIN_INSTALL": "",
+    "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE": "",
+    "COPYING_PLUGIN_TO_LOCATION": "",
+    "CREATING_INSTALL_LOCATION": "",
+    "DOWNLOADING_PLUGIN": "",
+    "ENABLE_PLUGIN": "",
+    "ENABLE_PLUGIN_NOW_QUESTION": "",
+    "FINALIZING_INSTALLATION": "",
+    "FINALIZING_UNINSTALL": "",
+    "INSTALL": "",
+    "INSTALLING_NECESSARY_UTILITIES": "",
+    "INSTALLING_PLUGIN": "",
+    "PLUGIN_DISABLED": "",
+    "PLUGIN_INSTALL_COMPLETED": "",
+    "PLUGIN_INSTALL_ERROR_OCCURRED": "",
+    "PLUGIN_START_ERROR": "",
+    "PLUGIN_STOPPED": "",
+    "PLUGIN_UNINSTALLED": "",
+    "PLUGIN_UNINSTALL_ERROR_OCCURRED": "",
+    "PLUGIN_UNINSTALL_FAILED": "",
+    "PLUGIN_UPDATE_COMPLETED": "",
+    "PLUGIN_UPDATE_ERROR_OCCURRED": "",
+    "PLUGIN_UPDATE_FAILED": "",
+    "REMOVING_NECESSARY_UTILITIES": "",
+    "SUCCESSFULLY_INSTALLED": "",
+    "SUCCESSFULLY_UPDATED_PLUGIN": "",
+    "UNINSTALLING_PLUGIN": "",
+    "UNPACKING_PLUGIN": "",
+    "UPDATING_PLUGIN_FILES": ""
   },
   "SYSTEM": {
     "CANNOT_REMOVE_MEDIA": "無法移除媒體",
@@ -290,7 +365,26 @@
     "SYSTEM_SETTINGS": "系統設定",
     "SYSTEM_UPDATES": "系統更新",
     "UPDATE_ALREADY_LATEST_VERSION": "已經是最新版本",
-    "VIDEO_OUT_OPTIONS": "視訊輸出選項"
+    "VIDEO_OUT_OPTIONS": "視訊輸出選項",
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
+    "CHECKING_SYSTEM_INTEGRITY": "",
+    "DELETE_FOLDER": "",
+    "DELETING_FOLDER": "",
+    "ERROR_DELETING_FOLDER": "",
+    "FULL_SETTINGS_SET": "",
+    "FULL_SETTINGS_SET_EXTENDED": "",
+    "KEEP_PRESSED_TO_TURN_OFF_IN": "",
+    "PRIVACY_SETTINGS": "",
+    "SHOW_ADVANCED_SETTINGS": "",
+    "SHOW_ADVANCED_SETTINGS_DOC": "",
+    "SIMPLE_SETTINGS_SET": "",
+    "SIMPLE_SETTINGS_SET_EXTENDED": "",
+    "STARTING_SOFTWARE_UPDATE": "",
+    "SUCCESSFULLY_DELETED_FOLDER": "",
+    "SYSTEM_INTEGRITY_CHECK_FAILED": "",
+    "TURN_OFF_IN": "",
+    "UPDATE_FAILED": ""
   },
   "WEBRADIO": {
     "BY_COUNTRY_RADIOS": "按照國家",
@@ -298,11 +392,43 @@
     "FAVOURITE_RADIOS": "最愛電台",
     "MY_WEB_RADIOS": "我的網路電台",
     "TOP_500_RADIOS": "前 500 電台",
-    "WEBRADIO": "網路電台"
+    "WEBRADIO": "網路電台",
+    "BEST_RADIOS": "",
+    "BY_LANGUAGE": "",
+    "LOCAL_RADIOS": "",
+    "POPULAR_RADIOS": "",
+    "SHOUTCAST_ERROR": "",
+    "TALK_RADIOS": ""
   },
   "WIZARD": {
     "CONGRATULATIONS": "恭喜",
     "DEVICE_SUCCESSFULLY_CONFIGURED": "已經完成設定, 準備就緒",
-    "RUN_FIRST_CONFIG_WIZARD": "執行初次設定精靈"
+    "RUN_FIRST_CONFIG_WIZARD": "執行初次設定精靈",
+    "PLEASE_DONATE": ""
+  },
+  "MYVOLUMIO": {
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY": "",
+    "FEATURE_NOT_AVAILABLE": "",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN": "",
+    "GOTO_DEVICE_LIST": "",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "",
+    "PLAN_REQUIRED": "",
+    "UPGRADE_YOUR_PLAN_NOW": ""
+  },
+  "UPDATER": {
+    "CHECKING_FOR_UPDATES": "",
+    "CHECKING_FOR_UPDATES_WAIT": "",
+    "CLEANING": "",
+    "CREATING_BACKUP": "",
+    "DOWNLOADING_UPDATE": "",
+    "ERROR": "",
+    "ERROR_UPDATE_FAILED": "",
+    "ERROR_UPDATE_FILE_NOT_FOUND": "",
+    "FINALIZING_UPDATE": "",
+    "PREPARING_UPDATE": "",
+    "SUCCESSFULLY_UPDATED_TO_VERSION": "",
+    "SYSTEM_RESTART_IN": "",
+    "SYSTEM_RESTART_REQUIRED": "",
+    "UPDATE": ""
   }
 }

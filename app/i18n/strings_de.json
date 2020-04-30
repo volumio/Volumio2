@@ -49,7 +49,11 @@
     "WEB_ALBUMART_ENABLE": "Albencover herunterladen",
     "WEB_ALBUMART_ENABLE_DOC": "Albencover aus dem Internet herunterladen, wenn keine Bilddatei im Ordner vorhanden ist.",
     "WEB_ALBUMART_SIZE": "Größe der Albencover",
-    "WEB_ALBUMART_SIZE_DOC": "Größe der Albencover auswählen. Je größer die Qualität, desto länger die Downloadzeit. Sollten sich die Ladezeiten verlängern, sollte diese Einstellung auf eine niedrigere Stufe gesetzt werden."
+    "WEB_ALBUMART_SIZE_DOC": "Größe der Albencover auswählen. Je größer die Qualität, desto länger die Downloadzeit. Sollten sich die Ladezeiten verlängern, sollte diese Einstellung auf eine niedrigere Stufe gesetzt werden.",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Füge ",
@@ -119,7 +123,8 @@
     "TRACKS": "Titel",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
     "USERNAME": "Benutzername",
-    "WITH": "mit"
+    "WITH": "mit",
+    "CANNOT_LIST": ""
   },
   "MAIN_MENU": {
     "ALARM": "Wecker",
@@ -385,7 +390,10 @@
     "TURN_OFF_IN": "Gedrückt halten für",
     "UPDATE_ALREADY_LATEST_VERSION": "Die verwendete Version ist aktuell.",
     "UPDATE_FAILED": "Aktualisierung fehlgeschlagen",
-    "VIDEO_OUT_OPTIONS": "Videoanzeige-Optionen"
+    "VIDEO_OUT_OPTIONS": "Videoanzeige-Optionen",
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
+    "PRIVACY_SETTINGS": ""
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Aktualisierungen werden gesucht",
@@ -414,7 +422,8 @@
     "POPULAR_RADIOS": "Beliebte Sender",
     "TALK_RADIOS": "Gesprochene Inhalte",
     "TOP_500_RADIOS": "Die 500 besten Sender",
-    "WEBRADIO": "Internetradio"
+    "WEBRADIO": "Internetradio",
+    "SHOUTCAST_ERROR": ""
   },
   "WIZARD": {
     "CONGRATULATIONS": "Glückwunsch",

@@ -1668,6 +1668,9 @@ CoreCommandRouter.prototype.translateKeys = function (parent, dictionary, defaul
               var value = defaultDictionary[category][key];
             } else {
               var value = dictionary[category][key];
+              if (value === '') {
+                value = defaultDictionary[category][key];
+              }
             }
             parent[keys[i]] = value;
           }

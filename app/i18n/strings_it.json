@@ -123,7 +123,8 @@
     "TRACKS": "Canzoni",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "E' cominciata la scansione della tua libreria musicale. L'icona in basso a sinistra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
     "USERNAME": "Nome Utente",
-    "WITH": "con"
+    "WITH": "con",
+    "CANNOT_LIST": ""
   },
   "MAIN_MENU": {
     "ALARM": "Sveglie",
@@ -421,7 +422,8 @@
     "POPULAR_RADIOS": "Radio Popolari",
     "TALK_RADIOS": "Talk Show",
     "TOP_500_RADIOS": "Le migliori 500",
-    "WEBRADIO": "Web Radio"
+    "WEBRADIO": "Web Radio",
+    "SHOUTCAST_ERROR": ""
   },
   "WIZARD": {
     "CONGRATULATIONS": "Congratulazioni",
