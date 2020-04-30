@@ -49,7 +49,6 @@ ControllerServices.prototype.getUIConfig = function () {
     }
   }
 
-  console.log(JSON.stringify(uiconf));
   return uiconf;
 };
 
