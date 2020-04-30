@@ -145,7 +145,6 @@
   },
   "COMMON":{
     "SAVE":"Lưu lại",
-    "DISABLED":"Hủy",
     "PLAY_TITLE":"Play",
     "PLAY_TEXT":"Đã bắt đầu chơi nhạc của ",
     "ADD_QUEUE_TITLE":"Thêm vào danh sách đợi",
@@ -315,7 +314,6 @@
     "INSTALL_TO_DISK_DESC":"Cài đặt vào ổ cứng",
     "INSTALL_TO_DISK_MESSAGE":"Xác nhận bạn muốn cài đặt hệ điều hành volumio vào ổ cứng",
     "INSTALL_TO_DISK_LABEL":"Nhãn",
-    "INSTALL_TO_DISK_LABEL":"LABEL",
     "INSTALL_TO_DISK_SIZE":"Kích thước",
     "INSTALL_TO_DISK_MESSAGE_WARNING":". CHÚ Ý: Cẩn thận khi lựa chọn ổ cứng cài đặt, tất cả dữ liệu trên ổ cứng sẽ bị mất hết và không thể khôi phục!",
     "INSTALLING_TO_DISK_SUCCESS_TITLE":"Hệ thống đã cài đặt thành công vào ổ cứng",
@@ -358,7 +356,6 @@
     "CONFIRM_PLUGIN_UNINSTALL":"Xác nhận gỡ bỏ tiện ích",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Bạn có chắc chắn muốn gỡ bỏ tiện ích này",
     "UNINSTALL":"Gỡ bỏ",
-    "UPDATING_PLUGIN":"Đang cập nhật tiện ích",
     "DOWNLOADING_FROM":"Đang tải tiện ích từ ",
     "DOWNLOADING":"Đang tải tiện ích",
     "NO_CONFIGURATION_AVAILABLE":"Không có cấu hình nào khả dụng",

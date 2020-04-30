@@ -145,7 +145,6 @@
   },
   "COMMON":{
     "SAVE":"Kaydet",
-    "DISABLED":"Devredışı",
     "PLAY_TITLE":"Oynat/Çal",
     "PLAY_TEXT":"Oynatmaya başladı ",
     "ADD_QUEUE_TITLE":"Kuyruğa ekle ",

@@ -145,7 +145,6 @@
   },
   "COMMON":{
     "SAVE":"Uložiť",
-    "DISABLED":"Zakázaný",
     "PLAY_TITLE":"Prehrať",
     "PLAY_TEXT":"Sputené prehrávanie ",
     "ADD_QUEUE_TITLE":"Pridať do zoznam skladieb",
@@ -357,7 +356,6 @@
     "CONFIRM_PLUGIN_UNINSTALL":"Odinštalovanie zásuvného modulu",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Naozaj chcete odinštalovať tento zásuvný modul?",
     "UNINSTALL":"Odinštalovať",
-    "UPDATING_PLUGIN":"Aktualizácia zásuvného modulu",
     "DOWNLOADING_FROM":"Sťahujem zásuvný modul z ",
     "DOWNLOADING":"Sťahujem zásuvný modul",
     "NO_CONFIGURATION_AVAILABLE":"Žiadne nastavenia k dispozícii",

@@ -356,7 +356,6 @@
     "CONFIRM_PLUGIN_UNINSTALL":"Deinstallation des Plugins bestätigen",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Soll dieses Plugin deinstalliert werden?",
     "UNINSTALL":"Deinstallieren",
-    "UPDATING_PLUGIN":"Plugin wird aktualisiert",
     "DOWNLOADING_FROM":"Plugin herunterladen von ",
     "DOWNLOADING":"Plugin wird heruntergeladen",
     "NO_CONFIGURATION_AVAILABLE":"Konfiguration nicht verfügbar",

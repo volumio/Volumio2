@@ -145,7 +145,6 @@
   },
   "COMMON":{
     "SAVE":"Salva",
-    "DISABLED":"Disattivato",
     "PLAY_TITLE":"Riproduzione",
     "PLAY_TEXT":"Iniziata la riproduzione di ",
     "ADD_QUEUE_TITLE":"Aggiungi alla coda",
@@ -365,7 +364,6 @@
     "CONFIRM_PLUGIN_UNINSTALL":"Conferma la disinstallazione del Plugin",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE":"Sicuro di voler disinstallare il plugin",
     "UNINSTALL":"Disinstalla",
-    "UPDATING_PLUGIN":"Aggiornamento Plugin",
     "DOWNLOADING_FROM":"Scaricando il Plugin da ",
     "DOWNLOADING":"Scaricando il Plugin",
     "NO_CONFIGURATION_AVAILABLE":"Nessuna configurazione disponibile",

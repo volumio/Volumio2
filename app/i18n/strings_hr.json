@@ -145,7 +145,6 @@
   },
   "COMMON":{
     "SAVE":"Spremi",
-    "DISABLED":"Onemogući",
     "PLAY_TITLE":"Reproduciram",
     "PLAY_TEXT":"Počela je reprodukcija datoteke ",
     "ADD_QUEUE_TITLE":"Dodaj u red",
@@ -378,7 +377,6 @@
     "FINALIZING_INSTALLATION":"Dovršavam instalaciju",
     "PLUGIN_INSTALL_COMPLETED":"Ažuriranje dodatka je završeno",
     "PLUGIN_INSTALL_ERROR_OCCURRED":"Došlo je do pogreške prilikom instaliranja dodatka",
-    "UPDATING_PLUGIN":"Ažuriram dodatak",
     "PLUGIN_STOPPED":"Dodatak je zaustavljen",
     "UPDATING_PLUGIN_FILES":"Ažuriranje datoteka dodatka",
     "SUCCESSFULLY_UPDATED_PLUGIN":"Dodatak je uspješno ažuriran",
