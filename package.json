@@ -8,7 +8,9 @@
     "start": "nodejs ./index.js",
     "lint": "semistandard \"./**/*.js\" --fix --verbose",
     "lint-staged": "lint-staged",
-    "test": "npm install --only=dev && ./node_modules/.bin/mocha --reporter spec"
+    "lint-lang": "jsonlint -qD ./app/i18n", 
+    "lint-JSON": "jsonlint -qD ./app/plugins", 
+    "test": "npm install --only=dev --no-package-lock && ./node_modules/.bin/mocha --reporter spec"
   },
   "lint-staged": {
     "*.js": [
@@ -63,6 +65,7 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
+    "@prantlf/jsonlint": "^10.2.0",
     "lint-staged": "^7.2.2",
     "mocha": "^3.2.0",
     "semistandard": "^14.2.0"

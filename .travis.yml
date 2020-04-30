@@ -3,3 +3,11 @@ node_js:
 - '8.11.1'
 
 install: true
+before_script: npm install --only=dev --no-package-lock
+
+script: npm run $COMMAND
+jobs:
+  include:
+    - stage: Lint
+      env: COMMAND=lint-lang
+    - env: COMMAND=lint-JSON
