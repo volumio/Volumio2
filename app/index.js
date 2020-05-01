@@ -15,7 +15,11 @@ function CoreCommandRouter (server) {
   this.logger = winston.createLogger({
     format: winston.format.simple(),
     transports: [
-      new (winston.transports.Console)()
+      new (winston.transports.Console)({
+      timestamp: function () {
+        return +new Date() 
+      }
+    })
     ]
   });
 
