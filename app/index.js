@@ -12,17 +12,10 @@ module.exports = CoreCommandRouter;
 function CoreCommandRouter (server) {
   metrics.time('CommandRouter');
 
-  var logfile = '/var/log/volumio.log';
-
-  fs.ensureFileSync(logfile);
   this.logger = winston.createLogger({
     format: winston.format.simple(),
     transports: [
-      new (winston.transports.Console)(),
-      new (winston.transports.File)({
-        filename: logfile,
-        json: false
-      })
+      new (winston.transports.Console)()
     ]
   });
 
