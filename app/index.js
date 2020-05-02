@@ -1542,10 +1542,10 @@ CoreCommandRouter.prototype.getI18nString = function (key) {
 
   if (this.i18nStrings) {
     if (splitted.length == 1) {
-      if (this.i18nStrings[key] !== undefined) { return this.i18nStrings[key]; } else return this.i18nStringsDefaults[key];
+      if (this.i18nStrings[key] !== undefined && this.i18nStrings[key] !== '') { return this.i18nStrings[key]; } else return this.i18nStringsDefaults[key];
     } else {
       if (this.i18nStrings[splitted[0]] !== undefined &&
-                this.i18nStrings[splitted[0]][splitted[1]] !== undefined) { return this.i18nStrings[splitted[0]][splitted[1]]; } else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
+                this.i18nStrings[splitted[0]][splitted[1]] !== undefined && this.i18nStrings[splitted[0]][splitted[1]] !== '') { return this.i18nStrings[splitted[0]][splitted[1]]; } else return this.i18nStringsDefaults[splitted[0]][splitted[1]];
     }
   } else {
     	var emptyString = '';
