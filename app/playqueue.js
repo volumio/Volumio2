@@ -169,7 +169,8 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         if (content[j].channels === undefined) {
           content[j].channels = self.defaultChannels;
         }
-        contentArray.push(content[j][0]);
+          contentArray = contentArray.concat(content[j])
+
       }
 
       if (self.arrayQueue.length > 0 && self.arrayQueue.length >= contentArray.length) {
@@ -258,13 +259,14 @@ CorePlayQueue.prototype.compareTrackListByUri = function (trackList1, trackList2
 
     for (var k in trackList1) {
       if (trackList1[k] && trackList1[k].uri) {
-          trackList1String = trackList1String + trackList1[k].uri;
+        // We have to replace music-library with mnt to get consistent results
+          trackList1String = trackList1String + trackList1[k].uri.replace('music-library', 'mnt');
       }
     }
 
     for (var h in trackList2) {
         if (trackList2[h] && trackList2[h].uri) {
-            trackList2String = trackList2String + trackList2[h].uri;
+            trackList2String = trackList2String + trackList2[h].uri.replace('music-library', 'mnt');
         }
     }
 
