@@ -156,6 +156,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
   libQ.all(promiseArray)
     .then(function (content) {
+      var contentArray = [];
       for (var j in content) {
         if (content[j].samplerate === undefined) {
           content[j].samplerate = self.defaultSampleRate;
@@ -168,11 +169,23 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
         if (content[j].channels === undefined) {
           content[j].channels = self.defaultChannels;
         }
+          contentArray = contentArray.concat(content[j])
 
-        if (self.arrayQueue.length > 0) {
+      }
+
+      if (self.arrayQueue.length > 0 && self.arrayQueue.length >= contentArray.length) {
           // if(content[j].uri!==self.arrayQueue[self.arrayQueue.length-1].uri)
-          self.arrayQueue = self.arrayQueue.concat(content[j]);
-        } else self.arrayQueue = self.arrayQueue.concat(content[j]);
+
+          var queueLastElementsObj = self.arrayQueue.slice(Math.max(self.arrayQueue.length - contentArray.length, 0));
+          var addQueueElementsObj = contentArray;
+          // If the array we are adding to queue is equal to the last elements of the queue, we don't add it and send index as first item of array we want to add
+          if (self.compareTrackListByUri(queueLastElementsObj, addQueueElementsObj)) {
+              firstItemIndex = self.arrayQueue.length - contentArray.length;
+          } else {
+              self.arrayQueue = self.arrayQueue.concat(contentArray);
+          }
+      } else {
+          self.arrayQueue = self.arrayQueue.concat(contentArray);
       }
 
       self.saveQueue();
@@ -237,3 +250,29 @@ CorePlayQueue.prototype.saveQueue = function () {
 /* CorePlayQueue.prototype.clearMpdQueue = function () {
 	return this.commandRouter.executeOnPlugin('music_service', 'mpd', 'clear');
 }; */
+
+CorePlayQueue.prototype.compareTrackListByUri = function (trackList1, trackList2) {
+    var self = this;
+
+    var trackList1String = '';
+    var trackList2String = '';
+
+    for (var k in trackList1) {
+      if (trackList1[k] && trackList1[k].uri) {
+        // We have to replace music-library with mnt to get consistent results
+          trackList1String = trackList1String + trackList1[k].uri.replace('music-library', 'mnt');
+      }
+    }
+
+    for (var h in trackList2) {
+        if (trackList2[h] && trackList2[h].uri) {
+            trackList2String = trackList2String + trackList2[h].uri.replace('music-library', 'mnt');
+        }
+    }
+
+    if (trackList1String === trackList2String) {
+      return true;
+    } else {
+      return false;
+    }
+};

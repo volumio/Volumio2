@@ -433,10 +433,32 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
 
   return this.stateMachine.addQueueItems(arrayItems);
 };
+
+CoreCommandRouter.prototype.addPlayList = function (data) {
+    var self = this;
+    var defer = libQ.defer();
+
+    this.pushConsoleMessage('CoreCommandRouter::volumioaddPlayList');
+
+    var queueArray = this.stateMachine.getQueue();
+    if (queueArray && queueArray.length > 0) {
+        this.stateMachine.addQueueItems(data.list)
+            .then((result) => {
+              var playIndex = result.firstItemIndex + data.index;
+              this.volumioPlay(playIndex);
+        defer.resolve();
+    });
+    } else {
+      return self.replaceAndPlay(data);
+    }
+
+    return defer.promise;
+};
+
 CoreCommandRouter.prototype.replaceAndPlay = function (data) {
   var self = this;
   var defer = libQ.defer();
-  var self = this;
+
   this.pushConsoleMessage('CoreCommandRouter::volumioReplaceandPlayItems');
 
   this.stateMachine.clearQueue();
