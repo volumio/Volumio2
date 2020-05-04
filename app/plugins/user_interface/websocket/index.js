@@ -101,6 +101,10 @@ function InterfaceWebUI (context) {
         });
     });
 
+    connWebSocket.on('addPlayList', function (data) {
+        return self.commandRouter.addPlayList(data);
+    });
+
     connWebSocket.on('addPlayCue', function (data) {
       if (data.service == undefined || data.service == 'mpd') {
         var uri = data.uri;
