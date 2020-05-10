@@ -1313,7 +1313,8 @@ CoreCommandRouter.prototype.volumioToggle = function () {
 
   if (state.status != undefined) {
     if (state.status === 'stop' || state.status === 'pause') {
-      return this.stateMachine.play();
+      // Use volumioPlay to account for volatile services
+      return this.stateMachine.volumioPlay();
     } else {
       if (state.trackType == 'webradio') {
         return this.stateMachine.stop();
