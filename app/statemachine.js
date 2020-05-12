@@ -3,6 +3,9 @@
 var libQ = require('kew');
 var RandomQueue = require('./randomqueue');
 
+// Some constants for easy access
+const UNSETVOLATILE_TIMEOUT = 3000; // 3 seconds
+
 // Define the CoreStateMachine class
 module.exports = CoreStateMachine;
 function CoreStateMachine (commandRouter) {
@@ -1180,36 +1183,38 @@ CoreStateMachine.prototype.servicePause = function () {
 
 // Volumio Stop Command
 CoreStateMachine.prototype.stop = function (promisedResponse) {
-  var self = this;
   this.commandRouter.pushConsoleMessage('CoreStateMachine::stop');
 
   if (this.isVolatile) {
     return this.serviceStop();
   } else {
-    self.setConsumeUpdateService(undefined);
-    self.unSetVolatile();
+    this.setConsumeUpdateService(undefined);
+    return this.unSetVolatile().then((res) => {
+      if (res) {
+        this.commandRouter.logger.info(`unSetVolatile:: ${res}`);
+      }
+      if (this.currentStatus === 'play') {
+        // Play -> Stop transition
+        this.currentStatus = 'stop';
+        this.currentSeek = 0;
 
-    if (this.currentStatus === 'play') {
-      // Play -> Stop transition
-      this.currentStatus = 'stop';
-      this.currentSeek = 0;
+        this.stopPlaybackTimer();
+        this.updateTrackBlock();
+        this.pushState().fail(this.pushError.bind(this));
+        return this.serviceStop();
+      } else if (this.currentStatus === 'pause') {
+        // Pause -> Stop transition
+        this.currentStatus = 'stop';
+        this.currentSeek = 0;
+        this.updateTrackBlock();
 
-      this.stopPlaybackTimer();
-      this.updateTrackBlock();
-      this.pushState().fail(this.pushError.bind(this));
-      return this.serviceStop();
-    } else if (this.currentStatus === 'pause') {
-      // Pause -> Stop transition
-      this.currentStatus = 'stop';
-      this.currentSeek = 0;
-      this.updateTrackBlock();
-
-      this.stopPlaybackTimer();
-      this.pushState().fail(this.pushError.bind(this));
-      return this.serviceStop();
-    } else {
-      return libQ.resolve();
-    }
+        this.stopPlaybackTimer();
+        this.pushState().fail(this.pushError.bind(this));
+        return this.serviceStop();
+      } else {
+        return libQ.resolve();
+      }
+    });
   }
 };
 
@@ -1486,6 +1491,7 @@ CoreStateMachine.prototype.sanitizeUri = function (uri) {
 };
 
 CoreStateMachine.prototype.setVolatile = function (data) {
+  this.commandRouter.pushConsoleMessage(`CoreStateMachine::setVolatile ${data.service}`);
   this.volatileService = data.service;
   this.isVolatile = true;
 
@@ -1495,19 +1501,43 @@ CoreStateMachine.prototype.setVolatile = function (data) {
   this.volatileCallback = data.callback;
 };
 
+/**
+ * [Relenquishes control from a volatile service by calling
+ * it's callback/Promise on volatile stop]
+ * @return {[Promise]} [description]
+ */
 CoreStateMachine.prototype.unSetVolatile = function () {
-  console.log('UNSET VOLATILE');
+  this.commandRouter.pushConsoleMessage('CoreStateMachine::unSetVolatile');
+  return new Promise((resolve, reject) => {
+    if (this.volatileCallback !== undefined) {
+      const unSetTimer = process.hrtime(); // TODO: Use metrics module instead?
+      this.commandRouter.logger.info(`[Volatile::${this.volatileService}] Unsetting...`);
+      // Set a timout incase a service misbehaves.
+      // This will probably just lead to ALSA sink errors though..
+      setTimeout(() => resolve('TimedOut!'), UNSETVOLATILE_TIMEOUT);
 
-  /**
-     * This function will be called on volatile stop
-     */
-  if (this.volatileCallback !== undefined) {
-    this.volatileCallback.call();
-    this.volatileCallback = undefined;
-  }
-
-  this.volatileService = undefined;
-  this.isVolatile = false;
+      // If volatileCallback is a callback, this is fire and forget
+      // i.e it should resolve immideatly!
+      Promise.resolve(this.volatileCallback()).then((res) => {
+        const end = process.hrtime(unSetTimer);
+        this.commandRouter.logger.info(`[Volatile::${this.volatileService}] Unset ${end[0]}s ${(end[1] / 1000000).toFixed(2)}ms`);
+        this.volatileCallback = undefined;
+        this.volatileService = undefined;
+        this.isVolatile = false;
+        return resolve();
+      }).catch((e) => {
+        this.commandRouter.logger.error(`[Volatile::${this.volatileService}] Error ${e}`);
+        return reject(new Error(e));
+      });
+    } else {
+      if (this.volatileService) { // Log an error if a service doesn't conform.
+        this.commandRouter.logger.error(`[Volatile::${this.volatileService}] has no unset callback!`);
+        this.volatileService = undefined;
+      }
+      this.isVolatile = false;
+      return resolve();
+    }
+  });
 };
 
 CoreStateMachine.prototype.startTimerForPreviousTrack = function () {

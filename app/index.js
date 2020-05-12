@@ -1296,11 +1296,16 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
 CoreCommandRouter.prototype.volumioPlay = function (N) {
   this.pushConsoleMessage('CoreCommandRouter::volumioPlay');
 
-  this.stateMachine.unSetVolatile();
-
-  if (N === undefined) { return this.stateMachine.play(); } else {
-    return this.stateMachine.play(N);
-  }
+  return this.stateMachine.unSetVolatile().then((res) => {
+    if (res) {
+      this.commandRouter.logger.info(`unSetVolatile:: ${res}`);
+    }
+    if (N === undefined) { return this.stateMachine.play(); } else {
+      return this.stateMachine.play(N);
+    }
+  }).catch((e) => {
+    console.error('unSetVolatile Error: ', e);
+  });
 };
 
 // Volumio Play
