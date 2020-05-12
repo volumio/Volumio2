@@ -88,8 +88,8 @@ function CoreVolumeController (commandRouter) {
     });
   };
 
-  var reInfo = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[(on|off)\]/i;
-  var reInfoOnlyVol = /[a-z][a-z ]*\: Playback [0-9-]+ \[([0-9]+)\%\] (?:[[0-9\.-]+dB\] )?\[/i;
+  var reInfo = /[a-z][a-z ]*: Playback [0-9-]+ \[([0-9]+)%\] (?:[[0-9.-]+dB\] )?\[(on|off)\]/i;
+  var reInfoOnlyVol = /[a-z][a-z ]*: Playback [0-9-]+ \[([0-9]+)%\] (?:[[0-9.-]+dB\] )?\[/i;
   var getInfo = function (cb) {
     if (volumescript.enabled) {
       try {
@@ -131,6 +131,7 @@ function CoreVolumeController (commandRouter) {
           if (res === null) {
             var resOnlyVol = reInfoOnlyVol.exec(data);
             if (resOnlyVol === null) {
+              console.warn('Unable to parse:\n', data);
               cb(new Error('Alsa Mixer Error: failed to parse output'));
             } else {
               hasHWMute = false;
@@ -331,7 +332,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
             if (err) {
               self.logger.error('Cannot get ALSA Volume: ' + err);
             }
-            if (vol === null) {
+            if (!vol) {
               vol = currentvolume;
             }
             currentmute = true;
@@ -387,7 +388,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
             if (err) {
               self.logger.error('Cannot get ALSA Volume: ' + err);
             }
-            if (vol === null || currentmute) {
+            if (!vol || currentmute) {
               vol = currentvolume;
             }
             VolumeInteger = Number(vol) + Number(volumesteps);
@@ -415,7 +416,7 @@ CoreVolumeController.prototype.alsavolume = function (VolumeInteger) {
             if (err) {
               self.logger.error('Cannot get ALSA Volume: ' + err);
             }
-            if (vol === null || currentmute) {
+            if (!vol || currentmute) {
               vol = currentvolume;
             }
             VolumeInteger = Number(vol) - Number(volumesteps);
@@ -513,7 +514,7 @@ CoreVolumeController.prototype.retrievevolume = function () {
           }
           // Log volume control
           self.logger.info('VolumeController:: Volume=' + vol + ' Mute =' + mute);
-          if (vol === null) {
+          if (!vol) {
             vol = currentvolume;
             mute = currentmute;
           } else {
