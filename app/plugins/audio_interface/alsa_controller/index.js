@@ -1021,7 +1021,10 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
   }
 	
   switch (outputdevice) {
-    case 'default':
+  case 'Loopback':
+  	console.log('Output is Loopback, do not update Mixer');
+         break;	  
+  case 'default':
 	
   if (i2sstatus && i2sstatus.enabled) {
     var cardname = i2sstatus.name;
@@ -1124,10 +1127,6 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
   setTimeout(() => {
     self.commandRouter.retrieveVolumeLevels();
   }, 2500);
-break;
-  case 'Loopback':
-  	console.log('Output is Loopback, do not update Mixer');
-break;
 }
 };
 
