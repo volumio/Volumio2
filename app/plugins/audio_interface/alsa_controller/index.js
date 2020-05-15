@@ -1024,7 +1024,7 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
   case 'Loopback':
   	console.log('Output is Loopback, do not update Mixer');
          break;	  
-  case 'default':
+  default:
 	
   if (i2sstatus && i2sstatus.enabled) {
     var cardname = i2sstatus.name;
