@@ -1020,6 +1020,11 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
     }
   }
 
+  if (outputdevice === 'Loopback') {
+      self.logger.info('Output is Loopback, do not update Mixer');
+      return;
+  }
+
   if (i2sstatus && i2sstatus.enabled) {
     var cardname = i2sstatus.name;
     var mixer = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SMixer', cardname);
