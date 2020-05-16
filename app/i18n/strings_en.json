@@ -268,7 +268,7 @@
     "PERSISTENT_QUEUE_DOC": "If enabled the Playqueue will be retained post reboot, if disabled the play queue will be cleared at every system start",
     "PLAYBACK_MODE": "Playback Mode",
     "PLAYBACK_MODE_CONTINUOUS": "Continuous",
-    "PLAYBACK_MODE_DOC": "You can select the plabyack Behaviour: Continuous will replace your current queue with all the songs in an album or a playlist, single will only add to queue the song you selected to play",
+    "PLAYBACK_MODE_DOC": "You can select the plabyack Behaviour: Continuous will add to your current queue all the songs in an album or a playlist, single will only add to queue the song you selected to play",
     "PLAYBACK_MODE_SINGLE": "Single",
     "PLAYBACK_OPTIONS_TITLE": "General Playback options",
     "RESAMPLING_ALG": "Resampling algorithm quality",

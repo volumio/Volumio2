@@ -312,7 +312,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
       self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value', value);
       self.configManager.setUIConfigParam(uiconf, 'sections[2].content[6].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[6].options'), value));
 
-      value = self.getAdditionalConf('music_service', 'mpd', 'playback_mode', 'single');
+      value = self.commandRouter.executeOnPlugin('music_service', 'mpd', 'getPlaybackMode');
       self.configManager.setUIConfigParam(uiconf, 'sections[2].content[7].value.value', value);
       self.configManager.setUIConfigParam(uiconf, 'sections[2].content[7].value.label', self.getLabelForSelect(self.configManager.getValue(uiconf, 'sections[2].content[7].options'), value));
 

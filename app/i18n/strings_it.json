@@ -268,7 +268,7 @@
     "PERSISTENT_QUEUE_DOC": "Se attivata, la coda di riproduzione sarà mantenuta al riavvio del sistema. Se disattivata, la coda di riproduzione sarà azzerata ad ogni avvio del sistema",
     "PLAYBACK_MODE": "Modalità di riproduzione",
     "PLAYBACK_MODE_CONTINUOUS": "Continua",
-    "PLAYBACK_MODE_DOC": "Puoi selezionare la modalirà di riproduzione: La modalità continua rimpiazzerà la coda corrente con tutte le tracce presenti in un album o in una playlist, la modalità singola aggiungerà unicamente la canzone selezionata",
+    "PLAYBACK_MODE_DOC": "Puoi selezionare la modalirà di riproduzione: La modalità continua aggiungerà alla coda corrente tutte le tracce presenti in un album o in una playlist, la modalità singola aggiungerà unicamente la canzone selezionata",
     "PLAYBACK_MODE_SINGLE": "Singola",
     "PLAYBACK_OPTIONS_TITLE": "Opzioni di Riproduzione Generali",
     "RESAMPLING_ALG": "Qualità dell'algoritmo di Resampling",

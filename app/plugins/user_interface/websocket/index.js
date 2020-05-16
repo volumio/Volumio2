@@ -95,14 +95,15 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('addPlay', function (data) {
-      self.commandRouter.addQueueItems(data)
-        .then(function (e) {
-          return self.commandRouter.volumioPlay(e.firstItemIndex);
-        });
+        return self.commandRouter.addPlay(data);
     });
 
     connWebSocket.on('addPlayList', function (data) {
-        return self.commandRouter.addPlayList(data);
+        if (process.env.PLAYBACK_MODE === 'single' && data.item) {
+            return self.commandRouter.addPlay(data.item);
+        } else {
+            return self.commandRouter.addPlayList(data);
+        }
     });
 
     connWebSocket.on('addPlayCue', function (data) {

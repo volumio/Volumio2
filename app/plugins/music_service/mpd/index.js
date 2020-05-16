@@ -599,6 +599,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
   self.config.loadFile(configFile);
   self.loadLibrarySettings();
   dsd_autovolume = self.config.get('dsd_autovolume', false);
+  self.getPlaybackMode();
   self.mpdInit();
 
   return libQ.resolve();
@@ -800,15 +801,11 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
     self.config.set('persistent_queue', data['persistent_queue']);
   }
 
-  var playbackMode = self.config.get('playback_mode', 'continuous');
   var playbackModeNew = data['playback_mode'].value;
-
-  if (playbackMode !== playbackModeNew) {
-    self.config.set('playback_mode', data['playback_mode'].value);
-    setTimeout(() => {
-      self.commandRouter.broadcastUiSettings();
-    }, 300);
+  if (playbackModeNew !== process.env.PLAYBACK_MODE) {
+      self.setPlaybackMode(playbackModeNew);
   }
+
 
   if (isonew != iso) {
     self.config.set('iso', data['iso']);
@@ -3835,4 +3832,29 @@ ControllerMpd.prototype.getSpecialCardConfig = function () {
   } else {
     return null;
   }
+};
+
+ControllerMpd.prototype.getPlaybackMode = function () {
+    var self = this;
+
+    //values: continuous|single
+    var playbackMode = self.config.get('playback_mode', 'unset');
+    if (playbackMode === 'unset') {
+        if (process.env.DEFAULT_PLAYBACK_MODE_CONTINUOUS === 'true') {
+            playbackMode = 'continuous';
+        } else {
+            playbackMode = 'single';
+        }
+    }
+    process.env.PLAYBACK_MODE = playbackMode;
+
+    return playbackMode;
+};
+
+ControllerMpd.prototype.setPlaybackMode = function (mode) {
+    var self = this;
+
+    //values: continuous|single
+    self.config.set('playback_mode', mode);
+    process.env.PLAYBACK_MODE = mode;
 };

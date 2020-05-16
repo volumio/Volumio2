@@ -434,6 +434,15 @@ CoreCommandRouter.prototype.addQueueItems = function (arrayItems) {
   return this.stateMachine.addQueueItems(arrayItems);
 };
 
+CoreCommandRouter.prototype.addPlay = function (data) {
+    var self = this;
+
+    self.addQueueItems(data)
+        .then(function (e) {
+            return self.volumioPlay(e.firstItemIndex);
+        });
+};
+
 CoreCommandRouter.prototype.addPlayList = function (data) {
     var self = this;
     var defer = libQ.defer();
