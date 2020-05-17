@@ -268,7 +268,7 @@
     "PERSISTENT_QUEUE_DOC": "Si activé, la file d'attente sera conservée après un redémarrage, sinon elle sera effacée",
     "PLAYBACK_MODE": "Mode de lecture",
     "PLAYBACK_MODE_CONTINUOUS": "Continue",
-    "PLAYBACK_MODE_DOC": "Vous pouvez choisir le comportement de lecture : Continue remplacera la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoutera seulement le morceau sélectionné",
+    "PLAYBACK_MODE_DOC": "Vous pouvez choisir le comportement de lecture : Continue ajoutera à la liste courante par tous les morceaux de l'album ou de la playlist, Unitaire ajoutera seulement le morceau sélectionné",
     "PLAYBACK_MODE_SINGLE": "Unitaire",
     "PLAYBACK_OPTIONS_TITLE": "Options de lecture générales",
     "RESAMPLING_ALG": "Qualité de l'algorithme de ré-échantillonnage",
