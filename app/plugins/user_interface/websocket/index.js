@@ -1744,6 +1744,28 @@ function InterfaceWebUI (context) {
           });
       }
     });
+    
+    // Method to get time zone of the device
+    connWebSocket.on('getTimeZone', function (data) {
+      self.commandRouter.executeOnPlugin('system_controller', 'system', 'getTimeZone','').then(tz => {
+        if (tz instanceof Error) {
+          console.error('Error getting timezone: ', tz);
+        } else {
+          // Not checking if object keys are as expected!
+          this.emit('pushTimeZone', tz)
+        }
+      });
+    });
+    
+    // Method to set time zone of the device
+    connWebSocket.on('setTimeZone', function (data) {
+      self.logger.info('setting timezone ' + JSON.stringify(data));
+      self.commandRouter.executeOnPlugin('system_controller', 'system', 'setTimeZone', data).then(res => {
+        // SocketIO serialises to JSON, and can't handle Error objects,
+        // so we coerce the possible Error into a string
+        this.emit('pushsetTimeZone',`${res || 'success'}`);
+      });
+    });
   });
 }
 
