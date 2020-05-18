@@ -1,7 +1,9 @@
-
-// const winston = require('winston');
-// const VolumeControl = require('../app/volumecontrol');
 const { execSync } = require('child_process');
+const fs = require('fs-extra');
+const path = require('path');
+
+// const VolumeControl = require('../app/volumecontrol');
+// const volContorller = new VolumeControl(new MockCommandRouter());
 
 class VolumeControlTester {
   constructor (context) {
@@ -32,7 +34,9 @@ class VolumeControlTester {
       2nd Capturing Group (on|off)
       \] matches the character ] literally (case sensitive)
      */
-    this.volRegx = new RegExp(/\w+\s?\w+:(?:\s|\sPlayback\s)[-0-9]+\s\[([0-9]+)%\](?:[\n\r]|\s(?:[[0-9.-]+dB\]\s)?\[(on|off)\])/);
+    this.volRegx = new RegExp(
+      /\w+\s?\w+:(?:\s|\sPlayback\s)[-0-9]+\s\[([0-9]+)%\](?:[\n\r]|\s(?:[[0-9.-]+dB\]\s)?\[(on|off)\])/
+    );
   }
 
   /**
@@ -43,9 +47,15 @@ class VolumeControlTester {
   parseVolumeString (string) {
     const res = this.volRegx.exec(string);
     if (res) {
-      return { volume: res[1], mute: res[2] };
+      return {
+        volume: res[1],
+        mute: res[2]
+      };
     }
-    return { volume: null, mute: null };
+    return {
+      volume: '',
+      mute: ''
+    };
   }
 
   /**
@@ -59,13 +69,52 @@ class VolumeControlTester {
     if (isNaN(volume)) {
       volume = 0; // Safe defualt
     }
-    console.log('mute: ', mute);
-    if (!mute) { // No mute parsed, check volume
+    if (!mute) {
+      // No mute parsed, check volume
       mute = volume === 0;
     } else {
-      mute = mute === 'on';
+      mute = mute === 'off';
     }
-    return { volume, mute };
+    return {
+      volume,
+      mute
+    };
+  }
+
+  async readConfigFile (fileName) {
+    console.log(`Parsing config file ${path.basename(fileName)}`);
+    try {
+      const alsaConfigParsed = await fs.readJson(fileName);
+      const alsaConfig = {};
+      Object.keys(alsaConfigParsed).map(key => {
+        // We can do this, cause interestingly all parameters are stored as
+        // strings, so we don't need to bother doing any type coercetion.
+        alsaConfig[key] = alsaConfigParsed[key].value;
+      });
+      return alsaConfig;
+    } catch (err) {
+      console.error('readConfigFile error: ', err);
+    }
+  }
+
+  // Read amxier directly
+  probeamixer (device, mixer) {
+    const amixerParams = ['-M', 'get', '-c', device, mixer];
+    try {
+      const amixerDataString = execSync(
+        `amixer ${amixerParams.join(' ')}`
+      ).toString();
+      console.log(
+        `\n:::Input:::\n{ device: ${device}, mixer: ${mixer}}\n:::amixer:::\n`,
+        amixerDataString
+      );
+      const volume = this.getVolume(amixerDataString);
+      console.log('\n:::Output:::\n', volume);
+      console.log('\n');
+      return volume;
+    } catch (e) {
+      console.error('Error Probing amixer: ', e);
+    }
   }
 }
 
@@ -80,17 +129,38 @@ const testSimple = () => {
     Limits: 0 - 99
     Front Left: 10 [10%]
     Front Right: 10 [10%]`;
-  console.log('\n:::Input:::\n', amixerDataString);
-  console.log(vc.getVolume(amixerDataString));
+  console.log('\n:::Input:::\n From String\n', amixerDataString);
+  console.log('\n:::Output:::\n', vc.getVolume(amixerDataString));
+  console.log('\n');
 };
 
-const testAmixer = (device, mixer) => {
-  // Read amxier directly
-  const amixerParams = ['-M', 'get', '-c', device, mixer];
-  const amixerDataString = execSync(`amixer ${amixerParams.join(' ')}`).toString();
-  console.log('\n:::Input:::\n', amixerDataString);
-  console.log(vc.getVolume(amixerDataString));
+const testFromConfig = async configFile => {
+  const { outputdevice, mixer, softvolumenumber } = await vc.readConfigFile(configFile);
+  const device = outputdevice === 'softvolume' ? softvolumenumber : outputdevice;
+  vc.probeamixer(device, mixer);
 };
 
+const testOnDevice = async () => {
+  console.log('Testing on Device');
+  const configFile = '/data/configuration/audio_interface/alsa_controller/config.json';
+  if (await fs.pathExists(configFile)) {
+    testFromConfig(configFile);
+  } else {
+    console.error('Cannot run this test on non Volumio device');
+  }
+};
+// Predefined string
 testSimple();
-testAmixer('1', 'PCM');
+
+// Probe amixer directly
+// vc.probeamixer('1', 'SoftMaster');
+// From a config file
+// testFromConfig('alsa_config.json');
+testOnDevice();
+
+// On the fly
+const [device, mixer] = process.argv.slice(2);
+if (device && mixer) {
+  console.log('On the Fly:');
+  vc.probeamixer(device, mixer);
+}
