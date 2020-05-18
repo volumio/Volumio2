@@ -1034,3 +1034,15 @@ ControllerSystem.prototype.savePrivacySettings = function (data) {
   }
   return self.commandRouter.reloadUi();
 };
+
+ControllerSystem.prototype.getCPUCoresNumber = function () {
+    var self = this;
+
+    try {
+      var cores = parseInt(execSync('/usr/bin/nproc --all').toString().replace(/\n/g, ''));
+      return cores;
+    } catch(e) {
+      self.logger.error('Could not retrieve CPU Cores: ' + e);
+      return 1
+    }
+};

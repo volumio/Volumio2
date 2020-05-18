@@ -1019,11 +1019,17 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
       if (self.config.get('iso', false)) {
         var conf9 = conf7.replace('${format}', '');
       } else {
+        var multiThreadSox = self.checkIfSoxCanBeMultithread();
+        if (multiThreadSox) {
+          var soxThreads = '0';
+        } else {
+          var soxThreads = '1';
+        }
         if (resampling) {
-          var conf8 = conf7.replace('${sox}', 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "1"' + os.EOL + '}');
+          var conf8 = conf7.replace('${sox}', 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "' + resampling_quality + '"' + os.EOL + '  		threads "' + soxThreads + '"' + os.EOL + '}');
           var conf9 = conf8.replace('${format}', 'format      "' + resampling_samplerate + ':' + resampling_bitdepth + ':2"');
         } else {
-          var conf8 = conf7.replace('${sox}', 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "1"' + os.EOL + '}');
+          var conf8 = conf7.replace('${sox}', 'resampler {      ' + os.EOL + '  		plugin "soxr"' + os.EOL + '  		quality "high"' + os.EOL + '  		threads "' + soxThreads + '"' + os.EOL + '}');
           var conf9 = conf8.replace('${format}', '');
         }
       }
@@ -3858,3 +3864,22 @@ ControllerMpd.prototype.setPlaybackMode = function (mode) {
     self.config.set('playback_mode_list', mode);
     process.env.PLAYBACK_MODE = mode;
 };
+
+ControllerMpd.prototype.checkIfSoxCanBeMultithread = function () {
+    var self = this;
+
+    var deviceHw = self.getAdditionalConf('system_controller', 'system', 'device');
+    if (deviceHw === 'Raspberry PI') {
+      return false;
+    } else {
+      var coresNumber = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getCPUCoresNumber', '');
+      if (coresNumber > 1) {
+          return true;
+      } else {
+        return false;
+      }
+    }
+
+};
+
+
