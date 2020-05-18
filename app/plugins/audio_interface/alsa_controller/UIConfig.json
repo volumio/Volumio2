@@ -99,7 +99,7 @@
           "buffer_before_play",
 		  "persistent_queue",
           "iso",
-          "playback_mode"
+          "playback_mode_list"
         ]
       },
       "content": [
@@ -217,7 +217,7 @@
           "value":false
         },
         {
-          "id": "playback_mode",
+          "id": "playback_mode_list",
           "element": "select",
           "doc": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE",

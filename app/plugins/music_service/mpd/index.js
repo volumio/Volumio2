@@ -801,7 +801,7 @@ ControllerMpd.prototype.savePlaybackOptions = function (data) {
     self.config.set('persistent_queue', data['persistent_queue']);
   }
 
-  var playbackModeNew = data['playback_mode'].value;
+  var playbackModeNew = data['playback_mode_list'].value;
   if (playbackModeNew !== process.env.PLAYBACK_MODE) {
       self.setPlaybackMode(playbackModeNew);
   }
@@ -3838,7 +3838,7 @@ ControllerMpd.prototype.getPlaybackMode = function () {
     var self = this;
 
     //values: continuous|single
-    var playbackMode = self.config.get('playback_mode', 'unset');
+    var playbackMode = self.config.get('playback_mode_list', 'unset');
     if (playbackMode === 'unset') {
         if (process.env.DEFAULT_PLAYBACK_MODE_CONTINUOUS === 'true') {
             playbackMode = 'continuous';
@@ -3855,6 +3855,6 @@ ControllerMpd.prototype.setPlaybackMode = function (mode) {
     var self = this;
 
     //values: continuous|single
-    self.config.set('playback_mode', mode);
+    self.config.set('playback_mode_list', mode);
     process.env.PLAYBACK_MODE = mode;
 };
