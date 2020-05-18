@@ -1361,19 +1361,31 @@ ControllerAlsa.prototype.updateVolumeSettings = function () {
   }
   var valvolumestart = self.config.get('volumestart');
   var valvolumesteps = self.config.get('volumesteps');
-
-  var settings = {
-    device: valdevice,
-    name: outdevicename,
-    mixer: valmixer,
-    mixertype: valmixertype,
-    maxvolume: valvolumemax,
-    volumecurve: valvolumecurvemode,
-    volumestart: valvolumestart,
-    volumesteps: valvolumesteps,
-    volumeOverride: false
+  
+  if (valdevice == 'Loopback') {
+    var settings = {
+      mixer: valmixer,
+      mixertype: valmixertype,
+      maxvolume: valvolumemax,
+      volumecurve: valvolumecurvemode,
+      volumestart: valvolumestart,
+      volumesteps: valvolumesteps,
+     volumeOverride: false
+    };
+  } else {
+    var settings = {
+      device: valdevice,
+      name: outdevicename,
+      mixer: valmixer,
+      mixertype: valmixertype,
+      maxvolume: valvolumemax,
+      volumecurve: valvolumecurvemode,
+      volumestart: valvolumestart,
+      volumesteps: valvolumesteps,
+      volumeOverride: false
+    };
   };
-
+	
   if (deviceVolumeOverride && deviceVolumeOverride.card !== undefined && deviceVolumeOverride.pluginType && deviceVolumeOverride.pluginName) {
     if (deviceVolumeOverride.card.toString() === valdevice.toString()) {
       self.logger.info('Applying Volume Override');
