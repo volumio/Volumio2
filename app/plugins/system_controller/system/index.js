@@ -1074,7 +1074,7 @@ ControllerSystem.prototype.setTimeZone = function (data) {
   const defer = libQ.defer();
   const tz = data.name || 'UTC' // Fall back to UTC if nothing is provided
   this.logger.info(`Setting time zone to ${tz}`);
-  const tzcmd = 'timedatectl --no-ask-password set-timezone'
+  const tzcmd = 'sudo timedatectl set-timezone'
   exec(`${tzcmd} ${tz}`, (err, response) => {
     if (err) {
       this.logger.error(`Cannot set TimeZone: ${err}`);
