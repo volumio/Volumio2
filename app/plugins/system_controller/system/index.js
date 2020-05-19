@@ -4,6 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var execSync = require('child_process').execSync;
+const { spwan } = require('child_process');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var crypto = require('crypto');
@@ -1045,4 +1046,52 @@ ControllerSystem.prototype.getCPUCoresNumber = function () {
       self.logger.error('Could not retrieve CPU Cores: ' + e);
       return 1
     }
+};
+
+ControllerSystem.prototype.enableLiveLog = function (data) {
+  if (data === 'true') {
+    try {
+      this.logger.info('Launching a new LiveLog session');
+      const format = 'cat'; // json is also an option for more serious logging/filtering
+      const args = ['--output', format, '-f'];
+      const defaults = {
+        cwd: undefined,
+        env: process.env
+      };
+      const liveLogData = {
+        message: 'Starting Live Log...\n'
+      };
+      this.commandRouter.broadcastMessage('LLogOpen', liveLogData);
+      
+      if (this.livelogchild) {
+        this.livelogchild.kill();
+      }
+      this.livelogchild = spawn('journalctl', args, defaults); // sudo or not?
+
+      this.livelogchild.stdout.on('data', (d) => {
+        liveLogData.message = d.toString();
+        this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
+      });
+
+      this.livelogchild.stderr.on('data', (d) => {
+        liveLogData.message = d.toString();
+        this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
+      });
+
+      this.livelogchild.on('close', (code) => {
+        this.logger.info(`Live Log process terminated: ${code}`);
+        liveLogData.message = `process exited with code ${code}`;
+        this.commandRouter.broadcastMessage('LLogDone', liveLogData);
+      });
+    } catch (e) {
+      // The irony is deep.
+      this.logger.error('Error launching debugging sessions.', e);
+    }
+  } else if (data === 'false') {
+    this.logger.info('Launching a new LiveLog session');
+    if (this.livelogchild) {
+      this.livelogchild.kill();
+      this.livelogchild = undefined;
+    }
+  }
 };
