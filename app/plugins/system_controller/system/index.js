@@ -4,7 +4,7 @@ var libQ = require('kew');
 var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var execSync = require('child_process').execSync;
-const { spwan } = require('child_process');
+var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var crypto = require('crypto');
@@ -1066,7 +1066,7 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
       if (this.livelogchild) {
         this.livelogchild.kill();
       }
-      this.livelogchild = spawn('journalctl', args, defaults); // sudo or not?
+      this.livelogchild = spawn('/usr/bin/sudo /bin/journalctl', args, defaults);
 
       this.livelogchild.stdout.on('data', (d) => {
         liveLogData.message = d.toString();
