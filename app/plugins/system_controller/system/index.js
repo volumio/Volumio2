@@ -1053,7 +1053,7 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
     try {
       this.logger.info('Launching a new LiveLog session');
       const format = 'cat'; // json is also an option for more serious logging/filtering
-      const args = ['/bin/journalctl','--output', format, '-f'];
+      const args = ['--output', format, '-f'];
       const defaults = {
         cwd: undefined,
         env: process.env
@@ -1066,7 +1066,7 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
       if (this.livelogchild) {
         this.livelogchild.kill();
       }
-      this.livelogchild = spawn('/usr/bin/sudo',args, defaults);
+      this.livelogchild = spawn('/bin/journalctl',args, defaults);
 
       this.livelogchild.stdout.on('data', (d) => {
         liveLogData.message = d.toString();
