@@ -1064,10 +1064,17 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
       this.commandRouter.broadcastMessage('LLogOpen', liveLogData);
       
       if (this.livelogchild) {
+        this.logger.info('Killing previous LiveLog session');
         this.livelogchild.kill();
       }
       this.livelogchild = spawn('/bin/journalctl',args, defaults);
-
+      
+      this.livelogchild.on('error', (d) => {
+        this.logger.info('Error spawning LiveLog session');
+        liveLogData.message = d.toString();
+        this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
+      });
+      
       this.livelogchild.stdout.on('data', (d) => {
         liveLogData.message = d.toString();
         this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
