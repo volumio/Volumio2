@@ -85,7 +85,7 @@ socket.on('LLogOpen',data => {
   document.getElementById('console').innerHTML += data.message;
 })
 socket.on('LLogProgress',data => {
-  document.getElementById('console').innerHTML += data.message;
+  document.getElementById('console').innerHTML += data.message.replace(/verbose:.*$/gm,"\b");
 })
 socket.on('LLogDone',data => {
   document.getElementById('console').innerHTML += data.message;
