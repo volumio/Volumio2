@@ -9,6 +9,7 @@ function CoreStateMachine (commandRouter) {
   this.unmanagedMode = false;
 
   this.commandRouter = commandRouter;
+  this.logger = this.commandRouter.logger;
 
   this.currentPosition = 0;
   this.currentConsume = false;
@@ -583,8 +584,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
     }
   }
   this.timeLastServiceStateUpdate = Date.now();
-  this.commandRouter.pushDebugConsoleMessage('STATE SERVICE ' + JSON.stringify(stateService));
-  this.commandRouter.pushDebugConsoleMessage('CURRENT POSITION ' + this.currentPosition);
+  this.logger.verbose('STATE SERVICE ' + JSON.stringify(stateService));
+  this.logger.verbose('CURRENT POSITION ' + this.currentPosition);
 
   if (stateService.isStreaming != undefined) {
     this.isStreaming = stateService.isStreaming;

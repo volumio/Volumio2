@@ -43,7 +43,7 @@ function ControllerMpd (context) {
 
 // MPD Play
 ControllerMpd.prototype.play = function (N) {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::play ' + N);
+  this.logger.info('ControllerMpd::play ' + N);
   return this.sendMpdCommand('play', [N]);
 };
 
@@ -55,25 +55,25 @@ ControllerMpd.prototype.add = function (data) {
 };
 // MPD Remove
 ControllerMpd.prototype.remove = function (position) {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::remove ' + position);
+  this.logger.info('ControllerMpd::remove ' + position);
   return this.sendMpdCommand('delete', [position]);
 };
 
 // MPD Next
 ControllerMpd.prototype.next = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::next');
+  this.logger.info('ControllerMpd::next');
   return this.sendMpdCommand('next', []);
 };
 
 // MPD Previous
 ControllerMpd.prototype.previous = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::previous');
+  this.logger.info('ControllerMpd::previous');
   return this.sendMpdCommand('previous', []);
 };
 
 // MPD Seek
 ControllerMpd.prototype.seek = function (timepos) {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::seek to ' + timepos);
+  this.logger.info('ControllerMpd::seek to ' + timepos);
   return this.sendMpdCommand('seekcur', [timepos]);
 };
 
@@ -95,32 +95,32 @@ ControllerMpd.prototype.repeat = function (repeatcmd) {
 
 // MPD clear
 ControllerMpd.prototype.clear = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::clear');
+  this.logger.info('ControllerMpd::clear');
   return this.sendMpdCommand('clear', []);
 };
 
 // MPD enable output
 ControllerMpd.prototype.enableOutput = function (output) {
-  this.commandRouter.pushConsoleMessage('Enable Output ' + output);
+  this.logger.info('Enable Output ' + output);
   return this.sendMpdCommand('enableoutput', [output]);
 };
 
 // MPD disable output
 ControllerMpd.prototype.disableOutput = function (output) {
-  this.commandRouter.pushConsoleMessage('Disable Output ' + output);
+  this.logger.info('Disable Output ' + output);
   return this.sendMpdCommand('disableoutput', [output]);
 };
 
 // UpdateDB
 ControllerMpd.prototype.updateMpdDB = function () {
-  this.commandRouter.pushConsoleMessage('Update mpd DB');
+  this.logger.info('Update mpd DB');
   return this.sendMpdCommand('update', []);
 };
 
 ControllerMpd.prototype.addPlay = function (fileName) {
   var self = this;
 
-  this.commandRouter.pushConsoleMessage('ControllerMpd::addPlay');
+  this.logger.info('ControllerMpd::addPlay');
   this.commandRouter.pushToastMessage('Success', '', fileName + self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TEXT_1'));
 
   // Add playlists and cue with load command
@@ -132,7 +132,6 @@ ControllerMpd.prototype.addPlay = function (fileName) {
       {command: 'play', parameters: []}
     ]);
   } else if (fileName.startsWith('albums')) {
-    self.logger.info('PLAYYYYYYYY');
     return self.playAlbum(fileName);
   } else {
     return this.sendMpdCommandArray([
@@ -173,7 +172,7 @@ ControllerMpd.prototype.addPlayCue = function (data) {
 // MPD music library
 ControllerMpd.prototype.getTracklist = function () {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::getTracklist');
+  this.logger.info('ControllerMpd::getTracklist');
 
   return self.mpdReady
     .then(function () {
@@ -249,7 +248,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function (sInput) {
 
 // Define a method to get the MPD state
 ControllerMpd.prototype.getState = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::getState');
+  this.logger.info('ControllerMpd::getState');
   var timeCurrentUpdate = Date.now();
   this.timeLatestUpdate = timeCurrentUpdate;
 
@@ -293,7 +292,7 @@ ControllerMpd.prototype.getState = function () {
 // Stop the current status update thread if a newer one exists
 ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentThread) {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::haltIfNewerUpdateRunning');
+  this.logger.info('ControllerMpd::haltIfNewerUpdateRunning');
 
   if (self.timeLatestUpdate > timeCurrentThread) {
     return libQ.reject('Alert: Aborting status update - newer one detected');
@@ -305,7 +304,7 @@ ControllerMpd.prototype.haltIfNewerUpdateRunning = function (data, timeCurrentTh
 // Announce updated MPD state
 ControllerMpd.prototype.pushState = function (state) {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::pushState');
+  this.logger.info('ControllerMpd::pushState');
 
   return self.commandRouter.servicePushState(state, self.servicename);
 };
@@ -313,8 +312,7 @@ ControllerMpd.prototype.pushState = function (state) {
 // Pass the error if we don't want to handle it
 ControllerMpd.prototype.pushError = function (sReason) {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::pushError');
-  self.commandRouter.pushConsoleMessage(sReason);
+  self.logger.error('ControllerMpd::pushError: ' + sReason);
 
   // Return a resolved empty promise to represent completion
   return libQ.resolve();
@@ -323,15 +321,13 @@ ControllerMpd.prototype.pushError = function (sReason) {
 // Define a general method for sending an MPD command, and return a promise for its execution
 ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::sendMpdCommand ' + sCommand);
+  self.logger.verbose('ControllerMpd::sendMpdCommand ' + sCommand);
 
   return self.mpdReady
     .then(function () {
-      self.commandRouter.pushConsoleMessage('sending command...');
       return libQ.nfcall(self.clientMpd.sendCommand.bind(self.clientMpd), libMpd.cmd(sCommand, arrayParameters));
     })
     .then(function (response) {
-      self.commandRouter.pushConsoleMessage('parsing response...');
       var respobject = libMpd.parseKeyValueMessage.call(libMpd, response);
       // If there's an error show an alert on UI
       if ('error' in respobject) {
@@ -347,13 +343,12 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 // Command array takes the form [{command: sCommand, parameters: arrayParameters}, ...]
 ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::sendMpdCommandArray');
 
   return self.mpdReady
     .then(function () {
       return libQ.nfcall(self.clientMpd.sendCommands.bind(self.clientMpd),
         libFast.map(arrayCommands, function (currentCommand) {
-          self.commandRouter.pushConsoleMessage('COMMAND ' + currentCommand);
+          self.logger.verbose('MPD COMMAND ' + currentCommand);
           return libMpd.cmd(currentCommand.command, currentCommand.parameters);
         })
       );
@@ -363,7 +358,8 @@ ControllerMpd.prototype.sendMpdCommandArray = function (arrayCommands) {
 
 // Parse MPD's track info text into Volumio recognizable object
 ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::parseTrackInfo');
+  var self = this;
+  self.logger.verbose('ControllerMpd::parseTrackInfo');
 
   // this.commandRouter.logger.info("OBJTRACKINFO "+JSON.stringify(objTrackInfo));
   var resp = {};
@@ -453,7 +449,6 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
 // Parse MPD's text playlist into a Volumio recognizable playlist object
 ControllerMpd.prototype.parsePlaylist = function (objQueue) {
   var self = this;
-  self.commandRouter.pushConsoleMessage('ControllerMpd::parsePlaylist');
 
   // objQueue is in form {'0': 'file: http://uk4.internet-radio.com:15938/', '1': 'file: http://2363.live.streamtheworld.com:80/KUSCMP128_SC'}
   // We want to convert to a straight array of trackIds
@@ -467,7 +462,7 @@ ControllerMpd.prototype.parseState = function (objState) {
   var self = this;
   // console.log(objState);
 
-  this.commandRouter.pushConsoleMessage('ControllerMpd::parseState');
+  self.logger.verbose('ControllerMpd::parseState');
 
   // Pull track duration out of status message
   var nDuration = null;
@@ -759,7 +754,7 @@ ControllerMpd.prototype.outputDeviceCallback = function () {
   var self = this;
 
   var defer = libQ.defer();
-  self.context.coreCommand.pushConsoleMessage('Output device has changed, restarting MPD');
+  self.logger.info('Output device has changed, restarting MPD');
   self.createMPDFile(function (error) {
     if (error !== undefined && error !== null) {
       self.commandRouter.pushToastMessage('error', self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE'), self.commandRouter.getI18nString('COMMON.CONFIGURATION_UPDATE_ERROR'));
@@ -1338,7 +1333,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
                     });
                   }
                 } catch (err) {
-                  self.logger.info('Cue Parser - Cannot parse ' + path);
+                  self.logger.error('Cue Parser - Cannot parse ' + path);
                 }
               } else {
                 list.push({
@@ -1410,7 +1405,7 @@ ControllerMpd.prototype.lsInfo = function (uri) {
             }
           }
         } else {
-          self.logger.info(err);
+          self.logger.error('Failed LSINFO: ' + err);
         }
       }
       defer.resolve({
@@ -1485,7 +1480,7 @@ ControllerMpd.prototype.listallFolder = function (uri) {
             });
           }
         }
-      } else self.logger.info(err);
+      } else self.logger.error('Listall folder error: ' + err);
 
       defer.resolve({
         navigation: {
@@ -1761,7 +1756,7 @@ ControllerMpd.prototype.updateQueue = function () {
           }
         }
         // self.commandRouter.addQueueItems(queue);
-      } else self.logger.info(err);
+      } else self.logger.error('updateQueue error: ' + err);
 
       defer.resolve({
         navigation: {
@@ -1791,7 +1786,7 @@ ControllerMpd.prototype.getAlbumArt = function (data, path, icon) {
 ControllerMpd.prototype.reportUpdatedLibrary = function () {
   var self = this;
   // TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
-  self.commandRouter.pushConsoleMessage('ControllerMpd::DB Update Finished');
+  self.logger.info('ControllerMpd::DB Update Finished');
   // return self.commandRouter.pushToastMessage('Success', 'ASF', ' Added');
 };
 
@@ -1915,8 +1910,8 @@ ControllerMpd.prototype.explodeUri = function (uri) {
 
       defer.resolve(list);
     } catch (err) {
-      self.logger.info(err);
-      self.logger.info('Cue Parser - Cannot parse ' + uriPath);
+      self.logger.error(err);
+      self.logger.error('Cue Parser - Cannot parse ' + uriPath);
     }
   } else if (uri.startsWith('search://')) {
     // exploding search
@@ -2117,7 +2112,7 @@ ControllerMpd.prototype.explodeUri = function (uri) {
             });
           }
         }
-      } else self.logger.info(err);
+      } else self.logger.error('Explode URI Error: ' + err);
 
       defer.resolve(list);
     });
@@ -2392,7 +2387,7 @@ ControllerMpd.prototype.exploderArtist = function (err, msg, defer) {
 
     defer.resolve(list);
   } else {
-    self.logger.info(err);
+    self.logger.error('Explode uri error: ' + err);
     defer.reject(new Error());
   }
 };
@@ -2655,7 +2650,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
   } else {
     var uri = self.sanitizeUri(track.uri);
 
-    self.commandRouter.pushConsoleMessage('ControllerMpd::clearAddPlayTracks ' + uri);
+    self.logger.verbose('ControllerMpd::clearAddPlayTracks ' + uri);
 
     var urilow = uri.toLowerCase();
     if (urilow.endsWith('.dff') || urilow.endsWith('.dsd') || urilow.endsWith('.dxd') || urilow.endsWith('.dsf')) {
@@ -2682,7 +2677,7 @@ ControllerMpd.prototype.clearAddPlayTrack = function (track) {
 
 ControllerMpd.prototype.seek = function (position) {
   var self = this;
-  this.commandRouter.pushConsoleMessage('ControllerMpd::seek');
+  self.logger.info('ControllerMpd::seek');
 
   var defer = libQ.defer();
   var command = 'seek ';
@@ -2705,19 +2700,19 @@ ControllerMpd.prototype.seek = function (position) {
 
 // MPD pause
 ControllerMpd.prototype.pause = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::pause');
+  this.logger.info('ControllerMpd::pause');
   return this.sendMpdCommand('pause', []);
 };
 
 // MPD resume
 ControllerMpd.prototype.resume = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::resume');
+  this.logger.info('ControllerMpd::resume');
   return this.sendMpdCommand('play', []);
 };
 
 // MPD stop
 ControllerMpd.prototype.stop = function () {
-  this.commandRouter.pushConsoleMessage('ControllerMpd::stop');
+  this.logger.info('ControllerMpd::stop');
   return this.sendMpdCommand('stop', []);
 };
 
@@ -2728,7 +2723,7 @@ ControllerMpd.prototype.sanitizeUri = function (uri) {
 ControllerMpd.prototype.reportUpdatedLibrary = function () {
   var self = this;
   // TODO PUSH THIS MESSAGE TO ALL CONNECTED CLIENTS
-  self.commandRouter.pushConsoleMessage('ControllerMpd::DB Update Finished');
+  self.logger.info('ControllerMpd::DB Update Finished');
   return self.commandRouter.pushToastMessage('Success', 'ASF', ' Added');
 };
 
@@ -3138,7 +3133,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri, index, previous) {
                   trackType: albumTrackType,
                   duration: duration
                 };
-    } else self.logger.info(err);
+    } else self.logger.error('Listalbum songs error: ' + err);
 
     defer.resolve(response);
   });
@@ -3384,7 +3379,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
 
     defer.resolve(response);
   } else {
-    self.logger.info(err);
+    self.logger.error('Parse List Albums error:' + err);
     defer.reject(new Error());
   }
 };
@@ -3577,7 +3572,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 
           defer.resolve(response);
         } else {
-          self.logger.info(err);
+          self.logger.error('List Genre error: ' + err);
           defer.reject(new Error());
         }
       });

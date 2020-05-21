@@ -15,7 +15,7 @@ function CoreCommandRouter (server) {
   this.logger = winston.createLogger({
     format: winston.format.simple(),
     transports: [
-      new (winston.transports.Console)()
+      new (winston.transports.Console)({level: 'verbose'})
     ]
   });
 
@@ -1157,7 +1157,7 @@ CoreCommandRouter.prototype.initPlayerControls = function () {
  * @param sMessage The debug message to push
  */
 CoreCommandRouter.prototype.pushDebugConsoleMessage = function (sMessage) {
-  this.logger.info(sMessage);
+  this.logger.debug(sMessage);
 };
 
 /**
