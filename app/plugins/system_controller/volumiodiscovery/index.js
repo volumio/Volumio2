@@ -263,7 +263,8 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
       });
       socket.on('disconnect', function () {
             	setTimeout(() => {
-          self.handleUngracefulDeviceDisappear(uuid);
+            	    // Disabled: the mdns cache will keep this device in memory, we need to find a way to reinstantiate the mdns search
+                    //self.handleUngracefulDeviceDisappear(uuid);
                 	socket.close();
         }, 4000);
       });
