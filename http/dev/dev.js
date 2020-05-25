@@ -12,6 +12,9 @@ document.getElementById('button-testtrue').onclick = function () { socket.emit('
 document.getElementById('button-testfalse').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'setTestSystem', data: 'false'}); };
 document.getElementById('button-sshenable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableSSH', data: 'true'}); };
 document.getElementById('button-sshdisable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableSSH', data: 'false'}); };
+document.getElementById('button-livelog-enable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableLiveLog', data: 'true'}); };
+document.getElementById('button-livelog-disable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableLiveLog', data: 'false'}); };
+document.getElementById('button-clearconsole').onclick = function() { clearConsole()};
 
 // Create listeners for websocket events--------------------------------
 socket.on('connect', function () {
@@ -39,8 +42,8 @@ socket.on('disconnect', function () {
   playlistHistory = new Array();
   nPlaylistHistoryPosition = 0;
   clearPlayQueue();
-  clearBrowseView();
-  clearPlaylistView();
+  // clearBrowseView();
+  // clearPlaylistView();
   clearPlayerStateDisplay();
 });
 
@@ -77,13 +80,24 @@ socket.on('pushDeviceHWUUID', function (data) {
   document.getElementById('hwuuid-copy-button').style.display = 'inline';
 });
 
+
+socket.on('LLogOpen',data => {
+  document.getElementById('console').innerHTML += data.message;
+})
+socket.on('LLogProgress',data => {
+  document.getElementById('console').innerHTML += data.message.replace(/verbose:.*$/gm,"\b");
+})
+socket.on('LLogDone',data => {
+  document.getElementById('console').innerHTML += data.message;
+})
+
 // Define internal functions ----------------------------------------------
 function clearConsole () {
   var nodeConsole = document.getElementById('console');
-
-  while (nodeConsole.firstChild) {
-    nodeConsole.removeChild(nodeConsole.firstChild);
-  }
+  nodeConsole.innerHTML = '';
+  // while (nodeConsole.firstChild) {
+  //   nodeConsole.removeChild(nodeConsole.firstChild);
+  // }
 }
 
 function enableControls () {

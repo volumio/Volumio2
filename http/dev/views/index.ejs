@@ -6,10 +6,25 @@
 		<style>
 			#div-console {
 				border: 1px solid black;
-				height: 400px;
-				overflow-y: scroll;
+				overflow-y: auto;
+				height: 98%;
+				width: 98%;
+				/* height: 400px; */
+				max-height:650px;
+				/* <pre> formatting */
+				display: block;
+				padding: 9.5px;
+				margin: 0 0 10px;
+				font-size: 13px;
+				line-height: 1.42857143;
+				color: #333;
+				word-break: break-all;
+				word-wrap: break-word;
+				background-color: #f5f5f5;
+				border: 1px solid #ccc;
+				border-radius: 4px;
 			}
-			#div-console ul {
+			/* #div-console ul {
 				list-style-type: none;
 				padding: 0px;
 				margin: 0px;
@@ -17,7 +32,7 @@
 			#div-console ul li pre {
 				padding: 0px;
 				margin: 0px;
-			}
+			} */
 			#div-browser li, #div-playqueue li {
 				clear: both;
 			}
@@ -64,6 +79,15 @@
 
 		<h3>Play Queue</h3>
 		<ol id='div-playqueue' start='0'></ol>
+
+		<h3>Live Log</hr>
+		<button id='button-clearconsole'>Clear</button>
+		<button id='console-copy-button' type="button" data-clipboard-demo data-clipboard-target="#console">Copy</button>
+		<div id='div-console' style='div-console'>
+			<pre id='console'></pre>
+		</div>
+		<button id='button-livelog-enable' class='control-websocket' disabled>ENABLE</button>
+		<button id='button-livelog-disable' class='control-websocket' disabled>DISABLE</button>
 
 		<script src="./assets/socket.io-2.0.3.js"></script>
 		<script src="./dev.js"></script>
