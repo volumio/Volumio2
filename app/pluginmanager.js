@@ -14,6 +14,7 @@ var compareVersions = require('compare-versions');
 var arch = '';
 var variant = '';
 var device = '';
+var isVolumioHardware = 'none';
 
 module.exports = PluginManager;
 
@@ -75,7 +76,7 @@ function PluginManager (ccommand, server) {
   var myVolumioPMPath = '/myvolumio/app/myvolumio-pluginmanager';
   if (fs.existsSync(myVolumioPMPath)) {
     	this.logger.info('MYVOLUMIO Environment detected');
-    self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager, self.config);
+        self.myVolumioPluginManager = new (require(myVolumioPMPath))(self.coreCommand, self.websocketServer, self.configManager, self.config);
   }
 }
 
@@ -1383,6 +1384,10 @@ PluginManager.prototype.getAvailablePlugins = function () {
   var myplugins = [];
   var response = [];
 
+  if (isVolumioHardware === 'none') {
+      self.detectVolumioHardware();
+  }
+
   var url = 'http://plugins.volumio.org/plugins/' + variant + '/' + arch + '/plugins.json';
   var installed = self.getInstalledPlugins();
 
@@ -1773,4 +1778,13 @@ PluginManager.prototype.checkConfigFileEmpty = function (destConfigurationFile) 
     		return true;
     }
   }
+};
+
+PluginManager.prototype.detectVolumioHardware = function () {
+    var self = this;
+
+    isVolumioHardware = self.coreCommand.executeOnPlugin('system_controller', 'my_volumio', 'detectVolumioHardware', '');
+    if (isVolumioHardware === true) {
+      variant = 'volumioproducts';
+    }
 };
