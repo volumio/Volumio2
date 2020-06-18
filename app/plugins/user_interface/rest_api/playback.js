@@ -271,6 +271,11 @@ RESTApiPlayback.prototype.playbackGetState = function (req, res) {
 RESTApiPlayback.prototype.addPlay = function (req, res) {
   var self = this;
 
+  if (!req.is('application/json')) {
+      self.logger.error('Cannot execute addPlay REST Call: Request type must be application/json');
+      return res.json({'error': 'Request type must be application/json'});
+  }
+
   var data = req.body;
   self.commandRouter.addQueueItems(data)
     .then(function (e) {
@@ -285,6 +290,11 @@ RESTApiPlayback.prototype.addPlay = function (req, res) {
 RESTApiPlayback.prototype.addToQueue = function (req, res) {
   var self = this;
 
+  if (!req.is('application/json')) {
+      self.logger.error('Cannot execute addToQueue REST Call: Request type must be application/json');
+      return res.json({'error': 'Request type must be application/json'});
+  }
+
   var data = req.body;
   self.commandRouter.addQueueItems(data)
     .then(function () {
@@ -297,6 +307,11 @@ RESTApiPlayback.prototype.addToQueue = function (req, res) {
 
 RESTApiPlayback.prototype.replaceAndPlay = function (req, res) {
   var self = this;
+
+  if (!req.is('application/json')) {
+    self.logger.error('Cannot execute replaceAndPlay REST Call: Request type must be application/json');
+    return res.json({'error': 'Request type must be application/json'});
+  }
 
   var data = req.body;
   self.commandRouter.replaceAndPlay(data)
