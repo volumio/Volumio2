@@ -28,6 +28,10 @@
             "value":0,
             "label": "0"
           },
+          "visibleIf": {
+            "field": "i2s",
+            "value": false
+          },
           "options": [
 
           ]

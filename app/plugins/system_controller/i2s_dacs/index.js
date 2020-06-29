@@ -44,6 +44,10 @@ ControllerI2s.prototype.onVolumioStart = function () {
 
   self.forceConfigTxtBannerCompat();
 
+  setTimeout(()=>{
+      self.checkUpdatedI2SNumberonRaspbberyPI();
+  }, 5000)
+
   return libQ.resolve();
 };
 
@@ -298,24 +302,27 @@ ControllerI2s.prototype.getI2sStatus = function () {
 };
 
 ControllerI2s.prototype.getI2SNumber = function (data) {
-  var self = this;
+    var self = this;
 
-  var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
-  var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
-  var number = '';
+    var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    var number = '';
 
-  for (var i = 0; i < dacdata.devices.length; i++) {
-    if (dacdata.devices[i].name == devicename) {
-      var num = i;
-      for (var i = 0; i < dacdata.devices[num].data.length; i++) {
-        if (dacdata.devices[num].data[i].name == data) {
-          var number = dacdata.devices[num].data[i].alsanum;
+    for (var i = 0; i < dacdata.devices.length; i++) {
+        if (dacdata.devices[i].name == devicename) {
+            var num = i;
+            for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+                if (dacdata.devices[num].data[i].name == data) {
+                    number = dacdata.devices[num].data[i].alsanum;
+                }
+            }
+            if (!number) {
+                number = dacdata.devices[num].data[0].alsanum;
+            }
         }
-      }
     }
-  }
 
-  return number;
+    return number;
 };
 
 ControllerI2s.prototype.getI2SMixer = function (data) {
@@ -611,4 +618,32 @@ ControllerI2s.prototype.writeModulesFile = function (modules) {
       ws.end();
     }
   });
+};
+
+ControllerI2s.prototype.checkUpdatedI2SNumberonRaspbberyPI = function () {
+    var self = this;
+
+    // Raspberry PI Kernel 5.4 onwards changed the numbering of i2s dacs
+    // We check and fix on start
+    // IF PI && I2S DAC && OUTPUT DEVICE = 1, we fix and restart audio card
+
+    var softvolume = false;
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    if (devicename === 'Raspberry PI') {
+        var i2senabled = self.getConfigParam('i2s_enabled');
+        var outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
+        if (outputDevice === 'softvolume') {
+            softvolume = true;
+            outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+        }
+        if (i2senabled && outputDevice === '1') {
+            self.logger.info('I2S DAC Found on device 1, changing it to device 2');
+            if (softvolume === false) {
+                self.commandRouter.sharedVars.set('alsa.outputdevice', '2');
+            } else {
+                self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'enableSoftMixer', '2');
+            }
+
+        }
+    }
 };
