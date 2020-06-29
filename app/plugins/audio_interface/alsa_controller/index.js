@@ -567,7 +567,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
   var defer = libQ.defer();
   var uiPush = true;
 
-  // console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
   if (data.output_device.label != undefined) {
     data.output_device.label = data.output_device.label.replace('USB: ', '');
   }
@@ -640,9 +640,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
     if (i2sstatus.enabled) {
       self.logger.info('Disabling I2S DAC: ');
       self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'disableI2SDAC', '');
-      this.config.set('outputdevicename', 'Audio Jack');
-      OutputDeviceNumber = '0';
-      self.enablePiJack();
+
       /*
 			var responseData = {
 				title: self.commandRouter.getI18nString('PLAYBACK_OPTIONS.I2S_DAC_DEACTIVATED'),
