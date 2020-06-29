@@ -298,24 +298,27 @@ ControllerI2s.prototype.getI2sStatus = function () {
 };
 
 ControllerI2s.prototype.getI2SNumber = function (data) {
-  var self = this;
+    var self = this;
 
-  var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
-  var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
-  var number = '';
+    var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    var number = '';
 
-  for (var i = 0; i < dacdata.devices.length; i++) {
-    if (dacdata.devices[i].name == devicename) {
-      var num = i;
-      for (var i = 0; i < dacdata.devices[num].data.length; i++) {
-        if (dacdata.devices[num].data[i].name == data) {
-          var number = dacdata.devices[num].data[i].alsanum;
+    for (var i = 0; i < dacdata.devices.length; i++) {
+        if (dacdata.devices[i].name == devicename) {
+            var num = i;
+            for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+                if (dacdata.devices[num].data[i].name == data) {
+                    number = dacdata.devices[num].data[i].alsanum;
+                }
+            }
+            if (!number) {
+                number = dacdata.devices[num].data[0].alsanum;
+            }
         }
-      }
     }
-  }
 
-  return number;
+    return number;
 };
 
 ControllerI2s.prototype.getI2SMixer = function (data) {

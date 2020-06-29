@@ -93,6 +93,8 @@ ControllerAlsa.prototype.getUIConfig = function () {
       var devicevalue;
 
       var cards = self.getAlsaCards();
+      var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
+      var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
       value = self.config.get('outputdevice');
       if (value == undefined) {
@@ -102,14 +104,24 @@ ControllerAlsa.prototype.getUIConfig = function () {
       }
       var cardnum = value;
 
-      self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
-      var outdevicename = self.config.get('outputdevicename');
-      if (outdevicename) {
-        self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+      if (i2sstatus.enabled) {
+          // IF I2S DAC is enable we don't show it in output list
+          var cards = self.getAlsaCardsWithoutI2SDAC();
+          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', cards[0].id);
+          outdevicename = self.getLabelForSelectedCard(cards, cards[0].id);
+          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
       } else {
-        outdevicename = self.getLabelForSelectedCard(cards, value);
-        self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
+          var outdevicename = self.config.get('outputdevicename');
+          if (outdevicename) {
+              self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+          } else {
+              outdevicename = self.getLabelForSelectedCard(cards, value);
+              self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+          }
       }
+
+
 
       for (var i in cards) {
         if (cards[i].name === 'Audio Jack') {
@@ -131,9 +143,6 @@ ControllerAlsa.prototype.getUIConfig = function () {
           });
         }
       }
-
-      var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
-      var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
       if (i2soptions.length > 0) {
         if (i2sstatus.enabled) {
@@ -567,7 +576,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
   var defer = libQ.defer();
   var uiPush = true;
 
-  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
+  //console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + JSON.stringify(data));
   if (data.output_device.label != undefined) {
     data.output_device.label = data.output_device.label.replace('USB: ', '');
   }
@@ -1633,13 +1642,31 @@ ControllerAlsa.prototype.checkValidMixer = function (mixerName) {
 };
 
 ControllerAlsa.prototype.setDeviceVolumeOverride = function (data) {
-  var self = this;
-  self.logger.info('Setting Device Volume Override');
+    var self = this;
+    self.logger.info('Setting Device Volume Override');
 
-  if (data && data.card !== undefined && data.pluginType && data.pluginName) {
-    deviceVolumeOverride = data;
-    this.updateVolumeSettings();
-  } else {
-    	self.logger.error('Failed to set Device Volume Override: missing parameters');
-  }
+    if (data && data.card !== undefined && data.pluginType && data.pluginName) {
+        deviceVolumeOverride = data;
+        this.updateVolumeSettings();
+    } else {
+        self.logger.error('Failed to set Device Volume Override: missing parameters');
+    }
+};
+
+ControllerAlsa.prototype.getAlsaCardsWithoutI2SDAC = function (data) {
+    var self = this;
+    self.logger.info('Getting Alsa Cards List without I2S DAC');
+
+    var cards = self.getAlsaCards();
+    var cardsWithoutI2S = [];
+    var i2sNumber = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SNumber');
+    var cards = self.getAlsaCards();
+
+    for (var i in cards) {
+        if (i2sNumber !== cards[i].id) {
+            cardsWithoutI2S.push(cards[i]);
+        }
+    }
+
+    return cardsWithoutI2S;
 };
