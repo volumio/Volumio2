@@ -1524,6 +1524,11 @@ ControllerAlsa.prototype.usbAudioDetach = function () {
 ControllerAlsa.prototype.checkAudioDeviceAvailable = function () {
   var self = this;
 
+  var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
+  if (i2sstatus.enabled) {
+      // If I2S is enabled we skip the device available check
+      return;
+  }
   var cards = self.getAlsaCards();
   var outdev = this.config.get('outputdevice');
   if (outdev === 'softvolume') {
