@@ -161,7 +161,8 @@ ControllerMpd.prototype.addPlayCue = function (data) {
       artist: cueItem.artist,
       album: cueItem.album,
       number: cueItem.number,
-      albumart: cueItem.albumart
+      albumart: cueItem.albumart,
+      date: cueItem.date,
     }]);
 
     var index = this.commandRouter.stateMachine.playQueue.arrayQueue.length;
@@ -271,6 +272,7 @@ ControllerMpd.prototype.getState = function () {
             collectedState.title = trackinfo.title;
             collectedState.artist = trackinfo.artist;
             collectedState.album = trackinfo.album;
+            collectedState.date = trackinfo.date;
             // collectedState.albumart = trackinfo.albumart;
             collectedState.uri = trackinfo.uri;
             collectedState.trackType = trackinfo.trackType.split('?')[0];
@@ -2932,6 +2934,7 @@ ControllerMpd.prototype.listAlbums = function (ui) {
             if (line.startsWith('file:')) {
               var path = line.slice(6);
               var albumName = self.searchFor(lines, i + 1, 'Album:');
+              var albumDate = self.searchFor(lines, i + 1, 'Date:');
               var artistName = self.searchFor(lines, i + 1, 'AlbumArtist:');
 
               if (!artistName) {
@@ -2953,6 +2956,7 @@ ControllerMpd.prototype.listAlbums = function (ui) {
                   type: 'folder',
                   title: albumName,
                   artist: artistName,
+                  date: albumDate,
                   album: '',
                   uri: 'albums://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName),
                   // Get correct album art from path- only download if not existent
@@ -3076,6 +3080,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri, index, previous) {
 
           var artist = self.searchFor(lines, i + 1, 'Artist:');
           var album = self.searchFor(lines, i + 1, 'Album:');
+          var date = self.searchFor(lines, i + 1, 'Date:');
 
           var track = self.searchFor(lines, i + 1, 'Track:');
           var title = self.searchFor(lines, i + 1, 'Title:');
@@ -3317,6 +3322,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
         }
         var album = self.searchFor(lines, i + 1, 'Album:');
         var genre = self.searchFor(lines, i + 1, 'Genre:');
+        var date = self.searchFor(lines, i + 1, 'Date:');
         // Include track number if tracknumber variable is set to 'true'
         if (!tracknumbers) {
           var title = self.searchFor(lines, i + 1, 'Title:');
@@ -3343,6 +3349,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
           title: title,
           artist: artist,
           album: album,
+          date: date,
           albumart: albumart,
           uri: 'music-library/' + path
         });
