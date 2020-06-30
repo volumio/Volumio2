@@ -34,18 +34,15 @@ function CoreVolumeController (commandRouter) {
   self.logger = self.commandRouter.logger;
 
   device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
-  if (device === 'softvolume') {
-    device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
-    devicename = 'softvolume';
-  } else {
-    if (device.indexOf(',') >= 0) {
-      device = device.charAt(0);
-    }
-    var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
-    if ((cards[device] !== undefined) && (cards[device].name !== undefined)) {
-      devicename = cards[device].name;
-    }
+
+  if (device.indexOf(',') >= 0) {
+    device = device.charAt(0);
   }
+  var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
+  if ((cards[device] !== undefined) && (cards[device].name !== undefined)) {
+    devicename = cards[device].name;
+  }
+  
   var mixerdev = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'mixer');
 
   if (mixerdev.indexOf(',') >= 0) {
