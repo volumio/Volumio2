@@ -389,7 +389,8 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
           this.config.set('i2s_enabled', true);
           this.config.set('i2s_dac', outdevicename);
 
-          self.commandRouter.sharedVars.set('alsa.outputdevice', num);
+          self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'setConfigParam', 
+                    {key: 'outputdevice', value: '' + num});
           // Restarting MPD, this seems needed only on first boot
           setTimeout(function () {
             self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
@@ -627,19 +628,18 @@ ControllerI2s.prototype.checkUpdatedI2SNumberonRaspbberyPI = function () {
     // We check and fix on start
     // IF PI && I2S DAC && OUTPUT DEVICE = 1, we fix and restart audio card
 
-    var softvolume = false;
     var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
     if (devicename === 'Raspberry PI') {
         var i2senabled = self.getConfigParam('i2s_enabled');
         var outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
-        if (outputDevice === 'softvolume') {
-            softvolume = true;
-            outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
-        }
+        var softvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolume');
         if (i2senabled && outputDevice !== '2') {
             self.logger.info('I2S DAC Found on wrong device number, changing it to device 2');
+
+            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'setConfigParam', 
+                    {key: 'outputdevice', value: '2'});
             if (softvolume === false) {
-                self.commandRouter.sharedVars.set('alsa.outputdevice', '2');
+              self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateALSAConfigFile');
                 setTimeout(()=>{
                     self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'setDefaultMixer', '2');
                 }, 1000)
