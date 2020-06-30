@@ -636,10 +636,13 @@ ControllerI2s.prototype.checkUpdatedI2SNumberonRaspbberyPI = function () {
             softvolume = true;
             outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
         }
-        if (i2senabled && outputDevice === '1') {
-            self.logger.info('I2S DAC Found on device 1, changing it to device 2');
+        if (i2senabled && outputDevice !== '2') {
+            self.logger.info('I2S DAC Found on wrong device number, changing it to device 2');
             if (softvolume === false) {
                 self.commandRouter.sharedVars.set('alsa.outputdevice', '2');
+                setTimeout(()=>{
+                    self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'setDefaultMixer', '2');
+                }, 1000)
             } else {
                 self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'enableSoftMixer', '2');
             }
