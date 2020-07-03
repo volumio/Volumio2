@@ -9,8 +9,16 @@
     "SLEEP_MODE_SYSTEM_WILL": "The system will ",
     "SLEEP_MODE_TITLE": "Sleep Mode",
     "STOP_MUSIC": "Stop Music",
-    "TIME_SELECT_ERROR": "Please select an alarm start time",
-    "TURN_OFF": "Turn off"
+    "TURN_OFF": "Turn off",
+    "TIME_SELECT_ERROR":"Please select an alarm start time",
+    "DAY_SELECT_ERROR":"Please select at least one day of week",
+    "MONDAY":"Monday",
+    "TUESDAY":"Tuesday",
+    "WEDNESDAY":"Wednesday",
+    "THURSDAY":"Thursday",
+    "FRIDAY":"Friday",
+    "SATURDAY":"Saturday",
+    "SUNDAY":"Sunday"
   },
   "APPEARANCE": {
     "ALBUMARTIST": "Albumartist",

@@ -10,7 +10,15 @@
     "SLEEP_MODE_TITLE": "Mode sommeil",
     "STOP_MUSIC": "Arrêter la musique dans",
     "TIME_SELECT_ERROR": "Sélectionner l'heure de l'alarme",
-    "TURN_OFF": "Éteindre dans"
+    "TURN_OFF": "Éteindre dans",
+    "DAY_SELECT_ERROR":"Sélectionner au moins un jour de la semaine",
+    "MONDAY":"Lundi",
+    "TUESDAY":"Mardi",
+    "WEDNESDAY":"Mercredi",
+    "THURSDAY":"Jeudi",
+    "FRIDAY":"Vendredi",
+    "SATURDAY":"Samedi",
+    "SUNDAY":"Dimanche"
   },
   "APPEARANCE": {
     "ALBUMARTIST": "Albumartist",
