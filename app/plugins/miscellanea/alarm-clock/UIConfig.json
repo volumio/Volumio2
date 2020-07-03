@@ -402,7 +402,7 @@
         {
           "id": "monday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.MONDAY",
+          "label": "TRANSLATE.ALARM.MONDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
@@ -412,7 +412,7 @@
         {
           "id": "tuesday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.TUESDAY",
+          "label": "TRANSLATE.ALARM.TUESDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
@@ -422,7 +422,7 @@
         {
           "id": "wednesday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.WEDNESDAY",
+          "label": "TRANSLATE.ALARM.WEDNESDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
@@ -432,7 +432,7 @@
         {
           "id": "thursday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.THURSDAY",
+          "label": "TRANSLATE.ALARM.THURSDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
@@ -442,7 +442,7 @@
         {
           "id": "friday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.FRIDAY",
+          "label": "TRANSLATE.ALARM.FRIDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
@@ -452,7 +452,7 @@
         {
           "id": "saturday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.SATURDAY",
+          "label": "TRANSLATE.ALARM.SATURDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
@@ -462,7 +462,7 @@
         {
           "id": "sunday",
           "element": "switch",
-          "label": "TRANSALTE.ALARM.SUNDAY",
+          "label": "TRANSLATE.ALARM.SUNDAY",
           "value": true,
           "visibleIf": {
             "field": "enabled",
