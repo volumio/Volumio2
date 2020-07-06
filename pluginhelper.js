@@ -690,10 +690,11 @@ function install(){
         socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
             + package.name + ".zip"})
         socket.on('installPluginStatus', function (data) {
-            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message + "\n" + data.advancedLog)
             if(data.message == "Plugin Successfully Installed"){
-                console.log("Done!");
-                socket.close()
+                console.log("Done! Plugin Successfully Installed");
+                socket.close();
+                process.exit(1);
             }
         })
     }
