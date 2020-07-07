@@ -162,7 +162,7 @@ ControllerMpd.prototype.addPlayCue = function (data) {
       album: cueItem.album,
       number: cueItem.number,
       albumart: cueItem.albumart,
-      date: cueItem.date,
+      year: cueItem.date,
     }]);
 
     var index = this.commandRouter.stateMachine.playQueue.arrayQueue.length;
@@ -215,7 +215,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function (sInput) {
         'genres': [],
         'performers': [],
         'tracknumber': 0,
-        'date': '',
+        'year': '',
         'duration': 0
       };
       objReturn.tracks.push(curEntry);
@@ -240,7 +240,7 @@ ControllerMpd.prototype.parseListAllInfoResult = function (sInput) {
       curEntry.tracknumber = Number(arrayLineParts[1]);
     } else if (arrayLineParts[0] === 'Date') {
       // TODO - parse into a date object
-      curEntry.date = arrayLineParts[1];
+      curEntry.year = arrayLineParts[1];
     }
   }
 
@@ -272,7 +272,7 @@ ControllerMpd.prototype.getState = function () {
             collectedState.title = trackinfo.title;
             collectedState.artist = trackinfo.artist;
             collectedState.album = trackinfo.album;
-            collectedState.date = trackinfo.date;
+            collectedState.year = trackinfo.year;
             // collectedState.albumart = trackinfo.albumart;
             collectedState.uri = trackinfo.uri;
             collectedState.trackType = trackinfo.trackType.split('?')[0];
@@ -2934,7 +2934,7 @@ ControllerMpd.prototype.listAlbums = function (ui) {
             if (line.startsWith('file:')) {
               var path = line.slice(6);
               var albumName = self.searchFor(lines, i + 1, 'Album:');
-              var albumDate = self.searchFor(lines, i + 1, 'Date:');
+              var albumYear = self.searchFor(lines, i + 1, 'Date:');
               var artistName = self.searchFor(lines, i + 1, 'AlbumArtist:');
 
               if (!artistName) {
@@ -2956,7 +2956,7 @@ ControllerMpd.prototype.listAlbums = function (ui) {
                   type: 'folder',
                   title: albumName,
                   artist: artistName,
-                  date: albumDate,
+                  year: albumYear,
                   album: '',
                   uri: 'albums://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName),
                   // Get correct album art from path- only download if not existent
@@ -3080,7 +3080,7 @@ ControllerMpd.prototype.listAlbumSongs = function (uri, index, previous) {
 
           var artist = self.searchFor(lines, i + 1, 'Artist:');
           var album = self.searchFor(lines, i + 1, 'Album:');
-          var date = self.searchFor(lines, i + 1, 'Date:');
+          var year = self.searchFor(lines, i + 1, 'Date:');
 
           var track = self.searchFor(lines, i + 1, 'Track:');
           var title = self.searchFor(lines, i + 1, 'Title:');
@@ -3094,7 +3094,6 @@ ControllerMpd.prototype.listAlbumSongs = function (uri, index, previous) {
           var time = parseInt(self.searchFor(lines, i + 1, 'Time:'));
           var trackType = path.split('.').pop();
           duration = duration + parseInt(self.searchFor(lines, i + 1, 'Time:'));
-          year = self.searchFor(lines, i + 1, 'Date:');
           genre = self.searchFor(lines, i + 1, 'Genre:');
           albumTrackType = trackType;
 
@@ -3322,7 +3321,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
         }
         var album = self.searchFor(lines, i + 1, 'Album:');
         var genre = self.searchFor(lines, i + 1, 'Genre:');
-        var date = self.searchFor(lines, i + 1, 'Date:');
+        var year = self.searchFor(lines, i + 1, 'Date:');
         // Include track number if tracknumber variable is set to 'true'
         if (!tracknumbers) {
           var title = self.searchFor(lines, i + 1, 'Title:');
@@ -3349,7 +3348,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
           title: title,
           artist: artist,
           album: album,
-          date: date,
+          year: year,
           albumart: albumart,
           uri: 'music-library/' + path
         });
