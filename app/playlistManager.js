@@ -217,12 +217,17 @@ PlaylistManager.prototype.removeFromFavourites = function (name, service, uri) {
   if (service === 'webradio') {
     return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder, 'radio-favourites', service, uri);
   } else {
-    self.commandRouter.executeOnPlugin('music_service', service, 'removeFromFavourites', {uri: uri, service: service});
-    return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri)
+    var plugin = this.commandRouter.pluginManager.getPlugin('music_service', service);
+    if (plugin && typeof (plugin.removeFromFavourites) === typeof (Function)) {
+      self.logger.info('Removing ' + uri + ' from favourites with specific ' + service + ' method');
+      return plugin.removeFromFavourites({uri: uri, service: service});
+    } else {
+      return self.commonRemoveFromPlaylist(self.favouritesPlaylistFolder, 'favourites', service, uri)
       .then(function (data) {
         if (data.success !== false) { self.commandRouter.emitFavourites({service: service, uri: uri, favourite: false}); }
         return data;
       });
+    }
   }
 };
 

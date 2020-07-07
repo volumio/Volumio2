@@ -613,6 +613,20 @@ function InterfaceWebUI (context) {
                 });
             }
           }, 600);
+        } else if (data.service === 'tidal') {
+          //TODO: Find a more elegant wait of handling this
+          setTimeout(() => {
+            var uri = data.uri.substring(0, data.uri.lastIndexOf('/'));
+            response = self.musicLibrary.executeBrowseSource(uri);
+            if (response != undefined) {
+              response.then(function (result) {
+                selfConnWebSocket.emit('pushBrowseLibrary', result);
+              })
+              .fail(function () {
+                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+              });
+            }
+          }, 600);
         } else {
           var response = self.commandRouter.playListManager.listFavourites();
           if (response != undefined) {
