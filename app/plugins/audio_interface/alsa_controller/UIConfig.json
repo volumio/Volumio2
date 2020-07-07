@@ -38,10 +38,10 @@
 
         },
         {
-          "id": "",
-          "element": "",
+          "id": "i2s",
+          "element": "switch",
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ENABLE_I2S_DAC",
-          "label": "",
+          "label": "I2S DAC",
           "hidden": true,
           "value": false
         },
