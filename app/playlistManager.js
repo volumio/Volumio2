@@ -55,17 +55,8 @@ PlaylistManager.prototype.deletePlaylist = function (name) {
 
   fs.exists(filePath, function (exists) {
     if (!exists) { defer.resolve({success: false, reason: 'Playlist does not exist'}); } else {
-      fs.unlink(filePath, function (err) {
-        if (err) {
-          defer.resolve({success: false});
-        } else {
-          var playlists = self.listPlaylist();
-          self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'),
-            name + ' ' + self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'));
-          defer.resolve(playlists);
-        }
-      });
-    }
+      return self.deleteJSONFile(name);
+    };
   });
 
   return defer.promise;
@@ -623,6 +614,31 @@ PlaylistManager.prototype.saveJSONFile = function (localFolder, fileName, data) 
   }
 
   return defer.promise;
+};
+
+PlaylistManager.prototype.deleteJSONFile = function (name) {
+    var self = this;
+    var defer = libQ.defer();
+    var filePath = self.playlistFolder + name;
+
+    if (this.commandRouter.sharedVars.get('myVolumio.cloudDeviceEnabled') === true && this.commandRouter.sharedVars.get('myvolumio.uid') !== '0') {
+        self.logger.info('Deleting Cloud item ' + name);
+        return self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'deleteCloudPlaylist', name);
+    } else {
+        self.logger.info('Deleting local item ' + name);
+        fs.unlink(filePath, function (err) {
+            if (err) {
+                defer.resolve({success: false});
+            } else {
+                var playlists = self.listPlaylist();
+                self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'),
+                    name + ' ' + self.commandRouter.getI18nString('PLAYLIST.REMOVE_SUCCESS'));
+                defer.resolve(playlists);
+            }
+        });
+    }
+
+    return defer.promise;
 };
 
 PlaylistManager.prototype.commonRemoveFromPlaylist = function (folder, name, service, uri) {
