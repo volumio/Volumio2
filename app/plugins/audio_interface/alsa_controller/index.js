@@ -388,8 +388,6 @@ ControllerAlsa.prototype.getUIConfig = function () {
       var advancedSettingsStatus = self.commandRouter.getAdvancedSettingsStatus();
       if (advancedSettingsStatus === false) {
         uiconf.sections[2].hidden = true;
-        uiconf.sections[3].content[0].hidden = true;
-        uiconf.sections[3].content[1].hidden = true;
         uiconf.sections[3].content[4].hidden = true;
         uiconf.sections[3].content[5].hidden = true;
         uiconf.sections[3].content[6].hidden = true;
