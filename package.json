@@ -31,7 +31,7 @@
     "express": "^4.15.3",
     "fast.js": "^0.1.1",
     "firebase": "^7.14.1",
-    "fs-extra": "^9.0.0",
+    "fs-extra": "^3.0.1",
     "hashmap": "^2.1.0",
     "html-entities": "^1.2.1",
     "inotify": "^1.4.1",
