@@ -18,6 +18,7 @@
     {"id":"hifiberry-dacpluspro","name":"HiFiBerry DAC+ Pro","overlay":"hifiberry-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dacplusadcpro","name":"HiFiBerry DAC Plus ADC PRO","overlay":"hifiberry-dacplusadcpro","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dacplusdsp","name":"HiFiBerry DAC Plus DSP","overlay":"hifiberry-dacplusdsp","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
+    {"id":"hifiberry-dac2hd","name":"HiFiBerry DAC2 HD","overlay":"hifiberry-dacplushd","alsanum":"2","mixer":"DAC","modules":"","script":"","eeprom_name":"DAC 2 HD","i2c_adress":"4d","needsreboot":"no"},
     {"id":"hifiberry-digi","name":"HiFiBerry Digi","overlay":"hifiberry-digi","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-digi-pro","name":"HiFiBerry Digi+ Pro","overlay":"hifiberry-digi-pro","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"no"},
     {"id":"hifibox-dac","name":"HiFiBox DAC","overlay":"hifiberry-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","eeprom_name":["HiFiBox DAC HAT","HiFiBox DAC HAT V1","HiFiBox DAC HAT V 10"],"needsreboot":"no"},
