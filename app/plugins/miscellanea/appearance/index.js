@@ -137,7 +137,7 @@ volumioAppearance.prototype.getUIConfig = function () {
         self.logger.error(e);
       }
 
-      if (fs.existsSync('/volumio/http/www3')) {
+      if (fs.existsSync('/volumio/http/www') && fs.existsSync('/volumio/http/www3')) {
         self.configManager.setUIConfigParam(uiconf, 'sections[2].hidden', false);
       }
 
