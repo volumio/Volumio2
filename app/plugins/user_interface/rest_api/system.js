@@ -32,6 +32,20 @@ RESTApiSystem.prototype.getSystemVersion = function (req, res) {
   }
 };
 
+RESTApiSystem.prototype.getSystemInfo = function (req, res) {
+  var self = this;
+
+  var returnedData = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemInfo');
+
+  if (returnedData != undefined) {
+    returnedData.then(function (data) {
+      if (data != undefined) {
+        res.send(data);
+      }
+    });
+  }
+};
+
 RESTApiSystem.prototype.oauth = function (req, res) {
   var self = this;
 

@@ -415,6 +415,26 @@ ControllerSystem.prototype.getSystemVersion = function () {
   return defer.promise;
 };
 
+ControllerSystem.prototype.getSystemInfo = function () {
+  var self = this;
+  var defer = libQ.defer();
+
+  var thisDeviceStatus = self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'getThisDevice', '');
+  var systemVersion = self.getSystemVersion()
+  systemVersion.then((systemInfoObj)=>{
+    var systemInfoObj = {
+      ...thisDeviceStatus,
+      ...systemInfoObj
+    };
+    defer.resolve(systemInfoObj)
+  })
+
+  return defer.promise;
+};
+
+
+
+
 ControllerSystem.prototype.setTestSystem = function (data) {
   var self = this;
 

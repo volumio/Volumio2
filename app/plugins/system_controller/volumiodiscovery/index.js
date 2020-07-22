@@ -410,6 +410,22 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
   return response;
 };
 
+ControllerVolumioDiscovery.prototype.getThisDevice = function () {
+  var self = this;
+
+  var devicesList = self.getDevices();
+  var thisDeviceArray = devicesList.list.filter(function (dev) {
+    return dev.isSelf === true;
+  });
+
+  if (thisDeviceArray && thisDeviceArray.length && thisDeviceArray[0]) {
+    var thisDevice = thisDeviceArray[0];
+    thisDevice.serviceName = config.get('service');
+    delete thisDevice.isSelf;
+    return thisDevice;
+  }
+};
+
 ControllerVolumioDiscovery.prototype.onStop = function () {
   var self = this;
   // Perform startup tasks here

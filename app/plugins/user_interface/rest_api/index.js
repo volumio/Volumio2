@@ -35,7 +35,8 @@ function interfaceApi (context) {
 
   // System
   api.get('/ping', this.system.ping.bind(this.system));
-  api.get('/getSystemVersion', this.system.getSystemVersion.bind(this.browse));
+  api.get('/getSystemVersion', this.system.getSystemVersion.bind(this.system));
+  api.get('/getSystemInfo', this.system.getSystemInfo.bind(this.system));
 
   // Playback
   api.get('/commands', this.playback.playbackCommands.bind(this.playback));
