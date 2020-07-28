@@ -3454,7 +3454,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     'navigation': {
       'lists': [
         {
-          'title': self.commandRouter.getI18nString('COMMON.ARTISTS') + ' ' + self.commandRouter.getI18nString('COMMON.WITH') + " '" + genreName + "' " + self.commandRouter.getI18nString('COMMON.GENRE') + ' ' + self.commandRouter.getI18nString('COMMON.TRACKS'),
+          'title': genreName + ' ' + self.commandRouter.getI18nString('COMMON.ALBUMS'),
           'icon': 'fa icon',
           'availableListViews': [
             'list',
@@ -3463,19 +3463,11 @@ ControllerMpd.prototype.listGenre = function (curUri) {
           'items': []
         },
         {
-          'title': self.commandRouter.getI18nString('COMMON.ALBUMS') + ' ' + self.commandRouter.getI18nString('COMMON.WITH') + " '" + genreName + "' " + self.commandRouter.getI18nString('COMMON.GENRE') + ' ' + self.commandRouter.getI18nString('COMMON.TRACKS'),
+          'title': genreName + ' ' + self.commandRouter.getI18nString('COMMON.ARTISTS') ,
           'icon': 'fa icon',
           'availableListViews': [
             'list',
             'grid'
-          ],
-          'items': []
-        },
-        {
-          'title': self.commandRouter.getI18nString('COMMON.TRACKS') + " - '" + genreName + "' " + self.commandRouter.getI18nString('COMMON.GENRE'),
-          'icon': 'fa icon',
-          'availableListViews': [
-            'list'
           ],
           'items': []
         }
@@ -3533,24 +3525,12 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                 title = name;
               }
 
-              if (title !== '') {
-                response.navigation.lists[2].items.push({
-                  service: 'mpd',
-                  type: 'song',
-                  title: title,
-                  artist: artist,
-                  album: album,
-                  albumart: albumart,
-                  uri: 'music-library/' + path
-                });
-              }
-
               if (albums.indexOf(album) === -1) {
                 albums.push(album);
                 albumsArt.push(albumart);
 
                 if (album !== '') {
-                  response.navigation.lists[1].items.push({
+                  response.navigation.lists[0].items.push({
                     service: 'mpd',
                     type: 'folder',
                     title: album,
@@ -3565,7 +3545,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                 artistArt.push();
 
                 if (artist !== '') {
-                  response.navigation.lists[0].items.push({
+                  response.navigation.lists[1].items.push({
                     service: 'mpd',
                     type: 'folder',
                     title: artist,
