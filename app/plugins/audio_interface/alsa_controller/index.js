@@ -108,8 +108,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
       if (i2sstatus.enabled) {
           // IF I2S DAC is enable we don't show it in output list
           var cardsWithoutI2SDAC = self.getAlsaCardsWithoutI2SDAC();
-          var cards = self.getAlsaCards();
-          outdevicename = self.getLabelForSelectedCard(cards, value);
+          var fullCardsList = cards;
+          cards = cardsWithoutI2SDAC;
+          outdevicename = self.getLabelForSelectedCard(fullCardsList, value);
           self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', cardsWithoutI2SDAC[0].id);
           var outdevicenameWithoutI2SDAC = self.getLabelForSelectedCard(cardsWithoutI2SDAC, cardsWithoutI2SDAC[0].id);
           self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicenameWithoutI2SDAC);
