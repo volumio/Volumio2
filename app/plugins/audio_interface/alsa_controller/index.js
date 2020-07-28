@@ -91,6 +91,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
     .then(function (uiconf) {
       var value;
       var devicevalue;
+      var outdevicename;
 
       var cards = self.getAlsaCards();
       var i2soptions = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sOptions');
@@ -106,10 +107,12 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
       if (i2sstatus.enabled) {
           // IF I2S DAC is enable we don't show it in output list
-          var cards = self.getAlsaCardsWithoutI2SDAC();
-          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', cards[0].id);
-          outdevicename = self.getLabelForSelectedCard(cards, cards[0].id);
-          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicename);
+          var cardsWithoutI2SDAC = self.getAlsaCardsWithoutI2SDAC();
+          var cards = self.getAlsaCards();
+          outdevicename = self.getLabelForSelectedCard(cards, value);
+          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', cardsWithoutI2SDAC[0].id);
+          var outdevicenameWithoutI2SDAC = self.getLabelForSelectedCard(cardsWithoutI2SDAC, cardsWithoutI2SDAC[0].id);
+          self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.label', outdevicenameWithoutI2SDAC);
       } else {
           self.configManager.setUIConfigParam(uiconf, 'sections[0].content[0].value.value', value);
           var outdevicename = self.config.get('outputdevicename');
@@ -473,8 +476,8 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
     outdevicename = self.getLabelForSelectedCard(cards, value);
   }
   if (outdevicename == 'Allo Piano 2.1') {
-    var SubValue = execSync("amixer get -c 1 'Subwoofer mode' | grep Item0", {encoding: 'utf8'}).split("'")[1];
-    var DualModeValue = execSync("amixer get -c 1 'Dual Mode' | grep Item0", {encoding: 'utf8'}).split("'")[1];
+    var SubValue = execSync("amixer get -c " + value + " 'Subwoofer mode' | grep Item0", {encoding: 'utf8'}).split("'")[1];
+    var DualModeValue = execSync("amixer get -c " + value + " 'Dual Mode' | grep Item0", {encoding: 'utf8'}).split("'")[1];
 
     if (data['Dual Mode'].value != DualModeValue && data['Dual Mode'].value != 'None') {
       data['Subwoofer mode'].value = 'None';
@@ -537,7 +540,6 @@ ControllerAlsa.prototype.getDSPDACOptions = function (data) {
     if (dspdata.cards[e].name === data.name) {
       try {
         var dsparray = execSync('amixer -c ' + data.number + ' scontents', {encoding: 'utf8'});
-
         var dspobj = dsparray.toString().split('Simple mixer control');
 
         for (var i in dspobj) {
