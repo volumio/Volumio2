@@ -413,17 +413,30 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
 ControllerVolumioDiscovery.prototype.getThisDevice = function () {
   var self = this;
 
-  var devicesList = self.getDevices();
-  var thisDeviceArray = devicesList.list.filter(function (dev) {
-    return dev.isSelf === true;
-  });
+  self.logger.info('Discovery: Getting this device information');
 
-  if (thisDeviceArray && thisDeviceArray.length && thisDeviceArray[0]) {
-    var thisDevice = thisDeviceArray[0];
-    thisDevice.serviceName = config.get('service');
-    delete thisDevice.isSelf;
-    return thisDevice;
+  var thisDevice = {};
+  var thisState = self.commandRouter.volumioGetState();
+  var ipAddresses = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getCachedPAddresses', '');
+  thisDevice.id = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConf', 'uuid');
+  if (ipAddresses && ipAddresses.wlan0 && ipAddresses.wlan0 !== '192.168.211.1') {
+    thisDevice.host = 'http://' + ipAddresses.wlan0;
+  } else if (ipAddresses && ipAddresses.eth0) {
+    thisDevice.host = 'http://' + ipAddresses.eth0;
   }
+  thisDevice.name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConf', 'playerName');
+  thisDevice.type = config.get('device_type', 'device');
+  thisDevice.serviceName = config.get('service');
+  thisDevice.state = {
+    status: thisState.status,
+    volume: thisState.volume,
+    mute: thisState.mute,
+    artist: thisState.artist,
+    track: thisState.title,
+    albumart: thisState.albumart.indexOf('http://') >= 0 ? thisState.albumart : thisDevice.host + thisState.albumart
+  };
+
+  return thisDevice;
 };
 
 ControllerVolumioDiscovery.prototype.onStop = function () {
