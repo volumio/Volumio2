@@ -1397,11 +1397,12 @@ ControllerAlsa.prototype.updateVolumeSettings = function () {
 ControllerAlsa.prototype.enablePiJack = function () {
   var self = this;
 
-  exec('/usr/bin/amixer cset numid=3 1', function (error, stdout, stderr) {
+  self.logger.info('Enabling PI Jack Output');
+  exec('/usr/bin/amixer cset -c 0 numid=3 1', function (error, stdout, stderr) {
     if (error) {
       self.logger.error('Cannot Enable Raspberry PI Jack Output: ' + error);
     } else {
-      self.logger.error('Raspberry PI Jack Output Enabled ');
+      self.logger.info('Raspberry PI Jack Output Enabled ');
       self.storeAlsaSettings();
     }
   });
@@ -1410,11 +1411,12 @@ ControllerAlsa.prototype.enablePiJack = function () {
 ControllerAlsa.prototype.enablePiHDMI = function () {
   var self = this;
 
-  exec('/usr/bin/amixer cset numid=3 2', function (error, stdout, stderr) {
+  self.logger.info('Enabling PI HDMI Output');
+  exec('/usr/bin/amixer cset -c 0 numid=3 2', function (error, stdout, stderr) {
     if (error) {
       self.logger.error('Cannot Enable Raspberry PI HDMI Output: ' + error);
     } else {
-      self.logger.error('Raspberry PI HDMI Output Enabled ');
+      self.logger.info('Raspberry PI HDMI Output Enabled ');
       self.storeAlsaSettings();
     }
   });
