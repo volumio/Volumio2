@@ -1210,7 +1210,16 @@ ControllerAlsa.prototype.writeSoftMixerFile = function (data) {
     var device = dataarr[1];
   }
 
+  asoundcontent += '# Convert to 24 bit to avoid unnecessary quality loss for 16 bit audio\n';
   asoundcontent += 'pcm.softvolume {\n';
+  asoundcontent += '    type            plug\n';
+  asoundcontent += '    slave {\n';
+  asoundcontent += '        pcm         "volumioSoftVol"\n';
+  asoundcontent += '        format      "S24_3LE"\n';  
+  asoundcontent += '    }\n';
+  asoundcontent += '}\n\n';
+  
+  asoundcontent += 'pcm.volumioSoftVol {\n';
   asoundcontent += '    type            softvol\n';
   asoundcontent += '    slave {\n';
   asoundcontent += '        pcm         "postVolume"\n';
@@ -1689,7 +1698,7 @@ ControllerAlsa.prototype.updateALSAConfigFile = function () {
 
     var asoundcontent = '';
     asoundcontent += 'pcm.!default {\n';
-    asoundcontent += '    type             plug\n';
+    asoundcontent += '    type             copy\n';
     asoundcontent += '    slave.pcm       "volumio"\n';
     asoundcontent += '}\n';
     asoundcontent += '\n';
@@ -1699,7 +1708,7 @@ ControllerAlsa.prototype.updateALSAConfigFile = function () {
       var contribution = contributions[i];
       
       asoundcontent += 'pcm.' + outPCM + ' {\n';
-      asoundcontent += '    type             plug\n';
+      asoundcontent += '    type             copy\n';
       asoundcontent += '    slave.pcm       "' + contribution.snippetDatum.inPCM + '"\n';
       asoundcontent += '}\n';
       asoundcontent += '\n';
@@ -1719,7 +1728,14 @@ ControllerAlsa.prototype.updateALSAConfigFile = function () {
       device = dataarr[1];
     }
     
+    
+    asoundcontent += '# There is always a plug before the hardware to be safe\n';
     asoundcontent += 'pcm.volumioOutput {\n';
+    asoundcontent += '    type plug\n';
+    asoundcontent += '    slave.pcm "volumioHw"\n';    
+    asoundcontent += '}\n\n';
+
+    asoundcontent += 'pcm.volumioHw {\n';
     asoundcontent += '    type hw\n';
     asoundcontent += '    card ' + card + '\n';
     if(device != null) {
