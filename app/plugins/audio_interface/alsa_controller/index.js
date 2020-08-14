@@ -21,6 +21,8 @@ function ControllerAlsa (context) {
   this.commandRouter = this.context.coreCommand;
   this.logger = this.context.logger;
   this.configManager = this.context.configManager;
+  // Used to prevent concurrent rewrites of the ALSA config file
+  this.pendingALSAConfigUpdate = libQ.resolve();
 }
 
 ControllerAlsa.prototype.onVolumioStart = function () {
@@ -1664,14 +1666,30 @@ ControllerAlsa.prototype.getAlsaCardsWithoutI2SDAC = function (data) {
 
 // This function regeneratees the ALSA config file, and then
 // updates the shared alsa output to notify listeners that
-// they need to reload themselves
+// they need to reload themselves. It uses the
+// pendingALSAConfigUpdate to serialize requests that happen
+// in parallel
 ControllerAlsa.prototype.updateALSAConfigFile = function () {
-	var self = this;
-	return self.internalUpdateALSAConfigFile()
-	  .then((x) => {
-		    self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
-		    return x;
-		  });
+  var self = this;
+  
+  var promise = self.pendingALSAConfigUpdate
+    .then(() => {
+    	return self.internalUpdateALSAConfigFile();
+    })
+    .then((x) => {
+        self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+        return x;
+      });
+  
+  self.pendingALSAConfigUpdate = promise;
+    
+  return promise.then((x) => {
+   
+      if(self.pendingALSAConfigUpdate === promise) {
+        self.pendingALSAConfigUpdate = libQ.resolve();
+      }
+      return x;
+    });
 };
 
 // This function regeneratees the ALSA config file, including
@@ -1758,14 +1776,15 @@ ControllerAlsa.prototype.internalUpdateALSAConfigFile = function () {
 
     return asoundcontent;
   }).then((asoundcontent) => {
-    var defer = libQ.defer();
+	// Write and move the file
+    let defer = libQ.defer();
     fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
       if (err) {
         self.logger.info('Cannot write /etc/asound.conf: ' + err);
       } else {
         self.logger.info('Asound.conf file written');
-        var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid: 1000, gid: 1000, encoding: 'utf8' });
-        var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
+        execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid: 1000, gid: 1000, encoding: 'utf8' });
+        execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
       }
       defer.resolve();
     });
