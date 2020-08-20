@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs = require('fs-extra');
+var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var winston = require('winston');
 var vconf = require('v-conf');
@@ -42,7 +43,7 @@ function CoreCommandRouter (server) {
   this.pluginManager.pluginFolderCleanup();
   this.configManager = new (require(__dirname + '/configManager.js'))(this.logger);
 
-  this.pluginManager.startPlugins();
+  var pluginPromise = this.pluginManager.startPlugins();
 
   this.loadI18nStrings();
   this.musicLibrary.updateBrowseSourcesLang();
@@ -60,11 +61,15 @@ function CoreCommandRouter (server) {
 
   this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
-  this.pushConsoleMessage('BOOT COMPLETED');
-  metrics.log('CommandRouter');
-
-  this.startupSound();
-  this.closeModals();
+  // Wait for plugin startup to complete before playing the startup sound as the
+  // ALSA configuration may require active plugins 
+  pluginPromise.then(() => {	  
+	  this.pushConsoleMessage('BOOT COMPLETED');
+	  metrics.log('CommandRouter');
+	  
+	  this.startupSound();
+	  this.closeModals();
+  });
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -2185,4 +2190,11 @@ CoreCommandRouter.prototype.refreshCachedPAddresses = function () {
 
   var networkPlugin = this.pluginManager.getPlugin('system_controller', 'network');
   return networkPlugin.refreshCachedPAddresses();
+};
+
+CoreCommandRouter.prototype.rebuildALSAConfiguration = function () {
+	var self = this;
+	
+	var alsaPlugin = this.pluginManager.getPlugin('audio_interface', 'alsa_controller');
+	return alsaPlugin.updateALSAConfigFile();
 };

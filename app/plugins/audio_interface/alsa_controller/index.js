@@ -1818,6 +1818,12 @@ ControllerAlsa.prototype.getPluginALSAContributions = function () {
         
         // Folder will be truthy if found
         if(folder) {
+          // Only get data from plugins that say they want to contribute in their package.json
+          var package_json = self.commandRouter.pluginManager.getPackageJson(folder);
+          if(!package_json || !package_json.volumio_info || !package_json.volumio_info.has_alsa_contribution) {
+        	  continue;
+          }
+        	
           // Check to see if the plugin wants to contribute
           folder += '/asound';
           if(fs.existsSync(folder)) {
