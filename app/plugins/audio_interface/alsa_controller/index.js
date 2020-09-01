@@ -474,6 +474,7 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
   var outdevicename = self.config.get('outputdevicename');
   if (outdevicename) {
   } else {
+    var cards = self.getAlsaCards();
     outdevicename = self.getLabelForSelectedCard(cards, value);
   }
   if (outdevicename == 'Allo Piano 2.1') {
