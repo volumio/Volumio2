@@ -50,6 +50,7 @@
     "node-ssdp": "^4.0.0",
     "node-tunein-radio": "^0.3.4",
     "node-uuid": "^1.4.8",
+    "onoff": "^5.0.1",
     "require-from-string": "^2.0.2",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
