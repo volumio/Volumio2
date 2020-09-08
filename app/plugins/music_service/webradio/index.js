@@ -548,7 +548,9 @@ ControllerWebradio.prototype.explodeUri = function (data) {
         defer.reject(new Error('Cannot retrieve details for stream ' + uri + ': ' + err));
       });
   } else {
-    if (data.title) data.name = data.title;
+    if (data.title) {
+      data.name = data.title;
+    }
     if (!data.albumart) {
       data.albumart = '/albumart';
     }

@@ -705,14 +705,10 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
             } else {
               service = data[i].service;
             }
-
             if (service === 'webradio') {
               if (data[i].title) {
                 data[i].name = data[i].title;
-              } else {
-                data[i].name = 'Webradio';
               }
-
               uris.push(data[i]);
             } else {
               uris.push({uri: uri, service: service});
