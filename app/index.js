@@ -443,25 +443,14 @@ CoreCommandRouter.prototype.addPlay = function (data) {
         });
 };
 
-CoreCommandRouter.prototype.addPlayList = function (data) {
-    var self = this;
-    var defer = libQ.defer();
+CoreCommandRouter.prototype.playItemsList = function (data) {
+  var self = this;
 
-    this.pushConsoleMessage('CoreCommandRouter::volumioaddPlayList');
-
-    var queueArray = this.stateMachine.getQueue();
-    if (queueArray && queueArray.length > 0) {
-        this.stateMachine.addQueueItems(data.list)
-            .then((result) => {
-              var playIndex = result.firstItemIndex + data.index;
-              this.volumioPlay(playIndex);
-        defer.resolve();
-    });
-    } else {
-      return self.replaceAndPlay(data);
-    }
-
-    return defer.promise;
+  if (process.env.PLAYBACK_MODE === 'single' && data.item) {
+    return self.replaceAndPlay(data.item);
+  } else {
+    return self.replaceAndPlay(data);
+  }
 };
 
 CoreCommandRouter.prototype.replaceAndPlay = function (data) {

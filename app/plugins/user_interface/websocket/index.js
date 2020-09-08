@@ -98,12 +98,8 @@ function InterfaceWebUI (context) {
         return self.commandRouter.addPlay(data);
     });
 
-    connWebSocket.on('addPlayList', function (data) {
-        if (process.env.PLAYBACK_MODE === 'single' && data.item) {
-            return self.commandRouter.addPlay(data.item);
-        } else {
-            return self.commandRouter.addPlayList(data);
-        }
+    connWebSocket.on('playItemsList', function (data) {
+        return self.commandRouter.playItemsList(data);
     });
 
     connWebSocket.on('addPlayCue', function (data) {
