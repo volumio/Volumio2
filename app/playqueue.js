@@ -139,7 +139,11 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
           }
           promiseArray.push(libQ.resolve(item));
         } else if (service === 'webradio') {
-          promiseArray.push(this.commandRouter.executeOnPlugin('music_service', 'webradio', 'explodeUri', item));
+          if (item && item.uri.startsWith('http')) {
+            promiseArray.push(libQ.resolve(item));
+          } else {
+            promiseArray.push(this.commandRouter.executeOnPlugin('music_service', 'webradio', 'explodeUri', item));
+          }
         } else {
           promiseArray.push(this.commandRouter.explodeUriFromService(service, item.uri));
         }

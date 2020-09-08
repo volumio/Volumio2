@@ -700,9 +700,23 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 
             var service;
 
-            if (data[i].service === undefined) { service = 'mpd'; } else service = data[i].service;
+            if (data[i].service === undefined) {
+              service = 'mpd';
+            } else {
+              service = data[i].service;
+            }
 
-            uris.push({uri: uri, service: service});
+            if (service === 'webradio') {
+              if (data[i].title) {
+                data[i].name = data[i].title;
+              } else {
+                data[i].name = 'Webradio';
+              }
+
+              uris.push(data[i]);
+            } else {
+              uris.push({uri: uri, service: service});
+            }
           }
 
           self.commandRouter.addQueueItems(uris)
