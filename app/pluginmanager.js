@@ -10,6 +10,7 @@ var http = require('http');
 var execSync = require('child_process').execSync;
 var Tail = require('tail').Tail;
 var compareVersions = require('compare-versions');
+var unirest = require('unirest');
 
 var arch = '';
 var variant = '';
@@ -1400,43 +1401,20 @@ PluginManager.prototype.getAvailablePlugins = function () {
     });
   }
 
-  http.get(url, function (res) {
-    var body = '';
-    if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
-      // self.logger.info("Following Redirect to: " + res.headers.location);
-      http.get(res.headers.location, function (res) {
-        res.on('data', function (chunk) {
-          body += chunk;
-        });
-
-        res.on('end', function () {
-          try {
-            var response = JSON.parse(body);
-            pushAvailablePlugins(response);
-          } catch (e) {
-            self.logger.info('Error Parsing Plugins JSON');
+  unirest
+      .get(url)
+      .timeout(6000)
+      .then(function (response) {
+        if (response && response.status === 200 && response.body && response.body.categories) {
+          pushAvailablePlugins(response.body);
+        } else {
+          if (response.error) {
+            self.logger.error('Cannot download Available plugins list: ' + response.error);
+          } else {
+            self.logger.error('Cannot download Available plugins list');
           }
-        });
-      }).on('error', function (e) {
-        self.logger.info('Cannot download Available plugins list: ' + e);
+        };
       });
-    } else {
-      res.on('data', function (chunk) {
-        body += chunk;
-      });
-
-      res.on('end', function () {
-        try {
-          var response = JSON.parse(body);
-          pushAvailablePlugins(response);
-        } catch (e) {
-          self.logger.info('Error Parsing Plugins JSON');
-        }
-      });
-    }
-  }).on('error', function (e) {
-    self.logger.info('Cannot download Available plugins list: ' + e);
-  });
 
   function pushAvailablePlugins (response) {
     for (var i = 0; i < response.categories.length; i++) {
