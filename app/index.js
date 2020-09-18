@@ -447,7 +447,7 @@ CoreCommandRouter.prototype.playItemsList = function (data) {
   var self = this;
 
   if (process.env.PLAYBACK_MODE === 'single' && data.item) {
-    return self.replaceAndPlay(data.item);
+    return self.addPlay(data.item);
   } else {
     return self.replaceAndPlay(data);
   }
