@@ -62,7 +62,7 @@ function CoreCommandRouter (server) {
   this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
   // Wait for plugin startup to complete before playing the startup sound as the
-  // ALSA configuration may require active plugins 
+  // plugins may need to be fully active before sound can play properly 
   pluginPromise.then(() => {	  
 	  this.pushConsoleMessage('BOOT COMPLETED');
 	  metrics.log('CommandRouter');
@@ -2182,8 +2182,13 @@ CoreCommandRouter.prototype.refreshCachedPAddresses = function () {
 };
 
 CoreCommandRouter.prototype.rebuildALSAConfiguration = function () {
-	var self = this;
+  var self = this;
 	
-	var alsaPlugin = this.pluginManager.getPlugin('audio_interface', 'alsa_controller');
-	return alsaPlugin.updateALSAConfigFile();
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    var alsaPlugin = this.pluginManager.getPlugin('audio_interface', 'alsa_controller');
+    return alsaPlugin.updateALSAConfigFile();
+  } else {
+    self.logger.error('Modular ALSA configuration is disabled and so cannot be rebuilt');
+    return libQ.resolve();
+  }
 };

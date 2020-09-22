@@ -21,8 +21,11 @@ function ControllerAlsa (context) {
   this.commandRouter = this.context.coreCommand;
   this.logger = this.context.logger;
   this.configManager = this.context.configManager;
-  // Used to prevent concurrent rewrites of the ALSA config file
-  this.pendingALSAConfigUpdate = libQ.resolve();
+  
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    // Used to prevent concurrent rewrites of the ALSA config file
+    this.pendingALSAConfigUpdate = libQ.resolve();
+  }
 }
 
 ControllerAlsa.prototype.onVolumioStart = function () {
@@ -32,6 +35,51 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 
   this.config = new (require('v-conf'))();
   this.config.loadFile(configFile);
+  
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    // Modular ALSA enabled, we need to check that things are set properly
+	var output = self.config.get('outputdevice');
+	
+    if (output == 'softvolume') {
+      self.config.set('softvolume', true);
+      output = self.config.get('softvolumenumber');
+      self.config.set('outputdevice', output);   
+    }
+    
+    if(self.config.get('softvolume')) {
+      var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
+      if(!fs.existsSync(folder + '/asound/softvolume.postVolume.conf')) {
+        self.writeSoftVolContribution(output);
+      }
+    }
+    
+    if(self.commandRouter.sharedVars.get('alsa.outputdevice') != 'volumio') {
+      self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+    }
+    
+  } else {
+    // Legacy ALSA, we need to check that things are set properly
+	if(self.commandRouter.sharedVars.get('alsa.outputdevice') === 'volumio') {
+	  self.commandRouter.sharedVars.set('alsa.outputdevice', self.config.get('outputdevice'));
+	}
+	
+    var softvol = self.config.get('softvolume');
+    if (softvol) {
+      self.config.set('softvolume', false);
+      self.config.set('outputdevice', 'softvolume')
+	  output = self.config.get('softvolumenumber');
+      
+      var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
+	
+      if(!fs.existsSync(folder + '/asound/softvolume.postVolume.conf')) {
+        fs.unlink(folder + '/asound/softvolume.postVolume.conf');
+      }
+      self.writeSoftMixerFile(output);
+    } else {
+    	self.disableSoftMixer();
+    }
+    
+  }
 
   var volumeval = this.config.get('volumestart');
 
@@ -70,9 +118,16 @@ ControllerAlsa.prototype.onVolumioStart = function () {
     this.updateVolumeSettings();
   }
 
-  self.logger.debug("Creating shared var alsa.outputdevice='volumio'");
-  this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', 'volumio');
-  this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    self.logger.debug("Creating shared var alsa.outputdevice='volumio'");
+    this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', 'volumio');
+    this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
+  } else {
+  self.logger.debug("Creating shared var alsa.outputdevice='" + this.config.get('outputdevice') + "'");
+    this.commandRouter.sharedVars.addConfigValue('alsa.outputdevice', 'string', this.config.get('outputdevice'));
+    this.commandRouter.sharedVars.addConfigValue('alsa.outputdevicemixer', 'string', this.config.get('mixer'));
+    this.commandRouter.sharedVars.registerCallback('alsa.outputdevice', this.outputDeviceCallback.bind(this));
+  }
 
   self.checkMixer();
 
@@ -101,6 +156,8 @@ ControllerAlsa.prototype.getUIConfig = function () {
       value = self.config.get('outputdevice');
       if (value == undefined) {
         value = 0;
+      } else if (value == 'softvolume') {
+        value = self.config.get('softvolumenumber');
       }
       var cardnum = value;
 
@@ -466,6 +523,8 @@ ControllerAlsa.prototype.saveDSPOptions = function (data) {
   var value = self.config.get('outputdevice');
   if (value == undefined) {
     value = 0;
+  } else if (value == 'softvolume') {
+    value = self.config.get('softvolumenumber');
   }
 
   var outdevicename = self.config.get('outputdevicename');
@@ -668,8 +727,12 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 			 */
     }
   }
-  
-  self.config.set('outputdevice', OutputDeviceNumber);
+
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    self.commandRouter.sharedVars.set('outputdevice', OutputDeviceNumber);
+  } else {
+    self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
+  }
   self.setDefaultMixer(OutputDeviceNumber);
 
   var respconfig = self.commandRouter.getUIConfigOnPlugin('audio_interface', 'alsa_controller', {});
@@ -680,17 +743,23 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
     }
   });
 
-  var promise = null;
-  if(self.config.get('softvolume')) {
-	  promise = self.writeSoftMixerFile(OutputDeviceNumber);
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    var promise = null;
+    if(self.config.get('softvolume')) {
+      promise = self.writeSoftVolContribution(OutputDeviceNumber);
+    } else {
+      promise = libQ.resolve();
+    }
+    
+    return promise
+      .then(self.updateALSAConfigFile.bind(self))
+      .then((x) => {
+        self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+        return x;
+      });
   } else {
-	  promise = self.internalUpdateALSAConfigFile();
+    return defer.promise;
   }
-
-  return promise.then((x) => {
-    self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
-    return x;
-  })
 };
 
 ControllerAlsa.prototype.saveVolumeOptions = function (data) {
@@ -719,6 +788,8 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
       var value = self.config.get('outputdevice');
       if (value == undefined) {
         value = 0;
+      } else if (value == 'softvolume') {
+        value = self.config.get('softvolumenumber');
       }
       var mixers = self.getMixerControls(value);
       var index = mixers.indexOf('SoftMaster');
@@ -727,34 +798,68 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
       }
       data.mixer.value = mixers[0];
     }
-    var softvolume = self.config.get('softvolume');
-    if (softvolume) {
-      self.disableSoftMixer();
-      self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+    if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+      var softvolume = self.config.get('softvolume');
+      if (softvolume) {
+        self.disableSoftMixer();
+        self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+      }
+    } else {
+      var outValue = self.config.get('outputdevice', 'none');
+      if (outValue === 'softvolume') {
+        var currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+        self.disableSoftMixer(currentDeviceNumber);
+        self.config.set('outputdevice', currentDeviceNumber);
+        self.config.delete('softvolumenumber');
+        self.commandRouter.sharedVars.set('alsa.outputdevice', currentDeviceNumber);
+      }
     }
     self.restorePreviousVolumeLevel(currentVolume, currentMute, false);
     self.setConfigParam({key: 'mixer', value: data.mixer.value});
   } else if (data.mixer_type.value === 'Software') {
     var outdevice = self.config.get('outputdevice');
-    var softvolume = self.config.get('softvolume');
-    if (!softvolume) {
-      self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
-      self.enableSoftMixer(outdevice);
-      self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+    if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+      var softvolume = self.config.get('softvolume');
+      if (!softvolume) {
+        self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
+        self.enableSoftMixer(outdevice);
+        self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+      } else {
+        self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
+      }
     } else {
-      self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
+      if (outdevice != 'softvolume') {
+        self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
+        self.enableSoftMixer(outdevice);
+        var outdevice = 'softvolume';
+        self.config.set('outputdevice', outdevice);
+        self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
+      } else {
+        self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
+      }
     }
   } else if (data.mixer_type.value === 'None') {
     self.setConfigParam({key: 'mixer', value: ''});
     var outdevice = self.config.get('outputdevice');
     self.setConfigParam({key: 'volumemax', value: '100'});
     self.restorePreviousVolumeLevel('100', false, false);
-    var softvolume = self.config.get('softvolume');
-    if (softvolume) {
-      self.restartMpd.bind(self);
-      self.disableSoftMixer();
+    if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+      var softvolume = self.config.get('softvolume');
+      if (softvolume) {
+        self.restartMpd.bind(self);
+        self.disableSoftMixer();
+      }
+      self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+    } else {
+      if (outdevice === 'softvolume') {
+        var outdevice = self.config.get('softvolumenumber');
+        this.config.set('outputdevice', outdevice);
+        self.config.delete('softvolumenumber');
+        self.restartMpd.bind(self);
+        self.disableSoftMixer(outdevice);
+      }
+      self.commandRouter.sharedVars.set('alsa.outputdevice', outdevice);
     }
-    self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
   }
   self.setConfigParam({key: 'mixer_type', value: data.mixer_type.value});
 
@@ -795,9 +900,15 @@ ControllerAlsa.prototype.saveResamplingOpts = function (data) {
 
 ControllerAlsa.prototype.outputDeviceCallback = function (value) {
   var self = this;
-  if(value != 'volumio') {
-    self.log.warn('The ALSA output device has been set to ' + value +  ' when it should always be \'volumio\'')
+
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    if(value != 'volumio') {
+      self.log.warn('The ALSA output device has been set to ' + value +  ' when it should always be \'volumio\'')
+    }
+  } else {
+    this.config.set('outputdevice', value);
   }
+  
 };
 
 ControllerAlsa.prototype.getConfigParam = function (key) {
@@ -974,7 +1085,9 @@ ControllerAlsa.prototype.getMixerControls = function (device) {
 
   var mixers = [];
   var outdev = this.config.get('outputdevice');
-  
+  if (outdev == 'softvolume') {
+    outdev = this.config.get('softvolumenumber');
+  }
   if (outdev.indexOf(',') >= 0) {
     outdev = outdev.charAt(0);
   }
@@ -1091,10 +1204,15 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
             }
           }
         }
-
-        var softvolume = self.config.get('softvolume');
-
-        if (softvolume) {
+        
+        var softVolumeEnabled = null;
+        if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+          softVolumeEnabled = self.config.get('softvolume');
+        } else {
+          softVolumeEnabled = outputdevice === 'softvolume';
+        }
+        
+        if (softVolumeEnabled) {
           self.logger.info('Setting default mixerSoftMaster for Softvolume device');
           this.mixertype = 'Software';
           defaultmixer = 'SoftMaster';
@@ -1161,7 +1279,11 @@ ControllerAlsa.prototype.checkMixer = function () {
           self.setConfigParam({key: 'softvolumenumber', value: outputdevice});
         }
         self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'SoftMaster');
-        self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+        if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+          self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+        } else {
+          self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
+        }        
         self.updateVolumeSettings();
         // Restarting MPD, this seems needed only on first boot
         setTimeout(function () {
@@ -1179,8 +1301,17 @@ ControllerAlsa.prototype.enableSoftMixer = function (data) {
   var self = this;
 
   self.logger.info('Enable softmixer device for audio device number ' + data);
-
-  self.writeSoftMixerFile(data)
+  self.commandRouter.volumioStop();
+  
+  var promise = null;
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    promise = self.writeSoftVolContribution(data)
+      .then(self.updateALSAConfigFile.bind(self));
+  } else {
+    promise = self.writeSoftMixerFile(data);
+  }
+  
+  return promise
     .then(self.setSoftParams.bind(self))
     .then(self.apply1.bind(self))
     .then(self.apply2.bind(self))
@@ -1188,15 +1319,86 @@ ControllerAlsa.prototype.enableSoftMixer = function (data) {
     .then(self.setSoftVolConf.bind(self))
     .then(self.restartMpd.bind(self));
 };
-
-
 ControllerAlsa.prototype.writeSoftMixerFile = function (data) {
   var self = this;
   var defer = libQ.defer();
 
   self.logger.info('Enable softmixer device for audio device number ' + data);
   var outnum = data;
-  self.commandRouter.volumioStop();
+  if (this.config.has('softvolumenumber') == false) {
+    self.config.addConfigValue('softvolumenumber', 'string', data);
+    self.updateVolumeSettings();
+  } else {
+    self.setConfigParam({key: 'softvolumenumber', value: data});
+  }
+
+  var asoundcontent = '';
+  if (data.indexOf(',') >= 0) {
+    var dataarr = data.split(',');
+    var card = dataarr[0];
+    var device = dataarr[1];
+
+    asoundcontent += 'pcm.softvolume {\n';
+    asoundcontent += '    type             plug\n';
+    asoundcontent += '    slave.pcm       "softvol"\n';
+    asoundcontent += '}\n';
+    asoundcontent += '\n';
+    asoundcontent += 'pcm.softvol {\n';
+    asoundcontent += '    type            softvol\n';
+    asoundcontent += '    slave {\n';
+    asoundcontent += '        pcm         "plughw:' + data + '"\n';
+    asoundcontent += '    }\n';
+    asoundcontent += '    control {\n';
+    asoundcontent += '        name        "SoftMaster"\n';
+    asoundcontent += '        card        ' + card + '\n';
+    asoundcontent += '        device      ' + device + '\n';
+    asoundcontent += '    }\n';
+    asoundcontent += 'max_dB 0.0\n';
+    asoundcontent += 'min_dB -50.0\n';
+    asoundcontent += 'resolution 100\n';
+    asoundcontent += '}\n';
+  } else {
+    asoundcontent += 'pcm.softvolume {\n';
+    asoundcontent += '    type             plug\n';
+    asoundcontent += '    slave.pcm       "softvol"\n';
+    asoundcontent += '}\n';
+    asoundcontent += '\n';
+    asoundcontent += 'pcm.softvol {\n';
+    asoundcontent += '    type            softvol\n';
+    asoundcontent += '    slave {\n';
+    asoundcontent += '        pcm         "plughw:' + data + ',0"\n';
+    asoundcontent += '    }\n';
+    asoundcontent += '    control {\n';
+    asoundcontent += '        name        "SoftMaster"\n';
+    asoundcontent += '        card        ' + data + '\n';
+    asoundcontent += '        device      0\n';
+    asoundcontent += '    }\n';
+    asoundcontent += 'max_dB 0.0\n';
+    asoundcontent += 'min_dB -50.0\n';
+    asoundcontent += 'resolution 100\n';
+    asoundcontent += '}\n';
+  }
+
+  fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
+    if (err) {
+      self.logger.info('Cannot write /etc/asound.conf: ' + err);
+    } else {
+      self.logger.info('Asound.conf file written');
+      var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid: 1000, gid: 1000, encoding: 'utf8' });
+      var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
+      defer.resolve();
+    }
+  });
+
+  return defer.promise;
+};
+
+ControllerAlsa.prototype.writeSoftVolContribution = function (data) {
+  var self = this;
+  var defer = libQ.defer();
+
+  self.logger.info('Enable softmixer device for audio device number ' + data);
+  var outnum = data;
   if (this.config.has('softvolumenumber') == false) {
     self.config.addConfigValue('softvolumenumber', 'string', data);
     self.updateVolumeSettings();
@@ -1249,8 +1451,8 @@ ControllerAlsa.prototype.writeSoftMixerFile = function (data) {
       self.logger.info('Cannot write Software Volume ALSA configuration: ' + err);
     } else {
       self.logger.info('Software Volume ALSA configuration written');
-      defer.resolve(self.internalUpdateALSAConfigFile());
     }
+    defer.resolve({});
   });
 
   return defer.promise;
@@ -1260,9 +1462,12 @@ ControllerAlsa.prototype.setSoftParams = function () {
   var self = this;
   var defer = libQ.defer();
 
-  self.setConfigParam({key: 'softvolume', value: true});
   self.setConfigParam({key: 'mixer', value: 'SoftMaster'});
-
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    self.setConfigParam({key: 'softvolume', value: true});
+  } else {
+    self.setConfigParam({key: 'outputdevice', value: 'softvolume'});
+  }
   defer.resolve();
   return defer.promise;
 };
@@ -1270,9 +1475,14 @@ ControllerAlsa.prototype.setSoftParams = function () {
 ControllerAlsa.prototype.apply1 = function () {
   var self = this;
   var defer = libQ.defer();
-
+  var pcm = null;
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    pcm = 'volumio';
+  } else {
+    pcm = 'softvolume';
+  }
   try {
-    var apply2 = execSync('/usr/bin/aplay -D volumio /volumio/app/silence.wav', { encoding: 'utf8' });
+    var apply2 = execSync('/usr/bin/aplay -D ' + pcm + ' /volumio/app/silence.wav', { encoding: 'utf8' });
   } catch (e) {
 
   }
@@ -1293,10 +1503,15 @@ ControllerAlsa.prototype.apply2 = function () {
 ControllerAlsa.prototype.setSoftConf = function () {
   var self = this;
   var defer = libQ.defer();
-
-  self.setConfigParam({key: 'softvolume', value: true});
-  self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'SoftMaster');
-  self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+  
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    self.setConfigParam({key: 'softvolume', value: true});
+    self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'SoftMaster');
+    self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+  } else {
+    self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'SoftMaster');
+    self.commandRouter.sharedVars.set('alsa.outputdevice', 'softvolume');
+  }
 
   defer.resolve();
   return defer.promise;
@@ -1323,23 +1538,39 @@ ControllerAlsa.prototype.restartMpd = function () {
   return defer.promise;
 };
 
-ControllerAlsa.prototype.disableSoftMixer = function () {
+ControllerAlsa.prototype.disableSoftMixer = function (data) {
   var self = this;
 
   self.logger.info('Disable softmixer device for audio device');
-  
-  self.setConfigParam({key: 'softvolume', value: false});
 
-  var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    self.setConfigParam({key: 'softvolume', value: false});
 
-  fs.unlink(folder + '/asound/softvolume.postVolume.conf', function (err) {
-    if (err) {
-      self.logger.info('Cannot delete ' + folder + '/asound/softvolume-postVolume.conf: ' + err);
-    } else {
-      self.logger.info('Soft Volume ALSA configuration file deleted');
-      self.internalUpdateALSAConfigFile();
-    }
-  });
+    var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
+
+    fs.unlink(folder + '/asound/softvolume.postVolume.conf', function (err) {
+      if (err) {
+        self.logger.info('Cannot delete ' + folder + '/asound/softvolume-postVolume.conf: ' + err);
+      } else {
+        self.logger.info('Soft Volume ALSA configuration file deleted');
+        self.updateALSAConfigFile();
+      }
+    });
+  } else {
+    var asoundcontent = '';
+
+    fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
+      if (err) {
+        self.logger.info('Cannot write /etc/asound.conf: ' + err);
+      } else {
+        self.logger.info('Asound.conf file written');
+        var mv = execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid: 1000, gid: 1000, encoding: 'utf8' });
+        var apply = execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
+        self.updateVolumeSettings();
+        var apply3 = execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
+      }
+    });
+  }
 };
 
 ControllerAlsa.prototype.updateVolumeSettings = function () {
@@ -1353,10 +1584,24 @@ ControllerAlsa.prototype.updateVolumeSettings = function () {
   var valmixer = self.config.get('mixer');
   var valmixertype = self.config.get('mixer_type');
 
-  if (cards[valdevice] != undefined) {
-    var outdevicename = cards[valdevice].name;
-  }
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    if (cards[valdevice] != undefined) {
+      var outdevicename = cards[valdevice].name;
+    }
+  } else {
+    if (valdevice != 'softvolume') {
+      if (cards[valdevice] != undefined) {
+        var outdevicename = cards[valdevice].name;
+      }
+    } else {
+      var outdevicename = 'softvolume';
+    }
 
+    if (valmixertype === 'Software') {
+      valdevice = self.config.get('softvolumenumber');
+    }
+  }
+  
   var valvolumestart = self.config.get('volumestart');
   var valvolumesteps = self.config.get('volumesteps');
 
@@ -1524,7 +1769,9 @@ ControllerAlsa.prototype.checkAudioDeviceAvailable = function () {
   }
   var cards = self.getAlsaCards();
   var outdev = this.config.get('outputdevice');
-  
+  if (outdev === 'softvolume') {
+    outdev = self.config.get('softvolumenumber', 'none');
+  }
   var outdevName = this.config.get('outputdevicename');
   if (cards.length === 0) {
     var responseData = {
@@ -1587,7 +1834,9 @@ ControllerAlsa.prototype.checkCurrentAudioDeviceAvailable = function () {
   var self = this;
 
   var currentDeviceNumber = self.config.get('outputdevice', 'none');
-
+  if (currentDeviceNumber === 'softvolume') {
+    	currentDeviceNumber = self.config.get('softvolumenumber', 'none');
+  }
   var cards = self.getAlsaCards();
   if (cards.length === 0) {
     return false;

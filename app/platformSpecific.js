@@ -86,7 +86,16 @@ PlatformSpecific.prototype.startupSound = function () {
   var startupSound = self.coreCommand.executeOnPlugin('system_controller', 'system', 'getConfigParam', 'startupSound');
 
   if (startupSound) {
-    	var hwdev = '-D ' + outdev;
+    var hwdev = null;
+    if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+      hwdev = '-D ' + outdev;
+    } else {
+      if (outdev === 'softvolume') {
+        hwdev = '-D softvolume';
+      } else {
+        hwdev = '--device=plughw:' + outdev + ',0';
+      }
+    }
     try {
       execSync('/usr/bin/aplay ' + hwdev + ' /volumio/app/startup.wav');
     } catch (e) {

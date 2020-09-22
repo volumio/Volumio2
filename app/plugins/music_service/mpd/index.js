@@ -944,10 +944,8 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
       if (err) {
         return self.logger.error(err);
       }
-      var outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
-      var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
+      var outdev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
       var mixer = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mixer');
-      var softvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolume');
 
       var resampling = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling');
       var resampling_bitdepth = self.getAdditionalConf('audio_interface', 'alsa_controller', 'resampling_target_bitdepth');
@@ -957,14 +955,34 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
       var mixerdev = '';
       var mixerstrings = '';
-      if (!softvolume) {
-        if (realDev.indexOf(',') >= 0) {
-          mixerdev = 'hw:' + realDev;
+      
+      if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+        var realDev = outdev;
+        outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
+        if(self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolume')) {
+          mixerdev = 'SoftMaster';
         } else {
-          mixerdev = 'hw:' + realDev;
+          if (realDev.indexOf(',') >= 0) {
+            mixerdev = 'hw:' + realDev;
+          } else {
+            mixerdev = 'hw:' + realDev + ',0';
+          }
         }
+      
       } else {
-        mixerdev = 'SoftMaster';
+        if (outdev != 'softvolume') {
+          var realDev = outdev;
+          if (outdev.indexOf(',') >= 0) {
+            mixerdev = 'hw:' + outdev;
+            outdev = 'hw:' + outdev;
+          } else {
+            mixerdev = 'hw:' + outdev;
+            outdev = 'hw:' + outdev + ',0';
+          }
+        } else {
+          mixerdev = 'SoftMaster';
+          var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+        }
       }
 
       var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');

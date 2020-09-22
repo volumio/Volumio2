@@ -1286,9 +1286,15 @@ PluginManager.prototype.disablePlugin = function (category, name) {
   var key = category + '.' + name;
   self.config.set(key + '.enabled', false);
 
-  var package_json = self.getPackageJson(self.findPluginFolder(category, name));
-  if(package_json.volumio_info.has_alsa_contribution) {
-    return self.coreCommand.rebuildALSAConfiguration();
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    var package_json = self.getPackageJson(self.findPluginFolder(category, name));
+    if(package_json.volumio_info.has_alsa_contribution) {
+      return self.coreCommand.rebuildALSAConfiguration();
+    } else {
+      defer.resolve();
+    }
+  } else {
+    defer.resolve();
   }
   return defer.promise;
 };
@@ -1628,11 +1634,13 @@ PluginManager.prototype.enableAndStartPlugin = function (category, name) {
       return self.loadCorePlugin(folder);
     })
     .then(() => {
-    	var package_json = self.getPackageJson(folder);
-    	if(package_json.volumio_info.has_alsa_contribution) {
-    		return self.coreCommand.rebuildALSAConfiguration();
+      if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+        var package_json = self.getPackageJson(folder);
+        if(package_json.volumio_info.has_alsa_contribution) {
+   	      return self.coreCommand.rebuildALSAConfiguration();
     	}
-    	return {};
+      }
+      return {};
     })
     .then(self.startPlugin.bind(this, category, name))
     .then(function (e) {
