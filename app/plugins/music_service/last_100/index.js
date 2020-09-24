@@ -50,11 +50,16 @@ last_100.prototype.listenState = function () {
     var newlastStates = [];
     if (data.status != 'stop' && data.service != 'webradio' && data.volatile != true) {
       if (data.uri != currentSong.uri) {
-        if (data.service && data.title && data.artist && data.album) {
+        if (data.service !== "undefined" && data.title && data.artist && data.album) {
           if (data.uri.startsWith('http://') || data.uri.startsWith('https://')) {
             data = self.parseStreamingUri(data);
           }
-          currentSong.uri = data.uri;
+          if (data && data.uri && data.service) {
+            currentSong.uri = data.uri;
+          } else {
+            return;
+          }
+
           var currentsong = {uri: data.uri, service: data.service, title: data.title, artist: data.artist, album: data.album, albumart: data.albumart, type: 'song'};
           newlastStates.push(currentsong);
           try {
