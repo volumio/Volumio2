@@ -5,7 +5,7 @@
     {"id":"allo-boss-dac","name":"Allo BOSS","overlay":"allo-boss-dac-pcm512x-audio","alsanum":"2","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-digione","name":"Allo DigiOne","overlay":"allo-digione","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-katana-dac","name":"Allo Katana","overlay":"allo-katana-dac-audio","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
-    {"id":"audio-injector-isolated","name":"AudioInjector Isolated","overlay":"audioinjector-isolated-soundcard","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
+    {"id":"audio-injector-isolated","name":"AudioInjector Isolated","overlay":"audioinjector-isolated-soundcard","alsanum":"2","mixer":"Master","modules":"snd_soc_cs4271_i2c","script":"","needsreboot":"yes"},
     {"id":"audio-injector-ultra","name":"AudioInjector Ultra 2","overlay":"audioinjector-ultra","alsanum":"2","mixer":"DAC","modules":"","script":"","needsreboot":"yes"},
     {"id":"piano-dac","name":"Allo Piano","overlay":"allo-piano-dac-pcm512x-audio","alsanum":"2","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"piano-dac-plus","name":"Allo Piano 2.1","overlay":"allo-piano-dac-plus-pcm512x-audio","alsanum":"2","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
