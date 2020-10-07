@@ -44,16 +44,16 @@
     "UI_CONFIG_SELECT_LANGUAGE": "Lựa chọn ngôn ngữ",
     "UI_CONFIG_SELECT_LANGUAGE_DOC": "Lựa chọn ngôn ngữ hệ thống",
     "UPLOAD_FAILED": "Lỗi tải lên",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": "",
     "VOLUMIO3_EXPERIMENTAL_UI": "Kích hoạt giao diện người dùng thử nghiệm",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Kích hoạt giao diện người dùng thử nghiệm",
     "WEB_ALBUMART_ENABLE": "Bìa Album từ Web",
     "WEB_ALBUMART_ENABLE_DOC": "Bật chế độ lấy ảnh bìa album từ web nếu trong thư mục của album không có ảnh",
     "WEB_ALBUMART_SIZE": "Kích thước ảnh bìa album từ web",
-    "WEB_ALBUMART_SIZE_DOC": "Chọn kích thước bìa album download từ web:Chất lượng cao hơn đồng nghĩa với việc tải ảnh chậm hơn. Ảnh chất lượng thấp sẽ tải nhanh hơn.",
-    "USER_INTERFACE_CLASSIC": "",
-    "USER_INTERFACE_CONTEMPORARY": "",
-    "USER_INTERFACE_LAYOUT_DESIGN": "",
-    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
+    "WEB_ALBUMART_SIZE_DOC": "Chọn kích thước bìa album download từ web:Chất lượng cao hơn đồng nghĩa với việc tải ảnh chậm hơn. Ảnh chất lượng thấp sẽ tải nhanh hơn."
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Đã thêm ",
@@ -64,6 +64,7 @@
     "ARTIST": "Nghệ Sỹ",
     "ARTISTS": "Các nghệ sỹ",
     "CANCEL": "Hủy bỏ",
+    "CANNOT_LIST": "",
     "CLOSE": "Đóng lại",
     "CONFIGURATION_UPDATE": "Cấu hình cập nhật",
     "CONFIGURATION_UPDATE_DESCRIPTION": "Cấu hình cập nhật thành công",
@@ -123,8 +124,7 @@
     "TRACKS": "Các bài hát",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Nhạc của bạn đang đươc quét và có 1 biểu tượng ở góc phía dưới bên trái. Nó sẽ tiếp tục quay cho đến khi thư viện được lập chỉ mục thành công. Trong thời gian này tốt nhất là bạn không nên làm gì cả, ĐỪNG CHƠI NHẠC TRONG KHI THƯ VIỆN ĐANG ĐƯỢC LẬP CHỈ MỤC.",
     "USERNAME": "Tên đăng nhập",
-    "WITH": "Với",
-    "CANNOT_LIST": ""
+    "WITH": "Với"
   },
   "MAIN_MENU": {
     "ALARM": "Báo thức",
@@ -333,6 +333,8 @@
     "UPDATING_PLUGIN_FILES": "Đang cập nhật file tiện ích"
   },
   "SYSTEM": {
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
     "CANNOT_REMOVE_MEDIA": "Không thể xóa dữ liệu media",
     "CHECKING_SYSTEM_INTEGRITY": "Kiểm tra tính toàn vẹn của hệ thống",
     "CHECK_UPDATES": "Kiểm tra các bản cập nhật",
@@ -371,6 +373,7 @@
     "NO_UPDATE_AVAILABLE": "Không có bản cập nhật nào khả dụng",
     "PLAYER_NAME": "Tên thiết bị",
     "PLAYER_NAME_DOC": "Đây là tên thiết bị sẽ hiển thị trong hệ thống mạng",
+    "PRIVACY_SETTINGS": "",
     "SHOW_ADVANCED_SETTINGS": "Hiển thị cài đặt nâng cao",
     "SHOW_ADVANCED_SETTINGS_DOC": "Khi kích hoạt, hệ thống sẽ hiển thị một vài cài đặt nâng cao. Những cài đặt này chỉ được vận hành bởi các chuyên gia",
     "SIMPLE_SETTINGS_SET": "Chế độ cài đặt đơn giản",
@@ -390,10 +393,7 @@
     "TURN_OFF_IN": "Tắt ngay lập tức",
     "UPDATE_ALREADY_LATEST_VERSION": "Bạn đang ở phiên bản mới nhất",
     "UPDATE_FAILED": "Lỗi cập nhật",
-    "VIDEO_OUT_OPTIONS": "Tùy chỉnh đầu ra Video",
-    "ALLOW_UI_STATISTICS": "",
-    "ALLOW_UI_STATISTICS_DOC": "",
-    "PRIVACY_SETTINGS": ""
+    "VIDEO_OUT_OPTIONS": "Tùy chỉnh đầu ra Video"
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Đang kiểm tra bản cập nhật",
@@ -420,10 +420,10 @@
     "LOCAL_RADIOS": "Vị trí Radios",
     "MY_WEB_RADIOS": "Radios của tôi",
     "POPULAR_RADIOS": "Các đài Radios nổi tiếng",
+    "SHOUTCAST_ERROR": "",
     "TALK_RADIOS": "Nói chuyện qua Radios",
     "TOP_500_RADIOS": "Top 500 đài Radios",
-    "WEBRADIO": "Web Radio",
-    "SHOUTCAST_ERROR": ""
+    "WEBRADIO": "Web Radio"
   },
   "WIZARD": {
     "CONGRATULATIONS": "Chúc mừng bạn",

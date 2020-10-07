@@ -44,16 +44,16 @@
     "UI_CONFIG_SELECT_LANGUAGE": "Izaberite jezik",
     "UI_CONFIG_SELECT_LANGUAGE_DOC": "Izaberite jezik sustava",
     "UPLOAD_FAILED": "Prijenos nije uspio",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": "",
     "VOLUMIO3_EXPERIMENTAL_UI": "Omogući eksperimentalno korisničko sučelje",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Omogućite eksperimentalno korisničko sučelje",
     "WEB_ALBUMART_ENABLE": "Album s weba",
     "WEB_ALBUMART_ENABLE_DOC": "Omogućite preuzimanje albuma s weba ako u mapi nije pronađena nijedna datoteka slike",
     "WEB_ALBUMART_SIZE": "Veličina slike web albuma",
-    "WEB_ALBUMART_SIZE_DOC": "Izaberite veličinu slike albuma preuzete s interneta: veća kvaliteta zahtijeva dulje vrijeme učitavanja. Niže vrijednosti mogu poboljšati vrijeme učitavanja.",
-    "USER_INTERFACE_CLASSIC": "",
-    "USER_INTERFACE_CONTEMPORARY": "",
-    "USER_INTERFACE_LAYOUT_DESIGN": "",
-    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
+    "WEB_ALBUMART_SIZE_DOC": "Izaberite veličinu slike albuma preuzete s interneta: veća kvaliteta zahtijeva dulje vrijeme učitavanja. Niže vrijednosti mogu poboljšati vrijeme učitavanja."
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Dodano ",
@@ -64,6 +64,7 @@
     "ARTIST": "Izvođač",
     "ARTISTS": "Izvođači",
     "CANCEL": "Odustani",
+    "CANNOT_LIST": "",
     "CLOSE": "Zatvori",
     "CONFIGURATION_UPDATE": "Ažuriranje konfiguracije",
     "CONFIGURATION_UPDATE_DESCRIPTION": "Konfiguracija je uspješno ažurirana",
@@ -123,8 +124,7 @@
     "TRACKS": "Pjesme",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Vaša se glazba pretražuje, a ikona u lijevom kutu će se vrtjeti sve dok se vaša biblioteka uspješno ne indeksira. Budući da tijekom ove operacije sustav može biti opterećen nemojte ga koristiti dok se glazba indeksira.",
     "USERNAME": "Korisničko ime",
-    "WITH": "sa",
-    "CANNOT_LIST": ""
+    "WITH": "sa"
   },
   "MAIN_MENU": {
     "ALARM": "Budilica",
@@ -333,6 +333,8 @@
     "UPDATING_PLUGIN_FILES": "Ažuriranje datoteka dodatka"
   },
   "SYSTEM": {
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
     "CANNOT_REMOVE_MEDIA": "Nije moguće ukloniti medij",
     "CHECKING_SYSTEM_INTEGRITY": "Provjera integriteta sustava",
     "CHECK_UPDATES": "Provjeri ažuriranja",
@@ -371,6 +373,7 @@
     "NO_UPDATE_AVAILABLE": "Nema dostupnih ažuriranja",
     "PLAYER_NAME": "Naziv playera",
     "PLAYER_NAME_DOC": "To je naziv vašeg playera onako kako će se pojaviti na vašoj mreži",
+    "PRIVACY_SETTINGS": "",
     "SHOW_ADVANCED_SETTINGS": "Prikaži napredne postavke",
     "SHOW_ADVANCED_SETTINGS_DOC": "Kad je omogućeno, sustav će prikazati neke napredne postavke kako bi omogućio napredne promjene. S tim postavkama trebaju raditi samo stručnjaci",
     "SIMPLE_SETTINGS_SET": "Pojednostavljeni način podešavanja",
@@ -390,10 +393,7 @@
     "TURN_OFF_IN": "Isključi se",
     "UPDATE_ALREADY_LATEST_VERSION": "Već ste na najnovijoj verziji",
     "UPDATE_FAILED": "Ažuriranje nije uspjelo",
-    "VIDEO_OUT_OPTIONS": "Opcije video izlaza",
-    "ALLOW_UI_STATISTICS": "",
-    "ALLOW_UI_STATISTICS_DOC": "",
-    "PRIVACY_SETTINGS": ""
+    "VIDEO_OUT_OPTIONS": "Opcije video izlaza"
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Provjera ažuriranja",
@@ -420,10 +420,10 @@
     "LOCAL_RADIOS": "Lokalne radio postaje",
     "MY_WEB_RADIOS": "Moje web radio postaje",
     "POPULAR_RADIOS": "Popularne radio postaje",
+    "SHOUTCAST_ERROR": "",
     "TALK_RADIOS": "Govorne radio postaje",
     "TOP_500_RADIOS": "500 najpopularnijih radija",
-    "WEBRADIO": "Web radio",
-    "SHOUTCAST_ERROR": ""
+    "WEBRADIO": "Web radio"
   },
   "WIZARD": {
     "CONGRATULATIONS": "Čestitke",
