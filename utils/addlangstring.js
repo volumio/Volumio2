@@ -31,9 +31,12 @@ const readline = require('readline').createInterface({
 const args = process.argv.slice(2);
 const [rootKey, langKey, langString] = args;
 readline.question('Beware, this assumes you know what your doing!\nContinue?[Y/n] ', (line) => {
-  if (line !== '' || line !== 'Y') {
+  if (line.toUpperCase() !== 'Y' && line !== '') {
+    console.log('Exiting!');
     process.exit();
   }
+  readline.close();
+  addLangString('./app/i18n/');
 });
 
 function addLangString (langDirPath) {
@@ -41,7 +44,7 @@ function addLangString (langDirPath) {
   const langEN = JSON.parse(langENFile);
 
   if (Object.keys(langEN).includes(rootKey)) {
-    console.log(`Adding ${rootKey}.${langKey}`);
+    console.log(`Adding ${rootKey}.${langKey} = ${langString}`);
     langEN[rootKey][langKey] = langString;
   } else {
     console.error(`${rootKey} not found! in strings_en`);
@@ -50,14 +53,15 @@ function addLangString (langDirPath) {
   const files = fs.readdirSync(langDirPath);
   files.forEach((file) => {
     const fullFile = path.join(langDirPath, file);
-    if (path.extname(file) === 'json' && path.basename(file, '.json') !== 'strings_en') {
+    if (path.extname(file) === '.json' && path.basename(file, '.json') !== 'strings_en') {
+      console.log(`Processing: ${file}`);
       const langJSON = JSON.parse(fs.readFileSync(fullFile));
       langJSON[rootKey][langKey] = '';
+      langJSON[rootKey] = Object.fromEntries(Object.entries(langJSON[rootKey]).sort());
       fs.writeFileSync(fullFile, JSON.stringify(langJSON, null, 2));
     } else {
       console.warn('Skipping file: ', file);
     }
   });
+  console.log('Finished');
 }
-
-addLangString('./app/i18n/');
