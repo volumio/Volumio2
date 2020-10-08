@@ -12,6 +12,6 @@ fi
 cd /volumio
 
 echo "Installing node modules"
-npm install
+npm install --production
 
 echo "Done"
