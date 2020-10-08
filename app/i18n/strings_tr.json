@@ -44,16 +44,16 @@
     "UI_CONFIG_SELECT_LANGUAGE": "Lisan seçimi",
     "UI_CONFIG_SELECT_LANGUAGE_DOC": "Sisteminizin lisanınızı Seçin",
     "UPLOAD_FAILED": "Yükleme başarısız",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": "",
     "VOLUMIO3_EXPERIMENTAL_UI": "Deneysel Kullanıcı Arayüzü Etkinleştirme",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Deneysel Kullanıcı Arayüzü Etkinleştir",
     "WEB_ALBUMART_ENABLE": "Web Albüm resmi",
     "WEB_ALBUMART_ENABLE_DOC": "Dosya dizininde resim bulunmazsa, Web'den Albüm resmi almayı etkinleştir",
     "WEB_ALBUMART_SIZE": "Web Albüm Resim Boyutu",
-    "WEB_ALBUMART_SIZE_DOC": "Web'den indirilen Albüm resmi boyutunu seçin: daha yüksek kalite daha uzun süreleri gerektirir. Düşük değerler yükleme sürelerini iyileştirebilir.",
-    "USER_INTERFACE_CLASSIC": "",
-    "USER_INTERFACE_CONTEMPORARY": "",
-    "USER_INTERFACE_LAYOUT_DESIGN": "",
-    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
+    "WEB_ALBUMART_SIZE_DOC": "Web'den indirilen Albüm resmi boyutunu seçin: daha yüksek kalite daha uzun süreleri gerektirir. Düşük değerler yükleme sürelerini iyileştirebilir."
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Eklendi ",
@@ -64,6 +64,8 @@
     "ARTIST": "Sanatçı",
     "ARTISTS": "Sanatçılar",
     "CANCEL": "İptal",
+    "CANNOT_LIST": "",
+    "CLOSE": "",
     "CONFIGURATION_UPDATE": "Yapılandırma güncellemesi",
     "CONFIGURATION_UPDATE_DESCRIPTION": "Yapılandırma başarıyla güncellendi",
     "CONFIGURATION_UPDATE_ERROR": "Bir hata oluştu",
@@ -95,6 +97,7 @@
     "NO_RESULTS": "Sonuç yok",
     "OFF": "Kapalı",
     "ON": "Açık",
+    "OR": "",
     "PASSWORD": "Şifre",
     "PLAYER_RESTARTED": "Oynatıcı başarıyla yeniden başlatıldı",
     "PLAYLISTS": "Oynatma listeleri",
@@ -116,15 +119,12 @@
     "SEARCH_SONG_SECTION": "Eserler",
     "SETTINGS_SAVED_SUCCESSFULLY": "Ayarlar başarıyla kaydedildi",
     "SETTINGS_SAVE_ERROR": "Ayarlar kaydedilirken hata oluştu",
+    "SOURCES": "",
     "TRACK": "Eser",
     "TRACKS": "Eserler",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Müziğiniz taranıyor ve sol alt kısımdaki simge, tüm kütüphaneniz başarıyla dizine eklenene kadar dönmeye devam edecek. Sistem bu işlem sırasında daha az duyarlı olabileceğinden, müzik endekslenirken lütfen sistemi kullanmayın.",
     "USERNAME": "Kullanıcı adı",
-    "WITH": "ile",
-    "CANNOT_LIST": "",
-    "CLOSE": "",
-    "OR": "",
-    "SOURCES": ""
+    "WITH": "ile"
   },
   "MAIN_MENU": {
     "ALARM": "Uyandırma/Alarm",
@@ -137,8 +137,17 @@
     "PLUGINS": "Eklentiler",
     "SHUTDOWN": "Kapat",
     "SLEEP": "Uyku",
-    "SYSTEM": "Sistem",
-    "SOURCES": ""
+    "SOURCES": "",
+    "SYSTEM": "Sistem"
+  },
+  "MYVOLUMIO": {
+    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY": "",
+    "FEATURE_NOT_AVAILABLE": "",
+    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN": "",
+    "GOTO_DEVICE_LIST": "",
+    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "",
+    "PLAN_REQUIRED": "",
+    "UPGRADE_YOUR_PLAN_NOW": ""
   },
   "NETWORK": {
     "AUTOMATIC_IP": "Otomatik IP",
@@ -285,30 +294,28 @@
     "REMOVE_SUCCESS": "Kaldırıldı"
   },
   "PLUGINS": {
+    "CHECKING_DUPLICATE_PLUGIN": "",
     "CONFIRM_PLUGIN_INSTALL": "Eklenti Kur",
     "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE": "Dikkat, topluluk eklentileri üçüncü taraf geliştiricileri tarafından geliştirilmiştir ve beklenmeyen davranışlara ve sistem kararsızlığına neden olabilir. Bu eklentiyi kurmak istediğinize emin misiniz",
     "CONFIRM_PLUGIN_UNINSTALL": "Eklentinin kaldırılmasını onaylayın",
     "CONFIRM_PLUGIN_UNINSTALL_MESSAGE": "Bu Eklentiyi kaldırmak istediğinize eminmisiniz?",
-    "DOWNLOADING": "Eklenti indiriliyor",
-    "DOWNLOADING_FROM": " Eklenti şuradan indiriliyor ",
-    "INSTALL": "Kur",
-    "NO_CONFIGURATION_AVAILABLE": "Yapılandırma Yok",
-    "PLUGIN_START_ERROR": "Bu eklenti başlatılamıyor. Lütfen güncellenmiş bir sürümünü yükleyin veya eklenti geliştiricisine başvurun",
-    "UNINSTALL": "Kaldır",
-    "UPDATING_PLUGIN": "Eklenti güncelle",
-    "CHECKING_DUPLICATE_PLUGIN": "",
     "COPYING_PLUGIN_TO_LOCATION": "",
     "CREATING_INSTALL_LOCATION": "",
+    "DOWNLOADING": "Eklenti indiriliyor",
+    "DOWNLOADING_FROM": " Eklenti şuradan indiriliyor ",
     "DOWNLOADING_PLUGIN": "",
     "ENABLE_PLUGIN": "",
     "ENABLE_PLUGIN_NOW_QUESTION": "",
     "FINALIZING_INSTALLATION": "",
     "FINALIZING_UNINSTALL": "",
+    "INSTALL": "Kur",
     "INSTALLING_NECESSARY_UTILITIES": "",
     "INSTALLING_PLUGIN": "",
+    "NO_CONFIGURATION_AVAILABLE": "Yapılandırma Yok",
     "PLUGIN_DISABLED": "",
     "PLUGIN_INSTALL_COMPLETED": "",
     "PLUGIN_INSTALL_ERROR_OCCURRED": "",
+    "PLUGIN_START_ERROR": "Bu eklenti başlatılamıyor. Lütfen güncellenmiş bir sürümünü yükleyin veya eklenti geliştiricisine başvurun",
     "PLUGIN_STOPPED": "",
     "PLUGIN_UNINSTALLED": "",
     "PLUGIN_UNINSTALL_ERROR_OCCURRED": "",
@@ -319,11 +326,15 @@
     "REMOVING_NECESSARY_UTILITIES": "",
     "SUCCESSFULLY_INSTALLED": "",
     "SUCCESSFULLY_UPDATED_PLUGIN": "",
+    "UNINSTALL": "Kaldır",
     "UNINSTALLING_PLUGIN": "",
     "UNPACKING_PLUGIN": "",
+    "UPDATING_PLUGIN": "Eklenti güncelle",
     "UPDATING_PLUGIN_FILES": ""
   },
   "SYSTEM": {
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
     "CANNOT_REMOVE_MEDIA": "Medya kaldırılamıyor",
     "CHECKING_SYSTEM_INTEGRITY": "Sistem bütünlüğü denetleme",
     "CHECK_UPDATES": "Güncellemeleri denetle",
@@ -362,6 +373,7 @@
     "NO_UPDATE_AVAILABLE": "yeni bir güncelleme yok",
     "PLAYER_NAME": "Oynatıcı/Cihaz Adı",
     "PLAYER_NAME_DOC": "Bu, sisteminizin ağınızda görüneceği adıdır",
+    "PRIVACY_SETTINGS": "",
     "SHOW_ADVANCED_SETTINGS": "Gelişmiş Ayarları göster",
     "SHOW_ADVANCED_SETTINGS_DOC": "Etkinleştirildiğinde, sistem gelişmiş ince ayarlara/tweakings izin vermek için bazı gelişmiş ayarları gösterecektir. Bu ayarlar yalnızca uzmanlar tarafından kullanılmalıdır",
     "SIMPLE_SETTINGS_SET": "Basitleştirilmiş Seçenekler Modu",
@@ -381,10 +393,7 @@
     "TURN_OFF_IN": "Kapat/Turn off in",
     "UPDATE_ALREADY_LATEST_VERSION": "Zaten enson sürümdesiniz",
     "UPDATE_FAILED": "Güncelleme başarısız oldu",
-    "VIDEO_OUT_OPTIONS": "Video/Görüntü çıkışı seçenekleri",
-    "ALLOW_UI_STATISTICS": "",
-    "ALLOW_UI_STATISTICS_DOC": "",
-    "PRIVACY_SETTINGS": ""
+    "VIDEO_OUT_OPTIONS": "Video/Görüntü çıkışı seçenekleri"
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Güncellemeler denetleniyor",
@@ -411,24 +420,15 @@
     "LOCAL_RADIOS": "Yerel Radyolar",
     "MY_WEB_RADIOS": "Web Radyolarım",
     "POPULAR_RADIOS": "Popüler Radyolar",
+    "SHOUTCAST_ERROR": "",
     "TALK_RADIOS": "Sohbet Radyoları",
     "TOP_500_RADIOS": "Zirveki 500 Radyo",
-    "WEBRADIO": "Web Radyosu",
-    "SHOUTCAST_ERROR": ""
+    "WEBRADIO": "Web Radyosu"
   },
   "WIZARD": {
     "CONGRATULATIONS": "Tebrikler",
     "DEVICE_SUCCESSFULLY_CONFIGURED": "Sisteminiz yapılandırıldı ve oynatmaya hazır",
     "PLEASE_DONATE": "Volumio'yu beğeniyorsanız, lütfen bağış yapmayı düşünün. Bu proje için fark yaratabilirsiniz!",
     "RUN_FIRST_CONFIG_WIZARD": "İlk yapılandırma Sihirbazını çalıştır"
-  },
-  "MYVOLUMIO": {
-    "ENABLE_YOUR_DEVICE_TO_USE_THIS_FUNCTIONALITY": "",
-    "FEATURE_NOT_AVAILABLE": "",
-    "FEATURE_NOT_AVAILABLE_CURRENT_PLAN": "",
-    "GOTO_DEVICE_LIST": "",
-    "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "",
-    "PLAN_REQUIRED": "",
-    "UPGRADE_YOUR_PLAN_NOW": ""
   }
 }

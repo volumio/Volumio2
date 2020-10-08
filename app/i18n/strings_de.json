@@ -44,16 +44,16 @@
     "UI_CONFIG_SELECT_LANGUAGE": "Sprache auswählen",
     "UI_CONFIG_SELECT_LANGUAGE_DOC": "Systemsprache auswählen",
     "UPLOAD_FAILED": "Upload fehlgeschlagen",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": "",
     "VOLUMIO3_EXPERIMENTAL_UI": "Aktiviere experimentelle Benutzeroberfläche",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Aktiviere experimentelle Benutzeroberfläche",
     "WEB_ALBUMART_ENABLE": "Albencover herunterladen",
     "WEB_ALBUMART_ENABLE_DOC": "Albencover aus dem Internet herunterladen, wenn keine Bilddatei im Ordner vorhanden ist.",
     "WEB_ALBUMART_SIZE": "Größe der Albencover",
-    "WEB_ALBUMART_SIZE_DOC": "Größe der Albencover auswählen. Je größer die Qualität, desto länger die Downloadzeit. Sollten sich die Ladezeiten verlängern, sollte diese Einstellung auf eine niedrigere Stufe gesetzt werden.",
-    "USER_INTERFACE_CLASSIC": "",
-    "USER_INTERFACE_CONTEMPORARY": "",
-    "USER_INTERFACE_LAYOUT_DESIGN": "",
-    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
+    "WEB_ALBUMART_SIZE_DOC": "Größe der Albencover auswählen. Je größer die Qualität, desto länger die Downloadzeit. Sollten sich die Ladezeiten verlängern, sollte diese Einstellung auf eine niedrigere Stufe gesetzt werden."
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Füge ",
@@ -64,6 +64,7 @@
     "ARTIST": "Interpret",
     "ARTISTS": "Interpreten",
     "CANCEL": "Abbrechen",
+    "CANNOT_LIST": "",
     "CLOSE": "Schließen",
     "CONFIGURATION_UPDATE": "Konfiguration aktualisieren",
     "CONFIGURATION_UPDATE_DESCRIPTION": "Konfiguration erfolgreich aktualisiert",
@@ -123,8 +124,7 @@
     "TRACKS": "Titel",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
     "USERNAME": "Benutzername",
-    "WITH": "mit",
-    "CANNOT_LIST": ""
+    "WITH": "mit"
   },
   "MAIN_MENU": {
     "ALARM": "Wecker",
@@ -333,6 +333,8 @@
     "UPDATING_PLUGIN_FILES": "Aktualisiere Plugin-Dateien"
   },
   "SYSTEM": {
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
     "CANNOT_REMOVE_MEDIA": "Medium kann nicht ausgeworfen werden",
     "CHECKING_SYSTEM_INTEGRITY": "Systemintegrität wird überprüft",
     "CHECK_UPDATES": "Suche Aktualisierungen",
@@ -371,6 +373,7 @@
     "NO_UPDATE_AVAILABLE": "Keine Aktualisierungen verfügbar",
     "PLAYER_NAME": "Gerätename",
     "PLAYER_NAME_DOC": "Name des Systems im Netzwerk",
+    "PRIVACY_SETTINGS": "",
     "SHOW_ADVANCED_SETTINGS": "Erweiterte Einstellungen anzeigen",
     "SHOW_ADVANCED_SETTINGS_DOC": "Wenn aktiviert, zeigt das System weitere Einstellungen, die mehr ins Detail gehen. Diese Einstellung sollte nur von erfahrenen Anwendern genutzt werden",
     "SIMPLE_SETTINGS_SET": "Einfache Einstellungen",
@@ -390,10 +393,7 @@
     "TURN_OFF_IN": "Gedrückt halten für",
     "UPDATE_ALREADY_LATEST_VERSION": "Die verwendete Version ist aktuell.",
     "UPDATE_FAILED": "Aktualisierung fehlgeschlagen",
-    "VIDEO_OUT_OPTIONS": "Videoanzeige-Optionen",
-    "ALLOW_UI_STATISTICS": "",
-    "ALLOW_UI_STATISTICS_DOC": "",
-    "PRIVACY_SETTINGS": ""
+    "VIDEO_OUT_OPTIONS": "Videoanzeige-Optionen"
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Aktualisierungen werden gesucht",
@@ -420,10 +420,10 @@
     "LOCAL_RADIOS": "Lokale Sender",
     "MY_WEB_RADIOS": "Meine Radiosender",
     "POPULAR_RADIOS": "Beliebte Sender",
+    "SHOUTCAST_ERROR": "",
     "TALK_RADIOS": "Gesprochene Inhalte",
     "TOP_500_RADIOS": "Die 500 besten Sender",
-    "WEBRADIO": "Internetradio",
-    "SHOUTCAST_ERROR": ""
+    "WEBRADIO": "Internetradio"
   },
   "WIZARD": {
     "CONGRATULATIONS": "Glückwunsch",

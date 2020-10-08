@@ -44,16 +44,16 @@
     "UI_CONFIG_SELECT_LANGUAGE": "Vyberte jazyk",
     "UI_CONFIG_SELECT_LANGUAGE_DOC": "Vyberte jazyk pre vaše zariadenie",
     "UPLOAD_FAILED": "Nahrávanie zlyhalo",
+    "USER_INTERFACE_CLASSIC": "",
+    "USER_INTERFACE_CONTEMPORARY": "",
+    "USER_INTERFACE_LAYOUT_DESIGN": "",
+    "USER_INTERFACE_LAYOUT_DESIGN_DOC": "",
     "VOLUMIO3_EXPERIMENTAL_UI": "Povoliť experimentálne používateľské rozhranie",
     "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Povoliť experimentálne používateľské rozhranie",
     "WEB_ALBUMART_ENABLE": "Obrázok obálky z webu",
     "WEB_ALBUMART_ENABLE_DOC": "Povoliť získanie obrázku obálky albumu z internetu, pokiaľ nie je obrázok nájdený v adresári",
     "WEB_ALBUMART_SIZE": "Veľkosť obrázku obálky",
-    "WEB_ALBUMART_SIZE_DOC": "Voľba veľkosti obrázku obálky sťahovaného z internetu",
-    "USER_INTERFACE_CLASSIC": "",
-    "USER_INTERFACE_CONTEMPORARY": "",
-    "USER_INTERFACE_LAYOUT_DESIGN": "",
-    "USER_INTERFACE_LAYOUT_DESIGN_DOC": ""
+    "WEB_ALBUMART_SIZE_DOC": "Voľba veľkosti obrázku obálky sťahovaného z internetu"
   },
   "COMMON": {
     "ADD_QUEUE_TEXT_1": "Pridáné ",
@@ -64,6 +64,7 @@
     "ARTIST": "Umelec",
     "ARTISTS": "Umelci",
     "CANCEL": "Zrušiť",
+    "CANNOT_LIST": "",
     "CLOSE": "Zatvoriť",
     "CONFIGURATION_UPDATE": "Aktualizácia nastavenia",
     "CONFIGURATION_UPDATE_DESCRIPTION": "Nastavenie bolo úspešne zmenené",
@@ -123,8 +124,7 @@
     "TRACKS": "Skladby",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Pre zlepšenie systému ukladá systém obrázky obálok do medzipamäte, avšak preto nejde zobraziť nanovo pridané obrázky. Nanovo pridané obrázky obálok budú k dispozícii po vyčistení tejto medzipamäte.",
     "USERNAME": "Používateľské meno",
-    "WITH": "s",
-    "CANNOT_LIST": ""
+    "WITH": "s"
   },
   "MAIN_MENU": {
     "ALARM": "Budík",
@@ -333,6 +333,8 @@
     "UPDATING_PLUGIN_FILES": "Aktualizáciu súborov pluginu"
   },
   "SYSTEM": {
+    "ALLOW_UI_STATISTICS": "",
+    "ALLOW_UI_STATISTICS_DOC": "",
     "CANNOT_REMOVE_MEDIA": "Médium sa nedá odobrať",
     "CHECKING_SYSTEM_INTEGRITY": "Kontrola integrity systému",
     "CHECK_UPDATES": "Vyhľadať aktualizácie",
@@ -371,6 +373,7 @@
     "NO_UPDATE_AVAILABLE": "Žiadne aktualizácie nie sú k dispozícii",
     "PLAYER_NAME": "Meno zariadenia",
     "PLAYER_NAME_DOC": "Toto meno se zobrazí vo vašej sieti",
+    "PRIVACY_SETTINGS": "",
     "SHOW_ADVANCED_SETTINGS": "Zobraziť pokročilé nastavenia",
     "SHOW_ADVANCED_SETTINGS_DOC": "Ak je táto možnosť povolená, systém zobrazí niektoré rozšírené nastavenia, ktoré umožnia pokročilé vylepšenia. Tieto nastavenia by mali prevádzkovať iba odborníci",
     "SIMPLE_SETTINGS_SET": "Režim jednoduchého nastavenia",
@@ -390,10 +393,7 @@
     "TURN_OFF_IN": "Vypnúť",
     "UPDATE_ALREADY_LATEST_VERSION": "Vaša verzia systému je aktuálna",
     "UPDATE_FAILED": "Aktualizácia zlyhala",
-    "VIDEO_OUT_OPTIONS": "Nastavenie videovýstupu",
-    "ALLOW_UI_STATISTICS": "",
-    "ALLOW_UI_STATISTICS_DOC": "",
-    "PRIVACY_SETTINGS": ""
+    "VIDEO_OUT_OPTIONS": "Nastavenie videovýstupu"
   },
   "UPDATER": {
     "CHECKING_FOR_UPDATES": "Kontrola aktualizácii",
@@ -420,10 +420,10 @@
     "LOCAL_RADIOS": "Lokálne rádia",
     "MY_WEB_RADIOS": "Moje webová rádiá",
     "POPULAR_RADIOS": "Populárne rádia",
+    "SHOUTCAST_ERROR": "",
     "TALK_RADIOS": "Hovorené slovo",
     "TOP_500_RADIOS": "500 najobľúbenejších rádií",
-    "WEBRADIO": "Webové rádio",
-    "SHOUTCAST_ERROR": ""
+    "WEBRADIO": "Webové rádio"
   },
   "WIZARD": {
     "CONGRATULATIONS": "Gratulujem",

@@ -64,6 +64,7 @@
     "ARTIST": "Artista",
     "ARTISTS": "Artisti",
     "CANCEL": "Annulla",
+    "CANNOT_LIST": "",
     "CLOSE": "Chiudi",
     "CONFIGURATION_UPDATE": "Configurazione aggiornata",
     "CONFIGURATION_UPDATE_DESCRIPTION": "Configurazione aggiornata correttamente",
@@ -123,8 +124,7 @@
     "TRACKS": "Canzoni",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "E' cominciata la scansione della tua libreria musicale. L'icona in basso a sinistra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
     "USERNAME": "Nome Utente",
-    "WITH": "con",
-    "CANNOT_LIST": ""
+    "WITH": "con"
   },
   "MAIN_MENU": {
     "ALARM": "Sveglie",
@@ -420,10 +420,10 @@
     "LOCAL_RADIOS": "Radio Locali",
     "MY_WEB_RADIOS": "Le mie Web Radio",
     "POPULAR_RADIOS": "Radio Popolari",
+    "SHOUTCAST_ERROR": "",
     "TALK_RADIOS": "Talk Show",
     "TOP_500_RADIOS": "Le migliori 500",
-    "WEBRADIO": "Web Radio",
-    "SHOUTCAST_ERROR": ""
+    "WEBRADIO": "Web Radio"
   },
   "WIZARD": {
     "CONGRATULATIONS": "Congratulazioni",
