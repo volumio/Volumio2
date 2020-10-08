@@ -322,12 +322,12 @@ function finalizing(path, package) {
     if (fs.existsSync(process.cwd + '/package-lock.json')) {
         execSync("/bin/rm package-lock.json");
     }
-    execSync("/usr/local/bin/npm install");
+    execSync("/usr/local/bin/npm install --production");
     if (fs.existsSync(process.cwd + '/package-lock.json')) {
         execSync("/bin/rm package-lock.json");
     }
 
-    console.log("\nCongratulation, your plugin has been succesfully created!\n" +
+    console.log("\nCongratulation, your plugin has been successfully created!\n" +
         "You can find it in: " + path + "\n");
 }
 
@@ -363,7 +363,7 @@ function zip(){
                 if (fs.existsSync(process.cwd + '/package-lock.json')) {
                     execSync("/bin/rm package-lock.json");
                 }
-                execSync("/usr/local/bin/npm install");
+                execSync("/usr/local/bin/npm install --production");
                 if (fs.existsSync(process.cwd + '/package-lock.json')) {
                     execSync("/bin/rm package-lock.json");
                 }
