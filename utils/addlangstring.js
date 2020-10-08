@@ -2,7 +2,7 @@
  * This little helper is written to make translations more streamlined
  * it is written in node to make it cross platform
  *
- * Useage:
+ * Usage:
  * addLangString rootKey langKey "String to add"
  * npm run addLangString -- ALARM TEST 'This is my test string'
  * npm run addLangString -- COMMON MYSETTING 'This is my setting string'
@@ -46,6 +46,7 @@ function addLangString (langDirPath) {
   if (Object.keys(langEN).includes(rootKey)) {
     console.log(`Adding ${rootKey}.${langKey} = ${langString}`);
     langEN[rootKey][langKey] = langString;
+    langEN[rootKey] = Object.fromEntries(Object.entries(langEN[rootKey]).sort());
   } else {
     console.error(`${rootKey} not found! in strings_en`);
   }
