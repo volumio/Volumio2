@@ -124,7 +124,8 @@
     "TRACKS": "Canzoni",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "E' cominciata la scansione della tua libreria musicale. L'icona in basso a sinistra continuerà a girare fino al completamento dell'operazione. Il sistema potrebbe essere meno fluido durante la scansione, si consiglia pertanto di utilizzarlo una volta completata.",
     "USERNAME": "Nome Utente",
-    "WITH": "con"
+    "WITH": "con",
+    "PLEASE_WAIT": "Attendere"
   },
   "MAIN_MENU": {
     "ALARM": "Sveglie",
@@ -191,7 +192,9 @@
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "Procedere al passo successivo",
     "WIRELESS_RESTART_ERROR": "Errore nel riavviare la rete wireless: ",
     "WIRELESS_RESTART_SUCCESS": "Rete wireless riavviata correttamente",
-    "WIRELESS_RESTART_TITLE": "Rete Wireless"
+    "WIRELESS_RESTART_TITLE": "Rete Wireless",
+    "WIRELESS_NETWORK_CONNECTING_TO" : "Connessione alla rete senza fili",
+    "WIRELESS_NETWORK_RESTART_AFTER_CONNECTION" : "Durante questa operazione sarai disconnesso. Per favore, riconnettiti alla tua rete senza fili e cerca il dispositivo una volta connesso"
   },
   "NETWORKFS": {
     "ALIAS_DOC": "Scegli un alias che verrà mostrato alla voce NAS",

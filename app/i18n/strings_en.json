@@ -124,7 +124,8 @@
     "TRACKS": "Tracks",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Your music is being scanned and the icon on bottom left will keep spinning until all your library has been successfully indexed. Since the system might be less responsive during this operation, please don't use the system while music is being indexed.",
     "USERNAME": "Username",
-    "WITH": "with"
+    "WITH": "with",
+    "PLEASE_WAIT": "Please wait"
   },
   "MAIN_MENU": {
     "ALARM": "Alarm",
@@ -191,7 +192,9 @@
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "Please proceed to next step",
     "WIRELESS_RESTART_ERROR": "Error while restarting wireless: ",
     "WIRELESS_RESTART_SUCCESS": "Wireless successfully restarted",
-    "WIRELESS_RESTART_TITLE": "Wireless restart"
+    "WIRELESS_RESTART_TITLE": "Wireless restart",
+    "WIRELESS_NETWORK_CONNECTING_TO" : "Connecting to wireless network",
+    "WIRELESS_NETWORK_RESTART_AFTER_CONNECTION" : "You will now be disconnected. Please connect back to your Wireless Network and discover your device again, once connection has been established"
   },
   "NETWORKFS": {
     "ALIAS_DOC": "Choose an Alias that will be displayed in NAS Mounts",

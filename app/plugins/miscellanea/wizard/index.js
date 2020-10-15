@@ -157,27 +157,38 @@ volumioWizard.prototype.connectWirelessNetwork = function (data) {
   wifiConnectPayload = {};
   wifiConnectPayloadExec = false;
 
-  var ethinfo = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWiredInfo', '');
-
-  ethinfo.then(function (ethdata) {
-    if (ethdata.connected) {
-      if (data.ssid != undefined) {
-        self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', data);
-
-        var connResults = {'wait': true, 'message': 'Connecting to network ' + data.ssid + '... ' + 'Please wait'};
-        defer.resolve(connResults);
-      } else {
-        defer.resolve('');
-      }
-    } else {
-      wifiConnectPayload = data;
-      wifiConnectPayloadExec = true;
-      var message = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER');
-      var message2 = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER2');
-      var connResults = {'wait': false, 'result': message + ' ' + data.ssid + ' ' + message2};
+  if (data.persistentWizard === true) {
+    if (data.ssid != undefined) {
+      self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', data);
+      var translatedMessage = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTING_TO') + ' ' + data.ssid + '... ' + self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_RESTART_AFTER_CONNECTION');
+      var connResults = {'wait': true, 'message': translatedMessage};
       defer.resolve(connResults);
+    } else {
+      defer.resolve('');
     }
-  });
+  } else {
+    var ethinfo = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getWiredInfo', '');
+
+    ethinfo.then(function (ethdata) {
+      if (ethdata.connected) {
+        if (data.ssid != undefined) {
+          self.commandRouter.executeOnPlugin('system_controller', 'network', 'saveWirelessNetworkSettings', data);
+          var translatedMessage = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTING_TO')+ ' ' + data.ssid + '... ' + self.commandRouter.getI18nString('COMMON.PLEASE_WAIT')
+          var connResults = {'wait': true, 'message': 'Connecting to network ' + data.ssid + '... ' + 'Please wait'};
+          defer.resolve(connResults);
+        } else {
+          defer.resolve('');
+        }
+      } else {
+        wifiConnectPayload = data;
+        wifiConnectPayloadExec = true;
+        var message = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER');
+        var message2 = self.commandRouter.getI18nString('NETWORK.WIRELESS_NETWORK_CONNECTION_DEFER2');
+        var connResults = {'wait': false, 'result': message + ' ' + data.ssid + ' ' + message2};
+        defer.resolve(connResults);
+      }
+    });
+  }
 
   return defer.promise;
 };
@@ -212,14 +223,14 @@ volumioWizard.prototype.getWizardConfig = function (data) {
   var conf = __dirname + '/wizard_steps/conf/' + data.page + '.json';
 
   self.commandRouter.i18nJson(__dirname + '/../../../i18n/strings_' + lang_code + '.json',
-    __dirname + '/../../../i18n/strings_en.json',
-    conf)
-    .then(function (uiconf) {
-      defer.resolve(uiconf);
-    })
-    .fail(function () {
-      defer.reject(new Error());
-    });
+      __dirname + '/../../../i18n/strings_en.json',
+      conf)
+      .then(function (uiconf) {
+        defer.resolve(uiconf);
+      })
+      .fail(function () {
+        defer.reject(new Error());
+      });
 
   return defer.promise;
 };
