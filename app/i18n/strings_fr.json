@@ -124,7 +124,8 @@
     "TRACKS": "Pistes",
     "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Scan de votre musique en cours. Durant cette période le système peut être ralenti, pour votre confort, évitez d'écouter de la musique ",
     "USERNAME": "Utilisateur",
-    "WITH": "avec"
+    "WITH": "avec",
+    "PLEASE_WAIT": "Merci de patienter"
   },
   "MAIN_MENU": {
     "ALARM": "Alarme",
@@ -191,7 +192,9 @@
     "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "Passez à l'étape suivante",
     "WIRELESS_RESTART_ERROR": "Erreur lors du redémarrage WiFi: ",
     "WIRELESS_RESTART_SUCCESS": "WiFi redémarré avec succès",
-    "WIRELESS_RESTART_TITLE": "Redémarrage WiFi"
+    "WIRELESS_RESTART_TITLE": "Redémarrage WiFi",
+    "WIRELESS_NETWORK_CONNECTING_TO" : "Connexion à un réseau WIFI",
+    "WIRELESS_NETWORK_RESTART_AFTER_CONNECTION" : "Vous allez être déconnecté. Merci de vous reconnecter à votre réseau WIFI pour voir votre périphérique lorsque votre connexion sera rétablie"
   },
   "NETWORKFS": {
     "ALIAS_DOC": "Choisir le nom qui sera affiché dans les disques NAS montés",
