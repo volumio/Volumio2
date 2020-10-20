@@ -453,35 +453,28 @@ var processExpressRequest = function (req, res) {
             }
           }
         } catch (e) {
-          try {
-            res.sendFile(__dirname + '/default.jpg');
-          } catch (e) {
-            res.sendFile(__dirname + '/default.png');
-          }
+          return sendDefaultAlbumart(req, res);
         }
       } else if (sourceicon !== undefined) {
         var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
         try {
+          var iconFound = false;
           for (i = 0; i < pluginPaths.length; i++) {
             var pluginIcon = pluginPaths[i] + sourceicon;
             if (fs.existsSync(pluginIcon)) {
+              iconFound = true;
               return res.sendFile(pluginIcon);
             }
           }
-        } catch (e) {
-          try {
-            res.sendFile(__dirname + '/default.jpg');
-          } catch (e) {
-            res.sendFile(__dirname + '/default.png');
+          if (!iconFound) {
+            return sendDefaultAlbumart(req, res);
           }
+        } catch (e) {
+          return sendDefaultAlbumart(req, res);
         }
       } else {
         res.setHeader('Cache-Control', 'public, max-age=' + maxage);
-        try {
-          res.sendFile(__dirname + '/default.jpg');
-        } catch (e) {
-          res.sendFile(__dirname + '/default.png');
-        }
+        return sendDefaultAlbumart(req, res);
       }
     });
 };
@@ -531,11 +524,7 @@ var processExpressRequestDirect = function (req, res) {
             }
           }
         } catch (e) {
-          try {
-            return sendTinyArt(req, res, __dirname + '/default.jpg');
-          } catch (e) {
-            return sendTinyArt(req, res, __dirname + '/default.png');
-          }
+          return sendDefaultAlbumart(req, res);
         }
       } else if (sourceicon !== undefined) {
         var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
@@ -547,19 +536,11 @@ var processExpressRequestDirect = function (req, res) {
             }
           }
         } catch (e) {
-          try {
-            return sendTinyArt(req, res, __dirname + '/default.jpg');
-          } catch (e) {
-            return sendTinyArt(req, res, __dirname + '/default.png');
-          }
+          return sendDefaultAlbumart(req, res);
         }
       } else {
         res.setHeader('Cache-Control', 'public, max-age=2628000');
-        try {
-          return sendTinyArt(req, res, __dirname + '/default.jpg');
-        } catch (e) {
-          return sendTinyArt(req, res, __dirname + '/default.png');
-        }
+        return sendDefaultAlbumart(req, res);
       }
     });
 };
@@ -596,25 +577,22 @@ var processExpressRequestTinyArt = function (req, res) {
       } else if (sourceicon !== undefined) {
         var pluginPaths = ['/volumio/app/plugins/', '/data/plugins/', '/myvolumio/plugins/', '/data/myvolumio/plugins/'];
         try {
+          var iconFound = false;
           for (i = 0; i < pluginPaths.length; i++) {
             var pluginIcon = pluginPaths[i] + sourceicon;
             if (fs.existsSync(pluginIcon)) {
+              iconFound = true;
               return sendTinyArt(req, res, pluginIcon);
             }
           }
-        } catch (e) {
-          try {
-            sendTinyArt(req, res, __dirname + '/default.jpg');
-          } catch (e) {
-            sendTinyArt(req, res, __dirname + '/default.png');
+          if (!iconFound) {
+            return sendDefaultAlbumart(req, res);
           }
+        } catch (e) {
+          return sendDefaultAlbumart(req, res);
         }
       } else {
-        try {
-          sendTinyArt(req, res, __dirname + '/default.jpg');
-        } catch (e) {
-          sendTinyArt(req, res, __dirname + '/default.png');
-        }
+        return sendDefaultAlbumart(req, res);
       }
     });
 };
@@ -748,6 +726,15 @@ var download = function (uri, dest, cb) {
       cb(response.statusMessage);
     }
   });
+};
+
+var sendDefaultAlbumart = function (req, res) {
+
+  try {
+    sendTinyArt(req, res, __dirname + '/default.jpg');
+  } catch (e) {
+    sendTinyArt(req, res, __dirname + '/default.png');
+  }
 };
 
 module.exports.processExpressRequest = processExpressRequest;
