@@ -84,7 +84,7 @@ pull() {
 cd /
 echo "Stopping Volumio"
 sudo systemctl stop volumio.service
-sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh $@
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh "$@"
 
 echo "Pull completed, restarting Volumio"
 sudo systemctl start volumio.service
@@ -170,9 +170,6 @@ case "$1" in
         vstart)
             vstart
             ;;
-        vstart)
-            vstart
-            ;;
 
         vstop)
             vstop
@@ -194,7 +191,7 @@ case "$1" in
             fi
             ;;
 	    pull)
-            pull $2 $3 $4
+            pull "$2" "$3" "$4"
             ;;
         dev)
         	dev
@@ -203,7 +200,7 @@ case "$1" in
 	        kernelsource
             ;;
             internet)
-                internet $@
+                internet "$@"
             ;;
 	    logdump)
 	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
@@ -239,7 +236,7 @@ correspondent folder in data"
                     echo "This command will update the plugin on your device"
                     echo ""
                 fi
-               /usr/local/bin/node /volumio/pluginhelper.js $2
+               /usr/local/bin/node /volumio/pluginhelper.js "$2"
             else
                 echo ""
                 echo "---- VOLUMIO PLUGIN HELPER ----"
@@ -256,7 +253,7 @@ correspondent folder in data"
             fi
             ;;
             updater)
-	        /usr/local/bin/node /volumio/update-helper.js $2
+                /usr/local/bin/node /volumio/update-helper.js "$@"
             ;;
         *)
             doc
