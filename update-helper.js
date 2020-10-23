@@ -3,9 +3,14 @@ var execSync = require('child_process').execSync;
 var io = require('socket.io-client');
 var inquirer = require('inquirer');
 
+var args = [];
+
 var errorMessage = 'Error, please provide the required updater action: forceupdate | factory | userdata | testmode | cleanupdate | restorevolumio';
-if (process.argv[2]) {
-  var argument = process.argv[2];
+if (process.argv[3]) {
+  var argument = process.argv[3];
+  if (process.argv.length >= 4) {
+    args = process.argv.slice(4);
+  }
 
   switch (argument) {
     case 'forceupdate':
@@ -44,6 +49,14 @@ function forceUpdate (data) {
     clean = true;
   }
 
+  function handleUpdate() {
+    if (clean) {
+      console.log('Executing a clean update');
+      execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
+    }
+    executeUpdate(socket);
+  }
+
   socket.on('updateReady', function (data) {
     if (data.updateavailable) {
       var question = [
@@ -53,13 +66,14 @@ function forceUpdate (data) {
           message: data.title + ' is available. Do you want to Update?'
         }
       ];
+
+      if (args.includes('--yes') || args.includes('-y')) {
+        handleUpdate();
+      }
+
       inquirer.prompt(question).then((answer) => {
         if (answer.executeUpdate) {
-          if (clean) {
-            console.log('Executing a clean update');
-            execSync('/bin/touch /boot/user_data', {uid: 1000, gid: 1000});
-          }
-          executeUpdate(socket);
+          handleUpdate();
         } else {
           console.log('Exiting...');
           return process.exit(0);
