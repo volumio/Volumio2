@@ -231,94 +231,97 @@ ControllerNetwork.prototype.getWirelessNetworks = function (defer) {
   var exself = this;
   var defer = libQ.defer();
 
-	 iwlist.scan('wlan0', function (err, networks) {
-		 var self = this;
+  var wireless_enabled_setting = config.get('wireless_enabled', true);
+  if (wireless_enabled_setting) {
+    iwlist.scan('wlan0', function (err, networks) {
+      var self = this;
 
-		 if (err) {
-		 	exself.logger.error('An error occurred while scanning: ' + err);
-		 	exself.logger.info('Cannot use regular scanning, forcing with ap-force');
-			 var networksarray = [];
-			 var arraynumber = 0;
+      if (err) {
+        exself.logger.error('An error occurred while scanning: ' + err);
+        exself.logger.info('Cannot use regular scanning, forcing with ap-force');
+        var networksarray = [];
+        var arraynumber = 0;
 
-			 try {
-				 var wirelessnets = execSync('/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force', {encoding: 'utf8'});
+        try {
+          var wirelessnets = execSync('/usr/bin/sudo /sbin/iw dev wlan0 scan ap-force', {encoding: 'utf8'});
 
-				 var wirelessnets2 = wirelessnets.split('(on wlan0)');
-				 for (var i = 0; i < wirelessnets2.length; i++) {
-					 var network = {};
-					 var wirelessnets3 = wirelessnets2[i].split('\n');
-					 for (var e = 0; e < wirelessnets3.length; e++) {
-						 var scanResults = wirelessnets3[e].replace('\t', '').replace(' ', '').split(':');
-						 // console.log(scanResults);
+          var wirelessnets2 = wirelessnets.split('(on wlan0)');
+          for (var i = 0; i < wirelessnets2.length; i++) {
+            var network = {};
+            var wirelessnets3 = wirelessnets2[i].split('\n');
+            for (var e = 0; e < wirelessnets3.length; e++) {
+              var scanResults = wirelessnets3[e].replace('\t', '').replace(' ', '').split(':');
+              // console.log(scanResults);
 
-						 if (scanResults[1]) {
-							 if ((scanResults[1].indexOf('CCMP') || scanResults[1].indexOf('TKIP')) >= 0) {
-								 network.security = 'wpa2';
-							 }
-						 }
+              if (scanResults[1]) {
+                if ((scanResults[1].indexOf('CCMP') || scanResults[1].indexOf('TKIP')) >= 0) {
+                  network.security = 'wpa2';
+                }
+              }
 
-						 switch (scanResults[0]) {
-							 case 'SSID':
+              switch (scanResults[0]) {
+                case 'SSID':
 
-								 network.ssid = scanResults[1].toString();
+                  network.ssid = scanResults[1].toString();
 
-								 break;
-							 case 'WPA':
+                  break;
+                case 'WPA':
 
-								 network.security = 'wpa2';
+                  network.security = 'wpa2';
 
-								 break;
-							 case 'signal':
+                  break;
+                case 'signal':
 
-								 var signal = '';
-								 var dbmraw = scanResults[1].split('.');
-								 var dbm = Number(dbmraw[0]);
-								 var rel = 100 + dbm;
-								 if (rel >= 45) { signal = 5; } else if (rel >= 40) { signal = 4; } else if (rel >= 30) { signal = 3; } else if (rel >= 20) { signal = 2; } else if (rel >= 1) { signal = 1; }
+                  var signal = '';
+                  var dbmraw = scanResults[1].split('.');
+                  var dbm = Number(dbmraw[0]);
+                  var rel = 100 + dbm;
+                  if (rel >= 45) { signal = 5; } else if (rel >= 40) { signal = 4; } else if (rel >= 30) { signal = 3; } else if (rel >= 20) { signal = 2; } else if (rel >= 1) { signal = 1; }
 
-								 network.signal = signal;
+                  network.signal = signal;
 
-								 break;
-							 default:
-								 break;
-						 }
-					 }
+                  break;
+                default:
+                  break;
+              }
+            }
 
-					 if (network.ssid) {
-						 // console.log(network)
-						 if (networksarray.length > 0) {
-							 var found = false;
-							 for (var o = 0; o < networksarray.length; o++) {
-								 if (network.ssid == networksarray[o].ssid) {
-									 found = true;
-								 }
-							 }
-							 if (found === false) {
-								 networksarray.push(network);
-							 }
-						 } else {
-							 networksarray.push(network);
-						 }
-					 }
-				 }
+            if (network.ssid) {
+              // console.log(network)
+              if (networksarray.length > 0) {
+                var found = false;
+                for (var o = 0; o < networksarray.length; o++) {
+                  if (network.ssid == networksarray[o].ssid) {
+                    found = true;
+                  }
+                }
+                if (found === false) {
+                  networksarray.push(network);
+                }
+              } else {
+                networksarray.push(network);
+              }
+            }
+          }
 
-				 var networkresults = {'available': networksarray};
+          var networkresults = {'available': networksarray};
+
+          // exself.enrichNetworks(networksarray);
+          wirelessNetworksScanCache = networkresults;
+          defer.resolve(networkresults);
+        } catch (e) {
+          exself.logger.error('Cannot use fallback scanning method: ' + e);
+        }
+      } else {
+        var networksarray = networks;
+        var networkresults = {'available': networksarray};
 
         // exself.enrichNetworks(networksarray);
         wirelessNetworksScanCache = networkresults;
-				 defer.resolve(networkresults);
-			 } catch (e) {
-			 	exself.logger.error('Cannot use fallback scanning method: ' + e);
-			 }
-		 } else {
-			 var networksarray = networks;
-			 var networkresults = {'available': networksarray};
-
-      // exself.enrichNetworks(networksarray);
-      wirelessNetworksScanCache = networkresults;
-			 defer.resolve(networkresults);
-		 }
-	 });
+        defer.resolve(networkresults);
+      }
+    });
+  } 
 
   return defer.promise;
 };
@@ -1103,7 +1106,10 @@ ControllerNetwork.prototype.onNetworkingRestart = function () {
 ControllerNetwork.prototype.getWirelessNetworksScanCache = function () {
   var self = this;
 
-  return wirelessNetworksScanCache;
+  var wireless_enabled_setting = config.get('wireless_enabled', true);
+  if (wireless_enabled_setting) {
+    return wirelessNetworksScanCache;
+  }
 };
 
 ControllerNetwork.prototype.forceHotspot = function () {
