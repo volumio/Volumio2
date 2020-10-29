@@ -51,7 +51,7 @@ var commandRouter = new (require('./app/index.js'))(httpServer); // eslint-disab
 
 expressApp.get('/?*', function (req, res) {
   var userAgent = req.get('user-agent');
-  if (userAgent === 'volumiokiosk' || process.env.VOLUMIO_3_UI === 'false') {
+  if (userAgent.includes('volumiokiosk') || process.env.VOLUMIO_3_UI === 'false') {
     res.sendFile(path.join(__dirname, 'http', 'www', 'index.html'));
   } else {
     res.sendFile(path.join(__dirname, 'http', 'www3', 'index.html'));
