@@ -22,6 +22,10 @@ function InterfaceWebUI (context) {
 
   /** On Client Connection, listen for various types of clients requests */
   self.libSocketIO.on('connection', function (connWebSocket) {
+
+    // Closing all modals when clients connect
+    connWebSocket.emit('closeAllModals', '');
+
     connWebSocket.on('getDeviceInfo', function () {
       var uuid = self.commandRouter.sharedVars.get('system.uuid');
       var name = self.commandRouter.sharedVars.get('system.name');
