@@ -117,7 +117,7 @@ PlatformSpecific.prototype.fileUpdate = function (data) {
         {
           name: self.coreCommand.getI18nString('COMMON.GOT_IT'),
           class: 'btn btn-info ng-scope',
-          emit: '',
+          emit: 'closeModals',
           payload: ''
         }
       ]
