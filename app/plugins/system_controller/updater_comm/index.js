@@ -173,16 +173,6 @@ updater_comm.prototype.onRestart = function () {
   // Perform startup tasks here
 };
 
-updater_comm.prototype.onInstall = function () {
-  var self = this;
-  // Perform your installation tasks here
-};
-
-updater_comm.prototype.onUninstall = function () {
-  var self = this;
-  // Perform your installation tasks here
-};
-
 updater_comm.prototype.getUIConfig = function () {
   var self = this;
 
@@ -190,32 +180,6 @@ updater_comm.prototype.getUIConfig = function () {
     success: true,
     plugin: 'updater_comm'
   };
-};
-
-updater_comm.prototype.setUIConfig = function (data) {
-  var self = this;
-  // Perform your installation tasks here
-};
-
-updater_comm.prototype.getConf = function (varName) {
-  var self = this;
-  // Perform your installation tasks here
-};
-
-updater_comm.prototype.setConf = function (varName, varValue) {
-  var self = this;
-  // Perform your installation tasks here
-};
-
-// Optional functions exposed for making development easier and more clear
-updater_comm.prototype.getSystemConf = function (pluginName, varName) {
-  var self = this;
-  // Perform your installation tasks here
-};
-
-updater_comm.prototype.setSystemConf = function (pluginName, varName) {
-  var self = this;
-  // Perform your installation tasks here
 };
 
 updater_comm.prototype.getAdditionalConf = function (type, controller, data, def) {
@@ -226,11 +190,6 @@ updater_comm.prototype.getAdditionalConf = function (type, controller, data, def
     setting = def;
   }
   return setting;
-};
-
-updater_comm.prototype.setAdditionalConf = function () {
-  var self = this;
-  // Perform your installation tasks here
 };
 
 updater_comm.prototype.checkSystemIntegrity = function () {
