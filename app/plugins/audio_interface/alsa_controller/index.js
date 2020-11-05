@@ -13,6 +13,8 @@ var ignoreUsbAudioAttach = false;
 var volumioDeviceName = '';
 var additionalUISections = [];
 var deviceVolumeOverride;
+var overrideAvoidSoftwareMixer = false;
+var overrideMixerType;
 
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
@@ -188,6 +190,9 @@ ControllerAlsa.prototype.getUIConfig = function () {
       var mixers = self.getMixerControls(value);
       var activemixer = self.config.get('mixer');
       var activemixer_type = self.config.get('mixer_type');
+      if (overrideMixerType !== undefined) {
+          activemixer_type = overrideMixerType;
+      }
 
       self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].element', 'select');
       self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
@@ -227,9 +232,8 @@ ControllerAlsa.prototype.getUIConfig = function () {
         }
       }
       // Hide software volume for Primo Analog out
-      var avoidSoftwareMixer = false;
-      if (volumioDeviceName === 'primo' && outdevicename === 'Analog RCA Output') {
-        avoidSoftwareMixer = true;
+      if ((volumioDeviceName === 'primo' && outdevicename === 'Analog RCA Output') || overrideAvoidSoftwareMixer === true) {
+        var avoidSoftwareMixer = true;
       }
 
       if (!avoidSoftwareMixer) {
@@ -291,6 +295,12 @@ ControllerAlsa.prototype.getUIConfig = function () {
           value: 'None',
           label: self.commandRouter.getI18nString('COMMON.NONE')
         });
+      }
+
+      if (overrideMixerType !== undefined) {
+          uiconf.sections[3].content[0].hidden = true;
+          uiconf.sections[3].content[1].hidden = true;
+          uiconf.sections[3].content[1].visibleIf = true;
       }
 
       value = self.getAdditionalConf('music_service', 'mpd', 'dop', false);
@@ -1389,6 +1399,20 @@ ControllerAlsa.prototype.updateVolumeSettings = function () {
       settings.volumeOverride = true;
       settings.pluginType = deviceVolumeOverride.pluginType;
       settings.pluginName = deviceVolumeOverride.pluginName;
+      if (deviceVolumeOverride.overrideMixerType) {
+          overrideMixerType = deviceVolumeOverride.overrideMixerType;
+          settings.mixertype = deviceVolumeOverride.overrideMixerType;
+      } else {
+          overrideMixerType = undefined;
+      }
+      if (deviceVolumeOverride.overrideAvoidSoftwareMixer) {
+          overrideAvoidSoftwareMixer = deviceVolumeOverride.overrideAvoidSoftwareMixer;
+      } else {
+          overrideAvoidSoftwareMixer = false;
+      }
+    } else {
+        overrideMixerType = undefined;
+        overrideAvoidSoftwareMixer = false;
     }
   }
 
