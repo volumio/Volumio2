@@ -642,7 +642,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             artist: trackBlock.artist,
             album: trackBlock.album,
             albumart: trackBlock.albumart,
-            uri: stateService.uri,
+            uri: trackBlock.uri,
             trackType: stateService.trackType,
             seek: stateService.seek,
             duration: stateService.duration,
@@ -650,7 +650,8 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             bitdepth: bDepth,
             channels: stateService.channels,
             bitrate: stateService.bitrate,
-            stream: stateService.isStreaming
+            stream: stateService.isStreaming,
+            service: trackBlock.service
           };
         } else {
           this.consumeState = {
