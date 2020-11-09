@@ -1278,7 +1278,7 @@ CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
   this.logger.info('Exploding uri ' + uri + ' in service ' + service);
 
   var thisPlugin = this.pluginManager.getPlugin('music_service', service);
-  if (thisPlugin.explodeUri != undefined) { return thisPlugin.explodeUri(uri); } else {
+  if (thisPlugin != undefined && thisPlugin.explodeUri != undefined) { return thisPlugin.explodeUri(uri); } else {
     var promise = libQ.defer();
     promise.resolve({
       uri: uri,
