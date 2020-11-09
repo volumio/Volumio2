@@ -17,6 +17,7 @@
     {"id":"fe-pi-audio","name":"Fe-Pi Audio","overlay":"fe-pi-audio","alsanum":"2","mixer":"PCM","modules":"","script":"","needsreboot":"yes"},
     {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-amp","name":"HiFiBerry Amp","overlay":"hifiberry-amp","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
+    {"id":"hifiberry-amp2","name":"HiFiBerry Amp2","overlay":"hifiberry-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","eeprom_name":"HiFiBerry DAC+","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dac","name":"HiFiBerry DAC","overlay":"hifiberry-dac","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-dacplus","name":"HiFiBerry DAC Plus","overlay":"hifiberry-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","eeprom_name":"HiFiBerry DAC+","i2c_address":"4d","needsreboot":"no"},
     {"id":"hifiberry-dacplusadc","name":"HiFiBerry DAC Plus ADC","overlay":"hifiberry-dacplusadc","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"no"},
