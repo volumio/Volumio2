@@ -158,19 +158,20 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     .then(function (content) {
       var contentArray = [];
       for (var j in content) {
-        if (content[j].samplerate === undefined) {
-          content[j].samplerate = self.defaultSampleRate;
-        }
+        if (content[j]) {
+          if (content[j].samplerate === undefined) {
+            content[j].samplerate = self.defaultSampleRate;
+          }
 
-        if (content[j].bitdepth === undefined) {
-          content[j].bitdepth = self.defaultBitdepth;
-        }
+          if (content[j].bitdepth === undefined) {
+            content[j].bitdepth = self.defaultBitdepth;
+          }
 
-        if (content[j].channels === undefined) {
-          content[j].channels = self.defaultChannels;
-        }
+          if (content[j].channels === undefined) {
+            content[j].channels = self.defaultChannels;
+          }
           contentArray = contentArray.concat(content[j])
-
+        }
       }
 
       if (self.arrayQueue.length > 0 && self.arrayQueue.length >= contentArray.length) {

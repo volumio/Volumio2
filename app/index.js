@@ -1275,17 +1275,25 @@ CoreCommandRouter.prototype.fileUpdate = function (data) {
 // ------------------------- Multiservice queue methods -----------------------------------
 
 CoreCommandRouter.prototype.explodeUriFromService = function (service, uri) {
+  var promise = libQ.defer();
   this.logger.info('Exploding uri ' + uri + ' in service ' + service);
 
   var thisPlugin = this.pluginManager.getPlugin('music_service', service);
-  if (thisPlugin != undefined && thisPlugin.explodeUri != undefined) { return thisPlugin.explodeUri(uri); } else {
-    var promise = libQ.defer();
+  if (thisPlugin != undefined && thisPlugin.explodeUri != undefined) {
+    thisPlugin.explodeUri(uri).then((explodedUri)=>{
+      promise.resolve(explodedUri);
+    }).fail((error)=>{
+      // If explodeUri Fails we resolve an empty promise, in order not to lock the playback progression
+      this.logger.error('Cannot explode uri ' + uri + ' from service ' + service + ': ' + error);
+      promise.resolve();
+    });
+  } else {
     promise.resolve({
       uri: uri,
       service: service
     });
-    return promise.promise;
   }
+  return promise.promise;
 };
 
 // ------------------------ Used in new play system -------------------------------
