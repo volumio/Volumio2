@@ -56,7 +56,7 @@ var staticMiddlewareUI3 = express.static(path.join(__dirname, 'www3'));
 
 app.use(function (req, res, next) {
   var userAgent = req.get('user-agent');
-  if (userAgent.includes('volumiokiosk') || process.env.VOLUMIO_3_UI === 'false') {
+  if ((userAgent && userAgent.includes('volumiokiosk')) || process.env.VOLUMIO_3_UI === 'false') {
     staticMiddlewareUI2(req, res, next);
   } else {
     staticMiddlewareUI3(req, res, next);
