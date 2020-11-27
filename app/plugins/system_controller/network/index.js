@@ -549,9 +549,9 @@ ControllerNetwork.prototype.rebuildHotspotConfig = function (forceHotspotConfigu
   var self = this;
   var hostapdedimax = '/etc/hostapd/hostapd-edimax.conf';
   var hostapd = '/etc/hostapd/hostapd.conf';
-  var hotspotname = config.get('hotspot_name');
-  var hotspotchannel = config.get('hotspot_channel');
-  var hotspotpassword = config.get('hotspot_password');
+  var hotspotname = config.get('hotspot_name', 'Volumio');
+  var hotspotchannel = config.get('hotspot_channel', '4');
+  var hotspotpassword = config.get('hotspot_password', 'volumio2');
 
   try {
     fs.accessSync(hostapdedimax, fs.F_OK);
