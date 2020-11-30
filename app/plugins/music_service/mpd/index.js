@@ -1231,18 +1231,18 @@ ControllerMpd.prototype.lsInfo = function (uri) {
       var list = [];
       if (singleBrowse && uri === 'music-library') {
         prev = '/';
-        var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: self.commandRouter.getI18nString('COMMON.FAVOURITES'), uri: 'favourites', type: 'title'},
-          {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'title'},
-          {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png', title: self.commandRouter.getI18nString('COMMON.ARTISTS'), uri: 'artists://', type: 'title'},
-          {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png', title: self.commandRouter.getI18nString('COMMON.ALBUMS'), uri: 'albums://', type: 'title'},
-          {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png', title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'title'}];
+        var browseSources = [{albumart: '/albumart?sourceicon=music_service/mpd/favouritesicon.png', title: self.commandRouter.getI18nString('COMMON.FAVOURITES'), uri: 'favourites', type: 'folder', disablePlayButton: true},
+          {albumart: '/albumart?sourceicon=music_service/mpd/playlisticon.png', title: self.commandRouter.getI18nString('COMMON.PLAYLISTS'), uri: 'playlists', type: 'folder', disablePlayButton: true},
+          {albumart: '/albumart?sourceicon=music_service/mpd/artisticon.png', title: self.commandRouter.getI18nString('COMMON.ARTISTS'), uri: 'artists://', type: 'folder', disablePlayButton: true},
+          {albumart: '/albumart?sourceicon=music_service/mpd/albumicon.png', title: self.commandRouter.getI18nString('COMMON.ALBUMS'), uri: 'albums://', type: 'folder', disablePlayButton: true},
+          {albumart: '/albumart?sourceicon=music_service/mpd/genreicon.png', title: self.commandRouter.getI18nString('COMMON.GENRES'), uri: 'genres://', type: 'folder', disablePlayButton: true}];
 
         for (var i in browseSources) {
           list.push(browseSources[i]);
         }
 
         if (self.commandRouter.getPluginEnabled('music_service', 'upnp_browser')) {
-          list.push({albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png', title: self.commandRouter.getI18nString('COMMON.MEDIA_SERVERS'), uri: 'upnp', type: 'title'});
+          list.push({albumart: '/albumart?sourceicon=music_service/upnp_browser/dlnaicon.png', title: self.commandRouter.getI18nString('COMMON.MEDIA_SERVERS'), uri: 'upnp', type: 'folder', disablePlayButton: true});
         }
       }
       if (uri === 'music-library' && stickingMusicLibrary) {
