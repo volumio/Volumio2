@@ -47,7 +47,7 @@
         "USER_INTERFACE_CLASSIC": "Klassisch",
         "USER_INTERFACE_CONTEMPORARY": "Modern",
         "USER_INTERFACE_LAYOUT_DESIGN": "Erscheinungsbild-Design",
-        "USER_INTERFACE_LAYOUT_DESIGN_DOC": "Wähle dein bevorzugtes Erscheinungsbild. „Modern“ basiert auf populären Software-Musikplayern.\n„Klassisch“ bietet eine über Tabs dreigeteilte Gliederung und ist eher minimalistisch ",
+        "USER_INTERFACE_LAYOUT_DESIGN_DOC": "Wähle dein bevorzugtes Erscheinungsbild. „Modern“ basiert auf populären Software-Musikplayern. „Klassisch“ bietet eine über Tabs dreigeteilte Gliederung und ist eher minimalistisch ",
         "VOLUMIO3_EXPERIMENTAL_UI": "Aktiviere experimentelle Benutzeroberfläche",
         "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Aktiviere experimentelle Benutzeroberfläche",
         "WEB_ALBUMART_ENABLE": "Albencover herunterladen",
