@@ -350,31 +350,38 @@ PluginManager.prototype.isEnabled = function (category, pluginName) {
 
 PluginManager.prototype.startCorePlugin = function (category, name) {
   var self = this;
-  var defer = libQ.defer();
-
+  
   var plugin = self.getPlugin(category, name);
 
   if (plugin) {
     if (plugin.onStart !== undefined) {
-		    var myPromise = plugin.onStart();
-      self.config.set(category + '.' + name + '.status', 'STARTED');
-
+      self.config.set(category + '.' + name + '.status', 'STARTING');
+	  
+      var myPromise = null;
+	  
+      try {
+		  myPromise = plugin.onStart();
+	  } catch (error) {
+		  self.logger.error('Plugin ' + name + ' failed to start! ' + error);
+		  myPromise = libQ.reject(error);
+	  }
+      
       if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
         // Handle non-compliant onStart(): push an error message and disable plugin
         self.coreCommand.pushToastMessage('error', name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
         self.logger.error('Plugin ' + name + ' does not return adequate promise from onStart: please update!');
-        myPromise = libQ.resolve(); // passing a fake promise to avoid crashes in new promise management
+        myPromise = libQ.reject(); // passing a fake promise to avoid crashes in new promise management
       }
+      return myPromise
+        .then(() => self.config.set(category + '.' + name + '.status', 'STARTED'))
+        .fail(() => self.config.set(category + '.' + name + '.status', 'FAILED'));
 
-      defer.resolve();
-      return myPromise;
     } else {
       self.config.set(category + '.' + name + '.status', 'STARTED');
-      defer.resolve();
     }
-  } else defer.resolve();
+  }
 
-  return defer.promise;
+  return libQ.resolve();
 };
 
 PluginManager.prototype.startPlugin = function (category, name) {
