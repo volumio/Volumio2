@@ -322,7 +322,7 @@ function finalizing(path, package) {
     if (fs.existsSync(process.cwd + '/package-lock.json')) {
         execSync("/bin/rm package-lock.json");
     }
-    execSync("/usr/local/bin/npm install --production");
+    execSync("/usr/bin/npm install --production");
     if (fs.existsSync(process.cwd + '/package-lock.json')) {
         execSync("/bin/rm package-lock.json");
     }
