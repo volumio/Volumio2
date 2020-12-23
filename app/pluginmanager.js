@@ -164,9 +164,9 @@ PluginManager.prototype.startPlugins = function () {
     // If the myVolumioPluginManager starts asynchronously then wait for it
     var myVolumioStartPromise = null;
     if (this.myVolumioPluginManager !== undefined) {
-      myVolumioStartPromise = this.myVolumioPluginManager.startPlugins();
+      return self.myVolumioPluginManager.startPlugins();
     } else {
-      myVolumioStartPromise = libQ.resolve({});
+      return libQ.resolve({});
     }
   });
 };
