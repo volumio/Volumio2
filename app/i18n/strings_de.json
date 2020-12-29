@@ -47,7 +47,7 @@
         "USER_INTERFACE_CLASSIC": "Klassisch",
         "USER_INTERFACE_CONTEMPORARY": "Modern",
         "USER_INTERFACE_LAYOUT_DESIGN": "Erscheinungsbild-Design",
-        "USER_INTERFACE_LAYOUT_DESIGN_DOC": "Wähle dein bevorzugtes Erscheinungsbild. „Modern“ basiert auf populären Software-Musikplayern. „Klassisch“ bietet eine über Tabs dreigeteilte Gliederung und ist eher minimalistisch ",
+        "USER_INTERFACE_LAYOUT_DESIGN_DOC": "Wähle dein bevorzugtes Erscheinungsbild. „Modern“ basiert auf populären Software-Musikplayern. „Klassisch“ bietet eine Aufteilung in 3 Tabs und ist eher minimalistisch ",
         "VOLUMIO3_EXPERIMENTAL_UI": "Aktiviere experimentelle Benutzeroberfläche",
         "VOLUMIO3_EXPERIMENTAL_UI_DOC": "Aktiviere experimentelle Benutzeroberfläche",
         "WEB_ALBUMART_ENABLE": "Albencover herunterladen",
@@ -337,7 +337,7 @@
     },
     "SYSTEM": {
         "ALLOW_UI_STATISTICS": "Sammeln von Informationen der Bedienung erlauben",
-        "ALLOW_UI_STATISTICS_DOC": "",
+        "ALLOW_UI_STATISTICS_DOC": "Stimme dem Erfassen von Verhaltens- und Nutzungsstatistiken der Volumio-Oberfläche über Facebook Pixel und Google Analytics zu. Diese Daten werden von uns verwendet, um das Nutzererlebnis zu verbessern. Weitere Informationen zur Erfassung und der Verarbeitung, erhältst du unter volumio.org/privacy-policy",
         "CANNOT_REMOVE_MEDIA": "Medium kann nicht ausgeworfen werden",
         "CHECKING_SYSTEM_INTEGRITY": "Systemintegrität wird überprüft",
         "CHECK_UPDATES": "Suche Aktualisierungen",
@@ -423,7 +423,7 @@
         "LOCAL_RADIOS": "Lokale Sender",
         "MY_WEB_RADIOS": "Meine Radiosender",
         "POPULAR_RADIOS": "Beliebte Sender",
-        "SHOUTCAST_ERROR": "",
+        "SHOUTCAST_ERROR": "Fehler bei der Kommunikation mit SHOUTCAST",
         "TALK_RADIOS": "Gesprochene Inhalte",
         "TOP_500_RADIOS": "Die 500 besten Sender",
         "WEBRADIO": "Internetradio"
