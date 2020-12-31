@@ -33,7 +33,17 @@ function CoreVolumeController (commandRouter) {
   self.commandRouter = commandRouter;
   self.logger = self.commandRouter.logger;
 
-  device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    if(this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolume')) {
+      // Software volume is enabled
+      device = 'softvolume';
+    } else {
+      device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
+    }
+  } else {
+    device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
+  }
+  
   if (device === 'softvolume') {
     device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
     devicename = 'softvolume';

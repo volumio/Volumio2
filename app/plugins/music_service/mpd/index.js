@@ -955,18 +955,34 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
       var mixerdev = '';
       var mixerstrings = '';
-      if (outdev != 'softvolume') {
+      
+      if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
         var realDev = outdev;
-        if (outdev.indexOf(',') >= 0) {
-          mixerdev = 'hw:' + outdev;
-          outdev = 'hw:' + outdev;
+        outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
+        if(self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolume')) {
+          mixerdev = 'SoftMaster';
         } else {
-          mixerdev = 'hw:' + outdev;
-          outdev = 'hw:' + outdev + ',0';
+          if (realDev.indexOf(',') >= 0) {
+            mixerdev = 'hw:' + realDev;
+          } else {
+            mixerdev = 'hw:' + realDev + ',0';
+          }
         }
+      
       } else {
-        mixerdev = 'SoftMaster';
-        var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+        if (outdev != 'softvolume') {
+          var realDev = outdev;
+          if (outdev.indexOf(',') >= 0) {
+            mixerdev = 'hw:' + outdev;
+            outdev = 'hw:' + outdev;
+          } else {
+            mixerdev = 'hw:' + outdev;
+            outdev = 'hw:' + outdev + ',0';
+          }
+        } else {
+          mixerdev = 'SoftMaster';
+          var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+        }
       }
 
       var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');

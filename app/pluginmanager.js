@@ -7,6 +7,7 @@ var S = require('string');
 var vconf = require('v-conf');
 var libQ = require('kew');
 var http = require('http');
+var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var Tail = require('tail').Tail;
 var compareVersions = require('compare-versions');
@@ -82,16 +83,92 @@ function PluginManager (ccommand, server) {
 }
 
 PluginManager.prototype.startPlugins = function () {
-  this.logger.info('-------------------------------------------');
-  this.logger.info('-----      Core plugins startup        ----');
-  this.logger.info('-------------------------------------------');
+  var self = this;
+  self.logger.info('-------------------------------------------');
+  self.logger.info('-----      Core plugins startup        ----');
+  self.logger.info('-------------------------------------------');
 
-  this.loadCorePlugins();
-  this.startCorePlugins();
-
-  if (this.myVolumioPluginManager !== undefined) {
-    this.myVolumioPluginManager.startPlugins();
-  }
+  var loadPromise = self.loadCorePlugins();
+  
+  var loadComplete = false;
+  
+  var loadDefer = libQ.defer();
+  
+  loadPromise.fin(() => {
+    if(!loadComplete) {
+      self.logger.info("Completed loading Core Plugins");
+      loadComplete = true;
+      loadDefer.resolve({});
+    } 
+  });
+  
+  // 30 second delay to continue startup if one or more plugins freeze in onVolumioStart
+  libQ.delay(30000)
+    .then(() => {
+      if(!loadComplete) {
+        loadComplete = true;
+        
+        var plugins = self.corePlugins.values();
+        for(var i = 0; i < plugins.length; i++) {
+          if(!plugins[i].volumioStart) {
+            self.logger.error("Plugin " + plugins[i].category + " " + plugins[i].name + " failed to complete 'onVolumioStart' in a timely fashion");
+          }
+        }
+        
+        loadDefer.resolve({});
+      }
+    });
+  
+  
+  return loadDefer.promise
+  .then(() => {
+    // Once all the plugins are loaded it is time to rebuild 
+    // the ALSA config so that the plugins can use it
+    return self.coreCommand.rebuildALSAConfiguration();
+  })
+  .then(() => {
+    var startDefer = libQ.defer();
+    var startPromise = self.startCorePlugins();
+    
+    var startComplete = false;
+    
+    startPromise.fin(() => {
+      if(!startComplete) {
+        startComplete = true;
+        self.logger.info("Completed starting Core Plugins");
+        startDefer.resolve({});
+      } 
+    });
+    
+    // 30 second delay to continue startup if one or more plugins freeze in onStart
+    libQ.delay(30000)
+      .then(() => {
+        if(!startComplete) {
+          startComplete = true;
+          
+          var plugins = self.corePlugins.values();
+          for(var i = 0; i < plugins.length; i++) {
+            var status = self.config.get(plugins[i].category + '.' + plugins[i].name + '.status');
+            
+            if(status != 'STARTED') {
+              self.logger.error("Plugin " + plugins[i].category + " " + plugins[i].name + " failed to complete 'onStart' in a timely fashion");
+            }
+          }
+          
+          startDefer.resolve({});
+        }
+      });
+    return startDefer.promise;
+  })
+  .then(() => {
+    // If the myVolumioPluginManager starts asynchronously then wait for it
+    var myVolumioStartPromise = null;
+    if (this.myVolumioPluginManager !== undefined) {
+      return self.myVolumioPluginManager.startPlugins();
+    } else {
+      return libQ.resolve({});
+    }
+  });
 };
 
 PluginManager.prototype.initializeConfiguration = function (package_json, pluginInstance, folder) {
@@ -159,7 +236,8 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
       name: name,
       category: category,
       folder: folder,
-      instance: pluginInstance
+      instance: pluginInstance,
+      volumioStart: false
     };
 
     if (pluginInstance && pluginInstance.onVolumioStart !== undefined) {
@@ -175,9 +253,13 @@ PluginManager.prototype.loadCorePlugin = function (folder) {
       self.corePlugins.set(key, pluginData); // set in any case, so it can be started/stopped
 
       defer.resolve();
-      return myPromise;
+      return myPromise
+        .then(() => {
+          pluginData.volumioStart = true;
+        });
     } else {
       self.corePlugins.set(key, pluginData);
+      pluginData.volumioStart = true;
       defer.resolve();
     }
   } else {
@@ -268,31 +350,38 @@ PluginManager.prototype.isEnabled = function (category, pluginName) {
 
 PluginManager.prototype.startCorePlugin = function (category, name) {
   var self = this;
-  var defer = libQ.defer();
-
+  
   var plugin = self.getPlugin(category, name);
 
   if (plugin) {
     if (plugin.onStart !== undefined) {
-		    var myPromise = plugin.onStart();
-      self.config.set(category + '.' + name + '.status', 'STARTED');
-
+      self.config.set(category + '.' + name + '.status', 'STARTING');
+	  
+      var myPromise = null;
+	  
+      try {
+		  myPromise = plugin.onStart();
+	  } catch (error) {
+		  self.logger.error('Plugin ' + name + ' failed to start! ' + error);
+		  myPromise = libQ.reject(error);
+	  }
+      
       if (Object.prototype.toString.call(myPromise) != Object.prototype.toString.call(libQ.resolve())) {
         // Handle non-compliant onStart(): push an error message and disable plugin
         self.coreCommand.pushToastMessage('error', name + ' Plugin', self.coreCommand.getI18nString('PLUGINS.PLUGIN_START_ERROR'));
         self.logger.error('Plugin ' + name + ' does not return adequate promise from onStart: please update!');
-        myPromise = libQ.resolve(); // passing a fake promise to avoid crashes in new promise management
+        myPromise = libQ.reject(); // passing a fake promise to avoid crashes in new promise management
       }
+      return myPromise
+        .then(() => self.config.set(category + '.' + name + '.status', 'STARTED'))
+        .fail(() => self.config.set(category + '.' + name + '.status', 'FAILED'));
 
-      defer.resolve();
-      return myPromise;
     } else {
       self.config.set(category + '.' + name + '.status', 'STARTED');
-      defer.resolve();
     }
-  } else defer.resolve();
+  }
 
-  return defer.promise;
+  return libQ.resolve();
 };
 
 PluginManager.prototype.startPlugin = function (category, name) {
@@ -1204,7 +1293,16 @@ PluginManager.prototype.disablePlugin = function (category, name) {
   var key = category + '.' + name;
   self.config.set(key + '.enabled', false);
 
-  defer.resolve();
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    var package_json = self.getPackageJson(self.findPluginFolder(category, name));
+    if(package_json.volumio_info.has_alsa_contribution) {
+      return self.coreCommand.rebuildALSAConfiguration();
+    } else {
+      defer.resolve();
+    }
+  } else {
+    defer.resolve();
+  }
   return defer.promise;
 };
 
@@ -1537,10 +1635,19 @@ PluginManager.prototype.enableAndStartPlugin = function (category, name) {
   var self = this;
   var defer = libQ.defer();
 
+  var folder = self.findPluginFolder(category, name);
   self.enablePlugin(category, name)
     .then(function (e) {
-      var folder = self.findPluginFolder(category, name);
       return self.loadCorePlugin(folder);
+    })
+    .then(() => {
+      if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+        var package_json = self.getPackageJson(folder);
+        if(package_json.volumio_info.has_alsa_contribution) {
+   	      return self.coreCommand.rebuildALSAConfiguration();
+    	}
+      }
+      return {};
     })
     .then(self.startPlugin.bind(this, category, name))
     .then(function (e) {
