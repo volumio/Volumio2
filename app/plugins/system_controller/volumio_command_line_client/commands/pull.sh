@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
 set -eu pipefail
 
+# Define defaults 
 REPO='https://github.com/volumio/Volumio2.git'
 BRANCH=''
-
-if [ $# -eq 3 ]; then
-    BRANCH="$2"
-    REPO="$3"
-elif [ $# -eq 2 ]; then
-    BRANCH="$2"
-fi
+while getopts ":b:r:" ARG; do
+  case ${ARG} in
+  b)
+    [[ -n ${OPTARG} ]] && BRANCH=${OPTARG}
+    ;;
+  r)
+    [[ -n ${OPTARG} ]] && REPO=${OPTARG}
+    ;;
+  \?)
+    echo "[pull] Unknown option ${OPTARG}"
+    volumio doc
+    exit 1
+    ;;
+  esac
+done
 
 cd /home/volumio
 echo "Backing Up current Volumio folder in /volumio-current"
@@ -20,7 +29,7 @@ if ! mv /volumio /volumio-current; then
 fi
 
 echo "Cloning Volumio Backend repo"
-if [ -n "${BRANCH}" ]; then
+if [[ -n "${BRANCH}" ]]; then
     echo "Cloning branch ${BRANCH} from repository ${REPO}"
     git clone -b "${BRANCH}" "${REPO}" /volumio
 else
