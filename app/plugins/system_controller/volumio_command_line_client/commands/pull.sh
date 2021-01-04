@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-set -eu pipefail
+set -eo pipefail
 
-# Define defaults 
+# Define defaults
 REPO='https://github.com/volumio/Volumio2.git'
 BRANCH=''
+# Workaround for old behaviour 
+[[ $# = 3 ]] && echo "[pull] Unknown number of arguments, if <$3> is a repo, please use the -r flag!" && exit 1
+
 while getopts ":b:r:" ARG; do
   case ${ARG} in
   b)
@@ -13,8 +16,8 @@ while getopts ":b:r:" ARG; do
     [[ -n ${OPTARG} ]] && REPO=${OPTARG}
     ;;
   \?)
-    echo "[pull] Unknown option ${OPTARG}"
     volumio doc
+    echo "[pull] Unknown option ${OPTARG}"
     exit 1
     ;;
   esac
