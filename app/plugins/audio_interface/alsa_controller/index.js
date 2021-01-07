@@ -47,8 +47,8 @@ ControllerAlsa.prototype.onVolumioStart = function () {
     }
     
     if(self.config.get('softvolume')) {
-      var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
-      if(!fs.existsSync(folder + '/asound/softvolume.postVolume.conf')) {
+    	var folder = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'asound');
+      if(!fs.existsSync(folder + '/softvolume.postVolume.conf')) {
         self.writeSoftVolContribution(output);
       }
     }
@@ -69,10 +69,10 @@ ControllerAlsa.prototype.onVolumioStart = function () {
       self.config.set('outputdevice', 'softvolume')
 	  output = self.config.get('softvolumenumber');
       
-      var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
+      var folder = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'asound');
 	
-      if(!fs.existsSync(folder + '/asound/softvolume.postVolume.conf')) {
-        fs.unlink(folder + '/asound/softvolume.postVolume.conf');
+      if(!fs.existsSync(folder + '/softvolume.postVolume.conf')) {
+        fs.unlink(folder + '/softvolume.postVolume.conf');
       }
       self.writeSoftMixerFile(output);
     } else {
@@ -1440,8 +1440,7 @@ ControllerAlsa.prototype.writeSoftVolContribution = function (data) {
   asoundcontent += 'resolution 100\n';
   asoundcontent += '}\n';
   
-  var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
-  folder += '/asound'
+  var folder = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'asound');
 
   if(!fs.existsSync(folder)) {
     fs.mkdirSync(folder);
@@ -1546,11 +1545,11 @@ ControllerAlsa.prototype.disableSoftMixer = function (data) {
   if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
     self.setConfigParam({key: 'softvolume', value: false});
 
-    var folder = self.commandRouter.pluginManager.findPluginFolder('audio_interface', 'alsa_controller');
+    var folder = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'asound');
 
-    fs.unlink(folder + '/asound/softvolume.postVolume.conf', function (err) {
+    fs.unlink(folder + '/softvolume.postVolume.conf', function (err) {
       if (err) {
-        self.logger.info('Cannot delete ' + folder + '/asound/softvolume-postVolume.conf: ' + err);
+        self.logger.info('Cannot delete ' + folder + '/softvolume-postVolume.conf: ' + err);
       } else {
         self.logger.info('Soft Volume ALSA configuration file deleted');
         self.updateALSAConfigFile();
@@ -2074,49 +2073,12 @@ ControllerAlsa.prototype.getPluginALSAContributions = function () {
         	  continue;
           }
         	
-          // Check to see if the plugin wants to contribute
-          folder += '/asound';
-          if(fs.existsSync(folder)) {
-            
-            let dirDefer = libQ.defer();
-            alsaSnippetChecks.push(dirDefer.promise);
-            
-            fs.readdir(folder, function (err, files) {
-              if (err) {
-                self.logger.warn('Unable to scan plugin ' + plugin.name + ' for ALSA configuration: ' + err);
-                dirDefer.resolve(null);
-                return;
-              } 
-              var fileData = [];
-              // Get the contribution file(s)
-              files.forEach(function (file) {
-                // Skip hidden files and non config files
-                if(file.startsWith('.') || !file.endsWith('.conf')) {
-                  return;
-                }
-                // Expected file name syntax is <in pcm>.<out pcm>.conf or <in pcm>.<out pcm>.<rank>.conf
-                var tokens = file.substring(0, file.length - 5).split('.');
-                
-                if(tokens.length < 2 || tokens.length > 3) {
-                  self.logger.warn('The plugin ' + plugin.name + 
-                      ' is trying to supply ALSA configuration but the file ' + file +
-                      ' does not meet the expected name syntax');
-                }
-                
-                self.logger.info('The plugin ' + plugin.name + ' has an ALSA contribution file ' + file);
-                
-                var pluginName = plugin.name;
-                var configFile = folder + "/" + file;
-                var inPCM = tokens[0];
-                var outPCM = tokens[1];
-                var priority = tokens.length == 3 ? parseInt(tokens[2]) : 0;
-  
-                fileData.push({pluginName, configFile, inPCM, outPCM, priority})
-              });
-  
-              dirDefer.resolve(fileData);
-            });
-          }
+          // This plugin has an ALSA contribution - check for static files and for dynamic files
+          
+          alsaSnippetChecks.push(self.searchFolderForPluginALSAContributions(plugin, folder + '/asound'));
+          
+          alsaSnippetChecks.push(self.searchFolderForPluginALSAContributions(plugin, 
+        		  self.commandRouter.pluginManager.getPluginConfigurationFile(category, plugin.name, 'asound')));
         }
       }
     }
@@ -2136,4 +2098,59 @@ ControllerAlsa.prototype.getPluginALSAContributions = function () {
   }, (error) => {
     self.logger.error('Failed to gather ALSA contribution files. ' + error);
   });
-} 
+};
+
+// Search a folder for ALSA snippets in <folder>/asound/<contribution>.conf
+//
+// Contributions are in the form <in pcm>-<out pcm>.conf or <in pcm>-<out pcm>-<rank>.conf
+// which allows us to construct a complete config file wiring the contributions together.
+ControllerAlsa.prototype.searchFolderForPluginALSAContributions = function (plugin, folder) {
+	
+	var self = this;
+	
+	// Check to see if the plugin wants to contribute
+    if(fs.existsSync(folder)) {
+      
+      let dirDefer = libQ.defer();
+      
+      fs.readdir(folder, function (err, files) {
+        if (err) {
+          self.logger.warn('Unable to scan plugin ' + plugin.name + ' for ALSA configuration: ' + err);
+          dirDefer.resolve(null);
+          return;
+        } 
+        var fileData = [];
+        // Get the contribution file(s)
+        files.forEach(function (file) {
+          // Skip hidden files and non config files
+          if(file.startsWith('.') || !file.endsWith('.conf')) {
+            return;
+          }
+          // Expected file name syntax is <in pcm>.<out pcm>.conf or <in pcm>.<out pcm>.<rank>.conf
+          var tokens = file.substring(0, file.length - 5).split('.');
+          
+          if(tokens.length < 2 || tokens.length > 3) {
+            self.logger.warn('The plugin ' + plugin.name + 
+                ' is trying to supply ALSA configuration but the file ' + file +
+                ' does not meet the expected name syntax');
+          }
+          
+          self.logger.info('The plugin ' + plugin.name + ' has an ALSA contribution file ' + file);
+          
+          var pluginName = plugin.name;
+          var configFile = folder + "/" + file;
+          var inPCM = tokens[0];
+          var outPCM = tokens[1];
+          var priority = tokens.length == 3 ? parseInt(tokens[2]) : 0;
+
+          fileData.push({pluginName, configFile, inPCM, outPCM, priority})
+        });
+
+        dirDefer.resolve(fileData);
+      });
+      
+      return dirDefer.promise
+    } else {
+    	return libQ.resolve([]);
+    }
+};
