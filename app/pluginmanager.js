@@ -685,6 +685,20 @@ PluginManager.prototype.getConfigurationFile = function (context, fileName) {
 		fileName;
 };
 
+/**
+ * Returns path for a specific configuration file for a plugin (identified by its context)
+ * @param context
+ * @param fileName
+ * @returns {string}
+ */
+PluginManager.prototype.getPluginConfigurationFile = function (category, name, fileName) {
+	var self = this;
+	return S(self.configurationFolder).ensureRight('/').s +
+	S(category).ensureRight('/').s +
+	S(name).ensureRight('/').s +
+	fileName;
+};
+
 PluginManager.prototype.checkRequiredConfigurationParameters = function (requiredFile, configFile) {
   var self = this;
 
