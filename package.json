@@ -8,8 +8,8 @@
     "start": "nodejs ./index.js",
     "lint": "semistandard \"./**/*.js\" --fix --verbose",
     "lint-staged": "lint-staged",
-    "lint-lang": "jsonlint -qD ./app/i18n", 
-    "lint-JSON": "jsonlint -qD ./app/plugins", 
+    "lint-lang": "jsonlint -qD ./app/i18n",
+    "lint-JSON": "jsonlint -qD ./app/plugins",
     "test": "npm install --only=dev --no-package-lock && ./node_modules/.bin/mocha --reporter spec",
     "addLangString": "node ./utils/addlangstring.js"
   },
@@ -30,6 +30,7 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.0.2",
     "express": "^4.15.3",
+    "fast-xml-parser": "^3.17.6",
     "fast.js": "^0.1.1",
     "firebase": "^7.14.1",
     "fs-extra": "^3.0.1",
@@ -63,6 +64,7 @@
     "unirest": "^0.6.0",
     "v-conf": "^1.4.2",
     "winston": "^3.2.1",
+    "xml2js": "^0.4.23",
     "xmlbuilder": "^10.1.1",
     "yargs": "^15.3.1"
   },
