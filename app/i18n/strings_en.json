@@ -460,7 +460,7 @@
         "DEVICE_SUCCESSFULLY_CONFIGURED": "has been configured and is ready to play",
         "PLEASE_DONATE": "If you like Volumio please consider donating. You can make a difference for this project!",
         "RUN_FIRST_CONFIG_WIZARD": "Run first config Wizard"
-    }
+    },
     "PLUGIN_CDCONTROLLER": {
         "PLAY":"Play",
         "RIP":"Rip To Hard Drive",
