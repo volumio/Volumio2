@@ -826,9 +826,11 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
     
     return promise
       .then(self.updateALSAConfigFile.bind(self))
-      .then((x) => {
-        self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
-        return x;
+      .then((result) => {
+        if(result.changed) {
+          self.commandRouter.sharedVars.set('alsa.outputdevice', 'volumio');
+        }
+        return result;
       });
   } else {
     return defer.promise;
@@ -2124,17 +2126,27 @@ ControllerAlsa.prototype.internalUpdateALSAConfigFile = function () {
 
     return asoundcontent;
   }).then((asoundcontent) => {
-	// Write and move the file
+  
     let defer = libQ.defer();
-    fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
-      if (err) {
-        self.logger.info('Cannot write /etc/asound.conf: ' + err);
+    fs.readFile('/etc/asound.conf', 'utf8', function (err, data) {
+      if(data === asoundcontent) {
+        // Data is unchanged, no need to update anything
+        self.logger.info('Asound.conf file unchanged, so no further update is needed');
+        defer.resolve({changed: false});
       } else {
-        self.logger.info('Asound.conf file written');
-        execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid: 1000, gid: 1000, encoding: 'utf8' });
-        execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
+    	// Write and move the file
+        fs.writeFile('/home/volumio/.asoundrc', asoundcontent, 'utf8', function (err) {
+          if (err) {
+            self.logger.error('Cannot write /etc/asound.conf: ' + err);
+            defer.resolve({changed: false});
+          } else {
+            self.logger.info('Asound.conf file written');
+            execSync('/usr/bin/sudo /bin/mv /home/volumio/.asoundrc /etc/asound.conf', { uid: 1000, gid: 1000, encoding: 'utf8' });
+            execSync('/usr/sbin/alsactl -L -R nrestore', { uid: 1000, gid: 1000, encoding: 'utf8' });
+            defer.resolve({changed: true});
+          }
+        });
       }
-      defer.resolve();
     });
     return defer.promise;
   });
