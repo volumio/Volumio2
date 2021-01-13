@@ -413,29 +413,22 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
           this.config.set('i2s_enabled', true);
           this.config.set('i2s_dac', outdevicename);
           
-          var promise = null;
-          if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
-            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'setConfigParam', 
-                    {key: 'outputdevice', value: '' + num});
-            promise = self.commandRouter.rebuildALSAConfiguration();
-          } else {
+          if (process.env.MODULAR_ALSA_PIPELINE !== 'true') {
             self.commandRouter.sharedVars.set('alsa.outputdevice', num);
             // Restarting MPD, this seems needed only on first boot
             setTimeout(function () {
               self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
               self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
             }, 1500);
-            promise = libQ.resolve();
           }
 
-          response = {'reboot': reboot};
-          promise.then(x => {defer.resolve(response);});
+          return libQ.resolve({'reboot': reboot});
         }
       }
     }
   }
 
-  return defer.promise;
+  return libQ.reject("Unable to locate I2S DAC " + data);
 };
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {
