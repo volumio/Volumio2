@@ -55,6 +55,8 @@ plugin publish                     publishes the plugin on git
 plugin install                     installs the plugin locally
 plugin update                      updates the plugin
 logdump <description>              dump logs to $LOGDUMP instead of uploading
+init-edit <initramfs filename>     unpacks the initramfs, feeds nano with the init script and upon nano exit, rebuilds initramfs
+
 
 [[VOLUMIO UPDATER]]
 updater forceupdate                Updates to latest version
@@ -101,6 +103,10 @@ sudo /volumio/app/plugins/system_controller/volumio_command_line_client/commands
 
 internet() {
 /volumio/app/plugins/system_controller/volumio_command_line_client/commands/internet.sh "$@"
+}
+
+init-edit() {
+sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/init-edit.sh -f $1
 }
 
 case "$1" in
@@ -205,7 +211,10 @@ case "$1" in
 	    logdump)
 	        /usr/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;
-        plugin)
+	    init-edit)
+		init-edit $2
+	    ;;
+	    plugin)
             if [ "$2" != "" ]; then
                 if [ "$2" == "init" ]; then
                     echo ""
