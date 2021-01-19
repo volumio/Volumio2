@@ -2882,11 +2882,11 @@ ControllerMpd.prototype.handleBrowseUri = function (curUri, previous) {
       if (splitted.length == 3) {
         response = self.listGenre(curUri);
       } else if (splitted.length == 4) {
-        response = self.listArtist(curUri, 3, 'genres://"' + splitted[2] + '"', 'genres://');
+        response = self.listArtist(curUri, 3, 'genres://' + splitted[2], 'genres://');
       } else if (splitted.length == 5) {
-        response = self.listAlbumSongs(curUri, 4, 'genres://"' + splitted[2] + '"');
+        response = self.listAlbumSongs(curUri, 4, 'genres://' + splitted[2]);
       } else if (splitted.length = 6) {
-        response = self.listAlbumSongs(curUri, 4, 'genres://"' + splitted[4]  + '"' + '/' + splitted[5]);
+        response = self.listAlbumSongs(curUri, 4, 'genres://' + splitted[4] + '/' + splitted[5]);
       }
     }
   }
@@ -2994,10 +2994,9 @@ ControllerMpd.prototype.listAlbumSongs = function (uri, index, previous) {
 
   if (splitted[0] == 'genres:') { // genre
     var genreString = uri.replace('genres://', '');
-    var extractedGenre = genreString.split('"')[1];
-    var genre = decodeURIComponent(extractedGenre);
-    var albumartist = decodeURIComponent(genreString.split('"')[2].split('/')[1]);
-    var albumName = decodeURIComponent(genreString.split('"')[2].split('/')[2]);
+    var genre = decodeURIComponent(splitted[2]);
+    var albumartist = decodeURIComponent(splitted[3]);
+    var albumName = decodeURIComponent(splitted[4]);
     var safeGenre = genre.replace(/"/g, '\\"');
     var safeAlbumartist = albumartist.replace(/"/g, '\\"');
     var safeAlbumName = albumName.replace(/"/g, '\\"');
@@ -3267,11 +3266,10 @@ ControllerMpd.prototype.listArtist = function (curUri, index, previous, uriBegin
 
       if (uriBegin === 'genres://') {
         try {
-          var genreString = curUri.replace('genres://');
-          var extractedGenre = genreString.split('"')[1];
-          var genre = decodeURIComponent(extractedGenre);
+          var genreString = curUri.replace('genres://', '');
+          var genre = decodeURIComponent(genreString.split('/')[0]);
           var safeGenre = genre.replace(/"/g, '\\"');
-          var artist = decodeURIComponent(genreString.split('"')[2].split('/')[1]);
+          var artist = decodeURIComponent(genreString.split('/')[1]);
           safeArtist = artist.replace(/"/g, '\\"');
         } catch(e) {
           self.logger.error('Cannot browse genre: ' + e);
@@ -3374,7 +3372,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
           if (uriBegin === 'artists://') {
             uri = 'artists://' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
           } else if (uriBegin === 'genres://') {
-            uri = 'genres://"' + genre +  '"' + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
+            uri = 'genres://' + encodeURIComponent(genre) + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
           } else {
             uri = uriBegin + encodeURIComponent(album);
           }
@@ -3545,7 +3543,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     title: album,
                     artist: albumartist,
                     albumart: albumart,
-                    uri: 'genres://"' + genreName + '"/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album)});
+                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album)});
                 }
               }
 
@@ -3559,7 +3557,7 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                     type: 'folder',
                     title: artist,
                     albumart: self.getAlbumArt({artist: artist}, undefined, 'users'),
-                    uri: 'genres://"' + encodeURIComponent(genreName) + '"/' + encodeURIComponent(artist)});
+                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist)});
                 }
               }
             }
