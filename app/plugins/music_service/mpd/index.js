@@ -2151,12 +2151,20 @@ ControllerMpd.prototype.explodeUri = function (uri) {
     var safeAlbumName = albumName.replace(/"/g, '\\"');
 
     if (splitted.length == 4) {
-      var GetMatches = 'find genre "' + safeGenreName + '" artist "' + safeArtistName + '"';
+      if (artistsort) {
+        var GetMatches = 'find genre "' + safeGenreName + '" albumartist "' + safeArtistName + '"';
+      } else {
+        var GetMatches = 'find genre "' + safeGenreName + '" artist "' + safeArtistName + '"';
+      }
     } else if (splitted.length == 5) {
       if (compilation.indexOf(artistName) > -1) { // artist is in compilation array so only find album
         var GetMatches = 'find genre "' + safeGenreName + '" album "' + safeAlbumName + '"';
       } else { // artist is NOT in compilation array so use artist
-        var GetMatches = 'find genre "' + safeGenreName + '" albumartist "' + safeArtistName + '" album "' + safeAlbumName + '"';
+        if (artistsort) {
+          var GetMatches = 'find genre "' + safeGenreName + '" albumartist "' + safeArtistName + '" album "' + safeAlbumName + '"';
+        } else {
+          var GetMatches = 'find genre "' + safeGenreName + '" artist "' + safeArtistName + '" album "' + safeAlbumName + '"';
+        }
       }
     } else {
       var GetMatches = 'find genre "' + safeGenreName + '"';
@@ -2995,16 +3003,18 @@ ControllerMpd.prototype.listAlbumSongs = function (uri, index, previous) {
   if (splitted[0] == 'genres:') { // genre
     var genreString = uri.replace('genres://', '');
     var genre = decodeURIComponent(splitted[2]);
-    var albumartist = decodeURIComponent(splitted[3]);
+    var artist = decodeURIComponent(splitted[3]);
     var albumName = decodeURIComponent(splitted[4]);
     var safeGenre = genre.replace(/"/g, '\\"');
-    var safeAlbumartist = albumartist.replace(/"/g, '\\"');
+    var safeArtist = artist.replace(/"/g, '\\"');
     var safeAlbumName = albumName.replace(/"/g, '\\"');
 
-    if (compilation.indexOf(albumartist) > -1) {
+    if (compilation.indexOf(artist) > -1) {
       var findstring = 'find album "' + safeAlbumName + '" genre "' + safeGenre + '" ';
+    } else if (artistsort) {
+      var findstring = 'find album "' + safeAlbumName + '" albumartist "' + safeArtist + '" genre "' + safeGenre + '" ';
     } else {
-      var findstring = 'find album "' + safeAlbumName + '" albumartist "' + safeAlbumartist + '" genre "' + safeGenre + '" ';
+      var findstring = 'find album "' + safeAlbumName + '" artist "' + safeArtist + '" genre "' + safeGenre + '" ';
     }
   } else if (splitted[0] == 'albums:') { // album
     var artist = decodeURIComponent(splitted[2]);
@@ -3274,7 +3284,11 @@ ControllerMpd.prototype.listArtist = function (curUri, index, previous, uriBegin
         } catch(e) {
           self.logger.error('Cannot browse genre: ' + e);
         }
-        var findartist = 'find albumartist "' + safeArtist + '" genre "' + safeGenre + '" ';
+        if (artistsort) {
+          var findartist = 'find albumartist "' + safeArtist + '" genre "' + safeGenre + '" ';
+        } else {
+          var findartist = 'find artist "' + safeArtist + '" genre "' + safeGenre + '" ';
+        }
       } else {
         if (compilation.indexOf(artist) > -1) { // artist is in compilation array so use albumartist
           var findartist = 'find albumartist "' + safeArtist + '"';
@@ -3489,7 +3503,11 @@ ControllerMpd.prototype.listGenre = function (curUri) {
     .then(function () {
       var cmd = libMpd.cmd;
       if (genreArtist != 'undefined') {
-        var findString = 'find genre "' + safeGenreName + '" albumartist "' + safeGenreArtist + '" ';
+        if (artistsort) {
+          var findString = 'find genre "' + safeGenreName + '" albumartist "' + safeGenreArtist + '" ';
+        } else {
+          var findString = 'find genre "' + safeGenreName + '" artist "' + safeGenreArtist + '" ';
+        }
       } else {
         var findString = 'find genre "' + safeGenreName + '"';
       }
@@ -3532,34 +3550,70 @@ ControllerMpd.prototype.listGenre = function (curUri) {
                 title = name;
               }
 
-              if (albums.indexOf(album) === -1) {
-                albums.push(album);
-                albumsArt.push(albumart);
+              if (artistsort) { // for albumArtist
 
-                if (album !== '') {
-                  response.navigation.lists[0].items.push({
-                    service: 'mpd',
-                    type: 'folder',
-                    title: album,
-                    artist: albumartist,
-                    albumart: albumart,
-                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album)});
+                if (albums.indexOf(album) === -1) {
+                  albums.push(album);
+                  albumsArt.push(albumart);
+
+                  if (album !== '') {
+                    response.navigation.lists[0].items.push({
+                      service: 'mpd',
+                      type: 'folder',
+                      title: album,
+                      artist: albumartist,
+                      albumart: albumart,
+                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album)});
+                  }
+                }
+
+                if (artists.indexOf(albumartist) === -1) {
+                  artists.push(albumartist);
+                  artistArt.push();
+
+                  if (albumartist !== '') {
+                    response.navigation.lists[1].items.push({
+                      service: 'mpd',
+                      type: 'folder',
+                      title: albumartist,
+                      albumart: self.getAlbumArt({artist: albumartist}, undefined, 'users'),
+                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist)
+                    });
+                  }
+                }
+
+              } else { // for artist
+
+                if (albums.indexOf(album) === -1) {
+                  albums.push(album);
+                  albumsArt.push(albumart);
+
+                  if (album !== '') {
+                    response.navigation.lists[0].items.push({
+                      service: 'mpd',
+                      type: 'folder',
+                      title: album,
+                      artist: albumartist,
+                      albumart: albumart,
+                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album)});
+                  }
+                }
+
+                if (artists.indexOf(artist) === -1) {
+                  artists.push(artist);
+                  artistArt.push();
+
+                  if (artist !== '') {
+                    response.navigation.lists[1].items.push({
+                      service: 'mpd',
+                      type: 'folder',
+                      title: artist,
+                      albumart: self.getAlbumArt({artist: artist}, undefined, 'users'),
+                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist)});
+                  }
                 }
               }
 
-              if (artists.indexOf(artist) === -1) {
-                artists.push(artist);
-                artistArt.push();
-
-                if (artist !== '') {
-                  response.navigation.lists[1].items.push({
-                    service: 'mpd',
-                    type: 'folder',
-                    title: artist,
-                    albumart: self.getAlbumArt({artist: artist}, undefined, 'users'),
-                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist)});
-                }
-              }
             }
           }
 
