@@ -10,6 +10,7 @@
   "license": "ISC",
   "volumio_info": {
     "plugin_type": "audio_interface",
-    "boot_priority":4
+    "boot_priority":4,
+    "has_alsa_contribution":true
   }
 }

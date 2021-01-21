@@ -244,17 +244,17 @@ ControllerI2s.prototype.i2sMatch = function (data) {
           for (var w = 0; w < dac.eeprom_name.length; w++) {
             if (dac.eeprom_name[w] == data.eepromName) {
               self.logger.info('I2S DAC DETECTION: Found Match with EEPROM ' + dac.eeprom_name[w]);
-              var str = {'output_device': {'value': dac.alsanum, 'label': dac.name}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
+              var str = {'output_device': {'value': dac.alsanum, 'label': dac.name, 'alsacard': dac.alsacard}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
               return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
             }
           }
         } else if (dac.eeprom_name == data.eepromName) {
           self.logger.info('I2S DAC DETECTION: Found Match with EEPROM ' + dac.eeprom_name);
-          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
+          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name, 'alsacard': dac.alsacard}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
           return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
         } else if (dac.i2c_address == data.i2cAddress) {
           self.logger.info('I2S DAC DETECTION: Found Match with ' + dac.name + ' at address ' + dac.i2c_address);
-          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
+          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name, 'alsacard': dac.alsacard}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
           return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
         } else {
 
@@ -325,6 +325,30 @@ ControllerI2s.prototype.getI2SNumber = function (data) {
     return number;
 };
 
+ControllerI2s.prototype.getI2SAlsaName = function (data) {
+    var self = this;
+
+    var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    var alsaname = '';
+
+    for (var i = 0; i < dacdata.devices.length; i++) {
+        if (dacdata.devices[i].name == devicename) {
+            var num = i;
+            for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+                if (dacdata.devices[num].data[i].name == data) {
+                    alsaname = dacdata.devices[num].data[i].alsacard;
+                }
+            }
+            if (!alsaname) {
+                alsaname = dacdata.devices[num].data[0].alsacard;
+            }
+        }
+    }
+
+    return alsaname;
+};
+
 ControllerI2s.prototype.getI2SMixer = function (data) {
   var self = this;
 
@@ -388,22 +412,23 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 
           this.config.set('i2s_enabled', true);
           this.config.set('i2s_dac', outdevicename);
+          
+          if (process.env.MODULAR_ALSA_PIPELINE !== 'true') {
+            self.commandRouter.sharedVars.set('alsa.outputdevice', num);
+            // Restarting MPD, this seems needed only on first boot
+            setTimeout(function () {
+              self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+              self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
+            }, 1500);
+          }
 
-          self.commandRouter.sharedVars.set('alsa.outputdevice', num);
-          // Restarting MPD, this seems needed only on first boot
-          setTimeout(function () {
-            self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
-            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
-          }, 1500);
-
-          response = {'reboot': reboot};
-          defer.resolve(response);
+          return libQ.resolve({'reboot': reboot});
         }
       }
     }
   }
 
-  return defer.promise;
+  return libQ.reject("Unable to locate I2S DAC " + data);
 };
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {

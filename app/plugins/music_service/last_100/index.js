@@ -26,13 +26,8 @@ last_100.prototype.onVolumioStart = function () {
 
 last_100.prototype.onStart = function () {
   var self = this;
-  var defer = libQ.defer();
-  self.addToBrowseSources();
-  setTimeout(function () {
-    self.listenState();
-  }, 3000);
-
-  return defer.promise;
+  return self.addToBrowseSources()
+  	.then(() => self.listenState());
 };
 
 /**
@@ -146,7 +141,7 @@ last_100.prototype.addToBrowseSources = function () {
     uri: 'Last_100',
     plugin_type: 'music_service',
     plugin_name: 'last_100'};
-  this.commandRouter.volumioAddToBrowseSources(data);
+  return this.commandRouter.volumioAddToBrowseSources(data);
 };
 
 last_100.prototype.onStop = function () {
