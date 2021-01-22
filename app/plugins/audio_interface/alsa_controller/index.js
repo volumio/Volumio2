@@ -49,20 +49,21 @@ ControllerAlsa.prototype.onVolumioStart = function () {
     } 
 
 	var outputdevicecard = null;
-	var outputdevicecardname = self.config.get('outputdevicecardname');
+	var outputdevicecardname = self.config.get('outputdevicecardname', null);
+	var outputdevicealsadevice = self.config.get('outputdevicealsadevice', null);
 	var alsacards = self.getAlsaCards();
 	
 	// Update the outputdevice card so that it uses the up to date alsa number
 	
-	if(outputdevicecardname === undefined || outputdevicecardname === null) {
+	if(outputdevicecardname === null) {
 	  self.logger.warn('The ALSA output card is not set, defaulting to card ' + output);
 	  outputdevicecard = self.getCardByAlsaCardNumber(alsacards, output);
 	} else {
-	  outputdevicecard = self.getCardByAlsaCardName(alsacards, outputdevicecardname);
+	  outputdevicecard = self.getCardByAlsaCardNameAndDevice(alsacards, outputdevicecardname, outputdevicealsadevice);
 	}
 	
+    var outputdevicename = self.config.get('outputdevicename');
 	if(outputdevicecard) {
-      var outputdevicename = self.config.get('outputdevicename');
       
       if(outputdevicename) {
         // Don't change the UI label based on hw reporting, as lots of DACs show up as hifiberry-dac
@@ -70,9 +71,11 @@ ControllerAlsa.prototype.onVolumioStart = function () {
       }
       
 	  self.config.set('outputdevicecardname', outputdevicecard.alsacard);
-	  self.config.set('outputdevicesubdevice', outputdevicecard.alsadevice);
+	  self.config.set('outputdevicealsadevice', outputdevicecard.alsadevice);
 	  self.config.set('outputdevicename', outputdevicecard.name);
 	  self.config.set('outputdevice', outputdevicecard.id);
+	} else {
+	  self.looger.warn('Unable to locate the audio output device ' + outputdevicename + '. Please configure a valid output device.');
 	}
 	
     
@@ -93,9 +96,8 @@ ControllerAlsa.prototype.onVolumioStart = function () {
     
     var outputdevice = self.config.get('outputdevice');
 
-    self.config.set('outputdevicecardname', null);
-    self.config.set('outputdevicesubdevice', null);
-	self.config.set('outputdevicename', null);
+    self.config.delete('outputdevicecardname');
+    self.config.delete('outputdevicealsadevice');
     
 	if(self.commandRouter.sharedVars.get('alsa.outputdevice') === 'volumio') {
 	  self.commandRouter.sharedVars.set('alsa.outputdevice', outputdevice);
@@ -691,7 +693,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
 
   var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
 
-  var OutputDeviceNumber = data.output_device.value;
+  var OutputDevice = data.output_device.value;
 
   if (data.i2s) {
     var I2SNumber = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SNumber', data.i2sid.label);
@@ -727,7 +729,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
     }
     // Set these even if it's not an updated card, otherwise the logic later has the wrong device number
     this.config.set('outputdevicename', data.i2sid.label);
-    OutputDeviceNumber = I2SNumber;
+    OutputDevice = I2SNumber;
   } else {
     if (data.output_device.label === 'HDMI Out') {
       if (this.config.has('outputdevicename') == false) {
@@ -779,34 +781,59 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
     var OutputDeviceCard = data.i2s ? 
         self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2SAlsaName', data.i2sid.label) : 
         data.output_device.alsacard;
+        
+    var outputAlsaDevice = null;
+    if (OutputDevice.indexOf(',') >= 0) {
+      outputAlsaDevice = OutputDevice.charAt(2);
+    } 
     
     var alsacards = self.getAlsaCards();
     var outputcard = null;
     
     if(OutputDeviceCard) {
-      outputcard = self.getCardByAlsaCardName(alsacards, OutputDeviceCard);
+      outputcard = self.getCardByAlsaCardNameAndDevice(alsacards, OutputDeviceCard, outputAlsaDevice);
       if(outputcard == null) {
-        outputcard = { 'id': OutputDeviceNumber, 'name': data.output_device.label, 'alsacard': OutputDeviceCard };
+        self.logger.warn('Unable to locate the device ' + data.output_device.label + ' a reboot may be required.');
+        outputcard = { 'id': OutputDevice, 'name': data.output_device.label, 'alsacard': OutputDeviceCard };
+        if(outputAlsaDevice !== null) {
+          outputcard.alsadevice = outputAlsaDevice;
+        }
       } else {
-        OutputDeviceNumber = outputcard.id;
+        OutputDevice = outputcard.id;
       }
     } else {
-      outputcard = self.getCardByAlsaCardNumber(alsacards, OutputDeviceNumber);
+      outputcard = self.getCardByAlsaCardNumber(alsacards, OutputDevice);
       if(outputcard == null) {
-        outputcard = { 'id': OutputDeviceNumber, 'name': data.output_device.label, 'alsacard': OutputDeviceCard };
+        self.logger.warn('Unable to locate the device ' + data.output_device.label + ' a reboot may be required.');
+        outputcard = { 'id': OutputDevice, 'name': data.output_device.label, 'alsacard': OutputDeviceCard };
+        if(outputAlsaDevice !== null) {
+          outputcard.alsadevice = outputAlsaDevice;
+        }
       }
     }
     // Whatever we discover the label should be defined by the UI, otherwise lots of DACs show up as hifiberry-dac
     outputcard.name = data.i2s ? data.i2sid.label : data.output_device.label;
     
     self.config.set('outputdevicecardname', outputcard.alsacard);
-	self.config.set('outputdevicesubdevice', outputcard.alsadevice);
+    if(outputcard.alsadevice !== null) {
+	  self.config.set('outputdevicealsadevice', outputcard.alsadevice);
+	} else {
+	  self.config.delete('outputdevicealsadevice');
+	}
 	self.config.set('outputdevicename', outputcard.name);
 	self.config.set('outputdevice', outputcard.id);
+     
+    self.setDefaultMixer(outputcard.id);
   } else {
-    self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDeviceNumber);
+    var alsacards = self.getAlsaCards();
+    var card = self.getCardByAlsaCardNumber(alsacards, OutputDevice);
+    if(card == null) {
+      self.logger.warn('Unable to locate the device ' + data.output_device.label + ' a reboot may be required.');
+    }
+    self.config.set('outputdevice', OutputDevice);
+    self.commandRouter.sharedVars.set('alsa.outputdevice', OutputDevice);
+    self.setDefaultMixer(OutputDevice);
   }
-  self.setDefaultMixer(OutputDeviceNumber);
 
   var respconfig = self.commandRouter.getUIConfigOnPlugin('audio_interface', 'alsa_controller', {});
 
@@ -819,7 +846,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
   if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
     var promise = null;
     if(self.config.get('softvolume')) {
-      promise = self.writeSoftVolContribution(OutputDeviceNumber);
+      promise = self.writeSoftVolContribution(OutputDevice);
     } else {
       promise = libQ.resolve();
     }
@@ -1033,11 +1060,11 @@ ControllerAlsa.prototype.getLabelForSelectedCard = function (cards, key) {
   return self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
 };
 
-ControllerAlsa.prototype.getCardByAlsaCardName = function (cards, name) {
+ControllerAlsa.prototype.getCardByAlsaCardNameAndDevice = function (cards, name, device) {
   var self = this;
   var n = cards.length;
   for (var i = 0; i < n; i++) {
-    if (cards[i].alsacard == name) { return cards[i]; }
+    if (cards[i].alsacard == name && (device === null || cards[i].alsadevice == device)) { return cards[i]; }
   }
 
   return null;
@@ -1055,7 +1082,6 @@ ControllerAlsa.prototype.getLabelForSelect = function (options, key) {
 
 ControllerAlsa.prototype.getAlsaCards = function () {
   var self = this;
-  var multi = false;
   var cards = [];
   var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'), 'utf8', {throws: false});
 
@@ -1067,18 +1093,17 @@ ControllerAlsa.prototype.getAlsaCards = function () {
 
   try {
     var aplaycards = self.getAplayInfo();
-    for (var k = 0; k < aplaycards.length; k++) {
+    aplay: for (var k = 0; k < aplaycards.length; k++) {
       var aplaycard = aplaycards[k];
       var name = aplaycard.name;
       var id = aplaycard.id;
       var alsacard = aplaycard.alsacard;
         	if (!ignoredCards.includes(name)) {
-        for (var n = 0; n < carddata.cards.length; n++) {
+        data: for (var n = 0; n < carddata.cards.length; n++) {
           var ignore = false;
           var cardname = carddata.cards[n].name.toString().trim();
           if (cardname === name) {
             if (carddata.cards[n].multidevice) {
-              multi = true;
               var card = carddata.cards[n];
               for (var j = 0; j < card.devices.length; j++) {
                             	var currentCard = carddata.cards[n].devices[j];
@@ -1093,10 +1118,10 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                 if (fs.existsSync(deviceProc)) {
                                 	if (!currentCard.ignore) {
                     if (currentCard.default !== undefined && currentCard.default) {
-                      cards.unshift({id: id, alsacard: alsacard, alsadevice: subdevice, name: name});
+                      cards.unshift({id: id + ',' + subdevice, alsacard: alsacard, alsadevice: subdevice, name: name});
                       name = undefined;
                     } else {
-                      cards.push({id: id, alsacard: alsacard, alsadevice: subdevice, name: name});
+                      cards.push({id: id + ',' + subdevice, alsacard: alsacard, alsadevice: subdevice, name: name});
                       name = undefined;
                     }
                   } else {
@@ -1105,13 +1130,13 @@ ControllerAlsa.prototype.getAlsaCards = function () {
                 }
               }
             } else {
-              multi = false;
               name = carddata.cards[n].prettyname;
+              cards.push({id: id, alsacard: alsacard, name: name});
             }
-          } else {
-            multi = false;
+            continue aplay;
           }
-        } if (!multi && name !== undefined) {
+        } 
+        if (name !== undefined) {
           if (volumioDeviceName === 'primo') {
             if (name === 'ES90x8Q2M DAC') {
               name = 'Analog RCA Output';
@@ -1120,11 +1145,6 @@ ControllerAlsa.prototype.getAlsaCards = function () {
           cards.push({id: id, alsacard: alsacard, name: name});
         }
       }
-    }
-    if (volumioDeviceName === 'primo') {
-        	// Not necessary anymore since we ignore HDMI
-      // cards.unshift(cards[2]);
-      // cards.splice(3, 1);
     }
   } catch (e) {
     var namestring = self.commandRouter.getI18nString('PLAYBACK_OPTIONS.NO_AUDIO_DEVICE_AVAILABLE');
@@ -1231,12 +1251,11 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
   var ignoreGenMixers = false;
 
   var i2sstatus = self.commandRouter.executeOnPlugin('system_controller', 'i2s_dacs', 'getI2sStatus');
+  
+  var card = self.getCardByAlsaCardNumber(cards, device.toString());
 
-  for (var i in cards) {
-    var devnum = device.toString();
-    if (devnum == cards[i].id) {
-      currentcardname = cards[i].name;
-    }
+  if (card) {
+    currentcardname = card.name;
   }
 
   if (outputdevice === 'Loopback') {
@@ -1252,7 +1271,7 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
       self.logger.info('Found match in i2s Card Database: setting mixer ' + defaultmixer + ' for card ' + cardname);
     }
   } else {
-    for (var n = 0; n < carddata.cards.length; n++) {
+    search: for (var n = 0; n < carddata.cards.length; n++) {
       if (carddata.cards[n].multidevice) {
         for (var j = 0; j < carddata.cards[n].devices.length; j++) {
           var cardname = carddata.cards[n].devices[j].prettyname.toString().trim();
@@ -1260,6 +1279,8 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
           if (cardname == currentcardname) {
             defaultmixer = carddata.cards[n].devices[j].defaultmixer;
             self.logger.info('Found match in Cards Database: setting mixer ' + defaultmixer + ' for card ' + currentcardname);
+            self.commandRouter.sharedVars.set('alsa.outputdevicemixer', defaultmixer);
+            break search;
           }
         }
       } else {
@@ -1268,6 +1289,7 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
           defaultmixer = carddata.cards[n].defaultmixer;
           self.logger.info('Found match in Cards Database: setting mixer ' + defaultmixer + ' for card ' + currentcardname);
           self.commandRouter.sharedVars.set('alsa.outputdevicemixer', defaultmixer);
+          break search;
         }
       }
     }
@@ -1321,7 +1343,7 @@ ControllerAlsa.prototype.setDefaultMixer = function (device) {
             this.mixertype = 'Hardware';
             self.commandRouter.sharedVars.set('alsa.outputdevicemixer', defaultmixer);
           } else {
-            self.logger.info('Device ' + device + ' does not have any Mixer Control Available, setting a softvol device');
+            self.logger.info('Device ' + device + ' does not have any Mixer Control Available');
             this.mixertype = 'None';
             self.commandRouter.sharedVars.set('alsa.outputdevicemixer', 'None');
             // defaultmixer = 'SoftMaster';
@@ -1495,7 +1517,7 @@ ControllerAlsa.prototype.writeSoftVolContribution = function (data) {
   var defer = libQ.defer();
 
   self.logger.info('Enable softmixer device for audio device ' + data.name);
-  var outnum = data;
+  
   if (this.config.has('softvolumenumber') == false) {
     self.config.addConfigValue('softvolumenumber', 'string', data);
     self.updateVolumeSettings();
@@ -1503,9 +1525,16 @@ ControllerAlsa.prototype.writeSoftVolContribution = function (data) {
     self.setConfigParam({key: 'softvolumenumber', value: data});
   }
 
-  var asoundcontent = '';
   var card = data;
-  var device = self.config.get('outputdevicesubdevice', 0);
+  var device = 0;
+  
+  if(data.indexOf(',') >= 0) {
+    var dataarr = data.split(',');
+    card = dataarr[0];
+    device = dataarr[1];
+  }
+
+  var asoundcontent = '';
 
   asoundcontent += '# Convert to 24 bit to avoid unnecessary quality loss for 16 bit audio\n';
   asoundcontent += 'pcm.softvolume {\n';
@@ -2108,7 +2137,7 @@ ControllerAlsa.prototype.internalUpdateALSAConfigFile = function () {
     }
     
     var card = self.config.get('outputdevicecardname')
-    var device = self.config.get('outputdevicesubdevice')
+    var device = self.config.get('outputdevicealsadevice')
     
     asoundcontent += '# There is always a plug before the hardware to be safe\n';
     asoundcontent += 'pcm.volumioOutput {\n';
