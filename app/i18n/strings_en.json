@@ -69,6 +69,7 @@
         "CONFIGURATION_UPDATE": "Configuration update",
         "CONFIGURATION_UPDATE_DESCRIPTION": "Configuration Updated Successfully",
         "CONFIGURATION_UPDATE_ERROR": "An error has occurred",
+        "CONNECT": "Connect",
         "CONNECTED": "Connected",
         "CONTINUE": "Continue",
         "DISABLED": "Disabled",
@@ -125,7 +126,9 @@
         "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Your music is being scanned and the icon on bottom left will keep spinning until all your library has been successfully indexed. Since the system might be less responsive during this operation, please don't use the system while music is being indexed.",
         "USERNAME": "Username",
         "WITH": "with",
-        "PLEASE_WAIT": "Please wait"
+        "PLEASE_WAIT": "Please wait",
+        "SEARCH_RESULTS_TITLE": "Number of search results",
+        "SEARCH_RESULTS_DESC": "Desired Number of search results"
     },
     "MAIN_MENU": {
         "ALARM": "Alarm",
@@ -148,6 +151,7 @@
         "GOTO_DEVICE_LIST": "Go to My Devices list",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio is not enabled on this device",
         "PLAN_REQUIRED": "is required to use this functionality",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio includes support for streaming services such as TIDAL, QOBUZ and  High Res Audio, as well as many additional plugins. In order to gain full access to them, you will need to subscribe a MyVolumio plan. Go to www.myvolumio.org to start a free trial!",
         "UPGRADE_YOUR_PLAN_NOW": "Upgrade your plan now"
     },
     "NETWORK": {
@@ -287,7 +291,18 @@
         "VOLUME_CURVE_MODE_DOC": "Natural (Logarithmic) is how most people perceive Volume variations. Don't change it unless the volume curve is too steep in your system",
         "VOLUME_NORMALIZATION": "Volume normalization",
         "VOLUME_NORMALIZATION_DOC": "If turned On Volumio will normalize the volume of tracks as they play. This might reduce sound quality.",
-        "VOLUME_OPTIONS": "Volume options"
+        "VOLUME_OPTIONS": "Volume options",
+        "SQ_QUALITY_TITLE": "Sound Quality",
+        "SQ_MP3_320": "MP3 (320 kbit/s)",
+        "SQ_FLAC_LOSSLESS": "FLAC Lossless",
+        "SQ_FLAC_HIRES_96": "FLAC Hi-Res 24 bit up to 96 kHz",
+        "SQ_FLAC_HIRES_192": "FLAC Hi-Res 24 bit up to 192 kHz",
+        "SQ_QUALITY_DESC": "Select your desired music quality",
+        "SQ_LOW": "Low",
+        "SQ_HIGH": "High",
+        "SQ_LOSSLESS": "Lossless",
+        "SQ_HI_RES": "Hi-Res",
+        "SQ_HIGHEST_POSSIBLE":"Highest Possible"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Added",
@@ -461,15 +476,56 @@
         "MY_PLAYLISTS": "My Playlists",
         "MY_ARTISTS": "My Artists",
         "MY_PURCHASES": "My Purchases",
-        "QOBUZ_ALBUMS": "Qobuz Albums",
-        "QOBUZ_TRACKS": "Qobuz Tracks",
-        "QOBUZ_PLAYLISTS": "Qobuz Playlists",
+        "QOBUZ_ALBUMS": "QOBUZ Albums",
+        "QOBUZ_TRACKS": "QOBUZ Tracks",
+        "QOBUZ_PLAYLISTS": "QOBUZ Playlists",
         "DISCOVER": "Discover",
         "PRESS_AWARDS": "Press Awards",
-        "SELECTED_BY_QOBUZ": "Selected by Qobuz",
+        "SELECTED_BY_QOBUZ": "Selected by QOBUZ",
         "SELECTED_BY_THE_MEDIA": "Selected by the Media",
         "NEW_RELEASES": "New releases",
         "FEATURED_LAST_CREATED": "Last created",
         "FEATURED_EDITOR_PICKS": "Editor picks"
+    },
+    "PLUGIN_CDCONTROLLER":{
+        "INTERNAL_MEMORY": "Internal Memory",
+        "RIP_IN_PROGRESS_MESSAGE": "This CD is currently being copied, and cannot be accessed until the copy operation has completed",
+        "CD_RIP": "CD Rip",
+        "CD_RIP_STARTED": "CD Rip started, this may take up to 30 minutes. You will be notified on RIP termination",
+        "CD_RIP_SUCCESS": "CD Has been ripped successfully",
+        "RIP_FAILED": "Copy process failed",
+        "TARGET_HARD_DRIVE_NOT_FOUND": "Hard Drive Not Found",
+        "RIP_MESSAGE": "Review CD Informations and select the desired location for the music files. Once done, click Rip to start copying your CD in lossless format. You'll be notified once the process is finished",
+        "RIP_LOCATION_MESSAGE": "Music files destination disk",
+        "RIP_LOCATION_MESSAGE_NO_SPACE": "There is no space available for ripping, please connect a different drive to save music files",
+        "CD_RIP_ERROR": "CD RIP Error",
+        "CD_RIP_ERROR_MESSAGE": "Cannot Start CD Rip ",
+        "UNKNOWN_ARTIST": "Unknown artist",
+        "UNKNOWN_ALBUM": "Unknown album",
+        "UNKNOWN_GENRE": "Unknown Genre"
+    },
+    "PLUGIN_TIDAL":{
+        "TIDAL_CONFIG_TITLE":"TIDAL Settings",
+        "SECTION_TIDAL_ACCOUNT": "TIDAL",
+        "SECTION_TIDAL_ACCOUNT_DESC": "",
+        "SECTION_ACCOUNT_BETA": "TIDAL (Experimental plugin)",
+        "TIDAL_CONNECT_DESC": "Access music from TIDAL in Volumio.",
+        "TIDAL_LOGOUT_DESC": "This device is connected to TIDAL. You can disconnect by clicking the Logout button.",
+        "SAVE_QUALITY_SUCCESS":"Quality settings saved successfully",
+        "EPSINGLES": "TIDAL EP & Singles",
+        "TIDAL_ARTISTS": "TIDAL Artists",
+        "TIDAL_ALBUMS": "TIDAL Albums",
+        "TIDAL_TRACKS": "TIDAL Tracks",
+        "TIDAL_PLAYLISTS": "TIDAL Playlists",
+        "MQA_TITLE": "Master Quality (MQA)",
+        "MQA_DESCR": "MQA will play back on any device to deliver higher than CD-quality. When paired with an MQA decoder, the MQA file reveals the original master recording."
+    },
+    "PLUGIN_QOBUZ":{
+        "QOBUZ_CONFIG_TITLE": "QOBUZ Settings",
+        "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
+        "QOBUZ_CONNECT_DESC": "Access music from QOBUZ in Volumio.",
+        "QOBUZ_LOGOUT_DESC": "This device is connected to QOBUZ. You can disconnect by clicking the Logout button.",
+        "QOBUZ_FREE_TRIAL": "Free Trial",
+        "QOBUZ_FREE_TRIAL_DESC": "Get 1 month free trial of QOBUZ HIFI (worth 19,99€)"
     }
 }
