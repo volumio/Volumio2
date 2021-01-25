@@ -433,5 +433,43 @@
         "DEVICE_SUCCESSFULLY_CONFIGURED": "has been configured and is ready to play",
         "PLEASE_DONATE": "If you like Volumio please consider donating. You can make a difference for this project!",
         "RUN_FIRST_CONFIG_WIZARD": "Run first config Wizard"
+    },
+    "VOLUMIO_CLOUD_TIDAL": {
+        "MENU_TIDAL": "TIDAL",
+        "MENU_MY_MUSIC": "My music",
+        "MENU_AZ": "A-Z",
+        "MENU_DATEADDED": "Date added",
+        "MENU_RELEASEDATE": "Release date",
+        "MENU_ARTIST": "Artist",
+        "TIDAL_ALBUMS": "TIDAL Albums",
+        "TIDAL_TRACKS": "TIDAL Tracks",
+        "TIDAL_PLAYLISTS": "TIDAL Playlists",
+        "TIDAL_EPSINGLES": "TIDAL EP & Singles",
+        "MIXES": "Mixes",
+        "NEW": "New",
+        "TIDAL_RISING": "TIDAL Rising",
+        "GENRES_AND_MOODS": "Genres & Moods",
+        "RECOMMENDED": "Recommended",
+        "LOCAL": "Local (not applicable all regions)",
+        "EXCLUSIVE": "Exclusive",
+        "TOP_20": "Top 20"
+    },
+    "VOLUMIO_CLOUD_QOBUZ": {
+        "MY_MUSIC": "My Music",
+        "MY_ALBUMS": "My Albums",
+        "MY_TRACKS": "My Tracks",
+        "MY_PLAYLISTS": "My Playlists",
+        "MY_ARTISTS": "My Artists",
+        "MY_PURCHASES": "My Purchases",
+        "QOBUZ_ALBUMS": "Qobuz Albums",
+        "QOBUZ_TRACKS": "Qobuz Tracks",
+        "QOBUZ_PLAYLISTS": "Qobuz Playlists",
+        "DISCOVER": "Discover",
+        "PRESS_AWARDS": "Press Awards",
+        "SELECTED_BY_QOBUZ": "Selected by Qobuz",
+        "SELECTED_BY_THE_MEDIA": "Selected by the Media",
+        "NEW_RELEASES": "New releases",
+        "FEATURED_LAST_CREATED": "Last created",
+        "FEATURED_EDITOR_PICKS": "Editor picks"
     }
 }
