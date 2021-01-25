@@ -125,7 +125,10 @@
         "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Musik-Verzeichnis wird indiziert. Das System kann währenddessen stark verlangsamt reagieren und sollte darum bis zum Abschluss der Indizierung nicht genutzt werden. Die Indizierung ist abgeschlossen, wenn das Symbol in der linken unteren Ecke zum Stillstand gekommen ist.",
         "USERNAME": "Benutzername",
         "WITH": "mit",
-        "PLEASE_WAIT": "Bitte warte"
+        "PLEASE_WAIT": "Bitte warte",
+        "SEARCH_RESULTS_DESC": "Gewünschte Anzahl der Suchergebisse",
+        "CONNECT": "Verbinden",
+        "SEARCH_RESULTS_TITLE": "Anzahl der Suchergebnisse"
     },
     "MAIN_MENU": {
         "ALARM": "Wecker",
@@ -287,7 +290,17 @@
         "VOLUME_CURVE_MODE_DOC": "Die Standardeinstellung für die Lautstärkekurve ist natürlich. Dies sollte nur verändert werden, wenn die Lautstärke unter dieser Einstellung zu schnell sehr stark ansteigt",
         "VOLUME_NORMALIZATION": "Lautstärke-Normalisierung",
         "VOLUME_NORMALIZATION_DOC": "Normalisiert die Lautstärke während der Wiedergabe. Dies kann die Tonqualität beeinträchtigen.",
-        "VOLUME_OPTIONS": "Lautstärke-Einstellungen"
+        "VOLUME_OPTIONS": "Lautstärke-Einstellungen",
+        "SQ_MP3_320": "MP3 (320 kbit/s)",
+        "SQ_FLAC_LOSSLESS": "FLAC (verlustfrei)",
+        "SQ_FLAC_HIRES_192": "FLAC Hi-Res (24 Bit, bis zu 192 kHz)",
+        "SQ_QUALITY_DESC": "Wähle deine bevorzugte Tonqualität",
+        "SQ_LOW": "Niedrig",
+        "SQ_HIGH": "Hoch",
+        "SQ_LOSSLESS": "Verlustfrei",
+        "SQ_HI_RES": "Hi-Res",
+        "SQ_QUALITY_TITLE": "Audioqualität",
+        "SQ_FLAC_HIRES_96": "FLAC Hi-Res (24 Bit, bis zu 96 kHz)"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Hinzugefügt",
@@ -433,5 +446,34 @@
         "DEVICE_SUCCESSFULLY_CONFIGURED": "wurde eingerichtet und ist bereit für die Wiedergabe",
         "PLEASE_DONATE": "Wenn dir Volumio gefällt, unterstütze uns doch mit einer Spende.",
         "RUN_FIRST_CONFIG_WIZARD": "Einrichtungsassistent ausführen"
+    },
+    "VOLUMIO_CLOUD_TIDAL": {
+        "MENU_MY_MUSIC": "Meine Musik",
+        "MENU_AZ": "A-Z",
+        "MENU_RELEASEDATE": "Erscheinungsdatum",
+        "MENU_ARTIST": "Interpret",
+        "TIDAL_ALBUMS": "TIDAL Alben",
+        "TIDAL_PLAYLISTS": "TIDAL Playlisten",
+        "TIDAL_EPSINGLES": "TIDAL EP & Singles",
+        "NEW": "Neu",
+        "TIDAL_RISING": "TIDAL Rising",
+        "GENRES_AND_MOODS": "Genres & Stimmungen",
+        "LOCAL": "Lokal (nicht auf alle Regionen zutreffend)",
+        "EXCLUSIVE": "Exklusiv",
+        "TOP_20": "Top 20",
+        "MENU_TIDAL": "TIDAL",
+        "TIDAL_TRACKS": "TIDAL Titel"
+    },
+    "VOLUMIO_CLOUD_QOBUZ": {
+        "MY_MUSIC": "Meine Music",
+        "MY_ALBUMS": "Meine Alben",
+        "MY_PLAYLISTS": "Meine Playlisten",
+        "MY_ARTISTS": "Meine Interpreten",
+        "MY_PURCHASES": "Meine Einkäufe",
+        "QOBUZ_ALBUMS": "QOBUZ Alben",
+        "QOBUZ_TRACKS": "QOBUZ Titel",
+        "QOBUZ_PLAYLISTS": "QOBUZ Playlisten",
+        "DISCOVER": "Entdecken",
+        "MY_TRACKS": "Meine Titel"
     }
 }
