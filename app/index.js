@@ -183,7 +183,7 @@ CoreCommandRouter.prototype.writeVolumeStatusFiles = function (vol) {
 };
 
 CoreCommandRouter.prototype.executeWriteVolumeStatusFiles = function (value) {
-  fs.writeFile('/tmp/volume', value, function (err) {
+  fs.writeFile('/tmp/volume', value.toString(), function (err) {
     if (err) {
         	this.logger.error('Could not save Volume value to status file: ' + err);
     }
