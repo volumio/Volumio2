@@ -33,12 +33,14 @@ function CoreVolumeController (commandRouter) {
   self.commandRouter = commandRouter;
   self.logger = self.commandRouter.logger;
 
-  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+  var outputdevicename = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevicename');
+  device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
   
-    var outputdevicename = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevicename');
-    
-    device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
-    
+  if (device.indexOf(',') >= 0) {
+    device = device.charAt(0);
+  }
+  
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
     if(this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolume')) {
       // Software volume is enabled
       devicename = 'softvolume';
@@ -46,18 +48,11 @@ function CoreVolumeController (commandRouter) {
       devicename = outputdevicename;
     }
   } else {
-    device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'outputdevice');
     if (device === 'softvolume') {
       device = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getConfigParam', 'softvolumenumber');
       devicename = 'softvolume';
     } else {
-      if (device.indexOf(',') >= 0) {
-        device = device.charAt(0);
-      }
-      var cards = this.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'getAlsaCards', '');
-      if ((cards[device] !== undefined) && (cards[device].name !== undefined)) {
-        devicename = cards[device].name;
-      }
+      devicename = outputdevicename;
     }
   }
   
