@@ -151,7 +151,8 @@
         "GOTO_DEVICE_LIST": "Zur Geräteliste",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio ist auf diesem Gerät nicht aktiviert",
         "PLAN_REQUIRED": "wird für diese Funktion benötigt",
-        "UPGRADE_YOUR_PLAN_NOW": "Führe jetzt ein Plan-Upgrade durch"
+        "UPGRADE_YOUR_PLAN_NOW": "Führe jetzt ein Plan-Upgrade durch",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio enthält Anbindungen für Streamingdienste wie TIDAL, QOBUZ und High Res Audio, sowie viele zusätzliche Plugins. Um vollen Zugang dazu zu erhalten, buche einen MyVolumio Plan. Besuche myvolumio.org für eine kostenlose Testphase!"
     },
     "NETWORK": {
         "AUTOMATIC_IP": "Automatische IP",
@@ -466,10 +467,11 @@
         "TIDAL_TRACKS": "TIDAL Titel",
         "MENU_DATEADDED": "Erscheinungsdatum",
         "RECOMMENDED": "Empfohlen",
-        "MIXES": "Abmischungen"
+        "MIXES": "Abmischungen",
+        "TIDAL_ARTISTS": "TIDAL Interpreten"
     },
     "VOLUMIO_CLOUD_QOBUZ": {
-        "MY_MUSIC": "Meine Music",
+        "MY_MUSIC": "Meine Musik",
         "MY_ALBUMS": "Meine Alben",
         "MY_PLAYLISTS": "Meine Playlisten",
         "MY_ARTISTS": "Meine Interpreten",
@@ -483,7 +485,8 @@
         "SELECTED_BY_QOBUZ": "Ausgewählt von QOBUZ",
         "SELECTED_BY_THE_MEDIA": "Ausgewählt durch die Medien",
         "NEW_RELEASES": "Neuerscheinungen",
-        "FEATURED_EDITOR_PICKS": "Redaktionstipps"
+        "FEATURED_EDITOR_PICKS": "Redaktionstipps",
+        "QOBUZ_ARTISTS": "QOBUZ Interpreten"
     },
     "PLUGIN_CDCONTROLLER": {
         "INTERNAL_MEMORY": "Interner Speicher",
@@ -508,13 +511,14 @@
         "SECTION_ACCOUNT_BETA": "TIDAL (Experimentales Plugin)",
         "TIDAL_LOGOUT_DESC": "Dieses Gerät ist mit TIDAL verbunden. Du kannst die Verbindung, durch einen Klick auf Abmelden, aufheben.",
         "SAVE_QUALITY_SUCCESS": "Qualitätseinstellungen erfolgreich gespeichert",
-        "EPSINGLES": "TIDAL EP & Singles",
+        "EPSINGLES": "TIDAL EPs & Singles",
         "TIDAL_ARTISTS": "TIDAL Interpreten",
         "TIDAL_TRACKS": "TIDAL Titel",
         "TIDAL_PLAYLISTS": "TIDAL Playlisten",
         "MQA_TITLE": "Master Quality (MQA)",
         "TIDAL_ALBUMS": "TIDAL Alben",
-        "TIDAL_CONNECT_DESC": "Greife auf den TIDAL-Katalog in Volumio zu."
+        "TIDAL_CONNECT_DESC": "Greife auf den TIDAL-Katalog in Volumio zu.",
+        "MQA_DESCR": "MQA wird auf jedem Gerät wiedergegeben und übertrifft in puncto Qualität die CD. In Verbindung mit einem MQA-Decoder erreicht MQA die original Master-Qualität."
     },
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "QOBUZ Einstellungen",
@@ -522,6 +526,6 @@
         "QOBUZ_CONNECT_DESC": "Greife auf den QOBUZ-Katalog in Volumio zu.",
         "QOBUZ_LOGOUT_DESC": "Dieses Gerät ist mit QOBUZ verbunden. Du kannst die Verbindung, durch einen Klick auf Abmelden, aufheben.",
         "QOBUZ_FREE_TRIAL": "Kostenlos Testen",
-        "QOBUZ_FREE_TRIAL_DESC": "Erhalte einen kostenlosen Monat QOBUZ HIFI im Wert von 19,99 €."
+        "QOBUZ_FREE_TRIAL_DESC": "Teste QOBUZ HIFI einen Monat kostenlos (Wert: 19,99€)"
     }
 }
