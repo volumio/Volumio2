@@ -125,7 +125,10 @@
         "UPDATING_MUSIC_DB_WAIT_MESSAGE": "Scan de votre musique en cours. Durant cette période le système peut être ralenti, pour votre confort, évitez d'écouter de la musique.",
         "USERNAME": "Utilisateur",
         "WITH": "avec",
-        "PLEASE_WAIT": "Merci de patienter"
+        "PLEASE_WAIT": "Merci de patienter",
+        "SEARCH_RESULTS_DESC": "Nombre de résultats souhaités",
+        "CONNECT": "Connecter",
+        "SEARCH_RESULTS_TITLE": "Nombre de résultats de recherche"
     },
     "MAIN_MENU": {
         "ALARM": "Alarme",
@@ -148,7 +151,8 @@
         "GOTO_DEVICE_LIST": "Aller à ma liste de périphériques",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio n'est pas activé sur ce périphérique",
         "PLAN_REQUIRED": "est nécéssaire pour utiliser cette fonctionnalité",
-        "UPGRADE_YOUR_PLAN_NOW": "Changer de plan maintenant"
+        "UPGRADE_YOUR_PLAN_NOW": "Changer de plan maintenant",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio supporte des services de streaming tels que TIDAL, QOBUZ et high res audio ainsi que d'autres plugins additionnels. Pour utiliser tout le potentiel, souscrivez à un plan MyVolumio. Rendez-vous à www.myvolumio.org pour un essai gratuit!"
     },
     "NETWORK": {
         "AUTOMATIC_IP": "IP Automatique",
@@ -287,7 +291,18 @@
         "VOLUME_CURVE_MODE_DOC": "Naturel (logarithmique) est le mode le plus souvent utilisé. Ne changer que si l'évolution du réglage volume pose problème",
         "VOLUME_NORMALIZATION": "Normalisation du Volume",
         "VOLUME_NORMALIZATION_DOC": "Si activé, Volumio nivellera le niveau sonore des pistes lues. Peut altérer la qualité sonore.",
-        "VOLUME_OPTIONS": "Options de volume"
+        "VOLUME_OPTIONS": "Options de volume",
+        "SQ_MP3_320": "MP3 (320 kbit/s)",
+        "SQ_FLAC_LOSSLESS": "FLAC Lossless",
+        "SQ_FLAC_HIRES_96": "FLAC Hi-Res 24 bit up to 96 kHz",
+        "SQ_FLAC_HIRES_192": "FLAC Hi-Res 24 bit up to 192 kHz",
+        "SQ_LOW": "Basse",
+        "SQ_HIGH": "Haute",
+        "SQ_LOSSLESS": "Lossless",
+        "SQ_HI_RES": "Hi-Res",
+        "SQ_HIGHEST_POSSIBLE": "La plus haute possible",
+        "SQ_QUALITY_TITLE": "Qualité du son",
+        "SQ_QUALITY_DESC": "Choisissez la qualité désirée"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Ajouté",
@@ -433,5 +448,19 @@
         "DEVICE_SUCCESSFULLY_CONFIGURED": "a été correctement configuré et est prêt à l'emploi",
         "PLEASE_DONATE": "Si vous aimez Volumio, faites un don ! Vous pouvez faire la différence pour ce projet !",
         "RUN_FIRST_CONFIG_WIZARD": "Lancer l'assistant de configuration"
+    },
+    "VOLUMIO_CLOUD_TIDAL": {
+        "MIXES": "Mixes",
+        "NEW": "Nouveau",
+        "MENU_MY_MUSIC": "Ma musique",
+        "MENU_AZ": "A-Z",
+        "MENU_DATEADDED": "Ajoutés par date",
+        "MENU_ARTIST": "Artiste",
+        "TIDAL_ALBUMS": "Albums TIDAL",
+        "TIDAL_TRACKS": "Morceaux TIDAL",
+        "TIDAL_PLAYLISTS": "Listes de lecture TIDAL",
+        "TIDAL_EPSINGLES": "EP & Singles TIDAL",
+        "MENU_TIDAL": "TIDAL",
+        "MENU_RELEASEDATE": "Date de sortie"
     }
 }
