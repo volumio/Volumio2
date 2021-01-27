@@ -8,7 +8,6 @@
     "start": "nodejs ./index.js",
     "lint": "semistandard \"./**/*.js\" --fix --verbose",
     "lint-staged": "lint-staged",
-    "lint-lang": "jsonlint -qD ./app/i18n",
     "lint-JSON": "jsonlint -qD ./app/plugins",
     "test": "npm install --only=dev --no-package-lock && ./node_modules/.bin/mocha --reporter spec",
     "addLangString": "node ./utils/addlangstring.js"
