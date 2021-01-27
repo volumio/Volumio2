@@ -465,9 +465,9 @@
         "TOP_20": "Top 20",
         "MENU_TIDAL": "TIDAL",
         "TIDAL_TRACKS": "TIDAL Titel",
-        "MENU_DATEADDED": "Erscheinungsdatum",
+        "MENU_DATEADDED": "Zuletzt hinzugefügt",
         "RECOMMENDED": "Empfohlen",
-        "MIXES": "Abmischungen",
+        "MIXES": "Mixes & Radio",
         "TIDAL_ARTISTS": "TIDAL Interpreten"
     },
     "VOLUMIO_CLOUD_QOBUZ": {
