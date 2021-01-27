@@ -1,6 +1,5 @@
 var express = require('express');
 var app = require('./index.js'); // eslint-disable-line
-var bodyParser = require('body-parser');
 var api = express.Router();
 var ifconfig = require('/volumio/app/plugins/system_controller/network/lib/ifconfig.js');
 var primaryhost;
@@ -25,8 +24,8 @@ var allowCrossDomain = function (req, res, next) {
 // All routes will be routed trough /api and encoded in json
 api.use(allowCrossDomain);
 api.use('/api', api);
-api.use(bodyParser.urlencoded({ extended: true }));
-api.use(bodyParser.json());
+api.use(express.urlencoded({ extended: true }));
+api.use(express.json());
 // Routes for Volumio API
 
 // Welcome Message

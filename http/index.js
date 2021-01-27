@@ -1,7 +1,6 @@
 var express = require('express');
 var compression = require('compression');
 var path = require('path');
-var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var restapi = require('./restapi.js');
 var busboy = require('connect-busboy');
@@ -36,8 +35,8 @@ var allowCrossDomain = function (req, res, next) {
 dev.set('views', path.join(__dirname, 'dev/views'));
 dev.set('view engine', 'ejs');
 
-dev.use(bodyParser.json());
-dev.use(bodyParser.urlencoded({ extended: false }));
+dev.use(express.json());
+dev.use(express.urlencoded({ extended: false }));
 dev.use(express.static(path.join(__dirname, 'dev')));
 
 dev.use('/', routes);

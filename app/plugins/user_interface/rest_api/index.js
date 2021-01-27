@@ -3,7 +3,6 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var api = require('/volumio/http/restapi.js');
-var bodyParser = require('body-parser');
 var unirest = require('unirest');
 var _ = require('underscore');
 
@@ -20,7 +19,6 @@ function interfaceApi (context) {
   self.logger = self.commandRouter.logger;
 
   api.use('/v1', api);
-  api.use(bodyParser.json());
 
   this.browse = new (require(__dirname + '/browse.js'))(context);
   this.playback = new (require(__dirname + '/playback.js'))(context);
