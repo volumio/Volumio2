@@ -7,9 +7,8 @@ const url = require('url');
 const xmlbuilder = require('xmlbuilder');
 const xmltojs = require('xml2js');
 const stripPrefix = require('xml2js').processors.stripPrefix;
-const Entities = require('html-entities').XmlEntities;
+const xmlDecode = (arg) => require('html-entities').decode(arg, { level: 'xml' } );
 
-const entities = new Entities();
 
 var debug = false;
 
@@ -89,7 +88,7 @@ var browseServer = function (id, controlUrl, options, callback) {
 
     response.on('end', function () {
       var browseResult = new Object();
-      xmltojs.parseString(entities.decode(data), {tagNameProcessors: [stripPrefix], explicitArray: true, explicitCharkey: true}, function (err, result) {
+      xmltojs.parseString(xmlDecode(data), {tagNameProcessors: [stripPrefix], explicitArray: true, explicitCharkey: true}, function (err, result) {
         if (err) {
           log(err);
           // bailout on error
