@@ -226,7 +226,7 @@ interfaceApi.prototype.getPushNotificationUrls = function (req, res) {
   if (pushNotificationsUrls && pushNotificationsUrls.length) {
     res.send(pushNotificationsUrls);
   } else {
-    res.send('No URLs defined for push notifications');
+    res.send('[]');
   }
 };
 
