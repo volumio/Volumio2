@@ -1162,6 +1162,33 @@ PluginManager.prototype.checkPluginDependencies = function (folder) {
   return pendingResult.then(() => { return result });
 };
 
+PluginManager.prototype.listPluginsBrokenByNewVersion = function (newVolumioVersion) {
+  var self = this;
+  var result = [];
+  
+  var plugins = self.getPluginsMatrix();
+  
+  for (var i = 0; i < plugins.length; i++) {
+
+    let category = plugins[i].cName;
+    
+    for(var j = 0; j < plugins[i].catPlugin.length; j++) {
+
+      let plugin = plugins[i].catPlugin[j];
+      let folder = self.findPluginFolder(category, plugin.name);
+      
+      var package_json = self.getPackageJson(folder);
+      
+      if(package_json && package_json.engines && package_json.engines.volumio) {
+        if(!semver.satisfies(semver.coerce(newVolumioVersion), package_json.engines.volumio)) {
+          result.push(category + '/' + plugin.name);
+        }
+      }
+    }
+  }
+  return result;
+};
+
 PluginManager.prototype.renameFolder = function (folder) {
   var self = this;
   var defer = libQ.defer();
