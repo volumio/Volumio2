@@ -53,6 +53,7 @@
     "node-uuid": "^1.4.8",
     "onoff": "^5.0.1",
     "require-from-string": "^2.0.2",
+    "semver": "^7.3.4",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
     "string": "^3.3.3",
