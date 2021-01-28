@@ -466,7 +466,8 @@
         "RECOMMENDED": "Recomendado",
         "LOCAL": "Regional (no se aplica a todas las regiones)",
         "EXCLUSIVE": "Exclusivo",
-        "TOP_20": "Top 20"
+        "TOP_20": "Top 20",
+        "MENU_DATEADDED": "Fecha en que se añadió"
     },
     "PLUGIN_TIDAL": {
         "SAVE_QUALITY_SUCCESS": "Configuración de calidad guardada correctamente",
