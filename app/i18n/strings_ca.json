@@ -301,7 +301,8 @@
         "SQ_LOSSLESS": "Lossless",
         "SQ_FLAC_HIRES_96": "FLAC alta resolució 24 bit fins a 96 kHz",
         "SQ_FLAC_HIRES_192": "FLAC alta resolució 24 bit fins a 192 kHz",
-        "SQ_HI_RES": "Alta resolució"
+        "SQ_HI_RES": "Alta resolució",
+        "SQ_QUALITY_DESC": "Selecciona la qualitat musical desitjada"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Afegit",
@@ -451,13 +452,13 @@
     "VOLUMIO_CLOUD_TIDAL": {
         "EXCLUSIVE": "Exclusiu",
         "TIDAL_ARTISTS": "Artistes de TIDAL",
-        "MIXES": "Mixes i Ràdio",
+        "MIXES": "Mixes & Radio",
         "GENRES_AND_MOODS": "Gèneres i Estats d'ànim",
         "MENU_MY_MUSIC": "La meva Música",
         "MENU_AZ": "A-Z",
         "MENU_TIDAL": "TIDAL",
         "MENU_ARTIST": "Artista",
-        "MENU_RELEASEDATE": "Fecha de publicación",
+        "MENU_RELEASEDATE": "Data de llançament",
         "NEW": "Nou",
         "TOP_20": "Top 20",
         "TIDAL_ALBUMS": "Àlbums de TIDAL",
@@ -466,13 +467,21 @@
         "TIDAL_EPSINGLES": "EP & Singles de TIDAL",
         "TIDAL_RISING": "TIDAL Rising",
         "RECOMMENDED": "Recomanat",
-        "LOCAL": "Regional (no aplicable a totes les regions)"
+        "LOCAL": "Regional (no aplicable a totes les regions)",
+        "MENU_DATEADDED": "Data en que s'ha afegit"
     },
     "PLUGIN_CDCONTROLLER": {
         "UNKNOWN_ALBUM": "Àlbum desconegut",
         "INTERNAL_MEMORY": "Memòria interna",
         "UNKNOWN_ARTIST": "Artista desconegut",
-        "UNKNOWN_GENRE": "Gènere desconegut"
+        "UNKNOWN_GENRE": "Gènere desconegut",
+        "CD_RIP": "Extracció de CD",
+        "CD_RIP_ERROR": "Error en la extracción del CD",
+        "CD_RIP_SUCCESS": "El CD s'ha copiat correctament",
+        "RIP_FAILED": "Ha fallat el procés de còpia",
+        "TARGET_HARD_DRIVE_NOT_FOUND": "No s'ha trobat el disc dur",
+        "RIP_LOCATION_MESSAGE": "Disc de destinació dels fitxers de música",
+        "CD_RIP_ERROR_MESSAGE": "No es pot iniciar la còpia del CD "
     },
     "VOLUMIO_CLOUD_QOBUZ": {
         "QOBUZ_TRACKS": "Pistes de QOBUZ",
@@ -489,7 +498,9 @@
         "DISCOVER": "Descobriments",
         "PRESS_AWARDS": "Premis de la premsa",
         "SELECTED_BY_QOBUZ": "Seleccionat per QOBUZ",
-        "SELECTED_BY_THE_MEDIA": "Seleccionat pels mitjans de comunicació"
+        "SELECTED_BY_THE_MEDIA": "Seleccionat pels mitjans de comunicació",
+        "FEATURED_LAST_CREATED": "Darrera creació",
+        "FEATURED_EDITOR_PICKS": "Selecció de l'editor"
     },
     "PLUGIN_TIDAL": {
         "SECTION_ACCOUNT_BETA": "TIDAL (Complement experimental)",
@@ -504,6 +515,7 @@
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
         "QOBUZ_FREE_TRIAL": "Prova gratuïta",
         "QOBUZ_CONFIG_TITLE": "Configuració de QOBUZ",
-        "QOBUZ_CONNECT_DESC": "Accedeix a la música de QOBUZ a Volumio."
+        "QOBUZ_CONNECT_DESC": "Accedeix a la música de QOBUZ a Volumio.",
+        "QOBUZ_FREE_TRIAL_DESC": "Aconsegueix 1 mes de prova gratuïta de QOBUZ HIFI (per valor de 19,99 €)"
     }
 }
