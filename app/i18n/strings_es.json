@@ -494,7 +494,8 @@
         "PRESS_AWARDS": "Premios de la prensa",
         "SELECTED_BY_QOBUZ": "Seleccionado por QOBUZ",
         "NEW_RELEASES": "Nuevos lanzamientos",
-        "SELECTED_BY_THE_MEDIA": "Seleccionado por los medios"
+        "SELECTED_BY_THE_MEDIA": "Seleccionado por los medios",
+        "FEATURED_LAST_CREATED": "Última creación"
     },
     "PLUGIN_CDCONTROLLER": {
         "UNKNOWN_ARTIST": "Artista desconocido",
