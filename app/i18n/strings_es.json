@@ -459,7 +459,7 @@
         "TIDAL_TRACKS": "Pistas de TIDAL",
         "TIDAL_PLAYLISTS": "Listas de reproducción de TIDAL",
         "TIDAL_EPSINGLES": "EP & Singles de TIDAL",
-        "MIXES": "Mixes y Ràdio",
+        "MIXES": "Mixes & Radio",
         "NEW": "Nuevo",
         "TIDAL_RISING": "TIDAL Rising",
         "GENRES_AND_MOODS": "Géneros y Estados de ánimo",
@@ -495,18 +495,27 @@
         "SELECTED_BY_QOBUZ": "Seleccionado por QOBUZ",
         "NEW_RELEASES": "Nuevos lanzamientos",
         "SELECTED_BY_THE_MEDIA": "Seleccionado por los medios",
-        "FEATURED_LAST_CREATED": "Última creación"
+        "FEATURED_LAST_CREATED": "Última creación",
+        "FEATURED_EDITOR_PICKS": "Selección del editor"
     },
     "PLUGIN_CDCONTROLLER": {
         "UNKNOWN_ARTIST": "Artista desconocido",
         "INTERNAL_MEMORY": "Memoria interna",
         "UNKNOWN_ALBUM": "Álbum desconocido",
-        "UNKNOWN_GENRE": "Género desconocido"
+        "UNKNOWN_GENRE": "Género desconocido",
+        "CD_RIP": "Extracción del CD",
+        "CD_RIP_ERROR": "Error en l'extracció del CD",
+        "CD_RIP_SUCCESS": "El CD se ha copiado correctamente",
+        "RIP_FAILED": "Error en el proceso de copia",
+        "TARGET_HARD_DRIVE_NOT_FOUND": "Disco duro no encontrado",
+        "RIP_LOCATION_MESSAGE": "Disco de destino de los archivos de música",
+        "CD_RIP_ERROR_MESSAGE": "No se puede iniciar la copia del CD "
     },
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "Configuración de QOBUZ",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
         "QOBUZ_CONNECT_DESC": "Accede a la música de QOBUZ en Volumio.",
-        "QOBUZ_FREE_TRIAL": "Prueba gratis"
+        "QOBUZ_FREE_TRIAL": "Prueba gratis",
+        "QOBUZ_FREE_TRIAL_DESC": "Consigue 1 mes de prueba gratuita de QOBUZ HIFI (valorado en 19,99 €)"
     }
 }
