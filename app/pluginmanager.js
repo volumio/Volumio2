@@ -12,6 +12,7 @@ var execSync = require('child_process').execSync;
 var Tail = require('tail').Tail;
 var compareVersions = require('compare-versions');
 var unirest = require('unirest');
+var semver = require('semver');
 
 var arch = '';
 var variant = '';
@@ -768,6 +769,24 @@ PluginManager.prototype.installPlugin = function (url) {
           self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
           return e;
         })
+        .then(self.checkPluginDependencies.bind(self))
+        .then(function (e) {
+          currentMessage = self.coreCommand.getI18nString('PLUGINS.CHECKING_DEPENDENCIES');
+          
+          if(e.message) {
+              currentMessage += ' ' + e.message;
+          }
+          
+          advancedlog = advancedlog + '<br>' + currentMessage;
+          
+          self.pushMessage('installPluginStatus', {'progress': 45, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          
+          if(e.success === 'failed') {
+              return libQ.reject(e.message);
+          } else {
+              return e.folder;      
+          }
+        })
         .then(self.checkPluginDoesntExist.bind(self))
         .then(function (e) {
           currentMessage = self.coreCommand.getI18nString('PLUGINS.CHECKING_DUPLICATE_PLUGIN');
@@ -912,6 +931,24 @@ PluginManager.prototype.updatePlugin = function (data) {
           advancedlog = advancedlog + '<br>' + currentMessage;
           self.pushMessage('installPluginStatus', {'progress': 40, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
           return e;
+        })
+        .then(self.checkPluginDependencies.bind(self))
+        .then(function (e) {
+          currentMessage = self.coreCommand.getI18nString('PLUGINS.CHECKING_DEPENDENCIES');
+          
+          if(e.message) {
+              currentMessage += ' ' + e.message;
+          }
+          
+          advancedlog = advancedlog + '<br>' + currentMessage;
+          
+          self.pushMessage('installPluginStatus', {'progress': 45, 'message': currentMessage, 'title': modaltitle, 'advancedLog': advancedlog});
+          
+          if(e.success === 'failed') {
+              return libQ.reject(e.message);
+          } else {
+              return e.folder;      
+          }
         })
         .then(self.renameFolder.bind(self))
         .then(function (e) {
@@ -1058,6 +1095,71 @@ PluginManager.prototype.unzipPackage = function () {
   });
 
   return defer.promise;
+};
+
+PluginManager.prototype.checkPluginDependencies = function (folder) {
+  var self = this;
+  var pendingResult = libQ.resolve();
+  
+  var result = { success: 'failed', message: 'Plugin failed the dependency check', folder: folder};
+  
+  self.logger.info('Check plugin dependencies');
+
+  var package_json = self.getPackageJson(folder);
+  
+  var nodeCheck = false;
+  var volumioCheck = false;
+  var message = '';
+  if(package_json.engines) {
+    
+    pendingResult = pendingResult
+    .then(() => {
+        if(package_json.engines.node) {
+            nodeCheck = true;
+            var nodeVersion = semver.coerce(process.versions.node);
+            if(!semver.satisfies(nodeVersion, package_json.engines.node)) {
+                message += 'Node version ' + nodeVersion + ' not usable with plugin. ';
+            }
+        }
+    })
+    .then(() => {    
+        if(package_json.engines.volumio) {
+            volumioCheck = true;
+            return self.coreCommand.getSystemVersion()
+                .then(e => {
+                    var volumioVersion = semver.coerce(e.systemversion);
+                    if(!semver.satisfies(volumioVersion, package_json.engines.volumio)) {
+                        message += 'Volumio version ' + volumioVersion + ' not usable with plugin. ';
+                    }
+            });
+        }
+    })
+    .then(() => {
+        if(message) {
+            result.success = 'failed'
+            result.message = message + 'The plugin cannot be installed on this version of Volumio.';
+        } else {
+            if(!nodeCheck) {
+                message += 'The plugin has no node version dependency information. ';
+            }
+            if(!volumioCheck) {
+                message += 'The plugin has no Volumio version dependency information. ';
+            }
+            if(message) {
+                result.success = 'warn';
+                result.message = message + 'The plugin may not work on this version of Volumio';
+            } else {
+                result.success = 'success'
+                result.message = 'The plugin can be used with this version of Volumio';
+            }
+        }
+    });
+  } else {
+      result.success = 'warn';
+      result.message = 'The plugin had no version dependency ranges to check. This plugin may not work with this version of Volumio.';
+  }
+
+  return pendingResult.then(() => { return result });
 };
 
 PluginManager.prototype.renameFolder = function (folder) {

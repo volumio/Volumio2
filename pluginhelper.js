@@ -5,6 +5,7 @@ var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
 var websocket = require('socket.io-client');
 var os = require('os');
+var semver = require('semver');
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -231,6 +232,21 @@ function customize_package(pluginName, path, category) {
         package.name = pluginName.sysName;
         package.volumio_info.prettyName = pluginName.prettyName;
         package.volumio_info.plugin_type = category;
+        
+        var defaultNodeRange = getRange(semver.coerce(process.versions.node));
+        var defaultVolumioRange = getRange(semver.coerce(getVolumioVersion()));
+        
+        var semVerRangeCheck = function(range) {
+            if(range === '' || range === null) {
+                return true;
+            }
+                
+            if(semver.validRange(range) === null){
+                return "The semantic version range is not valid";
+            }
+            return true;
+        };
+        
         questions = [
             {
                 type: 'input',
@@ -255,11 +271,43 @@ function customize_package(pluginName, path, category) {
                     }
                     return true;
                 }
+            },
+            {
+                type: 'input',
+                name: 'nodeVersion',
+                message: 'Supply a semantic version range indicating the node version(s) that your plugin supports',
+                default: defaultNodeRange,
+                validate: semVerRangeCheck
+            },
+            {
+                type: 'input',
+                name: 'volumioVersion',
+                message: 'Supply a semantic version range indicating the volumio version(s) that your plugin supports',
+                default: defaultVolumioRange,
+                validate: semVerRangeCheck
             }
         ];
         inquirer.prompt(questions).then(function (answer) {
             package.author = answer.username;
             package.description = answer.description;
+            
+            var addEngines = false;
+            var engines = {};
+            
+            if(answer.nodeVersion) {
+                addEngines = true;
+                engines.node = answer.nodeVersion;
+            }
+
+            if(answer.volumioVersion) {
+                addEngines = true;
+                engines.volumio = answer.volumioVersion;
+            }
+            
+            if(addEngines) {
+                package.engines = engines;
+            }
+            
             fs.writeJsonSync(path + '/package.json', package, {spaces:'\t'});
             finalizing(path, package);
         });
@@ -267,6 +315,30 @@ function customize_package(pluginName, path, category) {
     catch(e){
         console.log("Error reading package.json " + e);
     }
+}
+
+function getRange(version) {
+    if(semver.valid(version)) {
+        var baseVersion = version.version;
+        var nextVersion = semver.inc(version, 'major');
+        return '>=' + baseVersion + ' <' + nextVersion;
+    }
+    return '';
+}
+
+function getVolumioVersion() {
+
+  var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+  var volumioVersion = null;
+  // console.log(file);
+  var nLines = file.length;
+  var str;
+  for (var l = 0; l < nLines; l++) {
+    if (file[l].match(/VOLUMIO_VERSION/i)) {
+      str = file[l].split('=');
+      return str[1].replace(/\"/gi, '');
+    }
+  }
 }
 
 /**
