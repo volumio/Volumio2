@@ -488,7 +488,8 @@
         "QOBUZ_PLAYLISTS": "Llistes de reproducció de QOBUZ",
         "DISCOVER": "Descobriments",
         "PRESS_AWARDS": "Premis de la premsa",
-        "SELECTED_BY_QOBUZ": "Seleccionat per QOBUZ"
+        "SELECTED_BY_QOBUZ": "Seleccionat per QOBUZ",
+        "SELECTED_BY_THE_MEDIA": "Seleccionat pels mitjans de comunicació"
     },
     "PLUGIN_TIDAL": {
         "SECTION_ACCOUNT_BETA": "TIDAL (Complement experimental)",
