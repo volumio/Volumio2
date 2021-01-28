@@ -493,7 +493,8 @@
         "DISCOVER": "Descubrimientos",
         "PRESS_AWARDS": "Premios de la prensa",
         "SELECTED_BY_QOBUZ": "Seleccionado por QOBUZ",
-        "NEW_RELEASES": "Nuevos lanzamientos"
+        "NEW_RELEASES": "Nuevos lanzamientos",
+        "SELECTED_BY_THE_MEDIA": "Seleccionado por los medios"
     },
     "PLUGIN_CDCONTROLLER": {
         "UNKNOWN_ARTIST": "Artista desconocido",
