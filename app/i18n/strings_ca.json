@@ -125,7 +125,10 @@
         "UPDATING_MUSIC_DB_WAIT_MESSAGE": "S'està escanejant la teva música i la icona a la part inferior esquerra seguirà girant fins que tota la teva biblioteca s'hagi indexat correctament. Atès que el sistema pot respondre pitjor durant aquesta operació, és millor que no l'utilitzis mentre s'indexa la música.",
         "USERNAME": "Nom d'usuari",
         "WITH": "amb",
-        "PLEASE_WAIT": "Si us plau, espera"
+        "PLEASE_WAIT": "Si us plau, espera",
+        "CONNECT": "Connectar",
+        "SEARCH_RESULTS_TITLE": "Nombre de resultats de cerca",
+        "SEARCH_RESULTS_DESC": "Nombre de resultats de cerca desitjat"
     },
     "MAIN_MENU": {
         "ALARM": "Alarma",
@@ -288,7 +291,17 @@
         "VOLUME_CURVE_MODE_DOC": "Natural (logarítmic) és com la majoria de la gent percep les variacions de volum. No ho canviïs llevat que la corba de volum sigui massa pronunciada en el teu sistema",
         "VOLUME_NORMALIZATION": "Normalització de volum",
         "VOLUME_NORMALIZATION_DOC": "Si s'activa, Volumio normalitzarà el volum de les pistes mentre es reprodueixen. Això pot reduir la qualitat del so.",
-        "VOLUME_OPTIONS": "Opcions de volum"
+        "VOLUME_OPTIONS": "Opcions de volum",
+        "SQ_QUALITY_TITLE": "Qualitat del so",
+        "SQ_HIGHEST_POSSIBLE": "La més alta possible",
+        "SQ_MP3_320": "MP3 (320 kbit/s)",
+        "SQ_FLAC_LOSSLESS": "FLAC Lossless",
+        "SQ_LOW": "Baixa",
+        "SQ_HIGH": "Alta",
+        "SQ_LOSSLESS": "Lossless",
+        "SQ_FLAC_HIRES_96": "FLAC alta resolució 24 bit fins a 96 kHz",
+        "SQ_FLAC_HIRES_192": "FLAC alta resolució 24 bit fins a 192 kHz",
+        "SQ_HI_RES": "Alta resolució"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Afegit",
@@ -434,5 +447,62 @@
         "DEVICE_SUCCESSFULLY_CONFIGURED": "S'ha configurat i està llest per reproduir",
         "PLEASE_DONATE": "Si t'agrada Volumio, considera donar. Tu pots marcar la diferència per a aquest projecte!",
         "RUN_FIRST_CONFIG_WIZARD": "Executa l'assistent de primera configuració"
+    },
+    "VOLUMIO_CLOUD_TIDAL": {
+        "EXCLUSIVE": "Exclusiu",
+        "TIDAL_ARTISTS": "Artistes de TIDAL",
+        "MIXES": "Mixes i Ràdio",
+        "GENRES_AND_MOODS": "Gèneres i Estats d'ànim",
+        "MENU_MY_MUSIC": "La meva Música",
+        "MENU_AZ": "A-Z",
+        "MENU_TIDAL": "TIDAL",
+        "MENU_ARTIST": "Artista",
+        "MENU_RELEASEDATE": "Fecha de publicación",
+        "NEW": "Nou",
+        "TOP_20": "Top 20",
+        "TIDAL_ALBUMS": "Àlbums de TIDAL",
+        "TIDAL_TRACKS": "Pistes de TIDAL",
+        "TIDAL_PLAYLISTS": "Llistes de reproducció de TIDAL",
+        "TIDAL_EPSINGLES": "EP & Singles de TIDAL",
+        "TIDAL_RISING": "TIDAL Rising",
+        "RECOMMENDED": "Recomanat",
+        "LOCAL": "Regional (no aplicable a totes les regions)"
+    },
+    "PLUGIN_CDCONTROLLER": {
+        "UNKNOWN_ALBUM": "Àlbum desconegut",
+        "INTERNAL_MEMORY": "Memòria interna",
+        "UNKNOWN_ARTIST": "Artista desconegut",
+        "UNKNOWN_GENRE": "Gènere desconegut"
+    },
+    "VOLUMIO_CLOUD_QOBUZ": {
+        "QOBUZ_TRACKS": "Pistes de QOBUZ",
+        "NEW_RELEASES": "Nous llançaments",
+        "MY_MUSIC": "La meva Música",
+        "MY_ALBUMS": "Els meus Àlbums",
+        "MY_TRACKS": "Les meves Pistes",
+        "MY_ARTISTS": "Els meus Artistes",
+        "MY_PLAYLISTS": "Les meves llistes de reproducció",
+        "MY_PURCHASES": "Les meves Compres",
+        "QOBUZ_ARTISTS": "Artistes de QOBUZ",
+        "QOBUZ_ALBUMS": "Àlbums de QOBUZ",
+        "QOBUZ_PLAYLISTS": "Llistes de reproducció de QOBUZ",
+        "DISCOVER": "Descobriments",
+        "PRESS_AWARDS": "Premis de la premsa",
+        "SELECTED_BY_QOBUZ": "Seleccionat per QOBUZ"
+    },
+    "PLUGIN_TIDAL": {
+        "SECTION_ACCOUNT_BETA": "TIDAL (Complement experimental)",
+        "SECTION_TIDAL_ACCOUNT": "TIDAL",
+        "TIDAL_CONFIG_TITLE": "Configuració de TIDAL",
+        "TIDAL_CONNECT_DESC": "Accedeix a la música de TIDAL a Volumio.",
+        "SAVE_QUALITY_SUCCESS": "Configuració de qualitat desada correctament",
+        "EPSINGLES": "EP & Singles de TIDAL",
+        "MQA_TITLE": "Qualitat Mestra (MQA)"
+    },
+    "PLUGIN_QOBUZ": {
+        "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
+        "QOBUZ_FREE_TRIAL": "Prova gratuïta",
+        "QOBUZ_CONFIG_TITLE": "Configuració de QOBUZ",
+        "QOBUZ_CONNECT_DESC": "Accedeix a la música de QOBUZ a Volumio."
     }
 }
