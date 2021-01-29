@@ -4,12 +4,12 @@ var Q = require('kew');
 var url = require('url');
 var S = require('string');
 var fs = require('fs-extra');
-var uuid = require('node-uuid');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var apiKey = '4cb074e4b8ec4ee9ad3eb37d6f7eb240';
 var diskCache = true;
 var variant = 'none';
+const { v4: uuidv4 } = require('uuid');
 
 var winston = require('winston');
 var logger = winston.createLogger({
@@ -160,7 +160,7 @@ var searchOnline = function (defer, web) {
         if (url != undefined && url != '') {
           var splitted = url.split('.');
           var fileExtension = splitted[splitted.length - 1];
-          var diskFileName = uuid.v4() + '.' + fileExtension;
+          var diskFileName = uuidv4() + '.' + fileExtension;
           var fileName = folder + diskFileName;
 
           // console.log("URL: " + url);
