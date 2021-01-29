@@ -2,7 +2,6 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
-var S = require('string');
 var singleBrowse = false;
 
 module.exports = PlaylistManager;
@@ -689,14 +688,8 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
 
           var uris = [];
           for (var i in data) {
-            var uri;
-            var fullUri = S(data[i].uri);
-
-            if (fullUri.startsWith('music-library')) {
-              uri = fullUri.chompLeft('music-library/').s;
-            } /* else if (fullUri.startsWith('/')) {
-							uri = fullUri.chompLeft('/').s;
-						} */ else uri = data[i].uri;
+            // Remove leading `music-service/` identifier if present
+            var uri = data[i].uri.replace(/^music-library\//, '');
 
             var service;
 

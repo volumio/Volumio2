@@ -7,7 +7,6 @@ var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
 var udev = require('udev');
-var S = require('string');
 var _ = require('underscore');
 var removableMountPoint = '/mnt/';
 var mountPointFile = '/data/configuration/mountPoints';
@@ -346,12 +345,10 @@ ControllerNetworkfs.prototype.addShare = function (data) {
     return defer.promise;
   }
 
-  var nameStr = S(name);
-
   /**
      * Check special characters
      */
-  if (nameStr.contains('/')) {
+  if (name.includes('/')) {
     self.commandRouter.pushToastMessage('warning', self.commandRouter.getI18nString('COMMON.MY_MUSIC'), self.commandRouter.getI18nString('COMMON.ILLEGAL_CHARACTER_/'));
     defer.reject(new Error('Share names cannot contain /'));
     return defer.promise;

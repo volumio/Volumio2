@@ -53,7 +53,6 @@
     "require-from-string": "^2.0.2",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.4",
-    "string": "^3.3.3",
     "tail": "^1.2.2",
     "timsort": "^0.3.0",
     "udev": "https://github.com/volumio/node-udev.git",

@@ -3,7 +3,8 @@
 var fs = require('fs-extra');
 var HashMap = require('hashmap');
 var libFast = require('fast.js');
-var S = require('string');
+// var S = require('string');
+const path = require('path');
 var vconf = require('v-conf');
 var libQ = require('kew');
 var http = require('http');
@@ -678,11 +679,8 @@ PluginManager.prototype.getPlugin = function (category, name) {
  * @returns {string}
  */
 PluginManager.prototype.getConfigurationFile = function (context, fileName) {
-  var self = this;
-  return S(self.configurationFolder).ensureRight('/').s +
-		S(context.getEnvVariable('category')).ensureRight('/').s +
-		S(context.getEnvVariable('name')).ensureRight('/').s +
-		fileName;
+  return path.join(this.configurationFolder, context.getEnvVariable('category'),
+    context.getEnvVariable('name'), fileName);
 };
 
 /**
@@ -692,11 +690,7 @@ PluginManager.prototype.getConfigurationFile = function (context, fileName) {
  * @returns {string}
  */
 PluginManager.prototype.getPluginConfigurationFile = function (category, name, fileName) {
-	var self = this;
-	return S(self.configurationFolder).ensureRight('/').s +
-	S(category).ensureRight('/').s +
-	S(name).ensureRight('/').s +
-	fileName;
+  return path.join(this.configurationFolder, category, name, fileName);
 };
 
 PluginManager.prototype.checkRequiredConfigurationParameters = function (requiredFile, configFile) {

@@ -2,7 +2,6 @@
 
 var Q = require('kew');
 var url = require('url');
-var S = require('string');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
@@ -10,6 +9,7 @@ var apiKey = '4cb074e4b8ec4ee9ad3eb37d6f7eb240';
 var diskCache = true;
 var variant = 'none';
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
 var winston = require('winston');
 var logger = winston.createLogger({
@@ -36,16 +36,16 @@ var mountPersonalFolder = '/data/albumart/personal';
 
 var setFolder = function (newFolder) {
   // logger.info("Setting folder " + newFolder);
-  albumArtRootFolder = S(newFolder).ensureRight('/').s + 'web/';
+  albumArtRootFolder = path.join(newFolder, 'web/');
   fs.ensureDirSync(albumArtRootFolder);
 
-  mountAlbumartFolder = S(newFolder).ensureRight('/').s + 'folder/';
+  mountAlbumartFolder = path.join(newFolder, 'folder/');
   fs.ensureDirSync(mountAlbumartFolder);
 
-  mountMetadataFolder = S(newFolder).ensureRight('/').s + 'metadata/';
+  mountMetadataFolder = path.join(newFolder, 'metadata/');
   fs.ensureDirSync(mountMetadataFolder);
 
-  mountPersonalFolder = S(newFolder).ensureRight('/').s + 'personal/';
+  mountPersonalFolder = path.join(newFolder, 'personal/');
   fs.ensureDirSync(mountPersonalFolder);
 };
 
@@ -247,11 +247,11 @@ var searchInFolder = function (defer, path, web, meta) {
     }
 
     var files = fs.readdirSync(coverFolder);
+    const extensions = ['.png', '.jpg', '.jpeg']; 
     for (var j in files) {
-      var fileName = S(files[j]);
-
-      if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.JPG') || fileName.endsWith('.PNG') || fileName.endsWith('.jpeg') || fileName.endsWith('.JPEG')) {
-        var coverFile = coverFolder + '/' + fileName.s;
+      var fileName = files[j];
+      if (extensions.includes(path.extname(fileName).toLowerCase())) {
+        var coverFile = path.join(coverFolder,fileName);
         var size = fs.statSync(coverFile).size;
         // Limit the size of local arts to about 5MB
         if (size < 5000000) {
@@ -276,8 +276,8 @@ var searchMeta = function (defer, coverFolder, web, meta) {
     }
 
     var middleFileIndex = Math.floor(files.length / 2);
-    var fileName = coverFolder + '/' + S(files[middleFileIndex]);
-
+    var fileName = path.join(coverFolder,files[middleFileIndex]);
+    
     fs.stat(fileName, function (err, stats) {
       if (err) {
         return searchOnline(defer, web);
