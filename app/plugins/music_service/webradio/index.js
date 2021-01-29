@@ -359,13 +359,15 @@ ControllerWebradio.prototype.listRadioForGenres = function (curUri) {
           } else if (children[i].name() === 'station') {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
+            var bitrate = children[i].attr('br').value();
+
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: '',
-              album: '',
+              artist: bitrate + ' kB/s',
+              album: ' ',
               icon: 'fa fa-microphone',
               uri: 'http://yp.shoutcast.com' + '/sbin/tunein-station.m3u' + '?id=' + id
             };
@@ -432,13 +434,14 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
           } else if (children[i].name() === 'station') {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
+            var bitrate = children[i].attr('br').value();
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: '',
-              album: '',
+              artist: bitrate + ' kB/s',
+              album: ' ',
               uri: 'http://yp.shoutcast.com' + base + '?id=' + id
             };
             try {
@@ -696,7 +699,6 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
 
 ControllerWebradio.prototype.getStationsForCountry = function (id, per_page, page, callback) {
   var self = this;
-
   var Request = unirest.get('http://api.dirble.com/v2/countries/' + id + '/stations');
   Request.query({
     token: '8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2',
@@ -795,7 +797,6 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
         }
       }
     };
-
     for (var i in data) {
       var ithdata = data[i];
       var song = {
@@ -962,13 +963,14 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
           } else if (children[i].name() === 'station') {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
+            var bitrate = children[i].attr('br').value();
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: '',
-              album: '',
+              artist: bitrate + ' kB/s',
+              album: ' ',
               uri: 'http://yp.shoutcast.com' + base + '?id=' + id
             };
 
@@ -1110,7 +1112,7 @@ ControllerWebradio.prototype.listSelection = function () {
             type: 'webradio',
             title: station.title,
             artist: '',
-            album: '',
+            album: station.br,
             albumart: thumbnaiEndpoint + station.title + '.jpg',
             uri: station.uri
           };
@@ -1334,7 +1336,6 @@ ControllerWebradio.prototype.parseResults = function (results, category) {
 
   let body = results.body;
   let curList = 0;
-
   for (var i in body) {
     if (body[i].children) {
       // This is a list, parse it properly
@@ -1421,8 +1422,8 @@ ControllerWebradio.prototype.getNavigationItem = function (node, category) {
     service: 'webradio',
     type: servType,
     title: node.text,
-    artist: '',
-    album: '',
+    artist: node.type == "audio" ? node.bitrate + ' kB/s' : '',
+    album: node.type == "audio" ? ' ' : '',
     albumart: albumart,
     icon: icon,
     uri: uri
