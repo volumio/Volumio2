@@ -715,10 +715,13 @@ PlaylistManager.prototype.commonPlayPlaylist = function (folder, name) {
             }
           }
 
-          self.commandRouter.addQueueItems(uris)
+          var firstItem=uris.splice(0,1)
+          self.commandRouter.addQueueItems(firstItem)
             .then(function () {
               self.commandRouter.volumioPlay(0);
-              defer.resolve();
+              self.commandRouter.addQueueItems(uris).then(function() {
+                defer.resolve();
+              })
             })
             .fail(function () {
               defer.reject(new Error());
