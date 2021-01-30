@@ -151,7 +151,8 @@
         "GOTO_DEVICE_LIST": "Ir a la lista Mis dispositivos",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio no está habilitado en este dispositivo",
         "PLAN_REQUIRED": "es necesario para utilizar esta funcionalidad",
-        "UPGRADE_YOUR_PLAN_NOW": "Actualiza tu plan ahora"
+        "UPGRADE_YOUR_PLAN_NOW": "Actualiza tu plan ahora",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio incluye soporte para servicios de streaming como TIDAL, QOBUZ y High Res Audio, así como muchos complementos adicionales. Para obtener acceso completo a ellos, deberás suscribirte a un plan MyVolumio. ¡Ves a www.myvolumio.org para empezar una prueba gratuita!"
     },
     "NETWORK": {
         "AUTOMATIC_IP": "IP dinámica",
@@ -477,7 +478,8 @@
         "SECTION_TIDAL_ACCOUNT": "TIDAL",
         "TIDAL_CONFIG_TITLE": "Configuración de TIDAL",
         "SECTION_ACCOUNT_BETA": "TIDAL (Complemento experimental)",
-        "MQA_DESCR": ""
+        "MQA_DESCR": "MQA se reproducirá en cualquier dispositivo para ofrecer una calidad superior a la de un CD. Cuando se combina con un decodificador MQA, el archivo MQA muestra la grabación maestra original.",
+        "TIDAL_LOGOUT_DESC": "Este dispositivo está conectado a TIDAL. Puede desconectarlo haciendo clic en el botón Cerrar sesión."
     },
     "VOLUMIO_CLOUD_QOBUZ": {
         "MY_ALBUMS": "Mis Álbumes",
@@ -509,13 +511,18 @@
         "RIP_FAILED": "Error en el proceso de copia",
         "TARGET_HARD_DRIVE_NOT_FOUND": "Disco duro no encontrado",
         "RIP_LOCATION_MESSAGE": "Disco de destino de los archivos de música",
-        "CD_RIP_ERROR_MESSAGE": "No se puede iniciar la copia del CD "
+        "CD_RIP_ERROR_MESSAGE": "No se puede iniciar la copia del CD ",
+        "RIP_IN_PROGRESS_MESSAGE": "Este CD se está copiando actualmente y no se puede acceder a él hasta que se haya completado la operación de copia",
+        "RIP_LOCATION_MESSAGE_NO_SPACE": "No hay espacio disponible para copiar, conecta una unidad diferente para guardar loas archivos de música",
+        "CD_RIP_STARTED": "Copia del CD iniciada, esto puede tardar hasta 30 minutos. Se te notificará cuando termine la copia",
+        "RIP_MESSAGE": "Revisa la información del CD y selecciona la ubicación deseada para los archivos de música. Una vez hecho esto, haz clic en Copiar para iniciar la copia de tu CD en formato sin pérdidas. Se te notificará una vez haya finalizado el proceso"
     },
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "Configuración de QOBUZ",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
         "QOBUZ_CONNECT_DESC": "Accede a la música de QOBUZ en Volumio.",
         "QOBUZ_FREE_TRIAL": "Prueba gratis",
-        "QOBUZ_FREE_TRIAL_DESC": "Consigue 1 mes de prueba gratuita de QOBUZ HIFI (valorado en 19,99 €)"
+        "QOBUZ_FREE_TRIAL_DESC": "Consigue 1 mes de prueba gratuita de QOBUZ HIFI (valorado en 19,99 €)",
+        "QOBUZ_LOGOUT_DESC": "Este dispositivo está conectado a QOBUZ. Puede desconectarlo haciendo clic en el botón Cerrar sesión."
     }
 }
