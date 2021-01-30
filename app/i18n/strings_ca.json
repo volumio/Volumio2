@@ -151,7 +151,8 @@
         "GOTO_DEVICE_LIST": "Anar a la llista Els meus dispositius",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio no està habilitat en aquest dispositiu",
         "PLAN_REQUIRED": "és necessari per utilitzar aquesta funcionalitat",
-        "UPGRADE_YOUR_PLAN_NOW": "Actualitza el teu pla ara"
+        "UPGRADE_YOUR_PLAN_NOW": "Actualitza el teu pla ara",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio inclou suport per a serveis de streaming com Tidal, QOBUZ i High Res Audio, així com molts complements addicionals. Per obtenir accés complet a ells, hauràs de subscriure't a un pla MyVolumio. Ves a www.myvolumio.org per començar una prova gratuïta!"
     },
     "NETWORK": {
         "AUTOMATIC_IP": "IP dinàmica",
@@ -481,7 +482,11 @@
         "RIP_FAILED": "Ha fallat el procés de còpia",
         "TARGET_HARD_DRIVE_NOT_FOUND": "No s'ha trobat el disc dur",
         "RIP_LOCATION_MESSAGE": "Disc de destinació dels fitxers de música",
-        "CD_RIP_ERROR_MESSAGE": "No es pot iniciar la còpia del CD "
+        "CD_RIP_ERROR_MESSAGE": "No es pot iniciar la còpia del CD ",
+        "RIP_IN_PROGRESS_MESSAGE": "Aquest CD s'està copiant actualment i no es pot accedir-hi fins que s'hagi completat l'operació de còpia",
+        "RIP_LOCATION_MESSAGE_NO_SPACE": "No hi ha espai disponible per copiar, connecta una unitat diferent per guardar els arxius de música",
+        "CD_RIP_STARTED": "Còpia del CD iniciada, això pot trigar fins a 30 minuts. Se't notificarà quan acabi la còpia",
+        "RIP_MESSAGE": "Revisa la informació de el CD i selecciona la ubicació desitjada per als arxius de música. Un cop fet això, fes clic a Copia per iniciar la còpia del teu CD en format sense pèrdues. Se't notificarà una vegada hagi finalitzat el procés"
     },
     "VOLUMIO_CLOUD_QOBUZ": {
         "QOBUZ_TRACKS": "Pistes de QOBUZ",
@@ -509,13 +514,16 @@
         "TIDAL_CONNECT_DESC": "Accedeix a la música de TIDAL a Volumio.",
         "SAVE_QUALITY_SUCCESS": "Configuració de qualitat desada correctament",
         "EPSINGLES": "EP & Singles de TIDAL",
-        "MQA_TITLE": "Qualitat Mestra (MQA)"
+        "MQA_TITLE": "Qualitat Mestra (MQA)",
+        "TIDAL_LOGOUT_DESC": "Aquest dispositiu està connectat a TIDAL. Pot desconnectar-lo fent clic al botó Tancar sessió.",
+        "MQA_DESCR": "MQA es reproduirà en qualsevol dispositiu per oferir una qualitat superior a la d'un CD. Quan es combina amb un descodificador MQA, l'arxiu MQA mostra la gravació mestra original."
     },
     "PLUGIN_QOBUZ": {
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
         "QOBUZ_FREE_TRIAL": "Prova gratuïta",
         "QOBUZ_CONFIG_TITLE": "Configuració de QOBUZ",
         "QOBUZ_CONNECT_DESC": "Accedeix a la música de QOBUZ a Volumio.",
-        "QOBUZ_FREE_TRIAL_DESC": "Aconsegueix 1 mes de prova gratuïta de QOBUZ HIFI (per valor de 19,99 €)"
+        "QOBUZ_FREE_TRIAL_DESC": "Aconsegueix 1 mes de prova gratuïta de QOBUZ HIFI (per valor de 19,99 €)",
+        "QOBUZ_LOGOUT_DESC": "Aquest dispositiu està connectat a QOBUZ. Pot desconnectar-lo fent clic al botó Tancar sessió."
     }
 }
