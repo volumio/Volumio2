@@ -467,7 +467,8 @@
         "RECOMMENDED": "Recommandés",
         "LOCAL": "Régional (selon région)",
         "EXCLUSIVE": "Exclusif",
-        "TOP_20": "Top 20"
+        "TOP_20": "Top 20",
+        "TIDAL_ARTISTS": "Artistes TIDAL"
     },
     "VOLUMIO_CLOUD_QOBUZ": {
         "MY_MUSIC": "Ma Musique",
@@ -485,7 +486,8 @@
         "SELECTED_BY_THE_MEDIA": "Sélectionné par les médias",
         "NEW_RELEASES": "Nouvelles sorties",
         "FEATURED_LAST_CREATED": "Dernières créations",
-        "FEATURED_EDITOR_PICKS": "Choix éditeur"
+        "FEATURED_EDITOR_PICKS": "Choix éditeur",
+        "QOBUZ_ARTISTS": "Artistes QOBUZ"
     },
     "PLUGIN_CDCONTROLLER": {
         "INTERNAL_MEMORY": "Mémoire interne",
@@ -501,7 +503,8 @@
         "UNKNOWN_ALBUM": "Album inconnu",
         "UNKNOWN_GENRE": "Genre inconnu",
         "RIP_IN_PROGRESS_MESSAGE": "Ce CD est en cours de copie et n'est pas accessible avant la fin de l'opération",
-        "CD_RIP_STARTED": "Rip du CD démarré, cela peut prendre jusqu'a 30min. Vous serez averti à la fin"
+        "CD_RIP_STARTED": "Rip du CD démarré, cela peut prendre jusqu'a 30min. Vous serez averti à la fin",
+        "RIP_MESSAGE": "Vérifiez les informations du CD et sélectionnez l'emplacement souhaité pour les fichiers musicaux. Une fois terminé, cliquez sur Extraire pour commencer à copier votre CD au format sans perte. Vous serez averti une fois le processus terminé"
     },
     "PLUGIN_TIDAL": {
         "TIDAL_CONFIG_TITLE": "Réglages TIDAL",
