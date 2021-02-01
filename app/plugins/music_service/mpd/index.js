@@ -1485,7 +1485,11 @@ ControllerMpd.prototype.search = function (query) {
   var defer = libQ.defer();
   var safeValue = query.value.replace(/"/g, '\\"');
 
-  var commandArtist = 'search artist ' + ' "' + safeValue + '"';
+  if (artistsort) {
+    var commandArtist = 'search albumartist ' + ' "' + safeValue + '"';
+  } else {
+    var commandArtist = 'search artist ' + ' "' + safeValue + '"';
+  }
   var commandAlbum = 'search album ' + ' "' + safeValue + '"';
   var commandSong = 'search title ' + ' "' + safeValue + '"';
   var artistcount = 0;
@@ -1508,7 +1512,11 @@ ControllerMpd.prototype.search = function (query) {
           var line = lines[i];
           if (line.startsWith('file:')) {
             var path = line.slice(6);
+            var albumartist = self.searchFor(lines, i + 1, 'AlbumArtist:');
             var artist = self.searchFor(lines, i + 1, 'Artist:');
+            if (artistsort && albumartist) {
+              artist = albumartist;
+            }
             //* *********Check if artist is already found and exists in 'artistsfound' array
             if (artistsfound.indexOf(artist) < 0) { // Artist is not in 'artistsfound' array
               artistcount++;
@@ -1895,8 +1903,11 @@ ControllerMpd.prototype.explodeUri = function (uri) {
     var safeValue = value.replace(/"/g, '\\"');
 
     if (argument === 'artist') {
-      var commandArtist = 'search artist ' + ' "' + safeValue + '"';
-
+      if (artistsort) {
+        var commandArtist = 'search albumartist ' + ' "' + safeValue + '"';
+      } else {
+        var commandArtist = 'search artist ' + ' "' + safeValue + '"';
+      }
       self.mpdReady.then(function () {
         self.clientMpd.sendCommand(cmd(commandArtist, []), function (err, msg) {
           var subList = [];
@@ -1937,11 +1948,7 @@ ControllerMpd.prototype.explodeUri = function (uri) {
         });
       });
     } else if (argument === 'album') {
-      if (compilation.indexOf(value) > -1) { // artist is in Various Artists array
-        var commandArtist = 'search albumartist ' + ' "' + safeValue + '"';
-      } else {
-        var commandAlbum = 'search album ' + ' "' + safeValue + '"';
-      }
+      var commandAlbum = 'search album ' + ' "' + safeValue + '"';
       self.mpdReady.then(function () {
         self.clientMpd.sendCommand(cmd(commandAlbum, []), function (err, msg) {
           var subList = [];
