@@ -3213,9 +3213,17 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
           var uri;
 
           if (uriBegin === 'artists://') {
-            uri = 'artists://' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album);
+            if (artistsort) {
+              uri = 'artists://' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album);
+            } else {
+              uri = 'artists://' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
+            }
           } else if (uriBegin === 'genres://') {
-            uri = 'genres://' + encodeURIComponent(genre) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album);
+            if (artistsort) {
+              uri = 'genres://' + encodeURIComponent(genre) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album);
+            } else {
+              uri = 'genres://' + encodeURIComponent(genre) + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
+            }
           } else {
             uri = uriBegin + encodeURIComponent(album);
           }
