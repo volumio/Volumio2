@@ -3151,14 +3151,8 @@ ControllerMpd.prototype.listArtist = function (curUri, index, previous, uriBegin
         }
       }
 
-      self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) { // get data (msg)
-        if (msg == '') { // If there is no data (msg) get data first, else just parseListAlbum
-          self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {
-            self.parseListAlbum(err, msg, defer, response, uriBegin, VA);
-          });
-        } else {
-          self.parseListAlbum(err, msg, defer, response, uriBegin, VA);
-        }
+      self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {
+        self.parseListAlbum(err, msg, defer, response, uriBegin, VA);
       });
     });
 
