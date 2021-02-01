@@ -1937,7 +1937,7 @@ ControllerMpd.prototype.explodeUri = function (uri) {
                   tracknumber: 0,
                   albumart: self.getAlbumArt({artist: albumartist, album: album}, uri),
                   duration: time,
-                  trackType: 'mp3'
+                  trackType: path.split('.').pop()
                 });
               }
             }
