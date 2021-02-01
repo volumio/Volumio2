@@ -3363,68 +3363,59 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 
               if (artistsort) { // for albumArtist
 
-                if (albums.indexOf(album) === -1) {
+                if (album && albums.indexOf(album) === -1) {
                   albums.push(album);
                   albumsArt.push(albumart);
-
-                  if (album !== '') {
-                    response.navigation.lists[0].items.push({
-                      service: 'mpd',
-                      type: 'folder',
-                      title: album,
-                      artist: albumartist,
-                      albumart: albumart,
-                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album)});
-                  }
+                  response.navigation.lists[0].items.push({
+                    service: 'mpd',
+                    type: 'folder',
+                    title: album,
+                    artist: albumartist,
+                    albumart: albumart,
+                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album)
+                  });
                 }
 
-                if (artists.indexOf(albumartist) === -1) {
+                if (albumartist && artists.indexOf(albumartist) === -1) {
                   artists.push(albumartist);
                   artistArt.push();
-
-                  if (albumartist !== '') {
-                    response.navigation.lists[1].items.push({
-                      service: 'mpd',
-                      type: 'folder',
-                      title: albumartist,
-                      albumart: self.getAlbumArt({artist: albumartist}, undefined, 'users'),
-                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist)
-                    });
-                  }
+                  response.navigation.lists[1].items.push({
+                    service: 'mpd',
+                    type: 'folder',
+                    title: albumartist,
+                    albumart: self.getAlbumArt({artist: albumartist}, undefined, 'users'),
+                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(albumartist)
+                  });
                 }
 
               } else { // for artist
 
-                if (albums.indexOf(album) === -1) {
+                if (album && albums.indexOf(album) === -1) {
                   albums.push(album);
                   albumsArt.push(albumart);
-
-                  if (album !== '') {
-                    response.navigation.lists[0].items.push({
-                      service: 'mpd',
-                      type: 'folder',
-                      title: album,
-                      artist: albumartist,
-                      albumart: albumart,
-                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album)});
-                  }
+                  response.navigation.lists[0].items.push({
+                    service: 'mpd',
+                    type: 'folder',
+                    title: album,
+                    artist: albumartist,
+                    albumart: albumart,
+                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album)
+                  });
                 }
 
-                if (artists.indexOf(artist) === -1) {
+                if (artist && artists.indexOf(artist) === -1) {
                   artists.push(artist);
                   artistArt.push();
-
-                  if (artist !== '') {
-                    response.navigation.lists[1].items.push({
-                      service: 'mpd',
-                      type: 'folder',
-                      title: artist,
-                      albumart: self.getAlbumArt({artist: artist}, undefined, 'users'),
-                      uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist)});
-                  }
+                  response.navigation.lists[1].items.push({
+                    service: 'mpd',
+                    type: 'folder',
+                    title: artist,
+                    albumart: self.getAlbumArt({artist: artist}, undefined, 'users'),
+                    uri: 'genres://' + encodeURIComponent(genreName) + '/' + encodeURIComponent(artist)
+                  });
                 }
-              }
 
+              }
             }
           }
 
