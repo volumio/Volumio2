@@ -3504,7 +3504,7 @@ ControllerMpd.prototype.prefetch = function (trackBlock) {
 
 ControllerMpd.prototype.goto = function (data) {
   if (data.type == 'artist') {
-    return this.listArtist('artists://' + encodeURIComponent(data.value), 2, '', 'albums://' + encodeURIComponent(data.value) + '/');
+    return this.listArtist('artists://' + encodeURIComponent(data.value), 2, '', 'artists://' + encodeURIComponent(data.value) + '/');
   } else if (data.type == 'album') {
     return this.listAlbumSongs('albums://' + encodeURIComponent(data.artist) + '/' + encodeURIComponent(data.album), 2, 'albums://' + encodeURIComponent(data.artist) + '/');
   }
