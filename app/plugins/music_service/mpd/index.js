@@ -3226,7 +3226,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
               type: 'folder',
               title: album,
               artist: albumartist,
-              albumart: self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path), 'dot-circle-o'),
+              albumart: albumart,
               uri: uri
             });
         }
