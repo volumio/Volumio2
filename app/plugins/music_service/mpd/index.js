@@ -3230,14 +3230,14 @@ ControllerMpd.prototype.listArtist = function (curUri, index, previous, uriBegin
       }
 
       self.clientMpd.sendCommand(cmd(findartist, []), function (err, msg) {
-        self.parseListAlbum(err, msg, defer, response, uriBegin, VA);
+        self.parseListAlbum(err, msg, defer, response, curUri, VA);
       });
     });
 
   return defer.promise;
 };
 
-ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, uriBegin, VA) {
+ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, uri, VA) {
   var self = this;
   var list = [];
   var albums = [], albumarts = [];
@@ -3282,24 +3282,6 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
           albums.push(album + albumartist);
           albumarts.push();
 
-          var uri;
-
-          if (uriBegin === 'artists://') {
-            if (artistsort) {
-              uri = 'artists://' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album);
-            } else {
-              uri = 'artists://' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
-            }
-          } else if (uriBegin === 'genres://') {
-            if (artistsort) {
-              uri = 'genres://' + encodeURIComponent(genre) + '/' + encodeURIComponent(albumartist) + '/' + encodeURIComponent(album);
-            } else {
-              uri = 'genres://' + encodeURIComponent(genre) + '/' + encodeURIComponent(artist) + '/' + encodeURIComponent(album);
-            }
-          } else {
-            uri = uriBegin + encodeURIComponent(album);
-          }
-
           response.navigation.lists[0].items.push(
             {
               service: 'mpd',
@@ -3307,7 +3289,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
               title: album,
               artist: albumartist,
               albumart: albumart,
-              uri: uri
+              uri: uri + '/' + encodeURIComponent(album)
             });
         }
       }
