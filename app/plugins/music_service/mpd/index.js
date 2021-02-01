@@ -2808,29 +2808,34 @@ ControllerMpd.prototype.listAlbums = function (ui) {
               var path = line.slice(6);
               var albumName = self.searchFor(lines, i + 1, 'Album:');
               var albumYear = self.searchFor(lines, i + 1, 'Date:');
-              var artistName = self.searchFor(lines, i + 1, 'AlbumArtist:');
-
+              var albumartistName = self.searchFor(lines, i + 1, 'AlbumArtist:');
+              var artistName = self.searchFor(lines, i + 1, 'Artist:');
               // This causes all orphaned tracks (tracks without an album) in the Albums view to be
               //  grouped into a single dummy-album, rather than creating one such dummy-album per artist.
-              var albumId = albumName + artistName;
+              var albumId = albumName + albumartistName;
               if (!albumName) {
                 albumId = '';
                 albumName = '';
-                artistName = '*';
+                albumartistName = '*';
               }
               // Check if album and artist combination is already found and exists in 'albumsfound' array (Allows for duplicate album names)
               if (albumsfound.indexOf(albumId) < 0) { // Album/Artist is not in 'albumsfound' array
                 albumsfound.push(albumId);
+                // Get correct album art from path- only download if not existent
+                if (!albumartistName) {
+                  // artistsort
+                  var albumart = self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path), 'dot-circle-o');
+                } else {
+                  var albumart = self.getAlbumArt({artist: albumartistName, album: albumName}, self.getParentFolder('/mnt/' + path), 'dot-circle-o');
+                }
                 var album = {
                   service: 'mpd',
                   type: 'folder',
                   title: albumName,
-                  artist: artistName,
+                  artist: albumartistName,
                   year: albumYear,
-                  album: '',
-                  uri: 'albums://' + encodeURIComponent(artistName) + '/' + encodeURIComponent(albumName),
-                  // Get correct album art from path- only download if not existent
-                  albumart: self.getAlbumArt({artist: artistName, album: albumName}, self.getParentFolder('/mnt/' + path), 'dot-circle-o')
+                  uri: 'albums://' + encodeURIComponent(albumartistName) + '/' + encodeURIComponent(albumName),
+                  albumart: albumart
                 };
                 response.navigation.lists[0].items.push(album);
               }
@@ -3025,6 +3030,7 @@ ControllerMpd.prototype.listAlbums = function (ui) {
    var albumartist ='';
    var album = '';
    var albumart = '';
+   var artistsfound = [];
 
    var lines = msg.split('\n');
    for (var i = 0; i < lines.length; i++) {
@@ -3035,7 +3041,6 @@ ControllerMpd.prototype.listAlbums = function (ui) {
        album = self.searchFor(lines, i + 1, 'Album:');
        year = self.searchFor(lines, i + 1, 'Date:');
        genre = self.searchFor(lines, i + 1, 'Genre:');
-       albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path), 'dot-circle-o');
        var artist = self.searchFor(lines, i + 1, 'Artist:') || albumartist;
        var title = self.searchFor(lines, i + 1, 'Title:');
        var track = self.searchFor(lines, i + 1, 'Track:');
@@ -3044,6 +3049,11 @@ ControllerMpd.prototype.listAlbums = function (ui) {
        duration = duration + time;
        var trackType = path.split('.').pop();
        albumTrackType = trackType;
+
+       // artistsort
+       if (artistsfound.indexOf(artist) < 0) { // Artist is not in 'artistsfound' array
+         artistsfound.push(artist);
+       }
 
        response.navigation.lists[0].items.push({
          uri: 'music-library/' + path,
@@ -3065,6 +3075,13 @@ ControllerMpd.prototype.listAlbums = function (ui) {
        durationseconds = '0' + durationseconds;
      }
      duration = durationminutes + ':' + durationseconds;
+   }
+   if (albumartist) {
+     albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path), 'dot-circle-o');
+   } else if (artistsfound.length === 1) {
+     albumart = self.getAlbumArt({artist: artistsfound[0], album: album}, self.getParentFolder(path), 'dot-circle-o');
+   } else {
+     albumart = self.getAlbumArt({artist: undefined, album: album}, self.getParentFolder(path), 'dot-circle-o');
    }
    var isOrphanAlbum = (uri === 'albums://*/');
    response.navigation.info = {
@@ -3239,12 +3256,11 @@ ControllerMpd.prototype.listArtist = function (curUri, index, previous, uriBegin
 
 ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, uri, VA) {
   var self = this;
-  var list = [];
-  var albums = [], albumarts = [];
+  var albums = [];
   if (msg) {
     var path;
-    var name;
     var lines = msg.split('\n');
+    var albumart;
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
@@ -3262,25 +3278,15 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
         var title = self.searchFor(lines, i + 1, 'Title:');
         var track = self.searchFor(lines, i + 1, 'Track:');
         title = self.displayTrackTitle(path, title, track);
-        var albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path), 'dot-circle-o');
-
-        response.navigation.lists[1].items.push({
-          service: 'mpd',
-          type: 'song',
-          title: title,
-          artist: artist,
-          album: album,
-          year: year,
-          albumart: albumart,
-          uri: 'music-library/' + path
-        });
 
         // The first expression in the following "if" statement prevents dummy-albums from being
         //  created for orphaned tracks (tracks without an album). Such dummy-albums aren't required,
         //  as orphaned tracks remain accessible from the tracks-list.
-        if (album !== '' && albums.indexOf(album + albumartist) === -1) {
+        if (!album) {
+          albumart = self.getAlbumArt({artist: undefined, album: undefined}, self.getParentFolder(path), 'dot-circle-o');
+        } else if (albums.indexOf(album + albumartist) === -1) {
           albums.push(album + albumartist);
-          albumarts.push();
+          albumart = self.getAlbumArt({artist: (albumartist || artist), album: album}, self.getParentFolder(path), 'dot-circle-o');
 
           response.navigation.lists[0].items.push(
             {
@@ -3292,6 +3298,17 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
               uri: uri + '/' + encodeURIComponent(album)
             });
         }
+
+        response.navigation.lists[1].items.push({
+          service: 'mpd',
+          type: 'song',
+          title: title,
+          artist: artist,
+          album: album,
+          year: year,
+          albumart: albumart,
+          uri: 'music-library/' + path
+        });
       }
     }
   } else {
@@ -3421,12 +3438,12 @@ ControllerMpd.prototype.listGenre = function (curUri) {
               var title = self.searchFor(lines, i + 1, 'Title:');
               var track = self.searchFor(lines, i + 1, 'Track:');
               title = self.displayTrackTitle(path, title, track);
-              var albumart = self.getAlbumArt({artist: albumartist, album: album}, self.getParentFolder(path), 'dot-circle-o');
 
               if (artistsort) { // for albumArtist
 
-                if (album && albums.indexOf(album) === -1) {
-                  albums.push(album);
+                if (album && albums.indexOf(album + albumartist) === -1) {
+                  albums.push(album + albumartist);
+                  var albumart = self.getAlbumArt({artist: (albumartist || artist), album: album}, self.getParentFolder(path), 'dot-circle-o');
                   albumsArt.push(albumart);
                   response.navigation.lists[0].items.push({
                     service: 'mpd',
@@ -3452,8 +3469,9 @@ ControllerMpd.prototype.listGenre = function (curUri) {
 
               } else { // for artist
 
-                if (album && albums.indexOf(album) === -1) {
-                  albums.push(album);
+                if (album && albums.indexOf(album + albumartist) === -1) {
+                  albums.push(album + albumartist);
+                  var albumart = self.getAlbumArt({artist: (albumartist || artist), album: album}, self.getParentFolder(path), 'dot-circle-o');
                   albumsArt.push(albumart);
                   response.navigation.lists[0].items.push({
                     service: 'mpd',
