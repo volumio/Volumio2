@@ -3180,7 +3180,7 @@ ControllerMpd.prototype.parseListAlbum = function (err, msg, defer, response, ur
         var path = line.slice(6);
         var albumartist = self.searchFor(lines, i + 1, 'AlbumArtist:');
         if (VA === 1) {
-          var artist = albumArtist;
+          var artist = albumartist;
         } else {
           var artist = self.searchFor(lines, i + 1, 'Artist:') || albumartist;
         }
