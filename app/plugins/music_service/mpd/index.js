@@ -2839,6 +2839,12 @@ ControllerMpd.prototype.listAlbums = function (ui) {
               }
             }
           }
+          // Sort album items
+          response.navigation.lists[0].items.sort((a, b) => {
+            let la = a.title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\w]/ug, '').toUpperCase();
+            let lb = b.title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\w]/ug, '').toUpperCase();
+            return (la > lb ? 1 : (la < lb ? -1 : 0));
+          });
           // Save response in albumList cache for future use
           memoryCache.set('cacheAlbumList', response);
           if (ui) {
