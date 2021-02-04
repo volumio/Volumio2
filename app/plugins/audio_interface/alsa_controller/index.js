@@ -75,7 +75,7 @@ ControllerAlsa.prototype.onVolumioStart = function () {
 	  self.config.set('outputdevicename', outputdevicecard.name);
 	  self.config.set('outputdevice', outputdevicecard.id);
 	} else {
-	  self.looger.warn('Unable to locate the audio output device ' + outputdevicename + '. Please configure a valid output device.');
+	  self.logger.warn('Unable to locate the audio output device ' + outputdevicename + '. Please configure a valid output device.');
 	}
 	
     
