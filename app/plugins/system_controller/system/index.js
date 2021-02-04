@@ -47,10 +47,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
   process.env.ADVANCED_SETTINGS_MODE = this.config.get('advanced_settings_mode', true);
 
-  self.deviceDetect();
-  self.callHome();
-
-  return libQ.resolve();
+  return libQ.all(self.deviceDetect(), self.callHome());
 };
 
 ControllerSystem.prototype.onStop = function () {
@@ -189,7 +186,7 @@ ControllerSystem.prototype.setConf = function (varName, varValue) {
   var defer = libQ.defer();
 
   self.config.set(varName, varValue);
-  if (varName = 'player_name') {
+  if (varName === 'player_name') {
     var player_name = varValue;
 
     for (var i in self.callbacks) {
@@ -523,24 +520,34 @@ ControllerSystem.prototype.deviceDetect = function (data) {
   info.then(function (infos) {
     if (infos != undefined && infos.hardware != undefined && infos.hardware === 'x86') {
       device = 'x86';
-      defer.resolve(device);
       self.deviceCheck(device);
+      defer.resolve(device);
     } else {
       exec('cat /proc/cpuinfo | grep Hardware', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
         if (error !== null) {
           self.logger.info('Cannot read proc/cpuinfo: ' + error);
+          defer.resolve('unknown');
         } else {
           var hardwareLine = stdout.split(':');
           var cpuidparam = hardwareLine[1].replace(/\s/g, '');
-          var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'), 'utf8', {throws: false});
+          var deviceslist = fs.readJson(('/volumio/app/plugins/system_controller/system/devices.json'), 
+          { encoding: 'utf8', throws: false },
+          function (err, deviceslist) {
+            if(deviceslist && deviceslist.devices) {
+              for (var i = 0; i < deviceslist.devices.length; i++) {
+                if (deviceslist.devices[i].cpuid == cpuidparam) {
+                  device = deviceslist.devices[i].name;
+                  self.deviceCheck(device);
+                  defer.resolve(device);
+                  return;
+                }
+              }
+              defer.resolve('unknown');
+            } else {
+              defer.resolve('unknown');
+            } 
+          });
           // self.logger.info('CPU ID ::'+cpuidparam+'::');
-          for (var i = 0; i < deviceslist.devices.length; i++) {
-            if (deviceslist.devices[i].cpuid == cpuidparam) {
-              defer.resolve(deviceslist.devices[i].name);
-              device = deviceslist.devices[i].name;
-              self.deviceCheck(device);
-            }
-          }
         }
       });
     }
@@ -566,33 +573,45 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 ControllerSystem.prototype.callHome = function () {
   var self = this;
 
-  try {
-    var macaddr = fs.readFileSync('/sys/class/net/eth0/address', 'utf8');
-    var anonid = macaddr.toString().replace(':', '');
-  } catch (e) {
-    console.log(e);
-    var anonid = self.config.get('uuid');
-  }
-  var md5 = crypto.createHash('md5').update(anonid).digest('hex');
-  var info = self.getSystemVersion();
-  info.then(function (infos) {
-    if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
-      console.log('Volumio Calling Home');
-      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org:7070/downloader-v1/track-device',
-        function (error, stdout, stderr) {
-          if (error !== null) {
-            if (calltrials < 3) {
-              setTimeout(function () {
-                self.logger.info('Cannot call home: ' + error + ' retrying in 5 seconds, trial ' + calltrials);
-                calltrials++;
-                self.callHome();
-              }, 10000);
-            }
-          } else self.logger.info('Volumio called home');
-        });
+  var defer = libQ.defer();
+
+  fs.readFile('/sys/class/net/eth0/address', 'utf8', function (err, macaddr) {
+    if(err) {
+      if(err.code === 'ENOENT') {
+        console.log('No eth0 device found - this device may be wifi only');
+      } else {
+        console.log(err);
+      }
+      defer.resolve(self.config.get('uuid'));
     } else {
-      self.logger.info('Cannot retrieve data for calling home');
+      defer.resolve(macaddr.toString().replace(':', ''));
     }
+  });
+  
+  var info = self.getSystemVersion();
+
+  return defer.then(function (anonid) {
+    var md5 = crypto.createHash('md5').update(anonid).digest('hex');
+  
+    return info.then(function (infos) {
+      if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
+        console.log('Volumio Calling Home');
+        exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org:7070/downloader-v1/track-device',
+          function (error, stdout, stderr) {
+            if (error !== null) {
+              if (calltrials < 3) {
+                setTimeout(function () {
+                  self.logger.info('Cannot call home: ' + error + ' retrying in 5 seconds, trial ' + calltrials);
+                  calltrials++;
+                  self.callHome();
+                }, 10000);
+              }
+            } else self.logger.info('Volumio called home');
+          });
+      } else {
+        self.logger.info('Cannot retrieve data for calling home');
+      }
+    });
   });
 };
 
