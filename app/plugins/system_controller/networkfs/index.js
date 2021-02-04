@@ -38,14 +38,14 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
   var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   config.loadFile(configFile);
 
-  self.initShares();
+  var promise = self.initShares();
   if (process.env.NODE_MOUNT_HANDLER === 'true') {
     self.initUdevWatcher();
   }
   var boundMethod = self.onPlayerNameChanged.bind(self);
   self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
-  return libQ.resolve();
+  return promise;
 };
 
 ControllerNetworkfs.prototype.languageCallback = function (data) {
@@ -157,14 +157,16 @@ ControllerNetworkfs.prototype.setAdditionalConf = function () {
 
 ControllerNetworkfs.prototype.initShares = function () {
   var self = this;
-
+  var deferList = [];
+  
   var keys = config.getKeys('NasMounts');
   for (var i in keys) {
     var key = keys[i];
     if (key !== 'mountedFolders') {
-      self.mountShare({init: true, key: key});
+      deferList.push(self.mountShare({init: true, key: key}));
     }
   }
+  return libQ.all(deferList);
 };
 
 ControllerNetworkfs.prototype.mountShare = function (data) {

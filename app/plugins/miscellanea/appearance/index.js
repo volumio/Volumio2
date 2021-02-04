@@ -36,9 +36,7 @@ volumioAppearance.prototype.onVolumioStart = function () {
   config.loadFile(self.configFile);
 
   this.commandRouter.sharedVars.addConfigValue('language_code', 'string', config.get('language_code', 'en'));
-  self.createThumbnailPath();
-
-  return libQ.resolve();
+  return self.createThumbnailPath();
 };
 
 volumioAppearance.prototype.onStart = function () {
@@ -213,61 +211,75 @@ volumioAppearance.prototype.capitalize = function () {
 
 volumioAppearance.prototype.generateThumbnails = function () {
   var self = this;
-  var defer = libQ.defer();
-  fs.readdir(backgroundPath, function (err, files) {
-    if (err) {
-      console.log(err);
-    }
-    // console.log(files)
-    // console.log('Found '+ files.length + ' images')
-    var numberfile = 0;
-    files.forEach(function (f) {
-      numberfile++;
-      if (f.indexOf('thumbnail-') >= 0) {
-      } else {
-        // console.log('Processing file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f);
-        try {
-          fs.accessSync(backgroundPath + '/thumbnail-' + f, fs.F_OK);
-          // console.log('Thumbnail for file '+ numberfile + ' : '+ backgroundPath+'/thumbnail-'+f+ ' exists');
-        } catch (e) {
-          console.log('Creating Thumbnail for file ' + numberfile + ' : ' + backgroundPath + '/thumbnail-' + f);
-
-          Jimp.read(backgroundPath + '/' + f).then(function (image) {
-            image.resize(300, 200)
+  
+  return libQ.nfcall(fs.readdir, backgroundPath)
+    .then((files) => {
+      var defers = [];
+      var map = {};
+    
+      for(var i = 0; i < files.length; i++) {
+        map[files[i]] = true;
+      }
+      
+      for(var i = 0; i < files.length; i++) {
+        if(files[i].indexOf('thumbnail-') !== 0 && !map['thumbnail-' + files[i]]) {
+          console.log('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
+          let defer = libQ.defer();
+          defers.push(defer);
+          Jimp.read(backgroundPath + '/' + f)
+            .then(function (image) {
+              image.resize(300, 200)
               .quality(60)
               .write(backgroundPath + '/thumbnail-' + f);
-          }).catch(function (err) {
-            console.error('Failed to create thumbnail :' + err);
-          });
+            })
+            .catch(function (err) {
+              console.error('Failed to create thumbnail :' + err);
+            })
+            .then(function() { defer.resolve(); });
         }
       }
-      if (numberfile === files.length) {
-        var background = config.get('background_title');
-        if (background === 'Initial') {
-          self.selectRandomBacground();
-        }
-        defer.resolve('Ok');
+      return libQ.all(defers);
+    })
+    .fail(console.log)
+    .then(() => {
+      var background = config.get('background_title');
+      if (background === 'Initial') {
+        self.selectRandomBacground();
       }
+      return 'Ok';
     });
-  });
-  return defer.promise;
 };
 
 volumioAppearance.prototype.createThumbnailPath = function () {
   var self = this;
-
-  try {
-    fs.statSync(backgroundPath);
-  } catch (e) {
-    fs.mkdirSync(backgroundPath);
-  }
-  fs.copy(__dirname + '/backgrounds', backgroundPath, function (err) {
-    if (err) {
-      console.error(err);
-    } else {
-      self.generateThumbnails();
-    }
-  });
+  
+  // Node.JS recommends creating a directory and handling the "already exists"
+  // rather than doing a stat check.
+  return libQ.nfcall(fs.mkdir, backgroundPath)
+    .fail(function (e) { 
+      if(e.code === 'EEXIST') {
+        return null;
+      } else {
+        throw e;
+      }
+    })
+    .then(function() {
+      // Only copy backgrounds to the data folder if the backgrounds aren't there
+      var pluginFolder = libQ.nfcall(fs.readdir, __dirname + '/backgrounds');
+      var dataFolder = libQ.nfcall(fs.readdir, backgroundPath);
+      
+      return dataFolder.then(function(dataFiles) {
+        pluginFolder.then(function(pluginFiles) {
+          if(pluginFiles.every(function(f) { return dataFiles.includes(f); })) {
+            return null;
+          } else {
+            return libQ.nfcall(fs.copy, __dirname + '/backgrounds', backgroundPath);
+          }
+        });
+      });
+    })
+    .then(self.generateThumbnails.bind(self))
+    .fail(console.error);
 };
 
 volumioAppearance.prototype.setBackgrounds = function (data) {
