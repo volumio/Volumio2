@@ -578,7 +578,7 @@ ControllerSystem.prototype.callHome = function () {
   info.then(function (infos) {
     if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
       console.log('Volumio Calling Home');
-      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org:7070/downloader-v1/track-device',
+      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org/downloader-v1/track-device',
         function (error, stdout, stderr) {
           if (error !== null) {
             if (calltrials < 3) {
