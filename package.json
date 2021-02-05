@@ -41,7 +41,6 @@
     "libxmljs": "^0.19.7",
     "linux-mountutils": "^1.0.2",
     "mdns": "^2.5.1",
-    "modclean": "^2.1.2",
     "moment": "^2.18.1",
     "mqtt": "^3.0.0",
     "music-metadata": "^6.3.7",
