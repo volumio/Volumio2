@@ -33,7 +33,7 @@
     "firebase": "^7.14.1",
     "fs-extra": "^3.0.1",
     "hashmap": "^2.1.0",
-    "html-entities": "^2.1.0",
+    "html-entities": "^1.2.1",
     "inotify": "https://github.com/ashthespy/node-inotify.git",
     "inquirer": "^7.1.0",
     "jimp": "^0.10.2",
