@@ -45,10 +45,6 @@ ControllerI2s.prototype.onVolumioStart = function () {
 
   var bannerPromise = self.forceConfigTxtBannerCompat();
 
-  setTimeout(()=>{
-      self.checkUpdatedI2SNumberonRaspbberyPI();
-  }, 5000)
-
   return libQ.all(startupPromise, bannerPromise);
 };
 
