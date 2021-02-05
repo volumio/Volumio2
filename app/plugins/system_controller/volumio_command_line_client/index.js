@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs-extra');
-var execSync = require('child_process').execSync;
+var exec = require('child_process').exec;
 var libQ = require('kew');
 var os = require('os');
 var path = require('path');
@@ -18,9 +18,7 @@ function CommandLineClient (context) {
 CommandLineClient.prototype.onVolumioStart = function () {
   var self = this;
 
-  self.buildVolumeFiles();
-
-  return libQ.resolve();
+  return self.buildVolumeFiles();
 };
 
 CommandLineClient.prototype.getConfigParam = function (key) {
@@ -44,54 +42,64 @@ CommandLineClient.prototype.buildVolumeFiles = function () {
   var self = this;
 
   var getCommand = 'volume=`/bin/cat /tmp/volume`';
-  try {
-    var getVolumeTemplate = fs.readFileSync(path.join(__dirname, 'getvolume.sh.template'));
-    var setVolumeTemplate = fs.readFileSync(path.join(__dirname, 'setvolume.sh.template'));
-  } catch (e) {}
-  if (getVolumeTemplate && getVolumeTemplate.length && setVolumeTemplate && setVolumeTemplate.length) {
-    try {
-      fs.writeFileSync('/tmp/setvolume', setVolumeTemplate, 'utf8');
-      fs.writeFileSync('/tmp/getvolume', getVolumeTemplate, 'utf8');
-      execSync('/bin/chmod a+x /tmp/getvolume', {uid: 1000, gid: 1000});
-      execSync('/bin/chmod a+x /tmp/setvolume', {uid: 1000, gid: 1000});
-    } catch (e) {
-      console.log('Could not write template files');
-    }
-  } else {
-    self.writeVolumeFiles('/tmp/setvolume');
-    self.writeVolumeFiles('/tmp/getvolume', getCommand);
-  }
+
+  var getVolumeDefer = libQ.nfcall(fs.readFile, path.join(__dirname, 'getvolume.sh.template'))
+    .fail(function (e) { return null; });
+  var setVolumeDefer = libQ.nfcall(fs.readFile, path.join(__dirname, 'setvolume.sh.template'))
+    .fail(function (e) { return null; });
+
+  return getVolumeDefer.then(function(getVolumeTemplate) {
+    return setVolumeDefer.then(function(setVolumeTemplate) {
+      if (getVolumeTemplate && getVolumeTemplate.length && setVolumeTemplate && setVolumeTemplate.length) {
+        return libQ.all(
+          libQ.nfcall(fs.writeFile, '/tmp/setvolume', setVolumeTemplate, 'utf8'),
+          libQ.nfcall(fs.writeFile, '/tmp/getvolume', getVolumeTemplate, 'utf8')
+        )
+        .fail(function() {})
+        .then(function() {
+          return libQ.all(
+            libQ.nfcall(exec, '/bin/chmod a+x /tmp/getvolume', {uid: 1000, gid: 1000}),
+            libQ.nfcall(exec, '/bin/chmod a+x /tmp/setvolume', {uid: 1000, gid: 1000})
+          );
+        });
+      } else {
+        return libQ.all(
+          self.writeVolumeFiles('/tmp/setvolume'),
+          self.writeVolumeFiles('/tmp/getvolume', getCommand)
+        );
+      }
+    }); 
+  });
 };
 
 CommandLineClient.prototype.writeVolumeFiles = function (path, content) {
   var self = this;
 
-  try {
-    var ws = fs.createWriteStream(path);
-    ws.cork();
-    ws.write('#!/bin/bash\n');
-    if (path == '/tmp/setvolume') {
-      ws.write('echo $1\n');
-      ws.write('volume=$1\n');
-      ws.write('if [ "$volume" = "0" ]; then\n');
-      ws.write('volume="1"\n');
-      ws.write('fi\n');
-      ws.write('/usr/local/bin/volumio volume $volume\n');
-      ws.write('echo $volume\n');
-    } else {
-      ws.write(content + '\n');
-      ws.write('if [ "$volume" = "0" ]; then\n');
-      ws.write('echo "1"\n');
-      ws.write('else\n');
-      ws.write('echo $volume\n');
-      ws.write('fi\n');
-    }
-    ws.uncork();
-    ws.end();
-    execSync('/bin/chmod a+x ' + path, {uid: 1000, gid: 1000});
-  } catch (e) {
-    console.log(e);
+  var toWrite = '#!/bin/bash\n';
+  if (path == '/tmp/setvolume') {
+    toWrite += 'echo $1\n';
+    toWrite += 'volume=$1\n';
+    toWrite += 'if [ "$volume" = "0" ]; then\n';
+    toWrite += 'volume="1"\n';
+    toWrite += 'fi\n';
+    toWrite += '/usr/local/bin/volumio volume $volume\n';
+    toWrite += 'echo $volume\n';
+  } else {
+    toWrite += content + '\n';
+    toWrite += 'if [ "$volume" = "0" ]; then\n';
+    toWrite += 'echo "1"\n';
+    toWrite += 'else\n';
+    toWrite += 'echo $volume\n';
+    toWrite += 'fi\n';
   }
+  
+  return libQ.nfcall(fs.writeFile, path, toWrite, 'utf8')
+    .then(function(x) {
+      return libQ.nfcall(exec, '/bin/chmod a+x ' + path, {uid: 1000, gid: 1000});
+    })
+    .fail(function (e) {
+      console.log(e);
+    });
 };
 
 CommandLineClient.prototype.pushState = function (state) {

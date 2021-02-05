@@ -14,4 +14,10 @@ cd /volumio
 echo "Installing node modules"
 npm install --production
 
+
+if [ `npm list -g | grep -c modclean` -eq 0 ]; then
+  echo "Installing Modclean"
+  sudo npm install modclean@2.1.2 -g --unsafe-perms
+fi
+
 echo "Done"

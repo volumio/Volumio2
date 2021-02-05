@@ -312,6 +312,7 @@
         "REMOVE_SUCCESS": "Removed"
     },
     "PLUGINS": {
+        "CHECKING_DEPENDENCIES": "Checking that the plugin is suitable for this version of Volumio",
         "CHECKING_DUPLICATE_PLUGIN": "Checking for duplicate plugin",
         "CONFIRM_PLUGIN_INSTALL": "Install Plugin",
         "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE": "Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin?",
