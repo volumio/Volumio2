@@ -573,45 +573,33 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 ControllerSystem.prototype.callHome = function () {
   var self = this;
 
-  var defer = libQ.defer();
-
-  fs.readFile('/sys/class/net/eth0/address', 'utf8', function (err, macaddr) {
-    if(err) {
-      if(err.code === 'ENOENT') {
-        console.log('No eth0 device found - this device may be wifi only');
-      } else {
-        console.log(err);
-      }
-      defer.resolve(self.config.get('uuid'));
-    } else {
-      defer.resolve(macaddr.toString().replace(':', ''));
-    }
-  });
-  
+  try {
+    var macaddr = fs.readFileSync('/sys/class/net/eth0/address', 'utf8');
+    var anonid = macaddr.toString().replace(':', '');
+  } catch (e) {
+    console.log(e);
+    var anonid = self.config.get('uuid');
+  }
+  var md5 = crypto.createHash('md5').update(anonid).digest('hex');
   var info = self.getSystemVersion();
-
-  return defer.then(function (anonid) {
-    var md5 = crypto.createHash('md5').update(anonid).digest('hex');
-  
-    return info.then(function (infos) {
-      if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
-        console.log('Volumio Calling Home');
-        exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org:7070/downloader-v1/track-device',
-          function (error, stdout, stderr) {
-            if (error !== null) {
-              if (calltrials < 3) {
-                setTimeout(function () {
-                  self.logger.info('Cannot call home: ' + error + ' retrying in 5 seconds, trial ' + calltrials);
-                  calltrials++;
-                  self.callHome();
-                }, 10000);
-              }
-            } else self.logger.info('Volumio called home');
-          });
-      } else {
-        self.logger.info('Cannot retrieve data for calling home');
-      }
-    });
+  info.then(function (infos) {
+    if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
+      console.log('Volumio Calling Home');
+      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org/downloader-v1/track-device',
+        function (error, stdout, stderr) {
+          if (error !== null) {
+            if (calltrials < 3) {
+              setTimeout(function () {
+                self.logger.info('Cannot call home: ' + error + ' retrying in 5 seconds, trial ' + calltrials);
+                calltrials++;
+                self.callHome();
+              }, 10000);
+            }
+          } else self.logger.info('Volumio called home');
+        });
+    } else {
+      self.logger.info('Cannot retrieve data for calling home');
+    }
   });
 };
 
