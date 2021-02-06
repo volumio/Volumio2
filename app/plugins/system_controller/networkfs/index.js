@@ -6,12 +6,12 @@ var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
-var libUUID = require('node-uuid');
 var udev = require('udev');
 var S = require('string');
 var _ = require('underscore');
 var removableMountPoint = '/mnt/';
 var mountPointFile = '/data/configuration/mountPoints';
+const { v4: uuidv4 } = require('uuid');
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -38,14 +38,14 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
   var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   config.loadFile(configFile);
 
-  self.initShares();
+  var promise = self.initShares();
   if (process.env.NODE_MOUNT_HANDLER === 'true') {
     self.initUdevWatcher();
   }
   var boundMethod = self.onPlayerNameChanged.bind(self);
   self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
-  return libQ.resolve();
+  return promise;
 };
 
 ControllerNetworkfs.prototype.languageCallback = function (data) {
@@ -157,14 +157,16 @@ ControllerNetworkfs.prototype.setAdditionalConf = function () {
 
 ControllerNetworkfs.prototype.initShares = function () {
   var self = this;
-
+  var deferList = [];
+  
   var keys = config.getKeys('NasMounts');
   for (var i in keys) {
     var key = keys[i];
     if (key !== 'mountedFolders') {
-      self.mountShare({init: true, key: key});
+      deferList.push(self.mountShare({init: true, key: key}));
     }
   }
+  return libQ.all(deferList);
 };
 
 ControllerNetworkfs.prototype.mountShare = function (data) {
@@ -403,7 +405,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
     return defer.promise;
   }
 
-  uuid = libUUID.v4();
+  uuid = uuidv4();
   self.logger.info('No correspondence found in configuration for share ' + name + ' on IP ' + ip);
 
   var saveshare = self.saveShareConf('NasMounts', uuid, name, ip, path, fstype, username, password, options);

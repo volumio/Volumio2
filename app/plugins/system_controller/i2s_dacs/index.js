@@ -35,20 +35,17 @@ ControllerI2s.prototype.onVolumioStart = function () {
   this.config.loadFile(configFile);
   var i2sdac = this.config.get('i2s_dac');
 
+  var startupPromise = null;
   if (i2sdac == null || i2sdac.length === 0) {
     self.logger.info('I2S DAC not set, start Auto-detection');
-    self.i2sDetect();
+    startupPromise = self.i2sDetect();
   } else {
-    self.execDacScript();
+    startupPromise = self.execDacScript();
   }
 
-  self.forceConfigTxtBannerCompat();
+  var bannerPromise = self.forceConfigTxtBannerCompat();
 
-  setTimeout(()=>{
-      self.checkUpdatedI2SNumberonRaspbberyPI();
-  }, 5000)
-
-  return libQ.resolve();
+  return libQ.all(startupPromise, bannerPromise);
 };
 
 ControllerI2s.prototype.onStop = function () {
@@ -143,7 +140,7 @@ ControllerI2s.prototype.i2sDetect = function () {
 
   var methods = [eepromname, i2caddr ];
 
-  libQ.all(methods)
+  return libQ.all(methods)
     .then(function (content) {
       for (var j in content) {
         var discoveryParameters = {eepromName: '', i2cAddress: ''};
@@ -156,7 +153,7 @@ ControllerI2s.prototype.i2sDetect = function () {
           i2cAddress = content[j].i2c;
         }
       }
-      self.i2sMatch({'eepromName': eepromName, 'i2cAddress': i2cAddress});
+      return self.i2sMatch({'eepromName': eepromName, 'i2cAddress': i2cAddress});
     });
 };
 
@@ -244,17 +241,17 @@ ControllerI2s.prototype.i2sMatch = function (data) {
           for (var w = 0; w < dac.eeprom_name.length; w++) {
             if (dac.eeprom_name[w] == data.eepromName) {
               self.logger.info('I2S DAC DETECTION: Found Match with EEPROM ' + dac.eeprom_name[w]);
-              var str = {'output_device': {'value': dac.alsanum, 'label': dac.name}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
+              var str = {'output_device': {'value': dac.alsanum, 'label': dac.name, 'alsacard': dac.alsacard}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
               return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
             }
           }
         } else if (dac.eeprom_name == data.eepromName) {
           self.logger.info('I2S DAC DETECTION: Found Match with EEPROM ' + dac.eeprom_name);
-          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
+          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name, 'alsacard': dac.alsacard}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
           return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
         } else if (dac.i2c_address == data.i2cAddress) {
           self.logger.info('I2S DAC DETECTION: Found Match with ' + dac.name + ' at address ' + dac.i2c_address);
-          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
+          var str = {'output_device': {'value': dac.alsanum, 'label': dac.name, 'alsacard': dac.alsacard}, 'i2s': true, 'i2sid': {'value': dac.id, 'label': dac.name}};
           return self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'saveAlsaOptions', str);
         } else {
 
@@ -262,6 +259,7 @@ ControllerI2s.prototype.i2sMatch = function (data) {
       }
     }
   }
+  return libQ.resolve();
 };
 
 ControllerI2s.prototype.getI2sOptions = function () {
@@ -323,6 +321,30 @@ ControllerI2s.prototype.getI2SNumber = function (data) {
     }
 
     return number;
+};
+
+ControllerI2s.prototype.getI2SAlsaName = function (data) {
+    var self = this;
+
+    var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+    var alsaname = '';
+
+    for (var i = 0; i < dacdata.devices.length; i++) {
+        if (dacdata.devices[i].name == devicename) {
+            var num = i;
+            for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+                if (dacdata.devices[num].data[i].name == data) {
+                    alsaname = dacdata.devices[num].data[i].alsacard;
+                }
+            }
+            if (!alsaname) {
+                alsaname = dacdata.devices[num].data[0].alsacard;
+            }
+        }
+    }
+
+    return alsaname;
 };
 
 ControllerI2s.prototype.getI2SMixer = function (data) {
@@ -388,22 +410,23 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
 
           this.config.set('i2s_enabled', true);
           this.config.set('i2s_dac', outdevicename);
+          
+          if (process.env.MODULAR_ALSA_PIPELINE !== 'true') {
+            self.commandRouter.sharedVars.set('alsa.outputdevice', num);
+            // Restarting MPD, this seems needed only on first boot
+            setTimeout(function () {
+              self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
+              self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
+            }, 1500);
+          }
 
-          self.commandRouter.sharedVars.set('alsa.outputdevice', num);
-          // Restarting MPD, this seems needed only on first boot
-          setTimeout(function () {
-            self.commandRouter.executeOnPlugin('music_service', 'mpd', 'restartMpd', '');
-            self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'updateVolumeSettings', '');
-          }, 1500);
-
-          response = {'reboot': reboot};
-          defer.resolve(response);
+          return libQ.resolve({'reboot': reboot});
         }
       }
     }
   }
 
-  return defer.promise;
+  return libQ.reject("Unable to locate I2S DAC " + data);
 };
 
 ControllerI2s.prototype.writeI2SDAC = function (data) {
@@ -469,45 +492,57 @@ ControllerI2s.prototype.disableI2SDAC = function () {
 
 ControllerI2s.prototype.forceConfigTxtBannerCompat = function () {
   var self = this;
-
+  var defer = libQ.defer();
+  
   fs.readFile('/boot/config.txt', 'utf8', function (err, configTxt) {
   		if (err) {
-      self.logger.error('Cannot read config.txt file: ' + err);
+            self.logger.error('Cannot read config.txt file: ' + err);
+            defer.reject(err);
   		} else {
   			var index = configTxt.search(i2sOverlayBanner);
 
   			if (index == -1) {
   				// there is no Banner in config.txt; check if DAC dtoverlay is present (for backward compatibility)
 
-        fs.readFile('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json', 'utf8', function (err, dacdata) {
+                fs.readFile('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json', 'utf8', function (err, dacdata) {
   					if (err) {
-            self.logger.error('Cannot read dacs.json file: ' + err);
+                        self.logger.error('Cannot read dacs.json file: ' + err);
+                        defer.resolve();
   					} else {
-            var entries = configTxt.split(/dtoverlay=/);
-            var searchexp;
+                        var entries = configTxt.split(/dtoverlay=/);
+                        var searchexp;
 
-            entries.forEach(function (str) {
-              str = str.split(/[^a-zA-Z0-9-]/)[0]; // take first word only (candidate overlay name)
-              if (dacdata.includes(str)) { // we found current dtoverlay name within .json database => is an i2s!
-                searchexp = new RegExp('dtoverlay=' + str);
-              }
-            });
+                        entries.forEach(function (str) {
+                            str = str.split(/[^a-zA-Z0-9-]/)[0]; // take first word only (candidate overlay name)
+                            if (dacdata.includes(str)) { // we found current dtoverlay name within .json database => is an i2s!
+                                searchexp = new RegExp('dtoverlay=' + str);
+                            }
+                        });
 
   						if (searchexp !== undefined) { // we found older config file with valid DAC dtoverlay set and no Banner
   							// we add Banner before existing dtoverlay i2s entry and rewrite file
   							configTxt = configTxt.replace(searchexp, os.EOL + i2sOverlayBanner + searchexp.source + os.EOL);
 
   							fs.writeFile('/boot/config.txt', configTxt, 'utf8', function (err) {
-                if (err) self.logger.error('Cannot write config.txt file: ' + err);
+                                if (err) {
+                                    self.logger.error('Cannot write config.txt file: ' + err);
+                                    defer.reject(err);
+                                } else {
+                                    defer.resolve();
+                                }
   							});
-            }
+                        } else {
+                            defer.resolve();
+                        }
  					}
   				});
+  			} else {
+  			    defer.resolve();
   			}
   		}
   });
 
-  return libQ.resolve();
+  return defer.promise;
 };
 
 ControllerI2s.prototype.hotAddI2SDAC = function (data) {
@@ -576,29 +611,45 @@ ControllerI2s.prototype.revomeAllDtOverlays = function () {
 ControllerI2s.prototype.execDacScript = function () {
   var self = this;
   var dacname = self.getConfigParam('i2s_dac');
+  var defer = libQ.defer();
 
-  var dacdata = fs.readJsonSync(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), 'utf8', {throws: false});
-  var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
+  fs.readJson(('/volumio/app/plugins/system_controller/i2s_dacs/dacs.json'), {encoding: 'utf8', throws: false},
+  function(err, dacdata) {
+    if(err || dacdata === null || dacdata.devices === null) {
+      defer.reject(err);
+      return;
+    }
+  
+    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
 
-  for (var i = 0; i < dacdata.devices.length; i++) {
-    if (dacdata.devices[i].name == devicename) {
-      var num = i;
-      for (var i = 0; i < dacdata.devices[num].data.length; i++) {
-        if (dacdata.devices[num].data[i].name === dacname) {
-          if (dacdata.devices[num].data[i].script && dacdata.devices[num].data[i].script.length > 0) {
-            self.logger.info('Executing start script for DAC ' + dacname);
-            exec(__dirname + '/scripts/' + dacdata.devices[num].data[i].script, {uid: 1000, gid: 1000}, function (err, stdout, stderr) {
-              if (err) {
-                self.logger.error('Cannot execute DAC script: ' + err);
-              } else {
-                self.logger.info('Data script executed');
-              }
-            });
+    outer: for (var i = 0; i < dacdata.devices.length; i++) {
+      if (dacdata.devices[i].name == devicename) {
+        var num = i;
+        for (var i = 0; i < dacdata.devices[num].data.length; i++) {
+          if (dacdata.devices[num].data[i].name === dacname) {
+            if (dacdata.devices[num].data[i].script && dacdata.devices[num].data[i].script.length > 0) {
+              self.logger.info('Executing start script for DAC ' + dacname);
+              exec(__dirname + '/scripts/' + dacdata.devices[num].data[i].script, {uid: 1000, gid: 1000}, function (err, stdout, stderr) {
+                if (err) {
+                  self.logger.error('Cannot execute DAC script: ' + err);
+                } else {
+                  self.logger.info('DAC script executed');
+                }
+                defer.resolve();
+              });
+            } else {
+              defer.resolve();
+            }
+            return;
           }
         }
       }
     }
-  }
+    // No matching device
+    defer.resolve();
+  });
+  
+  return defer.promise;
 };
 
 ControllerI2s.prototype.writeModulesFile = function (modules) {
@@ -618,35 +669,4 @@ ControllerI2s.prototype.writeModulesFile = function (modules) {
       ws.end();
     }
   });
-};
-
-ControllerI2s.prototype.checkUpdatedI2SNumberonRaspbberyPI = function () {
-    var self = this;
-
-    // Raspberry PI Kernel 5.4 onwards changed the numbering of i2s dacs
-    // We check and fix on start
-    // IF PI && I2S DAC && OUTPUT DEVICE = 1, we fix and restart audio card
-
-    var softvolume = false;
-    var devicename = self.getAdditionalConf('system_controller', 'system', 'device');
-    if (devicename === 'Raspberry PI') {
-        var i2senabled = self.getConfigParam('i2s_enabled');
-        var outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'outputdevice');
-        if (outputDevice === 'softvolume') {
-            softvolume = true;
-            outputDevice = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
-        }
-        if (i2senabled && outputDevice !== '2') {
-            self.logger.info('I2S DAC Found on wrong device number, changing it to device 2');
-            if (softvolume === false) {
-                self.commandRouter.sharedVars.set('alsa.outputdevice', '2');
-                setTimeout(()=>{
-                    self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'setDefaultMixer', '2');
-                }, 1000)
-            } else {
-                self.commandRouter.executeOnPlugin('audio_interface', 'alsa_controller', 'enableSoftMixer', '2');
-            }
-
-        }
-    }
 };

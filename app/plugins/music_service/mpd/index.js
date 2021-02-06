@@ -597,41 +597,46 @@ ControllerMpd.prototype.onVolumioStart = function () {
   self.loadLibrarySettings();
   dsd_autovolume = self.config.get('dsd_autovolume', false);
   self.getPlaybackMode();
-  self.mpdInit();
-
-  return libQ.resolve();
+  
+  return self.mpdInit();
 };
 
 ControllerMpd.prototype.mpdInit = function () {
   var self = this;
+  var defer = libQ.defer()
 
   if (process.env.WRITE_MPD_CONFIGURATION_ON_STARTUP === 'true') {
     self.logger.info('Creating MPD Configuration file');
     self.createMPDFile(function (error) {
       if (error !== undefined && error !== null) {
         self.logger.error('Could not create MPD File on system start: ' + error);
+        defer.resolve();
       } else {
         self.restartMpd(function (error) {
           if (error !== null && error != undefined) {
             self.logger.error('Cannot start MPD on system Start: ' + error);
+            defer.resolve();
           } else {
-            self.initializeMpdConnection();
+            defer.resolve(self.initializeMpdConnection());
           }
         });
       }
     });
   } else {
-    self.initializeMpdConnection();
+    defer.resolve(self.initializeMpdConnection());
   }
+  return defer.promise;
 };
 
 ControllerMpd.prototype.initializeMpdConnection = function () {
   var self = this;
+  var defer = libQ.defer()
 
   // Connect to MPD only if process MPD is running
   exec('/bin/pidof mpd', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
     if (error) {
       self.logger.error('Cannot initialize  MPD Connection: MPD is not running');
+      defer.resolve();
     } else {
       if (stdout && stdout.length) {
         self.logger.info('MPD running with PID' + stdout + ' ,establishing connection');
@@ -639,6 +644,7 @@ ControllerMpd.prototype.initializeMpdConnection = function () {
       } else {
         self.logger.error('Cannot initialize  MPD Connection: MPD is not running');
       }
+      defer.resolve();
     }
   });
 };
@@ -955,18 +961,34 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
       var mixerdev = '';
       var mixerstrings = '';
-      if (outdev != 'softvolume') {
+      
+      if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
         var realDev = outdev;
-        if (outdev.indexOf(',') >= 0) {
-          mixerdev = 'hw:' + outdev;
-          outdev = 'hw:' + outdev;
+        outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
+        if(self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolume')) {
+          mixerdev = 'SoftMaster';
         } else {
-          mixerdev = 'hw:' + outdev;
-          outdev = 'hw:' + outdev + ',0';
+          if (realDev.indexOf(',') >= 0) {
+            mixerdev = 'hw:' + realDev;
+          } else {
+            mixerdev = 'hw:' + realDev + ',0';
+          }
         }
+      
       } else {
-        mixerdev = 'SoftMaster';
-        var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+        if (outdev != 'softvolume') {
+          var realDev = outdev;
+          if (outdev.indexOf(',') >= 0) {
+            mixerdev = 'hw:' + outdev;
+            outdev = 'hw:' + outdev;
+          } else {
+            mixerdev = 'hw:' + outdev;
+            outdev = 'hw:' + outdev + ',0';
+          }
+        } else {
+          mixerdev = 'SoftMaster';
+          var realDev = self.getAdditionalConf('audio_interface', 'alsa_controller', 'softvolumenumber');
+        }
       }
 
       var mpdvolume = self.getAdditionalConf('audio_interface', 'alsa_controller', 'mpdvolume');

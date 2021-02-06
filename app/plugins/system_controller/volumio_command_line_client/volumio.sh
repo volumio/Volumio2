@@ -45,7 +45,7 @@ vrestart                           Restarts Volumio Service
 
 pull                               Pulls latest github status on master from https://github.com/volumio/Volumio2.git
 pull -b <branch>                   Pulls branch <branch> from https://github.com/volumio/Volumio2.git
-pull -b <branch> <repository>      Pulls branch <branch> from git repository <repository>
+pull -b <branch> -r <repository>   Pulls branch <branch> from git repository <repository>
 dev                                Start Volumio in develpment mode, with Nodemon and Remote Debugger
 kernelsource                       Gets Current Kernel source (Raspberry PI only)
 plugin init                        Creates a new plugin
@@ -85,20 +85,20 @@ sudo systemctl stop volumio.service
 pull() {
 cd /
 echo "Stopping Volumio"
-sudo systemctl stop volumio.service
-sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh "$@"
+vstop
+sudo /volumio/app/plugins/system_controller/volumio_command_line_client/commands/pull.sh "$@"
 
 echo "Pull completed, restarting Volumio"
-sudo systemctl start volumio.service
+vstart
 echo "Done"
 }
 
 dev() {
-sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/devmode.sh
+/volumio/app/plugins/system_controller/volumio_command_line_client/commands/devmode.sh
 }
 
 kernelsource() {
-sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
+sudo /volumio/app/plugins/system_controller/volumio_command_line_client/commands/kernelsource.sh
 }
 
 internet() {
@@ -209,7 +209,7 @@ case "$1" in
                 internet "$@"
             ;;
 	    logdump)
-	        /usr/local/bin/node /volumio/logsubmit.js "$2" nosubmit
+	        /usr/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;
 	    init-edit)
 		init-edit $2
@@ -245,7 +245,7 @@ correspondent folder in data"
                     echo "This command will update the plugin on your device"
                     echo ""
                 fi
-               /usr/local/bin/node /volumio/pluginhelper.js "$2"
+               /usr/bin/node /volumio/pluginhelper.js "$2"
             else
                 echo ""
                 echo "---- VOLUMIO PLUGIN HELPER ----"
@@ -262,14 +262,10 @@ correspondent folder in data"
             fi
             ;;
             updater)
-                /usr/local/bin/node /volumio/update-helper.js "$@"
+                /usr/bin/node /volumio/update-helper.js "$@"
             ;;
         *)
             doc
             exit 1
 
 esac
-
-
-
-

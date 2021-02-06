@@ -10,6 +10,7 @@ var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var calltrials = 0;
 var additionalSVInfo;
+const { v4: uuidv4 } = require('uuid');
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -38,8 +39,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
   var uuid = this.config.get('uuid');
   if (uuid == undefined) {
     console.log('No id defined. Creating one');
-    var uuid = require('node-uuid');
-    self.config.addConfigValue('uuid', 'string', uuid.v4());
+    self.config.addConfigValue('uuid', 'string', uuidv4());
   }
 
   this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
@@ -47,10 +47,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
   process.env.ADVANCED_SETTINGS_MODE = this.config.get('advanced_settings_mode', true);
 
-  self.deviceDetect();
-  self.callHome();
-
-  return libQ.resolve();
+  return libQ.all(self.deviceDetect(), self.callHome());
 };
 
 ControllerSystem.prototype.onStop = function () {
@@ -189,7 +186,7 @@ ControllerSystem.prototype.setConf = function (varName, varValue) {
   var defer = libQ.defer();
 
   self.config.set(varName, varValue);
-  if (varName = 'player_name') {
+  if (varName === 'player_name') {
     var player_name = varValue;
 
     for (var i in self.callbacks) {
@@ -476,7 +473,7 @@ ControllerSystem.prototype.sendBugReport = function (message) {
     if (i < (n - 1)) description = description + "\\'";
   }
 
-  exec('/usr/local/bin/node /volumio/logsubmit.js ' + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+  exec('/usr/bin/node /volumio/logsubmit.js ' + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
     if (error !== null) {
       self.logger.info('Cannot send bug report: ' + error);
     } else {
@@ -523,24 +520,34 @@ ControllerSystem.prototype.deviceDetect = function (data) {
   info.then(function (infos) {
     if (infos != undefined && infos.hardware != undefined && infos.hardware === 'x86') {
       device = 'x86';
-      defer.resolve(device);
       self.deviceCheck(device);
+      defer.resolve(device);
     } else {
       exec('cat /proc/cpuinfo | grep Hardware', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
         if (error !== null) {
           self.logger.info('Cannot read proc/cpuinfo: ' + error);
+          defer.resolve('unknown');
         } else {
           var hardwareLine = stdout.split(':');
           var cpuidparam = hardwareLine[1].replace(/\s/g, '');
-          var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'), 'utf8', {throws: false});
+          var deviceslist = fs.readJson(('/volumio/app/plugins/system_controller/system/devices.json'), 
+          { encoding: 'utf8', throws: false },
+          function (err, deviceslist) {
+            if(deviceslist && deviceslist.devices) {
+              for (var i = 0; i < deviceslist.devices.length; i++) {
+                if (deviceslist.devices[i].cpuid == cpuidparam) {
+                  device = deviceslist.devices[i].name;
+                  self.deviceCheck(device);
+                  defer.resolve(device);
+                  return;
+                }
+              }
+              defer.resolve('unknown');
+            } else {
+              defer.resolve('unknown');
+            } 
+          });
           // self.logger.info('CPU ID ::'+cpuidparam+'::');
-          for (var i = 0; i < deviceslist.devices.length; i++) {
-            if (deviceslist.devices[i].cpuid == cpuidparam) {
-              defer.resolve(deviceslist.devices[i].name);
-              device = deviceslist.devices[i].name;
-              self.deviceCheck(device);
-            }
-          }
         }
       });
     }

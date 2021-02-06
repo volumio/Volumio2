@@ -7,7 +7,8 @@ var restapi = require('./restapi.js');
 var busboy = require('connect-busboy');
 var fs = require('fs-extra');
 var io = require('socket.io-client');
-var libUUID = require('node-uuid');
+const { v4: uuidv4 } = require('uuid');
+
 var app = express();
 var dev = express();
 var plugin = express();
@@ -123,7 +124,7 @@ app.route('/plugin-upload')
       }
       if (this.fileData) {
         console.log('Uploading: ' + this.filename);
-        this.uniquename = libUUID.v4() + '.zip';
+        this.uniquename = uuidv4() + '.zip';
         console.log("Created safe filename as '" + this.uniquename + "'");
         try {
           fs.ensureDirSync(plugindir);

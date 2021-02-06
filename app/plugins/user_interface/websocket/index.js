@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var semver = require('semver');
 
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
@@ -821,6 +822,16 @@ function InterfaceWebUI (context) {
         }
       } catch (e) {
                 	self.logger.error('Cannot translate update title: ' + e);
+      }
+      
+      if (updateMessage && updateMessage.updateavailable === true) {
+         var updateVersion = semver.coerce(updateMessage.title);
+         if(updateVersion !== null) {
+             var broken = self.commandRouter.pluginManager.listPluginsBrokenByNewVersion(updateVersion.version);
+             if(broken.length > 0) {
+                updateMessage.description += '<br><p><strong>The following plugins will be broken by this update:</strong></p> ' + broken;
+             }
+         }
       }
 
       self.commandRouter.broadcastMessage('updateReady', updateMessage);

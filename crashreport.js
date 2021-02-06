@@ -1,7 +1,6 @@
 var moment = require('moment');
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
-var argv = require('yargs').argv; // eslint-disable-line
 var logFile = '/tmp/crashdump';
 var lastCrashDescription = '/tmp/lastcrash';
 var description = 'Unknown';
