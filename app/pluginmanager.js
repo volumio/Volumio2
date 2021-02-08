@@ -66,7 +66,7 @@ function PluginManager (ccommand, server) {
         variant = 'volumio';
       }
       process.env.WARNING_ON_PLUGIN_INSTALL = false;
-      if (variant !== 'volumio') {
+      if (variant !== 'volumio' && variant !== 'volumiobuster') {
         process.env.WARNING_ON_PLUGIN_INSTALL = true;
       }
     }
