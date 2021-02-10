@@ -815,7 +815,7 @@ ControllerAlsa.prototype.saveAlsaOptions = function (data) {
     outputcard.name = data.i2s ? data.i2sid.label : data.output_device.label;
     
     self.config.set('outputdevicecardname', outputcard.alsacard);
-    if(outputcard.alsadevice !== null) {
+    if(outputcard.alsadevice !== undefined) {
 	  self.config.set('outputdevicealsadevice', outputcard.alsadevice);
 	} else {
 	  self.config.delete('outputdevicealsadevice');
