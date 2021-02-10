@@ -189,7 +189,7 @@ volumioAppearance.prototype.getBackgrounds = function () {
 
   fs.readdir(backgroundPath, function (err, files) {
     if (err) {
-      console.log(err);
+      self.logger.error('Failed to read Background files: ' + err);
     }
     files.forEach(function (f) {
       if (f.indexOf('thumbnail-') < 0) {
@@ -223,7 +223,7 @@ volumioAppearance.prototype.generateThumbnails = function () {
       
       for(var i = 0; i < files.length; i++) {
         if(files[i].indexOf('thumbnail-') !== 0 && !map['thumbnail-' + files[i]]) {
-          console.log('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
+          self.logger.info('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
           let defer = libQ.defer();
           defers.push(defer);
           Jimp.read(backgroundPath + '/' + f)
@@ -240,7 +240,7 @@ volumioAppearance.prototype.generateThumbnails = function () {
       }
       return libQ.all(defers);
     })
-    .fail(console.log)
+    .fail((e) => {self.logger.error('Failed to generate thumbnails: ' + e)})
     .then(() => {
       return 'Ok';
     });
@@ -383,11 +383,11 @@ volumioAppearance.prototype.deleteFile = function (filepath) {
   var defer = libQ.defer();
   fs.stat(filepath, function (err, stats) {
     if (err) {
-      console.log(err);
+      self.logger.error('Failed to read file: ' + err);
     } else {
       fs.unlink(filepath, function (err) {
         if (err) {
-          console.log(err);
+          self.logger.error('Failed to delete file: ' + err);
         } else {
           if (filepath.indexOf('thumbnail-') < 0) {
             self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
