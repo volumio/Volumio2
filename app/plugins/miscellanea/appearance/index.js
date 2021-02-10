@@ -183,26 +183,27 @@ volumioAppearance.prototype.getUiSettings = function () {
 
 volumioAppearance.prototype.getBackgrounds = function () {
   var self = this;
-  var defer = libQ.defer();
 
-  var backgroundsArray = [];
-
-  fs.readdir(backgroundPath, function (err, files) {
-    if (err) {
+  return libQ.nfcall(fs.readdir, backgroundPath)
+    .then((files) => {
+      var backgroundsArray = [];
+      
+      files.forEach(function (f) {
+        if (f.indexOf('thumbnail-') < 0) {
+          backgroundsArray.push({'name': f.split('.')[0].capitalize(), 'path': f, 'thumbnail': 'thumbnail-' + f});
+        }
+      });
+      return backgroundsArray;
+    })
+    .fail((err) => {
       self.logger.error('Failed to read Background files: ' + err);
-    }
-    files.forEach(function (f) {
-      if (f.indexOf('thumbnail-') < 0) {
-        backgroundsArray.push({'name': f.split('.')[0].capitalize(), 'path': f, 'thumbnail': 'thumbnail-' + f});
-      }
+      return [];
+    })
+    .then((bgArray) => {
+      var background_title = config.get('background_title');
+      var background_path = config.get('background_path');
+      return {'current': {'name': background_title, 'path': background_path}, 'available': bgArray};
     });
-    var background_title = config.get('background_title');
-    var background_path = config.get('background_path');
-    var backgrounds = {'current': {'name': background_title, 'path': background_path}, 'available': backgroundsArray};
-    defer.resolve(backgrounds);
-  });
-
-  return defer.promise;
 };
 
 volumioAppearance.prototype.capitalize = function () {
@@ -222,7 +223,8 @@ volumioAppearance.prototype.generateThumbnails = function () {
       }
       
       for(var i = 0; i < files.length; i++) {
-        if(files[i].indexOf('thumbnail-') !== 0 && !map['thumbnail-' + files[i]]) {
+        let f = files[i];
+        if(f.indexOf('thumbnail-') !== 0 && !map['thumbnail-' + f]) {
           self.logger.info('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
           let defer = libQ.defer();
           defers.push(defer);
@@ -250,7 +252,9 @@ volumioAppearance.prototype.setDefaultBackground = function () {
 
   var background = config.get('background_title');
   if (background === 'Initial') {
-    self.selectRandomBackground();
+    return self.selectRandomBackground();
+  } else {
+    return libQ.resolve();
   }
 };
 
@@ -277,19 +281,13 @@ volumioAppearance.prototype.createThumbnailPath = function () {
           if(pluginFiles.every(function(f) { return dataFiles.includes(f); })) {
             return null;
           } else {
-            fs.copy(__dirname + '/backgrounds', backgroundPath, function(err) {
-              if (err) {
-                self.logger.info('Failed to copy background: ' + err);
-                return libQ.resolve();
-              } else {
-                self.setDefaultBackground();
-                return libQ.resolve();
-              }
-            })
+            return libQ.nfcall(fs.copy, __dirname + '/backgrounds', backgroundPath)
+              .fail((err) => { self.logger.info('Failed to copy background: ' + err); });
           }
         });
       });
     })
+    .then(self.setDefaultBackground.bind(self))
     .then(self.generateThumbnails.bind(self))
     .fail(console.error);
 };
@@ -404,19 +402,21 @@ volumioAppearance.prototype.deleteFile = function (filepath) {
 volumioAppearance.prototype.selectRandomBackground = function () {
   var self = this;
 
-  var backgrounds = self.getBackgrounds();
-  if (backgrounds != undefined) {
-    backgrounds.then(function (result) {
-      var max = result.available.length - 1;
-      var random = Math.floor(Math.random() * (max - 0 + 1) + 0);
-      var randomBackground = result.available[random];
-      var setting = {'name': randomBackground.name, 'path': randomBackground.path};
+  return self.getBackgrounds()
+    .then(function (result) {
+      if(result.available.length) {
+      
+        var max = result.available.length - 1;
+        var random = Math.floor(Math.random() * (max - 0 + 1) + 0);
+        var randomBackground = result.available[random];
+        var setting = {'name': randomBackground.name, 'path': randomBackground.path};
 
-      return self.setBackgrounds(setting);
+        return self.setBackgrounds(setting);
+      }
     })
-      .fail(function () {
-      });
-  }
+    .fail(function (err) {
+      self.logger.error('Failed to select background: ' + err);
+    });
 };
 
 volumioAppearance.prototype.getAvailableLanguages = function () {
