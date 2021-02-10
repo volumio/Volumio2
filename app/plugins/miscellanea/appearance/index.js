@@ -189,7 +189,7 @@ volumioAppearance.prototype.getBackgrounds = function () {
 
   fs.readdir(backgroundPath, function (err, files) {
     if (err) {
-      console.log(err);
+      self.logger.error('Failed to read Background files: ' + err);
     }
     files.forEach(function (f) {
       if (f.indexOf('thumbnail-') < 0) {
@@ -223,7 +223,7 @@ volumioAppearance.prototype.generateThumbnails = function () {
       
       for(var i = 0; i < files.length; i++) {
         if(files[i].indexOf('thumbnail-') !== 0 && !map['thumbnail-' + files[i]]) {
-          console.log('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
+          self.logger.info('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
           let defer = libQ.defer();
           defers.push(defer);
           Jimp.read(backgroundPath + '/' + f)
@@ -235,19 +235,23 @@ volumioAppearance.prototype.generateThumbnails = function () {
             .catch(function (err) {
               console.error('Failed to create thumbnail :' + err);
             })
-            .then(function() { defer.resolve(); });
+            .then(function() {defer.resolve(); });
         }
       }
       return libQ.all(defers);
     })
-    .fail(console.log)
+    .fail((e) => {self.logger.error('Failed to generate thumbnails: ' + e)})
     .then(() => {
-      var background = config.get('background_title');
-      if (background === 'Initial') {
-        self.selectRandomBacground();
-      }
       return 'Ok';
     });
+};
+volumioAppearance.prototype.setDefaultBackground = function () {
+  var self = this;
+
+  var background = config.get('background_title');
+  if (background === 'Initial') {
+    self.selectRandomBackground();
+  }
 };
 
 volumioAppearance.prototype.createThumbnailPath = function () {
@@ -273,7 +277,15 @@ volumioAppearance.prototype.createThumbnailPath = function () {
           if(pluginFiles.every(function(f) { return dataFiles.includes(f); })) {
             return null;
           } else {
-            return libQ.nfcall(fs.copy, __dirname + '/backgrounds', backgroundPath);
+            fs.copy(__dirname + '/backgrounds', backgroundPath, function(err) {
+              if (err) {
+                self.logger.info('Failed to copy background: ' + err);
+                return libQ.resolve();
+              } else {
+                self.setDefaultBackground();
+                return libQ.resolve();
+              }
+            })
           }
         });
       });
@@ -371,11 +383,11 @@ volumioAppearance.prototype.deleteFile = function (filepath) {
   var defer = libQ.defer();
   fs.stat(filepath, function (err, stats) {
     if (err) {
-      console.log(err);
+      self.logger.error('Failed to read file: ' + err);
     } else {
       fs.unlink(filepath, function (err) {
         if (err) {
-          console.log(err);
+          self.logger.error('Failed to delete file: ' + err);
         } else {
           if (filepath.indexOf('thumbnail-') < 0) {
             self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('APPEARANCE.APPEARANCE'),
@@ -389,7 +401,7 @@ volumioAppearance.prototype.deleteFile = function (filepath) {
   return defer.promise;
 };
 
-volumioAppearance.prototype.selectRandomBacground = function () {
+volumioAppearance.prototype.selectRandomBackground = function () {
   var self = this;
 
   var backgrounds = self.getBackgrounds();
