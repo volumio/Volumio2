@@ -346,6 +346,12 @@ PluginManager.prototype.getPackageJson = function (folder) {
 PluginManager.prototype.isEnabled = function (category, pluginName) {
   var self = this;
 
+  // MyVolumio plugins aren't very good at updating the enabled flag - just check that 
+  // the plugin is valid
+  if(self.myVolumioPluginManager.checkIfPluginIsInCurrentPlan(category, pluginName)) {
+    return true;
+  }
+
   return self.config.get(category + '.' + pluginName + '.enabled');
 };
 
@@ -1828,8 +1834,9 @@ PluginManager.prototype.disableAndStopPlugin = function (category, name) {
 
 PluginManager.prototype.findPluginFolder = function (category, name) {
   var self = this;
-  for (var ppaths in self.pluginPath) {
-    var folder = self.pluginPath[ppaths];
+  var fullPluginPath = self.pluginPath.concat(['/myvolumio/plugins/']);
+  for (var ppaths in fullPluginPath) {
+    var folder = fullPluginPath[ppaths];
 
     var pathToCheck = folder + '/' + category + '/' + name;
     if (fs.existsSync(pathToCheck)) { return pathToCheck; }
