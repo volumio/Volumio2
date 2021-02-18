@@ -11,8 +11,11 @@ var commandArray = [
   'ps -ef',
   'df -h',
   'mount',
-  'sudo journalctl -p 7',
-  'cat /var/log/mpd.log'
+  'netstat -natp',
+  'cat /var/log/mpd.log',
+  'cat /data/configuration/plugins.json',
+  'cat /etc/mpd.conf',
+  'sudo journalctl -p 7'
 ];
 
 // Up to two arguments may be given:
