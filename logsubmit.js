@@ -15,6 +15,7 @@ var commandArray = [
   'cat /var/log/mpd.log',
   'cat /data/configuration/plugins.json',
   'cat /etc/mpd.conf',
+  'volumio endpointstest',
   'sudo journalctl -p 7'
 ];
 
