@@ -2148,6 +2148,28 @@ CoreCommandRouter.prototype.setAudioOutputVolume = function (data) {
   }
 };
 
+CoreCommandRouter.prototype.audioOutputPlay = function (data) {
+  var self = this;
+
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.audioOutputPlay === 'function') {
+    return audioOutputPlugin.audioOutputPlay(data);
+  } else {
+    this.logger.error('WARNING: No Audio Output plugin found');
+  }
+};
+
+CoreCommandRouter.prototype.audioOutputPause = function (data) {
+  var self = this;
+
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.audioOutputPause === 'function') {
+    return audioOutputPlugin.audioOutputPause(data);
+  } else {
+    this.logger.error('WARNING: No Audio Output plugin found');
+  }
+};
+
 CoreCommandRouter.prototype.getHwuuid = function () {
   var self = this;
 

@@ -1273,6 +1273,18 @@ function InterfaceWebUI (context) {
       self.commandRouter.setAudioOutputVolume(data);
     });
 
+    connWebSocket.on('audioOutputPlay', function (data) {
+      let selfConnWebSocket = this;
+
+      self.commandRouter.audioOutputPlay(data);
+    });
+
+    connWebSocket.on('audioOutputPause', function (data) {
+      let selfConnWebSocket = this;
+
+      self.commandRouter.audioOutputPause(data);
+    });
+
     connWebSocket.on('saveQueueToPlaylist', function (data) {
       var selfConnWebSocket = this;
 

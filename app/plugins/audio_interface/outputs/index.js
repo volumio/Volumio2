@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
+var unirest = require('unirest');
 
 module.exports = outputs;
 function outputs (context) {
@@ -318,5 +319,105 @@ outputs.prototype.setAudioOutputVolume = function (data) {
     }
   } else {
     self.logger.error('Could not set audio output volume: missing data, id, volume or mute fields');
+  }
+};
+
+/**
+ * This function plays an audio output, given its ID. Checks its
+ * presence in the list, retrieves the plugin that added it and asks that plugin
+ * to play.
+ * @param data
+ */
+outputs.prototype.audioOutputPlay = function (data) {
+  let self = this;
+
+  if (data.type === 'device' && data.host !== undefined) {
+    if(data.id === self.commandRouter.getHwuuid()) {
+      self.logger.info('Playing Local Device: ' + data.host);
+      self.commandRouter.volumioPlay();
+    } else {
+      self.logger.info('Playing Remote Device: ' + data.host);
+
+      let url = data.host + ':3000/api/v1/commands/?cmd=play';
+
+      unirest.get(url)
+        .timeout(3000)
+        .end(function (response) {
+          if (response && response.status === 200) {
+            self.logger.info('Done playing: ', data.host);
+          } else {
+            self.logger.error('Cannot play Remote Device: ' + data.host );
+          }
+        });
+    }
+  } else {
+      let i = self.checkElement(data.id);
+
+    if (i >= 0) {
+      let path = self.output.availableOutputs[i - 1].plugin;
+
+      let type = path.split('/')[0];
+
+      let name = path.split('/')[1];
+
+      self.commandRouter.executeOnPlugin(type, name, 'audioOutputPlay', data)
+        .then(function () {
+        })
+        .fail(function () {
+          self.commandRouter.pushToastMessage('error', 'plugin output failure', 'Failed to play audio output ' + data.id);
+        });
+    } else {
+      self.logger.error('Could not play audio output: ' + data.id + ' device not found');
+    }
+  }
+};
+
+/**
+ * This function pauses an audio output, given its ID. Checks its
+ * presence in the list, retrieves the plugin that added it and asks that plugin
+ * to play.
+ * @param data
+ */
+outputs.prototype.audioOutputPause = function (data) {
+  let self = this;
+
+  if (data.type === 'device' && data.host !== undefined) {
+    if(data.id === self.commandRouter.getHwuuid()) {
+      self.logger.info('Pausing Local Device: ' + data.host);
+      self.commandRouter.volumioPause();
+    } else {
+      self.logger.info('Pausing Remote Device: ' + data.host);
+
+      let url = data.host + ':3000/api/v1/commands/?cmd=pause';
+
+      unirest.get(url)
+        .timeout(3000)
+        .end(function (response) {
+          if (response && response.status === 200) {
+            self.logger.info('Done pausing: ', data.host);
+          } else {
+            self.logger.error('Cannot pause Remote Device: ' + data.host );
+          }
+        });
+    }
+  } else {
+    let i = self.checkElement(data.id);
+
+    if (i >= 0) {
+      let path = self.output.availableOutputs[i - 1].plugin;
+
+      let type = path.split('/')[0];
+
+      let name = path.split('/')[1];
+
+      self.commandRouter.executeOnPlugin(type, name, 'audioOutputPause', data)
+        .then(function () {
+        })
+        .fail(function () {
+          self.commandRouter.pushToastMessage('error', 'plugin output failure', 'Failed to pause audio output ' + data.id);
+        });
+    } else {
+      self.logger.error('Could not pause audio output: ' + data.id + ' device not found');
+    }
   }
 };
