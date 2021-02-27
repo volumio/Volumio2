@@ -11,6 +11,7 @@ var crypto = require('crypto');
 var calltrials = 0;
 var additionalSVInfo;
 const { v4: uuidv4 } = require('uuid');
+const os = require('os');
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -572,25 +573,17 @@ ControllerSystem.prototype.deviceCheck = function (data) {
 
 ControllerSystem.prototype.callHome = function () {
   var self = this;
-
-  try {
-    var macaddr = fs.readFileSync('/sys/class/net/eth0/address', 'utf8');
-    var anonid = macaddr.toString().replace(':', '');
-  } catch (e) {
-    console.log(e);
-    var anonid = self.config.get('uuid');
-  }
-  var md5 = crypto.createHash('md5').update(anonid).digest('hex');
-  var info = self.getSystemVersion();
+  const hwuuid = this.getHwuuid();  
+  const info = this.getSystemVersion();
   info.then(function (infos) {
-    if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (md5)) {
-      console.log('Volumio Calling Home');
-      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + md5 + '" http://updates.volumio.org/downloader-v1/track-device',
+    if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (hwuuid)) {
+      self.logger.info('Volumio Calling Home...');
+      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + hwuuid + '" http://updates.volumio.org/downloader-v1/track-device',
         function (error, stdout, stderr) {
           if (error !== null) {
             if (calltrials < 3) {
               setTimeout(function () {
-                self.logger.info('Cannot call home: ' + error + ' retrying in 5 seconds, trial ' + calltrials);
+                self.logger.info(`Cannot call home [attempt ${calltrials}]`, error);
                 calltrials++;
                 self.callHome();
               }, 10000);
@@ -1016,16 +1009,11 @@ ControllerSystem.prototype.getLabelForSelect = function (options, key) {
 };
 
 ControllerSystem.prototype.getHwuuid = function () {
-  var self = this;
-  var defer = libQ.defer();
-
-  try {
-    var macaddr = fs.readFileSync('/sys/class/net/eth0/address', 'utf8');
-    var anonid = macaddr.toString().replace(':', '');
-  } catch (e) {
-    var anonid = this.config.get('uuid');
-  }
-
+  const interfaces = this.getNetworkInterfaces();
+  this.logger.info(`Found active network interface(s): ${Object.keys(interfaces)}`);
+  // Get the first public, ipv4 interfaces's mac address.
+  let macaddr = Object.values(interfaces).map(i => i.mac);
+  let anonid = macaddr.pop().replace(/:/g, '') || this.config.get('uuid');
   return crypto.createHash('md5').update(anonid).digest('hex');
 };
 
@@ -1129,3 +1117,14 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
     }
   }
 };
+
+// Use Node's inbuild convenience functions instead of parsing /sys/class/net/*
+ControllerSystem.prototype.getNetworkInterfaces = function () {
+  const interfaces = os.networkInterfaces();
+  const external = Object.keys(interfaces).reduce((res, key) => {
+    const details = interfaces[key].find(i => i.family === 'IPv4' && !i.internal);
+    details ? res[key] = details : null;
+    return res;
+  }, {});
+  return external;
+}
