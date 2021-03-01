@@ -497,8 +497,8 @@ CoreVolumeController.prototype.retrievevolume = function () {
           self.logger.error('Cannot read softvolume: ' + error);
         } else {
           var volume = stdout.replace('\n', '');
-          currentvolume = volume;
-          if (currentvolume === '0') {
+          currentvolume = parseInt(volume);
+          if (currentvolume === 0) {
             currentmute = true;
           } else {
             currentmute = false;
