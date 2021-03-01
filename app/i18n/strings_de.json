@@ -486,7 +486,8 @@
         "SELECTED_BY_THE_MEDIA": "Ausgewählt durch die Medien",
         "NEW_RELEASES": "Neuerscheinungen",
         "FEATURED_EDITOR_PICKS": "Redaktionstipps",
-        "QOBUZ_ARTISTS": "QOBUZ Interpreten"
+        "QOBUZ_ARTISTS": "QOBUZ Interpreten",
+        "FEATURED_LAST_CREATED": "Zuletzt erstellt"
     },
     "PLUGIN_CDCONTROLLER": {
         "INTERNAL_MEMORY": "Interner Speicher",
