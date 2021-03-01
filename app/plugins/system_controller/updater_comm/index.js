@@ -242,37 +242,33 @@ updater_comm.prototype.checkSystemIntegrity = function () {
 
 updater_comm.prototype.pushUpdatesSubscribe = function () {
   var self = this;
-
-  try {
-    var id = execSync('/usr/bin/md5sum /sys/class/net/eth0/address', {uid: 1000, gid: 1000}).toString().split(' ')[0];
-    var isHw = true;
-  } catch (e) {
-    var id = self.getAdditionalConf('system_controller', 'system', 'uuid', '0000000000000000000000000');
-    var isHw = false;
-  }
-  var systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
-  var name = self.getAdditionalConf('system_controller', 'system', 'playerName', 'none');
+  
+  const hwuuid = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getHwuuid', '');
+  const systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+  const name = self.getAdditionalConf('system_controller', 'system', 'playerName', 'none');
   systemInfo.then((info) => {
     try {
-      var socket = io.connect('http://pushupdates.volumio.org');
-      var subscribeData = {
-        'id': id,
+      const socket = io.connect('http://pushupdates.volumio.org');
+      const subscribeData = {
+        'id': hwuuid.uuid,
         'systemversion': info.systemversion,
         'variant': info.variant,
         'hardware': info.hardware,
-        'isHw': isHw,
+        'isHw': hwuuid.isHw,
         'name': name
       };
+      self.logger.debug('Subscribing for pushUpdates', subscribeData);
       socket.emit('pushUpdateSubscribe', subscribeData);
       socket.on('ack', function (data) {
+        self.logger.info('pushUpdateSubscribe acknowledged');
         socket.disconnect();
       });
     } catch (e) {
-      self.logger.error('Could not establish connection with Push Updates Facility: ' + e);
+      self.logger.error('Could not establish connection with Push Updates Facility: ', e);
     }
   })
     .fail((e) => {
-      self.logger.error('Could not retrieve system info and connect to Push Updates Facility: ' + e);
+      self.logger.error('Could not retrieve system info and connect to Push Updates Facility: ', e);
     });
 };
 

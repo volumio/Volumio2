@@ -578,7 +578,7 @@ ControllerSystem.prototype.callHome = function () {
   info.then(function (infos) {
     if ((infos.variant) && (infos.systemversion) && (infos.hardware) && (hwuuid)) {
       self.logger.info('Volumio Calling Home...');
-      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + hwuuid + '" http://updates.volumio.org/downloader-v1/track-device',
+      exec('/usr/bin/curl -X POST --data-binary "device=' + infos.hardware + '&variante=' + infos.variant + '&version=' + infos.systemversion + '&uuid=' + hwuuid.uuid + '" http://updates.volumio.org/downloader-v1/track-device',
         function (error, stdout, stderr) {
           if (error !== null) {
             if (calltrials < 3) {
@@ -1010,11 +1010,17 @@ ControllerSystem.prototype.getLabelForSelect = function (options, key) {
 
 ControllerSystem.prototype.getHwuuid = function () {
   const interfaces = this.getNetworkInterfaces();
-  this.logger.info(`Found active network interface(s): ${Object.keys(interfaces)}`);
+  this.logger.info(`Found ${Object.keys(interfaces).length} active network interface(s): `, Object.keys(interfaces));
   // Get the first public, ipv4 interfaces's mac address.
-  let macaddr = Object.values(interfaces).map(i => i.mac);
-  let anonid = macaddr.pop().replace(/:/g, '') || this.config.get('uuid');
-  return crypto.createHash('md5').update(anonid).digest('hex');
+  const macaddr = Object.values(interfaces).map(i => i.mac);
+  let hwid;
+  if (macaddr) {
+    hwid = { uuid: macaddr.pop().replace(/:/g, ''), isHW: true };
+  } else {
+    hwid = { uuid: this.config.get('uuid'), isHW: false };
+  };
+  hwid.uuid = crypto.createHash('md5').update(hwid.uuid).digest('hex');
+  return hwid;
 };
 
 ControllerSystem.prototype.getPrivacySettings = function () {
