@@ -348,7 +348,7 @@ PluginManager.prototype.isEnabled = function (category, pluginName) {
 
   // MyVolumio plugins aren't very good at updating the enabled flag - just check that 
   // the plugin is valid
-  if(self.myVolumioPluginManager.checkIfPluginIsInCurrentPlan(category, pluginName)) {
+  if(self.myVolumioPluginManager !== undefined && self.myVolumioPluginManager.checkIfPluginIsInCurrentPlan(category, pluginName)) {
     return true;
   }
 
