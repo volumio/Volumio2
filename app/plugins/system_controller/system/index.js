@@ -531,7 +531,7 @@ ControllerSystem.prototype.deviceDetect = function (data) {
         } else {
           var hardwareLine = stdout.split(':');
           var cpuidparam = hardwareLine[1].replace(/\s/g, '');
-          var deviceslist = fs.readJson(('/volumio/app/plugins/system_controller/system/devices.json'), 
+          var deviceslist = fs.readJson(('/volumio/app/plugins/system_controller/system/devices.json'),
           { encoding: 'utf8', throws: false },
           function (err, deviceslist) {
             if(deviceslist && deviceslist.devices) {
@@ -546,7 +546,7 @@ ControllerSystem.prototype.deviceDetect = function (data) {
               defer.resolve('unknown');
             } else {
               defer.resolve('unknown');
-            } 
+            }
           });
           // self.logger.info('CPU ID ::'+cpuidparam+'::');
         }
@@ -785,47 +785,50 @@ ControllerSystem.prototype.installToDisk = function (data) {
 
   var hwdevice = data.hwdevice;
 
-  self.notifyInstallToDiskStatus({'progress': 0, 'status': 'started'});
-  var ddsizeRaw = execSync('/bin/lsblk -b | grep -w ' + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
-  ddsize = Math.ceil(ddsizeRaw / 1024 / 1024);
-  var ddsizeRawDest = execSync('/bin/lsblk -b | grep -w ' + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+  if (hwdevice !== 'x86') {
+    // Tinker processing
+    self.notifyInstallToDiskStatus({'progress': 0, 'status': 'started'});
+    var ddsizeRaw = execSync('/bin/lsblk -b | grep -w ' + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+    ddsize = Math.ceil(ddsizeRaw / 1024 / 1024);
+    var ddsizeRawDest = execSync('/bin/lsblk -b | grep -w ' + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
 
-  if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
-    error = true;
-    var sizeError = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_TARGET_SIZE');
-    self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': sizeError});
-  } else {
-    try {
-      var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source + ' of=' + target + ' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1', {uid: 1000, gid: 1000, encoding: 'utf8'});
-    } catch (e) {
+    if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
       error = true;
-      self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot install on new Disk'});
-    }
-
-    var copyProgress = exec('usr/bin/tail -f /tmp/install_progress');
-
-    copyProgress.stdout.on('data', function (data) {
-      if (data.indexOf('%') >= 0) {
-        var progressRaw = data.split('(')[1].split('Mb)')[0];
-        var progress = Math.ceil((100 * progressRaw) / ddsize);
-        if (progress <= 100) {
-          if (progress >= 95) {
-            progress = 95;
-          }
-          self.notifyInstallToDiskStatus({'progress': progress, 'status': 'progress'});
-        }
+      var sizeError = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_TARGET_SIZE');
+      self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': sizeError});
+    } else {
+      try {
+        var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source + ' of=' + target + ' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1', {uid: 1000, gid: 1000, encoding: 'utf8'});
+      } catch (e) {
+        error = true;
+        self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot install on new Disk'});
       }
-    });
 
-    copy.on('close', function (code) {
-      if (code === 0) {
-        self.logger.info('Successfully cloned system');
+      var copyProgress = exec('usr/bin/tail -f /tmp/install_progress');
 
-        try {
-          fs.unlinkSync('/tmp/boot');
-          fs.unlinkSync('/tmp/imgpart');
-        } catch (e) {}
-        if (hwdevice !== 'x86') {
+      copyProgress.stdout.on('data', function (data) {
+        self.logger.info('Data: ' + data);
+        if (data.indexOf('%') >= 0) {
+          var progressRaw = data.split('(')[1].split('Mb)')[0];
+          var progress = Math.ceil((100 * progressRaw) / ddsize);
+          if (progress <= 100) {
+            if (progress >= 95) {
+              progress = 95;
+            }
+            self.notifyInstallToDiskStatus({'progress': progress, 'status': 'progress'});
+          }
+        }
+      });
+
+      copy.on('close', function (code) {
+        if (code === 0) {
+          self.logger.info('Successfully cloned system');
+
+          try {
+            fs.unlinkSync('/tmp/boot');
+            fs.unlinkSync('/tmp/imgpart');
+          } catch (e) {}
+
           try {
             if (target === '/dev/mmcblk0' || target === '/dev/mmcblk1') {
               target = target + 'p';
@@ -842,13 +845,55 @@ ControllerSystem.prototype.installToDisk = function (data) {
             error = true;
             self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot prepare system for resize'});
           }
-        } else {
-          self.logger.info('installToDisk for x86 device: no sentinel needed');
-        }
 
-        if (!error) {
-          self.notifyInstallToDiskStatus({'progress': 100, 'status': 'done'});
+          if (!error) {
+            self.notifyInstallToDiskStatus({'progress': 100, 'status': 'done'});
+          }
+        } else {
+          self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error'});
         }
+      });
+    }
+  } else {
+
+
+    var sep = '';
+    if ((target.indexOf('mmcblk') >= 0) || (target.indexOf('nvme') >= 0)) {
+      sep = 'p';
+    }
+    var boot_part = target + sep + '1';
+    var volumio_part = target + sep + '2';
+    var data_part = target + sep + '3';
+
+    var partarr = fs.readFileSync('/boot/partconfig.json', 'utf8');
+    var partparams = JSON.parse(partarr);
+    var boot_start = partparams.params.find(item => item.name === 'boot_start').value;
+    var boot_end = partparams.params.find(item => item.name === 'boot_end').value;
+    var volumio_end = partparams.params.find(item => item.name === 'volumio_end').value;
+    var boot_type = partparams.params.find(item => item.name === 'boot_type').value;
+
+    self.notifyInstallToDiskStatus({'progress': 0, 'status': 'started'});
+    execSync('/bin/echo "0" > /tmp/install_progress', { uid: 1000, gid: 1000, encoding: 'utf8'});
+
+    try {
+      var fastinstall = exec('/usr/bin/sudo /usr/local/bin/x86Installer.sh ' + target + ' ' + boot_type + ' ' + boot_start + ' ' + boot_end + ' ' + volumio_end + ' ' + boot_part + ' ' + volumio_part + ' ' + data_part, { uid: 1000, gid: 1000, encoding: 'utf8'});
+    } catch (e) {
+        error = true;
+        self.logger.info('Install to disk failed');
+        self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot install on new Disk'});
+    }
+
+    var installProgress = exec('usr/bin/tail -f /tmp/install_progress');
+
+    installProgress.stdout.on('data', function (data) {
+      self.logger.info('Progress: ' + data);
+      self.notifyInstallToDiskStatus({'progress': data, 'status': 'progress'});
+    });
+
+    fastinstall.on('close', function (code) {
+      if (code === 0) {
+        self.logger.info('Successfully installed x86 factory copy to disk' + target);
+        self.notifyInstallToDiskStatus({'progress': 100, 'status': 'done'});
       } else {
         self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error'});
       }
@@ -1099,19 +1144,19 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
         message: 'Starting Live Log...\n'
       };
       this.commandRouter.broadcastMessage('LLogOpen', liveLogData);
-      
+
       if (this.livelogchild) {
         this.logger.info('Killing previous LiveLog session');
         this.livelogchild.kill();
       }
       this.livelogchild = spawn('/bin/journalctl',args, defaults);
-      
+
       this.livelogchild.on('error', (d) => {
         this.logger.info('Error spawning LiveLog session');
         liveLogData.message = d.toString();
         this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
       });
-      
+
       this.livelogchild.stdout.on('data', (d) => {
         liveLogData.message = d.toString();
         this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
