@@ -26,7 +26,7 @@
         "BACKGROUND_DELETED": "Bakgrunden togs bort",
         "BROWSE_SOURCES_VISIBILITY": "Synlighet för källor",
         "COMPILATION_METADATA": "Metadatafält för samlingar",
-        "COMPILATION_METADATA_DOC": "Konfigurera metadatafälten som ska användas för att beskriva albumartist i samlingar eller album med 'flera artister', använd kommaseparerade fält",
+        "COMPILATION_METADATA_DOC": "Konfigurera metadatafälten som ska användas för att beskriva albumartist i samlingar eller album med 'flera artister', använd kommaseparerade fält.",
         "EXTRALARGE": "Extrastor",
         "IMAGE_MUST_BE_LESS_THAN": "Bildstorleken måste vara mindre än ",
         "LARGE": "Stor",
