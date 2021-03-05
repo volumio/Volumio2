@@ -26,7 +26,7 @@
         "BACKGROUND_DELETED": "Fondo eliminado",
         "BROWSE_SOURCES_VISIBILITY": "Visibilidad de fuentes",
         "COMPILATION_METADATA": "Valores de campos para Compilaciones",
-        "COMPILATION_METADATA_DOC": "Configura los valores usados para describir compilaciones o álbumes de 'múltiples artistas' en ALBUMARTIST, usa valores separados por comas",
+        "COMPILATION_METADATA_DOC": "Configura los valores usados para describir compilaciones o álbumes de 'múltiples artistas' en ALBUMARTIST, usa valores separados por comas.",
         "EXTRALARGE": "Extra grande",
         "IMAGE_MUST_BE_LESS_THAN": "El tamaño de la imagen debe ser menor que",
         "LARGE": "Grande",
