@@ -189,7 +189,7 @@ ControllerSystem.prototype.setConf = function (varName, varValue) {
   var defer = libQ.defer();
 
   self.config.set(varName, varValue);
-  if (varName = 'player_name') {
+  if (varName === 'player_name') {
     var player_name = varValue;
 
     for (var i in self.callbacks) {
