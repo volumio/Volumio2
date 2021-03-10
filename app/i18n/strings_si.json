@@ -1,1 +1,10 @@
-{}
+{
+    "COMMON": {
+        "SAVE": "සුරකින්න",
+        "CANCEL": "අවලංගු",
+        "CLOSE": "වසන්න"
+    },
+    "ALARM": {
+        "SLEEP_MODE_HOUR": "හෝරා(ව)"
+    }
+}
