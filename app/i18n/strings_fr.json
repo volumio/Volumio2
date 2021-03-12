@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "Active ou désactive le WiFi.",
         "WIRELESS_NETWORK": "Réseau sans fil (WiFi)",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Cet appareil va se connecter au réseau",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "Quand la configuration sera terminée",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "quand la configuration sera terminée.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Échec de connexion au réseau",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Réessayez ou passez à l'étape suivante",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Connecté au réseau",
