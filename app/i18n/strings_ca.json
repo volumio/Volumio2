@@ -33,7 +33,7 @@
         "MEDIUM": "Mitjana",
         "MEGA": "Super gran",
         "METADATA_IMAGE": "Mostra la caràtula de l'àlbum incrustada",
-        "METADATA_IMAGE_DOC": "Quan està habilitat, si no es pot trobar cap arxiu de caràtula de l'àlbum a la carpeta, el sistema intentarà extreure qualsevol caràtula incrustada en els seus arxius de música. Això probablement augmentarà els temps de càrrega de caràtules d'àlbum",
+        "METADATA_IMAGE_DOC": "Quan està habilitat, si no es pot trobar cap arxiu de caràtula de l'àlbum a la carpeta, el sistema intentarà extreure qualsevol caràtula incrustada en els seus arxius de música. Això probablement augmentarà els temps de càrrega de caràtules d'àlbum.",
         "MUSIC_LIBRARY_SETTINGS": "Configuració de la biblioteca musical",
         "NEW_BACKGROUND_APPLIED": "S'ha canviat el fons",
         "NEW_LANGUAGE_SET": "Idioma canviat",
