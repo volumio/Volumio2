@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "Activar o desactivar les xarxes sense fils. Això podria millorar la qualitat de so de el sistema.",
         "WIRELESS_NETWORK": "Xarxa sense fils",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "La unitat es connectarà a la xarxa",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "quan es completi la primera configuració",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "quan es completi la primera configuració.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "No s'ha pogut connectar a la xarxa",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Torna-ho a provar o continua amb el pas següent",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Connectat amb èxit a la xarxa",
