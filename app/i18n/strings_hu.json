@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "A vezeték nélküli hálózat engedélyezése vagy letiltása. Ez javíthatja a rendszer hangminőségét.",
         "WIRELESS_NETWORK": "Vezeték nélküli hálózat",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Az egység a következő hálózathoz csatlakozik",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "miután az első telepítés befejeződik",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "miután az első telepítés befejeződik.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Nem sikerült csatlakozni a hálózathoz",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Kérjük, próbálkozzon újra, vagy folytassa a következő lépéssel",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Sikeresen csatlakozott a hálózathoz",
