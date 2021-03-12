@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "Włącz lub wyłącz sieć bezprzewodową urządzenia. To może mieć wpływ na jakość odtwarzanego dźwięku.",
         "WIRELESS_NETWORK": "Sieć bezprzewodowa",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Urządzenie zostanie podłączone do sieci",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "po zakończeniu pierwszej konfiguracji systemu",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "po zakończeniu pierwszej konfiguracji systemu.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Podłączenie do sieci nie powiodło się",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Spróbuj ponownie lub przejdź do kolejnego kroku",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Podłączenie do sieci zakończyło się sukcesem",
@@ -302,7 +302,7 @@
         "SQ_HIGH": "High",
         "SQ_LOSSLESS": "Lossless",
         "SQ_HI_RES": "Hi-Res",
-        "SQ_HIGHEST_POSSIBLE":"Highest Possible"
+        "SQ_HIGHEST_POSSIBLE": "Highest Possible"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Dodane",
