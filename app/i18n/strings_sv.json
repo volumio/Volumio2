@@ -185,7 +185,7 @@
         "WIRELESS_ENABLED_DOC": "Aktivera eller inaktivera trådlöst nätverk. Detta kan förbättra systemets ljudkvalitet.",
         "WIRELESS_NETWORK": "Trådlöst nätverk",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Enheten kommer att ansluta till nätverket",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "när den första konfigurationen är slutförd",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "när den första konfigurationen är slutförd.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Det gick inte att ansluta till nätverket",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Försök igen eller gå vidare till nästa steg",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Anslutningen till nätverket upprättades",
