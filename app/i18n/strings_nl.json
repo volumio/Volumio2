@@ -184,7 +184,7 @@
         "WIRELESS_ENABLED_DOC": "Schakel draadloos netwerk in of uit, dit kan de geluidskwaliteit van het systeem verbeteren",
         "WIRELESS_NETWORK": "Draadloos netwerk",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Het apparaat maakt verbinding met het netwerk",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "wanneer de eerste installatie voltooid is",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "wanneer de eerste installatie voltooid is.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Kan geen verbinding maken met het netwerk",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Probeer het opnieuw of ga door naar de volgende stap",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Succesvol verbonden met netwerk",
