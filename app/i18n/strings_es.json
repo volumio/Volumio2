@@ -33,7 +33,7 @@
         "MEDIUM": "Mediana",
         "MEGA": "Super grande",
         "METADATA_IMAGE": "Mostrar la carátula del álbum incrustada",
-        "METADATA_IMAGE_DOC": "Cuando está habilitado, si no se puede encontrar ningún archivo de carátula de álbum en la carpeta, el sistema intentará extraer cualquier carátula incrustada en sus archivos de música. Esto probablemente aumentará los tiempos de carga de caratulas de álbum",
+        "METADATA_IMAGE_DOC": "Cuando está habilitado, si no se puede encontrar ningún archivo de carátula de álbum en la carpeta, el sistema intentará extraer cualquier carátula incrustada en sus archivos de música. Esto probablemente aumentará los tiempos de carga de caratulas de álbum.",
         "MUSIC_LIBRARY_SETTINGS": "Configuración de la biblioteca musical",
         "NEW_BACKGROUND_APPLIED": "Fondo cambiado",
         "NEW_LANGUAGE_SET": "Idioma cambiado",
