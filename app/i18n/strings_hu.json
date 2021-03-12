@@ -33,7 +33,7 @@
         "MEDIUM": "Közepes",
         "MEGA": "Mega-nagy",
         "METADATA_IMAGE": "Beágyazott albumborító megjelenítése",
-        "METADATA_IMAGE_DOC": "Ha engedélyezett, és az albumborító fájl nem található az album mappájában, a rendszer a zene fájlokba ágyazott borító képet próbálja használni. Ez valószínűsíthetően megnöveli az albumborítók betöltési idejét",
+        "METADATA_IMAGE_DOC": "Ha engedélyezett, és az albumborító fájl nem található az album mappájában, a rendszer a zene fájlokba ágyazott borító képet próbálja használni. Ez valószínűsíthetően megnöveli az albumborítók betöltési idejét.",
         "MUSIC_LIBRARY_SETTINGS": "Zenei könyvtár beállításai",
         "NEW_BACKGROUND_APPLIED": "Új háttérkép beállítva",
         "NEW_LANGUAGE_SET": "Új nyelv beállítva",
