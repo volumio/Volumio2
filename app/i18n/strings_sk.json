@@ -17,7 +17,7 @@
         "ALBUMART_CACHE_CLEARED": "Úložisko obrázkov albumov bolo úspešne vyčistené",
         "ALBUMART_CACHE_CLEAR_ERROR": "Chyba pri čistení úložiska albumov, prosím skúste zopakovať o pár minút",
         "ALBUMART_RESET_CACHE": "Vyčistiť úložisko obrázkov albumov",
-        "ALBUMART_RESET_CACHE_DOC": "Systém ukladá obrázky albumov pre zvýšenie výkonu, ale toto zabraňuje zobrazovať novo pridané obrázky. Vyčistením úložiska obrázkov sa budú zobrazovať aj nové obrázky",
+        "ALBUMART_RESET_CACHE_DOC": "Systém ukladá obrázky albumov pre zvýšenie výkonu, ale toto zabraňuje zobrazovať novo pridané obrázky. Vyčistením úložiska obrázkov sa budú zobrazovať aj nové obrázky.",
         "ALBUMART_SETTINGS": "Nastavenie obálky albumu",
         "APPEARANCE": "Vzhľad",
         "ARTIST": "Umelec",
