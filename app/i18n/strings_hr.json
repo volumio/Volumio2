@@ -184,7 +184,7 @@
         "WIRELESS_ENABLED_DOC": "Omogućite ili onemogućite bežično umrežavanje. To bi moglo poboljšati kvalitetu zvuka u sustavu.",
         "WIRELESS_NETWORK": "Bežična mreža",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Jedinica će se povezati u mrežu",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "kada prvo postavljanje bude dovršeno",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "kada prvo postavljanje bude dovršeno.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Povezivanje s mrežom nije uspjelo",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Pokušajte ponovo ili prijeđite na sljedeći korak",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Uspješno povezan s mrežom",
