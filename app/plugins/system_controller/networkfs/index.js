@@ -13,6 +13,8 @@ var removableMountPoint = '/mnt/';
 var mountPointFile = '/data/configuration/mountPoints';
 const { v4: uuidv4 } = require('uuid');
 
+var ignoreDeviceAction = false;
+
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
 
@@ -158,7 +160,7 @@ ControllerNetworkfs.prototype.setAdditionalConf = function () {
 ControllerNetworkfs.prototype.initShares = function () {
   var self = this;
   var deferList = [];
-  
+
   var keys = config.getKeys('NasMounts');
   for (var i in keys) {
     var key = keys[i];
@@ -985,6 +987,18 @@ ControllerNetworkfs.prototype.umountShare = function (data) {
   }
 };
 
+ControllerNetworkfs.prototype.enableDeviceActions = function () {
+  var self = this;
+  ignoreDeviceAction = false;
+  self.logger.info('Mount handler: device actions (re-)enabled');
+}
+
+ControllerNetworkfs.prototype.disableDeviceActions = function () {
+  var self = this;
+  ignoreDeviceAction = true;
+  self.logger.info('Mount handler: device actions disabled');
+}
+
 ControllerNetworkfs.prototype.initUdevWatcher = function () {
   var self = this;
 
@@ -1011,7 +1025,9 @@ ControllerNetworkfs.prototype.initUdevWatcher = function () {
   function deviceAddAction (device) {
     switch (device.DEVTYPE) {
       case 'partition':
-        self.mountDevice(device);
+        if (!ignoreDeviceAction) {
+          self.mountDevice(device);
+        }
         break;
       case 'disk':
         break;
@@ -1023,7 +1039,9 @@ ControllerNetworkfs.prototype.initUdevWatcher = function () {
   function deviceRemoveAction (device) {
     switch (device.DEVTYPE) {
       case 'partition':
-        self.umountDevice(device);
+        if (!ignoreDeviceAction) {
+          self.umountDevice(device);
+        }
         break;
       case 'disk':
         break;

@@ -22,7 +22,6 @@ function ControllerSystem (context) {
   self.context = context;
   self.commandRouter = self.context.coreCommand;
   self.configManager = self.context.configManager;
-
   self.logger = self.context.logger;
   self.callbacks = [];
 }
@@ -856,6 +855,7 @@ ControllerSystem.prototype.installToDisk = function (data) {
     }
   } else {
 
+    self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'disableDeviceActions', '');
 
     var sep = '';
     if ((target.indexOf('mmcblk') >= 0) || (target.indexOf('nvme') >= 0)) {
@@ -897,6 +897,7 @@ ControllerSystem.prototype.installToDisk = function (data) {
       } else {
         self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error'});
       }
+      self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'enableDeviceActions', '');
     });
   }
 };
