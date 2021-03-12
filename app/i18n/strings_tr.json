@@ -184,7 +184,7 @@
         "WIRELESS_ENABLED_DOC": "Kablosuz Ağı etkinleştirin veya devredışı bırakın. Bu sistemin Ses kalitesini iyileştirebilir.",
         "WIRELESS_NETWORK": "Kablosuz Ağ",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Cihaz ağa bağlanacak",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "ilk kurulum tamamlandığında",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "ilk kurulum tamamlandığında.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Ağa bağlantı başarısız",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Lütfen yeniden deneyin veya sonraki adıma geçin",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Ağa başarıyla bağlandı",
