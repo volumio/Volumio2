@@ -184,7 +184,7 @@
         "WIRELESS_ENABLED_DOC": "Включить или отключить беспроводную сеть. Это может улучшить качество звука системы.",
         "WIRELESS_NETWORK": "Беспроводная сеть",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Устройство подключится к сети",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "когда будет завершена первоначальная настройка",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "когда будет завершена первоначальная настройка.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Не удалось подключиться к сети",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Пожалуйста, повторите попытку или перейдите к следующему шагу",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Успешно подключен к сети",
