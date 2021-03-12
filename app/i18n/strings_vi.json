@@ -33,7 +33,7 @@
         "MEDIUM": "Trung Bình",
         "MEGA": "Siêu to khổng lồ",
         "METADATA_IMAGE": "Hiển thị bìa album nhúng trong file nhạc",
-        "METADATA_IMAGE_DOC": "Khi kích hoạt, nếu không tìm thấy bìa album trong thư mục, hệ thống sẽ trích xuất một bìa album được nhúng bất kỳ trong file nhạc . Điều này sẽ làm tăng thời gian tải bìa album",
+        "METADATA_IMAGE_DOC": "Khi kích hoạt, nếu không tìm thấy bìa album trong thư mục, hệ thống sẽ trích xuất một bìa album được nhúng bất kỳ trong file nhạc . Điều này sẽ làm tăng thời gian tải bìa album.",
         "MUSIC_LIBRARY_SETTINGS": "Cài đặt thư viện nhạc",
         "NEW_BACKGROUND_APPLIED": "Áp dụng hình nền mới",
         "NEW_LANGUAGE_SET": "Thiết lập ngôn ngữ mới",
