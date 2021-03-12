@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "Enable or disable Wireless Networking. This might improve Sound quality of the system.",
         "WIRELESS_NETWORK": "Wireless Network",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "The unit will connect to network",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "when first setup will be completed",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "when first setup will be completed.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Failed to connect to network",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Please retry or proceed to next step",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Successfully connected to network",
