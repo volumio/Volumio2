@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "Habilita o deshabilita las redes inalámbricas. Esto podría mejorar la calidad del sonido del sistema.",
         "WIRELESS_NETWORK": "Red inalámbrica",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "La unidad se conectará a la red",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "cuando se complete la primera configuración",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "cuando se complete la primera configuración.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "No se pudo conectar a la red",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Vuelve a intentarlo o continúa con el paso siguiente",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Conectado con éxito a la red",
