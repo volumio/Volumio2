@@ -33,7 +33,7 @@
         "MEDIUM": "Mittel",
         "MEGA": "Mega groß",
         "METADATA_IMAGE": "Eingebettete Albumbilder anzeigen",
-        "METADATA_IMAGE_DOC": "Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern",
+        "METADATA_IMAGE_DOC": "Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern.",
         "MUSIC_LIBRARY_SETTINGS": "Einstellungen für Musikbibliothek",
         "NEW_BACKGROUND_APPLIED": "Neuer Hintergrund gesetzt",
         "NEW_LANGUAGE_SET": "Neue Sprache gesetzt",
