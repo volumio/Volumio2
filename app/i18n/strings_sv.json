@@ -33,7 +33,7 @@
         "MEDIUM": "Medium",
         "MEGA": "Mega",
         "METADATA_IMAGE": "Visa inbäddade skivomslag",
-        "METADATA_IMAGE_DOC": "Om aktiverad och ingen fil med skivomslag kan hittas i mappen, kommer systemet att försöka extrahera eventuella skivomslag som finns inbäddade i dina musikfiler. Detta kommer förmodligen att öka inläsningstiden för skivomslag",
+        "METADATA_IMAGE_DOC": "Om aktiverad och ingen fil med skivomslag kan hittas i mappen, kommer systemet att försöka extrahera eventuella skivomslag som finns inbäddade i dina musikfiler. Detta kommer förmodligen att öka inläsningstiden för skivomslag.",
         "MUSIC_LIBRARY_SETTINGS": "Inställningar för musikbibliotek",
         "NEW_BACKGROUND_APPLIED": "Ny bakgrund används",
         "NEW_LANGUAGE_SET": "Nytt språk valt",
