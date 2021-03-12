@@ -184,7 +184,7 @@
         "WIRELESS_ENABLED_DOC": "Zakázání bezdrátového připojení může zlepšit kvalitu zvuku zařízení.",
         "WIRELESS_NETWORK": "Bezdrátová síť",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "Přístroj se připojí k síti",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "když bude prvotní nastavení dokončeno",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "když bude prvotní nastavení dokončeno.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Nepodařilo se připojit k síti ",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Zkuste znovu nebo pokračujte dalším krokem",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Úspěšně připojeno k síti",
