@@ -33,7 +33,7 @@
         "MEDIUM": "Moyenne",
         "MEGA": "Mega",
         "METADATA_IMAGE": "Montrer les images inclues dans les fichiers",
-        "METADATA_IMAGE_DOC": "Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement",
+        "METADATA_IMAGE_DOC": "Quand activé, si aucune image n'est trouvée dans le dossier, Volumio tentera d'extraire les images inclues dans les fichiers. Augmente le temps de chargement.",
         "MUSIC_LIBRARY_SETTINGS": "Réglages de la bibliothèque",
         "NEW_BACKGROUND_APPLIED": "Nouveau fond d'écran appliqué",
         "NEW_LANGUAGE_SET": "Nouvelle langue appliquée",
