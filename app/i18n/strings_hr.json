@@ -33,7 +33,7 @@
         "MEDIUM": "Srednja",
         "MEGA": "Mega velika",
         "METADATA_IMAGE": "Prikaži umetnute slike albuma",
-        "METADATA_IMAGE_DOC": "Ako je omogućeno, ako se u mapi ne može pronaći nijedna albumska datoteka, sustav će pokušati izvući bilo koju sliku albuma ugrađenu u vaše glazbene datoteke. To će najvjerojatnije povećati vrijeme učitavanja albuma",
+        "METADATA_IMAGE_DOC": "Ako je omogućeno, ako se u mapi ne može pronaći nijedna albumska datoteka, sustav će pokušati izvući bilo koju sliku albuma ugrađenu u vaše glazbene datoteke. To će najvjerojatnije povećati vrijeme učitavanja albuma.",
         "MUSIC_LIBRARY_SETTINGS": "Postavke glazbene biblioteke",
         "NEW_BACKGROUND_APPLIED": "Nova pozadina je dodana",
         "NEW_LANGUAGE_SET": "Novi skup jezika",
