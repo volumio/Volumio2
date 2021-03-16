@@ -234,7 +234,7 @@ function customize_package(pluginName, path, category) {
         package.volumio_info.plugin_type = category;
         
         var defaultNodeRange = getRange(semver.coerce(process.versions.node));
-        var defaultVolumioRange = getRange(semver.coerce(getVolumioVersion()));
+        var defaultVolumioRange = getRange(semver.coerce(getVolumioVersion(), { loose: true }));
         
         var semVerRangeCheck = function(range) {
             if(range === '' || range === null) {

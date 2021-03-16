@@ -825,7 +825,9 @@ function InterfaceWebUI (context) {
       }
       
       if (updateMessage && updateMessage.updateavailable === true) {
-         var updateVersion = semver.coerce(updateMessage.title);
+         // Always use a loose parse as Volumio versions aren't properly semver.
+         // For example 3.054 isn't valid due to the leading '0'.
+         var updateVersion = semver.coerce(updateMessage.title, { loose: true });
          if(updateVersion !== null) {
              var broken = self.commandRouter.pluginManager.listPluginsBrokenByNewVersion(updateVersion.version);
              if(broken.length > 0) {
