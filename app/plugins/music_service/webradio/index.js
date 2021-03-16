@@ -360,14 +360,14 @@ ControllerWebradio.prototype.listRadioForGenres = function (curUri) {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
             var bitrate = children[i].attr('br').value();
-
+            var streamcodec = children[i].attr('mt').value();
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: bitrate + ' kB/s',
-              album: ' ',
+              artist: self.formatCodecString(streamcodec) + ' (' + bitrate + ' kbps)',
+              album: '',
               icon: 'fa fa-microphone',
               uri: 'http://yp.shoutcast.com' + '/sbin/tunein-station.m3u' + '?id=' + id
             };
@@ -435,13 +435,14 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
             var bitrate = children[i].attr('br').value();
+            var streamcodec = children[i].attr('mt').value();
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: bitrate + ' kB/s',
-              album: ' ',
+              artist: self.formatCodecString(streamcodec) + ' (' + bitrate + ' kbps)',
+              album: '',
               uri: 'http://yp.shoutcast.com' + base + '?id=' + id
             };
             try {
@@ -964,13 +965,15 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
             var bitrate = children[i].attr('br').value();
+            var streamcodec = children[i].attr('mt').value();
+
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: bitrate + ' kB/s',
-              album: ' ',
+              artist: self.formatCodecString(streamcodec) + ' (' + bitrate + ' kbps)',
+              album: '',
               uri: 'http://yp.shoutcast.com' + base + '?id=' + id
             };
 
@@ -1422,8 +1425,8 @@ ControllerWebradio.prototype.getNavigationItem = function (node, category) {
     service: 'webradio',
     type: servType,
     title: node.text,
-    artist: node.type == "audio" ? node.bitrate + ' kB/s' : '',
-    album: node.type == "audio" ? ' ' : '',
+    artist: node.type == "audio" ? self.formatCodecString(node.formats) + ' (' + node.bitrate + ' kbps)' : '',
+    album: node.type == '',
     albumart: albumart,
     icon: icon,
     uri: uri
@@ -1431,6 +1434,35 @@ ControllerWebradio.prototype.getNavigationItem = function (node, category) {
 
   return item;
 };
+ControllerWebradio.prototype.formatCodecString = function (text) {
+    var self = this;
+    // use first codec entry, if multiple are supplied
+    var codec=text.split(',')[0];
+    var codecString;
+    
+    switch (codec) {
+      case 'audio/flac':
+        codecString = 'flac';
+        break;
+      case 'audio/x-flac':
+        codecString = 'flac';
+        break;
+      case 'audio/aacp':
+        codecString = 'aac';
+        break;
+      case 'audio/aac':
+        codecString = 'aac';
+        break;
+      case 'audio/mpeg':
+        codecString = 'mp3';
+        break;
+      case 'audio/x-ms-wma':
+        codecString = 'wma';
+      default:
+        codecString = codec;
+    }
+    return codecString.toUpperCase();
+}
 
 ControllerWebradio.prototype.getNavigationItemIcon = function (text) {
   var self = this;
