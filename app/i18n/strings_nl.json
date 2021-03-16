@@ -124,7 +124,11 @@
         "TRACKS": "Tracks",
         "UPDATING_MUSIC_DB_WAIT_MESSAGE": "De muziek wordt gescand en het pictogram linksonder blijft ronddraaien totdat uw bibliotheek succesvol is geïndexeerd. Aangezien het systeem mogelijk traag kan reageren tijdens deze bewerking, moet u het systeem niet gebruiken terwijl muziek wordt geïndexeerd.",
         "USERNAME": "Gebruikersnaam",
-        "WITH": "met"
+        "WITH": "met",
+        "CONNECT": "Verbinden",
+        "SEARCH_RESULTS_DESC": "Gewenst aantal zoek resultaten",
+        "SEARCH_RESULTS_TITLE": "Aantal zoek resultaten",
+        "PLEASE_WAIT": "Even geduld a.u.b."
     },
     "MAIN_MENU": {
         "ALARM": "Wekker",
@@ -147,7 +151,8 @@
         "GOTO_DEVICE_LIST": "Ga naar apparaat-lijst",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio niet ingeschakeld op dit apparaat",
         "PLAN_REQUIRED": "Plan benodigd",
-        "UPGRADE_YOUR_PLAN_NOW": "Upgrade je plan nu"
+        "UPGRADE_YOUR_PLAN_NOW": "Upgrade je plan nu",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio heeft ondersteuning voor streamingdiensten zoals TIDAL, QOBUZ en High Res Audio, evenals vele extra plug-ins. Om volledige toegang toe te krijgen, heeft u een MyVolumio-abonnement nodig. Bezoek myvolumio.org voor een gratis proefperiode!"
     },
     "NETWORK": {
         "AUTOMATIC_IP": "Automatisch IP",
@@ -163,7 +168,7 @@
         "HOTSPOT_CHANNEL_DOC": "Verander het hotspot-zendkanaal. Dit kan handig zijn om de draadloze verbinding via hotspot te verbeteren als er al meerdere draadloze netwerken zijn.",
         "HOTSPOT_CONF_ERROR": "Hotspot configuratiefout",
         "HOTSPOT_FALLBACK": "Terugvallen op Hotspot",
-        "HOTSPOT_FALLBACK_DOC": "Indien ingeschakeld zal de Hotspot starten als de verbinding met het Draadloos Netwerk is weggevallen. Indien uitgeschakeld zal er worden geprobeerd om een verbinding te maken met een bekend draadloos netwerk.",
+        "HOTSPOT_FALLBACK_DOC": "Indien ingeschakeld zal de Hotspot starten als de verbinding met het Draadloze Netwerk is weggevallen. Indien uitgeschakeld zal er worden geprobeerd om een verbinding te maken met een bekend draadloos netwerk.",
         "HOTSPOT_NAME": "Hotspot naam",
         "HOTSPOT_PASSWORD": "Hotspot wachtwoord",
         "HOTSPOT_PASSWORD_DOC": "Verander het standaard hotspot-wachtwoord, gebruik een wachtwoord van minimaal 8 tekens",
@@ -191,7 +196,9 @@
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "Ga door naar de volgende stap",
         "WIRELESS_RESTART_ERROR": "Error bij herstarten draadloos netwerk: ",
         "WIRELESS_RESTART_SUCCESS": "Draadloos netwerk succesvol herstart",
-        "WIRELESS_RESTART_TITLE": "Draadloos netwerk herstarten"
+        "WIRELESS_RESTART_TITLE": "Draadloos netwerk herstarten",
+        "WIRELESS_NETWORK_CONNECTING_TO": "Verbinden met draadloos netwerk",
+        "WIRELESS_NETWORK_RESTART_AFTER_CONNECTION": "Uw verbinding wordt nu verbroken. Maak opnieuw verbinding met uw gewone draadloze netwerk om uw apparaat daar te vinden, zodra er verbinding is gemaakt"
     },
     "NETWORKFS": {
         "ALIAS_DOC": "Kies een alias die weergegeven wordt in NAS Mounts",
@@ -284,7 +291,16 @@
         "VOLUME_CURVE_MODE_DOC": "Natuurlijk (logaritmisch) is hoe de meeste mensen gewend zijn aan volumevariaties, verander het niet tenzij de volumecurve te steil is in uw systeem.",
         "VOLUME_NORMALIZATION": "Volume normalisatie",
         "VOLUME_NORMALIZATION_DOC": "Indien ingeschakeld zal het volume van elke track hetzelfde zijn. Dit kan de geluidskwaliteit verminderen.",
-        "VOLUME_OPTIONS": "Volume opties"
+        "VOLUME_OPTIONS": "Volume opties",
+        "SQ_LOSSLESS": "Lossless",
+        "SQ_HIGH": "Hoog",
+        "SQ_LOW": "Laag",
+        "SQ_FLAC_HIRES_96": "FLAC Hi-Res 24 bit tot 96 kHz",
+        "SQ_QUALITY_DESC": "Selecteer uw gewenste geluidskwaliteit",
+        "SQ_QUALITY_TITLE": "Geluidskwaliteit",
+        "SQ_HI_RES": "Hi-Res",
+        "SQ_FLAC_HIRES_192": "FLAC Hi-Res 24 bit tot 192 kHz",
+        "SQ_HIGHEST_POSSIBLE": "Hoogst mogelijke"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Toegevoegd",
@@ -430,5 +446,67 @@
         "DEVICE_SUCCESSFULLY_CONFIGURED": "is geconfigureerd en is klaar om muziek af te spelen",
         "PLEASE_DONATE": "Indien u Volumio gebruikt, wilt u dan een donatie in overweging nemen? U kunt het verschil maken voor dit project!",
         "RUN_FIRST_CONFIG_WIZARD": "Voer de eerste configuratie-wizard uit."
+    },
+    "VOLUMIO_CLOUD_TIDAL": {
+        "MIXES": "Mixes & Radio",
+        "MENU_TIDAL": "TIDAL",
+        "MENU_MY_MUSIC": "Mijn muziek",
+        "MENU_AZ": "A-Z",
+        "MENU_DATEADDED": "Datum toegevoegd",
+        "MENU_RELEASEDATE": "Release datum",
+        "MENU_ARTIST": "Artiest",
+        "TIDAL_ALBUMS": "TIDAL Albums",
+        "TIDAL_ARTISTS": "TIDAL Artiest",
+        "TIDAL_TRACKS": "TIDAL Nummers",
+        "TIDAL_PLAYLISTS": "TIDAL Afspeellijsten",
+        "TIDAL_EPSINGLES": "TIDAL EP's & Singels",
+        "NEW": "Nieuw",
+        "TIDAL_RISING": "TIDAL Opkomend",
+        "GENRES_AND_MOODS": "Genres & Stemmingen",
+        "RECOMMENDED": "Aanbevolen",
+        "LOCAL": "Lokaal (niet van toepassing voor alle regio's)",
+        "EXCLUSIVE": "Exclusief",
+        "TOP_20": "Top 20"
+    },
+    "VOLUMIO_CLOUD_QOBUZ": {
+        "SELECTED_BY_THE_MEDIA": "Geselecteerd door de Media",
+        "NEW_RELEASES": "Nieuwe releases",
+        "MY_TRACKS": "Mijn Tracks",
+        "MY_PLAYLISTS": "Mijn Playlists",
+        "SELECTED_BY_QOBUZ": "Geselecteerd door QOBUZ",
+        "FEATURED_LAST_CREATED": "Nieuwste aangemaakt",
+        "MY_MUSIC": "Mijn Muziek",
+        "MY_ALBUMS": "Mijn Albulms",
+        "MY_ARTISTS": "Mijn Artiesten",
+        "MY_PURCHASES": "Mijn Aankopen",
+        "QOBUZ_ARTISTS": "QOBUZ Artiesten",
+        "QOBUZ_ALBUMS": "QOBUZ Albums",
+        "QOBUZ_TRACKS": "QOBUZ Nummers",
+        "QOBUZ_PLAYLISTS": "QOBUZ Afspeellijsten",
+        "DISCOVER": "Ontdek",
+        "FEATURED_EDITOR_PICKS": "Redactie keuzes"
+    },
+    "PLUGIN_CDCONTROLLER": {
+        "RIP_IN_PROGRESS_MESSAGE": "Deze CD wordt op dit moment gekopieerd en kan niet benaderd worden tot de kopieer actie gereed is",
+        "INTERNAL_MEMORY": "Intern Geheugen",
+        "CD_RIP": "CD Rippen",
+        "CD_RIP_STARTED": "CD Rippen gestart, dit kan tot 30 minuten duren. U krijgt een melding wanneer het proces is voltooid.",
+        "CD_RIP_SUCCESS": "CD is succesvol geripped",
+        "RIP_FAILED": "Kopieer proces mislukt",
+        "TARGET_HARD_DRIVE_NOT_FOUND": "Hard Drive niet gevonden",
+        "CD_RIP_ERROR": "CD RIP fout",
+        "CD_RIP_ERROR_MESSAGE": "CD Rippen kan niet gestart worden ",
+        "UNKNOWN_ARTIST": "Onbekende artiest",
+        "UNKNOWN_ALBUM": "Onbekend Album",
+        "UNKNOWN_GENRE": "Onbekend Genre"
+    },
+    "PLUGIN_TIDAL": {
+        "SECTION_ACCOUNT_BETA": "TIDAL (Experimentele plugin)",
+        "TIDAL_CONFIG_TITLE": "TIDAL Instellingen",
+        "SECTION_TIDAL_ACCOUNT": "TIDAL"
+    },
+    "PLUGIN_QOBUZ": {
+        "QOBUZ_FREE_TRIAL_DESC": "Probeer QOBUZ HIFI 1 maand gratis (t.w.v. €19,99)",
+        "QOBUZ_FREE_TRIAL": "Gratis proefperiode"
     }
 }
