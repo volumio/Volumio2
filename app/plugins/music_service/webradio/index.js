@@ -700,6 +700,7 @@ ControllerWebradio.prototype.listRadioForCountry = function (uri) {
 
 ControllerWebradio.prototype.getStationsForCountry = function (id, per_page, page, callback) {
   var self = this;
+
   var Request = unirest.get('http://api.dirble.com/v2/countries/' + id + '/stations');
   Request.query({
     token: '8d27f1f258b01bd71ad2be7dfaf1cce9d3074ee2',
@@ -798,6 +799,7 @@ ControllerWebradio.prototype.listRadioFavourites = function (uri) {
         }
       }
     };
+
     for (var i in data) {
       var ithdata = data[i];
       var song = {
@@ -1426,7 +1428,7 @@ ControllerWebradio.prototype.getNavigationItem = function (node, category) {
     type: servType,
     title: node.text,
     artist: node.type == "audio" ? self.formatCodecString(node.formats) + ' (' + node.bitrate + ' kbps)' : '',
-    album: node.type == '',
+    album: '',
     albumart: albumart,
     icon: icon,
     uri: uri
