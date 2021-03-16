@@ -1132,7 +1132,7 @@ PluginManager.prototype.checkPluginDependencies = function (folder) {
             return self.coreCommand.getSystemVersion()
                 .then(e => {
                     var volumioVersion = semver.coerce(e.systemversion, { loose: true });
-                    if(nodeVersion === null) {
+                    if(volumioVersion === null) {
                         if(result.success === 'success') {
                             result.success = 'warn';
                         }
