@@ -15,7 +15,7 @@
     "APPEARANCE": {
         "ALBUMARTIST": "Albumartist",
         "ALBUMART_CACHE_CLEARED": "Cache des images des albums réinitialisé avec succès",
-        "ALBUMART_CACHE_CLEAR_ERROR": "Une erreur est survenue en effaçant le cache, réessayer ultérieurement",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Une erreur est survenue en effaçant le cache, réessayer ultérieurement.",
         "ALBUMART_RESET_CACHE": "Réinitialiser le cache des images des albums",
         "ALBUMART_RESET_CACHE_DOC": "Volumio met en cache les images des albums pour améliorer la performance, cependant cela empêche les nouveaux albums d'apparaître. En réinitialisant le cache, le système peut afficher les nouveaux ajouts d'albums.",
         "ALBUMART_SETTINGS": "Réglage de l'image des pochettes",
