@@ -94,7 +94,16 @@
 				  "tracknumbers",
 				  "compilation",
 				  "artistsort",
-				  "ffmpegenable"
+          "ffmpegenable",
+          "ignore_leading_article",
+          "article_list",
+          "split_artists_by_starting_letter",
+          "split_albums_by_starting_letter",
+          "split_genres_by_starting_letter",
+          "list_only_artists_with_min_entries",
+          "list_only_albums_with_min_entries",
+          "list_only_genres_with_min_entries",
+          "show_nr_of_tracks"
 			  ]
 		  },
 		  "content": [
@@ -133,13 +142,83 @@
 				  ]
 
 			  },
-			  {
-				  "id": "ffmpegenable",
+        {
+          "id": "ffmpegenable",
+          "element": "switch",
+          "hidden":true,
+          "doc" : "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT",
+          "value": false
+        },
+        {
+          "id": "ignore_leading_article",
 				  "element": "switch",
-				  "hidden":true,
-				  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT_DOC",
-				  "label": "TRANSLATE.PLAYBACK_OPTIONS.EXTENDED_FILE_FORMAT_SUPPORT",
+				  "doc" : "TRANSLATE.APPEARANCE.IGNORE_LEADING_ARTICLE_DOC",
+				  "label": "TRANSLATE.APPEARANCE.IGNORE_LEADING_ARTICLE",
 				  "value": false
+			  },
+        {
+          "id": "article_list",
+          "element": "input",
+          "doc" : "TRANSLATE.APPEARANCE.ARTICLE_LIST_DOC",
+          "label": "TRANSLATE.APPEARANCE.ARTICLE_LIST",
+          "value": ""
+        },
+
+        {
+          "id": "split_artists_by_starting_letter",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.APPEARANCE.SPLIT_ARTISTS_BY_STARTING_LETTER_DOC",
+				  "label": "TRANSLATE.APPEARANCE.SPLIT_ARTISTS_BY_STARTING_LETTER",
+				  "value": false
+			  },
+        {
+          "id": "list_only_artists_with_min_entries",
+          "element": "input",
+          "doc" : "TRANSLATE.APPEARANCE.LIST_ONLY_ARTISTS_WITH_MIN_ENTRIES_DOC",
+          "label": "TRANSLATE.APPEARANCE.LIST_ONLY_ARTISTS_WITH_MIN_ENTRIES",
+          "value": ""
+
+        },
+
+        {
+          "id": "split_albums_by_starting_letter",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.APPEARANCE.SPLIT_ALBUMS_BY_STARTING_LETTER_DOC",
+				  "label": "TRANSLATE.APPEARANCE.SPLIT_ALBUMS_BY_STARTING_LETTER",
+				  "value": false
+			  },
+        {
+          "id": "list_only_albums_with_min_entries",
+          "element": "input",
+          "doc" : "TRANSLATE.APPEARANCE.LIST_ONLY_ALBUMS_WITH_MIN_ENTRIES_DOC",
+          "label": "TRANSLATE.APPEARANCE.LIST_ONLY_ALBUMS_WITH_MIN_ENTRIES",
+          "value": ""
+
+        },
+
+        {
+          "id": "split_genres_by_starting_letter",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.APPEARANCE.SPLIT_GENRES_BY_STARTING_LETTER_DOC",
+				  "label": "TRANSLATE.APPEARANCE.SPLIT_GENRES_BY_STARTING_LETTER",
+				  "value": false
+			  },
+        {
+				  "id": "list_only_genres_with_min_entries",
+				  "element": "input",
+				  "doc" : "TRANSLATE.APPEARANCE.LIST_ONLY_GENRES_WITH_MIN_ENTRIES_DOC",
+				  "label": "TRANSLATE.APPEARANCE.LIST_ONLY_GENRES_WITH_MIN_ENTRIES",
+          "value": ""
+
+			  },
+        {
+				  "id": "show_nr_of_tracks",
+				  "element": "switch",
+				  "doc" : "TRANSLATE.APPEARANCE.SHOW_NR_OF_TRACKS_DOC",
+				  "label": "TRANSLATE.APPEARANCE.SHOW_NR_OF_TRACKS",
+          "value": false
+
 			  }
 		  ]
 	  },
