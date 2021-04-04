@@ -13,7 +13,8 @@ var removableMountPoint = '/mnt/';
 var mountPointFile = '/data/configuration/mountPoints';
 const { v4: uuidv4 } = require('uuid');
 
-var ignoreDeviceAction = false;
+// Initially, the udevWatcher shall not handle device actions
+var ignoreDeviceAction = true;
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -989,8 +990,12 @@ ControllerNetworkfs.prototype.umountShare = function (data) {
 
 ControllerNetworkfs.prototype.enableDeviceActions = function () {
   var self = this;
-  ignoreDeviceAction = false;
-  self.logger.info('Mount handler: device actions (re-)enabled');
+  if (ignoreDeviceAction) {
+    ignoreDeviceAction = false;
+    self.logger.info('Mount handler: trigger udev to add block devices');
+    execSync('/usr/bin/sudo /sbin/udevadm trigger --action=add --subsystem-match="block"', { uid: 1000, gid: 1000, encoding: 'utf8'});
+    self.logger.info('Mount handler: device actions (re-)enabled');
+  }
 }
 
 ControllerNetworkfs.prototype.disableDeviceActions = function () {
@@ -1063,21 +1068,28 @@ ControllerNetworkfs.prototype.mountDevice = function (device) {
   }
 
   if (fsLabel && device.DEVNAME && device.ID_FS_TYPE) {
-    	if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio') {
-      self.logger.info('Mounting Device ' + fsLabel);
-      if (fsLabel === 'issd' || fsLabel === 'ihdd' || fsLabel === 'Internal SSD' || fsLabel === 'Internal HDD') {
-        var mountFolder = removableMountPoint + 'INTERNAL/';
-        self.switchInternalMemoryPosition();
-      } else {
-        var mountFolder = removableMountPoint + 'USB/' + fsLabel;
-      }
+    // Temporary exclude built-in disks from indexing until we have a more reliable solution
+    var fsRemovable = execSync('/bin/lsblk -rno tran "/dev/$(lsblk -rno PKNAME ' + device.DEVNAME + ')"',{ uid: 1000, gid: 1000, encoding: 'utf8'});
+    if (fsRemovable.indexOf('usb') >= 0) {
+      // Also skip the v2 x86 volumio partition labels (volumioboot/volumioimg)
+      if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio' && fsLabel !== 'volumioboot' && fsLabel !== 'volumioimg') {
+        self.logger.info('Mounting Device ' + fsLabel);
+        if (fsLabel === 'issd' || fsLabel === 'ihdd' || fsLabel === 'Internal SSD' || fsLabel === 'Internal HDD') {
+          var mountFolder = removableMountPoint + 'INTERNAL/';
+          self.switchInternalMemoryPosition();
+        } else {
+          var mountFolder = removableMountPoint + 'USB/' + fsLabel;
+        }
 
-      if (!fs.existsSync(mountFolder)) {
-        this.createMountFolder(mountFolder);
+        if (!fs.existsSync(mountFolder)) {
+          this.createMountFolder(mountFolder);
+        }
+        self.mountPartition({'label': fsLabel, 'devName': device.DEVNAME, 'fsType': device.ID_FS_TYPE, 'mountFolder': mountFolder});
+      } else {
+        self.logger.info('Ignoring mount for partition: ' + fsLabel);
       }
-      self.mountPartition({'label': fsLabel, 'devName': device.DEVNAME, 'fsType': device.ID_FS_TYPE, 'mountFolder': mountFolder});
     } else {
-    		self.logger.info('Ignoring mount for partition: ' + fsLabel);
+      self.logger.info('Ignoring non-removable device ' + device.DEVNAME);
     }
   }
 };

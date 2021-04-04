@@ -1,5 +1,4 @@
 'use strict';
-
 var cacheManager = require('cache-manager');
 var memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 0});
 var libMpd = require('./lib/mpd.js');
@@ -597,7 +596,7 @@ ControllerMpd.prototype.onVolumioStart = function () {
   self.loadLibrarySettings();
   dsd_autovolume = self.config.get('dsd_autovolume', false);
   self.getPlaybackMode();
-  
+
   return self.mpdInit();
 };
 
@@ -919,6 +918,7 @@ ControllerMpd.prototype.restartMpd = function (callback) {
     exec('/usr/bin/sudo /bin/systemctl restart mpd.service ', {uid: 1000, gid: 1000},
       function (error, stdout, stderr) {
         self.mpdEstablish();
+        self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'enableDeviceActions', '');
         callback(error);
       });
   } else {
@@ -928,6 +928,7 @@ ControllerMpd.prototype.restartMpd = function (callback) {
           self.logger.error('Cannot restart MPD: ' + error);
         } else {
           self.mpdEstablish();
+          self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'enableDeviceActions', '');
         }
       });
   }
@@ -961,7 +962,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
 
       var mixerdev = '';
       var mixerstrings = '';
-      
+
       if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
         var realDev = outdev;
         outdev = self.commandRouter.sharedVars.get('alsa.outputdevice');
@@ -974,7 +975,7 @@ ControllerMpd.prototype.createMPDFile = function (callback) {
             mixerdev = 'hw:' + realDev + ',0';
           }
         }
-      
+
       } else {
         if (outdev != 'softvolume') {
           var realDev = outdev;
