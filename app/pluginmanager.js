@@ -1105,67 +1105,70 @@ PluginManager.prototype.unzipPackage = function () {
 
 PluginManager.prototype.checkPluginDependencies = function (folder) {
   var self = this;
-  var pendingResult = libQ.resolve();
-  
-  var result = { success: 'failed', message: 'Plugin failed the dependency check', folder: folder};
+  var pendingResult = libQ.resolve({ success: 'success', message: '', folder: folder});
   
   self.logger.info('Check plugin dependencies');
 
   var package_json = self.getPackageJson(folder);
   
-  var nodeCheck = false;
-  var volumioCheck = false;
-  var message = '';
   if(package_json.engines) {
     
     pendingResult = pendingResult
-    .then(() => {
+    .then((result) => {
         if(package_json.engines.node) {
-            nodeCheck = true;
+            result.nodeCheck = true;
             var nodeVersion = semver.coerce(process.versions.node);
-            if(!semver.satisfies(nodeVersion, package_json.engines.node)) {
-                message += 'Node version ' + nodeVersion + ' not usable with plugin. ';
+            if(nodeVersion === null) {
+                result.success = 'warn';
+                result.message += 'Current Node version cannot be detected. ';
+            } else if(!semver.satisfies(nodeVersion, package_json.engines.node)) {
+                result.success = 'failed';
+                result.message += 'Node version ' + nodeVersion + ' not usable with plugin. ';
             }
         }
-    })
-    .then(() => {    
+        
         if(package_json.engines.volumio) {
-            volumioCheck = true;
+            result.volumioCheck = true;
             return self.coreCommand.getSystemVersion()
                 .then(e => {
-                    var volumioVersion = semver.coerce(e.systemversion);
-                    if(!semver.satisfies(volumioVersion, package_json.engines.volumio)) {
-                        message += 'Volumio version ' + volumioVersion + ' not usable with plugin. ';
+                    var volumioVersion = semver.coerce(e.systemversion, { loose: true });
+                    if(volumioVersion === null) {
+                        if(result.success === 'success') {
+                            result.success = 'warn';
+                        }
+                        result.message += 'Current Volumio version cannot be detected. ';
+                    } else if(!semver.satisfies(volumioVersion, package_json.engines.volumio)) {
+                        result.success = 'failed';
+                        result.message += 'Volumio version ' + volumioVersion + ' not usable with plugin. ';
                     }
+                    return result;
             });
         }
-    })
-    .then(() => {
-        if(message) {
-            result.success = 'failed'
-            result.message = message + 'The plugin cannot be installed on this version of Volumio.';
+        return result;
+    });
+  }
+  
+  return pendingResult.then((result) => {
+        if(result.success === 'failed') {
+            result.message = 'Plugin failed the dependency check ' + result.message + 
+                'The plugin cannot be installed on this version of Volumio.';
         } else {
-            if(!nodeCheck) {
-                message += 'The plugin has no node version dependency information. ';
-            }
-            if(!volumioCheck) {
-                message += 'The plugin has no Volumio version dependency information. ';
-            }
-            if(message) {
+            if(!result.nodeCheck) {
                 result.success = 'warn';
-                result.message = message + 'The plugin may not work on this version of Volumio';
+                result.message += 'The plugin has no node version dependency information. ';
+            }
+            if(!result.volumioCheck) {
+                result.success = 'warn';
+                result.message += 'The plugin has no Volumio version dependency information. ';
+            }
+            if(result.success === 'warn') {
+                result.message += 'The plugin may not work on this version of Volumio';
             } else {
-                result.success = 'success'
                 result.message = 'The plugin can be used with this version of Volumio';
             }
         }
+        return result;
     });
-  } else {
-      result.success = 'warn';
-      result.message = 'The plugin had no version dependency ranges to check. This plugin may not work with this version of Volumio.';
-  }
-
-  return pendingResult.then(() => { return result });
 };
 
 PluginManager.prototype.listPluginsBrokenByNewVersion = function (newVolumioVersion) {
@@ -1186,7 +1189,7 @@ PluginManager.prototype.listPluginsBrokenByNewVersion = function (newVolumioVers
       var package_json = self.getPackageJson(folder);
       
       if(package_json && package_json.engines && package_json.engines.volumio) {
-        if(!semver.satisfies(semver.coerce(newVolumioVersion), package_json.engines.volumio)) {
+        if(!semver.satisfies(semver.coerce(newVolumioVersion, { loose: true }), package_json.engines.volumio)) {
           result.push(category + '/' + plugin.name);
         }
       }
