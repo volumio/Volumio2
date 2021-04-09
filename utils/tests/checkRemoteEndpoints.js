@@ -27,7 +27,7 @@ libQ.all(checkFunctions)
     .then(function (content) {
         var failedList = [];
         for (var j in content) {
-            console.log((content[j].endpoint) + ': ' + (content[j].success ? 'OK' : 'FAILED')+ ' (Test took '+content[j].elapsedTime+' milliseconds)')
+            console.log((content[j].endpoint) + ', ' + content[j].elapsedTime + ' ms'  + ': ' + (content[j].success ? 'OK' : 'FAILED'));
             if (!content[j].success) { failedList.push(content[j].endpoint)};
         }
         console.log('----------')
@@ -35,7 +35,7 @@ libQ.all(checkFunctions)
             console.log('WARNING!!! Some remote endpoints cannot be reached!');
             console.log('Failing endpoints: ');
             for (var k in failedList) {
-                console.log(failedList[k]+ ' (Test took '+content[j].elapsedTime+' milliseconds)');
+                console.log(failedList[k] + ', ' + content[j].elapsedTime + ' ms');
             }
 
         } else {
