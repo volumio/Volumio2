@@ -687,7 +687,7 @@ ControllerNetwork.prototype.wirelessConnect = function (data) {
 
   fs.writeFile('/etc/wpa_supplicant/wpa_supplicant.conf', netstring, function (err) {
     if (err) {
-      self.logger.error('Cannot write wpasupplicant.conf ' + error);
+      self.logger.error('Cannot write wpasupplicant.conf ' + err);
     }
 
     self.commandRouter.wirelessRestart();
