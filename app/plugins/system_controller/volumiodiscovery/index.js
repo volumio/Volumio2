@@ -39,25 +39,20 @@ ControllerVolumioDiscovery.prototype.getConfigurationFiles = function () {
 
 ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function (name) {
   var self = this;
-  if (self.callbackTracer < 1) {
-    self.callbackTracer = 1;
-    return;
-  }
-  console.log('Discovery: Restarting stuff');
+
+  self.logger.info('Discovery: Restarting Advertising due to device name change');
   var bound = self.startAdvertisement.bind(self);
   try {
-    console.log('Discovery: Stopped ads, if present');
     self.ad.stop();
-  } catch (e) {
-    console.log('Discovery: Stopped ads, if present ----> exception!');
-  }
+  } catch (e) {}
+
   self.forceRename = true;
   setTimeout(bound, 5000);
 };
 
 ControllerVolumioDiscovery.prototype.onVolumioStart = function () {
   var self = this;
-  self.callbackTracer = 0;
+
   var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   config.loadFile(configFile);
 
@@ -95,7 +90,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
   var self = this;
   var forceRename = self.forceRename;
   self.forceRename = undefined;
-  console.log('Discovery: StartAdv! ' + forceRename);
+
   try {
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     var name = systemController.getConf('playerName');
@@ -108,21 +103,22 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
       UUID: uuid
     };
 
-    console.log('Discovery: Started advertising... ' + name + ' - ' + forceRename);
+    self.logger.info('Discovery: Started advertising with name: ' + name);
 
     self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
       var lowerServer = serviceName.toLowerCase();
       var theName = service.name.replace(lowerServer, serviceName);
-      if ((theName != name) && (!forceRename)) {
-        console.log('Discovery: Changing my name to ' + service.name + ' CINGHIALE is ' + forceRename);
+      if ((theName != name) && (forceRename === false)) {
+        self.logger.info('Discovery: Changing my name to: ' + service.name);
         systemController.setConf('playerName', theName);
-
         self.ad.stop();
         txt_record.volumioName = theName;
         setTimeout(
           function () {
             self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-              console.log('Discovery: INT ' + error);
+              if (error) {
+                self.logger.error('Discovery: advertisement start error: ' + error);
+              }
             });
           },
           5000
@@ -130,7 +126,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
       }
     });
     self.ad.on('error', function (error) {
-      console.log('Discovery: ERROR' + error);
+      self.logger.error('Discovery: advertisement error: ' + error);
       self.context.coreCommand.pushConsoleMessage('mDNS Advertisement raised the following error ' + error);
       setTimeout(function () {
         self.startAdvertisement();
@@ -139,12 +135,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
     self.ad.start();
   } catch (ecc) {
     if (ecc == 'Error: dns service error: name conflict') {
-      console.log('Name conflict due to Shairport Sync, discarding error');
+      self.logger.error('Name conflict due to Shairport Sync, discarding error');
     } else {
       setTimeout(function () {
-        console.log('Discovery: ecc ' + ecc);
+        self.logger.error('Discovery: Generic error: ' + ecc);
         self.forceRename = false;
-        self.callbackTracer = 0;
         self.startAdvertisement();
       }, 5000);
     }
@@ -172,12 +167,12 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse = function () {
     });
     self.browser.on('serviceUp', function (service) {
       if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
-        console.log('Discovery: this is already registered,  ' + service.txtRecord.UUID);
+        self.logger.info('Discovery: this is already registered,  ' + service.txtRecord.UUID);
         foundVolumioInstances.delete(service.txtRecord.UUID + '.name');
         self.remoteConnections.remove(service.txtRecord.UUID + '.name');
       } else {
         registeredUUIDs.push(service.txtRecord.UUID);
-        console.log('Discovery: adding ' + service.txtRecord.UUID);
+        self.logger.info('Discovery: adding ' + service.txtRecord.UUID);
       }
 
       // console.log(service);
