@@ -12,7 +12,8 @@ var commandArray = [
   'df -h',
   'mount',
   'sudo journalctl -p 7',
-  'cat /var/log/mpd.log'
+  'cat /var/log/mpd.log',
+  'cat /etc/asound.conf'
 ];
 
 // Up to two arguments may be given:
