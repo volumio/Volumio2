@@ -15,7 +15,7 @@
     "APPEARANCE": {
         "ALBUMARTIST": "Artista de l'àlbum",
         "ALBUMART_CACHE_CLEARED": "La memòria cau de la caràtula de l'àlbum s'ha restablit correctament",
-        "ALBUMART_CACHE_CLEAR_ERROR": "Error a l'esborrar la memòria cau de la caràtula de l'àlbum, torna a intentar-ho en uns minuts",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Error a l'esborrar la memòria cau de la caràtula de l'àlbum, torna a intentar-ho en uns minuts.",
         "ALBUMART_RESET_CACHE": "Restablir la memòria cau de caràtules d'àlbum",
         "ALBUMART_RESET_CACHE_DOC": "El sistema emmagatzema en memòria cau les seves caràtules d'àlbum per millorar el rendiment, però això evita que es mostrin caràtules d'àlbum recentment agregades. A l'restablir la memòria cau, podras veure les caràtules de l'àlbum recentment agregades.",
         "ALBUMART_SETTINGS": "Configuració de les caràtules d'àlbum",
