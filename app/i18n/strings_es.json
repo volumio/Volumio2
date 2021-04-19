@@ -15,7 +15,7 @@
     "APPEARANCE": {
         "ALBUMARTIST": "Artista del álbum",
         "ALBUMART_CACHE_CLEARED": "La caché de la carátula del álbum se restableció correctamente",
-        "ALBUMART_CACHE_CLEAR_ERROR": "Error al borrar la caché de la carátula del álbum, vuelve a intentarlo en unos minutos",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Error al borrar la caché de la carátula del álbum, vuelve a intentarlo en unos minutos.",
         "ALBUMART_RESET_CACHE": "Restablecer la caché de carátulas de álbum",
         "ALBUMART_RESET_CACHE_DOC": "El sistema almacena en caché sus carátulas de álbum para mejorar el rendimiento, pero esto evita que se muestren carátulas de álbum recién agregadas. Al restablecer la caché, podrá ver las carátulas del álbum recién agregadas.",
         "ALBUMART_SETTINGS": "Configuración de las carátulas de álbum",
