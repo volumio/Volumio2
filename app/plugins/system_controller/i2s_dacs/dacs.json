@@ -3,7 +3,6 @@
     {"id":"adafruit-max98357","name":"Adafruit MAX98357","overlay":"hifiberry-dac","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"adafruit-uda1334a","name":"Adafruit UDA1334A","overlay":"hifiberry-dac,i2s-mmap","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-boss-dac","name":"Allo BOSS","overlay":"allo-boss-dac-pcm512x-audio","alsanum":"2","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
-    {"id":"allo-boss2-dac","name":"Allo BOSS2","overlay":"allo-boss2-dac-audio","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-digione","name":"Allo DigiOne","overlay":"allo-digione","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"allo-katana-dac","name":"Allo Katana","overlay":"allo-katana-dac-audio","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
     {"id":"audio-injector-isolated","name":"AudioInjector Isolated","overlay":"audioinjector-isolated-soundcard","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
