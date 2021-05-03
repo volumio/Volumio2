@@ -15,7 +15,7 @@
     "APPEARANCE": {
         "ALBUMARTIST": "Albuminterpret",
         "ALBUMART_CACHE_CLEARED": "Zurücksetzen des Albumbilder-Cache erfolgreich",
-        "ALBUMART_CACHE_CLEAR_ERROR": "Fehler beim Zurücksetzen des Albumbilder-Cache. Versuche es in ein paar Minuten erneut",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Fehler beim Zurücksetzen des Albumbilder-Cache. Versuche es in ein paar Minuten erneut.",
         "ALBUMART_RESET_CACHE": "Albumbilder-Cache zurücksetzen",
         "ALBUMART_RESET_CACHE_DOC": "Für bessere Leistung werden Albenbilder im Cache gespeichert. Dadurch werden neu hinzugefügte Albenbilder nicht sofort dargestellt. Durch Zurücksetzen des Cache werden auch neu hinzugefügte Albenbilder angezeigt.",
         "ALBUMART_SETTINGS": "Einstellungen für Albencover",
