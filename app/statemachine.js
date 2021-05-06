@@ -1373,11 +1373,10 @@ CoreStateMachine.prototype.setRepeat = function (value, repeatSingle) {
     }
   } else {
     this.currentRepeat = value;
-	if(this.currentRepeat && repeatSingle != undefined) {
-		this.currentRepeatSingleSong = repeatSingle;	
-	} else {
-		this.currentRepeatSingleSong = false;
-	}
+
+    if (repeatSingle != undefined) {
+      this.currentRepeatSingleSong = repeatSingle;
+    }
 
     this.pushState().fail(this.pushError.bind(this));
   }
