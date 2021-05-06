@@ -1555,7 +1555,7 @@ CoreCommandRouter.prototype.volumioMoveQueue = function (from, to) {
   var defer = libQ.defer();
   this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
 
-  if (from && to) {
+  if (from !== undefined && to !== undefined) {
     return this.stateMachine.moveQueueItem(from, to);
   } else {
     this.logger.error('Cannot move item in queue, from or to parameter missing');
