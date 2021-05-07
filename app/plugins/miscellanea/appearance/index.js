@@ -223,6 +223,7 @@ volumioAppearance.prototype.generateThumbnails = function () {
       
       for(var i = 0; i < files.length; i++) {
         if(files[i].indexOf('thumbnail-') !== 0 && !map['thumbnail-' + files[i]]) {
+          var f = files[i];
           self.logger.info('Creating Thumbnail for file ' + f + ' : ' + backgroundPath + '/thumbnail-' + f);
           let defer = libQ.defer();
           defers.push(defer);
