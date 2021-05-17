@@ -15,6 +15,7 @@ var unirest = require('unirest');
 var arch = '';
 var variant = '';
 var device = '';
+var volumioVersion = '';
 var isVolumioHardware = 'none';
 
 module.exports = PluginManager;
@@ -70,7 +71,11 @@ function PluginManager (ccommand, server) {
     }
     if (file[l].match(/VOLUMIO_HARDWARE/i)) {
       var str = file[l].split('=');
-      var device = str[1].replace(/\"/gi, '');
+      device = str[1].replace(/\"/gi, '');
+    }
+    if (file[l].match(/VOLUMIO_VERSION/i)) {
+      var str = file[l].split('=');
+      volumioVersion = str[1].replace(/\"/gi, '');
     }
   }
 
@@ -1391,7 +1396,6 @@ PluginManager.prototype.getAvailablePlugins = function () {
 
   var url = 'http://plugins.volumio.org/plugins/' + variant + '/' + arch + '/plugins.json';
   var installed = self.getInstalledPlugins();
-
   if (installed != undefined) {
     installed.then(function (installedPlugins) {
       for (var e = 0; e < installedPlugins.length; e++) {
@@ -1403,7 +1407,8 @@ PluginManager.prototype.getAvailablePlugins = function () {
 
   unirest
       .get(url)
-      .timeout(6000)
+      .headers({'device': device, 'version': volumioVersion})
+      .timeout(10000)
       .then(function (response) {
         if (response && response.status === 200 && response.body && response.body.categories) {
           pushAvailablePlugins(response.body);
