@@ -1554,8 +1554,7 @@ CoreCommandRouter.prototype.volumioSaveQueueToPlaylist = function (name) {
 CoreCommandRouter.prototype.volumioMoveQueue = function (from, to) {
   var defer = libQ.defer();
   this.pushConsoleMessage('CoreCommandRouter::volumioMoveQueue');
-
-  if (from && to) {
+  if (from !== undefined && to !== undefined && from >= 0 && to >= 0) {
     return this.stateMachine.moveQueueItem(from, to);
   } else {
     this.logger.error('Cannot move item in queue, from or to parameter missing');
