@@ -28,6 +28,7 @@
     {"id":"hifiberry-digi","name":"HiFiBerry Digi","overlay":"hifiberry-digi","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-digi-pro","name":"HiFiBerry Digi+ Pro","overlay":"hifiberry-digi-pro","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"no"},
     {"id":"hifibox-dac","name":"HiFiBox DAC","overlay":"hifiberry-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","eeprom_name":["HiFiBox DAC HAT","HiFiBox DAC HAT V1","HiFiBox DAC HAT V 10"],"needsreboot":"no"},
+    {"id":"melopero-daczero","name":"Melopero DAC ZERO","overlay":"hifiberry-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"4d","needsreboot":"yes"},
     {"id":"iqaudio-dacplus","name":"IQaudIO DAC Plus","overlay":"iqaudio-dacplus,unmute_amp ","alsanum":"2","mixer":"Digital","modules":"","script":"iqamp-unmute.sh","i2c_address":"4c","needsreboot":"no"},
     {"id":"iqaudio-digiplus","name":"IQaudIO Pi-Digi+","overlay":"iqaudio-digi-wm8804-audio","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"iqaudio-amp","name":"IQaudIO Pi-DigiAMP+","overlay":"iqaudio-dacplus,unmute_amp ","alsanum":"2","mixer":"Digital","modules":"","script":"iqamp-unmute.sh","needsreboot":"yes"},
