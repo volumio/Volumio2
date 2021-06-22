@@ -288,19 +288,21 @@
         "USB_DAC_CONNECTED": "USB DAC aangesloten",
         "VERY_HIGH": "Zéér hoog",
         "VOLUME_CURVE_MODE": "Volume curve-modus",
-        "VOLUME_CURVE_MODE_DOC": "Natuurlijk (logaritmisch) is hoe de meeste mensen gewend zijn aan volumevariaties, verander het niet tenzij de volumecurve te steil is in uw systeem.",
+        "VOLUME_CURVE_MODE_DOC": "Natuurlijk (logaritmisch) is hoe de meeste mensen volumevariaties waarnemen. Verander de instelling niet tenzij de volumecurve te steil is in uw systeem",
         "VOLUME_NORMALIZATION": "Volume normalisatie",
         "VOLUME_NORMALIZATION_DOC": "Indien ingeschakeld zal het volume van elke track hetzelfde zijn. Dit kan de geluidskwaliteit verminderen.",
         "VOLUME_OPTIONS": "Volume opties",
-        "SQ_LOSSLESS": "Lossless",
+        "SQ_LOSSLESS": "Verliesloos",
         "SQ_HIGH": "Hoog",
         "SQ_LOW": "Laag",
         "SQ_FLAC_HIRES_96": "FLAC Hi-Res 24 bit tot 96 kHz",
         "SQ_QUALITY_DESC": "Selecteer uw gewenste geluidskwaliteit",
         "SQ_QUALITY_TITLE": "Geluidskwaliteit",
-        "SQ_HI_RES": "Hi-Res",
+        "SQ_HI_RES": "Hoge resolutie",
         "SQ_FLAC_HIRES_192": "FLAC Hi-Res 24 bit tot 192 kHz",
-        "SQ_HIGHEST_POSSIBLE": "Hoogst mogelijke"
+        "SQ_HIGHEST_POSSIBLE": "Hoogst mogelijke",
+        "SQ_FLAC_LOSSLESS": "FLAC verliesloos",
+        "SQ_MP3_320": "MP3 (320 kbit/s)"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Toegevoegd",
@@ -310,11 +312,11 @@
         "REMOVE_SUCCESS": "Verwijderd"
     },
     "PLUGINS": {
-        "CHECKING_DUPLICATE_PLUGIN": "Contorleren op plug-in duplicaat",
-        "CONFIRM_PLUGIN_INSTALL": "Installeer plugin",
-        "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE": "Waarschuwing, community plugins zijn ontwikkeld door externe ontwikkelaars en kunnen resulteren in onverwacht gedrag en systeeminstabiliteit. Weet u zeker dat u deze plugin wilt installeren?",
-        "CONFIRM_PLUGIN_UNINSTALL": "Bevestig de verwijdering van de plug-in",
-        "CONFIRM_PLUGIN_UNINSTALL_MESSAGE": "Weet u zeker dat u deze plug-in wilt verwijderen?",
+        "CHECKING_DUPLICATE_PLUGIN": "Controle op Plug-in duplicaat",
+        "CONFIRM_PLUGIN_INSTALL": "Installeer Plug-in",
+        "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE": "Waarschuwing, community Plug-ins zijn ontwikkeld door externe ontwikkelaars en kunnen resulteren in onverwacht gedrag en systeeminstabiliteit. Weet u zeker dat u deze Plug-in wilt installeren?",
+        "CONFIRM_PLUGIN_UNINSTALL": "Bevestig de verwijdering van de Plug-in",
+        "CONFIRM_PLUGIN_UNINSTALL_MESSAGE": "Weet u zeker dat u deze Plug-in wilt verwijderen?",
         "COPYING_PLUGIN_TO_LOCATION": "Plug-in kopiëren naar locatie",
         "CREATING_INSTALL_LOCATION": "Installatie-locatie creëren",
         "DOWNLOADING": "Download Plug-in",
@@ -323,7 +325,7 @@
         "ENABLE_PLUGIN": "Plug-in inschakelen",
         "ENABLE_PLUGIN_NOW_QUESTION": "Wil je deze plug-in nu inschakelen?",
         "FINALIZING_INSTALLATION": "Installatie afronden",
-        "FINALIZING_UNINSTALL": "Deïnstallatie van plug-in afronden",
+        "FINALIZING_UNINSTALL": "Deïnstallatie van Plug-in afronden",
         "INSTALL": "Installeren",
         "INSTALLING_NECESSARY_UTILITIES": "Installeren van benodigdheden",
         "INSTALLING_PLUGIN": "Plug-in installeren",
@@ -331,20 +333,20 @@
         "PLUGIN_DISABLED": "Plug-in uitgeschakeld",
         "PLUGIN_INSTALL_COMPLETED": "Installatie compleet",
         "PLUGIN_INSTALL_ERROR_OCCURRED": "Fout opgetreden bij installatie",
-        "PLUGIN_START_ERROR": "Deze plugin start niet. Installeer een bijgewerkte versie of neem contact op met de ontwikkelaar van de plugin",
+        "PLUGIN_START_ERROR": "Deze Plug-in start niet. Installeer een bijgewerkte versie of neem contact op met de ontwikkelaar van de Plug-in",
         "PLUGIN_STOPPED": "Plug-in gestopt",
         "PLUGIN_UNINSTALLED": "Plug-in gedeïnstalleerd",
         "PLUGIN_UNINSTALL_ERROR_OCCURRED": "Fout opgestreden tijdens de installatie",
         "PLUGIN_UNINSTALL_FAILED": "Installatie mislukt",
-        "PLUGIN_UPDATE_COMPLETED": "Update van plug-in afgerond",
-        "PLUGIN_UPDATE_ERROR_OCCURRED": "Fout tijdens update plug-in",
-        "PLUGIN_UPDATE_FAILED": "Update van plug-in mislukt",
+        "PLUGIN_UPDATE_COMPLETED": "Update van Plug-in afgerond",
+        "PLUGIN_UPDATE_ERROR_OCCURRED": "Fout tijdens update Plug-in",
+        "PLUGIN_UPDATE_FAILED": "Update van Plug-in mislukt",
         "REMOVING_NECESSARY_UTILITIES": "Verwijderen van benodigdheden",
         "SUCCESSFULLY_INSTALLED": "Installate geslaagd",
         "SUCCESSFULLY_UPDATED_PLUGIN": "Update geslaagd",
         "UNINSTALL": "Verwijderen",
-        "UNINSTALLING_PLUGIN": "Deïnstalleren van plug-in",
-        "UNPACKING_PLUGIN": "Uitpakken van plug-in",
+        "UNINSTALLING_PLUGIN": "De-installeren van Plug-in",
+        "UNPACKING_PLUGIN": "Uitpakken van Plug-in",
         "UPDATING_PLUGIN": "Plug-in bijwerken",
         "UPDATING_PLUGIN_FILES": "Plug-in bestanden updaten"
     },
@@ -448,7 +450,7 @@
         "RUN_FIRST_CONFIG_WIZARD": "Voer de eerste configuratie-wizard uit."
     },
     "VOLUMIO_CLOUD_TIDAL": {
-        "MIXES": "Mixes & Radio",
+        "MIXES": "Mixen & Radio",
         "MENU_TIDAL": "TIDAL",
         "MENU_MY_MUSIC": "Mijn muziek",
         "MENU_AZ": "A-Z",
@@ -461,7 +463,7 @@
         "TIDAL_PLAYLISTS": "TIDAL Afspeellijsten",
         "TIDAL_EPSINGLES": "TIDAL EP's & Singels",
         "NEW": "Nieuw",
-        "TIDAL_RISING": "TIDAL Opkomend",
+        "TIDAL_RISING": "TIDAL Stijgend",
         "GENRES_AND_MOODS": "Genres & Stemmingen",
         "RECOMMENDED": "Aanbevolen",
         "LOCAL": "Lokaal (niet van toepassing voor alle regio's)",
@@ -484,7 +486,8 @@
         "QOBUZ_TRACKS": "QOBUZ Nummers",
         "QOBUZ_PLAYLISTS": "QOBUZ Afspeellijsten",
         "DISCOVER": "Ontdek",
-        "FEATURED_EDITOR_PICKS": "Redactie keuzes"
+        "FEATURED_EDITOR_PICKS": "Redactie keuzes",
+        "PRESS_AWARDS": "Pers Awards"
     },
     "PLUGIN_CDCONTROLLER": {
         "RIP_IN_PROGRESS_MESSAGE": "Deze CD wordt op dit moment gekopieerd en kan niet benaderd worden tot de kopieer actie gereed is",
@@ -498,15 +501,28 @@
         "CD_RIP_ERROR_MESSAGE": "CD Rippen kan niet gestart worden ",
         "UNKNOWN_ARTIST": "Onbekende artiest",
         "UNKNOWN_ALBUM": "Onbekend Album",
-        "UNKNOWN_GENRE": "Onbekend Genre"
+        "UNKNOWN_GENRE": "Onbekend Genre",
+        "RIP_LOCATION_MESSAGE_NO_SPACE": "Er is geen opslag ruimte voor rippen, sluit AUB een andere schijf aan voor de opslag van muziek bestanden",
+        "RIP_MESSAGE": "Bekijk de CD informatie en selecteer de gewenste locatie voor de muziekbestanden. Klik aansluitend op RIP om de CD in verliesloos formaat te kopiëren. U wordt verwittigd zodra het proces is afgesloten",
+        "RIP_LOCATION_MESSAGE": "Muziek bestanden doel schijf"
     },
     "PLUGIN_TIDAL": {
         "SECTION_ACCOUNT_BETA": "TIDAL (Experimentele plugin)",
         "TIDAL_CONFIG_TITLE": "TIDAL Instellingen",
-        "SECTION_TIDAL_ACCOUNT": "TIDAL"
+        "SECTION_TIDAL_ACCOUNT": "TIDAL",
+        "MQA_DESCR": "MQA wordt op ieder apparaat weergegeven met een kwaliteit beter dan die van CD. In verbinding met een MQA decoder benaderd de MQA file de originele Master kwaliteit.",
+        "EPSINGLES": "TIDAL EP & Singles",
+        "MQA_TITLE": "Master Quality (MQA)",
+        "SAVE_QUALITY_SUCCESS": "Kwaliteitsinstellingen succesvol opgeslagen",
+        "TIDAL_CONNECT_DESC": "Benader TIDAL muziek vanuit Volumio.",
+        "TIDAL_LOGOUT_DESC": "Dit apparaat is verbonden met TIDAL. U kunt de verbinding verbreken door uit te loggen."
     },
     "PLUGIN_QOBUZ": {
         "QOBUZ_FREE_TRIAL_DESC": "Probeer QOBUZ HIFI 1 maand gratis (t.w.v. €19,99)",
-        "QOBUZ_FREE_TRIAL": "Gratis proefperiode"
+        "QOBUZ_FREE_TRIAL": "Gratis proefperiode",
+        "QOBUZ_CONFIG_TITLE": "QOBUZ Instellingen",
+        "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
+        "QOBUZ_CONNECT_DESC": "Benader muziek uit de QOBUZ catalogus vanuit Volumio.",
+        "QOBUZ_LOGOUT_DESC": "Dit apparaat is verbonden met QOBUZ. U kunt alleen de verbinding verbreken door op Afmelden te klikken."
     }
 }
