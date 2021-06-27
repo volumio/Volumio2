@@ -549,7 +549,9 @@ ControllerVolumioDiscovery.prototype.setRemoteDeviceVolume = function (data) {
   let self = this;
 
   self.logger.info('Setting Remote Device Volume: ' + data.host);
-
+  if (data && data.isSelf === true ) {
+    data.host = 'http://127.0.0.1:3000';
+  }
   let url = data.host + '/api/v1/commands/?cmd=volume&volume=' + data.volume;
 
   unirest.get(url)

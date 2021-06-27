@@ -15,7 +15,7 @@
     "APPEARANCE": {
         "ALBUMARTIST": "Albumartist",
         "ALBUMART_CACHE_CLEARED": "Album Art cache reset successfully",
-        "ALBUMART_CACHE_CLEAR_ERROR": "Error clearing albumart cache, please retry in a few minutes",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Error clearing albumart cache, please retry in a few minutes.",
         "ALBUMART_RESET_CACHE": "Reset Album Art cache",
         "ALBUMART_RESET_CACHE_DOC": "The system caches your albumart to improve performance, but this prevents newly added albumart from being shown. By resetting the cache you will be able to see newly added albumart.",
         "ALBUMART_SETTINGS": "Album Art Settings",
@@ -26,14 +26,14 @@
         "BACKGROUND_DELETED": "Background deleted",
         "BROWSE_SOURCES_VISIBILITY": "Sources Visibility",
         "COMPILATION_METADATA": "Compilation metadata fields",
-        "COMPILATION_METADATA_DOC": "Configure the metadata fields used to describe albumartist in compilations or 'multiple artist' albums, use comma separated fields",
+        "COMPILATION_METADATA_DOC": "Configure the metadata fields used to describe albumartist in compilations or 'multiple artist' albums, use comma separated fields.",
         "EXTRALARGE": "Extra-large",
         "IMAGE_MUST_BE_LESS_THAN": "Image size must be less than",
         "LARGE": "Large",
         "MEDIUM": "Medium",
         "MEGA": "Mega",
         "METADATA_IMAGE": "Show embedded albumart",
-        "METADATA_IMAGE_DOC": "When enabled, if no albumart file can be found in the folder, the system will attempt to extract any albumart embedded in your music files. This will most likely increase albumart loading times",
+        "METADATA_IMAGE_DOC": "When enabled, if no albumart file can be found in the folder, the system will attempt to extract any albumart embedded in your music files. This will most likely increase albumart loading times.",
         "MUSIC_LIBRARY_SETTINGS": "Music Library Settings",
         "NEW_BACKGROUND_APPLIED": "New Background applied",
         "NEW_LANGUAGE_SET": "New language set",
@@ -189,7 +189,7 @@
         "WIRELESS_ENABLED_DOC": "Enable or disable Wireless Networking. This might improve Sound quality of the system.",
         "WIRELESS_NETWORK": "Wireless Network",
         "WIRELESS_NETWORK_CONNECTION_DEFER": "The unit will connect to network",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "when first setup will be completed",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "when first setup will be completed.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Failed to connect to network",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Please retry or proceed to next step",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Successfully connected to network",
@@ -302,7 +302,7 @@
         "SQ_HIGH": "High",
         "SQ_LOSSLESS": "Lossless",
         "SQ_HI_RES": "Hi-Res",
-        "SQ_HIGHEST_POSSIBLE":"Highest Possible"
+        "SQ_HIGHEST_POSSIBLE": "Highest Possible"
     },
     "PLAYLIST": {
         "ADDED_TITLE": "Added",
@@ -462,7 +462,7 @@
         "TIDAL_TRACKS": "TIDAL Tracks",
         "TIDAL_PLAYLISTS": "TIDAL Playlists",
         "TIDAL_EPSINGLES": "TIDAL EP & Singles",
-        "MIXES": "Mixes",
+        "MIXES": "Mixes & Radio",
         "NEW": "New",
         "TIDAL_RISING": "TIDAL Rising",
         "GENRES_AND_MOODS": "Genres & Moods",
@@ -490,7 +490,7 @@
         "FEATURED_LAST_CREATED": "Last created",
         "FEATURED_EDITOR_PICKS": "Editor picks"
     },
-    "PLUGIN_CDCONTROLLER":{
+    "PLUGIN_CDCONTROLLER": {
         "INTERNAL_MEMORY": "Internal Memory",
         "RIP_IN_PROGRESS_MESSAGE": "This CD is currently being copied, and cannot be accessed until the copy operation has completed",
         "CD_RIP": "CD Rip",
@@ -507,19 +507,19 @@
         "UNKNOWN_ALBUM": "Unknown album",
         "UNKNOWN_GENRE": "Unknown Genre"
     },
-    "PLUGIN_TIDAL":{
-        "TIDAL_CONFIG_TITLE":"TIDAL Settings",
+    "PLUGIN_TIDAL": {
+        "TIDAL_CONFIG_TITLE": "TIDAL Settings",
         "SECTION_TIDAL_ACCOUNT": "TIDAL",
         "SECTION_TIDAL_ACCOUNT_DESC": "",
         "SECTION_ACCOUNT_BETA": "TIDAL (Experimental plugin)",
         "TIDAL_CONNECT_DESC": "Access music from TIDAL in Volumio.",
         "TIDAL_LOGOUT_DESC": "This device is connected to TIDAL. You can disconnect by clicking the Logout button.",
-        "SAVE_QUALITY_SUCCESS":"Quality settings saved successfully",
+        "SAVE_QUALITY_SUCCESS": "Quality settings saved successfully",
         "EPSINGLES": "TIDAL EP & Singles",
         "MQA_TITLE": "Master Quality (MQA)",
         "MQA_DESCR": "MQA will play back on any device to deliver higher than CD-quality. When paired with an MQA decoder, the MQA file reveals the original master recording."
     },
-    "PLUGIN_QOBUZ":{
+    "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "QOBUZ Settings",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
         "QOBUZ_CONNECT_DESC": "Access music from QOBUZ in Volumio.",
