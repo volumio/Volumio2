@@ -297,6 +297,7 @@ AirPlayInterface.prototype.startShairportSyncMeta = function () {
     self.obj.albumart = '/albumart';
     self.obj.samplerate = '';
     self.obj.bitdepth = '';
+    self.obj.status = 'pause';
     self.pushAirplayMeta();
   });
 };
