@@ -95,9 +95,37 @@ ControllerMyMusic.prototype.getUIConfig = function () {
           self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.value', false);
           self.configManager.setUIConfigParam(uiconf, 'sections[4].content[2].value.label', 'artist');
         }
-
         var ffmpeg = self.getAdditionalConf('music_service', 'mpd', 'ffmpegenable', false);
         self.configManager.setUIConfigParam(uiconf, 'sections[4].content[3].value', ffmpeg);
+
+        var c;
+        c = self.getAdditionalConf('music_service', 'mpd', 'ignore_leading_article', false);
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[4].value', c);
+        c = self.getAdditionalConf('music_service', 'mpd', 'article_list', 'THE ,DER ,DIE ,DAS ,LE ,LA ,LES ');
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[5].value', c);
+
+        c = self.getAdditionalConf('music_service', 'mpd', 'split_artists_by_starting_letter', false);
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[6].value', c);
+        c = self.getAdditionalConf('music_service', 'mpd', 'list_only_artists_with_min_entries', '-1');
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[7].value', c);
+
+        c = self.getAdditionalConf('music_service', 'mpd', 'split_albums_by_starting_letter', false);
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[8].value', c);
+        c = self.getAdditionalConf('music_service', 'mpd', 'list_only_albums_with_min_entries', '-1');
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[9].value', c);
+
+        c = self.getAdditionalConf('music_service', 'mpd', 'split_genres_by_starting_letter', false);
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[10].value', c);
+        c = self.getAdditionalConf('music_service', 'mpd', 'list_only_genres_with_min_entries', '-1');
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[11].value', c);
+
+        c = self.getAdditionalConf('music_service', 'mpd', 'show_nr_of_tracks', false);
+        self.configManager.setUIConfigParam(uiconf, 'sections[4].content[12].value', c);
+
+
+
+
+
 
         try {
           var disabledSources = self.getDisabledSources();

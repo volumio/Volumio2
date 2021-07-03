@@ -53,7 +53,26 @@
         "WEB_ALBUMART_ENABLE": "Web Album art",
         "WEB_ALBUMART_ENABLE_DOC": "Enable retrieval of Album art from Web, if no image is found in the file folder",
         "WEB_ALBUMART_SIZE": "Web Album art Size",
-        "WEB_ALBUMART_SIZE_DOC": "Choose the size of Album art downloaded from web: higher quality requires longer load times. Lower values may improve load times."
+        "WEB_ALBUMART_SIZE_DOC": "Choose the size of Album art downloaded from web: higher quality requires longer load times. Lower values may improve load times.",
+        "IGNORE_LEADING_ARTICLE":"Ignore leading article when sorting artists/albums/genres",
+        "ARTICLE_LIST":"List of articles to ignore",
+        "SPLIT_ARTISTS_BY_STARTING_LETTER":"Artists by starting letter",
+        "SPLIT_GENRES_BY_STARTING_LETTER":"Genres by starting letter",
+        "SPLIT_ALBUMS_BY_STARTING_LETTER":"Albums by starting letter",
+        "LIST_ONLY_ARTISTS_WITH_MIN_ENTRIES":"Show only artists with given number of tracks",
+        "LIST_ONLY_ALBUMS_WITH_MIN_ENTRIES":"Show only albums with given number of tracks",
+        "LIST_ONLY_GENRES_WITH_MIN_ENTRIES":"Show only genres with given number of tracks",
+        "SHOW_NR_OF_TRACKS":"Show number of found tracks in artists/albums/genres title",
+        "IGNORE_LEADING_ARTICLE_DOC":"The Beatles would be sorted by letter B not letter T",
+        "ARTICLE_LIST_DOC":"List spearated by space and comma, for example: THE ,DER ,DIE ,DAS ,LE ,LA ,LES, EL ",
+        "SPLIT_ARTISTS_BY_STARTING_LETTER_DOC":"Artists will be shown separated by starting letter",
+        "SPLIT_GENRES_BY_STARTING_LETTER_DOC":"Genres will be shown separated by starting letter",
+        "SPLIT_ALBUMS_BY_STARTING_LETTER_DOC":"Albums will be shown separated by starting letter",
+        "LIST_ONLY_ARTISTS_WITH_MIN_ENTRIES_DOC":"Show only artists who have at least given number of tracks in the library",
+        "LIST_ONLY_ALBUMS_WITH_MIN_ENTRIES_DOC":"Show only albums which have at least given number of tracks in the library",
+        "LIST_ONLY_GENRES_WITH_MIN_ENTRIES_DOC":"Show only genres which have at least given number of tracks in the library",
+        "SHOW_NR_OF_TRACKS_DOC":"Show number of found tracks in artist/album/genre title"
+        
     },
     "COMMON": {
         "ADD_QUEUE_TEXT_1": "Added ",
