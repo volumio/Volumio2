@@ -14,6 +14,8 @@
     {"id":"bassfly","name":"BassFly-uHAT","overlay":"hifiberry-dac","alsanum":"2","mixer":"","modules":"","script":"bassfly-init.sh","needsreboot":"yes"},
     {"id":"bassfly-mic","name":"BassFly-uHAT with I2S Mic","overlay":"googlevoicehat-soundcard","alsanum":"2","mixer":"","modules":"","script":"bassfly-init.sh","needsreboot":"yes"},
     {"id":"bassowl","name":"BassOwl-HAT","overlay":"bassowl","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
+    {"id":"chipdip-master-dac","name":"CHIPDIP Master DAC","overlay":"chipdip-i2s-master-dac","alsanum":"2","mixer":"","modules":"","script":"chipdip-dac-init.sh","needsreboot":"yes"},
+    {"id":"chipdip-slave-dac","name":"CHIPDIP Slave DAC","overlay":"hifiberry-dac","alsanum":"2","mixer":"","modules":"","script":"chipdip-dac-init.sh","needsreboot":"yes"},
     {"id":"fe-pi-audio","name":"Fe-Pi Audio","overlay":"fe-pi-audio","alsanum":"2","mixer":"PCM","modules":"","script":"","needsreboot":"yes"},
     {"id":"generic-dac","name":"Generic I2S DAC","overlay":"hifiberry-dac","alsanum":"2","mixer":"","modules":"","script":"","needsreboot":"yes"},
     {"id":"hifiberry-amp","name":"HiFiBerry Amp","overlay":"hifiberry-amp","alsanum":"2","mixer":"Master","modules":"","script":"","needsreboot":"yes"},
