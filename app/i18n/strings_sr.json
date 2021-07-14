@@ -1,1 +1,29 @@
-{}
+{
+    "ALARM": {
+        "ALARM_CLOCK_TITLE": "Alarm",
+        "SLEEP_MODE_IN": "za",
+        "SLEEP_MODE_MINUTE": "minuta",
+        "SLEEP_MODE_SYSTEM_WILL": "Sistem će",
+        "SLEEP_MODE_TITLE": "Sleep režim",
+        "STOP_MUSIC": "Zaustavi muziku",
+        "TIME_SELECT_ERROR": "Vreme za uključivanje alarma",
+        "TURN_OFF": "Isključi",
+        "ALARM_CLOCK_SAVE": "Alarm je podešen",
+        "PLAYLIST_SELECT_ERROR": "Odaberi listu",
+        "SLEEP_MODE_HOUR": "sat(i)"
+    },
+    "APPEARANCE": {
+        "ALBUMART_CACHE_CLEARED": "Album Art cache uspešno resetovan",
+        "ALBUMART_RESET_CACHE": "Resetuj Album Art keš",
+        "ALBUMART_SETTINGS": "Albumart podešavanje",
+        "APPEARANCE": "Prikaz",
+        "ARTIST": "Izvođač",
+        "ARTIST_SORTING": "Sortiraj izvođače po",
+        "ARTIST_SORTING_DOC": "Odaberi podatke za sortitanje izvođača",
+        "BACKGROUND_DELETED": "Pozadina je obrisana",
+        "BROWSE_SOURCES_VISIBILITY": "Vidljivost izora",
+        "ALBUMARTIST": "Izvođač",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Greška prilikom brisanja keša. Pokušaj ponovo za par minuta.",
+        "ALBUMART_RESET_CACHE_DOC": "Sistem kešira Albumart da bi poboljšao performanse. Ovo onemogućava nove Albumarte da budu prikazani. Resetuj keš da vidiš novododate Albumarte."
+    }
+}
