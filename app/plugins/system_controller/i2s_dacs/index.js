@@ -397,7 +397,9 @@ ControllerI2s.prototype.enableI2SDAC = function (data) {
           if (modules) {
             this.config.set('i2s_id', id);
             self.writeModulesFile(modules);
-          } else {
+          }
+
+          if (overlay) {
             self.revomeAllDtOverlays();
             self.writeI2SDAC(overlay);
             if (script) {
