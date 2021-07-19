@@ -13,3 +13,5 @@ level 255 "Playback Volume"
 level 109 "Headphone Playback Volume" "Speaker Playback Volume"
 level 4   "Speaker DC Volume" "Speaker AC Volume"
 
+alsactl store
+
