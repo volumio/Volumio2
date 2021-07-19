@@ -1,7 +1,9 @@
 #!/bin/bash
+CARD=wm8960soundcard
+
 function level {
 	for s in "${@:2}"; do
-		amixer -c 1 cset iface=MIXER,name="${s}" $1
+		amixer -c $CARD cset iface=MIXER,name="${s}" $1
 	done
 }
 
