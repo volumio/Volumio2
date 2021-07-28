@@ -325,6 +325,7 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
   var self = this;
   self.logger.verbose('ControllerMpd::sendMpdCommand ' + sCommand);
 
+  const start=Date.now()
   return self.mpdReady
     .then(function () {
       return libQ.nfcall(self.clientMpd.sendCommand.bind(self.clientMpd), libMpd.cmd(sCommand, arrayParameters));
@@ -337,6 +338,9 @@ ControllerMpd.prototype.sendMpdCommand = function (sCommand, arrayParameters) {
 
         self.sendMpdCommand('clearerror', []);
       }
+      const stop=Date.now()
+      self.logger.info("sendMpdCommand "+sCommand+" took "+(stop-start)+" milliseconds")
+            
       return libQ.resolve(respobject);
     });
 };

@@ -15,7 +15,7 @@
     "APPEARANCE": {
         "ALBUMARTIST": "Albuminterpret",
         "ALBUMART_CACHE_CLEARED": "Zurücksetzen des Albumbilder-Cache erfolgreich",
-        "ALBUMART_CACHE_CLEAR_ERROR": "Fehler beim Zurücksetzen des Albumbilder-Cache. Versuche es in ein paar Minuten erneut",
+        "ALBUMART_CACHE_CLEAR_ERROR": "Fehler beim Zurücksetzen des Albumbilder-Cache. Versuche es in ein paar Minuten erneut.",
         "ALBUMART_RESET_CACHE": "Albumbilder-Cache zurücksetzen",
         "ALBUMART_RESET_CACHE_DOC": "Für bessere Leistung werden Albenbilder im Cache gespeichert. Dadurch werden neu hinzugefügte Albenbilder nicht sofort dargestellt. Durch Zurücksetzen des Cache werden auch neu hinzugefügte Albenbilder angezeigt.",
         "ALBUMART_SETTINGS": "Einstellungen für Albencover",
@@ -26,14 +26,14 @@
         "BACKGROUND_DELETED": "Hintergrund gelöscht",
         "BROWSE_SOURCES_VISIBILITY": "Quellen Sichtbarkeit",
         "COMPILATION_METADATA": "Metadaten-Felder Compilations",
-        "COMPILATION_METADATA_DOC": "Sollten diese Einträge in den Interpretenmetadaten entdeckt werden, wertet das System das entsprechende Album als Compilation (also ein Album mit verschiedenen Interpreten). Es können mehrere Einträge vorgenommen werden und sie müssen durch Kommata voneinander getrennt werden",
+        "COMPILATION_METADATA_DOC": "Sollten diese Einträge in den Interpretenmetadaten entdeckt werden, wertet das System das entsprechende Album als Compilation (also ein Album mit verschiedenen Interpreten). Es können mehrere Einträge vorgenommen werden und sie müssen durch Kommata voneinander getrennt werden.",
         "EXTRALARGE": "Sehr groß",
         "IMAGE_MUST_BE_LESS_THAN": "Bildgröße darf nicht größer sein als",
         "LARGE": "Groß",
         "MEDIUM": "Mittel",
         "MEGA": "Mega groß",
         "METADATA_IMAGE": "Eingebettete Albumbilder anzeigen",
-        "METADATA_IMAGE_DOC": "Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern",
+        "METADATA_IMAGE_DOC": "Sofern keine Albumbilder im Verzeichnis gefunden werden, liest das System eingebettete Albenbilder aus den Musikdateien aus. Die Ladezeit der Albenbilder wird dadurch wahrscheinlich länger dauern.",
         "MUSIC_LIBRARY_SETTINGS": "Einstellungen für Musikbibliothek",
         "NEW_BACKGROUND_APPLIED": "Neuer Hintergrund gesetzt",
         "NEW_LANGUAGE_SET": "Neue Sprache gesetzt",
@@ -41,8 +41,8 @@
         "SHOW_TRACKNUMBERS_DOC": "Dem Titel eines Stücks die Titelnummer voranstellen",
         "SMALL": "Klein",
         "UI_CONFIG_LANGUAGE": "Sprache",
-        "UI_CONFIG_SELECT_LANGUAGE": "Sprache auswählen",
-        "UI_CONFIG_SELECT_LANGUAGE_DOC": "Systemsprache auswählen",
+        "UI_CONFIG_SELECT_LANGUAGE": "Sprache wählen",
+        "UI_CONFIG_SELECT_LANGUAGE_DOC": "Systemsprache wählen",
         "UPLOAD_FAILED": "Upload fehlgeschlagen",
         "USER_INTERFACE_CLASSIC": "Klassisch",
         "USER_INTERFACE_CONTEMPORARY": "Modern",
@@ -151,7 +151,8 @@
         "GOTO_DEVICE_LIST": "Zur Geräteliste",
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio ist auf diesem Gerät nicht aktiviert",
         "PLAN_REQUIRED": "wird für diese Funktion benötigt",
-        "UPGRADE_YOUR_PLAN_NOW": "Führe jetzt ein Plan-Upgrade durch"
+        "UPGRADE_YOUR_PLAN_NOW": "Führe jetzt ein Plan-Upgrade durch",
+        "PLEASE_ENABLE_MY_VOLUMIO": "MyVolumio enthält Anbindungen für Streamingdienste wie TIDAL, QOBUZ und High Res Audio, sowie viele zusätzliche Plugins. Um vollen Zugang dazu zu erhalten, buche einen MyVolumio Plan. Besuche myvolumio.org für eine kostenlose Testphase!"
     },
     "NETWORK": {
         "AUTOMATIC_IP": "Automatische IP",
@@ -187,8 +188,8 @@
         "WIRELESS_ENABLED": "Drahtloses Netzwerk",
         "WIRELESS_ENABLED_DOC": "Drahtloses Netzwerk ein- oder ausschalten. Diese Einstellung kann die Klangqualität beeinflussen.",
         "WIRELESS_NETWORK": "Drahtloses Netzwerk",
-        "WIRELESS_NETWORK_CONNECTION_DEFER": "Das Gerät wird sich mit dem Netzwerk verbinden,",
-        "WIRELESS_NETWORK_CONNECTION_DEFER2": "sobald die Ersteinrichtung abgeschlossen ist",
+        "WIRELESS_NETWORK_CONNECTION_DEFER": "Das Gerät wird sich mit dem Netzwerk",
+        "WIRELESS_NETWORK_CONNECTION_DEFER2": "verbinden, sobald die Ersteinrichtung abgeschlossen ist.",
         "WIRELESS_NETWORK_CONNECTION_ERROR": "Beim Verbinden mit dem Netzwerk ist ein Fehler aufgetreten",
         "WIRELESS_NETWORK_CONNECTION_ERROR_PROCEED": "Bitte erneut versuchen oder mit dem nächsten Schritt fortfahren",
         "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL": "Erfolgreich mit dem Netzwerk verbunden",
@@ -464,12 +465,13 @@
         "TOP_20": "Top 20",
         "MENU_TIDAL": "TIDAL",
         "TIDAL_TRACKS": "TIDAL Titel",
-        "MENU_DATEADDED": "Erscheinungsdatum",
+        "MENU_DATEADDED": "Zuletzt hinzugefügt",
         "RECOMMENDED": "Empfohlen",
-        "MIXES": "Abmischungen"
+        "MIXES": "Mixes & Radio",
+        "TIDAL_ARTISTS": "TIDAL Interpreten"
     },
     "VOLUMIO_CLOUD_QOBUZ": {
-        "MY_MUSIC": "Meine Music",
+        "MY_MUSIC": "Meine Musik",
         "MY_ALBUMS": "Meine Alben",
         "MY_PLAYLISTS": "Meine Playlisten",
         "MY_ARTISTS": "Meine Interpreten",
@@ -483,7 +485,9 @@
         "SELECTED_BY_QOBUZ": "Ausgewählt von QOBUZ",
         "SELECTED_BY_THE_MEDIA": "Ausgewählt durch die Medien",
         "NEW_RELEASES": "Neuerscheinungen",
-        "FEATURED_EDITOR_PICKS": "Redaktionstipps"
+        "FEATURED_EDITOR_PICKS": "Redaktionstipps",
+        "QOBUZ_ARTISTS": "QOBUZ Interpreten",
+        "FEATURED_LAST_CREATED": "Zuletzt erstellt"
     },
     "PLUGIN_CDCONTROLLER": {
         "INTERNAL_MEMORY": "Interner Speicher",
@@ -508,13 +512,14 @@
         "SECTION_ACCOUNT_BETA": "TIDAL (Experimentales Plugin)",
         "TIDAL_LOGOUT_DESC": "Dieses Gerät ist mit TIDAL verbunden. Du kannst die Verbindung, durch einen Klick auf Abmelden, aufheben.",
         "SAVE_QUALITY_SUCCESS": "Qualitätseinstellungen erfolgreich gespeichert",
-        "EPSINGLES": "TIDAL EP & Singles",
+        "EPSINGLES": "TIDAL EPs & Singles",
         "TIDAL_ARTISTS": "TIDAL Interpreten",
         "TIDAL_TRACKS": "TIDAL Titel",
         "TIDAL_PLAYLISTS": "TIDAL Playlisten",
         "MQA_TITLE": "Master Quality (MQA)",
         "TIDAL_ALBUMS": "TIDAL Alben",
-        "TIDAL_CONNECT_DESC": "Greife auf den TIDAL-Katalog in Volumio zu."
+        "TIDAL_CONNECT_DESC": "Greife auf den TIDAL-Katalog in Volumio zu.",
+        "MQA_DESCR": "MQA wird auf jedem Gerät wiedergegeben und übertrifft in puncto Qualität die CD. In Verbindung mit einem MQA-Decoder erreicht MQA die original Master-Qualität."
     },
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "QOBUZ Einstellungen",
@@ -522,6 +527,6 @@
         "QOBUZ_CONNECT_DESC": "Greife auf den QOBUZ-Katalog in Volumio zu.",
         "QOBUZ_LOGOUT_DESC": "Dieses Gerät ist mit QOBUZ verbunden. Du kannst die Verbindung, durch einen Klick auf Abmelden, aufheben.",
         "QOBUZ_FREE_TRIAL": "Kostenlos Testen",
-        "QOBUZ_FREE_TRIAL_DESC": "Erhalte einen kostenlosen Monat QOBUZ HIFI im Wert von 19,99 €."
+        "QOBUZ_FREE_TRIAL_DESC": "Teste QOBUZ HIFI einen Monat kostenlos (Wert: 19,99€)"
     }
 }

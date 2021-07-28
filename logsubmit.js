@@ -11,9 +11,13 @@ var commandArray = [
   'ps -ef',
   'df -h',
   'mount',
-  'sudo journalctl -p 7',
+  'netstat -natp',
+  'cat /etc/asound.conf',
   'cat /var/log/mpd.log',
-  'cat /etc/asound.conf'
+  'cat /data/configuration/plugins.json',
+  'cat /etc/mpd.conf',
+  'volumio endpointstest',
+  'sudo journalctl -p 7'
 ];
 
 // Up to two arguments may be given:
