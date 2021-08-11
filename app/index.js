@@ -123,9 +123,11 @@ CoreCommandRouter.prototype.volumiosetvolume = function (VolumeInteger) {
   this.callCallback('volumiosetvolume', VolumeInteger);
 
   var volSet = this.volumeControl.alsavolume(VolumeInteger);
-  volSet.then(function (result) {
-		 return self.volumioupdatevolume(result);
-  });
+  if (volSet) {
+    volSet.then(function (result) {
+      return self.volumioupdatevolume(result);
+   });
+  }
 };
 
 // Volumio Update Volume
