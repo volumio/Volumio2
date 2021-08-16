@@ -2115,7 +2115,7 @@ ControllerAlsa.prototype.internalUpdateALSAConfigFile = function () {
 
     var asoundcontent = '';
     asoundcontent += 'pcm.!default {\n';
-    asoundcontent += '    type             copy\n';
+    asoundcontent += '    type             empty\n';
     asoundcontent += '    slave.pcm       "volumio"\n';
     asoundcontent += '}\n';
     asoundcontent += '\n';
@@ -2125,7 +2125,7 @@ ControllerAlsa.prototype.internalUpdateALSAConfigFile = function () {
       var contribution = contributions[i];
       
       asoundcontent += 'pcm.' + outPCM + ' {\n';
-      asoundcontent += '    type             copy\n';
+      asoundcontent += '    type             empty\n';
       asoundcontent += '    slave.pcm       "' + contribution.snippetDatum.inPCM + '"\n';
       asoundcontent += '}\n';
       asoundcontent += '\n';
