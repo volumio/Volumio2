@@ -198,42 +198,56 @@ function chooseBestStreamIdx (resArray) {
 
   if (resArray) {
     resArray.forEach((res, idx, arr) => {
-      // qualifies?
       let thisFreq = (res['$'].sampleFrequency === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].sampleFrequency);
       // bitsPerSample not always available - perhaps there is some kind of implicit default?
+      // only uses it if this is the only stream, and all the other properties qualifies.
       let thisBitsPerSample;
       if (res['$'].bitsPerSample === undefined) {
-        console.log(`Warning: allowing undefined bitsPerSample field.`);
-        thisBitsPerSample = MaxBitDepth;
+        console.log(`Warning: undefined bitsPerSample field.`);
       }
       else {
         thisBitsPerSample = Number(res['$'].bitsPerSample);
       }
       let thisNrChns = (res['$'].nrAudioChannels === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].nrAudioChannels);
       if (debug) console.log(`Entering: idx=${idx}:  ${thisFreq} / ${thisBitsPerSample} / ${thisNrChns}`);
-      if (thisFreq <= MaxSampFreq && thisBitsPerSample <= MaxBitDepth && thisNrChns <= MaxNrChns) {
+      // qualifies (let thisBitsPerSample===undefined qualifies)
+      if (thisFreq <= MaxSampFreq && (thisBitsPerSample === undefined || thisBitsPerSample <= MaxBitDepth) 
+          && thisNrChns <= MaxNrChns) {
         if (bstIdx >= 0) {
           let bstFreq = Number(arr[bstIdx]['$'].sampleFrequency);
           let bstBitsPerSample = Number(arr[bstIdx]['$'].bitsPerSample);
           let bstNrChns = Number(arr[bstIdx]['$'].nrAudioChannels);
-          if (thisFreq > bstFreq) {
-            //console.log(`${thisFreq} > ${bstFreq}`);
-            bstIdx = idx;
-          }
-          else if (thisFreq === bstFreq) {
-            if (thisBitsPerSample > bstBitsPerSample) {
-              if (debug) console.log(`${thisBitsPerSample} > ${bstBitsPerSample}`);
+          // Do not replace existing choice if this bitsPerSample is undefined while
+          // bitsPerSample of currently chosen stream is defined.
+          if (thisBitsPerSample !== undefined || bstBitsPerSample === undefined) {
+            if (thisFreq > bstFreq) {
+              if (debug) console.log(`${thisFreq} > ${bstFreq}`);
               bstIdx = idx;
             }
-            else if (thisBitsPerSample === bstBitsPerSample) {
+            else if (thisFreq === bstFreq) {
               if (thisNrChns > bstNrChns) {
                 if (debug) console.log(`${thisNrChns} > ${bstNrChns}`);
                 bstIdx = idx;
+              }
+              else if (thisNrChns === bstNrChns) {
+                if (thisBitsPerSample !== undefined) {
+                  if (bstBitsPerSample === undefined) {
+                    if (debug) console.log(`${bstBitsPerSample} better than  ${bstBitsPerSample}`);
+                    bstIdx = idx;
+                  }
+                  else {
+                    if (thisBitsPerSample > bstBitsPerSample) {
+                      if (debug) console.log(`${thisBitsPerSample} > ${bstBitsPerSample}`);
+                      bstIdx = idx;
+                    }
+                  }
+                }
               }
             }
           }
         }
         else {
+          // this should be the only place where undefined bitsPerSample will be chosen
           bstIdx = idx;
         }
       }
