@@ -187,6 +187,51 @@ function parseContainer (metadata) {
   return container;
 }
 
+function chooseBestStreamIdx (resArray) {
+  const MaxSampFreq = 192000;
+  const MaxBitDepth = 32; // because it alsa can play it at 24-bit
+  const MaxNrChns = 2;
+  let bstIdx = -1; // nothing chosen yet
+
+  if (resArray) {
+    resArray.forEach((res, idx, arr) => {
+      // qualifies?
+      let thisFreq = (res['$'].sampleFrequency === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].sampleFrequency);
+      let thisBitsPerSample = (res['$'].bitsPerSample === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].bitsPerSample);
+      let thisNrChns = (res['$'].nrAudioChannels === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].nrAudioChannels);
+      if (debug) console.log(`Entering: idx=${idx}:  ${thisFreq} / ${thisBitsPerSample} / ${thisNrChns}`);
+      if (thisFreq <= MaxSampFreq && thisBitsPerSample <= MaxBitDepth && thisNrChns <= MaxNrChns) {
+        if (bstIdx >= 0) {
+          let bstFreq = Number(arr[bstIdx]['$'].sampleFrequency);
+          let bstBitsPerSample = Number(arr[bstIdx]['$'].bitsPerSample);
+          let bstNrChns = Number(arr[bstIdx]['$'].nrAudioChannels);
+          if (thisFreq > bstFreq) {
+            //console.log(`${thisFreq} > ${bstFreq}`);
+            bstIdx = idx;
+          }
+          else if (thisFreq === bstFreq) {
+            if (thisBitsPerSample > bstBitsPerSample) {
+              if (debug) console.log(`${thisBitsPerSample} > ${bstBitsPerSample}`);
+              bstIdx = idx;
+            }
+            else if (thisBitsPerSample === bstBitsPerSample) {
+              if (thisNrChns > bstNrChns) {
+                if (debug) console.log(`${thisNrChns} > ${bstNrChns}`);
+                bstIdx = idx;
+              }
+            }
+          }
+        }
+        else {
+          bstIdx = idx;
+        }
+      }
+      if (debug) console.log(`bstIdx after idx=${idx}:  ${bstIdx}`);
+    });
+  }
+  return bstIdx;
+}
+
 function parseItem (metadata) {
   var item = {
     'class': '',
@@ -212,9 +257,20 @@ function parseItem (metadata) {
       item.album = metadata.album[0]['_'];
     }
     if (metadata.res) {
-      item.source = metadata.res[0]['_'];
-      if (metadata.res[0]['$'].duration) {
-        var dur = metadata.res[0]['$'].duration;
+      if (debug) console.log(`res length: ${metadata.res.length} for title ${item.title}`);
+      let bestResIdx = chooseBestStreamIdx(metadata.res);
+      if (bestResIdx < 0) {
+        console.log(`Warning: Unable to choose best stream format for ${item.title} - use the first available one out of ${metadata.res.length}`);
+        bestResIdx = 0;
+      }
+      else {
+        console.log(`Chosen res idx ${bestResIdx} out of ${metadata.res.length} for ${item.title}`);
+      }
+      item.source = metadata.res[bestResIdx]['_'];
+      console.log(`${item.title} source: ${item.source} `);
+      console.log(`${item.title} audio format: ${metadata.res[bestResIdx]['$'].sampleFrequency}Hz,  ${metadata.res[bestResIdx]['$'].bitsPerSample} bits,  ${metadata.res[bestResIdx]['$'].nrAudioChannels} channels  `);
+      if (metadata.res[bestResIdx]['$'].duration) {
+        var dur = metadata.res[bestResIdx]['$'].duration;
         var time = dur.split(':');
         item.duration = parseInt(parseFloat(time[0]) * 3600 + parseFloat(time[1]) * 60 + parseFloat(time[2]));
       }
