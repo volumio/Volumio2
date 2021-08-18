@@ -125,7 +125,10 @@ var browseServer = function (id, controlUrl, options, callback) {
             if (content.item) {
               browseResult.item = new Array();
               for (let i = 0; i < content.item.length; i++) {
-                browseResult.item[i] = parseItem(content.item[i]);
+                // hide the item if we cannot play
+                let parsedItem = parseItem(content.item[i]);
+                if (parsedItem)
+                  browseResult.item.push(parsedItem)
               }
             }
             callback(undefined, browseResult);
@@ -197,7 +200,15 @@ function chooseBestStreamIdx (resArray) {
     resArray.forEach((res, idx, arr) => {
       // qualifies?
       let thisFreq = (res['$'].sampleFrequency === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].sampleFrequency);
-      let thisBitsPerSample = (res['$'].bitsPerSample === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].bitsPerSample);
+      // bitsPerSample not always available - perhaps there is some kind of implicit default?
+      let thisBitsPerSample;
+      if (res['$'].bitsPerSample === undefined) {
+        console.log(`Warning: allowing undefined bitsPerSample field.`);
+        thisBitsPerSample = MaxBitDepth;
+      }
+      else {
+        thisBitsPerSample = Number(res['$'].bitsPerSample);
+      }
       let thisNrChns = (res['$'].nrAudioChannels === undefined)? Number.MAX_SAFE_INTEGER : Number(res['$'].nrAudioChannels);
       if (debug) console.log(`Entering: idx=${idx}:  ${thisFreq} / ${thisBitsPerSample} / ${thisNrChns}`);
       if (thisFreq <= MaxSampFreq && thisBitsPerSample <= MaxBitDepth && thisNrChns <= MaxNrChns) {
@@ -233,60 +244,67 @@ function chooseBestStreamIdx (resArray) {
 }
 
 function parseItem (metadata) {
-  var item = {
-    'class': '',
-    'id': '',
-    'title': '',
-    'artist': '',
-    'album': '',
-    'parentId': '',
-    'duration': '',
-    'source': '',
-    'image': ''};
-  if (metadata) {
-    if (metadata.class) {
-      item.class = metadata.class[0]['_'];
-    }
-    if (metadata.title) {
-      item.title = metadata.title[0]['_'];
-    }
-    if (metadata.artist) {
-      item.artist = metadata.artist[0]['_'];
-    }
-    if (metadata.album) {
-      item.album = metadata.album[0]['_'];
-    }
-    if (metadata.res) {
-      if (debug) console.log(`res length: ${metadata.res.length} for title ${item.title}`);
-      let bestResIdx = chooseBestStreamIdx(metadata.res);
-      if (bestResIdx < 0) {
-        console.log(`Warning: Unable to choose best stream format for ${item.title} - use the first available one out of ${metadata.res.length}`);
-        bestResIdx = 0;
+  let item = null;
+  try {
+    item = {
+      'class': '',
+      'id': '',
+      'title': '',
+      'artist': '',
+      'album': '',
+      'parentId': '',
+      'duration': '',
+      'source': '',
+      'image': ''};
+    if (metadata) {
+      if (metadata.class) {
+        item.class = metadata.class[0]['_'];
       }
-      else {
-        console.log(`Chosen res idx ${bestResIdx} out of ${metadata.res.length} for ${item.title}`);
+      if (metadata.title) {
+        item.title = metadata.title[0]['_'];
       }
-      item.source = metadata.res[bestResIdx]['_'];
-      console.log(`${item.title} source: ${item.source} `);
-      console.log(`${item.title} audio format: ${metadata.res[bestResIdx]['$'].sampleFrequency}Hz,  ${metadata.res[bestResIdx]['$'].bitsPerSample} bits,  ${metadata.res[bestResIdx]['$'].nrAudioChannels} channels  `);
-      if (metadata.res[bestResIdx]['$'].duration) {
-        var dur = metadata.res[bestResIdx]['$'].duration;
-        var time = dur.split(':');
-        item.duration = parseInt(parseFloat(time[0]) * 3600 + parseFloat(time[1]) * 60 + parseFloat(time[2]));
+      if (metadata.artist) {
+        item.artist = metadata.artist[0]['_'];
       }
-    }
-    if (metadata.albumArtURI) {
-      item.image = metadata.albumArtURI[0]['_'];
-    }
-    if (metadata['$']) {
-      if (metadata['$'].id) {
-        item.id = metadata['$'].id;
+      if (metadata.album) {
+        item.album = metadata.album[0]['_'];
       }
-      if (metadata['$'].parentID) {
-        item.parentId = metadata['$'].parentID;
+      if (metadata.res) {
+        if (debug) console.log(`res length: ${metadata.res.length} for title ${item.title}`);
+        let bestResIdx = chooseBestStreamIdx(metadata.res);
+        if (bestResIdx < 0) {
+          throw new Error(`Warning: Unable to choose best stream format for ${item.title} - return null!`);
+        }
+        else {
+          console.log(`Chosen res idx ${bestResIdx} out of ${metadata.res.length} for ${item.title}`);
+        }
+        item.source = metadata.res[bestResIdx]['_'];
+        console.log(`${item.title} source: ${item.source} `);
+        console.log(`${item.title} audio format: ${metadata.res[bestResIdx]['$'].sampleFrequency}Hz,  ${metadata.res[bestResIdx]['$'].bitsPerSample} bits,  ${metadata.res[bestResIdx]['$'].nrAudioChannels} channels  `);
+        if (metadata.res[bestResIdx]['$'].duration) {
+          var dur = metadata.res[bestResIdx]['$'].duration;
+          var time = dur.split(':');
+          item.duration = parseInt(parseFloat(time[0]) * 3600 + parseFloat(time[1]) * 60 + parseFloat(time[2]));
+        }
+      }
+      if (metadata.albumArtURI) {
+        item.image = metadata.albumArtURI[0]['_'];
+      }
+      if (metadata['$']) {
+        if (metadata['$'].id) {
+          item.id = metadata['$'].id;
+        }
+        if (metadata['$'].parentID) {
+          item.parentId = metadata['$'].parentID;
+        }
       }
     }
   }
+  catch(err) {
+    console.log(`Error caught in dlna-browser parseItem(). ${err}`);
+    item = null;
+  }
+  
   return item;
 }
 
