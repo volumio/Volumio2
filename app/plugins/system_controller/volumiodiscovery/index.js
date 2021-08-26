@@ -254,7 +254,7 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
     socket.on('connect', function () {
       socket.emit('getState', '');
       socket.on('pushState', function (data) {
-        self.pushMultiRoomStatusUpdate(uuid, data);
+        self.updateMultiroomDevice(uuid, data);
       });
       socket.on('disconnect', function () {
             	setTimeout(() => {
@@ -268,12 +268,12 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
     self.remoteConnections.set(uuid, socket);
   } else {
     var selfState = self.commandRouter.volumioGetState();
-    self.pushMultiRoomStatusUpdate(uuid, selfState);
+    self.updateMultiroomDevice(uuid, selfState);
   }
 };
 
-ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate = function (uuid, data) {
-  var self = this;
+ControllerVolumioDiscovery.prototype.updateMultiroomDevice = function (uuid, data) {
+  
 
   foundVolumioInstances.set(uuid + '.status', data.status);
   if (data.volume === undefined) {
@@ -289,6 +289,11 @@ ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate = function (uuid,
     volumeAvailable = false;
   }
   foundVolumioInstances.set(uuid + '.volumeAvailable', volumeAvailable);
+  self.pushMultiRoomStatus();
+};
+
+ControllerVolumioDiscovery.prototype.pushMultiRoomStatus = function () {
+  var self = this;
   var toAdvertise = self.getDevices();
   self.commandRouter.pushMultiroomDevices(toAdvertise);
 };
@@ -359,10 +364,12 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
       var address = addresses[j];
       if (isSelf) {
         var iPAddresses = self.commandRouter.getCachedPAddresses();
-        if (iPAddresses.wlan0 && iPAddresses.wlan0 !== '192.168.211.1') {
+        if (ipAddresses && ipAddresses.eth0 && ipAddresses.eth0 != '') {
+          address = iPAddresses.eth0;
+        } else if (ipAddresses && ipAddresses.wlan0 && ipAddresses.eth0 != '' && ipAddresses.wlan0 !== '192.168.211.1') {
           address = iPAddresses.wlan0;
         } else {
-          address = iPAddresses.eth0;
+          address = '127.0.0.1';
         }
       } else {
         if (address.value[0] != undefined && address.value[0].value[0] != undefined) {
@@ -414,10 +421,12 @@ ControllerVolumioDiscovery.prototype.getThisDevice = function () {
   var thisState = self.commandRouter.volumioGetState();
   var ipAddresses = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getCachedPAddresses', '');
   thisDevice.id = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConf', 'uuid');
-  if (ipAddresses && ipAddresses.wlan0 && ipAddresses.wlan0 !== '192.168.211.1') {
-    thisDevice.host = 'http://' + ipAddresses.wlan0;
-  } else if (ipAddresses && ipAddresses.eth0) {
+  if (ipAddresses && ipAddresses.eth0 && ipAddresses.eth0 != '') {
     thisDevice.host = 'http://' + ipAddresses.eth0;
+  } else if (ipAddresses && ipAddresses.wlan0 && ipAddresses.wlan0 !== '192.168.211.1') {
+    thisDevice.host = 'http://' + ipAddresses.wlan0;
+  } else {
+    thisDevice.host = 'http://127.0.0.1';
   }
   thisDevice.name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConf', 'playerName');
   thisDevice.type = config.get('device_type', 'device');
