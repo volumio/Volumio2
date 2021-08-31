@@ -256,6 +256,15 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
       socket.on('pushState', function (data) {
         self.updateMultiroomDevice(uuid, data);
       });
+      socket.on('pushMultiroomSyncOutput', function (data) {
+        self.commandRouter.updateMultiroomSyncOutput(data);
+      });
+      socket.on('enableMultiroomSyncOutput', function (data) {
+        self.commandRouter.enableMultiroomSyncOutput(data);
+      });
+      socket.on('disableMultiroomSyncOutput', function (data) {
+        self.commandRouter.disableMultiroomSyncOutput(data);
+      });
       socket.on('disconnect', function () {
             	setTimeout(() => {
             	    // Disabled: the mdns cache will keep this device in memory, we need to find a way to reinstantiate the mdns search
@@ -273,8 +282,7 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
 };
 
 ControllerVolumioDiscovery.prototype.updateMultiroomDevice = function (uuid, data) {
-  
-
+  var self = this;
   foundVolumioInstances.set(uuid + '.status', data.status);
   if (data.volume === undefined) {
     data.volume = 0;
@@ -364,9 +372,9 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
       var address = addresses[j];
       if (isSelf) {
         var iPAddresses = self.commandRouter.getCachedPAddresses();
-        if (ipAddresses && ipAddresses.eth0 && ipAddresses.eth0 != '') {
+        if (iPAddresses && iPAddresses.eth0 && iPAddresses.eth0 != '') {
           address = iPAddresses.eth0;
-        } else if (ipAddresses && ipAddresses.wlan0 && ipAddresses.eth0 != '' && ipAddresses.wlan0 !== '192.168.211.1') {
+        } else if (iPAddresses && iPAddresses.wlan0 && iPAddresses.eth0 != '' && iPAddresses.wlan0 !== '192.168.211.1') {
           address = iPAddresses.wlan0;
         } else {
           address = '127.0.0.1';

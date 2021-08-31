@@ -1216,6 +1216,33 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function (data) {
   );
 };
 
+CoreCommandRouter.prototype.updateMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.updateMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.updateMultiroomSyncOutput(data);
+  }
+};
+
+CoreCommandRouter.prototype.enableMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.enableMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.enableMultiroomSyncOutput(data);
+  }
+};
+
+CoreCommandRouter.prototype.disableMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.disableMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.disableMultiroomSyncOutput(data);
+  }
+};
+
 CoreCommandRouter.prototype.pushMultiroom = function (data) {
   var self = this;
   return libQ.all(
