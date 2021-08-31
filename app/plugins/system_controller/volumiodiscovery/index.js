@@ -374,7 +374,7 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
         var iPAddresses = self.commandRouter.getCachedPAddresses();
         if (iPAddresses && iPAddresses.eth0 && iPAddresses.eth0 != '') {
           address = iPAddresses.eth0;
-        } else if (iPAddresses && iPAddresses.wlan0 && iPAddresses.eth0 != '' && iPAddresses.wlan0 !== '192.168.211.1') {
+        } else if (iPAddresses && iPAddresses.wlan0 && iPAddresses.wlan0 != '' && iPAddresses.wlan0 !== '192.168.211.1') {
           address = iPAddresses.wlan0;
         } else {
           address = '127.0.0.1';
