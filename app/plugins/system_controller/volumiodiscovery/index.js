@@ -393,9 +393,10 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
         var albumartstring = 'http://' + address + '/albumart';
       }
 
-      if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
-        address = addresses[0].value[0].value;
-      }
+      // This overwrites the locally selected IP address, and breaks discovery when hotspot is active. Also seems redundant.
+      // if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
+      //   address = addresses[0].value[0].value;
+      // }
 
       var device = {
         id: key,
