@@ -27,6 +27,10 @@ function InterfaceWebUI (context) {
     // Closing all modals when clients connect
     connWebSocket.emit('closeAllModals', '');
 
+    connWebSocket.on('initSocket', function (data) {
+      self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'initSocket', data);
+    });
+
     connWebSocket.on('getDeviceInfo', function () {
       var uuid = self.commandRouter.sharedVars.get('system.uuid');
       var name = self.commandRouter.sharedVars.get('system.name');
