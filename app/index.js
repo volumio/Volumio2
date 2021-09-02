@@ -1225,6 +1225,15 @@ CoreCommandRouter.prototype.updateMultiroomSyncOutput = function (data) {
   }
 };
 
+CoreCommandRouter.prototype.getMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.getMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.getMultiroomSyncOutput(data);
+  }
+};
+
 CoreCommandRouter.prototype.enableMultiroomSyncOutput = function (data) {
   // Send this to all plugins that require this information
   var self = this;
