@@ -243,6 +243,24 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse = function () {
   }
 };
 
+ControllerVolumioDiscovery.prototype.initSocket = function (data) {
+  var self = this;  
+  // Wait untill the current connection times out
+  setTimeout(() => {
+    // If this device is in our mDNS cache and we got this message, then the device was offline and went back online. We reconnect the socketIO.
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var myuuid = systemController.getConf('uuid');
+    if (foundVolumioInstances.get(data.id + '.name') && !self.remoteConnections.has(data.id) && myuuid != data.id) {
+      var addresses = foundVolumioInstances.get(data.id + '.addresses');
+      if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
+        self.logger.info("Reconnecting to " + addresses[0].value[0].value + " which is still in the mDNS cache");
+        //This device was ungracefully disconnected, but is still in the mdns cache
+        self.connectToRemoteVolumio(data.id, addresses[0].value[0].value);        
+      }
+    }
+  }, 15000);  
+}
+
 ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip) {
   var self = this;
 
@@ -252,7 +270,11 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
   if ((!self.remoteConnections.has(uuid)) && (myuuid != uuid)) {
     var socket = io.connect('http://' + ip + ':3000');
     socket.on('connect', function () {
+      socket.emit('initSocket', {id: myuuid});
       socket.emit('getState', '');
+      //Synchronise multiroom devices      
+      socket.emit('getMultiroomSyncOutput', '');
+      self.commandRouter.getMultiroomSyncOutput();
       socket.on('pushState', function (data) {
         self.updateMultiroomDevice(uuid, data);
       });
@@ -265,12 +287,12 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
       socket.on('disableMultiroomSyncOutput', function (data) {
         self.commandRouter.disableMultiroomSyncOutput(data);
       });
-      socket.on('disconnect', function () {
-            	setTimeout(() => {
-            	    // Disabled: the mdns cache will keep this device in memory, we need to find a way to reinstantiate the mdns search
-                    //self.handleUngracefulDeviceDisappear(uuid);
-                	socket.close();
-        }, 4000);
+      socket.on('getMultiroomSyncOutput', function (data) {
+        self.commandRouter.getMultiroomSyncOutput(data);
+      });
+      socket.on('disconnect', function () {        
+        self.remoteConnections.remove(uuid);
+        socket.close(); 
       });
     });
 
