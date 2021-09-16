@@ -459,8 +459,8 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 // Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
   this.currentVolume = Volume.vol;
-  if (undefined != Volume.deviceVol)
-		this.currentDeviceVolume = Volume.deviceVol;
+  if (undefined != Volume.dbVolume)
+		this.currentDeviceVolume = Volume.dbVolume;
   this.currentMute = Volume.mute;
   this.currentDisableVolumeControl = Volume.disableVolumeControl;
   this.pushState().fail(this.pushError.bind(this));
@@ -472,8 +472,8 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
   this.commandRouter.pushConsoleMessage('CoreStateMachine::getcurrentVolume');
   this.commandRouter.volumioretrievevolume().then((volumeData) => {
     	self.currentVolume = volumeData.vol;
-      if (undefined != volumeData.deviceVol)
-				self.currentDeviceVolume = volumeData.deviceVol;
+      if (undefined != volumeData.dbVolume)
+				self.currentDeviceVolume = volumeData.dbVolume;
     	self.currentMute = volumeData.mute;
     	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
     	this.updateTrackBlock();
