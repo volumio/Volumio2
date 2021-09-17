@@ -551,7 +551,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
     // this.currentStatus='stop';
     var trackBlock = this.getTrack(this.currentPosition);
   } else if (this.isUpnp) {
-    console.log('In UPNP mode');
+    this.logger.verbose('In UPNP mode');
   } else {
     this.volatileService = undefined;
 
@@ -644,7 +644,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             sRate = trackBlock.samplerate;
             bDepth = trackBlock.bitdepth;
           }
-
           this.consumeState = {
             status: stateService.status,
             title: trackBlock.name,
@@ -663,6 +662,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             service: trackBlock.service
           };
         } else {
+          if (process.env.UPNP_192_CAP === 'true' && this.isUpnp && stateService.samplerate) {
+            stateService.samplerate = self.reportCappedSamplerate(stateService.samplerate);
+          }
           this.consumeState = {
             status: stateService.status,
             title: stateService.title,
@@ -1138,7 +1140,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
         this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.consumeState.service);
       }
     } else if (this.isUpnp) {
-      console.log('UPNP Next');
+      this.logger.verbose('UPNP Next');
     } else {
       this.stop()
         .then(function () {
@@ -1507,7 +1509,7 @@ CoreStateMachine.prototype.setVolatile = function (data) {
 };
 
 CoreStateMachine.prototype.unSetVolatile = function () {
-  console.log('UNSET VOLATILE');
+  this.logger.verbose('UNSET VOLATILE');
 
   /**
      * This function will be called on volatile stop
@@ -1527,4 +1529,18 @@ CoreStateMachine.prototype.startTimerForPreviousTrack = function () {
   setTimeout(() => {
     this.previousTrackonPrev = false;
   }, 3000);
+};
+
+CoreStateMachine.prototype.reportCappedSamplerate = function (samplerate) {
+
+  try {
+    let sampleRateNumber = parseInt(samplerate.replace('  kHz', ''));
+    if (sampleRateNumber > 192) {
+      return '192 kHz'
+    } else {
+      return samplerate
+    }
+  } catch(e) {
+    return samplerate;
+  }
 };
