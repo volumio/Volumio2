@@ -96,7 +96,7 @@ CoreStateMachine.prototype.getState = function () {
       enableSkip: this.volatileState.enableSkip,
       consume: false,
       volume: this.currentVolume,
-      dbVolume: this.currentDeviceVolume,
+      dbVolume: this.currentDbVolume,
       mute: this.currentMute,
       disableVolumeControl: this.currentDisableVolumeControl,
       stream: this.volatileState.stream,
@@ -138,7 +138,7 @@ CoreStateMachine.prototype.getState = function () {
         repeatSingle: this.currentRepeatSingleSong,
         consume: true,
         volume: this.currentVolume,
-        dbVolume: this.currentDeviceVolume,
+        dbVolume: this.currentDbVolume,
         mute: this.currentMute,
         disableVolumeControl: this.currentDisableVolumeControl,
         stream: this.consumeState.stream,
@@ -179,7 +179,7 @@ CoreStateMachine.prototype.getState = function () {
         repeatSingle: this.currentRepeatSingleSong,
         consume: this.currentConsume,
         volume: this.currentVolume,
-        dbVolume: this.currentDeviceVolume,
+        dbVolume: this.currentDbVolume,
         disableVolumeControl: this.currentDisableVolumeControl,
         mute: this.currentMute,
         stream: trackBlock.trackType,
@@ -212,7 +212,7 @@ CoreStateMachine.prototype.getEmptyState = function () {
     Streaming: false,
     service: 'mpd',
     volume: this.currentVolume,
-    dbVolume: this.currentDeviceVolume,
+    dbVolume: this.currentDbVolume,
     mute: this.currentMute,
     disableVolumeControl: this.currentDisableVolumeControl,
     random: this.currentRandom,
@@ -334,7 +334,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
       self.currentRandom = null;
       self.currentRepeat = null;
       self.currentVolume = null;
-      self.currentDeviceVolume = null;
+      self.currentDbVolume = null;
       self.currentMute = null;
       self.currentUpdate = false;
       self.getcurrentVolume();
@@ -460,7 +460,7 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 CoreStateMachine.prototype.updateVolume = function (Volume) {
   this.currentVolume = Volume.vol;
   if (undefined != Volume.dbVolume)
-		this.currentDeviceVolume = Volume.dbVolume;
+		this.currentDbVolume = Volume.dbVolume;
   this.currentMute = Volume.mute;
   this.currentDisableVolumeControl = Volume.disableVolumeControl;
   this.pushState().fail(this.pushError.bind(this));
@@ -473,7 +473,7 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
   this.commandRouter.volumioretrievevolume().then((volumeData) => {
     	self.currentVolume = volumeData.vol;
       if (undefined != volumeData.dbVolume)
-				self.currentDeviceVolume = volumeData.dbVolume;
+				self.currentDbVolume = volumeData.dbVolume;
     	self.currentMute = volumeData.mute;
     	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
     	this.updateTrackBlock();
