@@ -1037,7 +1037,7 @@ function InterfaceWebUI (context) {
              */
     connWebSocket.on('installPlugin', function (data) {
       var selfConnWebSocket = this;
-
+      selfConnWebSocket.emit('closeModals', '');
       if (process.env.WARNING_ON_PLUGIN_INSTALL === 'true' && data.confirm !== true) {
         data.confirm = true;
         return selfConnWebSocket.emit('openModal', {'title': self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL'), 'message': self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE') + '?', 'buttons': [{'name': self.commandRouter.getI18nString('COMMON.CANCEL'), 'class': 'btn btn-info', 'emit': 'closeModals', 'payload': ''}, {'name': self.commandRouter.getI18nString('PLUGINS.INSTALL'), 'class': 'btn btn-warning', 'emit': 'installPlugin', 'payload': data}]});
@@ -1191,7 +1191,11 @@ function InterfaceWebUI (context) {
 
       if (returnedData != undefined) {
         returnedData.then(function (AvailablePlugins) {
-          selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
+          if (AvailablePlugins.NotAuthorized) {
+            selfConnWebSocket.emit('openModal', {'title': self.commandRouter.getI18nString('PLUGINS.PLUGIN_LOGIN'), 'message': self.commandRouter.getI18nString('PLUGINS.PLUGIN_LOGIN_MESSAGE'), 'buttons': [{'name': self.commandRouter.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-info', 'emit': 'closeModals', 'payload': ''}]});
+          } else {
+            selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
+          }
         });
       } else self.logger.error('Error on getting Available plugins');
     });
