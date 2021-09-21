@@ -16,6 +16,7 @@ var semver = require('semver');
 
 var arch = '';
 var variant = '';
+var os = '';
 var device = '';
 var isVolumioHardware = 'none';
 
@@ -62,7 +63,7 @@ function PluginManager (ccommand, server) {
       var str = file[l].split('=');
       variant = str[1].replace(/\"/gi, '');
       // TEMPORARY UNTIL MYVOLUMIO GETS MERGED
-      if (variant === 'myvolumio') {
+      if (variant === 'myvolumio' || variant === 'volumiobuster') {
         variant = 'volumio';
       }
       process.env.WARNING_ON_PLUGIN_INSTALL = false;
@@ -73,6 +74,10 @@ function PluginManager (ccommand, server) {
     if (file[l].match(/VOLUMIO_HARDWARE/i)) {
       var str = file[l].split('=');
       var device = str[1].replace(/\"/gi, '');
+    }
+    if (file[l].match(/VERSION_CODENAME/i)) {
+      var str = file[l].split('=');
+      os = str[1].replace(/\"/gi, '');
     }
   }
 
@@ -1637,9 +1642,8 @@ PluginManager.prototype.getAvailablePlugins = function () {
 
   if (isVolumioHardware === 'none') {
       self.detectVolumioHardware();
-  }
+  } 
 
-  var url = 'http://plugins.volumio.org/plugins/' + variant + '/' + arch + '/plugins.json';
   var installed = self.getInstalledPlugins();
 
   if (installed != undefined) {
@@ -1651,22 +1655,48 @@ PluginManager.prototype.getAvailablePlugins = function () {
     });
   }
 
-  unirest
-      .get(url)
-      .timeout(6000)
-      .then(function (response) {
-        if (response && response.status === 200 && response.body && response.body.categories) {
-          pushAvailablePlugins(response.body);
-        } else {
-          if (response.error) {
-            self.logger.error('Cannot download Available plugins list: ' + response.error);
-          } else {
-            self.logger.error('Cannot download Available plugins list');
-          }
-        };
+  var url = 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/variant/' + variant + '/' + os + '/' + arch;
+  
+  var loggedIn = this.coreCommand.getMyVolumioStatus();
+  
+  loggedIn.then(loggedIn => {
+    if (!loggedIn.loggedIn){
+      defer.resolve({'NotAuthorized': true})
+    } else {
+      var token = this.coreCommand.getMyVolumioToken();
+      token.then(result => {
+        if (result.tokenAvailable) {
+          unirest
+          .get(url)
+          .headers({'Authorization': 'Bearer ' + result.token})
+          .timeout(10000)
+          .then(function (response) {
+            if (response && response.status === 200 && response.body && response.body.categories) {
+              pushAvailablePlugins(response.body);
+            } else {
+              if (response.error) {
+                self.logger.error('Cannot download Available plugins list: ' + response.error);
+              } else {
+                self.logger.error('Cannot download Available plugins list');
+              }
+            };
+          });
+        } else {      
+          defer.resolve({'NotAuthorized': true})
+        }
+      })
+      .fail(error => {
+        defer.resolve({'NotAuthorized': true})
       });
+    }
+  })
+  .fail(error => {
+    defer.resolve({'NotAuthorized': true})
+  })
 
-  function pushAvailablePlugins (response) {
+  
+  
+  function pushAvailablePlugins (response) {    
     for (var i = 0; i < response.categories.length; i++) {
       var plugins = response.categories[i].plugins;
       for (var a = 0; a < plugins.length; a++) {
@@ -1675,6 +1705,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
         var availableCategory = plugins[a].category;
         var thisPlugin = plugins[a];
         thisPlugin.installed = false;
+        thisPlugin.url = 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/downloadLatest/' + plugins[a].name + '/' + variant + '/' + os + '/' + arch
         for (var c = 0; c < myplugins.length; c++) {
           if (myplugins[c].prettyName === availableName) {
             thisPlugin.installed = true;
@@ -1697,86 +1728,57 @@ PluginManager.prototype.getAvailablePlugins = function () {
 PluginManager.prototype.getPluginDetails = function (data) {
   var self = this;
   var defer = libQ.defer();
-  var responseData = '';
 
-  var response = [];
-  var url = 'http://plugins.volumio.org/plugins/' + variant + '/' + arch + '/plugins.json';
+  var url = 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin/' + data.name;
 
-  var pluginCategory = data.category;
-  var pluginName = data.name;
+  var token = this.coreCommand.getMyVolumioToken();
 
-  http.get(url, function (res) {
-    var body = '';
-    if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
-      self.logger.info('Following Redirect to: ' + res.headers.location);
-      http.get(res.headers.location, function (res) {
-        res.on('data', function (chunk) {
-          body += chunk;
-        });
-
-        res.on('end', function () {
-          try {
-            var response = JSON.parse(body);
-            searchDetails(response);
-          } catch (e) {
-            self.logger.info('Error Parsing Plugins JSON');
+  token.then(result => {
+    unirest
+      .get(url)
+      .headers({'Authorization': 'Bearer ' + result.token})
+      .timeout(10000)
+      .then(function (response) {
+        if (response && response.status === 200 && response.body) {
+          pushDetails(response.body)
+        } else {
+          if (response.error) {
+            self.logger.error('Cannot download Available plugins list: ' + response.error);
+          } else {
+            self.logger.error('Cannot download Available plugins list');
           }
-        });
-      }).on('error', function (e) {
-        self.logger.info('Cannot download Available plugins list: ' + e);
+        };
       });
-    } else {
-      res.on('data', function (chunk) {
-        body += chunk;
-      });
+  });  
 
-      res.on('end', function () {
-        try {
-          var response = JSON.parse(body);
-          searchDetails(response);
-        } catch (e) {
-          self.logger.info('Error Parsing Plugins JSON');
-        }
-      });
-    }
-  }).on('error', function (e) {
-    self.logger.info('Cannot download Available plugins list: ' + e);
-  });
-
-  function searchDetails (response) {
-    var self = this;
-    for (var i = 0; i < response.categories.length; i++) {
-      var category = response.categories[i];
-      var categoryName = response.categories[i].name;
-      if (categoryName == data.category) {
-        for (var c = 0; c < category.plugins.length; c++) {
-          var plugin = category.plugins[c];
-          var name = category.plugins[c].name;
-          var prettyname = category.plugins[c].prettyName;
-          if (name == pluginName) {
-            var details = 'No Details available for plugin ' + prettyname + '.';
-            if (plugin.details) {
-              var details = plugin.details;
-            }
-            pushDetails(details, prettyname);
-          }
-        }
-      }
-    }
-  }
-
-  function pushDetails (details, prettyname) {
+  function pushDetails (response) {
     var responseData = {
-      title: prettyname + ' Plugin',
-      message: details,
+      title: response.prettyName,
+      message: response.details,
       size: 'lg',
-      buttons: [
-        {
-          name: self.coreCommand.getI18nString('COMMON.CLOSE'),
-          class: 'btn btn-warning'
-        }
-      ]
+      buttons: []
     };
+
+    response.versions.forEach((version) => {
+      version.variants.forEach((versionVariant) => {
+        if (versionVariant.variant === variant + '/' + os + '/' + arch) {
+          responseData.buttons.push(            
+              {
+                name: 'Install v' + version.version + ' (' + version.channel + ')',
+                class: 'btn btn-warning',
+                emit: 'installPlugin',
+                payload: {'url': 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/download/' + data.name + '/' + version.version + '/' + variant + '/' + os + '/' + arch }
+              }
+          )
+        }
+      });
+    })
+    responseData.buttons.push(         
+      {
+        name: self.coreCommand.getI18nString('COMMON.CLOSE'),
+        class: 'btn btn-warning'
+      }   
+    );
     defer.resolve(responseData);
   }
 
