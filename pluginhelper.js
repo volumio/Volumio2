@@ -467,35 +467,116 @@ function zip(){
  * missing, then switches branch and prepares the folder
  */
 function publish() {
+    function exit() {
+        console.log("For help please go to: https://volumio.github.io/docs/Plugin_System/Writing_A_Plugin.html");
+        process.exit(); 
+    }
+    
     try {
         var package = fs.readJsonSync("package.json");
-        if (!package.cpu){
-            console.log('Package.json does not contain cpu field, please add it. Example: "cpu": ["amd64", "armhf", "i386"]' );
-            process.exit();        
+        if (!package){
+            console.log('Error loading package.json' );
+            exit();        
         }
-        if (!package.engines.volumio){
-            console.log('Package.json does not contain volumio engines field. Example: "engines": { "node": ">=8", "volumio": ">=3" }' );
-            process.exit();        
+        if (!package.engines || !package.engines.volumio){
+            console.log('Package.json does not contain engines.volumio field. Example: "engines": { "node": ">=8", "volumio": ">=3" }' );
+            exit();        
+        }
+        if (!package.name){
+            console.log('Package.json does not contain name field. Example: "name": "my_project"' );
+            exit();        
+        }
+        if (!package.version){
+            console.log('Package.json does not contain version field. Example: "version": "1.0.0"' );
+            exit();        
+        } else {
+            var temp = package.version.split('.');
+            if (temp.length != 3) {
+                console.log("Please, insert a version number according to format (example: 1.0.0)");
+                exit();
+            }
+            for (var i in temp) {
+                if (!temp[i].match(/[0-9]/i)) {
+                    console.log("Please, insert only numbers");
+                    exit();
+                }
+            }
+        }
+        if (!package.author){
+            console.log('Package.json does not contain author field. Example: "author": "me2000"' );
+            exit();        
+        }
+        if (!package.description){
+            console.log('Package.json does not contain description field. Example: "description": "This is my awesome project"' );
+            exit();        
+        }
+        if (!package.license){
+            console.log('Package.json does not contain license field. Example: "license": "ISC"' );
+            exit();        
+        }
+        if (!package.repository){
+            console.log('Package.json does not contain repository field. Example: "repository": "http://github.com/yourproject"' );
+            exit();        
         }
         if (!package.volumio_info){
             console.log('Package.json does not contain volumio_info field. Example: "volumio_info": { "prettyName": "Plugin Pretty Name", "icon": "fa-spotify", "plugin_type": "music_service", "variants": ["volumio", "justboom", "minidspshd"] },' );
-            process.exit();        
+            exit();        
         }
-        if (!package.volumio_info.variants){
-            console.log('Package.json does not contain volumio_info variants field. Example: "volumio_info": { "variants": ["volumio", "justboom", "minidspshd"] }' );
-            process.exit();
+        if (!package.volumio_info.prettyName){
+            console.log('Package.json does not contain volumio_info.prettyName field. Example: "prettyName": "My Project"' );
+            exit();
+        }
+        if (!package.volumio_info.architectures){
+            console.log('Package.json does not contain volumio_info.architectures field, please add it. Example: "architectures": ["amd64", "armhf", "i386"]' );
+            exit();        
+        } else {
+            //TODO: Get valid architectures from db
+            package.volumio_info.architectures.forEach(arch => {
+                if (!new Array("amd64", "armhf", "i386").includes(arch)){
+                    console.log('Invalid architecture: ' + arch + '. Valid values: "amd64", "armhf", "i386"' );
+                    exit();
+                }
+            });
+        }
+        if (!package.volumio_info.os){
+            console.log('Package.json does not contain volumio_info.os field, please add it. Example: "os": ["buster"]' );
+            exit();        
+        } else {
+            //TODO: Get valid os's from db
+            package.volumio_info.os.forEach(os => {
+                if (!new Array("buster").includes(os)){
+                    console.log('Invalid architecture: ' + os + '. Valid values: "buster"' );
+                    exit();
+                }
+            });
         }
         if (!package.volumio_info.details){
-            console.log('Package.json does not contain volumio_info details field. Example: "volumio_info": { "details": "Lorem ipsum" }' );
-            process.exit();
+            console.log('Package.json does not contain volumio_info.details field. Example: "volumio_info": { "details": "Lorem ipsum" }' );
+            exit();
         }
         if (!package.volumio_info.changelog){
-            console.log('Package.json does not contain volumio_info changelog field. Example: "volumio_info": { "changelog": "Lorem ipsum" }' );
-            process.exit();
+            console.log('Package.json does not contain volumio_info.changelog field. Example: "volumio_info": { "changelog": "Lorem ipsum" }' );
+            exit();
+        }
+        if (!package.volumio_info.plugin_type){
+            console.log('Package.json does not contain volumio_info.plugin_type field. Example: "plugin_type": "music_service"' );
+            exit();
+        }
+        if (!new Array("audio_interface", "music_service", "system_controller", "system_hardware", "user_interface").includes(package.volumio_info.plugin_type)){
+            console.log('Invalid plugin_type: ' + package.volumio_info.plugin_type + '. Valid values: "audio_interface", "music_service", "system_controller", "system_hardware", "user_interface"' );
+            exit();
+        }
+        if (!package.volumio_info.icon){
+            console.log('Package.json does not contain volumio_info.icon field. Example: "icon": "fa-headphones" Available icons: https://fontawesome.com/v5.15/icons' );
+            exit();
         }
         if (!package.volumio_info.channel){
-            console.log('Package.json does not contain volumio_info changelog field. Example: "volumio_info": { "channel": "beta" } Values: beta, stable' );
-            process.exit();
+            console.log('Package.json does not contain volumio_info.channel field. Example: "volumio_info": { "channel": "beta" } Values: beta, stable' );
+            exit();
+        }
+        if (!new Array("alpha", "beta", "stable").includes(package.volumio_info.channel)){
+            console.log('Invalid channel: ' + package.volumio_info.channel + '. Valid values: "alpha", "beta", "stable"');
+            exit();
         }
         var questions = [
             {
@@ -553,46 +634,70 @@ function post_plugin(package, fileName) {
         plugin.description = package.description;
         plugin.license = package.license;
         plugin.author = package.author;
+        plugin.repository = package.repository;
+        plugin.volumioVersion = package.engines.volumio;
         var today = new Date();
         plugin.updated = today.getDate() + "-" + (today.getMonth()+1) + "-" + today.getFullYear();
         plugin.details = package.volumio_info.details;
         plugin.changelog = package.volumio_info.changelog;
         plugin.screenshots = [{"image": "", "thumb": ""}];
-        plugin.os = ["buster"];
-        plugin.variants = package.volumio_info.variants;
-        plugin.architectures = package.cpu;
+        plugin.os = package.volumio_info.os;
+        plugin.variants = ["volumio"];
+        plugin.architectures = package.volumio_info.architectures;
         plugin.version = package.version;
         plugin.fileName = fileName;
-        plugin.channel = package.volumio_info.channel;
+        plugin.channel = package.volumio_info.channel;        
 
-        //console.log(JSON.stringify(plugin));
+        for (const [key, value] of Object.entries(plugin)) {
+            if (value === undefined) {
+                console.log('Error: Value for ' + key + ' not defined')
+                process.exit();
+            }
+        }
 
         let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
-        socket.emit('getMyVolumioToken', {})
-        socket.on('pushMyVolumioToken', function (result) {
+        socket.emit('getMyVolumioStatus', {})
+        socket.on('pushMyVolumioStatus', function (result) {
             //console.log(result)
-            if (result.tokenAvailable) {
-                unirest
-                    .post('https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin/upload')
-                    .headers({'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + result.token})
-                    .attach('plugin', '/tmp/' + fileName)
-                    .then(function (response) {
-                        console.log('Upload complete');
-                        unirest
-                            .post('https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin')
-                            .headers({'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + result.token})
-                            .send(plugin)
-                            .then(function (response) {
-                                //console.log(response.body)
+            if (result.loggedIn) {
+                socket.emit('getMyVolumioToken', {})
+                socket.on('pushMyVolumioToken', function (tokenResult) {
+                    unirest
+                        .post('https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin')
+                        .headers({'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenResult.token})
+                        .send(plugin)
+                        .then(function (response) {
+                            if (response && response.status === 200 && response.body) {
                                 console.log('Plugin added');
+                                unirest
+                                    .post('https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin/upload')
+                                    .headers({'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + tokenResult.token})
+                                    .attach('plugin', '/tmp/' + fileName)
+                                    .then(function (response) {
+                                        if (response && response.status === 200 && response.body) {
+                                            console.log('Plugin uploaded');
+                                            process.exit();
+                                        } else {
+                                            if (response.error) {
+                                                console.log('Error uploading plugin: ' + response.error);
+                                            } else {
+                                                console.log('Could not upload plugin: ' + response.body);
+                                            }
+                                            process.exit();
+                                        }
+                                    })
+                            } else {
+                                if (response.error) {
+                                    console.log('Error adding plugin: ' + response.error);
+                                } else {
+                                    console.log('Could not add plugin: ' + response.body);
+                                }
                                 process.exit();
-                            })
-                    })
-
-            
-
+                            }
+                        })
+                });
             } else {
-                console.log('Please login to myvolumio in order to add plugins.');
+                console.log('Error: Please login to myvolumio in order to add plugins.');
                 process.exit();
             }            
         })        
