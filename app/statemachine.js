@@ -1384,10 +1384,11 @@ CoreStateMachine.prototype.setRepeat = function (value, repeatSingle) {
     }
   } else {
     this.currentRepeat = value;
-
-    if (repeatSingle != undefined) {
-      this.currentRepeatSingleSong = repeatSingle;
-    }
+	if(this.currentRepeat && repeatSingle != undefined) {
+		this.currentRepeatSingleSong = repeatSingle;	
+	} else {
+		this.currentRepeatSingleSong = false;
+	}
 
     this.pushState().fail(this.pushError.bind(this));
   }
