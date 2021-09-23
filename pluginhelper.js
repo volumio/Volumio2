@@ -663,14 +663,14 @@ function post_plugin(package, fileName) {
                 socket.emit('getMyVolumioToken', {})
                 socket.on('pushMyVolumioToken', function (tokenResult) {
                     unirest
-                        .post('https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin')
+                        .post('https://plugins.volumio.workers.dev/pluginsv2/plugin')
                         .headers({'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenResult.token})
                         .send(plugin)
                         .then(function (response) {
                             if (response && response.status === 200 && response.body) {
                                 console.log('Plugin added');
                                 unirest
-                                    .post('https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin/upload')
+                                    .post('https://plugins.volumio.workers.dev/pluginsv2/plugin/upload')
                                     .headers({'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + tokenResult.token})
                                     .attach('plugin', '/tmp/' + fileName)
                                     .then(function (response) {
