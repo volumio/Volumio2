@@ -1655,7 +1655,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
     });
   }
 
-  var url = 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/variant/' + variant + '/' + os + '/' + arch;
+  var url = 'https://plugins.volumio.workers.dev/pluginsv2/variant/' + variant + '/' + os + '/' + arch;
   
   var loggedIn = this.coreCommand.getMyVolumioStatus();
   
@@ -1705,7 +1705,7 @@ PluginManager.prototype.getAvailablePlugins = function () {
         var availableCategory = plugins[a].category;
         var thisPlugin = plugins[a];
         thisPlugin.installed = false;
-        thisPlugin.url = 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/downloadLatest/' + plugins[a].name + '/' + variant + '/' + os + '/' + arch
+        thisPlugin.url = 'https://plugins.volumio.workers.dev/pluginsv2/downloadLatest/' + plugins[a].name + '/' + variant + '/' + os + '/' + arch
         for (var c = 0; c < myplugins.length; c++) {
           if (myplugins[c].prettyName === availableName) {
             thisPlugin.installed = true;
@@ -1729,7 +1729,7 @@ PluginManager.prototype.getPluginDetails = function (data) {
   var self = this;
   var defer = libQ.defer();
 
-  var url = 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/plugin/' + data.name;
+  var url = 'https://plugins.volumio.workers.dev/pluginsv2/plugin/' + data.name;
 
   var token = this.coreCommand.getMyVolumioToken();
 
@@ -1767,7 +1767,7 @@ PluginManager.prototype.getPluginDetails = function (data) {
                 name: 'Install v' + version.version + ' (' + version.channel + ')',
                 class: 'btn btn-warning',
                 emit: 'installPlugin',
-                payload: {'url': 'https://us-central1-volumio-plugins-store.cloudfunctions.net/pluginsv2/download/' + data.name + '/' + version.version + '/' + variant + '/' + os + '/' + arch }
+                payload: {'url': 'https://plugins.volumio.workers.dev/pluginsv2/download/' + data.name + '/' + version.version + '/' + variant + '/' + os + '/' + arch }
               }
           )
         }
