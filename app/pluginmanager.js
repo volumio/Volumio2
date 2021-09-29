@@ -1709,7 +1709,12 @@ PluginManager.prototype.getAvailablePlugins = function () {
         var availableCategory = plugins[a].category;
         var thisPlugin = plugins[a];
         thisPlugin.installed = false;
-        thisPlugin.url = 'https://plugins.volumio.workers.dev/pluginsv2/downloadLatest/' + plugins[a].name + '/' + variant + '/' + os + '/' + arch
+        if (fs.existsSync("/data/testplugins")) {
+          thisPlugin.url = 'https://plugins.volumio.workers.dev/pluginsv2/downloadLatest/' + plugins[a].name + '/' + variant + '/' + os + '/' + arch
+        } else {
+          thisPlugin.url = 'https://plugins.volumio.workers.dev/pluginsv2/downloadLatestStable/' + plugins[a].name + '/' + variant + '/' + os + '/' + arch
+        }
+        
         for (var c = 0; c < myplugins.length; c++) {
           if (myplugins[c].prettyName === availableName) {
             thisPlugin.installed = true;
@@ -1763,19 +1768,23 @@ PluginManager.prototype.getPluginDetails = function (data) {
       buttons: []
     };
 
+    var allowBeta = fs.existsSync("/data/testplugins");
+
     response.versions.forEach((version) => {
-      version.variants.forEach((versionVariant) => {
-        if (versionVariant.variant === variant + '/' + os + '/' + arch) {
-          responseData.buttons.push(            
-              {
-                name: 'Install v' + version.version + ' (' + version.channel + ')',
-                class: 'btn btn-warning',
-                emit: 'installPlugin',
-                payload: {'url': 'https://plugins.volumio.workers.dev/pluginsv2/download/' + data.name + '/' + version.version + '/' + variant + '/' + os + '/' + arch }
-              }
-          )
-        }
-      });
+      if(version.channel === 'stable' || allowBeta){
+        version.variants.forEach((versionVariant) => {
+          if (versionVariant.variant === variant + '/' + os + '/' + arch) {
+            responseData.buttons.push(            
+                {
+                  name: 'Install v' + version.version + ' (' + version.channel + ')',
+                  class: 'btn btn-warning',
+                  emit: 'installPlugin',
+                  payload: {'url': 'https://plugins.volumio.workers.dev/pluginsv2/download/' + data.name + '/' + version.version + '/' + variant + '/' + os + '/' + arch }
+                }
+            )
+          }
+        });
+      }
     })
     responseData.buttons.push(         
       {
