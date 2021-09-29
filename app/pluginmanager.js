@@ -1655,7 +1655,11 @@ PluginManager.prototype.getAvailablePlugins = function () {
     });
   }
 
-  var url = 'https://plugins.volumio.workers.dev/pluginsv2/variant/' + variant + '/' + os + '/' + arch;
+  var url = 'https://plugins.volumio.workers.dev/pluginsv2/stable/variant/' + variant + '/' + os + '/' + arch;
+
+  if(fs.existsSync("/data/testplugins")){
+    url = 'https://plugins.volumio.workers.dev/pluginsv2/variant/' + variant + '/' + os + '/' + arch;
+  }
   
   var loggedIn = this.coreCommand.getMyVolumioStatus();
   
