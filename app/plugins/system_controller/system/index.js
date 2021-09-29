@@ -456,6 +456,30 @@ ControllerSystem.prototype.setTestSystem = function (data) {
   }
 };
 
+ControllerSystem.prototype.setTestPlugins = function (data) {
+  var self = this;
+
+  if (data == 'true') {
+    fs.writeFile('/data/testplugins', ' ', function (err) {
+      if (err) {
+        self.logger.info('Cannot set as plugins test device:' + err);
+      }
+      self.logger.info('Plugins store is now in test mode');
+    });
+  } else if (data == 'false') {
+    fs.exists('/data/testplugins', function (exists) {
+      exec('rm /data/testplugins', function (error, stdout, stderr) {
+        if (error !== null) {
+          console.log(error);
+          self.logger.info('Cannot delete plugins test file: ' + error);
+        } else {
+          self.logger.info('Plugins Test File deleted');
+        }
+      });
+    });
+  }
+};
+
 ControllerSystem.prototype.sendBugReport = function (message) {
   var self = this;
 
