@@ -51,7 +51,7 @@ kernelsource                       Gets Current Kernel source (Raspberry PI only
 plugin init                        Creates a new plugin
 plugin refresh                     updates plugin in the system
 plugin package                     compresses the plugin
-plugin publish                     publishes the plugin on git
+plugin submit                      submits the plugin to the plugins store
 plugin install                     installs the plugin locally
 plugin update                      updates the plugin
 logdump <description>              dump logs to $LOGDUMP instead of uploading
@@ -243,9 +243,9 @@ correspondent folder in data"
                     echo ""
                     echo "This command will create a package with your plugin"
                     echo ""
-                elif [ "$2" == "publish" ]; then
+                elif [ "$2" == "submit" ]; then
                     echo ""
-                    echo "This command will publish the plugin on volumio plugins store"
+                    echo "This command will submit a plugin for publishing in the plugins store. Newly submitted plugins will be verified by the volumio team. After verification the plugin will be publically available on the beta channel. When the plugin is properly tested in the beta channel, it will be promoted to the stable channel, available to download by everyone. Every subsequent version of the plugin will alo be put in the beta channel, and will be promoted to the stable channel after testing. "
                     echo ""
                 elif [ "$2" == "install" ]; then
                     echo ""
@@ -266,7 +266,7 @@ correspondent folder in data"
                 echo "init      creates a new plugin"
                 echo "refresh   copies the plugin in the system"
                 echo "package   compresses the plugin"
-                echo "publish   publishes the plugin on git"
+                echo "submit    submits the plugin to the plugins store"
                 echo "install   installs the plugin locally"
                 echo "update    updates the plugin"
                 echo ""

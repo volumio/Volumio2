@@ -10,6 +10,8 @@ var nPlaylistHistoryPosition = 0;
 // Define button actions --------------------------------------------
 document.getElementById('button-testtrue').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'setTestSystem', data: 'true'}); };
 document.getElementById('button-testfalse').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'setTestSystem', data: 'false'}); };
+document.getElementById('button-plugintesttrue').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'setTestPlugins', data: 'true'}); };
+document.getElementById('button-plugintestfalse').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'setTestPlugins', data: 'false'}); };
 document.getElementById('button-sshenable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableSSH', data: 'true'}); };
 document.getElementById('button-sshdisable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableSSH', data: 'false'}); };
 document.getElementById('button-livelog-enable').onclick = function () { socket.emit('callMethod', {endpoint: 'system_controller/system', method: 'enableLiveLog', data: 'true'}); };
