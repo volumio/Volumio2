@@ -18,6 +18,7 @@ var arch = '';
 var variant = '';
 var os = '';
 var device = '';
+var volumioVersion = '';
 var isVolumioHardware = 'none';
 
 module.exports = PluginManager;
@@ -73,7 +74,11 @@ function PluginManager (ccommand, server) {
     }
     if (file[l].match(/VOLUMIO_HARDWARE/i)) {
       var str = file[l].split('=');
-      var device = str[1].replace(/\"/gi, '');
+      device = str[1].replace(/\"/gi, '');
+    }
+    if (file[l].match(/VOLUMIO_VERSION/i)) {
+      var str = file[l].split('=');
+      volumioVersion = str[1].replace(/\"/gi, '');
     }
     if (file[l].match(/VERSION_CODENAME/i)) {
       var str = file[l].split('=');
@@ -1645,7 +1650,6 @@ PluginManager.prototype.getAvailablePlugins = function () {
   } 
 
   var installed = self.getInstalledPlugins();
-
   if (installed != undefined) {
     installed.then(function (installedPlugins) {
       for (var e = 0; e < installedPlugins.length; e++) {

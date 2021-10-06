@@ -65,7 +65,10 @@ updater userdata                   Wipes all user data
 updater testmode                   Enables or disables Test mode, allowing to receive beta builds
 updater cleanupdate                Updates to latest version and cleans user data, allowing a start like a newly flashed image
 updater restorevolumio             Delete all manually edited files from /volumio folder, restoring a pristine volumio core system
+
+[[MISCELLANEA AND TEST]]
 internet                           Enables or disbles internet access, accepted commands: on | off
+endpointstest                      Check availability of remote ancillary cloud endpoints
 "
 
 }
@@ -104,6 +107,11 @@ sudo /volumio/app/plugins/system_controller/volumio_command_line_client/commands
 internet() {
 /volumio/app/plugins/system_controller/volumio_command_line_client/commands/internet.sh "$@"
 }
+
+endpointstest() {
+node /volumio/utils/tests/checkRemoteEndpoints.js
+}
+
 
 init-edit() {
 sudo /bin/sh /volumio/app/plugins/system_controller/volumio_command_line_client/commands/init-edit.sh -f $1
@@ -205,9 +213,12 @@ case "$1" in
 	    kernelsource)
 	        kernelsource
             ;;
-            internet)
-                internet "$@"
+      internet)
+          internet "$@"
             ;;
+	    endpointstest)
+	         endpointstest
+	         ;;
 	    logdump)
 	        /usr/bin/node /volumio/logsubmit.js "$2" nosubmit
             ;;

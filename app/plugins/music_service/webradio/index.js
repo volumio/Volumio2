@@ -359,12 +359,14 @@ ControllerWebradio.prototype.listRadioForGenres = function (curUri) {
           } else if (children[i].name() === 'station') {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
+            var bitrate = children[i].attr('br').value();
+            var streamcodec = children[i].attr('mt').value();
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: '',
+              artist: self.formatCodecString(streamcodec) + ' (' + bitrate + ' kbps)',
               album: '',
               icon: 'fa fa-microphone',
               uri: 'http://yp.shoutcast.com' + '/sbin/tunein-station.m3u' + '?id=' + id
@@ -432,12 +434,14 @@ ControllerWebradio.prototype.listTop500Radios = function (curUri) {
           } else if (children[i].name() === 'station') {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
+            var bitrate = children[i].attr('br').value();
+            var streamcodec = children[i].attr('mt').value();
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: '',
+              artist: self.formatCodecString(streamcodec) + ' (' + bitrate + ' kbps)',
               album: '',
               uri: 'http://yp.shoutcast.com' + base + '?id=' + id
             };
@@ -962,12 +966,15 @@ ControllerWebradio.prototype.searchWithShoutcast = function (search) {
           } else if (children[i].name() === 'station') {
             var name = children[i].attr('name').value();
             var id = children[i].attr('id').value();
+            var bitrate = children[i].attr('br').value();
+            var streamcodec = children[i].attr('mt').value();
+
 
             var category = {
               service: 'webradio',
               type: 'webradio',
               title: name,
-              artist: '',
+              artist: self.formatCodecString(streamcodec) + ' (' + bitrate + ' kbps)',
               album: '',
               uri: 'http://yp.shoutcast.com' + base + '?id=' + id
             };
@@ -1110,7 +1117,7 @@ ControllerWebradio.prototype.listSelection = function () {
             type: 'webradio',
             title: station.title,
             artist: '',
-            album: '',
+            album: station.br,
             albumart: thumbnaiEndpoint + station.title + '.jpg',
             uri: station.uri
           };
@@ -1334,7 +1341,6 @@ ControllerWebradio.prototype.parseResults = function (results, category) {
 
   let body = results.body;
   let curList = 0;
-
   for (var i in body) {
     if (body[i].children) {
       // This is a list, parse it properly
@@ -1421,7 +1427,7 @@ ControllerWebradio.prototype.getNavigationItem = function (node, category) {
     service: 'webradio',
     type: servType,
     title: node.text,
-    artist: '',
+    artist: node.type == "audio" ? self.formatCodecString(node.formats) + ' (' + node.bitrate + ' kbps)' : '',
     album: '',
     albumart: albumart,
     icon: icon,
@@ -1430,6 +1436,35 @@ ControllerWebradio.prototype.getNavigationItem = function (node, category) {
 
   return item;
 };
+ControllerWebradio.prototype.formatCodecString = function (text) {
+    var self = this;
+    // use first codec entry, if multiple are supplied
+    var codec=text.split(',')[0];
+    var codecString;
+    
+    switch (codec) {
+      case 'audio/flac':
+        codecString = 'flac';
+        break;
+      case 'audio/x-flac':
+        codecString = 'flac';
+        break;
+      case 'audio/aacp':
+        codecString = 'aac';
+        break;
+      case 'audio/aac':
+        codecString = 'aac';
+        break;
+      case 'audio/mpeg':
+        codecString = 'mp3';
+        break;
+      case 'audio/x-ms-wma':
+        codecString = 'wma';
+      default:
+        codecString = codec;
+    }
+    return codecString.toUpperCase();
+}
 
 ControllerWebradio.prototype.getNavigationItemIcon = function (text) {
   var self = this;
