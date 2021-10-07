@@ -481,19 +481,19 @@ function submit() {
             if (error) {
                 console.log('Could not determine the plugin\'s remote. A plugin can only submitted from a fork of the volumio-plugins repository' );
                 exit(); 
-            } else if (!stdout.includes('volumio-plugins.git')) {
-                console.log('A plugin can only submitted from a fork of the volumio-plugins repository' );
+            } else if (!stdout.includes('volumio-plugins-sources') && stdout.includes('https://github.com/volumio/volumio-plugins-sources')) {
+                console.log('A plugin can only submitted from a fork of the volumio-plugins-sources repository (https://github.com/volumio/volumio-plugins-sources)' );
                 exit();
             } else {
                 exec("git status", function (error, stdout, stderr) {
                     if (error) {
                         console.log('Could not determine the plugin\'s git status. A plugin can only submitted from a fork of the volumio-plugins repository' );
                         exit(); 
-                    } else if (stdout.includes('Changes not staged for commit')) {
+                    } else if (stdout.includes('Changes not staged for commit') || stdout.includes('Untracked files')) {
                         console.log('Your repository contains unstaged changes. Please stage and commit your changes. Use \'git add *\' to stage all changes.' );
                         exit();
                     } else if (stdout.includes('Changes to be committed')) {
-                        console.log('Your repository contains uncommitted changes. Please commit your changes. Use \'git commit -m "description"\' to commit all changes.' );
+                        console.log('Your repository contains uncommitted changes. Please commit your changes. Use \'git commit -m "description"\' to commit all changes. Please use the version number in the description.' );
                         exit();
                     } else if (stdout.includes('Your branch is ahead of')) {
                         console.log('Your repository contains changes that are not pushed to origin. Please push your changes. Use \'git push\' to push all changes.' );
@@ -604,14 +604,6 @@ function submit() {
             }
             if (!package.volumio_info.icon){
                 console.log('Package.json does not contain volumio_info.icon field. Example: "icon": "fa-headphones" Available icons: https://fontawesome.com/v5.15/icons' );
-                exit();
-            }
-            if (!package.volumio_info.channel){
-                console.log('Package.json does not contain volumio_info.channel field. Example: "volumio_info": { "channel": "beta" } Values: beta, stable' );
-                exit();
-            }
-            if (!new Array("alpha", "beta", "stable").includes(package.volumio_info.channel)){
-                console.log('Invalid channel: ' + package.volumio_info.channel + '. Valid values: "alpha", "beta", "stable"');
                 exit();
             }
             var questions = [
