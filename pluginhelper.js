@@ -126,7 +126,7 @@ function ask_name(categories, answer) {
                 if(name == "")
                     return "insert a proper name";
                 for(var i in categories){
-                    if(fs.existsSync("/home/volumio/volumio-plugins/plugins/" +
+                    if(fs.existsSync("/home/volumio/volumio-plugins-sources/" +
                             categories[i] + "/" + name) || fs.existsSync("/data/plugins/"+
                             categories[i] + "/" + name) || fs.existsSync("/volumio/app/plugins/"+
                             categories[i] + "/" + name)) {
@@ -152,7 +152,7 @@ function create_plugin(answer, category, prettyName) {
     var name = {};
     name.sysName = answer.name;
     name.prettyName = prettyName;
-    var path = "/home/volumio/volumio-plugins/plugins/" + category;
+    var path = "/home/volumio/volumio-plugins-sources";
     console.log("NAME: " + name.sysName + " CATEGORY: " + category);
     if(!fs.existsSync(path)) {
         fs.mkdirSync(path);
@@ -162,7 +162,7 @@ function create_plugin(answer, category, prettyName) {
 
     console.log("Copying sample files");
 
-    execSync("/bin/cp -rp /home/volumio/volumio-plugins/example_plugin/* " +
+    execSync("/bin/cp -rp /home/volumio/volumio-plugins-sources/example_plugin/* " +
         path);
 
     fs.readFile(path + '/index.js', 'utf8', function (err, data) {
@@ -384,8 +384,7 @@ function finalizing(path, package) {
         console.log("Error, impossible to update plugins.json: " + e);
     }
 
-    execSync("/bin/cp -rp /home/volumio/volumio-plugins/plugins/" +
-        package.volumio_info.plugin_type + "/" + package.name + "/* " +
+    execSync("/bin/cp -rp /home/volumio/volumio-plugins-sources/" + package.name + "/* " +
         "/data/plugins/" + package.volumio_info.plugin_type + "/" +
         package.name);
 
@@ -479,7 +478,7 @@ function submit() {
     function validateGit(package) {
         exec("git config --get remote.origin.url", function (error, stdout, stderr) {
             if (error) {
-                console.log('Could not determine the plugin\'s remote. A plugin can only submitted from a fork of the volumio-plugins repository' );
+                console.log('Could not determine the plugin\'s remote. A plugin can only submitted from a fork of the volumio-plugins-sources repository' );
                 exit(); 
             } else if (!stdout.includes('volumio-plugins-sources') && stdout.includes('https://github.com/volumio/volumio-plugins-sources')) {
                 console.log('A plugin can only submitted from a fork of the volumio-plugins-sources repository (https://github.com/volumio/volumio-plugins-sources)' );
@@ -487,7 +486,7 @@ function submit() {
             } else {
                 exec("git status", function (error, stdout, stderr) {
                     if (error) {
-                        console.log('Could not determine the plugin\'s git status. A plugin can only submitted from a fork of the volumio-plugins repository' );
+                        console.log('Could not determine the plugin\'s git status. A plugin can only submitted from a fork of the volumio-plugins-sources repository' );
                         exit(); 
                     } else if (stdout.includes('Changes not staged for commit') || stdout.includes('Untracked files')) {
                         console.log('Your repository contains unstaged changes. Please stage and commit your changes. Use \'git add *\' to stage all changes.' );
