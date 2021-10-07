@@ -476,7 +476,7 @@ function submit() {
         process.exit();
     }
 
-    function validateGit() {
+    function validateGit(package) {
         exec("git config --get remote.origin.url", function (error, stdout, stderr) {
             if (error) {
                 console.log('Could not determine the plugin\'s remote. A plugin can only submitted from a fork of the volumio-plugins repository' );
@@ -499,7 +499,7 @@ function submit() {
                         console.log('Your repository contains changes that are not pushed to origin. Please push your changes. Use \'git push\' to push all changes.' );
                         exit();
                     } else {
-                        validatePackage();
+                        createPackage(package);
                     }        
                 });
             }
@@ -631,7 +631,7 @@ function submit() {
             inquirer.prompt(questions).then(function (answer) {
                 package.version = answer.version;
                 fs.writeJsonSync("package.json", package, {spaces:'\t'});
-                createPackage(package);
+                validateGit(package);
             });
         }
         catch (e) {
@@ -641,7 +641,7 @@ function submit() {
     }
 
     function createPackage(package) {        
-        fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip");
+        fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip" + os.EOL + "package-lock.json");
         zip();
         var fileName = uuidv4() + ".zip";
         execSync("/bin/mv " + package.name + ".zip /tmp/" + fileName);
@@ -733,8 +733,7 @@ function submit() {
         }
     }
 
-    validateGit();
-
+    validatePackage();
 }
 
 // =============================== INSTALL ====================================
