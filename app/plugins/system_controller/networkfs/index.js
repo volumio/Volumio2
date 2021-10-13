@@ -1090,8 +1090,8 @@ ControllerNetworkfs.prototype.isDeviceToBeMounted = function (device) {
   var self = this;
 
   var fsLabel = self.getFSLabel(device);
-  if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio') {
-    if (device.ID_BUS === 'usb') {
+  if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio' && fsLabel !== 'volumioboot' && fsLabel !== 'volumioimg') {
+    if (self.isUsbDevice(device)) {
       return true;
     } else {
       // TODO: We need to save internal HDDs partitions that we want to mount. This has to be done in the UI.
@@ -1099,6 +1099,22 @@ ControllerNetworkfs.prototype.isDeviceToBeMounted = function (device) {
       return false;
     }
   } else {
+    return false;
+  }
+};
+
+ControllerNetworkfs.prototype.isUsbDevice = function (device) {
+  var self = this;
+
+  try {
+    var fsRemovable = execSync('/bin/lsblk -rno tran "/dev/$(lsblk -rno PKNAME ' + device.DEVNAME + ')"',{ uid: 1000, gid: 1000, encoding: 'utf8'});
+    if (fsRemovable.indexOf('usb') >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch(e) {
+    self.logger.error('Failed USB identification: ' + e);
     return false;
   }
 };
