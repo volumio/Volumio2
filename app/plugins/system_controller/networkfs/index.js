@@ -766,7 +766,7 @@ ControllerNetworkfs.prototype.discoverShares = function () {
   var systemShare = self.commandRouter.sharedVars.get('system.name').toUpperCase();
 
   try {
-    var shares = execSync('/usr/bin/smbtree -N -b', { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
+    var shares = execSync('/usr/bin/sudo /usr/bin/smbtree -N -b', { uid: 1000, gid: 1000, encoding: 'utf8', timeout: 10000 });
   } catch (err) {
     var shares = err.stdout;
   }
