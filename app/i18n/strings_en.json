@@ -312,9 +312,12 @@
         "REMOVE_SUCCESS": "Removed"
     },
     "PLUGINS": {
+        "CHECKING_DEPENDENCIES": "Checking that the plugin is suitable for this version of Volumio",
         "CHECKING_DUPLICATE_PLUGIN": "Checking for duplicate plugin",
         "CONFIRM_PLUGIN_INSTALL": "Install Plugin",
         "CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE": "Warning, community plugins are developed by third party developers and might result in unexpected behaviours and system instabilitiy. Are you sure you want to install this plugin?",
+        "PLUGIN_LOGIN_MESSAGE": "To access the plugins store you need to <a href=\"/myvolumio/signup\">login to MyVolumio</a>",
+        "PLUGIN_LOGIN": "Please login",
         "CONFIRM_PLUGIN_UNINSTALL": "Confirm plugin uninstall",
         "CONFIRM_PLUGIN_UNINSTALL_MESSAGE": "Are you sure you want to uninstall this Plugin?",
         "COPYING_PLUGIN_TO_LOCATION": "Copying plugin to location",

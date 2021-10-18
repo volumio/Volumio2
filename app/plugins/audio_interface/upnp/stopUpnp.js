@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/usr/bin/env node
 var io = require('socket.io-client');
 
 var socket = io.connect('http://localhost:3000');

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Lint only staged files
+semistandard --fix --verbose "../$(git diff-index --cached --name-only HEAD)"

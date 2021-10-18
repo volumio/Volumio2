@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var semver = require('semver');
 
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
@@ -25,6 +26,10 @@ function InterfaceWebUI (context) {
 
     // Closing all modals when clients connect
     connWebSocket.emit('closeAllModals', '');
+
+    connWebSocket.on('initSocket', function (data) {
+      self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'initSocket', data);
+    });
 
     connWebSocket.on('getDeviceInfo', function () {
       var uuid = self.commandRouter.sharedVars.get('system.uuid');
@@ -822,6 +827,18 @@ function InterfaceWebUI (context) {
       } catch (e) {
                 	self.logger.error('Cannot translate update title: ' + e);
       }
+      
+      if (updateMessage && updateMessage.updateavailable === true) {
+         // Always use a loose parse as Volumio versions aren't properly semver.
+         // For example 3.054 isn't valid due to the leading '0'.
+         var updateVersion = semver.coerce(updateMessage.title, { loose: true });
+         if(updateVersion !== null) {
+             var broken = self.commandRouter.pluginManager.listPluginsBrokenByNewVersion(updateVersion.version);
+             if(broken.length > 0) {
+                updateMessage.description += '<br><p><strong>The following plugins will be broken by this update:</strong></p> ' + broken;
+             }
+         }
+      }
 
       self.commandRouter.broadcastMessage('updateReady', updateMessage);
     });
@@ -1020,7 +1037,7 @@ function InterfaceWebUI (context) {
              */
     connWebSocket.on('installPlugin', function (data) {
       var selfConnWebSocket = this;
-
+      selfConnWebSocket.emit('closeModals', '');
       if (process.env.WARNING_ON_PLUGIN_INSTALL === 'true' && data.confirm !== true) {
         data.confirm = true;
         return selfConnWebSocket.emit('openModal', {'title': self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL'), 'message': self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE') + '?', 'buttons': [{'name': self.commandRouter.getI18nString('COMMON.CANCEL'), 'class': 'btn btn-info', 'emit': 'closeModals', 'payload': ''}, {'name': self.commandRouter.getI18nString('PLUGINS.INSTALL'), 'class': 'btn btn-warning', 'emit': 'installPlugin', 'payload': data}]});
@@ -1174,7 +1191,11 @@ function InterfaceWebUI (context) {
 
       if (returnedData != undefined) {
         returnedData.then(function (AvailablePlugins) {
-          selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
+          if (AvailablePlugins.NotAuthorized) {
+            selfConnWebSocket.emit('openModal', {'title': self.commandRouter.getI18nString('PLUGINS.PLUGIN_LOGIN'), 'message': self.commandRouter.getI18nString('PLUGINS.PLUGIN_LOGIN_MESSAGE'), 'buttons': [{'name': self.commandRouter.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-info', 'emit': 'closeModals', 'payload': ''}]});
+          } else {
+            selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
+          }
         });
       } else self.logger.error('Error on getting Available plugins');
     });
@@ -1260,6 +1281,18 @@ function InterfaceWebUI (context) {
       let selfConnWebSocket = this;
 
       self.commandRouter.setAudioOutputVolume(data);
+    });
+
+    connWebSocket.on('audioOutputPlay', function (data) {
+      let selfConnWebSocket = this;
+
+      self.commandRouter.audioOutputPlay(data);
+    });
+
+    connWebSocket.on('audioOutputPause', function (data) {
+      let selfConnWebSocket = this;
+
+      self.commandRouter.audioOutputPause(data);
     });
 
     connWebSocket.on('saveQueueToPlaylist', function (data) {

@@ -3,6 +3,7 @@
 var libQ = require('kew');
 var libFast = require('fast.js');
 var fs = require('fs-extra');
+var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var winston = require('winston');
 var vconf = require('v-conf');
@@ -42,7 +43,7 @@ function CoreCommandRouter (server) {
   this.pluginManager.pluginFolderCleanup();
   this.configManager = new (require(__dirname + '/configManager.js'))(this.logger);
 
-  this.pluginManager.startPlugins();
+  var pluginPromise = this.pluginManager.startPlugins();
 
   this.loadI18nStrings();
   this.musicLibrary.updateBrowseSourcesLang();
@@ -60,11 +61,15 @@ function CoreCommandRouter (server) {
 
   this.platformspecific = new (require(__dirname + '/platformSpecific.js'))(this);
 
-  this.pushConsoleMessage('BOOT COMPLETED');
-  metrics.log('CommandRouter');
-
-  this.startupSound();
-  this.closeModals();
+  // Wait for plugin startup to complete before playing the startup sound as the
+  // plugins may need to be fully active before sound can play properly 
+  pluginPromise.then(() => {	  
+	  this.pushConsoleMessage('BOOT COMPLETED');
+	  metrics.log('CommandRouter');
+	  
+	  this.startupSound();
+	  this.closeModals();
+  });
 }
 
 // Methods usually called by the Client Interfaces ----------------------------------------------------------------------------
@@ -178,7 +183,7 @@ CoreCommandRouter.prototype.writeVolumeStatusFiles = function (vol) {
 };
 
 CoreCommandRouter.prototype.executeWriteVolumeStatusFiles = function (value) {
-  fs.writeFile('/tmp/volume', value, function (err) {
+  fs.writeFile('/tmp/volume', value.toString(), function (err) {
     if (err) {
         	this.logger.error('Could not save Volume value to status file: ' + err);
     }
@@ -1211,6 +1216,42 @@ CoreCommandRouter.prototype.pushMultiroomDevices = function (data) {
   );
 };
 
+CoreCommandRouter.prototype.updateMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.updateMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.updateMultiroomSyncOutput(data);
+  }
+};
+
+CoreCommandRouter.prototype.getMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.getMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.getMultiroomSyncOutput(data);
+  }
+};
+
+CoreCommandRouter.prototype.enableMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.enableMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.enableMultiroomSyncOutput(data);
+  }
+};
+
+CoreCommandRouter.prototype.disableMultiroomSyncOutput = function (data) {
+  // Send this to all plugins that require this information
+  var self = this;
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'multiroom');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.disableMultiroomSyncOutput === 'function') {
+    audioOutputPlugin.disableMultiroomSyncOutput(data);
+  }
+};
+
 CoreCommandRouter.prototype.pushMultiroom = function (data) {
   var self = this;
   return libQ.all(
@@ -2142,6 +2183,28 @@ CoreCommandRouter.prototype.setAudioOutputVolume = function (data) {
   }
 };
 
+CoreCommandRouter.prototype.audioOutputPlay = function (data) {
+  var self = this;
+
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.audioOutputPlay === 'function') {
+    return audioOutputPlugin.audioOutputPlay(data);
+  } else {
+    this.logger.error('WARNING: No Audio Output plugin found');
+  }
+};
+
+CoreCommandRouter.prototype.audioOutputPause = function (data) {
+  var self = this;
+
+  var audioOutputPlugin = this.pluginManager.getPlugin('audio_interface', 'outputs');
+  if (audioOutputPlugin != undefined && typeof audioOutputPlugin.audioOutputPause === 'function') {
+    return audioOutputPlugin.audioOutputPause(data);
+  } else {
+    this.logger.error('WARNING: No Audio Output plugin found');
+  }
+};
+
 CoreCommandRouter.prototype.getHwuuid = function () {
   var self = this;
 
@@ -2181,4 +2244,16 @@ CoreCommandRouter.prototype.refreshCachedPAddresses = function () {
 
   var networkPlugin = this.pluginManager.getPlugin('system_controller', 'network');
   return networkPlugin.refreshCachedPAddresses();
+};
+
+CoreCommandRouter.prototype.rebuildALSAConfiguration = function () {
+  var self = this;
+	
+  if (process.env.MODULAR_ALSA_PIPELINE === 'true') {
+    var alsaPlugin = this.pluginManager.getPlugin('audio_interface', 'alsa_controller');
+    return alsaPlugin.updateALSAConfigFile();
+  } else {
+    self.logger.error('Modular ALSA configuration is disabled and so cannot be rebuilt');
+    return libQ.resolve();
+  }
 };

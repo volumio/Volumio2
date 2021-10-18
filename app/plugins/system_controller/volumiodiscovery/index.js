@@ -39,25 +39,20 @@ ControllerVolumioDiscovery.prototype.getConfigurationFiles = function () {
 
 ControllerVolumioDiscovery.prototype.onPlayerNameChanged = function (name) {
   var self = this;
-  if (self.callbackTracer < 1) {
-    self.callbackTracer = 1;
-    return;
-  }
-  console.log('Discovery: Restarting stuff');
+
+  self.logger.info('Discovery: Restarting Advertising due to device name change');
   var bound = self.startAdvertisement.bind(self);
   try {
-    console.log('Discovery: Stopped ads, if present');
     self.ad.stop();
-  } catch (e) {
-    console.log('Discovery: Stopped ads, if present ----> exception!');
-  }
+  } catch (e) {}
+
   self.forceRename = true;
   setTimeout(bound, 5000);
 };
 
 ControllerVolumioDiscovery.prototype.onVolumioStart = function () {
   var self = this;
-  self.callbackTracer = 0;
+
   var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   config.loadFile(configFile);
 
@@ -95,7 +90,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
   var self = this;
   var forceRename = self.forceRename;
   self.forceRename = undefined;
-  console.log('Discovery: StartAdv! ' + forceRename);
+
   try {
     var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
     var name = systemController.getConf('playerName');
@@ -108,21 +103,22 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
       UUID: uuid
     };
 
-    console.log('Discovery: Started advertising... ' + name + ' - ' + forceRename);
+    self.logger.info('Discovery: Started advertising with name: ' + name);
 
     self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
       var lowerServer = serviceName.toLowerCase();
       var theName = service.name.replace(lowerServer, serviceName);
-      if ((theName != name) && (!forceRename)) {
-        console.log('Discovery: Changing my name to ' + service.name + ' CINGHIALE is ' + forceRename);
+      if ((theName != name) && (forceRename === false)) {
+        self.logger.info('Discovery: Changing my name to: ' + service.name);
         systemController.setConf('playerName', theName);
-
         self.ad.stop();
         txt_record.volumioName = theName;
         setTimeout(
           function () {
             self.ad = mdns.createAdvertisement(mdns.tcp(serviceName), servicePort, {txtRecord: txt_record}, function (error, service) {
-              console.log('Discovery: INT ' + error);
+              if (error) {
+                self.logger.error('Discovery: advertisement start error: ' + error);
+              }
             });
           },
           5000
@@ -130,7 +126,7 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
       }
     });
     self.ad.on('error', function (error) {
-      console.log('Discovery: ERROR' + error);
+      self.logger.error('Discovery: advertisement error: ' + error);
       self.context.coreCommand.pushConsoleMessage('mDNS Advertisement raised the following error ' + error);
       setTimeout(function () {
         self.startAdvertisement();
@@ -139,12 +135,11 @@ ControllerVolumioDiscovery.prototype.startAdvertisement = function () {
     self.ad.start();
   } catch (ecc) {
     if (ecc == 'Error: dns service error: name conflict') {
-      console.log('Name conflict due to Shairport Sync, discarding error');
+      self.logger.error('Name conflict due to Shairport Sync, discarding error');
     } else {
       setTimeout(function () {
-        console.log('Discovery: ecc ' + ecc);
+        self.logger.error('Discovery: Generic error: ' + ecc);
         self.forceRename = false;
-        self.callbackTracer = 0;
         self.startAdvertisement();
       }, 5000);
     }
@@ -172,12 +167,12 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse = function () {
     });
     self.browser.on('serviceUp', function (service) {
       if (registeredUUIDs.indexOf(service.txtRecord.UUID) > -1) {
-        console.log('Discovery: this is already registered,  ' + service.txtRecord.UUID);
+        self.logger.info('Discovery: this is already registered,  ' + service.txtRecord.UUID);
         foundVolumioInstances.delete(service.txtRecord.UUID + '.name');
         self.remoteConnections.remove(service.txtRecord.UUID + '.name');
       } else {
         registeredUUIDs.push(service.txtRecord.UUID);
-        console.log('Discovery: adding ' + service.txtRecord.UUID);
+        self.logger.info('Discovery: adding ' + service.txtRecord.UUID);
       }
 
       // console.log(service);
@@ -248,6 +243,24 @@ ControllerVolumioDiscovery.prototype.startMDNSBrowse = function () {
   }
 };
 
+ControllerVolumioDiscovery.prototype.initSocket = function (data) {
+  var self = this;  
+  // Wait untill the current connection times out
+  setTimeout(() => {
+    // If this device is in our mDNS cache and we got this message, then the device was offline and went back online. We reconnect the socketIO.
+    var systemController = self.commandRouter.pluginManager.getPlugin('system_controller', 'system');
+    var myuuid = systemController.getConf('uuid');
+    if (foundVolumioInstances.get(data.id + '.name') && !self.remoteConnections.has(data.id) && myuuid != data.id) {
+      var addresses = foundVolumioInstances.get(data.id + '.addresses');
+      if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
+        self.logger.info("Reconnecting to " + addresses[0].value[0].value + " which is still in the mDNS cache");
+        //This device was ungracefully disconnected, but is still in the mdns cache
+        self.connectToRemoteVolumio(data.id, addresses[0].value[0].value);        
+      }
+    }
+  }, 15000);  
+}
+
 ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip) {
   var self = this;
 
@@ -257,29 +270,41 @@ ControllerVolumioDiscovery.prototype.connectToRemoteVolumio = function (uuid, ip
   if ((!self.remoteConnections.has(uuid)) && (myuuid != uuid)) {
     var socket = io.connect('http://' + ip + ':3000');
     socket.on('connect', function () {
+      socket.emit('initSocket', {id: myuuid});
       socket.emit('getState', '');
+      //Synchronise multiroom devices      
+      socket.emit('getMultiroomSyncOutput', '');
+      self.commandRouter.getMultiroomSyncOutput();
       socket.on('pushState', function (data) {
-        self.pushMultiRoomStatusUpdate(uuid, data);
+        self.updateMultiroomDevice(uuid, data);
       });
-      socket.on('disconnect', function () {
-            	setTimeout(() => {
-            	    // Disabled: the mdns cache will keep this device in memory, we need to find a way to reinstantiate the mdns search
-                    //self.handleUngracefulDeviceDisappear(uuid);
-                	socket.close();
-        }, 4000);
+      socket.on('pushMultiroomSyncOutput', function (data) {
+        self.commandRouter.updateMultiroomSyncOutput(data);
+      });
+      socket.on('enableMultiroomSyncOutput', function (data) {
+        self.commandRouter.enableMultiroomSyncOutput(data);
+      });
+      socket.on('disableMultiroomSyncOutput', function (data) {
+        self.commandRouter.disableMultiroomSyncOutput(data);
+      });
+      socket.on('getMultiroomSyncOutput', function (data) {
+        self.commandRouter.getMultiroomSyncOutput(data);
+      });
+      socket.on('disconnect', function () {        
+        self.remoteConnections.remove(uuid);
+        socket.close(); 
       });
     });
 
     self.remoteConnections.set(uuid, socket);
   } else {
     var selfState = self.commandRouter.volumioGetState();
-    self.pushMultiRoomStatusUpdate(uuid, selfState);
+    self.updateMultiroomDevice(uuid, selfState);
   }
 };
 
-ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate = function (uuid, data) {
+ControllerVolumioDiscovery.prototype.updateMultiroomDevice = function (uuid, data) {
   var self = this;
-
   foundVolumioInstances.set(uuid + '.status', data.status);
   if (data.volume === undefined) {
     data.volume = 0;
@@ -294,6 +319,11 @@ ControllerVolumioDiscovery.prototype.pushMultiRoomStatusUpdate = function (uuid,
     volumeAvailable = false;
   }
   foundVolumioInstances.set(uuid + '.volumeAvailable', volumeAvailable);
+  self.pushMultiRoomStatus();
+};
+
+ControllerVolumioDiscovery.prototype.pushMultiRoomStatus = function () {
+  var self = this;
   var toAdvertise = self.getDevices();
   self.commandRouter.pushMultiroomDevices(toAdvertise);
 };
@@ -364,10 +394,12 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
       var address = addresses[j];
       if (isSelf) {
         var iPAddresses = self.commandRouter.getCachedPAddresses();
-        if (iPAddresses.wlan0 && iPAddresses.wlan0 !== '192.168.211.1') {
+        if (iPAddresses && iPAddresses.eth0 && iPAddresses.eth0 != '') {
+          address = iPAddresses.eth0;
+        } else if (iPAddresses && iPAddresses.wlan0 && iPAddresses.wlan0 != '' && iPAddresses.wlan0 !== '192.168.211.1') {
           address = iPAddresses.wlan0;
         } else {
-          address = iPAddresses.eth0;
+          address = '127.0.0.1';
         }
       } else {
         if (address.value[0] != undefined && address.value[0].value[0] != undefined) {
@@ -383,9 +415,10 @@ ControllerVolumioDiscovery.prototype.getDevices = function () {
         var albumartstring = 'http://' + address + '/albumart';
       }
 
-      if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
-        address = addresses[0].value[0].value;
-      }
+      // This overwrites the locally selected IP address, and breaks discovery when hotspot is active. Also seems redundant.
+      // if (addresses && addresses[0] && addresses[0].value && addresses[0].value[0].value) {
+      //   address = addresses[0].value[0].value;
+      // }
 
       var device = {
         id: key,
@@ -419,10 +452,12 @@ ControllerVolumioDiscovery.prototype.getThisDevice = function () {
   var thisState = self.commandRouter.volumioGetState();
   var ipAddresses = self.commandRouter.executeOnPlugin('system_controller', 'network', 'getCachedPAddresses', '');
   thisDevice.id = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConf', 'uuid');
-  if (ipAddresses && ipAddresses.wlan0 && ipAddresses.wlan0 !== '192.168.211.1') {
-    thisDevice.host = 'http://' + ipAddresses.wlan0;
-  } else if (ipAddresses && ipAddresses.eth0) {
+  if (ipAddresses && ipAddresses.eth0 && ipAddresses.eth0 != '') {
     thisDevice.host = 'http://' + ipAddresses.eth0;
+  } else if (ipAddresses && ipAddresses.wlan0 && ipAddresses.wlan0 !== '192.168.211.1') {
+    thisDevice.host = 'http://' + ipAddresses.wlan0;
+  } else {
+    thisDevice.host = 'http://127.0.0.1';
   }
   thisDevice.name = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getConf', 'playerName');
   thisDevice.type = config.get('device_type', 'device');

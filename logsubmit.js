@@ -12,6 +12,7 @@ var commandArray = [
   'df -h',
   'mount',
   'netstat -natp',
+  'cat /etc/asound.conf',
   'cat /var/log/mpd.log',
   'cat /data/configuration/plugins.json',
   'cat /etc/mpd.conf',

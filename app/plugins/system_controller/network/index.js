@@ -33,7 +33,7 @@ ControllerNetwork.prototype.onVolumioStart = function () {
   // getting configuration
   var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   config.loadFile(configFile);
-  self.refreshCachedPAddresses();
+  var promise = self.refreshCachedPAddresses();
 
   if (!config.has('wirelessNetworksSSID') && config.has('wlanssid')) {
     config.addConfigValue('wirelessNetworksSSID', 'array', config.get('wlanssid'));
@@ -43,7 +43,7 @@ ControllerNetwork.prototype.onVolumioStart = function () {
     config.delete('wlanpass');
   }
 
-  return libQ.resolve();
+  return promise;
 };
 
 ControllerNetwork.prototype.onStop = function () {
@@ -1162,6 +1162,5 @@ ControllerNetwork.prototype.refreshCachedPAddresses = function () {
 
   self.logger.info('Refreshing Cached IP Addresses');
 
-  self.getEthernetIPAddress();
-  self.getWirelessIPAddress();
+  return libQ.all(self.getEthernetIPAddress(), self.getWirelessIPAddress());
 };

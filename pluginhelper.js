@@ -5,6 +5,9 @@ var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
 var websocket = require('socket.io-client');
 var os = require('os');
+var semver = require('semver');
+var unirest = require('unirest');
+const { v4: uuidv4 } = require('uuid');
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -16,7 +19,7 @@ function init() {
     var self = this;
     console.log("Creating a new plugin");
 
-    if(!fs.existsSync("/home/volumio/volumio-plugins")){
+    if(!fs.existsSync("/home/volumio/volumio-plugins-sources")){
         var question = [
             {
                 type: 'input',
@@ -28,10 +31,10 @@ function init() {
         inquirer.prompt(question).then(function (answer) {
             var name = answer.user;
             console.log("cloning repo:\ngit clone https://github.com/" + name +
-                "/volumio-plugins.git");
+                "/volumio-plugins-sources");
             try {
                 execSync("/usr/bin/git clone --depth 5 --no-single-branch https://github.com/" + name +
-                    "/volumio-plugins.git /home/volumio/volumio-plugins");
+                    "/volumio-plugins-sources /home/volumio/volumio-plugins-sources");
                 console.log("Done, please run command again");
             }catch(e){
                 console.log("Unable to find repo, are you sure you forked it?")
@@ -40,7 +43,7 @@ function init() {
         });
     }
     else {
-        process.chdir("/home/volumio/volumio-plugins");
+        process.chdir("/home/volumio/volumio-plugins-sources");
         exec("git config --get remote.origin.url", function (error, stdout, stderr) {
             if (error) {
                 console.error('exec error: ${error}');
@@ -48,7 +51,7 @@ function init() {
                 return;
             }
             var url = stdout;
-            if (url == "https://github.com/volumio/volumio-plugins.git\n") {
+            if (url == "https://github.com/volumio/volumio-plugins-sources\n") {
                 exec("git config user.name", function (error, stdout, stderr) {
                     if (error) {
                         console.error('exec error: ${error}');
@@ -81,9 +84,9 @@ function init() {
 function ask_category() {
     var categories = [
         "audio_interface",
-        "miscellanea",
         "music_service",
         "system_controller",
+        "system_hardware",
         "user_interface"
     ];
 
@@ -123,7 +126,7 @@ function ask_name(categories, answer) {
                 if(name == "")
                     return "insert a proper name";
                 for(var i in categories){
-                    if(fs.existsSync("/home/volumio/volumio-plugins/plugins/" +
+                    if(fs.existsSync("/home/volumio/volumio-plugins-sources/" +
                             categories[i] + "/" + name) || fs.existsSync("/data/plugins/"+
                             categories[i] + "/" + name) || fs.existsSync("/volumio/app/plugins/"+
                             categories[i] + "/" + name)) {
@@ -149,7 +152,7 @@ function create_plugin(answer, category, prettyName) {
     var name = {};
     name.sysName = answer.name;
     name.prettyName = prettyName;
-    var path = "/home/volumio/volumio-plugins/plugins/" + category;
+    var path = "/home/volumio/volumio-plugins-sources";
     console.log("NAME: " + name.sysName + " CATEGORY: " + category);
     if(!fs.existsSync(path)) {
         fs.mkdirSync(path);
@@ -159,7 +162,7 @@ function create_plugin(answer, category, prettyName) {
 
     console.log("Copying sample files");
 
-    execSync("/bin/cp -rp /home/volumio/volumio-plugins/example_plugin/* " +
+    execSync("/bin/cp -rp /home/volumio/volumio-plugins-sources/example_plugin/* " +
         path);
 
     fs.readFile(path + '/index.js', 'utf8', function (err, data) {
@@ -231,6 +234,21 @@ function customize_package(pluginName, path, category) {
         package.name = pluginName.sysName;
         package.volumio_info.prettyName = pluginName.prettyName;
         package.volumio_info.plugin_type = category;
+        
+        var defaultNodeRange = getRange(semver.coerce(process.versions.node));
+        var defaultVolumioRange = getRange(semver.coerce(getVolumioVersion(), { loose: true }));
+        
+        var semVerRangeCheck = function(range) {
+            if(range === '' || range === null) {
+                return true;
+            }
+                
+            if(semver.validRange(range) === null){
+                return "The semantic version range is not valid";
+            }
+            return true;
+        };
+        
         questions = [
             {
                 type: 'input',
@@ -255,11 +273,43 @@ function customize_package(pluginName, path, category) {
                     }
                     return true;
                 }
+            },
+            {
+                type: 'input',
+                name: 'nodeVersion',
+                message: 'Supply a semantic version range indicating the node version(s) that your plugin supports',
+                default: defaultNodeRange,
+                validate: semVerRangeCheck
+            },
+            {
+                type: 'input',
+                name: 'volumioVersion',
+                message: 'Supply a semantic version range indicating the volumio version(s) that your plugin supports',
+                default: defaultVolumioRange,
+                validate: semVerRangeCheck
             }
         ];
         inquirer.prompt(questions).then(function (answer) {
             package.author = answer.username;
             package.description = answer.description;
+            
+            var addEngines = false;
+            var engines = {};
+            
+            if(answer.nodeVersion) {
+                addEngines = true;
+                engines.node = answer.nodeVersion;
+            }
+
+            if(answer.volumioVersion) {
+                addEngines = true;
+                engines.volumio = answer.volumioVersion;
+            }
+            
+            if(addEngines) {
+                package.engines = engines;
+            }
+            
             fs.writeJsonSync(path + '/package.json', package, {spaces:'\t'});
             finalizing(path, package);
         });
@@ -267,6 +317,30 @@ function customize_package(pluginName, path, category) {
     catch(e){
         console.log("Error reading package.json " + e);
     }
+}
+
+function getRange(version) {
+    if(semver.valid(version)) {
+        var baseVersion = version.version;
+        var nextVersion = semver.inc(version, 'major');
+        return '>=' + baseVersion + ' <' + nextVersion;
+    }
+    return '';
+}
+
+function getVolumioVersion() {
+
+  var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+  var volumioVersion = null;
+  // console.log(file);
+  var nLines = file.length;
+  var str;
+  for (var l = 0; l < nLines; l++) {
+    if (file[l].match(/VOLUMIO_VERSION/i)) {
+      str = file[l].split('=');
+      return str[1].replace(/\"/gi, '');
+    }
+  }
 }
 
 /**
@@ -310,8 +384,7 @@ function finalizing(path, package) {
         console.log("Error, impossible to update plugins.json: " + e);
     }
 
-    execSync("/bin/cp -rp /home/volumio/volumio-plugins/plugins/" +
-        package.volumio_info.plugin_type + "/" + package.name + "/* " +
+    execSync("/bin/cp -rp /home/volumio/volumio-plugins-sources/" + package.name + "/* " +
         "/data/plugins/" + package.volumio_info.plugin_type + "/" +
         package.name);
 
@@ -322,7 +395,7 @@ function finalizing(path, package) {
     if (fs.existsSync(process.cwd + '/package-lock.json')) {
         execSync("/bin/rm package-lock.json");
     }
-    execSync("/usr/local/bin/npm install --production");
+    execSync("/usr/bin/npm install --production");
     if (fs.existsSync(process.cwd + '/package-lock.json')) {
         execSync("/bin/rm package-lock.json");
     }
@@ -363,7 +436,7 @@ function zip(){
                 if (fs.existsSync(process.cwd + '/package-lock.json')) {
                     execSync("/bin/rm package-lock.json");
                 }
-                execSync("/usr/local/bin/npm install --production");
+                execSync("/usr/bin/npm install --production");
                 if (fs.existsSync(process.cwd + '/package-lock.json')) {
                     execSync("/bin/rm package-lock.json");
                 }
@@ -386,294 +459,297 @@ function zip(){
     }
 }
 
-// ================================= COMMIT ===================================
+// ================================= SUBMIT ===================================
 
 /**
- * This function starts to publish the package, it calls zip to create it, if
- * missing, then switches branch and prepares the folder
+ * This function will submit the package to the plugins store
  */
-function publish() {
-    console.log("Publishing the plugin");
+function submit() {
+    function exit() {
+        console.log("For help please go to: https://volumio.github.io/docs/Plugin_System/Writing_A_Plugin.html");
+        process.exit(); 
+    }
 
-    try {
-        var package = fs.readJsonSync("package.json");
-        var questions = [
-            {
-                type: 'input',
-                name: 'version',
-                message: 'do you want to change your version? (leave blank ' +
-                'for default)',
-                default: package.version,
-                validate: function (value) {
-                    var temp = value.split('.');
-                    if (temp.length != 3) {
-                        return "Please, insert a version number " +
-                            "according to format (example: 1.0.0)";
-                    }
-                    for (var i in temp) {
-                        if (!temp[i].match(/[0-9]/i)) {
-                            return "Please, insert only numbers";
-                        }
-                    }
-                    return true;
-                }
-            }
-        ];
-        inquirer.prompt(questions).then(function (answer) {
-            package.version = answer.version;
-            fs.writeJsonSync("package.json", package, {spaces:'\t'});
-            fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip");
-            try {
-                execSync("/usr/bin/git add *");
-            }
-            catch (e){
-                console.log("Nothing to add");
-            }
+    function submitFinished() {
+        console.log("Your plugin is submitted to the volumio plugins store. Please create a pull request to submit your changes. This is mandatory for the plugin to be verified or accepted for the stable channel. For help please go to: https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request")
+        process.exit();
+    }
 
-            try {
-                execSync("/usr/bin/git commit -am \"updating plugin " +
-                    package.name + " version " + package.version + "\"");
-
-            }
-            catch (e){
-                console.log("Nothing to commit");
-            }
-
-            zip();
-
-            execSync("/bin/mv " + package.name + ".zip /tmp/");
-            process.chdir("../../../");
-            execSync("/usr/bin/git checkout gh-pages");
-            var arch = "";
-            exec("cat /etc/os-release | grep ^VOLUMIO_ARCH | tr -d \'VOLUMIO_ARCH=\"\'",
-                function (error, stdout, stderr) {
+    function validateGit(package) {
+        exec("git config --get remote.origin.url", function (error, stdout, stderr) {
+            if (error) {
+                console.log('Could not determine the plugin\'s remote. A plugin can only submitted from a fork of the volumio-plugins-sources repository' );
+                exit(); 
+            } else if (!stdout.includes('volumio-plugins-sources') && stdout.includes('https://github.com/volumio/volumio-plugins-sources')) {
+                console.log('A plugin can only submitted from a fork of the volumio-plugins-sources repository (https://github.com/volumio/volumio-plugins-sources)' );
+                exit();
+            } else {
+                exec("git status", function (error, stdout, stderr) {
                     if (error) {
-                        console.error('Error, cannot detect system architecture: '+error);
-                        return;
+                        console.log('Could not determine the plugin\'s git status. A plugin can only submitted from a fork of the volumio-plugins-sources repository' );
+                        exit(); 
+                    } else if (stdout.includes('Changes not staged for commit') || stdout.includes('Untracked files')) {
+                        console.log('Your repository contains unstaged changes. Please stage and commit your changes. Use \'git add *\' to stage all changes.' );
+                        exit();
+                    } else if (stdout.includes('Changes to be committed')) {
+                        console.log('Your repository contains uncommitted changes. Please commit your changes. Use \'git commit -m "description"\' to commit all changes. Please use the version number in the description.' );
+                        exit();
+                    } else if (stdout.includes('Your branch is ahead of')) {
+                        console.log('Your repository contains changes that are not pushed to origin. Please push your changes. Use \'git push\' to push all changes.' );
+                        exit();
                     } else {
-                        arch = stdout.replace(/\n$/, '');
-                        if (arch == 'x86') {
-                            arch = 'i386';
-                        }
-                        else {
-                            arch = 'armhf';
-                        }
-                        create_folder(package, arch);
-                    }
-
+                        createPackage(package);
+                    }        
                 });
-        });
+            }
+        });       
+        
     }
-    catch (e) {
-        console.log("Error publishing plugin: " + e);
-    }
-}
 
-/**
- * This functions creates the appropriate folder path for the package
- * @param package = package.json
- * @param arch = architecture
- */
-function create_folder(package, arch) {
-    var path = process.cwd() + "/plugins/volumio/" + arch + "/" +
-        package.volumio_info.plugin_type;
-    if(!fs.existsSync(path + "/" + package.name)){
-        if(!fs.existsSync(path)){
-            fs.mkdirSync(path);
-        }
-        fs.mkdirSync(path + "/" + package.name);
-    }
-    execSync("/bin/cp -rp /tmp/" + package.name + ".zip " + path + "/" +
-        package.name);
-
-    update_plugins(package, arch);
-}
-
-/**
- * This function updates the plugins.json file, adding the information about
- * the new plugin, then prepares for the commit
- * @param package = package.json
- * @param arch = architecture
- */
-function update_plugins(package, arch) {
-    try {
-        var plugins = fs.readJsonSync(process.cwd() + "/plugins/volumio/" + arch +
-        "/plugins.json");
-        var i = 0;
-        var catFound = false;
-        var plugFound = false;
-        for (i = 0; i < plugins.categories.length; i++){
-            if(plugins.categories[i].name == package.volumio_info.plugin_type){
-                var j = 0;
-                for (j = 0; j < plugins.categories[i].plugins.length; j++){
-                    if(plugins.categories[i].plugins[j].name == package.name){
-                        var today = new Date();
-                        plugins.categories[i].plugins[j].updated =
-                            today.getDate() + "-" + (today.getMonth()+1) +
-                            "-" + today.getFullYear();
-                        plugins.categories[i].plugins[j].version = package.version;
-                        update_desc_details(package, plugins, i, j, arch);
-                        plugFound = true;
-                        catFound = true;
+    function validatePackage() {
+        try {
+            var package = fs.readJsonSync("package.json");
+            if (!package){
+                console.log('Error loading package.json' );
+                exit();        
+            }
+            if (!package.engines || !package.engines.volumio){
+                package.engines = {};
+                package.engines.volumio = ">=3";
+                package.engines.node = ">=" + process.versions.node;
+                console.log('Package.json does not contain engines.volumio field. Adding default: ' + JSON.stringify(package.engines) );
+            }
+            if (!package.name){
+                console.log('Package.json does not contain name field. Example: "name": "my_project"' );
+                exit();        
+            }
+            if (!package.version){
+                package.version = "1.0.0"
+                console.log('Package.json does not contain version field. Adding default: "version": "1.0.0"' );      
+            } else {
+                var temp = package.version.split('.');
+                if (temp.length != 3) {
+                    console.log("Please, insert a version number according to format (example: 1.0.0)");
+                    exit();
+                }
+                for (var i in temp) {
+                    if (!temp[i].match(/[0-9]/i)) {
+                        console.log("Please, insert only numbers");
+                        exit();
                     }
                 }
-                if(j == plugins.categories[i].plugins.length && !plugFound &&
-                    plugins.categories[i].plugins[j-1].name != package.name){
-                    write_new_plugin(package, arch, plugins, i);
-                    catFound = true;
-                }
             }
+            if (!package.author){
+                let author = execSync('git config user.name').toString().replace('\n', '')
+                package.author = author
+                console.log('Package.json does not contain author field. Adding default: "author": "' + author +'"' );
+            }
+            if (!package.description){
+                console.log('Package.json does not contain description field. Example: "description": "This is my awesome project"' );
+                exit();        
+            }
+            if (!package.license){
+                package.license = "ISC";
+                console.log('Package.json does not contain license field. Adding default: "license": "ISC". See https://opensource.org/licenses for license types.' );  
+            }
+            if (!package.repository){
+                package.repository = "https://github.com/volumio/volumio-plugins-sources"
+                console.log('Package.json does not contain repository field. Adding default: "repository": "https://github.com/volumio/volumio-plugins-sources"' );     
+            }
+            if (!package.volumio_info){
+                package.volumio_info = {};
+            }
+            if (!package.volumio_info.prettyName){
+                console.log('Package.json does not contain volumio_info.prettyName field. Example: "prettyName": "My Project"' );
+                exit();
+            }            
+            if (package.volumio_info.architectures) {           
+                //TODO: Get valid architectures from db
+                package.volumio_info.architectures.forEach(arch => {
+                    if (!new Array("amd64", "armhf", "i386").includes(arch)){
+                        console.log('Invalid architecture: ' + arch + '. Valid values: "amd64", "armhf", "i386"' );
+                        exit();
+                    }
+                });
+            }
+            if (!package.volumio_info.os){                
+                package.volumio_info.os = new Array('buster');
+                console.log('Package.json does not contain volumio_info.os field, please add it. Adding default: "os": ["buster"]' );    
+            } else {
+                //TODO: Get valid os's from db
+                package.volumio_info.os.forEach(os => {
+                    if (!new Array("buster").includes(os)){
+                        console.log('Invalid os: ' + os + '. Valid values: "buster"' );
+                        exit();
+                    }
+                });
+            }
+            if (!package.volumio_info.details){
+                package.volumio_info.details = package.description;
+                console.log('Package.json does not contain volumio_info.details field. Adding default: "volumio_info": { "details": "' + package.description + '" }' );
+            }
+            if (!package.volumio_info.changelog){
+                package.volumio_info.changelog = "";
+                console.log('Package.json does not contain volumio_info.changelog field. Adding default: "volumio_info": { "changelog": "" }' );
+            }
+            if (!package.volumio_info.plugin_type){
+                console.log('Package.json does not contain volumio_info.plugin_type field. Example: "plugin_type": "music_service"' );
+                exit();
+            }
+            if (!new Array("audio_interface", "music_service", "system_controller", "system_hardware", "user_interface").includes(package.volumio_info.plugin_type)){
+                console.log('Invalid plugin_type: ' + package.volumio_info.plugin_type + '. Valid values: "audio_interface", "music_service", "system_controller", "system_hardware", "user_interface"' );
+                exit();
+            }
+            if (!package.volumio_info.icon){
+                package.volumio_info.icon = "fa-headphones";
+                console.log('Package.json does not contain volumio_info.icon field. Adding default: "icon": "fa-headphones" Available icons: https://fontawesome.com/v5.15/icons' );
+            }
+            var questions = [
+                {
+                    type: 'input',
+                    name: 'version',
+                    message: 'do you want to change your version? (leave blank ' +
+                    'for default)',
+                    default: package.version,
+                    validate: function (value) {
+                        var temp = value.split('.');
+                        if (temp.length != 3) {
+                            return "Please, insert a version number " +
+                                "according to format (example: 1.0.0)";
+                        }
+                        for (var i in temp) {
+                            if (!temp[i].match(/[0-9]/i)) {
+                                return "Please, insert only numbers";
+                            }
+                        }
+                        return true;
+                    }
+                }
+            ];        
+            inquirer.prompt(questions).then(function (answer) {
+                package.version = answer.version;
+                fs.writeJsonSync("package.json", package, {spaces:'\t'});
+                if (!package.volumio_info.architectures){                
+                    var architectures = new Array("amd64", "armhf", "i386");            
+                    var questions = [
+                        {
+                            type: 'checkbox',
+                            name: 'architectures',
+                            message: 'Please select the compatible architectures for this plugin',
+                            choices: architectures
+                        }];
+                
+                    inquirer.prompt(questions).then(function (answer) {
+                        //console.log(answer.architectures);
+                        package.volumio_info.architectures = answer.architectures;
+                        fs.writeJsonSync("package.json", package, {spaces:'\t'});
+                        validateGit(package);
+                    }); 
+                } else {
+                    validateGit(package);
+                }
+            });
         }
-        if(i == plugins.categories.length && plugins.categories[i-1].name
-            != package.volumio_info.plugin_type && !catFound){
-            write_new_category(package, arch, plugins, i);
+        catch (e) {
+            console.log("Error publishing plugin: " + e);
+            exit();
         }
     }
-    catch(e){
-        console.log("Error updating plugins.json: " + e)
+
+    function createPackage(package) {        
+        fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip" + os.EOL + "package-lock.json");
+        zip();
+        var fileName = uuidv4() + ".zip";
+        execSync("/bin/mv " + package.name + ".zip /tmp/" + fileName);
+        process.chdir("../../../");
+        postPlugin(package, fileName);
     }
-}
 
-/**
- * This function creates a json containing information about the new plugin
- * @param package = package.json
- * @param arch = architecture
- * @param plugins = plugins.json
- * @param index = plugin_index
- */
-function write_new_plugin(package, arch, plugins, index) {
-    var data = {};
-    var question = [
-        {
-            type: 'input',
-            name: 'details',
-            message: 'Insert some details about your plugin (e.g. features, ' +
-            'requirements, notes, etc... max 1000 chars)',
-            default: "",
-            validate: function (desc) {
-                if(desc.length > 1000){
-                    return "Description is too long. Use 1000 characters maximum";
+    function postPlugin(package, fileName) {
+        try {
+            
+            var plugin = {}
+            plugin.category = package.volumio_info.plugin_type;
+            plugin.name = package.name;
+            plugin.prettyName = package.volumio_info.prettyName;
+            plugin.icon = package.volumio_info.icon;
+            plugin.description = package.description;
+            plugin.license = package.license;
+            plugin.author = package.author;
+            plugin.repository = package.repository;
+            plugin.volumioVersion = package.engines.volumio;
+            var today = new Date();
+            plugin.updated = today.getDate() + "-" + (today.getMonth()+1) + "-" + today.getFullYear();
+            plugin.details = package.volumio_info.details;
+            plugin.changelog = package.volumio_info.changelog;
+            plugin.screenshots = [{"image": "", "thumb": ""}];
+            plugin.os = package.volumio_info.os;
+            plugin.variants = ["volumio"];
+            plugin.architectures = package.volumio_info.architectures;
+            plugin.version = package.version;
+            plugin.fileName = fileName;
+            plugin.channel = "beta";        
+
+            for (const [key, value] of Object.entries(plugin)) {
+                if (value === undefined) {
+                    console.log('Error: Value for ' + key + ' not defined')
+                    process.exit();
                 }
-                return true;
             }
+
+            let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
+            socket.emit('getMyVolumioStatus', {})
+            socket.on('pushMyVolumioStatus', function (result) {
+                //console.log(result)
+                if (result.loggedIn) {
+                    socket.emit('getMyVolumioToken', {})
+                    socket.on('pushMyVolumioToken', function (tokenResult) {
+                        unirest
+                            .post('https://plugins.volumio.workers.dev/pluginsv2/plugin')
+                            .headers({'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tokenResult.token})
+                            .send(plugin)
+                            .then(function (response) {
+                                if (response && response.status === 200 && response.body) {
+                                    console.log('Plugin added');
+                                    unirest
+                                        .post('https://plugins.volumio.workers.dev/pluginsv2/plugin/upload')
+                                        .headers({'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer ' + tokenResult.token})
+                                        .attach('plugin', '/tmp/' + fileName)
+                                        .then(function (response) {
+                                            if (response && response.status === 200 && response.body) {
+                                                console.log('Plugin uploaded');
+                                                submitFinished();
+                                            } else {
+                                                if (response.error) {
+                                                    console.log('Error uploading plugin: ' + response.error);
+                                                } else {
+                                                    console.log('Could not upload plugin: ' + response.body);
+                                                }
+                                                process.exit();
+                                            }
+                                        })
+                                } else {
+                                    if (response.error) {
+                                        console.log('Error adding plugin: ' + response.error);
+                                    } else {
+                                        console.log('Could not add plugin: ' + response.body);
+                                    }
+                                    process.exit();
+                                }
+                            })
+                    });
+                } else {
+                    console.log('Error: Please login to myvolumio in order to add plugins.');
+                    process.exit();
+                }            
+            })        
         }
-    ];
-    inquirer.prompt(question).then(function (answer) {
-        var today = new Date();
-        data.prettyName = package.volumio_info.prettyName;
-        if (package.icon != undefined) {
-            data.icon = package.icon;
-        } else {
-            data.icon = "fa-lightbulb-o";
+        catch(e){
+            console.log("Error updating plugins.json: " + e)
         }
-        data.name = package.name;
-        data.version = package.version;
-        data.url = "http://volumio.github.io/volumio-plugins/" +
-            "plugins/volumio/" + arch + "/" +
-            package.volumio_info.plugin_type + "/" +
-            package.name + "/" + package.name + ".zip";
-        data.license = package.license;
-        data.description = package.description;
-        data.details = answer.details;
-        data.author = package.author;
-        data.screenshots = [{"image": "", "thumb": ""}];
-        data.updated = today.getDate() + "-" + (today.getMonth()+1) +
-            "-" + today.getFullYear();
+    }
 
-        plugins.categories[index].plugins.push(data);
-        fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-            arch + "/plugins.json", plugins, {spaces:'\t'});
-
-        commit(package, arch);
-    });
-}
-
-/**
- * This function creates a json with info about the category in which to put
- * the plugin, called if the category is missing from plugins.json
- * @param package = package.json
- * @param arch = architecture
- * @param plugins = plugins.json
- * @param index = plugin_index
- */
-function write_new_category(package, arch, plugins, index){
-    var data = {};
-    data.prettyName = package.volumio_info.plugin_type.replace(/_/g, " ");
-    data.name = package.volumio_info.plugin_type;
-    data.id = "cat" + (index+1);
-    data.description = "";
-    data.plugins = [];
-
-    plugins.categories.push(data);
-    write_new_plugin(package, arch, plugins, index);
-}
-
-/**
- * This function updates description and details for an already existing plugin
- * @param package = package.json
- * @param plugins = plugins.json
- * @param catIndex = i
- * @param plugIndex = j
- */
-function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
-    var descDet = {};
-    var questions = [
-        {
-            type: 'input',
-            name: 'details',
-            message: 'Do you want to change the details of your plugin?' +
-            ' (leave blank for default)',
-            default: plugins.categories[catIndex].plugins[plugIndex].details,
-            validate: function (desc) {
-                if(desc.length > 1000){
-                    return "Description is too long. Use 1000 characters maximum";
-                }
-                return true;
-            }
-        },
-        {
-            type: 'input',
-            name: 'description',
-            message: 'Do you want to change the description of your plugin?' +
-            ' (leave blank for default)',
-            default: package.description,
-            validate: function (desc) {
-                if(desc.length > 200){
-                    return "Description is too long. Use 200 characters maximum";
-                }
-                return true;
-            }
-        }
-    ];
-    inquirer.prompt(questions).then(function (answer) {
-        plugins.categories[catIndex].plugins[plugIndex].details = answer.details;
-        plugins.categories[catIndex].plugins[plugIndex].description = answer.description;
-
-        fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-            arch + "/plugins.json", plugins, {spaces:'\t'});
-
-        commit(package, arch);
-    });
-}
-
-/**
- * This function creates a commit for github, it pushes it if called by volumio
- * else it notifies that commit is ready
- * @param package = package.json
- * @param arch = architecture
- */
-function commit(package, arch) {
-    execSync("/usr/bin/git add " + process.cwd() + "/plugins/volumio/" + arch +
-       "/" + package.volumio_info.plugin_type + "/" + package.name + "/*");
-    execSync("/usr/bin/git commit -am \"updating plugin " + package.name + " " +
-        package.version + "\"");
-    console.log("updating plugin sources:\n");
-    execSync("/usr/bin/git push origin master");
-    console.log("updating plugin packages:\n");
-    execSync("/usr/bin/git push origin gh-pages");
-    console.log("Congratulations, your package has been correctly uploaded and" +
-        "is ready for merging!")
-    process.exit(1)
+    validatePackage();
 }
 
 // =============================== INSTALL ====================================
@@ -744,8 +820,8 @@ switch (argument){
     case "package":
         zip()
         break;
-    case "publish":
-        publish()
+    case "submit":
+        submit()
         break;
     case "install":
         install()

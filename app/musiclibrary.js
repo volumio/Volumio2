@@ -512,6 +512,12 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function () {
   var self = this;
 
   console.log('Updating browse sources language');
+  self.translateDefaultBrowseSources();
+  return self.pushBrowseSources(self.browseSources);
+};
+
+CoreMusicLibrary.prototype.translateDefaultBrowseSources = function () {
+  var self = this;
 
   for (var i in self.browseSources) {
     if (self.browseSources[i] !== undefined) {
@@ -545,7 +551,6 @@ CoreMusicLibrary.prototype.updateBrowseSourcesLang = function () {
       }
     }
   }
-  return this.pushBrowseSources(self.browseSources);
 };
 
 CoreMusicLibrary.prototype.goto = function (data) {
@@ -565,6 +570,7 @@ CoreMusicLibrary.prototype.pushBrowseSources = function (data) {
   var self = this;
 
   var visibleSources = self.setDisabledBrowseSources(data);
+  self.translateDefaultBrowseSources();
   return this.commandRouter.broadcastMessage('pushBrowseSources', visibleSources);
 };
 

@@ -6,12 +6,14 @@ var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var config = new (require('v-conf'))();
 var mountutil = require('linux-mountutils');
-var libUUID = require('node-uuid');
 var udev = require('udev');
 var S = require('string');
 var _ = require('underscore');
 var removableMountPoint = '/mnt/';
 var mountPointFile = '/data/configuration/mountPoints';
+const { v4: uuidv4 } = require('uuid');
+
+var ignoreDeviceAction = false;
 
 // Define the ControllerNetworkfs class
 module.exports = ControllerNetworkfs;
@@ -38,14 +40,14 @@ ControllerNetworkfs.prototype.onVolumioStart = function () {
   var configFile = self.commandRouter.pluginManager.getConfigurationFile(self.context, 'config.json');
   config.loadFile(configFile);
 
-  self.initShares();
+  var promise = self.initShares();
   if (process.env.NODE_MOUNT_HANDLER === 'true') {
     self.initUdevWatcher();
   }
   var boundMethod = self.onPlayerNameChanged.bind(self);
   self.commandRouter.executeOnPlugin('system_controller', 'system', 'registerCallback', boundMethod);
 
-  return libQ.resolve();
+  return promise;
 };
 
 ControllerNetworkfs.prototype.languageCallback = function (data) {
@@ -157,14 +159,16 @@ ControllerNetworkfs.prototype.setAdditionalConf = function () {
 
 ControllerNetworkfs.prototype.initShares = function () {
   var self = this;
+  var deferList = [];
 
   var keys = config.getKeys('NasMounts');
   for (var i in keys) {
     var key = keys[i];
     if (key !== 'mountedFolders') {
-      self.mountShare({init: true, key: key});
+      deferList.push(self.mountShare({init: true, key: key}));
     }
   }
+  return libQ.all(deferList);
 };
 
 ControllerNetworkfs.prototype.mountShare = function (data) {
@@ -185,7 +189,7 @@ ControllerNetworkfs.prototype.mountShare = function (data) {
   var mountidraw = config.get(key + '.name');
   // Check we have sane data - operating on undefined values will crash us
   if (fstype === 'undefined' || path === 'undefined') {
-    console.log('Unable to retrieve config for share ' + shareid + ', returning early');
+    self.logger.error('Unable to retrieve config for share ' + shareid + ', returning early');
     return defer.promise;
   }
   var pointer;
@@ -403,7 +407,7 @@ ControllerNetworkfs.prototype.addShare = function (data) {
     return defer.promise;
   }
 
-  uuid = libUUID.v4();
+  uuid = uuidv4();
   self.logger.info('No correspondence found in configuration for share ' + name + ' on IP ' + ip);
 
   var saveshare = self.saveShareConf('NasMounts', uuid, name, ip, path, fstype, username, password, options);
@@ -531,7 +535,7 @@ ControllerNetworkfs.prototype.listShares = function (data) {
     libQ.all(promises).then(function (d) {
       defer.resolve(d);
     }).fail(function (e) {
-      console.log('Failed getting mounts size', e);
+      self.logger.error('Failed getting mounts size', e);
     });
   } else {
     response = [];
@@ -580,7 +584,6 @@ ControllerNetworkfs.prototype.getMountSize = function (share) {
       respShare.size = size.toFixed(2) + ' ' + unity;
       resolve(respShare);
     }).fail(function (e) {
-      console.log('fail....' + e);
       reject(respShare);
     });
   });
@@ -895,7 +898,6 @@ ControllerNetworkfs.prototype.writeSMBConf = function () {
             } else {
               exec('/usr/bin/sudo /bin/systemctl restart nmbd.service && /usr/bin/sudo /bin/systemctl restart smbd.service', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
                 if (error !== null) {
-                  console.log(error);
                   self.logger.error('Cannot restart SAMBA');
                 } else {
                   self.logger.info('SAMBA Restarted');
@@ -983,6 +985,18 @@ ControllerNetworkfs.prototype.umountShare = function (data) {
   }
 };
 
+ControllerNetworkfs.prototype.enableDeviceActions = function () {
+  var self = this;
+  ignoreDeviceAction = false;
+  self.logger.info('Mount handler: device actions (re-)enabled');
+}
+
+ControllerNetworkfs.prototype.disableDeviceActions = function () {
+  var self = this;
+  ignoreDeviceAction = true;
+  self.logger.info('Mount handler: device actions disabled');
+}
+
 ControllerNetworkfs.prototype.initUdevWatcher = function () {
   var self = this;
 
@@ -1009,7 +1023,9 @@ ControllerNetworkfs.prototype.initUdevWatcher = function () {
   function deviceAddAction (device) {
     switch (device.DEVTYPE) {
       case 'partition':
-        self.mountDevice(device);
+        if (!ignoreDeviceAction) {
+          self.mountDevice(device);
+        }
         break;
       case 'disk':
         break;
@@ -1021,7 +1037,9 @@ ControllerNetworkfs.prototype.initUdevWatcher = function () {
   function deviceRemoveAction (device) {
     switch (device.DEVTYPE) {
       case 'partition':
-        self.umountDevice(device);
+        if (!ignoreDeviceAction) {
+          self.umountDevice(device);
+        }
         break;
       case 'disk':
         break;
@@ -1034,31 +1052,54 @@ ControllerNetworkfs.prototype.initUdevWatcher = function () {
 ControllerNetworkfs.prototype.mountDevice = function (device) {
   var self = this;
 
-  if (device.ID_FS_LABEL) {
-    	var fsLabel = device.ID_FS_LABEL;
-  } else if (device.ID_FS_UUID) {
-    var fsLabel = device.ID_FS_UUID;
-  } else {
-    	self.logger.error('Cannot associate FS Label, not mounting');
-  }
-
+  var fsLabel = self.getFSLabel(device);
   if (fsLabel && device.DEVNAME && device.ID_FS_TYPE) {
-    	if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio') {
-      self.logger.info('Mounting Device ' + fsLabel);
-      if (fsLabel === 'issd' || fsLabel === 'ihdd' || fsLabel === 'Internal SSD' || fsLabel === 'Internal HDD') {
-        var mountFolder = removableMountPoint + 'INTERNAL/';
-        self.switchInternalMemoryPosition();
-      } else {
-        var mountFolder = removableMountPoint + 'USB/' + fsLabel;
-      }
+    	if (self.isDeviceToBeMounted(device)) {
+    	  self.logger.info('Mounting Device ' + fsLabel);
+    	  if (fsLabel === 'issd' || fsLabel === 'ihdd' || fsLabel === 'Internal SSD' || fsLabel === 'Internal HDD') {
+    	    var mountFolder = removableMountPoint + 'INTERNAL/';
+    	    self.switchInternalMemoryPosition();
+    	  } else {
+    	    var mountFolder = removableMountPoint + 'USB/' + fsLabel;
+    	  }
 
-      if (!fs.existsSync(mountFolder)) {
-        this.createMountFolder(mountFolder);
-      }
-      self.mountPartition({'label': fsLabel, 'devName': device.DEVNAME, 'fsType': device.ID_FS_TYPE, 'mountFolder': mountFolder});
+    	  if (!fs.existsSync(mountFolder)) {
+    	    this.createMountFolder(mountFolder);
+    	  }
+    	  self.mountPartition({'label': fsLabel, 'devName': device.DEVNAME, 'fsType': device.ID_FS_TYPE, 'mountFolder': mountFolder});
+    	} else {
+    	  self.logger.info('Ignoring mount for partition: ' + fsLabel);
+    	}
+  }
+};
+
+ControllerNetworkfs.prototype.getFSLabel = function (device) {
+  var self = this;
+
+  if (device.ID_FS_LABEL) {
+    return device.ID_FS_LABEL;
+  } else if (device.ID_FS_UUID) {
+    return device.ID_FS_UUID;
+  } else {
+    self.logger.error('Cannot associate FS Label, not mounting');
+    return false;
+  }
+};
+
+ControllerNetworkfs.prototype.isDeviceToBeMounted = function (device) {
+  var self = this;
+
+  var fsLabel = self.getFSLabel(device);
+  if (fsLabel !== 'boot' && fsLabel !== 'volumio_data' && fsLabel !== 'volumio') {
+    if (device.ID_BUS === 'usb') {
+      return true;
     } else {
-    		self.logger.info('Ignoring mount for partition: ' + fsLabel);
+      // TODO: We need to save internal HDDs partitions that we want to mount. This has to be done in the UI.
+      // Here we must check if ther uuid or label is saved by user as mountable and mount it.
+      return false;
     }
+  } else {
+    return false;
   }
 };
 
@@ -1182,7 +1223,7 @@ ControllerNetworkfs.prototype.storeMountedFolder = function (mountFolder) {
     if (!_.contains(data, mountFolder)) {
       data.push(mountFolder);
       self.saveMountedFolder(data);
-      var clearFolder = mountFolder.replace('/mnt/USB/', '').replace('/mnt/', '');
+      var clearFolder = mountFolder.replace('/mnt/', '');
       execSync('/usr/bin/mpc update "' + clearFolder + '"', {uid: 1000, gid: 1000});
       self.logger.info('Scanning new location : ' + '"' + clearFolder + '"');
     }

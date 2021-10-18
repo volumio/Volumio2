@@ -10,6 +10,7 @@ var spawn = require('child_process').spawn;
 var crypto = require('crypto');
 var calltrials = 0;
 var additionalSVInfo;
+const { v4: uuidv4 } = require('uuid');
 
 // Define the ControllerSystem class
 module.exports = ControllerSystem;
@@ -21,7 +22,6 @@ function ControllerSystem (context) {
   self.context = context;
   self.commandRouter = self.context.coreCommand;
   self.configManager = self.context.configManager;
-
   self.logger = self.context.logger;
   self.callbacks = [];
 }
@@ -38,8 +38,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
   var uuid = this.config.get('uuid');
   if (uuid == undefined) {
     console.log('No id defined. Creating one');
-    var uuid = require('node-uuid');
-    self.config.addConfigValue('uuid', 'string', uuid.v4());
+    self.config.addConfigValue('uuid', 'string', uuidv4());
   }
 
   this.commandRouter.sharedVars.addConfigValue('system.uuid', 'string', uuid);
@@ -47,10 +46,7 @@ ControllerSystem.prototype.onVolumioStart = function () {
 
   process.env.ADVANCED_SETTINGS_MODE = this.config.get('advanced_settings_mode', true);
 
-  self.deviceDetect();
-  self.callHome();
-
-  return libQ.resolve();
+  return libQ.all(self.deviceDetect(), self.callHome());
 };
 
 ControllerSystem.prototype.onStop = function () {
@@ -98,6 +94,7 @@ ControllerSystem.prototype.getUIConfig = function () {
       self.configManager.setUIConfigParam(uiconf, 'sections[1].content[0].value', HDMIEnabled);
 
       if (device != undefined && device.length > 0 && (device === 'Tinkerboard' || device === 'x86') && showDiskInstaller) {
+        var hwdevice = device;
         var disks = self.getDisks();
         if (disks != undefined) {
           disks.then(function (result) {
@@ -110,7 +107,7 @@ ControllerSystem.prototype.getUIConfig = function () {
                 var description = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ': ' + device.name + ' ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_SIZE') + ': ' + device.size;
                 var title = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_DESC') + ' ' + device.name;
                 var message = self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE') + ' ' + device.name + ' ' + device.size + '. ' + self.commandRouter.getI18nString('SYSTEM.INSTALL_TO_DISK_MESSAGE_WARNING');
-                var onClick = {'type': 'emit', 'message': 'installToDisk', 'data': {'from': result.current, 'target': device.device}, 'askForConfirm': {'title': title, 'message': message}};
+                var onClick = {'type': 'emit', 'message': 'installToDisk', 'data': {'from': result.current, 'target': device.device, 'hwdevice': hwdevice}, 'askForConfirm': {'title': title, 'message': message}};
                 var item = {'id': 'install_to_disk' + device.device, 'element': 'button', 'label': label, 'description': description, 'onClick': onClick};
                 uiconf.sections[4].content.push(item);
               }
@@ -459,6 +456,30 @@ ControllerSystem.prototype.setTestSystem = function (data) {
   }
 };
 
+ControllerSystem.prototype.setTestPlugins = function (data) {
+  var self = this;
+
+  if (data == 'true') {
+    fs.writeFile('/data/testplugins', ' ', function (err) {
+      if (err) {
+        self.logger.info('Cannot set as plugins test device:' + err);
+      }
+      self.logger.info('Plugins store is now in test mode');
+    });
+  } else if (data == 'false') {
+    fs.exists('/data/testplugins', function (exists) {
+      exec('rm /data/testplugins', function (error, stdout, stderr) {
+        if (error !== null) {
+          console.log(error);
+          self.logger.info('Cannot delete plugins test file: ' + error);
+        } else {
+          self.logger.info('Plugins Test File deleted');
+        }
+      });
+    });
+  }
+};
+
 ControllerSystem.prototype.sendBugReport = function (message) {
   var self = this;
 
@@ -476,7 +497,7 @@ ControllerSystem.prototype.sendBugReport = function (message) {
     if (i < (n - 1)) description = description + "\\'";
   }
 
-  exec('/usr/local/bin/node /volumio/logsubmit.js ' + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
+  exec('/usr/bin/node /volumio/logsubmit.js ' + description, {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
     if (error !== null) {
       self.logger.info('Cannot send bug report: ' + error);
     } else {
@@ -521,26 +542,36 @@ ControllerSystem.prototype.deviceDetect = function (data) {
 
   var info = self.getSystemVersion();
   info.then(function (infos) {
-    if (infos != undefined && infos.hardware != undefined && infos.hardware === 'x86') {
+    if (infos != undefined && infos.hardware != undefined && (infos.hardware === 'x86' || infos.hardware === 'x86_amd64' || infos.hardware === 'x86_i386')) {
       device = 'x86';
-      defer.resolve(device);
       self.deviceCheck(device);
+      defer.resolve(device);
     } else {
       exec('cat /proc/cpuinfo | grep Hardware', {uid: 1000, gid: 1000}, function (error, stdout, stderr) {
         if (error !== null) {
           self.logger.info('Cannot read proc/cpuinfo: ' + error);
+          defer.resolve('unknown');
         } else {
           var hardwareLine = stdout.split(':');
           var cpuidparam = hardwareLine[1].replace(/\s/g, '');
-          var deviceslist = fs.readJsonSync(('/volumio/app/plugins/system_controller/system/devices.json'), 'utf8', {throws: false});
-          // self.logger.info('CPU ID ::'+cpuidparam+'::');
-          for (var i = 0; i < deviceslist.devices.length; i++) {
-            if (deviceslist.devices[i].cpuid == cpuidparam) {
-              defer.resolve(deviceslist.devices[i].name);
-              device = deviceslist.devices[i].name;
-              self.deviceCheck(device);
+          var deviceslist = fs.readJson(('/volumio/app/plugins/system_controller/system/devices.json'),
+          { encoding: 'utf8', throws: false },
+          function (err, deviceslist) {
+            if(deviceslist && deviceslist.devices) {
+              for (var i = 0; i < deviceslist.devices.length; i++) {
+                if (deviceslist.devices[i].cpuid == cpuidparam) {
+                  device = deviceslist.devices[i].name;
+                  self.deviceCheck(device);
+                  defer.resolve(device);
+                  return;
+                }
+              }
+              defer.resolve('unknown');
+            } else {
+              defer.resolve('unknown');
             }
-          }
+          });
+          // self.logger.info('CPU ID ::'+cpuidparam+'::');
         }
       });
     }
@@ -636,14 +667,14 @@ ControllerSystem.prototype.getDisks = function () {
   var defer = libQ.defer();
   var availablearray = [];
 
-  var currentdiskRaw = execSync('/bin/mount | head -n 1 | cut -d " " -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+  var currentdiskRaw = execSync('/bin/mount | grep "/imgpart" | head -n 1 | cut -d " " -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
   var currentdisk = currentdiskRaw.replace(/[0-9]/g, '').replace('/dev/', '').replace(/\n/, '');
 
   var disksraw = execSync('/bin/lsblk -P -o KNAME,SIZE,MODEL -d', { uid: 1000, gid: 1000, encoding: 'utf8'});
   var disks = disksraw.split('\n');
 
-  if (currentdisk === 'mmcblkp') {
-    currentdiskRaw = execSync('/bin/mount | head -n 1 | cut -d " " -f 1 | cut -d "/" -f 3 | cut -d "p" -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+  if (currentdisk === 'mmcblkp' || currentdisk === 'nvmenp') {
+    currentdiskRaw = execSync('/bin/mount | grep "/imgpart" | head -n 1 | cut -d " " -f 1 | cut -d "/" -f 3 | cut -d "p" -f 1', { uid: 1000, gid: 1000, encoding: 'utf8'});
     currentdisk = currentdiskRaw.replace(/\n/, '');
   }
 
@@ -668,6 +699,9 @@ ControllerSystem.prototype.getDisks = function () {
         }
         if (diskinfo.device.indexOf('mmcblk') >= 0) {
 				   diskinfo.name = 'eMMC/SD';
+        }
+        if (diskinfo.device.indexOf('nvme') >= 0) {
+          diskinfo.name = 'NVMe';
         }
 
         if (count === 3) {
@@ -771,70 +805,123 @@ ControllerSystem.prototype.installToDisk = function (data) {
   if (data.target != undefined) {
     	var target = '/dev/' + data.target;
   }
-  self.notifyInstallToDiskStatus({'progress': 0, 'status': 'started'});
-  var ddsizeRaw = execSync('/bin/lsblk -b | grep -w ' + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
-  ddsize = Math.ceil(ddsizeRaw / 1024 / 1024);
-  var ddsizeRawDest = execSync('/bin/lsblk -b | grep -w ' + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
 
-  if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
-    error = true;
-    var sizeError = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_TARGET_SIZE');
-    self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': sizeError});
-  } else {
-    try {
-      var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source + ' of=' + target + ' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1', {uid: 1000, gid: 1000, encoding: 'utf8'});
-    } catch (e) {
+  var hwdevice = data.hwdevice;
+
+  if (hwdevice !== 'x86') {
+    // Tinker processing
+    self.notifyInstallToDiskStatus({'progress': 0, 'status': 'started'});
+    var ddsizeRaw = execSync('/bin/lsblk -b | grep -w ' + data.from + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+    ddsize = Math.ceil(ddsizeRaw / 1024 / 1024);
+    var ddsizeRawDest = execSync('/bin/lsblk -b | grep -w ' + data.target + " | awk '{print $4}' | head -n1", { uid: 1000, gid: 1000, encoding: 'utf8'});
+
+    if (Number(ddsizeRaw) > Number(ddsizeRawDest)) {
       error = true;
-      self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot install on new Disk'});
+      var sizeError = self.commandRouter.getI18nString('SYSTEM.INSTALLING_TO_DISK_ERROR_TARGET_SIZE');
+      self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': sizeError});
+    } else {
+      try {
+        var copy = exec('/usr/bin/sudo /usr/bin/dcfldd if=' + source + ' of=' + target + ' bs=1M status=on sizeprobe=if statusinterval=10 >> /tmp/install_progress 2>&1', {uid: 1000, gid: 1000, encoding: 'utf8'});
+      } catch (e) {
+        error = true;
+        self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot install on new Disk'});
+      }
+
+      var copyProgress = exec('usr/bin/tail -f /tmp/install_progress');
+
+      copyProgress.stdout.on('data', function (data) {
+        self.logger.info('Data: ' + data);
+        if (data.indexOf('%') >= 0) {
+          var progressRaw = data.split('(')[1].split('Mb)')[0];
+          var progress = Math.ceil((100 * progressRaw) / ddsize);
+          if (progress <= 100) {
+            if (progress >= 95) {
+              progress = 95;
+            }
+            self.notifyInstallToDiskStatus({'progress': progress, 'status': 'progress'});
+          }
+        }
+      });
+
+      copy.on('close', function (code) {
+        if (code === 0) {
+          self.logger.info('Successfully cloned system');
+
+          try {
+            fs.unlinkSync('/tmp/boot');
+            fs.unlinkSync('/tmp/imgpart');
+          } catch (e) {}
+
+          try {
+            if (target === '/dev/mmcblk0' || target === '/dev/mmcblk1') {
+              target = target + 'p';
+            }
+            execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('/usr/bin/sudo /bin/umount ' + target + '1', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            execSync('rm -rf /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
+            self.logger.info('Successfully prepared system for resize');
+          } catch (e) {
+            self.logger.error('Cannot prepare system for resize');
+            error = true;
+            self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot prepare system for resize'});
+          }
+
+          if (!error) {
+            self.notifyInstallToDiskStatus({'progress': 100, 'status': 'done'});
+          }
+        } else {
+          self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error'});
+        }
+      });
+    }
+  } else {
+
+    self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'disableDeviceActions', '');
+
+    var sep = '';
+    if ((target.indexOf('mmcblk') >= 0) || (target.indexOf('nvme') >= 0)) {
+      sep = 'p';
+    }
+    var boot_part = target + sep + '1';
+    var volumio_part = target + sep + '2';
+    var data_part = target + sep + '3';
+
+    var partarr = fs.readFileSync('/boot/partconfig.json', 'utf8');
+    var partparams = JSON.parse(partarr);
+    var boot_start = partparams.params.find(item => item.name === 'boot_start').value;
+    var boot_end = partparams.params.find(item => item.name === 'boot_end').value;
+    var volumio_end = partparams.params.find(item => item.name === 'volumio_end').value;
+    var boot_type = partparams.params.find(item => item.name === 'boot_type').value;
+
+    self.notifyInstallToDiskStatus({'progress': 0, 'status': 'started'});
+    execSync('/bin/echo "0" > /tmp/install_progress', { uid: 1000, gid: 1000, encoding: 'utf8'});
+
+    try {
+      var fastinstall = exec('/usr/bin/sudo /usr/local/bin/x86Installer.sh ' + target + ' ' + boot_type + ' ' + boot_start + ' ' + boot_end + ' ' + volumio_end + ' ' + boot_part + ' ' + volumio_part + ' ' + data_part, { uid: 1000, gid: 1000, encoding: 'utf8'});
+    } catch (e) {
+        error = true;
+        self.logger.info('Install to disk failed');
+        self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot install on new Disk'});
     }
 
-    var copyProgress = exec('tail -f /tmp/install_progress');
+    var installProgress = exec('usr/bin/tail -f /tmp/install_progress');
 
-    copyProgress.stdout.on('data', function (data) {
-      if (data.indexOf('%') >= 0) {
-        var progressRaw = data.split('(')[1].split('Mb)')[0];
-        var progress = Math.ceil((100 * progressRaw) / ddsize);
-        if (progress <= 100) {
-          if (progress >= 95) {
-            progress = 95;
-          }
-          self.notifyInstallToDiskStatus({'progress': progress, 'status': 'progress'});
-        }
-      }
+    installProgress.stdout.on('data', function (data) {
+      self.logger.info('Progress: ' + data);
+      self.notifyInstallToDiskStatus({'progress': data, 'status': 'progress'});
     });
 
-    copy.on('close', function (code) {
+    fastinstall.on('close', function (code) {
       if (code === 0) {
-        self.logger.info('Successfully cloned system');
-
-        try {
-          fs.unlinkSync('/tmp/boot');
-          fs.unlinkSync('/tmp/imgpart');
-        } catch (e) {}
-        // TODO: remove resize sentinel once initrd for arm devices have been aligned with x86
-        try {
-          if (target === '/dev/mmcblk0' || target === '/dev/mmcblk1') {
-            target = target + 'p';
-          }
-          execSync('mkdir /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
-          execSync('/usr/bin/sudo /bin/mount ' + target + '1 /tmp/boot -o rw,uid=1000,gid=1000', { uid: 1000, gid: 1000, encoding: 'utf8'});
-          execSync('/bin/touch /tmp/boot/resize-volumio-datapart', { uid: 1000, gid: 1000, encoding: 'utf8'});
-          execSync('/bin/sync', { uid: 1000, gid: 1000, encoding: 'utf8'});
-          execSync('/usr/bin/sudo /bin/umount ' + target + '1', { uid: 1000, gid: 1000, encoding: 'utf8'});
-          execSync('rm -rf /tmp/boot', { uid: 1000, gid: 1000, encoding: 'utf8'});
-          self.logger.info('Successfully prepared system for resize');
-        } catch (e) {
-          self.logger.error('Cannot prepare system for resize');
-          error = true;
-          self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error', 'error': 'Cannot prepare system for resize'});
-        }
-
-        if (!error) {
-          self.notifyInstallToDiskStatus({'progress': 100, 'status': 'done'});
-        }
+        self.logger.info('Successfully installed x86 factory copy to disk' + target);
+        self.notifyInstallToDiskStatus({'progress': 100, 'status': 'done'});
       } else {
         self.notifyInstallToDiskStatus({'progress': 0, 'status': 'error'});
       }
+      self.commandRouter.executeOnPlugin('system_controller', 'networkfs', 'enableDeviceActions', '');
     });
   }
 };
@@ -1082,19 +1169,19 @@ ControllerSystem.prototype.enableLiveLog = function (data) {
         message: 'Starting Live Log...\n'
       };
       this.commandRouter.broadcastMessage('LLogOpen', liveLogData);
-      
+
       if (this.livelogchild) {
         this.logger.info('Killing previous LiveLog session');
         this.livelogchild.kill();
       }
       this.livelogchild = spawn('/bin/journalctl',args, defaults);
-      
+
       this.livelogchild.on('error', (d) => {
         this.logger.info('Error spawning LiveLog session');
         liveLogData.message = d.toString();
         this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
       });
-      
+
       this.livelogchild.stdout.on('data', (d) => {
         liveLogData.message = d.toString();
         this.commandRouter.broadcastMessage('LLogProgress', liveLogData);
