@@ -466,7 +466,7 @@
         "TIDAL_RISING": "TIDAL Stijgend",
         "GENRES_AND_MOODS": "Genres & Stemmingen",
         "RECOMMENDED": "Aanbevolen",
-        "LOCAL": "Lokaal (niet van toepassing voor alle regio's)",
+        "LOCAL": "Lokaal (niet van toepassing op alle regio's)",
         "EXCLUSIVE": "Exclusief",
         "TOP_20": "Top 20"
     },
@@ -491,7 +491,7 @@
     },
     "PLUGIN_CDCONTROLLER": {
         "RIP_IN_PROGRESS_MESSAGE": "Deze CD wordt op dit moment gekopieerd en kan niet benaderd worden tot de kopieer actie gereed is",
-        "INTERNAL_MEMORY": "Intern Geheugen",
+        "INTERNAL_MEMORY": "Intern geheugen",
         "CD_RIP": "CD Rippen",
         "CD_RIP_STARTED": "CD Rippen gestart, dit kan tot 30 minuten duren. U krijgt een melding wanneer het proces is voltooid.",
         "CD_RIP_SUCCESS": "CD is succesvol geripped",

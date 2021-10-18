@@ -96,6 +96,7 @@ CoreStateMachine.prototype.getState = function () {
       enableSkip: this.volatileState.enableSkip,
       consume: false,
       volume: this.currentVolume,
+      dbVolume: this.currentDbVolume,
       mute: this.currentMute,
       disableVolumeControl: this.currentDisableVolumeControl,
       stream: this.volatileState.stream,
@@ -137,6 +138,7 @@ CoreStateMachine.prototype.getState = function () {
         repeatSingle: this.currentRepeatSingleSong,
         consume: true,
         volume: this.currentVolume,
+        dbVolume: this.currentDbVolume,
         mute: this.currentMute,
         disableVolumeControl: this.currentDisableVolumeControl,
         stream: this.consumeState.stream,
@@ -177,6 +179,7 @@ CoreStateMachine.prototype.getState = function () {
         repeatSingle: this.currentRepeatSingleSong,
         consume: this.currentConsume,
         volume: this.currentVolume,
+        dbVolume: this.currentDbVolume,
         disableVolumeControl: this.currentDisableVolumeControl,
         mute: this.currentMute,
         stream: trackBlock.trackType,
@@ -209,6 +212,7 @@ CoreStateMachine.prototype.getEmptyState = function () {
     Streaming: false,
     service: 'mpd',
     volume: this.currentVolume,
+    dbVolume: this.currentDbVolume,
     mute: this.currentMute,
     disableVolumeControl: this.currentDisableVolumeControl,
     random: this.currentRandom,
@@ -330,6 +334,7 @@ CoreStateMachine.prototype.resetVolumioState = function () {
       self.currentRandom = null;
       self.currentRepeat = null;
       self.currentVolume = null;
+      self.currentDbVolume = null;
       self.currentMute = null;
       self.currentUpdate = false;
       self.getcurrentVolume();
@@ -454,6 +459,8 @@ CoreStateMachine.prototype.increasePlaybackTimer = function () {
 // Update Volume Value
 CoreStateMachine.prototype.updateVolume = function (Volume) {
   this.currentVolume = Volume.vol;
+  if (undefined != Volume.dbVolume)
+		this.currentDbVolume = Volume.dbVolume;
   this.currentMute = Volume.mute;
   this.currentDisableVolumeControl = Volume.disableVolumeControl;
   this.pushState().fail(this.pushError.bind(this));
@@ -465,6 +472,8 @@ CoreStateMachine.prototype.getcurrentVolume = function () {
   this.commandRouter.pushConsoleMessage('CoreStateMachine::getcurrentVolume');
   this.commandRouter.volumioretrievevolume().then((volumeData) => {
     	self.currentVolume = volumeData.vol;
+      if (undefined != volumeData.dbVolume)
+				self.currentDbVolume = volumeData.dbVolume;
     	self.currentMute = volumeData.mute;
     	self.currentDisableVolumeControl = volumeData.disableVolumeControl;
     	this.updateTrackBlock();
@@ -542,7 +551,7 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
     // this.currentStatus='stop';
     var trackBlock = this.getTrack(this.currentPosition);
   } else if (this.isUpnp) {
-    console.log('In UPNP mode');
+    this.logger.verbose('In UPNP mode');
   } else {
     this.volatileService = undefined;
 
@@ -635,7 +644,6 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             sRate = trackBlock.samplerate;
             bDepth = trackBlock.bitdepth;
           }
-
           this.consumeState = {
             status: stateService.status,
             title: trackBlock.name,
@@ -654,6 +662,9 @@ CoreStateMachine.prototype.syncState = function (stateService, sService) {
             service: trackBlock.service
           };
         } else {
+          if (process.env.UPNP_192_CAP === 'true' && this.isUpnp && stateService.samplerate) {
+            stateService.samplerate = self.reportCappedSamplerate(stateService.samplerate);
+          }
           this.consumeState = {
             status: stateService.status,
             title: stateService.title,
@@ -1129,7 +1140,7 @@ CoreStateMachine.prototype.next = function (promisedResponse) {
         this.commandRouter.pushConsoleMessage('WARNING: No next method for plugin ' + this.consumeState.service);
       }
     } else if (this.isUpnp) {
-      console.log('UPNP Next');
+      this.logger.verbose('UPNP Next');
     } else {
       this.stop()
         .then(function () {
@@ -1373,10 +1384,11 @@ CoreStateMachine.prototype.setRepeat = function (value, repeatSingle) {
     }
   } else {
     this.currentRepeat = value;
-
-    if (repeatSingle != undefined) {
-      this.currentRepeatSingleSong = repeatSingle;
-    }
+	if(this.currentRepeat && repeatSingle != undefined) {
+		this.currentRepeatSingleSong = repeatSingle;	
+	} else {
+		this.currentRepeatSingleSong = false;
+	}
 
     this.pushState().fail(this.pushError.bind(this));
   }
@@ -1498,7 +1510,7 @@ CoreStateMachine.prototype.setVolatile = function (data) {
 };
 
 CoreStateMachine.prototype.unSetVolatile = function () {
-  console.log('UNSET VOLATILE');
+  this.logger.verbose('UNSET VOLATILE');
 
   /**
      * This function will be called on volatile stop
@@ -1518,4 +1530,18 @@ CoreStateMachine.prototype.startTimerForPreviousTrack = function () {
   setTimeout(() => {
     this.previousTrackonPrev = false;
   }, 3000);
+};
+
+CoreStateMachine.prototype.reportCappedSamplerate = function (samplerate) {
+
+  try {
+    let sampleRateNumber = parseInt(samplerate.replace('  kHz', ''));
+    if (sampleRateNumber > 192) {
+      return '192 kHz'
+    } else {
+      return samplerate
+    }
+  } catch(e) {
+    return samplerate;
+  }
 };
