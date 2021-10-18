@@ -81,7 +81,7 @@ kernelinstall() {
   echo "Done, you can now build and install out of kernel modules"
 }
 
-if (cat /proc/cpuinfo | grep '^Hardware.*BCM2[78][013][05-9].*' > /dev/null); then
+if (cat /etc/os-release | grep 'VOLUMIO_HARDWARE="pi"' > /dev/null); then
   kernelinstall
 else
   echo "This tool is available only for Raspberry PI, exiting"
