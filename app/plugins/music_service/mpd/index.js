@@ -389,7 +389,7 @@ ControllerMpd.prototype.parseTrackInfo = function (objTrackInfo) {
       resp.trackType = 'tidal';
     } else if (resp.uri.indexOf('http://') >= 0) {
       resp.service = 'dirble';
-      if (objTrackInfo.file.indexOf('bbc') >= 0) {
+      if (objTrackInfo.file.indexOf('bbc') >= 0 && objTrackInfo.Name) {
         objTrackInfo.Name = objTrackInfo.Name.replace(/_/g, ' ').replace('bbc', 'BBC');
         objTrackInfo.file = objTrackInfo.Name;
       }
