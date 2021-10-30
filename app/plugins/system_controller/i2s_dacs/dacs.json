@@ -57,7 +57,8 @@
     {"id":"st400-dac-amp","name":"ST400 Dac (PCM5122) - Amp","overlay":"iqaudio-dacplus","alsanum":"2","mixer":"Digital","modules":"","script":"","needsreboot":"yes"},
     {"id":"taudac","name":"TauDAC - DM101","overlay":"taudac","alsanum":"2","mixer":"","modules":"","script":"","eeprom_name":"TauDAC-DM101","needsreboot":"yes"},
     {"id":"terraberry-dac2","name":"Terra-Berry DAC 2/3","overlay":"i-sabre-q2m","alsanum":"2","alsacard":"DAC","mixer":"","modules":"","script":"","needsreboot":"yes"},
-    {"id":"es90x8q2m-dac","name":"Volumio ESS 9028QM","overlay":"es90x8q2m-dac","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"48","needsreboot":"no"}
+    {"id":"es90x8q2m-dac","name":"Volumio ESS 9028QM","overlay":"es90x8q2m-dac","alsanum":"2","mixer":"Digital","modules":"","script":"","i2c_address":"48","needsreboot":"no"},
+    {"id":"wm8960-soundcard","name":"Waveshare - WM8960","overlay":"wm8960-soundcard,i2s-mmap","alsanum":"","alsacard":"wm8960soundcard","mixer":"Playback","modules":"","script":"wm8960-unmute.sh","i2c_address":"1a","needsreboot":"yes"}
   ]},
   {"name":"Odroid C1+","data":[
     {"id":"odroid-hifi-shield","name":"HiFi Shield","overlay":"","alsanum":"2","mixer":"","modules":"","script":""}
