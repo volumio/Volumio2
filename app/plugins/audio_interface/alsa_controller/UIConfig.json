@@ -28,16 +28,20 @@
             "value":0,
             "label": "0"
           },
+          "visibleIf": {
+            "field": "i2s",
+            "value": false
+          },
           "options": [
 
           ]
 
         },
         {
-          "id": "",
-          "element": "",
+          "id": "i2s",
+          "element": "switch",
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ENABLE_I2S_DAC",
-          "label": "",
+          "label": "I2S DAC",
           "hidden": true,
           "value": false
         },
@@ -97,7 +101,9 @@
           "volume_normalization",
           "audio_buffer_size",
           "buffer_before_play",
-		  "persistent_queue"
+		  "persistent_queue",
+          "iso",
+          "playback_mode_list"
         ]
       },
       "content": [
@@ -148,7 +154,7 @@
           "options": [
             {
               "value":1024,
-              "label": "128 KB"
+              "label": "1 MB"
             },
             {
               "value":2048,
@@ -205,7 +211,36 @@
 		  "doc":"TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE_DOC",
 		  "label": "TRANSLATE.PLAYBACK_OPTIONS.PERSISTENT_QUEUE",
 		  "value":true
-		}
+		},
+        {
+          "id": "iso",
+          "element": "switch",
+          "hidden": "true",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.ISO_PLAYBACK",
+          "value":false
+        },
+        {
+          "id": "playback_mode_list",
+          "element": "select",
+          "doc": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_DOC",
+          "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE",
+          "value":  {
+            "value": "ccontinuous",
+            "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_CONTINUOUS"
+          },
+          "options": [
+            {
+              "value": "continuous",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_CONTINUOUS"
+            },
+            {
+              "value": "single",
+              "label": "TRANSLATE.PLAYBACK_OPTIONS.PLAYBACK_MODE_SINGLE"
+            }
+          ]
+
+        }
       ]
     },
     {
@@ -244,6 +279,10 @@
         {
           "id": "mixer",
           "element": "select",
+          "visibleIf": {
+            "field": "mixer_type",
+            "value": "Hardware"
+          },
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MIXER_CONTROL_NAME",
           "value":  {
@@ -258,6 +297,7 @@
         {
           "id": "volumestart",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.DEFAULT_STARTUP_VOLUME",
           "value":  {
@@ -269,41 +309,81 @@
               "value":"disabled",
               "label": "TRANSLATE.COMMON.DISABLED"
             },
-            {
+	    {
+              "value":"5",
+              "label": "5"
+            },
+	    {
               "value":"10",
               "label": "10"
+            },
+            {
+              "value":"15",
+              "label": "15"
             },
             {
               "value":"20",
               "label": "20"
             },
             {
+              "value":"25",
+              "label": "25"
+            },
+            {
               "value":"30",
               "label": "30"
+            },
+            {
+              "value":"35",
+              "label": "35"
             },
             {
               "value":"40",
               "label": "40"
             },
             {
+              "value":"45",
+              "label": "45"
+            },
+            {
               "value":"50",
               "label": "50"
             },
             {
+              "value":"55",
+              "label": "55"
+            },
+	    {
               "value":"60",
               "label": "60"
+            },
+            {
+              "value":"65",
+              "label": "65"
             },
             {
               "value":"70",
               "label": "70"
             },
             {
+              "value":"75",
+              "label": "75"
+            },
+            {
               "value":"80",
               "label": "80"
             },
             {
+              "value":"85",
+              "label": "85"
+            },
+            {
               "value":"90",
               "label": "90"
+            },
+            {
+              "value":"95",
+              "label": "95"
             },
             {
               "value":"100",
@@ -316,6 +396,7 @@
         {
           "id": "volumemax",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MAX_VOLUME_LEVEL",
           "value":  {
@@ -369,6 +450,7 @@
         {
           "id": "volumesteps",
           "element": "select",
+          "hidden": false,
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.ONE_CLICK_VOLUME_STEPS",
           "value":  {
@@ -409,6 +491,7 @@
           "element": "select",
           "doc" : "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.VOLUME_CURVE_MODE",
+          "hidden": true,
           "value":  {
             "value":"logarithmic",
             "label": "TRANSLATE.PLAYBACK_OPTIONS.NATURAL"
@@ -428,6 +511,7 @@
         {
           "id": "mpdvolume",
           "element": "switch",
+          "hidden": false,
           "doc":"TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME_DOC",
           "label": "TRANSLATE.PLAYBACK_OPTIONS.MPD_VOLUME",
           "value":false
@@ -454,7 +538,7 @@
 		{
 		  "id": "resampling",
 		  "element": "switch",
-		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
+		  "doc" : "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING_DOC",
 		  "label": "TRANSLATE.PLAYBACK_OPTIONS.AUDIO_RESAMPLING",
 		  "value": false
 		},

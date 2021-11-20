@@ -1,11 +1,9 @@
-[![Join the chat at https://gitter.im/volumio/Volumio2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/volumio/Volumio2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/volumio/Volumio2.svg?branch=master)](https://travis-ci.org/volumio/Volumio2)
 [![dependencies](https://david-dm.org/volumio/Volumio2.svg)](https://david-dm.org/volumio/Volumio2)
-[![bitHound Score](https://www.bithound.io/github/volumio/Volumio2/badges/score.svg)](https://www.bithound.io/github/volumio/Volumio2)
-[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
-[![GPL Licence](https://badges.frapsoft.com/os/gpl/gpl.svg?v=103)](https://opensource.org/licenses/GPL-3.0/)
-[![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/evancohen/awesome-raspberrypi)
-
+[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Awesome](https://awesome.re/badge.svg)](https://github.com/thibmaek/awesome-raspberry-pi)
+[![js-semistandard-style](https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat-square)](https://github.com/standard/semistandard)
 [![Volumio](https://volumio.org/wp-content/uploads/2016/02/Volumio_logo_HD2000.jpg)](https://volumio.org)
 
 Volumio is an headless audiophile music player, designed to play music with the highest possible fidelity. Volumio runs on most embedded devices (Raspberry Pi, UDOO, Odroid, Cubieboard, Beaglebone, Pine64, Allo Sparky...) and on any ordinary PC (x86).
@@ -19,22 +17,22 @@ Logins
 * user : *volumio*
 * password : *volumio*
 
-Root login has been disabled by default, however user volumio can become root.
+Root login via ssh has been disabled by default, however user volumio can become root.
 
 ## Resources
 
 Developers are welcome! Check out the resources:
 
 * [Main documentation](https://volumio.github.io/docs/index.html)
-* [Setup a dev environment](https://volumio.github.io/docs/Development_How_To/Set_up_a_development_environment.html)
+* [Setup a dev environment](https://volumio.github.io/docs/Development_How_To/Set_up_development_environment_introduction.html)
 * [Forum thread for feedbacks and suggestions](https://volumio.org/forum/introducing-volumio-t3169.html)
 * [Wiki](https://github.com/volumio/Volumio2/wiki) (there might be some overlap between the documentation and the wiki; in general, consider documentation as the primary information source)
 
-## Volumio 2 Virtual Machines 
+## Volumio 2 Virtual Machines
 
 Some VM images are available, although they're not always kept up-to-date. It can be an alternative to developing directly on target (Raspberry Pi, or whatever).
 
-VMWARE Image is suggested, as Network configuration is tricky with Virtual Box 
+VMWARE Image is suggested, as Network configuration is tricky with Virtual Box
 
 * [VMWare Virtual Machine - Beta1](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VMWare.zip)
 * [Virtual Box Virtual Machine - Alpha5](http://repo.volumio.org/Volumio2/DevTools/VolumioVM-VirtualBox.zip)

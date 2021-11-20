@@ -6,10 +6,25 @@
 		<style>
 			#div-console {
 				border: 1px solid black;
-				height: 400px;
-				overflow-y: scroll;
+				overflow-y: auto;
+				height: 98%;
+				width: 98%;
+				/* height: 400px; */
+				max-height:650px;
+				/* <pre> formatting */
+				display: block;
+				padding: 9.5px;
+				margin: 0 0 10px;
+				font-size: 13px;
+				line-height: 1.42857143;
+				color: #333;
+				word-break: break-all;
+				word-wrap: break-word;
+				background-color: #f5f5f5;
+				border: 1px solid #ccc;
+				border-radius: 4px;
 			}
-			#div-console ul {
+			/* #div-console ul {
 				list-style-type: none;
 				padding: 0px;
 				margin: 0px;
@@ -17,7 +32,7 @@
 			#div-console ul li pre {
 				padding: 0px;
 				margin: 0px;
-			}
+			} */
 			#div-browser li, #div-playqueue li {
 				clear: both;
 			}
@@ -33,23 +48,15 @@
 		<div id='playerstate'></div>
 		<br />
 
+		<div<%if (process.env.HIDE_TESTMODE_SELECTOR === 'true'){%> style="visibility:hidden"<%}%>>
 		<h3>Test Mode</h3>
 		<button id='button-testtrue' class='control-websocket' disabled>TRUE</button>
 		<button id='button-testfalse' class='control-websocket' disabled>FALSE</button>
+		</div>
 
 		<h3>SSH</h3>
 		<button id='button-sshenable' class='control-websocket' disabled>ENABLE</button>
 		<button id='button-sshdisable' class='control-websocket' disabled>DISABLE</button>
-
-		<h3>Plugin Upload</h3>
-		<form ref='uploadForm'
-			  id='uploadForm'
-			  action='/plugin-upload'
-			  method='post'
-			  encType="multipart/form-data">
-			<input type="file" name="Choose Plugin" />
-			<input type='submit' value='Upload!' />
-		</form>
 
 		<h3>Send Log or bug report</h3>
 		<span id="log-message"></span>
@@ -61,10 +68,28 @@
 			</button>
 		</form>
 
+		<h3>Device Unique Identification Code</h3>
+		<span id="hwuuid"></span>
+		<form class="hwuuid-form">
+			<input id="hwuuid-text" type="text" style="border: 1px solid black; width: 600px;"/>
+			<button class="btn" id="hwuuid-copy-button" type="button" data-clipboard-demo data-clipboard-target="#hwuuid-text" style="display:none">
+				Copy to clipboard
+			</button>
+		</form>
+
 		<h3>Play Queue</h3>
 		<ol id='div-playqueue' start='0'></ol>
 
-		<script src="./assets/socket.io-1.2.0.js"></script>
+		<h3>Live Log</hr>
+		<button id='button-clearconsole'>Clear</button>
+		<button id='console-copy-button' type="button" data-clipboard-demo data-clipboard-target="#console">Copy</button>
+		<div id='div-console' style='div-console'>
+			<pre id='console'></pre>
+		</div>
+		<button id='button-livelog-enable' class='control-websocket' disabled>ENABLE</button>
+		<button id='button-livelog-disable' class='control-websocket' disabled>DISABLE</button>
+
+		<script src="./assets/socket.io-2.0.3.js"></script>
 		<script src="./dev.js"></script>
 
 	</body>

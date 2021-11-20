@@ -9,7 +9,17 @@
   "author": "Volumio",
   "license": "ISC",
   "volumio_info": {
+    "prettyName": "DLNA Browser",
     "plugin_type": "music_service",
-    "boot_priority":9
+    "boot_priority":9,
+    "is_my_music_plugin":true,
+    "has_configuration":false
+  },
+  "dependencies":{
+    "node-ssdp": "3.2.1",
+    "dlna-browser-utils": ">= 0.0.1",
+    "xml2js": "~0.4.19",
+    "xmlbuilder": "~8.2.2",
+    "html-entities": "1.2.1"
   }
 }

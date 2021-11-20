@@ -1,19 +1,26 @@
 general =
 {
     name = "${name}";
+};
+
+diagnostics =
+{
     log_verbosity = 0;
-    interpolation = "soxr";
 };
 
 alsa =
 {
   output_device = "${device}";
+  ${buffer_size_line}
 };
 
 sessioncontrol =
 {
   allow_session_interruption = "yes";
-  run_this_after_play_ends = "/usr/local/bin/volumio stopairplay";
+  run_this_before_play_begins= "/usr/local/bin/volumio startairplayplayback";
+  run_this_after_play_ends = "/usr/local/bin/volumio stopairplayplayback";
+  run_this_before_entering_active_state="/usr/local/bin/volumio airplayactive";
+  run_this_after_exiting_active_state="/usr/local/bin/volumio airplayinactive";
 };
 
 metadata =
@@ -22,6 +29,6 @@ metadata =
     include_cover_art = "no";
     //pipe_name = "/tmp/shairport-sync-metadata";
     //pipe_timeout = 5000;
-    socket_address = "226.0.0.1";
+    socket_address = "127.0.0.1";
     socket_port = 5555;
 };

@@ -103,24 +103,24 @@ function parse_cell(cell) {
     if (strength < 0) {
       var rel = 100+strength;
 
-      if (rel >= 65)
+      if (rel >= 45)
         parsed.signal = 5;
-      else if (rel >= 50)
-        parsed.signal = 4;
       else if (rel >= 40)
-        parsed.signal = 3;
+        parsed.signal = 4;
       else if (rel >= 30)
+        parsed.signal = 3;
+      else if (rel >= 20)
         parsed.signal = 2;
       else if (rel >= 1)
         parsed.signal = 1;
     } else {
-    if (strength >= 65)
+    if (strength >= 45)
       parsed.signal = 5;
-    else if (strength >= 50)
-      parsed.signal = 4;
     else if (strength >= 40)
-      parsed.signal = 3;
+      parsed.signal = 4;
     else if (strength >= 30)
+      parsed.signal = 3;
+    else if (strength >= 20)
       parsed.signal = 2;
     else if (strength >= 1)
       parsed.signal = 1;

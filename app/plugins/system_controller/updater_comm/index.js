@@ -2,163 +2,293 @@
 
 module.exports = updater_comm;
 var Inotify = require('inotify').Inotify;
-var inotify = new Inotify(); //persistent by default, new Inotify(false) //no persistent
+var inotify = new Inotify(); // persistent by default, new Inotify(false) //no persistent
+var io = require('socket.io-client');
 global.io = require('socket.io')(3005);
 global.exec = require('child_process').exec;
+var execSync = require('child_process').execSync;
 global.fs = require('fs');
 var libQ = require('kew');
+var interferingProcessesKilled = false;
 
+function updater_comm (context) {
+  var self = this;
 
-function updater_comm(context) {
-	var self = this;
-
-	// Save a reference to the parent commandRouter
-	self.context = context;
-	self.commandRouter = self.context.coreCommand;
-	self.configManager=self.context.configManager;
-	self.logger = self.context.logger;
+  // Save a reference to the parent commandRouter
+  self.context = context;
+  self.commandRouter = self.context.coreCommand;
+  self.configManager = self.context.configManager;
+  self.logger = self.context.logger;
 }
 
-
 updater_comm.prototype.onVolumioStart = function () {
-	var self=this;
-	var lang_code = self.commandRouter.sharedVars.get('language_code');
+  return libQ.resolve();
+};
 
-	io.sockets.on('connection', function (socket) {
-		var sachet = socket
-		socket.on("update", function (msg, data) {
+updater_comm.prototype.notifyProgress = function () {
+  var self = this;
 
-			if (msg.value == "now") {
-				//console.log("---" + msg.value);
-				var there = require("socket.io-client")("http://localhost:3006");
-				there.emit("update", msg);
-				//exec("/usr/bin/sudo /bin/systemctl restart volumio-remote-updater@update", function(error, stdout, stderr) {
-				//}); }
-			}
-		});
-		socket.on("updateCheck", function (msg, data) {
-			var there = require("socket.io-client")("http://localhost:3006");
-			there.emit("updateCheck", msg);
-			//  exec("/usr/bin/sudo /bin/systemctl restart volumio-remote-updater@updateCheck", function(error, stdout, stderr) {
-			// });
+  var lang_code = self.commandRouter.sharedVars.get('language_code');
 
-		});
-		socket.on("factoryReset", function (msg, data) {
-				var there = require("socket.io-client")("http://localhost:3006");
-				there.emit("factoryReset", msg);
-				try {
-					exec("/usr/bin/sudo /bin/systemctl stop avahi-daemon")
-				} catch(e){
-				}
-			}
-		);
+  try {
+    var cmd = '/usr/bin/touch /tmp/updater';
+    var stats = fs.lstatSync('/tmp/updater');
+    if (stats.isFile()) {
+      cmd = '/bin/echo';
+    }
+  } catch (e) {
+  }
 
-		try {
-			var cmd = '/usr/bin/touch /tmp/updater';
-			var stats = fs.lstatSync('/tmp/updater');
-			if (stats.isFile()) {
-				cmd = "/bin/echo"
-			}
-		} catch (e) {
-		}
+  var callback = function (event) {
+    var mask = event.mask;
+    var type = mask & Inotify.IN_ISDIR ? 'directory ' : 'file ';
+    event.name ? type += ' ' + event.name + ' ' : ' ';
+    if (mask & Inotify.IN_CLOSE_WRITE) {
+      fs = require('fs');
+      fs.readFile('/tmp/updater', function (err, dota) {
+        try {
+          var data = dota.toString();
+          // console.log("Got " + data);
+          var arr = data.split('\n');
+          if (arr.length > 1) {
+            var message = arr[0];
+            var obj = JSON.parse(arr[1]);
+            if (obj != undefined && obj.updateavailable != undefined && !obj.updateavailable) {
+              obj.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
+              obj.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
+            }
+            if (obj.status) {
+              obj.status = self.translateUpdateString(obj.status);
+            }
+            if (obj.message) {
+              obj.message = self.translateUpdateString(obj.message);
+            }
+            if (message === 'updateDone') {
+              return self.initRestartRoutine(obj.message);
+            } else {
+              self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg': message, 'value': obj});
+            }
+            console.log(message);
+            console.log(obj);
+          }
+        } catch (e) {
+          self.logger.error('Error in translating update message: ' + e);
+        }
+      });
+    }
+  };
+  exec(cmd, function (error, stdout, stderr) {
+    var self = this;
+    var ilFile = {
+      path: '/tmp/updater',
+      watch_for: Inotify.IN_CLOSE_WRITE,
+      callback: callback
+    };
+    var ilFileDescriptor = inotify.addWatch(ilFile);
+  });
+};
 
-		var callback = function (event) {
-			var mask = event.mask;
-			var type = mask & Inotify.IN_ISDIR ? 'directory ' : 'file ';
-			event.name ? type += ' ' + event.name + ' ' : ' ';
-			if (mask & Inotify.IN_CLOSE_WRITE) {
-				fs = require('fs')
-				fs.readFile('/tmp/updater', function (err, dota) {
-					var data = dota.toString()
-					//console.log("Got " + data);
-					var arr = data.split("\n")
-					if (arr.length > 1) {
-						var message = arr[0];
-						var obj = JSON.parse(arr[1]);
-						if (obj != undefined && obj.updateavailable != undefined && !obj.updateavailable) {
-							obj.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
-							obj.title = self.commandRouter.getI18nString('SYSTEM.NO_UPDATE_AVAILABLE');
-						}
-						sachet.emit(message, obj)
-					}
-				});
-			}
-		}
-		exec(cmd, function (error, stdout, stderr) {
-			var self = this;
-			var ilFile = {
-				path: '/tmp/updater',
-				watch_for: Inotify.IN_CLOSE_WRITE,
-				callback: callback
-			};
-			var ilFileDescriptor = inotify.addWatch(ilFile);
-		});
-	});
+updater_comm.prototype.translateUpdateString = function (string) {
+  var self = this;
 
-    return libQ.resolve();
+  try {
+    if (string.indexOf('Successfully updated to ') >= 0) {
+      var version = string.split('"')[1];
+      var status = self.commandRouter.getI18nString('UPDATER.SUCCESSFULLY_UPDATED_TO_VERSION') + ' ' + version + '. ' + self.commandRouter.getI18nString('UPDATER.SYSTEM_RESTART_IN');
+      return status;
+    } else {
+      switch (string) {
+        case 'Preparing update':
+          if (!interferingProcessesKilled) {
+              self.killInterferingProcesses();
+          }
+          return self.commandRouter.getI18nString('UPDATER.PREPARING_UPDATE');
+          break;
+        case 'Creating backup':
+          return self.commandRouter.getI18nString('UPDATER.CREATING_BACKUP');
+          break;
+        case 'Downloading new update':
+          return self.commandRouter.getI18nString('UPDATER.DOWNLOADING_UPDATE');
+          break;
+        case 'Cleaning old files':
+          return self.commandRouter.getI18nString('UPDATER.CLEANING');
+          break;
+        case 'Finalizing update':
+          return self.commandRouter.getI18nString('UPDATER.FINALIZING_UPDATE');
+          break;
+        case 'Error':
+          return self.commandRouter.getI18nString('UPDATER.ERROR');
+          break;
+        case 'Error: update failed, please restart system and retry':
+          return self.commandRouter.getI18nString('UPDATER.ERROR_UPDATE_FAILED');
+          break;
+        case 'Update file not found':
+          return self.commandRouter.getI18nString('UPDATER.ERROR_UPDATE_FILE_NOT_FOUND');
+          break;
+        default:
+          return string;
+      }
+    }
+  } catch (e) {
+    self.logger.error('Cannot translate update string ' + string + ': ' + e);
+    return string;
+  }
+};
+
+updater_comm.prototype.initRestartRoutine = function (string) {
+  var self = this;
+  var seconds = 15;
+
+  try {
+    setInterval(() => {
+      if (seconds !== 0) {
+        var message = string + ' ' + seconds;
+        var obj = { message: message, progress: 100, status: 'success' };
+        self.commandRouter.executeOnPlugin('user_interface', 'websocket', 'broadcastMessage', {'msg': 'updateDone', 'value': obj});
+        seconds = seconds - 1;
+      } else {
+        self.commandRouter.closeModals();
+        return self.commandRouter.reboot();
+      }
+    }, 1000);
+  } catch (e) {
+    self.logger.error('Updater, cannot finalize update and restart: ' + e);
+  }
+};
+
+updater_comm.prototype.onStart = function () {
+  var self = this;
+
+  setTimeout(() => {
+    if (process.env.PUSH_UPDATES_COMM === 'true') {
+      self.pushUpdatesSubscribe();
+    }
+  }, 30000);
+  return libQ.resolve();
 };
 
 updater_comm.prototype.onStop = function () {
-	var self = this;
-	inotify.removeWatch(self.ilFileDescriptor)
+  var self = this;
+  inotify.removeWatch(self.ilFileDescriptor);
 };
 
 updater_comm.prototype.onRestart = function () {
-	var self = this;
-	//Perform startup tasks here
-};
-
-updater_comm.prototype.onInstall = function () {
-	var self = this;
-	//Perform your installation tasks here
-};
-
-updater_comm.prototype.onUninstall = function () {
-	var self = this;
-	//Perform your installation tasks here
+  var self = this;
+  // Perform startup tasks here
 };
 
 updater_comm.prototype.getUIConfig = function () {
-	var self = this;
+  var self = this;
 
-	return {
-		success: true,
-		plugin: "updater_comm"
-	};
+  return {
+    success: true,
+    plugin: 'updater_comm'
+  };
 };
 
-updater_comm.prototype.setUIConfig = function (data) {
-	var self = this;
-	//Perform your installation tasks here
+updater_comm.prototype.getAdditionalConf = function (type, controller, data, def) {
+  var self = this;
+  var setting = self.commandRouter.executeOnPlugin(type, controller, 'getConfigParam', data);
+
+  if (setting == undefined) {
+    setting = def;
+  }
+  return setting;
 };
 
-updater_comm.prototype.getConf = function (varName) {
-	var self = this;
-	//Perform your installation tasks here
+updater_comm.prototype.checkSystemIntegrity = function () {
+  var self = this;
+  var defer = libQ.defer();
+
+  var ignoreSystemCheck = self.getAdditionalConf('system_controller', 'system', 'ignoreSystemCheck', false);
+  if (fs.existsSync('/data/ignoresystemcheck') || ignoreSystemCheck) {
+    defer.resolve({'isSystemOk': true});
+  } else {
+    var file = fs.readFileSync('/etc/os-release').toString().split('\n');
+    var nLines = file.length;
+    var str;
+    for (var l = 0; l < nLines; l++) {
+      if (file[l].match(/VOLUMIO_HASH/i)) {
+        str = file[l].split('=');
+        var defaultHash = str[1].replace(/\"/gi, '');
+      }
+      if (file[l].match(/VOLUMIO_VARIANT/i)) {
+        str = file[l].split('=');
+        var thisVariant = str[1].replace(/\"/gi, '');
+      }
+    }
+
+    if (thisVariant && thisVariant !== 'volumio') {
+      defer.resolve({'isSystemOk': true});
+    } else {
+      exec('/usr/bin/md5deep -r -l -s -q /volumio | sort | md5sum | tr -d "-" | tr -d " \t\n\r"', function (error, stdout, stderr) {
+        if (error !== null) {
+          self.logger.error('Cannot read os relase file: ' + error);
+          defer.resolve({'isSystemOk': false});
+        } else {
+          var currentHash = stdout;
+          if (currentHash === defaultHash) {
+            defer.resolve({'isSystemOk': true});
+          } else {
+            defer.resolve({'isSystemOk': false});
+          }
+        }
+      });
+    }
+  }
+
+  return defer.promise;
 };
 
-updater_comm.prototype.setConf = function (varName, varValue) {
-	var self = this;
-	//Perform your installation tasks here
+updater_comm.prototype.pushUpdatesSubscribe = function () {
+  var self = this;
+
+  try {
+    var id = execSync('/usr/bin/md5sum /sys/class/net/eth0/address', {uid: 1000, gid: 1000}).toString().split(' ')[0];
+    var isHw = true;
+  } catch (e) {
+    var id = self.getAdditionalConf('system_controller', 'system', 'uuid', '0000000000000000000000000');
+    var isHw = false;
+  }
+  var systemInfo = self.commandRouter.executeOnPlugin('system_controller', 'system', 'getSystemVersion', '');
+  var name = self.getAdditionalConf('system_controller', 'system', 'playerName', 'none');
+  systemInfo.then((info) => {
+    try {
+      var socket = io.connect('http://pushupdates.volumio.org');
+      var subscribeData = {
+        'id': id,
+        'systemversion': info.systemversion,
+        'variant': info.variant,
+        'hardware': info.hardware,
+        'isHw': isHw,
+        'name': name
+      };
+      socket.emit('pushUpdateSubscribe', subscribeData);
+      socket.on('ack', function (data) {
+        socket.disconnect();
+      });
+    } catch (e) {
+      self.logger.error('Could not establish connection with Push Updates Facility: ' + e);
+    }
+  })
+    .fail((e) => {
+      self.logger.error('Could not retrieve system info and connect to Push Updates Facility: ' + e);
+    });
 };
 
-//Optional functions exposed for making development easier and more clear
-updater_comm.prototype.getSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
-};
+updater_comm.prototype.killInterferingProcesses = function () {
+  var self = this;
 
-updater_comm.prototype.setSystemConf = function (pluginName, varName) {
-	var self = this;
-	//Perform your installation tasks here
-};
+  interferingProcessesKilled = true;
+  var interferingProcessesArray = ['matchbox-keyboard', 'matchbox-window-manager'];
+  self.logger.info('Killing processes that might interfere with OTA Updates');
 
-updater_comm.prototype.getAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
-};
-
-updater_comm.prototype.setAdditionalConf = function () {
-	var self = this;
-	//Perform your installation tasks here
+  for (var i in interferingProcessesArray) {
+    var processToKill = interferingProcessesArray[i];
+    exec('/usr/bin/sudo /usr/bin/killall ' + processToKill, function (error, stdout, stderr) {
+      if (error) {
+        self.logger.error('Cannot kill process: ' + error);
+      }
+    });
+  }
 };

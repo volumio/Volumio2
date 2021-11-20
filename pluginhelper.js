@@ -1,7 +1,10 @@
+/* eslint-disable */
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
 var execSync = require('child_process').execSync;
 var inquirer = require('inquirer');
+var websocket = require('socket.io-client');
+var os = require('os');
 
 // ============================== CREATE PLUGIN ===============================
 
@@ -27,13 +30,12 @@ function init() {
             console.log("cloning repo:\ngit clone https://github.com/" + name +
                 "/volumio-plugins.git");
             try {
-                execSync("/usr/bin/git clone https://github.com/" + name +
+                execSync("/usr/bin/git clone --depth 5 --no-single-branch https://github.com/" + name +
                     "/volumio-plugins.git /home/volumio/volumio-plugins");
                 console.log("Done, please run command again");
-                process.exit(1);
             }catch(e){
                 console.log("Unable to find repo, are you sure you forked it?")
-                process.exit(1);
+                process.exitCode = 1;
             }
         });
     }
@@ -42,20 +44,23 @@ function init() {
         exec("git config --get remote.origin.url", function (error, stdout, stderr) {
             if (error) {
                 console.error('exec error: ${error}');
-                process.exit(1);
+                process.exitCode = 1;
+                return;
             }
             var url = stdout;
             if (url == "https://github.com/volumio/volumio-plugins.git\n") {
                 exec("git config user.name", function (error, stdout, stderr) {
                     if (error) {
                         console.error('exec error: ${error}');
-                        process.exit(1);
+                        process.exitCode = 1;
+                        return;
                     }
                     var user = stdout;
                     if (user != 'volumio\n'){
                         console.log("Error, your repo is the original one, please " +
                             "fork it as suggested in the documentation!");
-                        process.exit(1);
+                        process.exitCode = 1;
+                        return;
                     }
                     else{
                         ask_category();
@@ -242,11 +247,11 @@ function customize_package(pluginName, path, category) {
             {
                 type: 'input',
                 name: 'description',
-                message: 'Insert a brief description of your plugin (100 chars)',
+                message: 'Insert a brief description of your plugin (Maximum 200 characters)',
                 default: pluginName.sysName,
                 validate: function (desc) {
-                    if(desc.length > 100){
-                        return "please be brief";
+                    if(desc.length > 200){
+                        return "Description is too long. Use 200 characters maximum";
                     }
                     return true;
                 }
@@ -255,7 +260,7 @@ function customize_package(pluginName, path, category) {
         inquirer.prompt(questions).then(function (answer) {
             package.author = answer.username;
             package.description = answer.description;
-            fs.writeJsonSync(path + '/package.json', package);
+            fs.writeJsonSync(path + '/package.json', package, {spaces:'\t'});
             finalizing(path, package);
         });
     }
@@ -299,7 +304,7 @@ function finalizing(path, package) {
                 plugins[i][pluginName] = field;
             }
         }
-        fs.writeJsonSync("/data/configuration/plugins.json", plugins);
+        fs.writeJsonSync("/data/configuration/plugins.json", plugins, {spaces:'\t'});
     }
     catch(e){
         console.log("Error, impossible to update plugins.json: " + e);
@@ -314,9 +319,15 @@ function finalizing(path, package) {
         package.name);
 
     console.log("Installing dependencies locally");
-    execSync("/usr/local/bin/npm install");
+    if (fs.existsSync(process.cwd + '/package-lock.json')) {
+        execSync("/bin/rm package-lock.json");
+    }
+    execSync("/usr/local/bin/npm install --production");
+    if (fs.existsSync(process.cwd + '/package-lock.json')) {
+        execSync("/bin/rm package-lock.json");
+    }
 
-    console.log("\nCongratulation, your plugin has been succesfully created!\n" +
+    console.log("\nCongratulation, your plugin has been successfully created!\n" +
         "You can find it in: " + path + "\n");
 }
 
@@ -346,29 +357,32 @@ function refresh() {
 function zip(){
     console.log("Compressing the plugin");
     try {
-        if(fs.existsSync("node_modules")) {
-            var package = fs.readJsonSync("package.json");
-            execSync("cd " + process.cwd() + " && /usr/bin/zip -r " +
-                package.name + ".zip *");
-            console.log("Plugin succesfully compressed");
-        }
-        else{
+        if(! fs.existsSync("node_modules")) {
             console.log("No modules found, running \"npm install\"");
             try{
-                execSync("/usr/local/bin/npm install");
-                var package = fs.readJsonSync("package.json");
-                execSync("cd " + process.cwd() + " && /usr/bin/zip -r " +
-                    package.name + ".zip *");
-                console.log("Plugin succesfully compressed");
+                if (fs.existsSync(process.cwd + '/package-lock.json')) {
+                    execSync("/bin/rm package-lock.json");
+                }
+                execSync("/usr/local/bin/npm install --production");
+                if (fs.existsSync(process.cwd + '/package-lock.json')) {
+                    execSync("/bin/rm package-lock.json");
+                }
             }
             catch (e){
                 console.log("Error installing node modules: " + e);
-                process.exit(1);
+                process.exitCode = 1;
+                return;
             }
         }
+        var package = fs.readJsonSync("package.json");
+        execSync("IFS=$'\\n'; /usr/bin/minizip -o -9 " + package.name +
+            ".zip $(find -type f -not -name " + package.name + ".zip -printf '%P\\n')",
+            {shell: '/bin/bash'}, {cwd: process.cwd()});
+        console.log("Plugin succesfully compressed");
     }
     catch (e){
         console.log("Error compressing plugin: " + e);
+        process.exitCode = 1;
     }
 }
 
@@ -407,36 +421,46 @@ function publish() {
         ];
         inquirer.prompt(questions).then(function (answer) {
             package.version = answer.version;
-            fs.writeJsonSync("package.json", package);
+            fs.writeJsonSync("package.json", package, {spaces:'\t'});
+            fs.writeFileSync(".gitignore", ".gitignore" + os.EOL + "node_modules" + os.EOL + "*.zip");
             try {
                 execSync("/usr/bin/git add *");
+            }
+            catch (e){
+                console.log("Nothing to add");
+            }
+
+            try {
                 execSync("/usr/bin/git commit -am \"updating plugin " +
                     package.name + " version " + package.version + "\"");
+
             }
             catch (e){
                 console.log("Nothing to commit");
             }
-            if (!fs.existsSync(package.name + ".zip")) {
-                zip();
-            }
-            execSync("/bin/cp -rp " + package.name + ".zip /tmp/");
+
+            zip();
+
+            execSync("/bin/mv " + package.name + ".zip /tmp/");
             process.chdir("../../../");
             execSync("/usr/bin/git checkout gh-pages");
             var arch = "";
             exec("cat /etc/os-release | grep ^VOLUMIO_ARCH | tr -d \'VOLUMIO_ARCH=\"\'",
                 function (error, stdout, stderr) {
                     if (error) {
-                        console.error('exec error: ${error}');
+                        console.error('Error, cannot detect system architecture: '+error);
                         return;
+                    } else {
+                        arch = stdout.replace(/\n$/, '');
+                        if (arch == 'x86') {
+                            arch = 'i386';
+                        }
+                        else {
+                            arch = 'armhf';
+                        }
+                        create_folder(package, arch);
                     }
-                    arch = stdout;
-                    if (arch == 'x86') {
-                        arch = 'i386';
-                    }
-                    else {
-                        arch = 'armhf';
-                    }
-                    create_folder(package, arch);
+
                 });
         });
     }
@@ -495,7 +519,7 @@ function update_plugins(package, arch) {
                 }
                 if(j == plugins.categories[i].plugins.length && !plugFound &&
                     plugins.categories[i].plugins[j-1].name != package.name){
-                    write_new_plugin(package, arch, plugins, j);
+                    write_new_plugin(package, arch, plugins, i);
                     catFound = true;
                 }
             }
@@ -528,7 +552,7 @@ function write_new_plugin(package, arch, plugins, index) {
             default: "",
             validate: function (desc) {
                 if(desc.length > 1000){
-                    return "please be brief";
+                    return "Description is too long. Use 1000 characters maximum";
                 }
                 return true;
             }
@@ -537,7 +561,11 @@ function write_new_plugin(package, arch, plugins, index) {
     inquirer.prompt(question).then(function (answer) {
         var today = new Date();
         data.prettyName = package.volumio_info.prettyName;
-        data.icon = "fa-lightbulb-o";
+        if (package.icon != undefined) {
+            data.icon = package.icon;
+        } else {
+            data.icon = "fa-lightbulb-o";
+        }
         data.name = package.name;
         data.version = package.version;
         data.url = "http://volumio.github.io/volumio-plugins/" +
@@ -554,7 +582,7 @@ function write_new_plugin(package, arch, plugins, index) {
 
         plugins.categories[index].plugins.push(data);
         fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-            arch + "/plugins.json", plugins);
+            arch + "/plugins.json", plugins, {spaces:'\t'});
 
         commit(package, arch);
     });
@@ -598,7 +626,7 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
             default: plugins.categories[catIndex].plugins[plugIndex].details,
             validate: function (desc) {
                 if(desc.length > 1000){
-                    return "please be brief";
+                    return "Description is too long. Use 1000 characters maximum";
                 }
                 return true;
             }
@@ -610,8 +638,8 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
             ' (leave blank for default)',
             default: package.description,
             validate: function (desc) {
-                if(desc.length > 100){
-                    return "please be brief";
+                if(desc.length > 200){
+                    return "Description is too long. Use 200 characters maximum";
                 }
                 return true;
             }
@@ -622,7 +650,7 @@ function update_desc_details(package, plugins, catIndex, plugIndex, arch) {
         plugins.categories[catIndex].plugins[plugIndex].description = answer.description;
 
         fs.writeJsonSync(process.cwd() + "/plugins/volumio/" +
-            arch + "/plugins.json", plugins);
+            arch + "/plugins.json", plugins, {spaces:'\t'});
 
         commit(package, arch);
     });
@@ -645,6 +673,62 @@ function commit(package, arch) {
     execSync("/usr/bin/git push origin gh-pages");
     console.log("Congratulations, your package has been correctly uploaded and" +
         "is ready for merging!")
+    process.exit(1)
+}
+
+// =============================== INSTALL ====================================
+
+function install(){
+    if(fs.existsSync("package.json")){
+        let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
+        var package = fs.readJsonSync("package.json");
+        zip();
+        if(!fs.existsSync("/tmp/plugins")) {
+            execSync("/bin/mkdir /tmp/plugins/")
+        }
+        execSync("/bin/mv *.zip /tmp/plugins/" + package.name + ".zip");
+        socket.emit('installPlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
+            + package.name + ".zip"})
+        socket.on('installPluginStatus', function (data) {
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message + "\n" + data.advancedLog)
+            if(data.message == "Plugin Successfully Installed"){
+                console.log("Done! Plugin Successfully Installed");
+                socket.close();
+                process.exit(1);
+            }
+        })
+    }
+    else {
+        console.log("No package found")
+        process.exitCode = 1;
+    }
+}
+
+// ================================ UPDATE ====================================
+
+function update() {
+    if(fs.existsSync("package.json")){
+        let socket = websocket.connect('http://127.0.0.1:3000', {reconnect: true});
+        var package = fs.readJsonSync("package.json");
+        zip();
+        if(!fs.existsSync("/tmp/plugins")) {
+            execSync("/bin/mkdir /tmp/plugins/")
+        }
+        execSync("/bin/mv *.zip /tmp/plugins/" + package.name + ".zip");
+        socket.emit('updatePlugin', {url: 'http://127.0.0.1:3000/plugin-serve/'
+            + package.name + ".zip", category: package.category, name: package.name})
+        socket.on('installPluginStatus', function (data) {
+            console.log("Progress: " + data.progress + "\nStatus :" + data.message)
+            if(data.message == "Plugin Successfully Installed"){
+                console.log("Done!");
+                socket.close()
+            }
+        })
+    }
+    else {
+        console.log("No package found")
+        process.exitCode = 1;
+    }
 }
 
 // ================================ START =====================================
@@ -662,5 +746,11 @@ switch (argument){
         break;
     case "publish":
         publish()
+        break;
+    case "install":
+        install()
+        break;
+    case "update":
+        update()
         break;
 }

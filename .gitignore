@@ -32,3 +32,4 @@ node_modules
 spotify-login.txt
 .idea
 *.iml
+.DS_Store

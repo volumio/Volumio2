@@ -18,5 +18,9 @@
   "device": {
     "value": "",
     "type": "string"
+  },
+  "show_wizard": {
+    "value": true,
+    "type": "boolean"
   }
 }
