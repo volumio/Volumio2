@@ -37,7 +37,13 @@
         "HOTSPOT_PASSWORD": "รหัสผ่านฮอตสปอต",
         "HOTSPOT_PASSWORD_DOC": "เปลี่ยนรหัสผ่าน Hotspot ที่เป็นค่าเริ่มต้น ใช้ข้อความรหัสผ่านอย่างน้อย 8 ตัวอักษร",
         "HOTSPOT_PROTECTION": "ฮอตสปอตที่ป้องกันด้วยรหัสผ่าน",
-        "HOTSPOT_SETTINGS": "การตั้งค่าฮอตสปอต (Hotspot)"
+        "HOTSPOT_SETTINGS": "การตั้งค่าฮอตสปอต (Hotspot)",
+        "WIRELESS_NETWORK_CONNECTION_SUCCESSFUL_PROCEED": "กรุณาดำเนินการในขั้นตอนต่อไป",
+        "WIRELESS_RESTART_ERROR": "มีข้อผิดพลาดขณะรีสตาร์ตเครือข่ายไร้สาย (Wifi) : ",
+        "WIRELESS_RESTART_SUCCESS": "รีสตาร์ตเครือข่ายไร้สาย (Wifi) สำเร็จ",
+        "WIRELESS_RESTART_TITLE": "รีสตาร์ตเครือข่ายไร้สาย (Wifi)",
+        "WIRELESS_NETWORK_CONNECTING_TO": "กำลังเชื่อมต่อเครือข่ายไร้สาย (Wifi)",
+        "WIRELESS_NETWORK_RESTART_AFTER_CONNECTION": "คุณจะถูกตัดการเชื่อมต่อ โปรดเชื่อมต่อกลับไปที่เครือข่ายไร้สายและค้นหาอุปกรณ์ของคุณอีกครั้ง เมื่อทำการเชื่อมต่อแล้วเร็จ"
     },
     "ALARM": {
         "ALARM_CLOCK_SAVE": "ตั้งเวลาเตือนแล้วเสร็จ",
@@ -98,7 +104,7 @@
     "COMMON": {
         "CONFIGURATION_UPDATE_DESCRIPTION": "การอัปเดตการกำหนดค่า สำเร็จแล้ว",
         "CONNECTED": "สามารถเชื่อมต่อได้แล้ว",
-        "FAVOURITES": "รายการโปรด",
+        "FAVOURITES": "เพลงโปรด",
         "ILLEGAL_CHARACTER_/": "ลบตัวอักษรต้องห้ามออก /",
         "LOGIN_FAIL": "ไม่สามารถเข้าระบบได้",
         "LOGOUT_SUCCESS": "ออกจากระบบสำเร็จแล้ว",
@@ -129,9 +135,9 @@
         "ENABLED": "เปิดใช้งานได้แล้ว",
         "ERROR": "มีความผิดพลาด",
         "FOUND": "พบแล้ว",
-        "GENRE": "ประเภท",
+        "GENRE": "ประเภทเพลง",
         "GENRES": "ประเภท",
-        "GOT_IT": "ได้แล้ว",
+        "GOT_IT": "รับทราบ",
         "LAST_100": "100 เพลงที่เปิดล่าสุด",
         "LOGGING_IN": "กำลังเข้าระบบ",
         "LOGGING_OUT": "กำลังออกจากระบบ",
@@ -193,5 +199,19 @@
         "MYVOLUMIO_NOT_ENABLED_ON_DEVICE": "MyVolumio ไม่สามารถเปิดใช้งานบนอุปกรณ์นี้ได้",
         "PLAN_REQUIRED": "ต้องการใช้ฟังก์ชันนี้",
         "UPGRADE_YOUR_PLAN_NOW": "อัพเกรด plan ของคุณเดี๋ยวนี้"
+    },
+    "NETWORKFS": {
+        "MOUNT_SHARE_ERROR": "มีข้อผิดพลาดขณะกำลังเพิ่มไดรฟ์เครือข่าย",
+        "NETWORK_DRIVE": "ไดรฟ์เครือข่าย",
+        "SHARE_MOUNT_SUCCESS": "เพิ่มไดรฟ์เครือข่ายสำเร็จแล้ว",
+        "ALIAS_DOC": "เลือกโฟลเดอร์ (Alias) ที่จะแสดงใน NAS Mounts",
+        "ERROR_PATH_UNDEFINED": "กรุณาใส่ชื่อโฟลเดอร์หรือเส้นทางที่แชร์",
+        "ERROR_UMOUNT": "ไม่สามารถลบโฟลเดอร์ที่แชร์ได้",
+        "REMOVED": "ลบโฟลเดอร์ที่แชร์ได้สำเร็จ",
+        "SHARE_NOT_CONFIGURED": "ไม่ได้กำหนดค่าโฟลเดอร์ที่แชร์"
+    },
+    "PLUGINS": {
+        "INSTALL": "ติดตั้ง",
+        "UNINSTALL": "ถอนการติดตั้ง"
     }
 }
