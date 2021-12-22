@@ -196,7 +196,7 @@ ControllerAlsa.prototype.getUIConfig = function () {
 
       self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].element', 'select');
       self.configManager.setUIConfigParam(uiconf, 'sections[3].content[0].label', self.commandRouter.getI18nString('PLAYBACK_OPTIONS.MIXER_TYPE'));
-      if (activemixer_type == 'None') {
+      if (activemixer_type == 'None' && process.env.FORCE_VOLUME_OPTIONS_VISIBILITY !== 'true') {
         var activemixer_type_lang = self.commandRouter.getI18nString('COMMON.NONE');
         self.configManager.setUIConfigParam(uiconf, 'sections[3].content[1].hidden', true);
         self.configManager.setUIConfigParam(uiconf, 'sections[3].content[2].hidden', true);
