@@ -15,6 +15,7 @@ var additionalUISections = [];
 var deviceVolumeOverride;
 var overrideAvoidSoftwareMixer = false;
 var overrideMixerType;
+var externalVolume = false;
 
 // Define the ControllerAlsa class
 module.exports = ControllerAlsa;
@@ -753,7 +754,7 @@ ControllerAlsa.prototype.saveVolumeOptions = function (data) {
     } else {
       self.restorePreviousVolumeLevel(currentVolume, currentMute, true);
     }
-  } else if (data.mixer_type.value === 'None') {
+  } else if (data.mixer_type.value === 'None' && externalVolume === false) {
     self.setConfigParam({key: 'mixer', value: ''});
     var outdevice = self.config.get('outputdevice');
     self.setConfigParam({key: 'volumemax', value: '100'});
@@ -1702,4 +1703,10 @@ ControllerAlsa.prototype.getAlsaCardsWithoutI2SDAC = function (data) {
     }
 
     return cardsWithoutI2S;
+};
+
+ControllerAlsa.prototype.setExternalVolume = function (data) {
+    var self = this;
+
+    externalVolume = data;
 };
