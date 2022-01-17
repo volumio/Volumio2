@@ -2,6 +2,7 @@
 
 var libQ = require('kew');
 var fs = require('fs-extra');
+var semver = require('semver');
 
 /** Define the InterfaceWebUI class (Used by DEV UI)
  *
@@ -23,8 +24,14 @@ function InterfaceWebUI (context) {
   /** On Client Connection, listen for various types of clients requests */
   self.libSocketIO.on('connection', function (connWebSocket) {
 
+    self.logClientConnection(connWebSocket);
+
     // Closing all modals when clients connect
     connWebSocket.emit('closeAllModals', '');
+
+    connWebSocket.on('initSocket', function (data) {
+      self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'initSocket', data);
+    });
 
     connWebSocket.on('getDeviceInfo', function () {
       var uuid = self.commandRouter.sharedVars.get('system.uuid');
@@ -61,13 +68,13 @@ function InterfaceWebUI (context) {
 
     connWebSocket.on('addToQueue', function (data) {
       self.commandRouter.addQueueItems(data)
-        .then(function () {
-          var item = data.uri;
-          if (data.title) {
-            item = data.title;
-          }
-          self.printToastMessage('success', self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TITLE'), item);
-        });
+          .then(function () {
+            var item = data.uri;
+            if (data.title) {
+              item = data.title;
+            }
+            self.printToastMessage('success', self.commandRouter.getI18nString('COMMON.ADD_QUEUE_TITLE'), item);
+          });
     });
 
     connWebSocket.on('replaceAndPlay', function (data) {
@@ -85,25 +92,25 @@ function InterfaceWebUI (context) {
       } else str = data.uri;
 
       self.logStart('Client requests Volumio Clear Queue')
-        .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
-        .then(function () {
-          self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
-            'uri': str,
-            'number': data.number
+          .then(self.commandRouter.volumioClearQueue.bind(self.commandRouter))
+          .then(function () {
+            self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
+              'uri': str,
+              'number': data.number
+            });
+          })
+          .fail(self.pushError.bind(self))
+          .done(function () {
+            return self.logDone(timeStart);
           });
-        })
-        .fail(self.pushError.bind(self))
-        .done(function () {
-          return self.logDone(timeStart);
-        });
     });
 
     connWebSocket.on('addPlay', function (data) {
-        return self.commandRouter.addPlay(data);
+      return self.commandRouter.addPlay(data);
     });
 
     connWebSocket.on('playItemsList', function (data) {
-        return self.commandRouter.playItemsList(data);
+      return self.commandRouter.playItemsList(data);
     });
 
     connWebSocket.on('addPlayCue', function (data) {
@@ -117,16 +124,16 @@ function InterfaceWebUI (context) {
       // TODO add proper service handler
       var timeStart = Date.now();
       self.logStart('Client requests add and Play Volumio CUE entry')
-        .then(function () {
-          return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
-            'uri': str,
-            'number': data.number
+          .then(function () {
+            return self.commandRouter.executeOnPlugin('music_service', 'mpd', 'addPlayCue', {
+              'uri': str,
+              'number': data.number
+            });
+          })
+          .fail(self.pushError.bind(self))
+          .done(function () {
+            return self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.PLAY'), str);
           });
-        })
-        .fail(self.pushError.bind(self))
-        .done(function () {
-          return self.commandRouter.pushToastMessage('success', self.commandRouter.getI18nString('COMMON.PLAY'), str);
-        });
     });
 
     connWebSocket.on('removeFromQueue', function (positionN) {
@@ -145,18 +152,18 @@ function InterfaceWebUI (context) {
 
       var timeStart = Date.now();
       self.logStart('Client requests get library listing')
-        .then(function () {
-          return self.commandRouter.volumioGetLibraryListing.call(self.commandRouter, objParams.uid, objParams.options);
-        })
-        .then(function (objBrowseData) {
-          if (objBrowseData) {
-            return self.pushLibraryListing.call(self, objBrowseData, selfConnWebSocket);
-          }
-        })
-        .fail(self.pushError.bind(self))
-        .done(function () {
-          return self.logDone(timeStart);
-        });
+          .then(function () {
+            return self.commandRouter.volumioGetLibraryListing.call(self.commandRouter, objParams.uid, objParams.options);
+          })
+          .then(function (objBrowseData) {
+            if (objBrowseData) {
+              return self.pushLibraryListing.call(self, objBrowseData, selfConnWebSocket);
+            }
+          })
+          .fail(self.pushError.bind(self))
+          .done(function () {
+            return self.logDone(timeStart);
+          });
     });
 
     connWebSocket.on('getLibraryFilters', function (sUid) {
@@ -164,18 +171,18 @@ function InterfaceWebUI (context) {
 
       var timeStart = Date.now();
       self.logStart('Client requests get library index')
-        .then(function () {
-          return self.commandRouter.volumioGetLibraryFilters.call(self.commandRouter, sUid);
-        })
-        .then(function (objBrowseData) {
-          if (objBrowseData) {
-            return self.pushLibraryFilters.call(self, objBrowseData, selfConnWebSocket);
-          }
-        })
-        .fail(self.pushError.bind(self))
-        .done(function () {
-          return self.logDone(timeStart);
-        });
+          .then(function () {
+            return self.commandRouter.volumioGetLibraryFilters.call(self.commandRouter, sUid);
+          })
+          .then(function (objBrowseData) {
+            if (objBrowseData) {
+              return self.pushLibraryFilters.call(self, objBrowseData, selfConnWebSocket);
+            }
+          })
+          .fail(self.pushError.bind(self))
+          .done(function () {
+            return self.logDone(timeStart);
+          });
     });
 
     connWebSocket.on('getPlaylistIndex', function (sUid) {
@@ -183,18 +190,18 @@ function InterfaceWebUI (context) {
 
       var timeStart = Date.now();
       self.logStart('Client requests get playlist index')
-        .then(function () {
-          return self.commandRouter.volumioGetPlaylistIndex.call(self.commandRouter, sUid);
-        })
-        .then(function (objBrowseData) {
-          if (objBrowseData) {
-            return self.pushPlaylistIndex.call(self, objBrowseData, selfConnWebSocket);
-          }
-        })
-        .fail(self.pushError.bind(self))
-        .done(function () {
-          return self.logDone(timeStart);
-        });
+          .then(function () {
+            return self.commandRouter.volumioGetPlaylistIndex.call(self.commandRouter, sUid);
+          })
+          .then(function (objBrowseData) {
+            if (objBrowseData) {
+              return self.pushPlaylistIndex.call(self, objBrowseData, selfConnWebSocket);
+            }
+          })
+          .fail(self.pushError.bind(self))
+          .done(function () {
+            return self.logDone(timeStart);
+          });
     });
 
     connWebSocket.on('play', function (N) {
@@ -205,13 +212,13 @@ function InterfaceWebUI (context) {
       }
     });
 
-        	connWebSocket.on('volatilePlay', function (N) {
-            	if (N == null) {
-                	return self.commandRouter.volumioVolatilePlay();
-            	} else if (N.value != undefined) {
-                	return self.commandRouter.volumioVolatilePlay(N.value);
-            	}
-        	});
+    connWebSocket.on('volatilePlay', function (N) {
+      if (N == null) {
+        return self.commandRouter.volumioVolatilePlay();
+      } else if (N.value != undefined) {
+        return self.commandRouter.volumioVolatilePlay(N.value);
+      }
+    });
 
     connWebSocket.on('pause', function () {
       return self.commandRouter.volumioPause();
@@ -247,15 +254,15 @@ function InterfaceWebUI (context) {
       return self.commandRouter.volumioRepeat(data.value, data.repeatSingle);
     });
 
-        	connWebSocket.on('skipBackwards', function (data) {
-            	return self.commandRouter.volumioSkipBackwards(data);
-        	});
+    connWebSocket.on('skipBackwards', function (data) {
+      return self.commandRouter.volumioSkipBackwards(data);
+    });
 
-        	connWebSocket.on('skipForward', function (data) {
-            	return self.commandRouter.volumioSkipForward(data);
-        	});
+    connWebSocket.on('skipForward', function (data) {
+      return self.commandRouter.volumioSkipForward(data);
+    });
 
-        	connWebSocket.on('serviceUpdateTracklist', function (sService) {
+    connWebSocket.on('serviceUpdateTracklist', function (sService) {
       return self.commandRouter.serviceUpdateTracklist(sService);
     });
 
@@ -355,9 +362,9 @@ function InterfaceWebUI (context) {
         response.then(function (result) {
           selfConnWebSocket.emit('pushBrowseLibrary', result);
         })
-          .fail(function () {
-            self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.NO_RESULTS'));
-          });
+            .fail(function () {
+              self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.NO_RESULTS'));
+            });
       }
     });
 
@@ -370,10 +377,10 @@ function InterfaceWebUI (context) {
       var response;
 
       response = self.commandRouter.managePlaylists(value)
-        .then(self.commandRouter.manageFavourites(value))
-        .fail(function () {
-          self.printToastMessage('error', 'Backup error', 'An error occurred while managing backups');
-        });
+          .then(self.commandRouter.manageFavourites(value))
+          .fail(function () {
+            self.printToastMessage('error', 'Backup error', 'An error occurred while managing backups');
+          });
     });
 
     connWebSocket.on('getBackup', function (data) {
@@ -385,9 +392,9 @@ function InterfaceWebUI (context) {
         response.then(function (result) {
           selfConnWebSocket.emit('pushBackup', result);
         })
-          .fail(function () {
-            self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not retrieve backup');
-          });
+            .fail(function () {
+              self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not retrieve backup');
+            });
       }
     });
 
@@ -395,10 +402,10 @@ function InterfaceWebUI (context) {
       var selfConnWebSocket = this;
 
       var response = self.commandRouter.restorePluginsConf()
-        .then(self.commandRouter.restorePluginsConf())
-        .fail(function () {
-          self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not restore configuration');
-        });
+          .then(self.commandRouter.restorePluginsConf())
+          .fail(function () {
+            self.printToastMessage('error', self.commandRouter.getI18nString(COMMON.ERROR), 'Could not restore configuration');
+          });
     });
 
     connWebSocket.on('search', function (data) {
@@ -417,9 +424,9 @@ function InterfaceWebUI (context) {
         returnedData.then(function (result) {
           selfConnWebSocket.emit('pushBrowseLibrary', result);
         })
-          .fail(function () {
-            // No goto method available
-          });
+            .fail(function () {
+              // No goto method available
+            });
       }
     });
 
@@ -440,9 +447,9 @@ function InterfaceWebUI (context) {
         response.then(function (result) {
           selfConnWebSocket.emit('pushAddWebRadio', result);
         })
-          .fail(function () {
-            self.printToastMessage('error', 'Search error', 'An error occurred while Searching');
-          });
+            .fail(function () {
+              self.printToastMessage('error', 'Search error', 'An error occurred while Searching');
+            });
       }
     });
 
@@ -461,14 +468,14 @@ function InterfaceWebUI (context) {
             response2.then(function (result2) {
               selfConnWebSocket.emit('pushBrowseLibrary', result2);
             })
-              .fail(function () {
-                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-              });
+                .fail(function () {
+                  self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+                });
           }
         })
-          .fail(function () {
-            self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-          });
+            .fail(function () {
+              self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+            });
       }
     });
 
@@ -487,8 +494,12 @@ function InterfaceWebUI (context) {
 
       var returnedData = self.commandRouter.playListManager.createPlaylist(data.name);
       returnedData.then(function (data) {
-        selfConnWebSocket.emit('pushListPlaylist', data);
         selfConnWebSocket.emit('pushCreatePlaylist', data);
+        /* Check if creation was succesful and push new content, on failure data would be same */
+        if(data.success === true) {
+          self.commandRouter.playListManager.listPlaylist().then(data =>
+              selfConnWebSocket.emit('pushListPlaylist', data));
+        }
       });
     });
 
@@ -504,9 +515,9 @@ function InterfaceWebUI (context) {
           response.then(function (result) {
             selfConnWebSocket.emit('pushBrowseLibrary', result);
           })
-            .fail(function () {
-              self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-            });
+              .fail(function () {
+                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+              });
         }
       });
     });
@@ -521,7 +532,7 @@ function InterfaceWebUI (context) {
     });
 
     connWebSocket.on('addToPlaylist', function (data) {
-			    var selfConnWebSocket = this;
+      var selfConnWebSocket = this;
 
       var returnedData = self.commandRouter.playListManager.addToPlaylist(data.name, data.service, data.uri);
       returnedData.then(function (data) {
@@ -544,9 +555,9 @@ function InterfaceWebUI (context) {
           response.then(function (result) {
             selfConnWebSocket.emit('pushBrowseLibrary', result);
           })
-            .fail(function () {
-              self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-            });
+              .fail(function () {
+                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+              });
         }
       });
     });
@@ -596,21 +607,21 @@ function InterfaceWebUI (context) {
             response.then(function (result) {
               selfConnWebSocket.emit('pushBrowseLibrary', result);
             })
-              .fail(function () {
-                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-              });
+                .fail(function () {
+                  self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+                });
           }
         } else if (data.service === 'streaming_services') {
           setTimeout(() => {
             var uri = data.uri.substring(0, data.uri.lastIndexOf('/'));
-                        	response = self.musicLibrary.executeBrowseSource(uri);
+            response = self.musicLibrary.executeBrowseSource(uri);
             if (response != undefined) {
               response.then(function (result) {
                 selfConnWebSocket.emit('pushBrowseLibrary', result);
               })
-                .fail(function () {
-                  self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-                });
+                  .fail(function () {
+                    self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+                  });
             }
           }, 600);
         } else {
@@ -619,9 +630,9 @@ function InterfaceWebUI (context) {
             response.then(function (result) {
               selfConnWebSocket.emit('pushBrowseLibrary', result);
             })
-              .fail(function () {
-                self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
-              });
+                .fail(function () {
+                  self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.REMOVE_FAIL'));
+                });
           }
         }
       });
@@ -795,9 +806,9 @@ function InterfaceWebUI (context) {
       defer.then(function (data) {
         selfConnWebSocket.emit('pushInfoNetwork', data);
       })
-        .fail(function () {
-          selfConnWebSocket.emit('pushInfoNetwork', {status: 'Not Connected', online: 'no'});
-        });
+          .fail(function () {
+            selfConnWebSocket.emit('pushInfoNetwork', {status: 'Not Connected', online: 'no'});
+          });
     });
 
     // Updater
@@ -820,7 +831,19 @@ function InterfaceWebUI (context) {
           updateMessage.description = self.commandRouter.getI18nString('SYSTEM.UPDATE_ALREADY_LATEST_VERSION');
         }
       } catch (e) {
-                	self.logger.error('Cannot translate update title: ' + e);
+        self.logger.error('Cannot translate update title: ' + e);
+      }
+
+      if (updateMessage && updateMessage.updateavailable === true) {
+        // Always use a loose parse as Volumio versions aren't properly semver.
+        // For example 3.054 isn't valid due to the leading '0'.
+        var updateVersion = semver.coerce(updateMessage.title, { loose: true });
+        if(updateVersion !== null) {
+          var broken = self.commandRouter.pluginManager.listPluginsBrokenByNewVersion(updateVersion.version);
+          if(broken.length > 0) {
+            updateMessage.description += '<br><p><strong>The following plugins will be broken by this update:</strong></p> ' + broken;
+          }
+        }
       }
 
       self.commandRouter.broadcastMessage('updateReady', updateMessage);
@@ -886,8 +909,8 @@ function InterfaceWebUI (context) {
     });
 
     /**
-			 * Executes the getMyCollectionStats method on the MPD plugin
-			 */
+     * Executes the getMyCollectionStats method on the MPD plugin
+     */
     connWebSocket.on('getMyCollectionStats', function (data) {
       var selfConnWebSocket = this;
 
@@ -901,8 +924,8 @@ function InterfaceWebUI (context) {
     });
 
     /**
-			 * Executes the rescanDb method on the MPD plugin. No response is foreseen
-			 */
+     * Executes the rescanDb method on the MPD plugin. No response is foreseen
+     */
     connWebSocket.on('rescanDb', function (data) {
       self.commandRouter.executeOnPlugin('music_service', 'mpd', 'rescanDb', '');
     });
@@ -912,8 +935,8 @@ function InterfaceWebUI (context) {
     });
 
     /**
-			 * New share APIs
-			 */
+     * New share APIs
+     */
     connWebSocket.on('addShare', function (data) {
       var selfConnWebSocket = this;
 
@@ -1020,11 +1043,12 @@ function InterfaceWebUI (context) {
              */
     connWebSocket.on('installPlugin', function (data) {
       var selfConnWebSocket = this;
-
+      selfConnWebSocket.emit('closeModals', '');
       if (process.env.WARNING_ON_PLUGIN_INSTALL === 'true' && data.confirm !== true) {
         data.confirm = true;
         return selfConnWebSocket.emit('openModal', {'title': self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL'), 'message': self.commandRouter.getI18nString('PLUGINS.CONFIRM_PLUGIN_INSTALL_WARNING_MESSAGE') + '?', 'buttons': [{'name': self.commandRouter.getI18nString('COMMON.CANCEL'), 'class': 'btn btn-info', 'emit': 'closeModals', 'payload': ''}, {'name': self.commandRouter.getI18nString('PLUGINS.INSTALL'), 'class': 'btn btn-warning', 'emit': 'installPlugin', 'payload': data}]});
       } else {
+        selfConnWebSocket.emit('openInstallerModal', '');
         var returnedData = self.commandRouter.installPlugin(data.url);
         if (returnedData != undefined) {
           returnedData.then(function (data) {
@@ -1050,7 +1074,7 @@ function InterfaceWebUI (context) {
 
     connWebSocket.on('updatePlugin', function (data) {
       var selfConnWebSocket = this;
-
+      selfConnWebSocket.emit('openInstallerModal', '');
       var returnedData = self.commandRouter.updatePlugin(data);
 
       if (returnedData != undefined) {
@@ -1174,7 +1198,11 @@ function InterfaceWebUI (context) {
 
       if (returnedData != undefined) {
         returnedData.then(function (AvailablePlugins) {
-          selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
+          if (AvailablePlugins.NotAuthorized) {
+            selfConnWebSocket.emit('openModal', {'title': self.commandRouter.getI18nString('PLUGINS.PLUGIN_LOGIN'), 'message': self.commandRouter.getI18nString('PLUGINS.PLUGIN_LOGIN_MESSAGE'), 'buttons': [{'name': self.commandRouter.getI18nString('COMMON.CLOSE'), 'class': 'btn btn-info', 'emit': 'closeModals', 'payload': ''}]});
+          } else {
+            selfConnWebSocket.emit('pushAvailablePlugins', AvailablePlugins);
+          }
         });
       } else self.logger.error('Error on getting Available plugins');
     });
@@ -1235,13 +1263,13 @@ function InterfaceWebUI (context) {
     // ======================== AUDIO OUTPUTS ==========================
 
     connWebSocket.on('getAudioOutputs', function (data) {
-      var selfConnWebSocket = this;
+          var selfConnWebSocket = this;
 
-      var outputs = self.commandRouter.getAudioOutputs();
-      if (outputs != undefined) {
-        selfConnWebSocket.emit('pushAudioOutputs', outputs);
-      }
-    }
+          var outputs = self.commandRouter.getAudioOutputs();
+          if (outputs != undefined) {
+            selfConnWebSocket.emit('pushAudioOutputs', outputs);
+          }
+        }
     );
 
     connWebSocket.on('enableAudioOutput', function (data) {
@@ -1262,6 +1290,18 @@ function InterfaceWebUI (context) {
       self.commandRouter.setAudioOutputVolume(data);
     });
 
+    connWebSocket.on('audioOutputPlay', function (data) {
+      let selfConnWebSocket = this;
+
+      self.commandRouter.audioOutputPlay(data);
+    });
+
+    connWebSocket.on('audioOutputPause', function (data) {
+      let selfConnWebSocket = this;
+
+      self.commandRouter.audioOutputPause(data);
+    });
+
     connWebSocket.on('saveQueueToPlaylist', function (data) {
       var selfConnWebSocket = this;
 
@@ -1270,7 +1310,7 @@ function InterfaceWebUI (context) {
       if (returnedData != undefined) {
         returnedData.then(function (data) {
           selfConnWebSocket.emit('pushSaveQueueToPlaylist', data);
-		    });
+        });
       } else self.logger.error('Error on saving queue to playlist');
     });
 
@@ -1474,18 +1514,18 @@ function InterfaceWebUI (context) {
       }
     });
 
-        	connWebSocket.on('getExperienceAdvancedSettings', function () {
-            	var selfConnWebSocket = this;
+    connWebSocket.on('getExperienceAdvancedSettings', function () {
+      var selfConnWebSocket = this;
 
-            	var experienceAdvancedSettings = self.commandRouter.getExperienceAdvancedSettings();
-            	selfConnWebSocket.emit('pushExperienceAdvancedSettings', experienceAdvancedSettings);
-        	});
+      var experienceAdvancedSettings = self.commandRouter.getExperienceAdvancedSettings();
+      selfConnWebSocket.emit('pushExperienceAdvancedSettings', experienceAdvancedSettings);
+    });
 
-        	connWebSocket.on('setExperienceAdvancedSettings', function (data) {
-            	var selfConnWebSocket = this;
+    connWebSocket.on('setExperienceAdvancedSettings', function (data) {
+      var selfConnWebSocket = this;
 
       return self.commandRouter.executeOnPlugin('system_controller', 'system', 'setExperienceAdvancedSettings', data);
-        	});
+    });
 
     connWebSocket.on('setOutputDevices', function (data) {
       var selfConnWebSocket = this;
@@ -1505,8 +1545,8 @@ function InterfaceWebUI (context) {
       selfConnWebSocket.emit('pushDonePage', laststep);
     });
 
-        	connWebSocket.on('setDeviceActivationCode', function (data) {
-            	var selfConnWebSocket = this;
+    connWebSocket.on('setDeviceActivationCode', function (data) {
+      var selfConnWebSocket = this;
 
       var codeCheck = self.commandRouter.executeOnPlugin('system_controller', 'my_volumio', 'checkDeviceCode', data);
 
@@ -1515,7 +1555,7 @@ function InterfaceWebUI (context) {
           selfConnWebSocket.emit('pushDeviceActivationCodeResult', data);
         });
       }
-        	});
+    });
 
     connWebSocket.on('getDeviceActivationStatus', function () {
       var selfConnWebSocket = this;
@@ -1562,8 +1602,8 @@ function InterfaceWebUI (context) {
         remove.then(function (result) {
           selfConnWebSocket.emit('pushBrowseLibrary', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1576,8 +1616,8 @@ function InterfaceWebUI (context) {
         installDisk.then(function (result) {
           selfConnWebSocket.emit('pushInstallToDisk', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1590,8 +1630,8 @@ function InterfaceWebUI (context) {
         remove.then(function (result) {
           selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1604,8 +1644,8 @@ function InterfaceWebUI (context) {
         remove.then(function (result) {
           selfConnWebSocket.emit('pushMyVolumioToken', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1618,8 +1658,8 @@ function InterfaceWebUI (context) {
         token.then(function (result) {
           self.commandRouter.broadcastMessage('pushMyVolumioToken', {'token': result});
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1640,8 +1680,8 @@ function InterfaceWebUI (context) {
         enable.then(function (result) {
           // selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1654,8 +1694,8 @@ function InterfaceWebUI (context) {
         disable.then(function (result) {
           // selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
@@ -1668,22 +1708,22 @@ function InterfaceWebUI (context) {
         deleteDevice.then(function (result) {
           // selfConnWebSocket.emit('pushMyVolumioStatus', result);
         })
-          .fail(function () {
-          });
+            .fail(function () {
+            });
       }
     });
 
-        	connWebSocket.on('getMyMusicPlugins', function () {
-            	var selfConnWebSocket = this;
+    connWebSocket.on('getMyMusicPlugins', function () {
+      var selfConnWebSocket = this;
 
-            	var myMusicPlugins = self.commandRouter.getMyMusicPlugins();
+      var myMusicPlugins = self.commandRouter.getMyMusicPlugins();
       if (myMusicPlugins != undefined) {
         myMusicPlugins.then(function (plugins) {
-              	      selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
-            	    })
-          .fail(function () {
-          });
-           	 	}
+          selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
+        })
+            .fail(function () {
+            });
+      }
     });
 
     connWebSocket.on('enableDisableMyMusicPlugin', function (data) {
@@ -1693,9 +1733,9 @@ function InterfaceWebUI (context) {
       enableDisableMyMusicPlugin.then(function (plugins) {
         selfConnWebSocket.emit('pushMyMusicPlugins', plugins);
       })
-        .fail(function (error) {
-          self.logger.error(error);
-        });
+          .fail(function (error) {
+            self.logger.error(error);
+          });
     });
 
     connWebSocket.on('pinger', function (data) {
@@ -1718,10 +1758,10 @@ function InterfaceWebUI (context) {
         self.printToastMessage('success', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'), self.commandRouter.getI18nString('SYSTEM.SUCCESSFULLY_DELETED_FOLDER'));
         selfConnWebSocket.emit('pushBrowseLibrary', data);
       })
-        .fail(function (error) {
-          self.printToastMessage('error', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'), self.commandRouter.getI18nString('SYSTEM.ERROR_DELETING_FOLDER'));
-          self.logger.error(error);
-        });
+          .fail(function (error) {
+            self.printToastMessage('error', self.commandRouter.getI18nString('SYSTEM.DELETE_FOLDER'), self.commandRouter.getI18nString('SYSTEM.ERROR_DELETING_FOLDER'));
+            self.logger.error(error);
+          });
     });
 
     connWebSocket.on('getDeviceHWUUID', function () {
@@ -1739,9 +1779,9 @@ function InterfaceWebUI (context) {
         privacySettings.then(function (result) {
           selfConnWebSocket.emit('pushPrivacySettings', result);
         })
-          .fail(function (e) {
+            .fail(function (e) {
 
-          });
+            });
       }
     });
   });
@@ -1894,4 +1934,16 @@ InterfaceWebUI.prototype.broadcastMessage = function (emit, payload) {
   } else {
     this.libSocketIO.sockets.emit(emit, payload);
   }
+};
+
+InterfaceWebUI.prototype.logClientConnection = function (client) {
+  var self = this;
+
+  try {
+    let socketUserAgent = client.handshake.headers['user-agent'] || 'unknown';
+    let socketHost = client.handshake.headers.host;
+    let socketOrigin = client.handshake.address.split(':').pop();
+    let connectedClientsNumber = this.libSocketIO.engine.clientsCount;
+    self.logger.verbose('New Socket.io Connection to ' + socketHost + ' from ' + socketOrigin + ' UA: ' + socketUserAgent + ' Total Clients: ' + connectedClientsNumber);
+  } catch(e) {}
 };
