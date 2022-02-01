@@ -353,8 +353,19 @@ function InterfaceWebUI (context) {
       response = self.musicLibrary.executeBrowseSource(curUri);
 
       if (response != undefined) {
-        response.then(function (result) {
+        response.then(function (result) {       
           selfConnWebSocket.emit('pushBrowseLibrary', result);
+          
+          if (result.navigation != undefined && result.navigation.lists != undefined){
+            result.navigation.lists.forEach(list => {              
+              if (list.items != undefined)
+                try {
+                  setTimeout(function(){ self.commandRouter.preLoadItems(list.items) }, 50)
+                } catch (error) {
+                  self.logger.error("Preload failed: " + error);
+                }
+            });
+          }
         })
           .fail(function () {
             self.printToastMessage('error', self.commandRouter.getI18nString('COMMON.ERROR'), self.commandRouter.getI18nString('COMMON.NO_RESULTS'));

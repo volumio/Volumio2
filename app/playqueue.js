@@ -3,6 +3,8 @@
 var libQ = require('kew');
 var fs = require('fs-extra');
 var execSync = require('child_process').execSync;
+const NodeCache = require( "node-cache" );
+const queue = require( "queue" )
 
 // Define the CorePlayQueue class
 module.exports = CorePlayQueue;
@@ -16,6 +18,11 @@ function CorePlayQueue (commandRouter, stateMachine) {
   this.defaultSampleRate = '';
   this.defaultBitdepth = 0;
   this.defaultChannels = 0;
+
+  this.preloadStop = false;
+  this.preloadQueue = [];
+
+  this.cache = new NodeCache();
 
   // trying to read play queue from file
   var persistentqueue = this.commandRouter.executeOnPlugin('music_service', 'mpd', 'getConfigParam', 'persistent_queue');
@@ -105,6 +112,85 @@ CorePlayQueue.prototype.removeQueueItem = function (nIndex) {
   return defer.promise;
 };
 
+CorePlayQueue.prototype.explodeUriFromCache = function (service, uri) {
+  var self = this;  
+  var defer = libQ.defer();
+  var value = self.cache.get(uri);
+  
+  if ( value == undefined ){
+    self.commandRouter.explodeUriFromService(service, uri)
+    .then(result => {      
+      self.cache.set(uri, result, 3600);
+      defer.resolve(result);
+    }).fail((error)=>{
+      this.logger.error('PlayQueue: Cannot explode uri ' + uri + ' from service ' + service + ': ' + error);
+      defer.resolve();
+    });
+  } else {
+    self.commandRouter.logger.info('Using cached record of: ' + uri);
+    defer.resolve(value);
+  }
+  return defer.promise;
+}
+
+CorePlayQueue.prototype.preLoadItems = function (items) {
+  var self = this;
+  var timeOut = 50;
+  this.clearPreloadQueue();
+  items.slice(0, 100).forEach(item => {
+    if (item.uri != undefined && item.type === "song") {
+      var value = self.cache.get(item.uri);    
+      if ( value == undefined ){
+        try {
+          self.commandRouter.logger.info('Preloading ' + item.type + ': ' + item.uri);
+
+          self.preloadQueue.push(setTimeout(function(){ self.cache.set(item.uri, self.explodeUri(item), 3600) }, timeOut));
+          timeOut += 50;
+        } catch (error) {
+          self.commandRouter.logger.error("Preload failed for uri: " + item.uri + ": " + error);
+        }
+      }
+    }      
+  });
+}
+
+CorePlayQueue.prototype.clearPreloadQueue = function () {
+  var self = this;
+  self.preloadQueue.forEach(preloadItem => {
+    clearTimeout(preloadItem);
+  });
+  self.preloadQueue = [];
+  self.commandRouter.logger.info('Preload queue cleared');
+}
+
+CorePlayQueue.prototype.explodeUri = function (item) {
+  var self = this;
+  var service = 'mpd';
+
+  if (item.service) {
+    service = item.service;
+
+    if (item.uri.startsWith('cdda:')) {
+      item.name = item.title;
+      if (!item.albumart) {
+        item.albumart = '/albumart';
+      }
+      return libQ.resolve(item);
+    } else if (service === 'webradio') {
+      return self.commandRouter.executeOnPlugin('music_service', 'webradio', 'explodeUri', item);
+    } else {
+      return self.explodeUriFromCache(service, item.uri);
+    }
+  } else {
+    // backward compatibility with SPOP plugin
+    if (item.uri.startsWith('spotify:')) {
+      service = 'spop';
+    }
+
+    return self.explodeUriFromCache(service, item.uri);
+  }
+}
+
 // Add one item to the queue
 CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
   var self = this;
@@ -114,45 +200,27 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
 
   // self.commandRouter.logger.info(arrayItems);
 
-  var array = [].concat(arrayItems);
-
   var firstItemIndex = this.arrayQueue.length;
   // self.commandRouter.logger.info("First index is "+firstItemIndex);
 
   // We need to ask the service if the uri corresponds to something bigger, like a playlist
-  var promiseArray = [];
-  for (var i in array) {
-    var item = array[i];
+  var promiseArray = [];  
 
+  var items = [];
+  if (!Array.isArray(arrayItems))
+    items = [].concat(arrayItems);
+  else
+    items = arrayItems;
+
+  self.clearPreloadQueue();
+  
+  items.forEach(item => {
     if (item.uri != undefined) {
       self.commandRouter.logger.info('Adding Item to queue: ' + item.uri);
-
-      var service = 'mpd';
-
-      if (item.service) {
-        service = item.service;
-
-        if (item.uri.startsWith('cdda:')) {
-          item.name = item.title;
-          if (!item.albumart) {
-            item.albumart = '/albumart';
-          }
-          promiseArray.push(libQ.resolve(item));
-        } else if (service === 'webradio') {
-          promiseArray.push(this.commandRouter.executeOnPlugin('music_service', 'webradio', 'explodeUri', item));
-        } else {
-          promiseArray.push(this.commandRouter.explodeUriFromService(service, item.uri));
-        }
-      } else {
-        // backward compatibility with SPOP plugin
-        if (item.uri.startsWith('spotify:')) {
-          service = 'spop';
-        }
-
-        promiseArray.push(this.commandRouter.explodeUriFromService(service, item.uri));
-      }
+      //Put some ease on the api's
+      promiseArray.push(self.explodeUri(item));
     }
-  }
+  });
 
   libQ.all(promiseArray)
     .then(function (content) {
@@ -200,7 +268,7 @@ CorePlayQueue.prototype.addQueueItems = function (arrayItems) {
     }).fail(function (e) {
       defer.reject(new Error(e));
       self.commandRouter.logger.info('An error occurred while exploding URI: ' + e);
-    });
+    });  
   return defer.promise;
 };
 
