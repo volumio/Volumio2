@@ -520,7 +520,7 @@
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "Configuración de QOBUZ",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
-        "QOBUZ_CONNECT_DESC": "Accede a la música de QOBUZ en Volumio.",
+        "QOBUZ_CONNECT_DESC": "Accede a la música de QOBUZ",
         "QOBUZ_FREE_TRIAL": "Prueba gratis",
         "QOBUZ_FREE_TRIAL_DESC": "Consigue 1 mes de prueba gratuita de QOBUZ HIFI (valorado en 19,99 €)",
         "QOBUZ_LOGOUT_DESC": "Este dispositivo está conectado a QOBUZ. Puede desconectarlo haciendo clic en el botón Cerrar sesión."

@@ -511,7 +511,7 @@
         "SECTION_ACCOUNT_BETA": "TIDAL (Complement experimental)",
         "SECTION_TIDAL_ACCOUNT": "TIDAL",
         "TIDAL_CONFIG_TITLE": "Configuració de TIDAL",
-        "TIDAL_CONNECT_DESC": "Accedeix a la música de TIDAL a Volumio.",
+        "TIDAL_CONNECT_DESC": "Accedeix a la música de TIDAL",
         "SAVE_QUALITY_SUCCESS": "Configuració de qualitat desada correctament",
         "EPSINGLES": "EP & Singles de TIDAL",
         "MQA_TITLE": "Qualitat Mestra (MQA)",
@@ -522,7 +522,7 @@
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
         "QOBUZ_FREE_TRIAL": "Prova gratuïta",
         "QOBUZ_CONFIG_TITLE": "Configuració de QOBUZ",
-        "QOBUZ_CONNECT_DESC": "Accedeix a la música de QOBUZ a Volumio.",
+        "QOBUZ_CONNECT_DESC": "Accedeix a la música de QOBUZ",
         "QOBUZ_FREE_TRIAL_DESC": "Aconsegueix 1 mes de prova gratuïta de QOBUZ HIFI (per valor de 19,99 €)",
         "QOBUZ_LOGOUT_DESC": "Aquest dispositiu està connectat a QOBUZ. Pot desconnectar-lo fent clic al botó Tancar sessió."
     }

@@ -518,13 +518,13 @@
         "TIDAL_PLAYLISTS": "TIDAL Playlisten",
         "MQA_TITLE": "Master Quality (MQA)",
         "TIDAL_ALBUMS": "TIDAL Alben",
-        "TIDAL_CONNECT_DESC": "Greife auf den TIDAL-Katalog in Volumio zu.",
+        "TIDAL_CONNECT_DESC": "Greife auf den TIDAL-Katalog",
         "MQA_DESCR": "MQA wird auf jedem Gerät wiedergegeben und übertrifft in puncto Qualität die CD. In Verbindung mit einem MQA-Decoder erreicht MQA die original Master-Qualität."
     },
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "QOBUZ Einstellungen",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
-        "QOBUZ_CONNECT_DESC": "Greife auf den QOBUZ-Katalog in Volumio zu.",
+        "QOBUZ_CONNECT_DESC": "Greife auf den QOBUZ-Katalog",
         "QOBUZ_LOGOUT_DESC": "Dieses Gerät ist mit QOBUZ verbunden. Du kannst die Verbindung, durch einen Klick auf Abmelden, aufheben.",
         "QOBUZ_FREE_TRIAL": "Kostenlos Testen",
         "QOBUZ_FREE_TRIAL_DESC": "Teste QOBUZ HIFI einen Monat kostenlos (Wert: 19,99€)"

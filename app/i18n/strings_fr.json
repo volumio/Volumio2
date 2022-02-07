@@ -509,7 +509,7 @@
     "PLUGIN_TIDAL": {
         "TIDAL_CONFIG_TITLE": "Réglages TIDAL",
         "SECTION_TIDAL_ACCOUNT": "TIDAL",
-        "TIDAL_CONNECT_DESC": "Accédez à TIDAL dans Volumio.",
+        "TIDAL_CONNECT_DESC": "Accédez à TIDAL",
         "SAVE_QUALITY_SUCCESS": "Réglages de la qualité enregistrés",
         "EPSINGLES": "EP & Singles TIDAL",
         "TIDAL_ARTISTS": "Artistes TIDAL",
@@ -524,7 +524,7 @@
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "Réglages QOBUZ",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
-        "QOBUZ_CONNECT_DESC": "Accédez à QOBUZ dans Volumio.",
+        "QOBUZ_CONNECT_DESC": "Accédez à QOBUZ",
         "QOBUZ_LOGOUT_DESC": "Cet appareil est connecté à QOBUZ. Vous pouvez vous déconnecter en cliquant le bouton Déconnecter.",
         "QOBUZ_FREE_TRIAL": "Essai gratuit",
         "QOBUZ_FREE_TRIAL_DESC": "1 mois d' essai gratuit à QOBUZ HIFI (valeur 19,99€)"

@@ -511,7 +511,7 @@
         "SECTION_TIDAL_ACCOUNT": "TIDAL",
         "SECTION_TIDAL_ACCOUNT_DESC": "",
         "SECTION_ACCOUNT_BETA": "TIDAL (Experimental plugin)",
-        "TIDAL_CONNECT_DESC": "Access music from TIDAL in Volumio.",
+        "TIDAL_CONNECT_DESC": "Access music from TIDAL",
         "TIDAL_LOGOUT_DESC": "This device is connected to TIDAL. You can disconnect by clicking the Logout button.",
         "SAVE_QUALITY_SUCCESS": "Quality settings saved successfully",
         "EPSINGLES": "TIDAL EP & Singles",
