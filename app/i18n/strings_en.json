@@ -521,7 +521,7 @@
     "PLUGIN_QOBUZ": {
         "QOBUZ_CONFIG_TITLE": "QOBUZ Settings",
         "SECTION_QOBUZ_ACCOUNT": "QOBUZ",
-        "QOBUZ_CONNECT_DESC": "Access music from QOBUZ in Volumio.",
+        "QOBUZ_CONNECT_DESC": "Access music from QOBUZ",
         "QOBUZ_LOGOUT_DESC": "This device is connected to QOBUZ. You can disconnect by clicking the Logout button.",
         "QOBUZ_FREE_TRIAL": "Free Trial",
         "QOBUZ_FREE_TRIAL_DESC": "Get 1 month free trial of QOBUZ HIFI (worth 19,99€)"
