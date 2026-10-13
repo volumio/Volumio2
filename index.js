@@ -1,6 +1,6 @@
 var path = require('path');
 var dotenv = require('dotenv').config({ path: path.join(__dirname, '.env')}); // eslint-disable-line
-var execSync = require('child_process').execSync;
+var execFileSync = require('child_process').execFileSync;
 var expressInstance = require('./http/index.js');
 var expressApp = expressInstance.app;
 /* eslint-disable */
@@ -68,7 +68,9 @@ process.on('uncaughtException', (error) => {
   } else {
     errorMessage = 'Unknown';
   }
-  execSync('/usr/local/bin/node /volumio/crashreport.js "' + errorMessage + '"');
+  // Pass the error message as a single argument to execFileSync (which does not
+  // use a shell), so it can never be interpreted as shell syntax.
+  execFileSync('/usr/local/bin/node', ['/volumio/crashreport.js', errorMessage]);
   if (process.env.EXIT_ON_EXCEPTION === 'true') {
     process.exit(1);
   }
